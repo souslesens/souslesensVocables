@@ -15,6 +15,7 @@ var logger = require("../bin/logger..js");
 //var annotator_skos = require("../bin/backoffice/annotator_skos.");
 //var skosReader = require("../bin/backoffice/skosReader..js");
 var httpProxy = require("../bin/httpProxy.")
+var mediawikiTaggger=require("../bin/mediawiki/mediawikiTagger.")
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
@@ -232,7 +233,8 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
         if (req.body.httpProxy) {
             if (req.body.POST) {
-                httpProxy.post(req.body.url, req.body.body.headers, req.body.body.params, function (err, result) {
+                var body=JSON.parse(req.body.body)
+                httpProxy.post(req.body.url,body.headers, body.params, function (err, result) {
                     processResponse(response, err, result)
                 })
             } else {
@@ -257,7 +259,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
             })
         }
         if (req.body.getWikimediaPageNonThesaurusWords) {
-            var mediawikiTaggger=require("../bin/others/mediawiki/mediawikiTagger.")
+
             mediawikiTaggger.getWikimediaPageNonThesaurusWords(req.body.elasticUrl,req.body.indexName,req.body.pageName,req.body.graphIri,req.body.pageCategoryThesaurusWords,function (err, result) {
                 processResponse(response, err, result)
 

@@ -44,7 +44,7 @@ var ThesaurusBrowser = (function () {
             if (!options)
                 options = {}
             if (err) {
-                return MainController.message(err);
+                return MainController.UI.message(err);
             }
 
             if(false){

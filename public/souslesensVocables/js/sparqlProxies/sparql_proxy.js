@@ -90,9 +90,10 @@ var Sparql_proxy = (function () {
 
         var body = {
             params: {query: query},
-            headers: {
+            headers:{
                 "Accept": "application/sparql-results+json",
                 "Content-Type": "application/x-www-form-urlencoded"
+
             }
         }
 
@@ -103,7 +104,7 @@ var Sparql_proxy = (function () {
         var payload = {
             httpProxy: 1,
             url: url,
-            body: body,
+            body: JSON.stringify(body),
             options: queryOptions
 
 

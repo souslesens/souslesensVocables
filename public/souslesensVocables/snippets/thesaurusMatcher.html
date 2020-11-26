@@ -1,0 +1,54 @@
+<table><tbody>
+<tr>
+    <td>
+        targetGraphUri</td>
+    <td>
+        <select id="ThesaurusMatcher_targetGraphUriSelect">
+
+        </select>
+    </td>
+</tr>
+<tr>
+    <td>
+        outputType</td>
+    <td>
+        <select id="ThesaurusMatcher_outputTypeSelect">
+            <option>
+                graph</option>
+            <option>
+                table</option>
+            <option>
+                stats</option>
+        </select>
+    </td>
+</tr>
+<tr>
+    <td>
+        depth</td>
+    <td>
+        <input value="4" id="ThesaurusMatcher_maxDescendantsDepth"/>
+
+    </td>
+</tr>
+
+<tr>
+    <td colspan="2">
+        <input type="checkbox" id="showAllSourceNodesCBX">
+        showAllSourceNodes</td>
+</tr>
+<!--
+<tr>
+    <td colspan="2">
+        <input type="checkbox" id="showOlderAncestorsOnlyCBX">
+        showOlderAncestorsOnly</td>
+</tr>
+-->
+<tr>
+    <td colspan="2">
+        <button onclick="ThesaurusMatcher.compareConcepts();">
+            Compare</button>
+    </td>
+</tr>
+</tbody>
+</table>
+

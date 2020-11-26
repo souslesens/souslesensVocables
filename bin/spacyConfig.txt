@@ -1,0 +1,23 @@
+vps475829.ovh.net
+docker run --restart always -p 8000:8000 neelkamath/spacy-server:2-en_core_web_sm-sense2vec
+curl http://localhost:8000/pos -H 'Content-Type: application/json' -d '{"text": "My name is John Doe. I grew up in California."}'
+
+
+
+
+nginx
+
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+
+
+    location ^~/spacy/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection '';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+     }

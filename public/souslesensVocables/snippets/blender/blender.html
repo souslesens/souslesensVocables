@@ -1,0 +1,75 @@
+<style>
+    .treeType_externalReference {
+        color: blue;
+
+    }
+
+    .treeType_concept {
+        color: darkgreen;
+    }
+
+    .blender_collectionFilter {
+        background-color: #95a4bd;
+        border: black 1px solid;
+        border-radius: 3px;
+        padding: 2px;
+        margin: 2px
+    }
+
+    #Blender_conceptTreeContainerDiv {
+        max-width: 50%;
+        min-width: 400px;
+
+        margin: 10px;
+        border: #6e2500 solid 1px;
+        border-radius: 5px;
+        background-color: white;
+    }
+
+    #Blender_nodeEditionContainerDiv {
+
+        margin: 10px;
+    }
+
+</style>
+
+<div style="width:20%;align-self:end">
+    <span style="font:bold 14px Arial;">Blender</span><select onchange="Blender.onSourceSelect($(this).val())" id="Blender_SourcesSelect"></select>
+    <div id="Blender_currentFilterDiv" style="background-color: beige;padding: 2px"></div>
+    <button onclick="Blender.moveTaxonomyPanel()">expand</button>
+</div>
+
+<!--<button onclick="Blender.saveModifiedNodes()">Save</button>-->
+
+<button onclick="Blender.nodeEdition.createSchemeOrCollection('Scheme')">New scheme</button>
+<button onclick="Blender.nodeEdition.createSchemeOrCollection('Collection')">New Collection</button>
+<button onclick="Blender.copyGraph()">Save source</button>
+<div id="Blender_tabs" style="width:400px;height:80%">
+
+    <ul>
+        <li><a href="#Blender_tabs_concepts">Taxonomy</a></li>
+        <li><a href="#Blender_tabs_collections">Collections</a></li>
+
+
+    </ul>
+    <div id="Blender_tabs_concepts">
+<div id="Blender_onceptTreeDivContainerDiv">
+            <div class='max-height' id="Blender_conceptTreeDiv"></div>
+</div>
+    </div>
+    <div id="Blender_tabs_collections">
+        <div id="Blender_collectionTreeDiv"></div>
+    </div>
+</div>
+<div id="Blender_PopupEditDiv" style="">
+    <div id="Blender_PopupEditButtonsDiv">
+        <button onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
+        <button onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
+    </div>
+
+    <div id="Blender_nodeEditionDiv"></div>
+
+
+</div>
+
+

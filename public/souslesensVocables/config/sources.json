@@ -1,0 +1,210 @@
+{
+  "TEST": {
+    "editable": true,
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://souslesens/thesaurus/TEST/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+  "POC-EP": {
+    "editable": true,
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://data.total.com/resource/thesaurus/POC-EP/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+  "Total-CTG": {
+    "editable": true,
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://data.total.com/resource/thesaurus/ctg/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "lang": "en"
+    },
+    "color": "#9edae5"
+  },
+  "Oil&Gas-Upstream": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://souslesens.org/oil-gas/upstream/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "lang": "en"
+    },
+    "color": "#17becf"
+  },
+  "Gaia": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://data.total.com/resource/dictionary/gaia/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "lang": "en"
+    },
+    "color": "#dbdb8d"
+  },
+  "ISO_15926": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://68.71.136.105/sparql/",
+    "graphUri": null,
+    "sourceSchema": "ISO_15926",
+    "predicates": {
+      "prefixes": [
+        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+      ],
+      "prefLabel": "rdfs:label",
+      "broaderPredicate": "rdfs:subClassOf|^rdfs:superClassFor",
+      "topConceptFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>."
+    },
+    "color": "#bcbd22"
+  },
+  "GEMET": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://www.eionet.europa.eu/gemet/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "lang": "en",
+      "prefLabel": "rdfs:label|skos:prefLabel",
+      "broaderPredicate": "^skos:member|skos:broader",
+      "topConceptFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",
+      "optionalDepth": 3
+    },
+    "color": "#c7c7c7"
+  },
+  "BNF": {
+    "controller": "Sparql_generic",
+    "sparql_url": "https://data.bnf.fr/sparql",
+    "graphUri": "http://data.bnf.fr",
+    "sourceSchema": "SKOSXXX",
+    "predicates": {
+      "broaderPredicate": "terms:isPartOf",
+      "lang": "fr"
+    },
+    "color": "#7f7f7f"
+  },
+  "Dbpedia": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://dbpedia.org/sparql",
+    "graphUri": "http://dbpedia.org",
+    "ancestorsDepth": 4,
+    "predicates": {
+      "topConceptFilter": "?topConcept  <http://www.w3.org/2000/01/rdf-schema#subClassOf>\t<http://www.w3.org/2002/07/owl#Thing> .",
+      "broaderPredicate": "rdfs:subClassOf",
+      "prefLabel": "rdfs:label",
+      "lang": "en"
+    },
+    "color": "#f7b6d2"
+  },
+  "WORDNET": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://wordnet.rkbexplorer.com/sparql/",
+    "graphUri": "",
+    "predicates": {
+      "prefixes": [
+        "wordnet:<http://www.w3.org/2006/03/wn/wn20/schema/>",
+        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>",
+        "rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+      ],
+      "topConceptFilter": "?topConcept wordnet:hyponymOf  <http://wordnet.rkbexplorer.com/id/synset-entity-noun-1> .",
+      "broaderPredicate": " wordnet:hyponymOf",
+      "prefLabel": "rdfs:label",
+      "optionalDepth": 1,
+      "lang": "en"
+    },
+    "color": "#e377c2"
+  },
+  "USGS": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "graphUri": "https://www2.usgs.gov/science/USGSThesaurus/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "topConceptFilter": "?topConcept skos:broader <https://www2.usgs.gov/science/USGSThesaurus/Categories>.",
+      "lang": "en"
+    },
+    "color": "#c49c94"
+  },
+  "GEOSCMIL": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "graphUri": "http://resource.geosciml.org/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+    "broaderPredicate": "^skos:hasTopConcept|skos:broader",
+      "lang": "en"
+    },
+    "color": "#c5b0d5"
+  },
+  "TermSciences": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "graphUri": "http://api.termsciences.fr/termsciences/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "topConceptFilter": "?topConcept skos:prefLabel ?topConceptLabel.filter( ?topConcept in(<http://api.termsciences.fr/termsciences/TE-48512>,<http://api.termsciences.fr/termsciences/TE-60624>,<http://api.termsciences.fr/termsciences/TE-42031>,<http://api.termsciences.fr/termsciences/TE-27516>,<http://api.termsciences.fr/termsciences/TE-42056>,<http://api.termsciences.fr/termsciences/TE-15428>,<http://api.termsciences.fr/termsciences/TE-10236>) )",
+      "lang": "en"
+    },
+    "color": "#c5b0d5"
+  },
+  "ThesaurusIngenieur": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "graphUri": "http://www.souslesens.org/thesaurusIngenieur/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.filter( NOT EXISTS{?topConcept skos:broader ?x})",
+      "lang": "en"
+    },
+    "color": "#ff9896"
+  },
+  "Unesco": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "graphUri": "http://skos.um.es/unesco6/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.filter( NOT EXISTS{?topConcept skos:broader ?x})",
+      "lang": "en"
+    },
+    "color": "#98df8a"
+  },
+  "LibraryOfCongress": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "graphUri": "http://www.loc.gov/",
+    "sourceSchema": "SKOS!!!",
+    "predicates": {
+      "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.filter( NOT EXISTS{?topConcept skos:broader ?x})",
+      "lang": "en"
+    },
+    "color": "#ffbb78"
+  },
+  "NPD": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": [
+      "http://sws.ifi.uio.no/data/npd-v2/",
+      "http://sws.ifi.uio.no/vocab/npd-v2/"
+    ],
+    "sourceSchema": "NPD",
+    "predicates": {
+      "prefixes": [
+        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+      ],
+      "prefLabel": "rdfs:label",
+      "broaderPredicate": "rdfs:subClassOf|^rdfs:superClassFor",
+      "topConceptFilter": " ?topConcept rdf:type rdfs:Class. ?x rdfs:range ?topConcept.  ?topConcept rdf:type ?type. filter (?type= owl:Class)",
+      "broader": "rdfs:subClassOf",
+      "lang": null
+    },
+    "color": "#bcbd22"
+  }
+}

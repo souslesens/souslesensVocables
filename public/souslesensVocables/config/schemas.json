@@ -1,0 +1,62 @@
+{
+  "SKOS": {
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://www.w3.org/2004/02/skos/core/",
+    "label": "skos",
+    "isOntology":false,
+    "allSubclasses": true,
+    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+
+    "newObject": {
+      "treeChildrenClasses": {
+        "http://www.w3.org/2004/02/skos/core#Concept": "http://www.w3.org/2004/02/skos/core#Concept",
+        "http://www.w3.org/2004/02/skos/core#ConceptScheme": "http://www.w3.org/2004/02/skos/core#Concept"
+      },
+      "treeParentProperty": "http://www.w3.org/2004/02/skos/core#broader",
+      "mandatoryProperties": [
+        "http://www.w3.org/2004/02/skos/core#prefLabel"
+      ]
+    }
+  },
+  "ISO_15926": {
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri":"http://data.15926.org/dm/",
+    "label": "NPD",
+    "isOntology":true,
+    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    "newObject": {
+      "treeChildrenClasses": {
+      },
+      "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "mandatoryProperties": [
+        "http://www.w3.org/2000/01/rdf-schema#label"
+      ]
+    }
+  },
+ "NPD": {
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
+    "label": "NPD",
+    "isOntology":true,
+    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    "newObject": {
+      "treeChildrenClasses": {
+      },
+      "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "mandatoryProperties": [
+        "http://www.w3.org/2000/01/rdf-schema#label"
+      ]
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+

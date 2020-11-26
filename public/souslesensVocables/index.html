@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>SouslesensVocables</title>
+
+
+    <script src="./js/external/jquery/jquery.min.js"></script>
+    <script src="./js/external/jquery/jquery-ui.min.js"></script>
+    <link href="./js/external/jquery/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+    <script src="./js/external/async.js" charset="utf-8"></script>
+
+    <script src="js/common.js" charset="utf-8"></script>
+
+
+    <script src="./js/external/jsTree/jstree.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"/>
+
+
+    <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
+    <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css"/>
+    <script src="./js/graph/visjsGraph2.js"></script>
+
+
+    <script src="js/mainController.js"></script>
+    <script src="js/graphController.js"></script>
+    <script src="js/treeController.js"></script>
+    <script src="js/skosConceptEditor.js"></script>
+    <script src="js/clipboard.js"></script>
+
+
+
+    <script src="js/sparqlProxies/sparql_proxy.js"></script>
+    <script src="js/sparqlProxies/sparql_generic.js"></script>
+    <script src="js/sparqlProxies/sparql_schema.js"></script>
+
+
+
+    <script src="js/tools/thesaurusBrowser.js"></script>
+
+    <script src="js/tools/thesaurusMatcher.js"></script>
+    <script src="js/tools/nerEvaluator.js"></script>
+    <script src="js/tools/termTaxonomy.js"></script>
+    <script src="js/tools/ontologyBrowser.js"></script>
+    <script src="js/tools/annotator.js"></script>
+
+    <script src="js/tools/blender/blender.js"></script>
+    <script src="js/tools/blender/collection.js"></script>
+    <script src="js/tools/blender/sourceEditor.js"></script>
+    <script src="js/tools/blender/import.js"></script>
+    <script src="js/tools/blender/externalReferences.js"></script>
+    <script src="js/tools/blender/transform.js"></script>
+
+    <script src="config/app_config.js"></script>
+
+    <!--  <script src="js/authentification.js"></script>-->
+
+
+    <script>
+
+        var leftPanelWidth = 400
+        $(function () {
+
+            var w = $(document).width() - leftPanelWidth;
+            var h = $(document).height;
+            // $("#centralPanel").width(w)
+            $("#graphDiv").width(w)
+            $("#blendDiv").width(w)
+            $("#graphDiv").height(h - 100)
+            $("#blendDiv").height(h - 100)
+
+
+            $("#accordion").accordion()
+            $("#accordion").accordion("option", {active: 0});
+            $("#accordion").on("accordionactivate", function (event, ui) {
+
+                if (ui.newPanel[0].id == "blenderPanelDiv") {
+                    Blender.initPanel();
+                    MainController.UI.showInCentralPanelDiv("blendDiv")
+                } else {
+                    MainController.UI.showInCentralPanelDiv("graphDiv")
+                }
+            });
+
+
+            MainController.UI.showToolsList("toolsTreeDiv")
+            MainController.loadSources("sourcesTreeDiv")
+            MainController.UI.setCredits()
+        });
+
+
+    </script>
+    <style>
+        body {
+            font-size: 14px;
+            font-family: Arial;
+        }
+
+
+        .jstree {
+            margin: 5px;
+            min-height: 500px;
+            min-width: 300px;
+            overflow: auto;
+
+        }
+
+        #graphDiv {
+            margin: 5px;
+        }
+
+        .jstree-node {
+            font-weight: bold;
+        }
+
+        .infosTable {
+            background-color: #d9d9d9;
+            padding: 5px;
+            width: 100%;
+        }
+
+        .detailsCellName {
+            padding: 2px;
+            max-width: 400px;
+            text-align: right;
+        }
+
+        .detailsCellValue {
+            padding: 2px;
+            border-radius: 3px;
+            border: 1px solid black;
+            background-color: white;
+            max-width: 400px;
+        }
+
+        #messageDiv {
+            font-weight: normal;
+            font-size: 12px;
+            color: #6e2500;
+        / / max-width: 1200 px;
+
+        }
+
+        .toolDescriptionImg {
+            padding: 5px;
+            margin: 50px;
+            width: 400px;
+        }
+
+        .clipboardSelected {
+            border: #3b13ef 1px solid !important;
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .searched_concept {
+            color: blue;
+        }
+
+        .searched_conceptSource {
+            color: blueviolet;
+        }
+
+    </style>
+</head>
+<body>
+<div class='row'>
+
+</div>
+
+
+<div style="height: 20px;display: flex;    flex-flow: row;">
+    <div style="width:90%">
+        <table>
+            <tr>
+                <td><img src="../images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
+                <td><span id="messageDiv"></span></td>
+            </tr>
+        </table>
+
+
+    </div>
+
+
+</div>
+
+<div style="display: flex;flex-direction: row;justify-content:left">
+
+    <div id="leftPanelDiv" style='max-width: 400px;'>
+
+
+        <div id="accordion">
+
+            <h3><span class="title">Tool </span></h3>
+            <div style="margin:5px" class='max-height'>
+                <div class='max-height' id="toolsTreeDiv" class="jstree"></div>
+            </div>
+
+
+            <h3><span class="title">Sources </span></h3>
+            <div style="margin:5px" class='max-height'>
+                <div id="sourceDivControlPanelDiv"></div>
+                <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+            </div>
+
+
+            <h3><span class="title" id="sourcePanelLabel"> </span></h3>
+            <div style="margin:5px" class='max-height'>
+                <div id="actionDivContolPanelDiv"></div>
+                <div id="actionDiv" class="jstree"></div>
+
+            </div>
+
+            <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
+            <div id="blenderPanelDiv" class='max-height'>
+
+            </div>
+
+        </div>
+    </div>
+    <div id="centralPanel" style="display: flex;flex-direction: row">
+        <div id="graphDiv">
+        </div>
+
+        <div id="blendDiv">
+            <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
+            <div style='display: flex;flex-direction: row;background-color: #ccc;'>
+                <div id='Blender_conceptTreeContainerDiv'></div>
+                <div id='Blender_nodeEditionContainerDiv'></div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+</body>
+</html>

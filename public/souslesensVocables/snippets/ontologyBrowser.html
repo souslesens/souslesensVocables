@@ -1,0 +1,97 @@
+<style>
+
+    .OntologyBrowser_majorDiv {
+        min-height: 100px;
+        border-radius: 5px;
+        border: #372806 2px solid;
+        background-color: #bdbdbd;
+        margin: 5px;
+        padding: 5px;
+
+    }
+
+    .OntologyBrowser_minorDiv {
+
+        border-radius: 5px;
+        border: #372806 1px solid;
+        background-color: #a2afc8;
+        margin: 5px;
+        padding: 5px;
+
+    }
+
+    #OntologyBrowser_tabs_result{
+        width:500px;
+        height:500px;
+        overflow: auto;
+    }
+
+
+</style>
+
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
+
+
+<div id="OntologyBrowser_tabs">
+
+    <ul>
+        <li><a href="#OntologyBrowser_tabs_selection">Selection</a></li>
+        <li><a href="#OntologyBrowser_tabs_result">Result</a></li>
+
+
+    </ul>
+    <div id="OntologyBrowser_tabs_selection">
+
+
+        <div class="OntologyBrowser_majorDiv">Object Properties<select id="OntologyBrowser_filter_ObjectpropertiesSelect" onchange="OntologyBrowser.showDatatypeProperties($(this).val())"></select>
+        </div>
+        <div class="OntologyBrowser_majorDiv" style="display: flex;flex-direction: row">
+            <div id="OntologyBrowser_PropertiesDiv">
+
+            </div>
+            <div id="OntologyBrowser_PropertiesFilterInputDiv" style="display: none">
+
+                filter Properties
+                <table>
+                    <tr>
+                        <td>Properties</td>
+                        <!--  <td><select id="OntologyBrowser_filter_DataPropertiesSelect" onchange="OntologyBrowser.onDataPropertySelect($(this).val())"></select></td>-->
+                        <td><input id="OntologyBrowser_filter_DataPropertiesSelect"></input></td>
+                    </tr>
+                    <tr>
+                        <td>Operator</td>
+                        <td><select id="OntologyBrowser_filter_operators"></select></td>
+                    </tr>
+                    <tr>
+                        <td>value</td>
+                        <td><input id="OntologyBrowser_filter_value"/><select id="OntologyBrowser_filter_choice"></select></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button onclick="OntologyBrowser.addFilter()">Add filter</button>
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+        </div>
+
+        <div class="OntologyBrowser_majorDiv">
+            Query
+            <div id="OntologyBrowser_filtersContainerDiv" style="display: flex;flex-direction: column">
+
+
+            </div>
+            <button onclick="OntologyBrowser.executeFilterQuery()">Query</button>
+
+        </div>
+    </div>
+
+
+    <div id="OntologyBrowser_tabs_result">
+        <table id='dataTableDiv'></table>
+    </div>
+
+
+</div>

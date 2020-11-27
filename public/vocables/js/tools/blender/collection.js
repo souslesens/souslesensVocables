@@ -59,7 +59,7 @@ var Collection = (function () {
         menuItems.deleteNode = {
             label: "Delete node",
             action: function (obj, sss, cc) {
-                Blender.menuActions.deleteNode();
+                Blender.menuActions.deleteNode("collection");
             },
 
 
@@ -67,7 +67,7 @@ var Collection = (function () {
         menuItems.addChildNodeNode = {
             label: "Create child",
             action: function (obj, sss, cc) {
-                Blender.nodeEdition.createChildNode();
+                Blender.nodeEdition.createChildNode(null,"collection",);
                 ;
             },
         },
@@ -75,7 +75,7 @@ var Collection = (function () {
             menuItems.importChildren = {
                 label: "Import child nodes",
                 action: function (obj, sss, cc) {
-                    Import.showImportNodesDialog();
+                    Import.showImportNodesDialog("collection");
                     ;
                 },
             }

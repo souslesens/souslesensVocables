@@ -228,10 +228,18 @@
         </div>
 
         <div id="blendDiv">
+
             <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
             <div style='display: flex;flex-direction: row;background-color: #ccc;'>
                 <div id='Blender_conceptTreeContainerDiv'></div>
-                <div id='Blender_nodeEditionContainerDiv'></div>
+                <div>
+                    <div id="Blender_nodeEditionButtonsDiv" style="display: none">
+                    <button onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
+                    <button onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
+                    </div>
+                    <div id='Blender_nodeEditionContainerDiv'></div>
+                </div>
+
             </div>
         </div>
 

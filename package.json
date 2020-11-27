@@ -23,7 +23,6 @@
     "iconv-lite": "^0.5.0",
     "imap": "^0.8.19",
     "inflected": "^2.1.0",
-    "jade": "~1.11.0",
     "js2xmlparser": "^4.0.0",
     "jsoneditor": "^8.1.2",
     "lemmatizer": "0.0.1",

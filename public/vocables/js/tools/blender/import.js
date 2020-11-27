@@ -1,22 +1,26 @@
 var Import=(function(){
 
  var self={}
+ self.currentType
 
 
- self.showImportNodesDialog=function() {
+ self.showImportNodesDialog=function(type) {
 $("#graphDiv").load("snippets/blender/import.html")
+  self.currentType=type
 
  }
 
-  self.importNodes=function(){
-   var parentNode,treeDivId,type,predicate;
-   if (Blender.currentTab == 0) {
+  self.importNodes=function(type){
+     if(!type)
+         alert ("no type")
+   var parentNode,treeDivId,predicate;
+   if (type=="concept") {
     parentNode = Blender.currentTreeNode
     type="http://www.w3.org/2004/02/skos/core#Concept"
     predicate="http://www.w3.org/2004/02/skos/core#broader"
     treeDivId = "Blender_conceptTreeDiv"
    }
-   else if (Blender.currentTab == 1) {
+   else if  (type=="collection") {
     parentNode = Collection.currentTreeNode
     treeDivId = "Blender_collectionTreeDiv"
     type="http://www.w3.org/2004/02/skos/core#Collection"

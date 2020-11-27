@@ -183,10 +183,12 @@ var Blender = (function () {
 
             },
             "drag_stop": function (data, element, helper, event) {
-                console.log("drag_stop_" + self.currentTab)
-                if (self.currentTab == 0) {
+             var type=Blender.menuActions.movingNode.data.type;
+             if(!type)
+                 alert("no type")
+                if (type == "concept") {
                     Blender.menuActions.dropNode()
-                } else if (self.currentTab == 1) {
+                } else if (type == "collection") {
                     Collection.dropNode()
                 }
                 // return true;
@@ -339,7 +341,7 @@ var Blender = (function () {
             menuItems.deleteNode = {
                 label: "Delete node",
                 action: function (obj, sss, cc) {
-                    self.menuActions.deleteNode();
+                    self.menuActions.deleteNode("concept");
                 },
 
 
@@ -347,14 +349,14 @@ var Blender = (function () {
             menuItems.addChildNodeNode = {
                 label: "Create child",
                 action: function (obj, sss, cc) {
-                    self.nodeEdition.createChildNode();
+                    self.nodeEdition.createChildNode(null,"concept");
                     ;
                 },
             },
                 menuItems.importChildren = {
                     label: "Import child nodes",
                     action: function (obj, sss, cc) {
-                        Import.showImportNodesDialog();
+                        Import.showImportNodesDialog("concept");
                         ;
                     },
                 }
@@ -402,15 +404,16 @@ var Blender = (function () {
             },
 
 
-            deleteNode: function () {
-
+            deleteNode: function (type) {
+                if (!type)
+                    alert(" no type")
 
                 var node;
                 var treeDivId;
-                if (self.currentTab == 0) {
+                if (  type == "concept") {
                     node = self.currentTreeNode
                     treeDivId = "Blender_conceptTreeDiv"
-                } else if (self.currentTab == 1) {
+                } else  if (  type == "collection") {
                     node = Collection.currentTreeNode
                     treeDivId = "Blender_collectionTreeDiv"
                 }
@@ -425,8 +428,9 @@ var Blender = (function () {
                             function (callbackSeries) {// descendants of type concept
                                 if (node.children.length == 0)
                                     return callbackSeries();
-                                if (self.currentTab != 0)
+                               if (  type != "concept")
                                     return callbackSeries();
+
                                 Sparql_generic.getSingleNodeAllDescendants(self.currentSource, node.id, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
@@ -441,8 +445,10 @@ var Blender = (function () {
                             function (callbackSeries) {// descendants of type collection
                                 if (node.children.length == 0)
                                     return callbackSeries();
-                                if (self.currentTab != 1)
+                                if (  type != "collection")
                                     return callbackSeries();
+
+
                                 Collection.Sparql.getSingleNodeAllDescendants(self.currentSource, node.id, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
@@ -465,8 +471,9 @@ var Blender = (function () {
                                 })
                             },
                             function (callbackSeries) {// delete members triple in parentNode
-                                if (self.currentTab != 1)
+                                if (  type == "concept")
                                     return callbackSeries();
+
                                 Sparql_generic.deleteTriples(self.currentSource, node.parent, "http://www.w3.org/2004/02/skos/core#member", node.id, function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
@@ -477,9 +484,9 @@ var Blender = (function () {
                             },
                             function (callbackSeries) {// delete from tree
                                 common.deleteNode(treeDivId, node.id)
-                                if (self.currentTab == 0) {
+                                if(  type == "concept")  {
                                     self.currentTreeNode = null;
-                                } else if (self.currentTab == 1) {
+                                } else if (  type == "collection")  {
                                     Collection.currentTreeNode = null
                                 }
                                 callbackSeries();
@@ -722,7 +729,7 @@ var Blender = (function () {
             createConceptFromWord: function () {
                 var data = Clipboard.getContent();
                 var initData = {"http://www.w3.org/2004/02/skos/core#prefLabel": [{"xml:lang": SourceEditor.prefLang, value: data.label, type: "literal"}]}
-                self.nodeEdition.createChildNode(initData)
+                self.nodeEdition.createChildNode(initData,"concept")
             }
             ,
 
@@ -763,7 +770,7 @@ var Blender = (function () {
             ,
             editNode: function (type) {
                 if (!type)
-                    type = "concept"
+                    alert(" no type")
 
 
                 if (type == "concept") {
@@ -788,7 +795,7 @@ var Blender = (function () {
             }
 
 
-            , createChildNode: function (initData) {
+            , createChildNode: function (initData,type) {
                 if (!initData)
                     initData = {}
                 var parentNode;
@@ -798,7 +805,8 @@ var Blender = (function () {
                 var treeDivId;
 
 
-                if (self.currentTab == 0) {
+
+                if (type == "concept") {
                     parentNode = self.currentTreeNode;
                     parentProperty = SourceEditor.currentSourceSchema.newObject.treeParentProperty;
                     mandatoryProps = SourceEditor.currentSourceSchema.newObject.mandatoryProperties;
@@ -808,7 +816,7 @@ var Blender = (function () {
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#ConceptScheme")
                         initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{value: self.currentTreeNode.id, type: "uri"}]
 
-                } else if (self.currentTab == 1) {
+                } else if (type == "collection") {
                     parentNode = Collection.currentTreeNode;
                     var type = "http://www.w3.org/2004/02/skos/core#Collection"
                     parentProperty = "^" + Collection.broaderProperty;
@@ -825,10 +833,11 @@ var Blender = (function () {
 
 
                 if (self.displayMode == "centralPanel") {
-                    SourceEditor.editNode("Blender_nodeEditionContainerDiv",self.currentSource, childClass, initData);
+
+                    SourceEditor.editNode("Blender_nodeEditionContainerDiv",self.currentSource,type, childClass, initData);
                 } else {
                     self.nodeEdition.openDialog()
-                    SourceEditor.editNewObject("Blender_nodeEditionDiv", self.currentSource, childClass, initData);
+                    SourceEditor.editNewObject("Blender_nodeEditionDiv", self.currentSource,type, childClass, initData);
                 }
 
             },
@@ -847,6 +856,8 @@ var Blender = (function () {
                     if (err) {
                         MainController.UI.message(err)
                     }
+                    $("#Blender_nodeEditionButtonsDiv").css("display","none")
+                    $("#Blender_nodeEditionContainerDiv").html("")
                     if (self.nodeEdition.afterSaveEditingObject(editingObject))
                         $("#Blender_PopupEditDiv").dialog("close")
                 })
@@ -868,11 +879,11 @@ var Blender = (function () {
 
                 var treeDiv, currentNodeId;
                 currentNodeId = "#"
-                if (Blender.currentTab == 0) {
+                if (type == "concept") {
                     treeDiv = 'Blender_conceptTreeDiv'
                     if (Blender.currentTreeNode)
                         currentNodeId = Blender.currentTreeNode.id
-                } else if (Blender.currentTab == 1) {
+                } else   if (type == "collection")  {
                     treeDiv = 'Blender_collectionTreeDiv'
                     if (Collection.currentTreeNode)
                         currentNodeId = Collection.currentTreeNode.id

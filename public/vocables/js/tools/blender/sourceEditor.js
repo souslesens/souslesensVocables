@@ -245,6 +245,7 @@ var SourceEditor = (function () {
 
         self.editNode = function (divId, source, nodeId, type, initData, isNew) {
             $("#" + divId).css("display", "block")
+            $("#Blender_nodeEditionButtonsDiv").css("display","block")
             var editingObject;
 
             var nodeProps = {}

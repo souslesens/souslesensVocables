@@ -12,6 +12,8 @@
 var Config = (function () {
     var self = {};
     self.serverUrl = "/elastic";
+    if (window.location.href.indexOf("https") > -1)
+        self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
 

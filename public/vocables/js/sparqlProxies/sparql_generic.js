@@ -126,6 +126,7 @@ var Sparql_generic = (function () {
             }
             return filter;
         }
+        self.setFilter=setFilter
 
         function getUriFilter(varName, uri) {
             var filterStr = ""
@@ -143,6 +144,7 @@ var Sparql_generic = (function () {
             }
             return filterStr;
         }
+        self.getUriFilter=getUriFilter
 
 
         self.formatString = function (str, forUri) {
@@ -176,6 +178,14 @@ var Sparql_generic = (function () {
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
+            if(Config.sources[sourceLabel].controller.isSpecific){
+                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
+                     callback(err, result);
+                 })
+                return;
+            }
+
+
             if (!options) {
                 options = {}
             }
@@ -247,6 +257,14 @@ var Sparql_generic = (function () {
 
 
          self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
+
+             if(Config.sources[sourceLabel].controller.isSpecific){
+                 Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options,function(err,result){
+                     callback(err, result);
+                 })
+                 return;
+             }
+
             setVariables(sourceLabel);
 
 
@@ -322,6 +340,13 @@ var Sparql_generic = (function () {
         }
 
          self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+             if(Config.sources[sourceLabel].controller.isSpecific){
+                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
+                     callback(err, result);
+                 })
+                 return;
+             }
+
             if (!options) {
                 options = {depth: 0}
             }
@@ -380,7 +405,45 @@ var Sparql_generic = (function () {
             })
         }
 
+        self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
+            if( Config.sources[sourceLabel].controller.isSpecific){
+                Config.sources[sourceLabel].controller.getNodeInfos  (sourceLabel, conceptId, options, function(err,result){
+                    callback(err, result);
+                })
+                return;
+            }
+            if (!options)
+                options = {}
+            setVariables(sourceLabel);
+            var filter = getUriFilter("id", conceptId);
+            if (options.propertyFilter) {
+                filter += getUriFilter("prop", options.propertyFilter);
+            }
+
+            var query = " select distinct * " + fromStr + "  WHERE {" +
+                " ?id ?prop ?value. " + filter + "} limit 10000";
+
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                return callback(null, result.results.bindings)
+
+
+            })
+        }
+
+
+        /*******************************************end basic requests (mode read) **************************************************************/
+
         self.getSingleNodeAllAncestors = function (sourceLabel, id, callback) {
+            if(Config.sources[sourceLabel].controller.isSpecific){
+                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
+                    callback(err, result);
+                })
+                return;
+            }
             setVariables(sourceLabel);
             var query = "";
             query += prefixesStr;
@@ -452,28 +515,7 @@ var Sparql_generic = (function () {
         }
 
 
-        self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
-            if (!options)
-                options = {}
-            setVariables(sourceLabel);
-            var filter = getUriFilter("id", conceptId);
-            if (options.propertyFilter) {
-                filter += getUriFilter("prop", options.propertyFilter);
-            }
 
-            var query = " select distinct * " + fromStr + "  WHERE {" +
-                " ?id ?prop ?value. " + filter + "} limit 10000";
-
-
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, result.results.bindings)
-
-
-            })
-        }
 
 
         self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {

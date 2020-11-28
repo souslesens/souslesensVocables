@@ -50,21 +50,7 @@
     },
     "color": "#dbdb8d"
   },
-  "ISO_15926": {
-    "controller": "Sparql_generic",
-    "sparql_url": "http://68.71.136.105/sparql/",
-    "graphUri": null,
-    "sourceSchema": "ISO_15926",
-    "predicates": {
-      "prefixes": [
-        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-      ],
-      "prefLabel": "rdfs:label",
-      "broaderPredicate": "rdfs:subClassOf|^rdfs:superClassFor",
-      "topConceptFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>."
-    },
-    "color": "#bcbd22"
-  },
+
   "GEMET": {
     "controller": "Sparql_generic",
     "sparql_url": "http://51.178.139.80:8890/sparql",
@@ -103,24 +89,7 @@
     },
     "color": "#f7b6d2"
   },
-  "WORDNET": {
-    "controller": "Sparql_generic",
-    "sparql_url": "http://wordnet.rkbexplorer.com/sparql/",
-    "graphUri": "",
-    "predicates": {
-      "prefixes": [
-        "wordnet:<http://www.w3.org/2006/03/wn/wn20/schema/>",
-        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>",
-        "rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-      ],
-      "topConceptFilter": "?topConcept wordnet:hyponymOf  <http://wordnet.rkbexplorer.com/id/synset-entity-noun-1> .",
-      "broaderPredicate": " wordnet:hyponymOf",
-      "prefLabel": "rdfs:label",
-      "optionalDepth": 1,
-      "lang": "en"
-    },
-    "color": "#e377c2"
-  },
+
   "USGS": {
     "controller": "Sparql_generic",
     "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
@@ -187,6 +156,14 @@
     },
     "color": "#ffbb78"
   },
+
+
+
+  "_comment":"**************************************************************ontologies***************************************",
+  "_comment":"**************************************************************ontologies***************************************",
+  "_comment":"**************************************************************ontologies***************************************",
+  "_comment":"**************************************************************ontologies***************************************",
+
   "NPD": {
     "controller": "Sparql_generic",
     "sparql_url": "http://51.178.139.80:8890/sparql",
@@ -204,6 +181,27 @@
       "topConceptFilter": " ?topConcept rdf:type rdfs:Class. ?x rdfs:range ?topConcept.  ?topConcept rdf:type ?type. filter (?type= owl:Class)",
       "broader": "rdfs:subClassOf",
       "lang": null
+    },
+    "color": "#bcbd22"
+  },
+  "WORDNET": {
+    "controller": "Sparql_WORDNET",
+    "sourceSchema": "SKOS",
+    "color": "#e377c2"
+  },
+  "ISO_15926": {
+    "controller": "Sparql_generic",
+    "sparql_url": "http://68.71.136.105/sparql/",
+    "sparql_proxy": "ISO_15926",
+    "graphUri": null,
+    "sourceSchema": "ISO_15926",
+    "predicates": {
+      "prefixes": [
+        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
+      ],
+      "prefLabel": "rdfs:label",
+      "broaderPredicate": "rdfs:subClassOf|^rdfs:superClassFor",
+      "topConceptFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>."
     },
     "color": "#bcbd22"
   }

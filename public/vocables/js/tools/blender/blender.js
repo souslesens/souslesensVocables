@@ -879,11 +879,12 @@ var Blender = (function () {
 
                 var treeDiv, currentNodeId;
                 currentNodeId = "#"
-                if (type == "concept") {
+                if (editingObject.type.indexOf("Concept")>0) {
                     treeDiv = 'Blender_conceptTreeDiv'
                     if (Blender.currentTreeNode)
                         currentNodeId = Blender.currentTreeNode.id
-                } else   if (type == "collection")  {
+                }
+                    if (editingObject.type.indexOf("Collection")>0) {
                     treeDiv = 'Blender_collectionTreeDiv'
                     if (Collection.currentTreeNode)
                         currentNodeId = Collection.currentTreeNode.id

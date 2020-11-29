@@ -258,7 +258,7 @@ var ThesaurusBrowser = (function () {
             var jstreeData = []
 
             result.forEach(function (item) {
-                for (var i = depth; i > 0; i--) {
+                for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
                         var id = item["broader" + i].value
                         if (!existingNodes[id]) {

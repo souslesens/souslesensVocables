@@ -88,6 +88,8 @@ var Sparql_generic = (function () {
 
 
         setFilter = function (varName, ids, words, options) {
+            if(!options)
+                options={}
             var filter = ";"
             if (words) {
                 if (Array.isArray(words)) {
@@ -178,7 +180,8 @@ var Sparql_generic = (function () {
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
-            if(Config.sources[sourceLabel].controller.isSpecific){
+            if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
+                
                  Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
                      callback(err, result);
                  })
@@ -258,7 +261,7 @@ var Sparql_generic = (function () {
 
          self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
 
-             if(Config.sources[sourceLabel].controller.isSpecific){
+             if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
                  Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options,function(err,result){
                      callback(err, result);
                  })
@@ -340,8 +343,8 @@ var Sparql_generic = (function () {
         }
 
          self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
-             if(Config.sources[sourceLabel].controller.isSpecific){
-                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
+             if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
+                 Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function(err,result){
                      callback(err, result);
                  })
                  return;
@@ -406,7 +409,7 @@ var Sparql_generic = (function () {
         }
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
-            if( Config.sources[sourceLabel].controller.isSpecific){
+            if( Config.sources[sourceLabel].controllerName!="Sparql_generic"){
                 Config.sources[sourceLabel].controller.getNodeInfos  (sourceLabel, conceptId, options, function(err,result){
                     callback(err, result);
                 })
@@ -438,7 +441,7 @@ var Sparql_generic = (function () {
         /*******************************************end basic requests (mode read) **************************************************************/
 
         self.getSingleNodeAllAncestors = function (sourceLabel, id, callback) {
-            if(Config.sources[sourceLabel].controller.isSpecific){
+            if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
                     callback(err, result);
                 })

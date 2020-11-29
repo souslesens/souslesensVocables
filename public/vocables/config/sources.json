@@ -165,24 +165,9 @@
   "_comment":"**************************************************************ontologies***************************************",
 
   "NPD": {
-    "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
-    "graphUri": [
-      "http://sws.ifi.uio.no/data/npd-v2/",
-      "http://sws.ifi.uio.no/vocab/npd-v2/"
-    ],
-    "sourceSchema": "NPD",
-    "predicates": {
-      "prefixes": [
-        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-      ],
-      "prefLabel": "rdfs:label",
-      "broaderPredicate": "rdfs:subClassOf|^rdfs:superClassFor",
-      "topConceptFilter": " ?topConcept rdf:type rdfs:Class. ?x rdfs:range ?topConcept.  ?topConcept rdf:type ?type. filter (?type= owl:Class)",
-      "broader": "rdfs:subClassOf",
-      "lang": null
-    },
-    "color": "#bcbd22"
+    "controller": "Sparql_NPD",
+    "sourceSchema": "SKOS",
+    "color": "#e377c2"
   },
   "WORDNET": {
     "controller": "Sparql_WORDNET",
@@ -190,19 +175,9 @@
     "color": "#e377c2"
   },
   "ISO_15926": {
-    "controller": "Sparql_generic",
-    "sparql_url": "http://68.71.136.105/sparql/",
-    "sparql_proxy": "ISO_15926",
-    "graphUri": null,
-    "sourceSchema": "ISO_15926",
-    "predicates": {
-      "prefixes": [
-        "rdfs:<http://www.w3.org/2000/01/rdf-schema#>"
-      ],
-      "prefLabel": "rdfs:label",
-      "broaderPredicate": "rdfs:subClassOf|^rdfs:superClassFor",
-      "topConceptFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>."
-    },
+    "controller": "Sparql_ISO_15926",
+    "sourceSchema": "SKOS",
+
     "color": "#bcbd22"
   }
 }

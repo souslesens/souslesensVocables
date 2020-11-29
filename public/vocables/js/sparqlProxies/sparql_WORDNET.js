@@ -1,7 +1,7 @@
 var Sparql_WORDNET = (function () {
     var self = {};
     self.sparql_url = "http://wordnet.rkbexplorer.com/sparql/";
-    self.isSpecific = true
+    self.ancestorsDepth =3
     self.getTopConcepts = function (sourceLabel, options, callback) {
 
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -31,21 +31,24 @@ var Sparql_WORDNET = (function () {
         } else if (ids) {
             strFilter = Sparql_generic.setFilter("concept", ids, null)
         }
-        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>  PREFIX wordnet: <http://www.w3.org/2006/03/wn/wn20/schema/>" +
-            " SELECT * WHERE { ?concept rdfs:label ?conceptLabel." + strFilter +
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "  PREFIX wordnet: <http://www.w3.org/2006/03/wn/wn20/schema/>" +
+            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            " SELECT distinct * WHERE { ?concept rdfs:label ?conceptLabel." + strFilter +
             "?child1 wordnet:hyponymOf  ?concept." +
-            "?child1 rdfs:label ?child1Label."+
+            "?child1 rdfs:label ?child1Label." +
+            // " filter (?child1 rdf:type <http://www.w3.org/2006/03/wn/wn20/schema/NounSynset>"+
             "}" +
-            "LIMIT 1000"
+            "LIMIT 10000"
 
         var url = self.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
             if (err) {
                 return callback(err)
             }
-            var bindings=[]
+            var bindings = []
             result.results.bindings.forEach(function (item) {
-                item.child1Type={value:"http://www.w3.org/2004/02/skos/core#Concept"}
+                item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
 
             })
             return callback(null, result.results.bindings)
@@ -54,8 +57,8 @@ var Sparql_WORDNET = (function () {
     }
 
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
-        if(!options)
-            options={}
+        if (!options)
+            options = {}
         var filter = Sparql_generic.getUriFilter("id", conceptId);
         if (options.propertyFilter) {
             filter += Sparql_generic.getUriFilter("prop", options.propertyFilter);
@@ -71,6 +74,75 @@ var Sparql_WORDNET = (function () {
             }
             return callback(null, result.results.bindings)
 
+
+        })
+    }
+    self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+        if (!options)
+            options = {}
+        var strFilter;
+        if (words) {
+            strFilter = Sparql_generic.setFilter("concept", null, words, {exactMatch:true})
+        } else if (ids) {
+            strFilter = Sparql_generic.setFilter("concept", ids, null)
+        }
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "  PREFIX wordnet: <http://www.w3.org/2006/03/wn/wn20/schema/>" +
+            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+
+            " select distinct *   WHERE {{"
+
+        query += "?concept rdfs:label ?conceptLabel. " + strFilter+
+        "?broader rdf:type wordnet:NounSynset "
+
+
+        ancestorsDepth = self.ancestorsDepth
+        for (var i = 1; i <= ancestorsDepth; i++) {
+            if (i == 1) {
+                query += "  ?concept wordnet:hyponymOf ?broader" + i + "." +
+                    "?broader rdf:type wordnet:NounSynset "+
+                    "?broader" + (i) + " rdfs:label ?broader" + (i) + "Label."
+
+
+            } else {
+                if( i <ancestorsDepth)
+                query += "  ?broader" + (i - 1) + " wordnet:hyponymOf ?broader" + i + "."
+                else
+                    query += "OPTIONAL { ?broader" + (i - 1) + " wordnet:hyponymOf ?broader" + i + "."
+
+
+                query += "?broader" + (i) + " rdfs:label ?broader" + (i) + "Label."
+
+            }
+
+
+        }
+
+
+      //  for (var i = 1; i < ancestorsDepth; i++) {
+            query += "} "
+      //  }
+
+
+        query += "  }";
+
+        if (options.filterCollections) {
+            query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + getUriFilter("collection", options.filterCollections)
+        }
+        query += "}limit 1000 ";
+
+
+        var url = self.sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            var bindings = []
+            result.results.bindings.forEach(function (item) {
+                item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
+
+            })
+            return callback(null, result.results.bindings)
 
         })
     }
@@ -130,8 +202,6 @@ var Sparql_WORDNET = (function () {
 
         })
     }
-
-
 
 
     self.getDetails = function (source, id, options, callback) {

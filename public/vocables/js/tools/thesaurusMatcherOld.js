@@ -12,26 +12,26 @@ var ThesaurusMatcher = (function () {
             ThesaurusBrowser.showThesaurusTopConcepts(thesaurusLabel)
 
 
-            $("#actionDivContolPanelDiv").load("snippets/thesaurusMatcher.html")
-            setTimeout(function () {
-                $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option("", ""));
-                for (var key in Config.sources) {
-                    var selected = ""
-                    if (key != MainController.currentSource) {
-                        $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option(key, key));
+                    $("#actionDivContolPanelDiv").load("snippets/thesaurusMatcher.html")
+                    setTimeout(function () {
+                        $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option("", ""));
+                        for (var key in Config.sources) {
+                            var selected = ""
+                            if (key != MainController.currentSource) {
+                                $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option(key, key));
 
-                    }
-                }
-                $("#actionDivContolPanelDiv").css('display', 'none')
-                $("#accordion").accordion("option", {active: 2});
-            }, 200)
+                            }
+                        }
+                        $("#actionDivContolPanelDiv").css('display', 'none')
+                        $("#accordion").accordion("option", {active: 2});
+                    }, 200)
 
 
         }
         self.selectNodeFn = function (event, propertiesMap) {
             $("#actionDivContolPanelDiv").css('display', 'block')
             ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", MainController.currentSource, propertiesMap.node)
-            ThesaurusBrowser.currentTreeNode = propertiesMap.node
+            ThesaurusBrowser.currentTreeNode= propertiesMap.node
         }
 
 
@@ -59,9 +59,7 @@ var ThesaurusMatcher = (function () {
             var targetConceptAggrDepth = maxDescendantsDepth;
             var sliceSize = 20;
 
-var sourceConceptsCount=0;
-            var sourceConceptsProcessed=0;
-            var targetConceptsCount=0
+
             var bindings = [];
             var allSourceConcepts = [];
             var commonConceptsMap = {};
@@ -83,7 +81,6 @@ var sourceConceptsCount=0;
                             if (err)
                                 return callbackSeries(err);
                             result.forEach(function (item) {
-                                sourceConceptsCount+=1
                                 for (var i = 0; i <= sourceConceptAggrDepth; i++) {
                                     var child = item["child" + i]
 
@@ -100,7 +97,6 @@ var sourceConceptsCount=0;
 
                             })
 
-MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.currentSource)
                             callbackSeries();
                         })
 
@@ -164,26 +160,67 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
 
                         var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize)
                         async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
-                            sourceConceptsProcessed+=sourceConcepts.length
-                            var words = []
+
+                            var regexStr = "("
                             sourceConcepts.forEach(function (concept, index) {
-                                words.push(concept.label.replace(/[-"]/g, ""));
+                                if (index > 0)
+                                    regexStr += "|";
+                                regexStr += "^" + concept.label.replace(/[-"]/g, "") + "$";
                             })
+                            regexStr += ")"
 
 
-                            Sparql_generic.getNodeParents(self.targetSourceId , words, null, targetConceptAggrDepth, {exactMatch:true}, function(err, result){
+                            var filter = "  regex(?prefLabel, \"" + regexStr + "\", \"i\")";
+
+                            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                                "SELECT DISTINCT * " +
+                                "FROM <" + targetGraphURI + "> " +
+                                "WHERE {" +
+                                "?id skos:prefLabel ?prefLabel ." +
+                                "FILTER (lang(?prefLabel) = '" + lang + "')" +
+                                " filter " + filter
+
+
+                            for (var i = 1; i < targetConceptAggrDepth; i++) {
+                                if (i == 1) {
+                                    query += " OPTIONAL{ ?id" + " skos:broader ?broader" + i + ". ";
+                                    query += "?broader" + i + " skos:prefLabel ?broaderLabel" + (i) + ". " +
+                                        "FILTER (lang(?broaderLabel" + i + ") = '" + lang + "')"
+
+                                } else {
+
+                                    query += " OPTIONAL{ ?broader" + (i - 1) + " skos:broader ?broader" + (i) + ". ";
+
+                                    query += "?broader" + i + " skos:prefLabel ?broaderLabel" + (i) + ". " +
+                                        "FILTER (lang(?broaderLabel" + i + ") = '" + lang + "')"
+                                }
+
+                            }
+
+                            for (var i = 1; i < targetConceptAggrDepth; i++) {
+                                query += "}"
+                            }
+
+                            query += "}" +
+                                "LIMIT 10000";
+
+                            var url = targetSparql_url + "?&query=";// + query + queryOptions
+                            var queryOptions = "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
                                 if (err) {
                                     return callbackEach(err);
                                 }
-                                var ids = [];
-                                targetConceptsCount+=result.length
 
-                                    result.forEach(function (item) {
+                                var ids = [];
+
+                                if (result.results.bindings.length > 0) {
+
+                                    result.results.bindings.forEach(function (item) {
 
 
                                         var targetObj = {
-                                            id: item.concept.value,
-                                            label: item.conceptLabel.value,
+                                            id: item.id.value,
+                                            label: item.prefLabel.value,
                                         }
                                         var targetBroaders = []
                                         for (var i = 1; i < targetConceptAggrDepth; i++) {
@@ -191,9 +228,9 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                             var broaderId = item["broader" + i]
                                             if (typeof broaderId !== "undefined") {
                                                 if (targetBroaders.indexOf(broaderId.value) < 0) {
-                                                    var broaderLabel = item["broader"+ i+"Label" ];
+                                                    var broaderLabel = item["broaderLabel" + i];
                                                     if (typeof broaderLabel !== "undefined")
-                                                        broaderLabel = item["broader"+ i+"Label" ].value
+                                                        broaderLabel = item["broaderLabel" + i].value
                                                     else
                                                         broaderLabel = broaderId.value
                                                     targetBroaders.push({level: i, id: broaderId.value, label: broaderLabel});
@@ -204,24 +241,25 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
 
                                         }
                                         targetObj.broaders = targetBroaders;
-                                        if (!commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
+                                        if (!commonConceptsMap[item.prefLabel.value.toLowerCase()]) {
+
                                             return callbackEach();
                                         }
-                                        commonConceptsMap[item.conceptLabel.value.toLowerCase()].target = targetObj
+                                        commonConceptsMap[item.prefLabel.value.toLowerCase()].target = targetObj
 
                                     })
-                                MainController.UI.message(targetConceptsCount+" found  " +sourceConceptsProcessed+ '/'+ sourceConceptsCount+" processed")
+                                } else {
+
+                                }
                                 return callbackEach();
-
                             })
-
 
 
                         }, function (err) {
                             if (Object.keys(commonConceptsMap).length == 0) {
                                 alert(("no matching concepts"))
                             }
-                            MainController.UI.message("drawing"+ targetConceptsCount+'/'+ sourceConceptsCount+" concepts")
+
                             return callbackSeries(err);
                         })
 
@@ -240,13 +278,8 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                         }
                         if (conceptIds.length == 0)
                             return callbackSeries();
-
-                       var conceptIdsSlices=common.sliceArray(conceptIds,"50");
-                       async.eachSeries(conceptIdsSlices,function(conceptIds,callbackSeriesSourceBroaders){
                         Sparql_generic.getNodeParents(MainController.currentSource, null, conceptIds, maxDescendantsDepth, null, function (err, result) {
-                            if(err){
-                                return callbackSeriesSourceBroaders(err)
-                            }
+                            //   Concepts.sparql_getAncestors(conceptIds, {}, function (err, result) {
                             var sourceBroaders = [];
                             result.forEach(function (item) {
 
@@ -265,12 +298,8 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                 }
                             })
 
-                            callbackSeriesSourceBroaders()
-                        });
-
-                        },function(err){
-                           return callbackSeries();
-                       })
+                            return callbackSeries();
+                        })
 
 
                     }
@@ -290,7 +319,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                         var yOffset = 30;
 
 
-                        function addBroaderNodes(broaders, childId, startOffest, direction, color, source) {
+                        function addBroaderNodes(broaders, childId, startOffest, direction, color,source) {
                             broaders.forEach(function (itemBroader, index) {
 
 
@@ -301,7 +330,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                         id: itemBroader.id,
                                         label: itemBroader.label,
                                         color: color,
-                                        data: {source: source},
+                                        data:{source:source},
                                         shape: "box",
                                         fixed: {x: true, y: false},
                                         x: direction * (startOffest + (xOffset * (index + 1))),
@@ -351,7 +380,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                         label: item.source.label,
                                         color: "#add",
                                         shape: "box",
-                                        data: {source: MainController.currentSource},
+                                        data:{source:MainController.currentSource},
                                         fixed: {x: true, y: true},
                                         x: currentX,
                                         y: currentY
@@ -365,7 +394,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                                 label: item.target.label,
                                                 color: "#dda",
                                                 shape: "box",
-                                                data: {source: self.targetSourceId},
+                                                data:{source:self.targetSourceId},
                                                 fixed: {x: true, y: true},
                                                 x: currentX + xOffset,
                                                 y: currentY
@@ -383,9 +412,9 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                             })
                                         }
                                     }
-                                    addBroaderNodes(item.source.broaders, item.source.id, currentX, -1, "#add", MainController.currentSource);
+                                    addBroaderNodes(item.source.broaders, item.source.id, currentX, -1, "#add",MainController.currentSource);
                                     if (item.target && item.target.broaders)
-                                        addBroaderNodes(item.target.broaders, item.target.id, currentX + xOffset, +1, "#dda", self.targetSourceId)
+                                        addBroaderNodes(item.target.broaders, item.target.id, currentX + xOffset, +1, "#dda",self.targetSourceId)
 
                                 }
                                 currentY += yOffset;
@@ -516,9 +545,9 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
 
         }
 
-        self.onGraphClickNode = function (node, point, event) {
-            if (event && event.ctrlKey) {
-                Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
+        self.onGraphClickNode = function ( node, point,event) {
+            if(event && event.ctrlKey){
+                Clipboard.copy({type: "node", source: node.data.source, id: node.id, label:node.label}, "_visjsNode", event)
             }
 
 

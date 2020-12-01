@@ -87,6 +87,8 @@ var Sparql_generic = (function () {
         }
 
 
+
+
         setFilter = function (varName, ids, words, options) {
             if(!options)
                 options={}
@@ -98,11 +100,11 @@ var Sparql_generic = (function () {
                         if (index > 0)
                             conceptWordStr += "|"
                         if (options.exactMatch)
-                            conceptWordStr += "  \"^" + word + "$\"";
+                            conceptWordStr += "^" + word + "$";
                         else
-                            conceptWordStr += "  \"" + word + "\"";
+                            conceptWordStr += "" + word + "";
                     })
-                    filter = " filter( regex(?" + varName + "Label in( " + conceptWordStr + "))) ";
+                    filter = " filter( regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ";
                 } else {
                     var filter = "  filter( regex(?" + varName + "Label, \"^" + words + "$\", \"i\"))";
                     if (!options.exactMatch) {

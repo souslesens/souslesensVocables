@@ -47,9 +47,22 @@ var Sparql_ISO_15926 = (function () {
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select distinct *  where { ?child1 rdfs:subClassOf ?concept. "+strFilter+
-            "?child1 rdfs:label ?child1Label."+
+            "?child1 rdfs:label ?child1Label."
 
-            "}" +
+
+         //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
+            for (var i = 1; i < descendantsDepth; i++) {
+
+                query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." +
+                    "?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label."
+
+            }
+            for (var i = 1; i < descendantsDepth; i++) {
+                query += "} "
+            }
+
+
+           query+= "}" +
             "LIMIT 10000"
 
             var url = self.sparql_url + "?format=json&query=";

@@ -27,8 +27,10 @@ var MainController = (function () {
                 if(Config.currentProfile.allowedSourceSchemas.indexOf( Config.sources[sourceLabel].sourceSchema)<0)
                     return;
                 Config.sources[sourceLabel].name=sourceLabel
-                Config.sources[sourceLabel].controllerName=Config.sources[sourceLabel].controller
-                Config.sources[sourceLabel].controller=eval( Config.sources[sourceLabel].controller)
+                if(! Config.sources[sourceLabel].controllerName) {
+                    Config.sources[sourceLabel].controllerName = Config.sources[sourceLabel].controller
+                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
+                }
                 if (!Config.sources[sourceLabel].color)
                     Config.sources[sourceLabel].color = common.palette[index%common.palette.length];
 

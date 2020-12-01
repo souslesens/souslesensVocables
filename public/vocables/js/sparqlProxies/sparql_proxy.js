@@ -127,6 +127,8 @@ var Sparql_proxy = (function () {
             success: function (data, textStatus, jqXHR) {
                 var xx = data;
                 $("#waitImg").css("display", "none");
+                if (!data.results )
+                    var x=3
                 if (data.results.bindings.length == 0)
                     ;
                 //    console.log(JSON.stringify(query))

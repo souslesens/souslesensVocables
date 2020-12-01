@@ -30,6 +30,17 @@
     },
     "color": "#9edae5"
   },
+  "IEC": {
+    "editable": true,
+    "controller": "Sparql_generic",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "graphUri": "http://souslesens.org/vocabulary/iec/",
+    "sourceSchema": "SKOS",
+    "predicates": {
+      "lang": "en"
+    },
+    "color": "#9edae5"
+  },
   "Oil&Gas-Upstream": {
     "controller": "Sparql_generic",
     "sparql_url": "http://51.178.139.80:8890/sparql",
@@ -50,7 +61,6 @@
     },
     "color": "#dbdb8d"
   },
-
   "GEMET": {
     "controller": "Sparql_generic",
     "sparql_url": "http://51.178.139.80:8890/sparql",
@@ -89,7 +99,6 @@
     },
     "color": "#f7b6d2"
   },
-
   "USGS": {
     "controller": "Sparql_generic",
     "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
@@ -107,7 +116,7 @@
     "graphUri": "http://resource.geosciml.org/",
     "sourceSchema": "SKOS",
     "predicates": {
-    "broaderPredicate": "^skos:hasTopConcept|skos:broader",
+      "broaderPredicate": "^skos:hasTopConcept|skos:broader",
       "lang": "en"
     },
     "color": "#c5b0d5"
@@ -156,14 +165,10 @@
     },
     "color": "#ffbb78"
   },
-
-
-
-  "_comment":"**************************************************************ontologies***************************************",
-  "_comment":"**************************************************************ontologies***************************************",
-  "_comment":"**************************************************************ontologies***************************************",
-  "_comment":"**************************************************************ontologies***************************************",
-
+  "_comment": "**************************************************************ontologies***************************************",
+  "_comment": "**************************************************************ontologies***************************************",
+  "_comment": "**************************************************************ontologies***************************************",
+  "_comment": "**************************************************************ontologies***************************************",
   "NPD": {
     "controller": "Sparql_NPD",
     "sourceSchema": "SKOS",
@@ -177,7 +182,6 @@
   "ISO_15926": {
     "controller": "Sparql_ISO_15926",
     "sourceSchema": "SKOS",
-
     "color": "#bcbd22"
   }
 }

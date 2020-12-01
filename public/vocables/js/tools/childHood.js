@@ -1,4 +1,4 @@
-var TermTaxonomy = (function () {
+var ChildHood = (function () {
     var self = {context: {}}
 
     var colorsMap = {}
@@ -9,7 +9,7 @@ var TermTaxonomy = (function () {
 
 
     self.onSourceSelect = function () {
-        var html = "<button onclick='TermTaxonomy.showActionPanel()'>OK</button>"
+        var html = "<button onclick='ChildHood.showActionPanel()'>OK</button>"
         $("#sourceDivControlPanelDiv").html(html)
 
     }
@@ -20,7 +20,7 @@ var TermTaxonomy = (function () {
     self.showActionPanel = function () {
         self.initsourceLabels();
         $("#actionDivContolPanelDiv").html("")
-        $("#actionDiv").load("snippets/termTaxonomy.html")
+        $("#actionDiv").load("snippets/childHood.html")
         $("#accordion").accordion("option", {active: 2});
 
     }
@@ -38,97 +38,137 @@ var TermTaxonomy = (function () {
     }
 
 
-    self.searchConcepts = function (word) {
 
 
-        self.context.currentWord = word
-        conceptsMap = {}
+    self.displayGraph = function (direction) {
+        var depth = parseInt($("#ChildHood_depth").val())
+        self.initsourceLabels()
+
+        var allNodes = {}
+        async.eachSeries(sourceLabels, function (sourceLabel, callbackEach) {
+
+            var sourceNodes = []
+            allNodes[sourceLabel] = sourceNodes
+            async.series([
+
+                //get TopConcepts
+                function (callbackSeries) {
+                    Sparql_generic.getTopConcepts(sourceLabel, null, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        result.forEach(function (item) {
+                            sourceNodes.push({
+                                id: item.topConcept.value,
+                                label: item.topConceptLabel.value,
+                                level: 0,
+                                parent: sourceLabel
+                            })
+
+                        })
+                        callbackSeries()
+                    })
+
+                },
+
+                //get TopConcepts
+                function (callbackSeries) {
+                    var ids = [];
+                    sourceNodes.forEach(function (item) {
+                        ids.push(item.id)
+                    })
+                    Sparql_generic.getNodeChildren(sourceLabel, null, ids, depth, null, function (err, result) {
+
+                        if (err)
+                            return callbackSeries(err);
+                        result.forEach(function (item) {
+                            for (var i = 1; i <= depth; i++) {
+                                if (item["child" + i]) {
+                                    var parent;
+                                    if (i == 1)
+                                        parent = item.concept.value;
+                                    else
+                                        parent = item["child" + (i - 1)].value
+
+                                    sourceNodes.push({
+                                        id: item["child" + i].value,
+                                        label: item["child" + i + "Label"].value,
+                                        level: i,
+                                        parent: parent
+                                    })
+                                }
+                            }
+
+                        })
+                        callbackSeries()
+                    })
+
+                },
 
 
-        var exactMatch = $("#exactMatchCBX").prop("checked")
-
-        var bindings = {}
-        var sourceNodes = [];
-
-        sourceLabels.forEach(function (sourceId) {
-
-            sourceNodes.push({id: sourceId, text: "<span class='tree_level_1' style='background-color: " + Config.sources[sourceId].color + "'>" + sourceId + "</span>", children: [], parent: "#"})
-
-
-        })
-        if ($('#conceptsJstreeDiv').jstree)
-            $('#conceptsJstreeDiv').jstree("destroy")
-        $("#conceptsJstreeDiv").jstree({
-
-            "checkbox": {
-                "keep_selected_style": false
-            },
-            "plugins": ["checkbox"],
-            "core": {
-                'check_callback': true,
-                'data': sourceNodes
-            }
-
-
-        });
-        var selectedIds = [];
-        //  sourceLabels.forEach(function (source) {
-        async.eachSeries(sourceLabels, function (sourceId, callbackEach) {
-
-
-            Sparql_generic.getNodeParents(sourceId, word, null, 1, {exactMatch: exactMatch}, function (err, result) {
-                // sparql_abstract.list(source.name, word, {exactMatch: exactMatch}, function (err, result) {
-
-                if (err) {
-                    return console.log(err);
-                }
-
-                result.forEach(function (item) {
-                    var conceptId = item.concept.value
-                    if (!conceptsMap[conceptId]) {
-                        /*  if (result.length == 1)
-                              selectedIds.push(item.id)*/
-                        conceptsMap[conceptId] = item;
-                        item.sourceId = sourceId;
-                        item.title = item.conceptLabel.value + " / " + (item.description || item.broader1Label.value)
-
-                        var newNode = {id: conceptId, text: "<span class='tree_level_2'>" + item.title + "</span>", data: item}
-                        // setTimeout(function () {
-                        $("#conceptsJstreeDiv").jstree(true).create_node(sourceId, newNode, "first", function () {
-                            $("#conceptsJstreeDiv").jstree(true)._open_to(newNode.id);
-
-
-                        }, false);
-
-                        //  }, 1000)
-                    }
-
-                })
-                callbackEach()
-
-
+            ], function (err) {
+                callbackEach(err);
             })
 
 
         }, function (err) {
             if (err)
-                return $("#messageDiv").html(err)
-            $("#messageDiv").html("done")
+                return MainController.UI.message(err);
+            self.drawGraph( allNodes);
         })
-        return;
-
-
-        setTimeout(function () {
-
-            $("#conceptsJstreeDiv").jstree(true).select_node(selectedIds);
-
-        }, 3000)
 
 
     }
 
-    self.displayGraph = function (direction) {
-        $("#TermTaxonomy_nodeInfosDiv").html("")
+
+    self.drawGraph=function(allNodesMap)   {
+        var visjsData={nodes:[],edges:[]};
+        var allIds={}
+
+        var colors=[""]
+        for(var source in allNodesMap){
+            var color=colorsMap[source];
+            visjsData.nodes.push({
+                id: source,
+                label:source,
+                shape:"box",
+                color:color
+            })
+            allNodesMap[source].forEach(function(item){
+                var label=null;
+                if(item.level<2)
+                    label=item.label
+                if(!allIds[item.id]) {
+                    allIds[item.id]=1
+                    visjsData.nodes.push({
+                        id: item.id,
+                       label: label,
+                        color:  common.palette[10+item.level]
+                    })
+                }
+                var edgeId=item.id+"_"+item.parent
+                if(!allIds[edgeId]) {
+                    allIds[edgeId] = 1
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.id,
+                        to: item.parent
+                    })
+                }
+
+            })
+
+        }
+
+        visjsGraph.draw("graphDiv", visjsData)
+
+
+
+
+
+    }
+
+
+/*
         var maxDepth = 5
 
         drawRootNode = function (word) {
@@ -156,12 +196,7 @@ var TermTaxonomy = (function () {
         }
 
 
-        var selectedConcepts = []
-        var jstreeNodes = $("#conceptsJstreeDiv").jstree(true).get_bottom_checked(false)
-        jstreeNodes.forEach(function (nodeId) {
-            if (conceptsMap[nodeId])
-                selectedConcepts.push(conceptsMap[nodeId]);
-        });
+
 
 
         drawRootNode(self.context.currentWord)
@@ -312,7 +347,7 @@ var TermTaxonomy = (function () {
         }
 
 
-    }
+    }*/
 
 
     return self;

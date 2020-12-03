@@ -1,12 +1,10 @@
-var Sparql_NPD = (function () {
+var Sparql_OWL = (function () {
+
         var self = {};
-        var sourceLabel="CIDOC"
-
-
 
 
         self.ancestorsDepth = 6
-        self.sparql_url = "http://51.178.139.80:8890/sparql";
+
         var elasticUrl = "/elastic";
         if (window.location.href.indexOf("https") > -1)
             elasticUrl = "../elastic";
@@ -19,19 +17,17 @@ var Sparql_NPD = (function () {
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
                 "" +
-                "select   distinct *  from <" + self.graphUri + ">  where {"
-             /*   "?topConcept   rdfs:label ?topConceptLabel." +
-                " filter( not EXISTS {?topConcept rdfs:subClassOf ?d})" +
-                "}limit 1000" */
+                "select   distinct * from <" + self.graphUri + ">   where {"+
+              "?topConcept   rdfs:label ?topConceptLabel." +
+                " ?topConcept rdfs:subClassOf owl:Thing" +
+                "}limit 1000"
 
-            query+="  ?prop   rdf:type owl:DatatypeProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.   }limit 1000"
+           // query+="  ?prop   rdf:type owl:ObjectProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.  filter( not EXISTS {?topConcept rdfs:subClassOf ?d}) }limit 1000"
             self.execute_GET_query(query, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
                 result.results.bindings.forEach(function(item){
-                    var id=item.topConcept.value
-                    item.topConceptLabel={value:id.substring(id.lastIndexOf("#")+1)}
                     item.topConceptType = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
 
                 })
@@ -56,7 +52,7 @@ var Sparql_NPD = (function () {
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * from <" + self.graphUri + ">  where {" +
                 "?child1   rdfs:subClassOf ?concept. " + strFilter +
-                "?child1   rdfs:label ?child1Label. "
+                "?child1   rdfs:label ?child1Label. "+
                 "} order by ?child1 limit 10000";
 
 
@@ -80,7 +76,7 @@ var Sparql_NPD = (function () {
             self.graphUri =  Config.sources[sourceLabel].graphUri ;
             self.sparql_url =  Config.sources[sourceLabel].sparql_url;
 
-            var query = "select *" +
+            var query = "select *  from <" + self.graphUri + "> " +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
             self.execute_GET_query(query, function (err, result) {
                 if (err) {
@@ -92,18 +88,20 @@ var Sparql_NPD = (function () {
             })
         }
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+            self.graphUri =  Config.sources[sourceLabel].graphUri ;
+            self.sparql_url =  Config.sources[sourceLabel].sparql_url;
             if (!options)
                 options = {}
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, {exactMatch: true})
+                strFilter = Sparql_generic.setFilter("concept", null, words, )
             } else if (ids) {
                 strFilter = Sparql_generic.setFilter("concept", ids, null)
             }
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 
-                " select distinct *   WHERE {{"
+                " select distinct *  from <" + self.graphUri + ">   WHERE {{"
 
             query += "?concept rdfs:label ?conceptLabel. " + strFilter;
 

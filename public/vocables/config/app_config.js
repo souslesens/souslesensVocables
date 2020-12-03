@@ -18,7 +18,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
 
     self.currentProfile = {
-        allowedSourceSchemas: "SKOS"
+        allowedSourceSchemas: ["SKOS","OWL"]
     }
 
 
@@ -35,8 +35,8 @@ var Config = (function () {
     // self.tools["ontologyBrowser"] = {label: "Ontology", multiSources: 0, controller: OntologyBrowser,toolDescriptionImg:null}
 
     self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
-    self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
-    self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
+   // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
+  //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
 
     // moved self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender,toolDescriptionImg:null}
 

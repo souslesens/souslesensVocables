@@ -7,6 +7,16 @@
     }
 
 </style>
+<script>
+$("#TermTaxonomy_nodeInfosDiv").dialog({
+    autoOpen: false,
+    height: 800,
+    width: 800,
+    modal: false,
+})
+
+
+</script>
 
 
 <div id="dialogDiv" style="display: flex;flex-direction: column">
@@ -14,12 +24,12 @@
     <div>
         <button onclick="TermTaxonomy.searchConcepts($('#searchWordInput').val())">Search</button>
         <input type="checkbox" checked="checked" id="exactMatchCBX">Exact Match&nbsp;
-        &nbsp;<input type="checkbox" id='allConceptsCbx' onchange="TermTaxonomy.onAllConceptsCbxChange()">select All
+        &nbsp;<input type="checkbox" id='allConceptsCbx' onchange="common.onAllTreeCbxChange($(this),'conceptsJstreeDiv')">select All
     </div>
 
 
     <div id="conceptOperationsDiv">
-        <div id="TermTaxonomy_nodeInfosDiv"></div>
+
         <!--  <button onclick="multiSkosGraph3.searchConceptsContainWord()">search more concepts</button>-->
         <button onclick="TermTaxonomy.displayGraph('ancestors')">display ancestors Graph</button>&nbsp;
        <!-- <button onclick="TermTaxonomy.displayGraph('children')">display children Graph</button>-->
@@ -32,5 +42,7 @@
     <span  class="popupMenuItem" onclick="TermTaxonomy.graphActions.setAsRootNode();"> set a rootNode</span>
 
 </div>
+
+<div id="TermTaxonomy_nodeInfosDiv"></div>
 
 

@@ -10,6 +10,7 @@ var TermTaxonomy = (function () {
 
     self.onSourceSelect = function () {
         var html = "<button onclick='TermTaxonomy.showActionPanel()'>OK</button>"
+        html+=  "&nbsp;<input type='checkbox' id='allConceptsCbx' onchange=\"common.onAllTreeCbxChange($(this),'sourcesTreeDiv')\"> All"
         $("#sourceDivControlPanelDiv").html(html)
 
     }
@@ -295,7 +296,7 @@ var TermTaxonomy = (function () {
                 if (err) {
                     return MainController.UI.message(err);
                 }
-
+                $("#TermTaxonomy_nodeInfosDiv").dialog("open");
                 SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDiv", "en", self.graphActions.currentNode.id, result)
 
             })

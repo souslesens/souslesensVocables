@@ -1,7 +1,7 @@
 var SourceEditor = (function () {
         var self = {};
         self.data = {};
-        self.currentSourceSchema;
+
         self.currentSourceUri;
 
         self.schemasConfig;
@@ -11,113 +11,7 @@ var SourceEditor = (function () {
         self.editingObject;
 
 
-        self.schema = {
-            initSourceSchema: function (sourceLabel, callback) {
-                async.series([
-                    // load schema sconfig
-                    function (callbackSeries) {
-                        if (self.schemasConfig)
-                            return callbackSeries();
 
-
-                        $.getJSON("config/schemas.json", function (json) {
-                            self.schemasConfig = json;
-                            if (Config.sources[sourceLabel].sourceSchema)
-                                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].sourceSchema]
-                            else// default SKOS
-                                self.currentSourceSchema = self.schemasConfig["SKOS"];
-                            return callbackSeries();
-                        })
-
-
-                    },
-                    // load classes
-                    function (callbackSeries) {
-                        Sparql_schema.getClasses(self.currentSourceSchema, function (err, result) {
-                            if (err)
-                                return callbackSeries(err);
-                            self.currentSourceSchema.classes = {}
-                            result.forEach(function (item) {
-                                self.currentSourceSchema.classes[item.class.value] = {id: item.class.value, label: common.getItemLabel(item, "class"), objectProperties: {}, annotations: {}}
-                            })
-                            return callbackSeries();
-
-                        })
-                    },
-                ], function (err) {
-                    callback(err)
-                })
-            }
-
-            ,
-            initClassProperties: function (sourceLabel, classType, callback) {
-                async.series([
-                        // load schema if not
-                        function (callbackSeries) {
-
-                            if (self.currentSourceSchema)
-                                return callbackSeries();
-                            self.schema.initSourceSchema(sourceLabel, function (err, result) {
-                                callbackSeries(err);
-                            })
-                        }
-                        ,
-                        //check if classType already loaded
-                        function (callbackSeries) {
-                            if (Object.keys(self.currentSourceSchema.classes[classType].objectProperties).length > 0)
-                                return callback();
-                            return callbackSeries()
-                        },
-                        // load classes
-                        function (callbackSeries) {
-                            Sparql_schema.getClasses(self.currentSourceSchema, function (err, result) {
-                                if (err)
-                                    return callbackSeries(err);
-                                self.currentSourceSchema.classes = {}
-                                result.forEach(function (item) {
-                                    self.currentSourceSchema.classes[item.class.value] = {id: item.class.value, label: common.getItemLabel(item, "class"), objectProperties: {}, annotations: {}}
-                                })
-                                return callbackSeries();
-                            })
-                        }
-                        ,
-                        // load object properties
-                        function (callbackSeries) {
-                            Sparql_schema.getClassProperties(self.currentSourceSchema, classType, function (err, result) {
-                                if (err)
-                                    return callbackSeries(err)
-                                result.forEach(function (item) {
-                                    if (item.subProperty)
-                                        self.currentSourceSchema.classes[classType].objectProperties[item.subProperty.value] = {id: item.subProperty.value, label: common.getItemLabel(item, "subProperty")}
-                                    else
-                                        self.currentSourceSchema.classes[classType].objectProperties[item.property.value] = {id: item.property.value, label: common.getItemLabel(item, "property")}
-
-                                })
-
-                                callbackSeries();
-                            })
-                        }
-                        // load annotations
-                        ,
-                        function (callbackSeries) {
-                            Sparql_schema.getObjectAnnotations(self.currentSourceSchema, classType, function (err, result) {
-                                if (err)
-                                    return callbackSeries(err)
-
-                                result.forEach(function (item) {
-                                    self.currentSourceSchema.classes[classType].annotations[item.annotation.value] = {id: item.annotation.value, label: common.getItemLabel(item, "annotation")}
-                                })
-
-                                callbackSeries();
-                            })
-                        }
-                    ],
-                    function (err) {
-                        callback(err)
-                    }
-                )
-            }
-        }
 
 
         self.onLoaded = function () {
@@ -150,7 +44,7 @@ var SourceEditor = (function () {
         self.onSourceSelect = function (sourceLabel) {
             MainController.currentSource = sourceLabel;
             self.currentSourceUri = Config.sources[sourceLabel].graphUri
-            self.initSourceSchema(sourceLabel, function (err, result) {
+            OwlSchema.initSourceSchema(sourceLabel, function (err, result) {
 
                 if (err)
                     return MainController.UI.message(err)
@@ -178,15 +72,15 @@ var SourceEditor = (function () {
                 //  $("#SourceEditor_mainDiv").css("display", "block")
                 $("#SourceEditor_NewObjectDiv").css("display", "block")
                 $("#SourceEditor_graphUri").html("sourceGraphUri")
-                common.fillSelectOptions("SourceEditor_NewClassSelect", self.currentSourceSchema.classes, true, "label", "id")
+                common.fillSelectOptions("SourceEditor_NewClassSelect", OwlSchema.currentSourceSchema.classes, true, "label", "id")
 
                 if (!parentObj)
                     parentObj = self.editingObject
                 if (parentObj) {
-                    if (self.currentSourceSchema) {
-                        var parentProperty = self.currentSourceSchema.newObject.treeParentProperty
-                        var mandatoryProps = self.currentSourceSchema.newObject.mandatoryProperties;
-                        var childClass = self.currentSourceSchema.newObject.treeChildrenClasses[parentObj.type]
+                    if (OwlSchema.currentSourceSchema) {
+                        var parentProperty = OwlSchema.currentSourceSchema.newObject.treeParentProperty
+                        var mandatoryProps = OwlSchema.currentSourceSchema.newObject.mandatoryProperties;
+                        var childClass = OwlSchema.currentSourceSchema.newObject.treeChildrenClasses[parentObj.type]
                         var initData = {}
                         initData[parentProperty] = [{value: parentObj.about, type: "uri"}];
                         mandatoryProps.forEach(function (item) {
@@ -208,8 +102,8 @@ var SourceEditor = (function () {
                 if (!classId)
                     classId = $("#SourceEditor_NewClassSelect").val();
 
-                var classLabel = self.currentSourceSchema.classes[classId].label
-                self.schema.initClassProperties(sourceLabel, classId, function (err, result) {
+                var classLabel = OwlSchema.currentSourceSchema.classes[classId].label
+                OwlSchema.initClassProperties(sourceLabel, classId, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
                     $("#SourceEditor_NewClassSelect").val("");
@@ -252,13 +146,13 @@ var SourceEditor = (function () {
             async.series([
                     //initClassPropsAndAnnotations for type
                     function (callbackSeries) {
-                        self.schema.initClassProperties(source, type, function (err, result) {
+                        OwlSchema.initClassProperties(source, type, function (err, result) {
                             return callbackSeries(err)
                         })
                     }
                     //init editing object
                     , function (callbackSeries) {
-                        editingObject = JSON.parse(JSON.stringify(self.currentSourceSchema.classes[type]))
+                        editingObject = JSON.parse(JSON.stringify(OwlSchema.currentSourceSchema.classes[type]))
                         editingObject.source = source;
                         editingObject.inverseObjectProperties = {}
                         if (isNew)
@@ -325,9 +219,9 @@ var SourceEditor = (function () {
                         setTimeout(function () {
                             $("#SourceEditor_mainDiv").css("display", "block")
                             $("#SourceEditor_ObjectUri").val(editingObject.about);
-                            $("#SourceEditor_ObjectType").html(self.currentSourceSchema.classes[editingObject.type].label);
+                            $("#SourceEditor_ObjectType").html(OwlSchema.currentSourceSchema.classes[editingObject.type].label);
                             $(".SourceEditor_minorDiv").remove();
-                            var objectPropertiesList = Object.keys(self.currentSourceSchema.classes[type].objectProperties).sort();
+                            var objectPropertiesList = Object.keys(OwlSchema.currentSourceSchema.classes[type].objectProperties).sort();
                             common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true, "label", "id")
                             for (var key in editingObject.objectProperties) {
                                 if (editingObject.objectProperties[key].value) {
@@ -335,7 +229,7 @@ var SourceEditor = (function () {
                                     self.drawObjectValue("objectProperties", key, editingObject, "SourceEditor_ObjectPropertiesTableDiv")
                                 }
                             }
-                            var annotationsList = Object.keys(self.currentSourceSchema.classes[type].annotations).sort();
+                            var annotationsList = Object.keys(OwlSchema.currentSourceSchema.classes[type].annotations).sort();
                             common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, "label", "id")
                             for (var key in editingObject.annotations) {
                                 if (editingObject.annotations[key].value)
@@ -401,7 +295,7 @@ var SourceEditor = (function () {
 
             //if (!self.currentSourceSchema.classes[type][metaType][key].divId) {
             if (!$("#" + divId).length) {
-                self.currentSourceSchema.classes[type][metaType][key].divId = divId;
+                OwlSchema.currentSourceSchema.classes[type][metaType][key].divId = divId;
                 $("#" + parentDiv).append("<div class='SourceEditor_minorDiv' id='" + divId + "'>  <table></table></div>")
             }
             setTimeout(function () {
@@ -417,9 +311,9 @@ var SourceEditor = (function () {
         }
 
         self.getPredicateValueType = function (className, predicate) {
-            if (self.currentSourceSchema.classes[className].objectProperties[predicate])
+            if (OwlSchema.currentSourceSchema.classes[className].objectProperties[predicate])
                 return "uri"
-            if (self.currentSourceSchema.classes[className].annotations[predicate])
+            if (OwlSchema.currentSourceSchema.classes[className].annotations[predicate])
                 return "literal"
             return null;
         }
@@ -427,7 +321,7 @@ var SourceEditor = (function () {
         self.saveEditingObject = function (callback) {
 
 
-            var mandatoryProps = SourceEditor.currentSourceSchema.newObject.mandatoryProperties;
+            var mandatoryProps = OwlSchema.currentSourceSchema.newObject.mandatoryProperties;
             var triples = [];
             var predicate
             var nodeLabel = null

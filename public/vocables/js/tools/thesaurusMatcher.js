@@ -6,8 +6,8 @@ var ThesaurusMatcher = (function () {
 
         self.onSourceSelect = function (thesaurusLabel) {
 
-            //  $("#actionDivContolPanelDiv").html("<button onclick='ThesaurusMatcher.showcompareWithDialog()'>Compare with...</button>")
-            $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
+          //  $("#actionDivContolPanelDiv").html("<button onclick='ThesaurusMatcher.showcompareWithDialog()'>Compare with...</button>")
+        // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
 
             ThesaurusBrowser.showThesaurusTopConcepts(thesaurusLabel)
 
@@ -22,14 +22,14 @@ var ThesaurusMatcher = (function () {
 
                     }
                 }
-                $("#actionDivContolPanelDiv").css('display', 'none')
+                $("#ThesaurusMatcher_actionDiv").css('display', 'none')
                 $("#accordion").accordion("option", {active: 2});
             }, 200)
 
 
         }
         self.selectNodeFn = function (event, propertiesMap) {
-            $("#actionDivContolPanelDiv").css('display', 'block')
+            $("#ThesaurusMatcher_actionDiv").css('display', 'block')
             ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", MainController.currentSource, propertiesMap.node)
             ThesaurusBrowser.currentTreeNode = propertiesMap.node
         }

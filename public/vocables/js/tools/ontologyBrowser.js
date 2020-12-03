@@ -2,7 +2,6 @@ var OntologyBrowser = (function () {
     var self = {}
 
     self.schemasConfig
-    self.currentSourceSchema
     self.currentSourceUri
     self.nodeProperties;
     self.currentFilters = {}
@@ -22,11 +21,11 @@ var OntologyBrowser = (function () {
     self.onSourceSelect = function (sourceLabel) {
           MainController.currentSource = sourceLabel;
         self.currentSourceUri = Config.sources[sourceLabel].graphUri
-        if (Config.sources[sourceLabel].sourceSchema) {
+        if (Config.sources[sourceLabel].schema) {
             //  if(! self.schemasConfig) {
             $.getJSON("config/schemas.json", function (json) {
                 self.schemasConfig = json;
-                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].sourceSchema]
+                OwlSchema.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schema]
                 ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {treeSelectNodeFn: OntologyBrowser.onNodeSelect, contextMenu: {}})
                 $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
                 $("#graphDiv").load("snippets/ontologyBrowser.html")
@@ -44,12 +43,12 @@ var OntologyBrowser = (function () {
     self.onNodeSelect = function (event, obj) {
 
 
-        Sparql_schema.getObjectDomainProperties(self.currentSourceSchema, obj.node.id, function (err, result) {
+        Sparql_schema.getObjectDomainProperties(OwlSchema.currentSourceSchema, obj.node.id, function (err, result) {
             var nodeProperties = [];
             result.forEach(function (item) {
                 nodeProperties.push({id: item.domain.value, label: common.getItemLabel(item, "domain")})
             })
-             Sparql_schema.getObjectRangeProperties(self.currentSourceSchema,obj.node.id,function(err,result){
+             Sparql_schema.getObjectRangeProperties(OwlSchema.currentSourceSchema,obj.node.id,function(err,result){
 
                  result.forEach(function(item){
                      nodeProperties.push({id: item.range.value, label: common.getItemLabel(item, "range")})
@@ -69,7 +68,7 @@ var OntologyBrowser = (function () {
 
     self.showDatatypeProperties = function (classId) {
         self.currentClass = classId;
-        Sparql_schema.getDataTypeProperties(self.currentSourceSchema, classId, function (err, result) {
+        Sparql_schema.getDataTypeProperties(OwlSchema.currentSourceSchema, classId, function (err, result) {
             self.nodeProperties = {};
             result.forEach(function (item) {
                 var propLabel = common.getItemLabel(item, "property")
@@ -296,6 +295,15 @@ var OntologyBrowser = (function () {
 
         })
 
+    }
+
+    self.showProperties=function() {
+var classType=ThesaurusBrowser.currentTreeNode.id
+        OwlSchema.initClassProperties(MainController.currentSource, classType,function (err, result) {
+            var schema = result
+
+
+        })
     }
 
     return self;

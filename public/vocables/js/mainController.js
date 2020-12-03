@@ -23,12 +23,11 @@ var MainController = (function () {
         showSources:function(treeDiv, withCBX){
             var treeData = [];
             Object.keys(Config.sources).sort().forEach(function (sourceLabel,index) {
-
-                if(Config.currentProfile.allowedSourceSchemas.indexOf( Config.sources[sourceLabel].sourceSchema)<0)
+                if(Config.currentProfile.allowedSourceSchemas.indexOf( Config.sources[sourceLabel].schemaType)<0)
                     return;
                 Config.sources[sourceLabel].name=sourceLabel
                 if(! Config.sources[sourceLabel].controllerName) {
-                    Config.sources[sourceLabel].controllerName = Config.sources[sourceLabel].controller
+                    Config.sources[sourceLabel].controllerName = ""+Config.sources[sourceLabel].controller
                     Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
                 }
                 if (!Config.sources[sourceLabel].color)

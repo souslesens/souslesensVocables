@@ -36,7 +36,8 @@
 
     <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
     <script src="js/sparqlProxies/sparql_ISO_15926.js"></script>
-    <script src="js/sparqlProxies/sparql_NPD.js"></script>
+ <script src="js/sparqlProxies/sparql_NPD.js"></script>
+    <script src="js/sparqlProxies/sparql_OWL.js"></script>
 
 
 
@@ -46,6 +47,7 @@
     <script src="js/tools/nerEvaluator.js"></script>
     <script src="js/tools/termTaxonomy.js"></script>
     <script src="js/tools/ontologyBrowser.js"></script>
+    <script src="js/tools/owlSchema.js"></script>
     <script src="js/tools/annotator.js"></script>
     <script src="js/tools/childHood.js"></script>
     <script src="js/tools/importCSV.js"></script>
@@ -61,6 +63,8 @@
 
     <script src="config/app_config.js"></script>
 
+    <script src="js/authentification.js"></script>
+
     <!--  <script src="js/authentification.js"></script>-->
 
 
@@ -68,6 +72,8 @@
 
         var leftPanelWidth = 400
         $(function () {
+            config={loginMode:"none",appName:"VOCABLES"};
+            authentication.init()
 
             var w = $(document).width() - leftPanelWidth;
             var h = $(document).height;
@@ -89,6 +95,12 @@
                     MainController.UI.showInCentralPanelDiv("graphDiv")
                 }
             });
+            $("#mainDialogDiv").dialog({
+                autoOpen: false,
+                height: 800,
+                width: 800,
+                modal: false,
+            })
 
 
             MainController.UI.showToolsList("toolsTreeDiv")
@@ -107,8 +119,8 @@
 
         .jstree {
             margin: 5px;
-            min-height: 500px;
-            min-width: 300px;
+            height: 500px;
+            width: 380px;
             overflow: auto;
 
         }
@@ -256,6 +268,21 @@
 
     </div>
 
+
+</div>
+<div id="loginDiv"
+     style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
+    <div> login<input id="loginInput">
+        password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
+                        document.getElementById('loginButton').click()">
+        <button id="loginButton" onclick="authentication.doLogin()">OK</button>
+        <!--   <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>-->
+
+        <div id="loginMessage" style="margin: 20px; font-size: 14px; color:saddlebrown"></div>
+    </div>
+</div>
+
+<div id="mainDialogDiv">
 
 </div>
 

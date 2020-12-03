@@ -30,12 +30,9 @@ var authentication = {
                 return callback(err);
             }
             if (users[login] && users[login].password == password) {
-                //  logger.log({level:'info',message:login+" connected"})
-               // logger.info(login + " connected")
                 callback(null, users[login].groups);
             } else {
-               // logger.info(login + " rejected")
-                callback(null, false);
+                callback("Invalid login or password");
             }
 
 

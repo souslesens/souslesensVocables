@@ -4,7 +4,7 @@ var Blender = (function () {
         var isLoaded = false
         self.modifiedNodes = []
         self.tempGraph;
-        self.currentSourceSchema;
+
         self.currentSource;
         self.currentTab = 0;
         self.backupSource = false// using  a clone of source graph
@@ -25,6 +25,11 @@ var Blender = (function () {
             setTimeout(function () {
                     var editableSources = [];
                     for (var key in Config.sources) {
+
+                        if(! Config.sources[key].controllerName) {
+                            Config.sources[key].controllerName = ""+Config.sources[key].controller
+                            Config.sources[key].controller = eval(Config.sources[key].controller)
+                        }
                         if (Config.sources[key].editable)
                             editableSources.push(key)
                     }
@@ -71,7 +76,7 @@ var Blender = (function () {
 
             async.series([
                     function (callbackSeries) {
-                        SourceEditor.schema.initSourceSchema(source, function (err, result) {
+                        OwlSchema.initSourceSchema(source, function (err, result) {
                             callbackSeries(err);
                         })
                     }
@@ -86,7 +91,7 @@ var Blender = (function () {
                             "controller": Sparql_generic,
                             "sparql_url": Config.sources[source].sparql_url,// on the same server !!!
                             "graphUri": "http://souslesens/_backup/" + source,
-                            "sourceSchema": "SKOS",
+                            "schema": "SKOS",
                             "predicates": {
                                 "lang": "en"
                             },
@@ -183,6 +188,8 @@ var Blender = (function () {
 
             },
             "drag_stop": function (data, element, helper, event) {
+                if(!Blender.menuActions.movingNode || !Blender.menuActions.movingNode.data)
+                    return false;
              var type=Blender.menuActions.movingNode.data.type;
              if(!type)
                  alert("no type")
@@ -257,6 +264,7 @@ var Blender = (function () {
                 return ExternalReferences.getJstreeConceptsContextMenu(self.currentTreeNode)
 
             }
+
 
             if (self.currentTreeNode.data.type == "externalReference") {
 
@@ -808,9 +816,9 @@ var Blender = (function () {
 
                 if (type == "concept") {
                     parentNode = self.currentTreeNode;
-                    parentProperty = SourceEditor.currentSourceSchema.newObject.treeParentProperty;
-                    mandatoryProps = SourceEditor.currentSourceSchema.newObject.mandatoryProperties;
-                    childClass = SourceEditor.currentSourceSchema.newObject.treeChildrenClasses[parentNode.data.type];
+                    parentProperty = OwlSchema.currentSourceSchema.newObject.treeParentProperty;
+                    mandatoryProps = OwlSchema.currentSourceSchema.newObject.mandatoryProperties;
+                    childClass = OwlSchema.currentSourceSchema.newObject.treeChildrenClasses[parentNode.data.type];
                     treeDivId = 'Blender_conceptTreeDiv';
                     type = "http://www.w3.org/2004/02/skos/core#Concept"
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#ConceptScheme")
@@ -846,7 +854,7 @@ var Blender = (function () {
             openDialog: function () {
                 $("#Blender_PopupEditDiv").dialog("open")
 
-                $(".ui-dialog-titlebar-close").css("display", "none")
+              /*  $(".ui-dialog-titlebar-close").css("display", "none")*/
                 $("#Blender_PopupEditButtonsDiv").css("display", "block")
 
             },
@@ -958,6 +966,11 @@ var Blender = (function () {
 
                 $('#graphDiv').html("")
             }
+        }
+
+        self.searchTerm=function(){
+
+            "Blender_conceptTreeDiv"
         }
 
 

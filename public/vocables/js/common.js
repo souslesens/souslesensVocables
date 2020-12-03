@@ -183,6 +183,15 @@ var common = (function () {
             self.setTreeAppearance()
         }
 
+        self.onAllTreeCbxChange=function( allCBX,jstreeDiv){
+            var checked=$(allCBX).prop("checked")
+            if(checked){
+                $("#"+jstreeDiv).jstree(true).check_all ()
+            }else{
+                $("#"+jstreeDiv).jstree(true).uncheck_all ()
+            }
+        }
+
 
         self.sliceArray = function (array, sliceSize) {
             var slices = [];
@@ -250,6 +259,8 @@ var common = (function () {
             var nodeId = sourceUri + common.getRandomHexaId(length)
             return nodeId;
         }
+
+
 
 
         self.palette = [

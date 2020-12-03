@@ -4,23 +4,32 @@ var ExternalReferences = (function () {
         var menuItems = {}
         if (!treeNode || !treeNode.data)
             return menuItems
+        menuItems.showExternalReferenceNodeInfos = {
 
-
-        menuItems.showExternalReferenceTreeNodes = {
-
-            label: "show external nodes",
+            label: "view node properties",
             action: function (obj, sss, cc) {
-                ExternalReferences.showExternalReferenceTreeNodes()
+                ExternalReferences.showExternalReferenceNodeInfos()
+            }
+        },
+
+        menuItems.showExternalReferenceChildren = {
+
+
+
+
+            label: "show external nodes ",
+            action: function (obj, sss, cc) {
+                ExternalReferences.showExternalReferenceChildren()
             }
         },
             menuItems.deleteExternalReferenceTreeNode = {
 
                 label: "delete external reference",
                 action: function (obj, sss, cc) {
-                    ExternalReferences.showExternalReferenceTreeNodes()
+                    ExternalReferences.deleteReference()
                 }
-            },
-            menuItems.importReference = {
+            }
+        /*   menuItems.importReference = {
 
                 label: "import external reference",
                 "action": false,
@@ -42,7 +51,7 @@ var ExternalReferences = (function () {
 
                 }
 
-            }
+            }*/
         return menuItems;
     }
 
@@ -109,7 +118,7 @@ var ExternalReferences = (function () {
                     var objectUri = self.generateExternalUrl(id, fromSparql_url, fromGraphUri, data.label)
                     newTreeNodes.push(
                         {
-                            id: id,
+                            id: objectUri,
                             text: "@" + fromSource + "/" + data.label,
                             parent: Blender.currentTreeNode,
                             data: {type: "externalReference", source: Blender.currentSource}
@@ -131,7 +140,7 @@ var ExternalReferences = (function () {
             )
         }
 
-    self.showExternalReferenceTreeNodes = function () {
+    self.showExternalReferenceChildren = function () {
         if (Blender.currentTreeNode.children.length > 0)
             return
         var url = Blender.currentTreeNode.id;
@@ -152,9 +161,13 @@ var ExternalReferences = (function () {
     },
 
         self.showExternalReferenceNodeInfos = function () {
+            var url = Blender.currentTreeNode.id;
+            var params = self.parseExternalUrl(url)
 
+            if (!params.sourceLabel)
+                return MainController.UI.message("no sourceLabel found from node id url params")
             var sourceLabel = Blender.currentTreeNode.data.source
-            Sparql_generic.getNodeInfos(sourceLabel, Blender.currentTreeNode.id, null, function (err, result) {
+            Sparql_generic.getNodeInfos(params.sourceLabel, params.id, null, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
@@ -213,6 +226,25 @@ var ExternalReferences = (function () {
     }
     self.importReferenceDescendants = function () {
         self.importReferenceNode(true)
+
+    }
+
+    self.deleteReference=function(){
+            if(confirm (" delete reference ")) {
+                var parentId = Blender.currentTreeNode.parent;
+                Sparql_generic.deleteTriples(Blender.currentSource, parentId, "http://www.w3.org/2004/02/skos/core#narrowMatch",  Blender.currentTreeNode.id, function (err, result) {
+
+                    if (err) {
+                        Blender.currentTreeNode=null;
+                        return MainController.UI.message(err);
+                    }
+                    $('#Blender_conceptTreeDiv').jstree(true).delete_node( Blender.currentTreeNode.id)
+                    Blender.currentTreeNode=null;
+
+
+
+                })
+            }
 
     }
 

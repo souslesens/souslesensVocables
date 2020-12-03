@@ -1,30 +1,34 @@
 var Sparql_ISO_15926 = (function () {
         var self = {};
-        self.graphUri="<http://data.15926.org/rdl>"
-        self.graphUri=null;//"<http://data.15926.org/rdl>"
-    self.ancestorsDepth=6
-        self.sparql_url = "http://192.236.179.169/sparql";
+        self.ancestorsDepth = 6
+
         var elasticUrl = "/elastic";
         if (window.location.href.indexOf("https") > -1)
             elasticUrl = "../elastic";
 
 
-
-
-        function prefixLabelWithScheme(id,label){
-          var array=id.split("/")
-            if(array.length!=5)
+        function prefixLabelWithScheme(id, label) {
+            var array = id.split("/")
+            if (array.length != 5)
                 return label;
-            return array[3]+"_"+label
+            return array[3] + "_" + label
 
 
         }
+
         self.getTopConcepts = function (sourceLabel, options, callback) {
+            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+          /*  if( !self.sparql_url ) {
+                self.sparql_url = Config.sources[sourceLabel].sparql_url;
+                return self.selectGraphDialog()
+            }*/
+
 
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> "
-            query += "select * where{?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>."+
+            query += "select * where{?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>." +
                 "?topConcept rdfs:label ?topConceptLabel." +
+                "?topConcept rdf:type ?topConceptType." +
                 "}order by ?conceptLabel limit 5000"
 
             self.execute_GET_query(query, function (err, result) {
@@ -38,19 +42,23 @@ var Sparql_ISO_15926 = (function () {
 
 
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
+
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_url;
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, null)
+                strFilter = Sparql_generic.setFilter("concept", null, words, options)
             } else if (ids) {
-                strFilter = Sparql_generic.setFilter("concept", ids, null)
+                strFilter = Sparql_generic.setFilter("concept", ids, options)
             }
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                "select distinct *  where { ?child1 rdfs:subClassOf ?concept. "+strFilter+
-            "?child1 rdfs:label ?child1Label."
+                "select distinct *  where { ?child1 rdfs:subClassOf ?concept. " + strFilter +
+                "?child1 rdfs:label ?child1Label."+
+            "?child1 rdf:type ?tchild1Type."
 
 
-         //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
+            //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
             for (var i = 1; i < descendantsDepth; i++) {
 
                 query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." +
@@ -62,18 +70,18 @@ var Sparql_ISO_15926 = (function () {
             }
 
 
-           query+= "}" +
-            "LIMIT 10000"
+            query += "}" +
+                "LIMIT 10000"
 
             var url = self.sparql_url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
-                var bindings=[]
+                var bindings = []
                 result.results.bindings.forEach(function (item) {
-                    item.child1Type={value:"http://www.w3.org/2004/02/skos/core#Concept"}
-                    item.child1Label.value=prefixLabelWithScheme(item.child1.value,item.child1Label.value)
+                    item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
+                    item.child1Label.value = prefixLabelWithScheme(item.child1.value, item.child1Label.value)
 
                 })
                 return callback(null, result.results.bindings)
@@ -82,7 +90,9 @@ var Sparql_ISO_15926 = (function () {
 
         }
 
-        self.getNodeInfos = function (sourceLabel,conceptId,options, callback) {
+        self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_url;
 
             var query = "select *" +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
@@ -96,11 +106,14 @@ var Sparql_ISO_15926 = (function () {
             })
         }
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+
             if (!options)
                 options = {}
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, {exactMatch:true})
+                strFilter = Sparql_generic.setFilter("concept", null, words, options)
             } else if (ids) {
                 strFilter = Sparql_generic.setFilter("concept", ids, null)
             }
@@ -121,7 +134,7 @@ var Sparql_ISO_15926 = (function () {
 
                 } else {
 
-                        query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "."
+                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "."
 
 
                     query += "?broader" + (i) + " rdfs:label ?broader" + (i) + "Label."
@@ -132,10 +145,10 @@ var Sparql_ISO_15926 = (function () {
             }
 
 
-             for (var i = 1; i < ancestorsDepth; i++) {
-                 query += "} "
+            for (var i = 1; i < ancestorsDepth; i++) {
+                query += "} "
 
-             }
+            }
 
             query += "  }";
 
@@ -153,11 +166,11 @@ var Sparql_ISO_15926 = (function () {
                 var bindings = []
                 result.results.bindings.forEach(function (item) {
                     item.broader1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                    for(var i=1;i<20;i++) {
-                        if( item["broader"+i])
-                        item["broader"+i+"Label"].value = prefixLabelWithScheme(item["broader"+i].value, item["broader"+i+"Label"].value)
+                    for (var i = 1; i < 20; i++) {
+                        if (item["broader" + i])
+                            item["broader" + i + "Label"].value = prefixLabelWithScheme(item["broader" + i].value, item["broader" + i + "Label"].value)
                     }
-                    item.conceptLabel.value=prefixLabelWithScheme(item.concept.value,item.conceptLabel.value)
+                    item.conceptLabel.value = prefixLabelWithScheme(item.concept.value, item.conceptLabel.value)
 
                 })
                 return callback(null, result.results.bindings)
@@ -166,19 +179,18 @@ var Sparql_ISO_15926 = (function () {
         }
 
 
-
-
         self.execute_GET_query = function (query, callback) {
+
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim()
 
-            var url =  self.sparql_url+ "?output=json&query=" + query2;
+            var url = self.sparql_url + "?output=json&query=" + query2;
 
             var body = {
                 headers: {
                     "Accept": "application/sparql-results+json",
                     "Content-Type": "application/x-www-form-urlencoded",
-                    "Referer": self.graphUri,
+                    "Referer":""// "<" + self.graphUri + ">",
                 }
             }
             var payload = {
@@ -223,6 +235,40 @@ var Sparql_ISO_15926 = (function () {
                 }
 
             });
+        }
+
+        self.selectGraphDialog = function (callback) {
+            var query = "select distinct ?g WHERE{ GRAPH ?g{?a ?b ?c}} order by ?g"
+            Sparql_ISO_15926.execute_GET_query(query, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+                var sparql_urls=[]
+                result.results.bindings.forEach(function (item) {
+                    sparql_urls.push(item.g.value)
+
+                })
+
+                $("#mainDialogDiv").dialog("open");
+var html="select a endPoint<br> <select size='20' id='Sparql_ISO_15926_sparql_urlSelect'onclick='Sparql_ISO_15926.setCurrentSparql_url($(this).val())'></select>"
+                sparql_urls.sort();
+                sparql_urls.splice(0,0,"ALL")
+                $("#mainDialogDiv").html(html);
+                setTimeout(function(){
+                    common.fillSelectOptions("Sparql_ISO_15926_sparql_urlSelect",sparql_urls)
+                },200)
+            })
+
+
+        }
+
+        self.setCurrentSparql_url=function(sparql_url){
+
+            if(graphUri="ALL")
+           ;
+            else
+                self.sparql_url=sparql_url;
+            $("#mainDialogDiv").dialog("close");
+
         }
 
 

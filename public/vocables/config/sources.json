@@ -92,6 +92,7 @@
     "sparql_url": "http://dbpedia.org/sparql",
     "graphUri": "http://dbpedia.org",
     "ancestorsDepth": 4,
+    "schemaType": "SKOS",
     "predicates": {
       "topConceptFilter": "?topConcept  <http://www.w3.org/2000/01/rdf-schema#subClassOf>\t<http://www.w3.org/2002/07/owl#Thing> .",
       "broaderPredicate": "rdfs:subClassOf",

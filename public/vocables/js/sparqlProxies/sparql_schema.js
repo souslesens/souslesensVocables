@@ -78,6 +78,31 @@ var Sparql_schema = (function () {
 
     }
 
+    self.getPropertiesRangeAndDomain = function (schema, propertyIds, callback) {
+        var fromStr = "";
+        if (schema.graphUri)
+            fromStr = "FROM <" + schema.graphUri + "> ";
+
+        var filterStr=Sparql_generic.setFilter("property",propertyIds)
+        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+            "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            " select distinct *  " + fromStr + "  WHERE  {" +
+            "?property rdfs:range ?range. "+ filterStr+
+            "?property rdfs:domain ?domain."+
+            "} limit 1000"
+
+        var url = schema.sparql_url + "?query=&format=json";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            return callback(null, result.results.bindings)
+
+        })
+
+
+    }
+
     self.getObjectRangeProperties = function (schema, classId, callback) {
         var fromStr = "";
         if (schema.graphUri)
@@ -140,7 +165,7 @@ var Sparql_schema = (function () {
 
     }
 
-    self.getDataTypeProperties = function (schema, classId, callback) {
+    self.getClassPropertiesAndRanges = function (schema, classId, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";

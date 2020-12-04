@@ -24,7 +24,9 @@ var Sparql_NPD = (function () {
                 " filter( not EXISTS {?topConcept rdfs:subClassOf ?d})" +
                 "}limit 1000" */
 
-            query+="  ?prop   rdf:type owl:DatatypeProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.   }limit 1000"
+           // query+="  ?prop   rdf:type owl:DatatypeProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.   }limit 1000"
+         query+="   ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))}order by ?topConcept limit 1000"
+          //  query+="   ?topConcept   rdfs:subClassOf ?d}order by ?topConcept limit 1000"
             self.execute_GET_query(query, function (err, result) {
                 if (err) {
                     return callback(err)
@@ -56,7 +58,7 @@ var Sparql_NPD = (function () {
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * from <" + self.graphUri + ">  where {" +
                 "?child1   rdfs:subClassOf ?concept. " + strFilter +
-                "?child1   rdfs:label ?child1Label. "
+                "?child1   rdfs:label ?child1Label. "+
                 "} order by ?child1 limit 10000";
 
 

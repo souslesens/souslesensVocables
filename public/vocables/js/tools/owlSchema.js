@@ -1,6 +1,6 @@
 var OwlSchema=(function(){
    var self={}
-
+    self.currentSourceSchema=null;
 
         self.initSourceSchema= function (sourceLabel, callback) {
             async.series([
@@ -40,7 +40,7 @@ var OwlSchema=(function(){
         }
 
 
-        self.initClassProperties= function (sourceLabel, classType, callback) {
+        self.getClassDescription= function (sourceLabel, classType, callback) {
             async.series([
                     // load schema if not
                     function (callbackSeries) {
@@ -100,10 +100,25 @@ var OwlSchema=(function(){
 
                             callbackSeries();
                         })
-                    }
+                    },
+                function(callbackSeries){
+                var properties=Object.keys(self.currentSourceSchema.classes[classType].objectProperties)
+                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema,properties, function(err,result){
+                        result.forEach(function(item){
+                            self.currentSourceSchema.classes[classType].objectProperties[item.property.value].range=item.range.value
+                            self.currentSourceSchema.classes[classType].objectProperties[item.property.value].domain=item.domain.value
+
+
+
+                        })
+                        callbackSeries();
+
+                    })
+                }
                 ],
                 function (err) {
-                    callback(err)
+                    callback(err, self.currentSourceSchema.classes[classType])
+
                 }
             )
         }

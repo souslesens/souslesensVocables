@@ -49,13 +49,13 @@ var Sparql_ISO_15926 = (function () {
             if (words) {
                 strFilter = Sparql_generic.setFilter("concept", null, words, options)
             } else if (ids) {
-                strFilter = Sparql_generic.setFilter("concept", ids, options)
+                strFilter = Sparql_generic.setFilter("concept", ids,null, options)
             }
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select distinct *  where { ?child1 rdfs:subClassOf ?concept. " + strFilter +
                 "?child1 rdfs:label ?child1Label."+
-            "?child1 rdf:type ?tchild1Type."
+            "?child1 rdf:type ?child1Type."
 
 
             //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);

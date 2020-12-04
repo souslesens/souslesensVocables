@@ -19,7 +19,7 @@ var OntologyBrowser = (function () {
     }
 
     self.onSourceSelect = function (sourceLabel) {
-          MainController.currentSource = sourceLabel;
+        MainController.currentSource = sourceLabel;
         self.currentSourceUri = Config.sources[sourceLabel].graphUri
         if (Config.sources[sourceLabel].schema) {
             //  if(! self.schemasConfig) {
@@ -48,16 +48,16 @@ var OntologyBrowser = (function () {
             result.forEach(function (item) {
                 nodeProperties.push({id: item.domain.value, label: common.getItemLabel(item, "domain")})
             })
-             Sparql_schema.getObjectRangeProperties(OwlSchema.currentSourceSchema,obj.node.id,function(err,result){
+            Sparql_schema.getObjectRangeProperties(OwlSchema.currentSourceSchema, obj.node.id, function (err, result) {
 
-                 result.forEach(function(item){
-                     nodeProperties.push({id: item.range.value, label: common.getItemLabel(item, "range")})
-                 })
+                result.forEach(function (item) {
+                    nodeProperties.push({id: item.range.value, label: common.getItemLabel(item, "range")})
+                })
 
 
-             })
+            })
             common.fillSelectOptions("OntologyBrowser_filter_ObjectpropertiesSelect", nodeProperties, true, "label", "id")
-            $("#OntologyBrowser_tabs").tabs( "option", "active", 0 );
+            $("#OntologyBrowser_tabs").tabs("option", "active", 0);
             self.showDatatypeProperties(obj.node.id);
 
         })
@@ -68,17 +68,17 @@ var OntologyBrowser = (function () {
 
     self.showDatatypeProperties = function (classId) {
         self.currentClass = classId;
-        Sparql_schema.getDataTypeProperties(OwlSchema.currentSourceSchema, classId, function (err, result) {
+        Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, classId, function (err, result) {
             self.nodeProperties = {};
             result.forEach(function (item) {
                 var propLabel = common.getItemLabel(item, "property")
-                if( self.nodeProperties[propLabel])
+                if (self.nodeProperties[propLabel])
                     return;
                 var range = "";
-                if (item.range )
+                if (item.range)
                     range = item.range.value
                 else //?? correct ?????
-                    range= "http://www.w3.org/2001/XMLSchema#string"
+                    range = "http://www.w3.org/2001/XMLSchema#string"
                 self.nodeProperties[propLabel] = {id: item.property.value, label: propLabel, range: range}
             })
             var html = "<table border='1px'><tr><tr><td>property</td><td>all<input type='checkbox' class='OntologyBrowser_propCBX'  value='ALL'> </td></tr>"
@@ -103,8 +103,8 @@ var OntologyBrowser = (function () {
 
     self.onDataPropertySelect = function (propLabel, add) {
         if (add) {
-            if(propLabel=="ALL"){
-                return $(".OntologyBrowser_propCBX").prop( "checked", true )
+            if (propLabel == "ALL") {
+                return $(".OntologyBrowser_propCBX").prop("checked", true)
             }
 
 
@@ -119,14 +119,14 @@ var OntologyBrowser = (function () {
             }
             var classLabel = common.getUriLabel(self.currentClass)
             if (!self.currentSelectedProps[classLabel])
-                self.currentSelectedProps[classLabel] ={classId: self.currentClass, properties: []};
+                self.currentSelectedProps[classLabel] = {classId: self.currentClass, properties: []};
             if (self.currentSelectedProps[classLabel].properties.indexOf(propLabel) < 0)
                 self.currentSelectedProps[classLabel].properties.push(propLabel)
 
 
         } else {
-            if(propLabel=="ALL"){
-                return $(".OntologyBrowser_propCBX").prop( "checked", false )
+            if (propLabel == "ALL") {
+                return $(".OntologyBrowser_propCBX").prop("checked", false)
             }
             $("#OntologyBrowser_PropertiesFilterInputDiv").css("display", "none")
             //$("#OntologyBrowser_filter_DataPropertiesSelect").val("")
@@ -208,7 +208,7 @@ var OntologyBrowser = (function () {
         var query = ""
         var queryWhere = "";
         var querySelectProps = "";
-        var selectProps="";
+        var selectProps = "";
 
 
         for (var key in self.currentSelectedProps) {
@@ -220,8 +220,6 @@ var OntologyBrowser = (function () {
                 selectProps += "?" + item + " ";
             })
         }
-
-
 
 
         for (var key in self.currentFilters) {
@@ -240,7 +238,7 @@ var OntologyBrowser = (function () {
             })
         }
         var fromStr = ""
-        var graphUri = Config.sources[  MainController.currentSource].graphUri
+        var graphUri = Config.sources[MainController.currentSource].graphUri
         if (graphUri && graphUri != "") {
             if (!Array.isArray(graphUri))
                 graphUri = [graphUri];
@@ -250,19 +248,19 @@ var OntologyBrowser = (function () {
         }
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            " select distinct "+selectProps+ " " + fromStr + "   WHERE { " +
+            " select distinct " + selectProps + " " + fromStr + "   WHERE { " +
             queryWhere + " " + querySelectProps +
             "}limit 1000 "
 
-        var url = Config.sources[  MainController.currentSource].sparql_url + "?query=&format=json";
+        var url = Config.sources[MainController.currentSource].sparql_url + "?query=&format=json";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, null, function (err, result) {
             if (err) {
                 return err
             }
 
             var dataSet = [];
-            var cols =[];
-            result.head.vars.forEach(function(item){
+            var cols = [];
+            result.head.vars.forEach(function (item) {
                 cols.push({title: item})
             })
             result.results.bindings.forEach(function (item, indexRow) {
@@ -275,7 +273,7 @@ var OntologyBrowser = (function () {
                 })
                 dataSet.push(line)
             })
-            $("#OntologyBrowser_tabs").tabs( "option", "active", 1 );
+            $("#OntologyBrowser_tabs").tabs("option", "active", 1);
 
             $('#OntologyBrowser_tabs_result').html("<table id='dataTableDiv'></table>");
             setTimeout(function () {
@@ -297,16 +295,141 @@ var OntologyBrowser = (function () {
 
     }
 
-    self.showProperties=function() {
-var classType=ThesaurusBrowser.currentTreeNode.id
-        OwlSchema.initClassProperties(MainController.currentSource, classType,function (err, result) {
-            var schema = result
 
+    /********************************************************************************************************************************/
+
+    self.showProperties = function (classId) {
+        var newGraph = true
+        if (!classId)
+            classId = ThesaurusBrowser.currentTreeNode.id
+        else
+            newGraph = false;
+        var properties = {};
+
+        async.series([
+
+            function (callbackSeries) {
+                OwlSchema.initSourceSchema(MainController.currentSource, function (err, result) {
+                    callbackSeries(err)
+                })
+            },
+            function (callbackSeries) {
+                OwlSchema.getClassDescription(MainController.currentSource, classId, function (err, description) {
+                    if (err)
+                        return callbackSeries(err);
+                    for (var key in description.objectProperties) {
+                        properties[key] = description.objectProperties[key];
+                    }
+                    callbackSeries()
+                })
+            }
+            ,
+            function (callbackSeries) {// use anonymNodes properties
+                var schema = Config.sources[MainController.currentSource].schema;
+                Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, classId, function (err, result) {
+                    result.forEach(function (item) {
+                        if (!item.range)
+                            return;
+                        if (!properties[item.property.value])
+                            properties[item.property.value] = {id: item.property.value, label: item.property.value}
+                        properties[item.property.value].range = item.range.value
+
+                    })
+                    return callbackSeries();
+
+                })
+
+            },
+
+            function (callbackSeries) {// draw graph new or update
+                function getLabelFromId(id) {
+                    return id.substring(id.lastIndexOf("#") + 1)
+                }
+
+                var visjsData = {nodes: [], edges: []}
+                var existingVisjsIds = {}
+                if (!newGraph) {
+                    var oldIds = visjsGraph.data.nodes.getIds()
+                    oldIds = oldIds.concat(visjsGraph.data.edges.getIds())
+                    oldIds.forEach(function (id) {
+                        existingVisjsIds[id] = 1;
+                    })
+                }
+
+                if (!existingVisjsIds[classId]) {
+                    existingVisjsIds[classId] = 1
+                    visjsData.nodes.push({
+                        id: ThesaurusBrowser.currentTreeNode.id,
+                        label: getLabelFromId(classId),
+                        shape: "box"
+
+                    })
+                }
+                for (var key in properties) {
+                    var property = properties[key]
+                    if (property.domain && !existingVisjsIds[property.domain]) {
+                        existingVisjsIds[property.domain] = 1
+
+                        visjsData.nodes.push({
+                            id: property.domain,
+                            label: getLabelFromId(property.domain),
+                            shape: "box"
+                        })
+                        var edgeId = classId + "_" + property.domain
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: classId,
+                            to: property.domain,
+                            label: getLabelFromId(key),
+
+
+                        })
+                    }
+                    if (property.range && !existingVisjsIds[property.range]) {
+                        existingVisjsIds[property.range] = 1
+
+                        visjsData.nodes.push({
+                            id: property.range,
+                            label: getLabelFromId(property.range),
+                            shape: "box"
+                        })
+                        var edgeId = classId + "_" + property.range
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: classId,
+                            to: property.range,
+                            label: getLabelFromId(key),
+
+
+                        })
+                    }
+
+
+                }
+                if (newGraph)
+                    visjsGraph.draw("graphDiv", visjsData, {onclickFn: OntologyBrowser.onNodeClick})
+                else {
+                    visjsGraph.data.nodes.update(visjsData.nodes);
+                    visjsGraph.data.edges.update(visjsData.edges);
+                }
+                callbackSeries();
+            }
+
+        ], function (err) {
+            if (err)
+                return MainController.UI.message(err);
 
         })
+
+
+    }
+    self.onNodeClick = function (node, point, event) {
+        if(node && node.id)
+        self.showProperties(node.id)
     }
 
     return self;
 
 
-})()
+})
+()

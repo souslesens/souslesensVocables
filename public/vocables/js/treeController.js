@@ -28,7 +28,7 @@ if(true || jsTreeOptions.labelClass) {
     var cssType=type
     if(type=="http://www.w3.org/2004/02/skos/core#Concept")
         cssType="concept"
-    childNodeLabel = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
+    var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
 }
 
                 if (!existingNodes[childNodeId]) {
@@ -37,8 +37,8 @@ if(true || jsTreeOptions.labelClass) {
                     var child = {
                         parent: parentNodeId,
                         id: childNodeId,
-                        text: childNodeLabel,
-                        data: {type: type,source:jsTreeOptions.source}
+                        text: label,
+                        data: {type: type,source:jsTreeOptions.source,label:childNodeLabel}
 
                     }
 

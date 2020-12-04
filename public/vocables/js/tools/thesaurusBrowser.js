@@ -9,6 +9,7 @@ var ThesaurusBrowser = (function () {
     }
     self.onSourceSelect = function (thesaurusLabel) {
         MainController.currentSource = thesaurusLabel;
+        OwlSchema.currentSourceSchema=null;
         self.showThesaurusTopConcepts(thesaurusLabel)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'ThesaurusBrowser_exactMatchSearchCBX'>Exact Match" +
@@ -86,7 +87,7 @@ var ThesaurusBrowser = (function () {
         // return {}
         var items={}
         ;
-        if(Config.sources[MainController.currentSource].schemaType== "OWL") {
+        if(MainController.currentSource && Config.sources[MainController.currentSource].schemaType== "OWL") {
             items.showProperties= {
                 label: "Show Properties",
                 action: function (e) {// pb avec source

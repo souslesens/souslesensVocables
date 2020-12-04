@@ -103,7 +103,7 @@ var SourceEditor = (function () {
                     classId = $("#SourceEditor_NewClassSelect").val();
 
                 var classLabel = OwlSchema.currentSourceSchema.classes[classId].label
-                OwlSchema.initClassProperties(sourceLabel, classId, function (err, result) {
+                OwlSchema.getClassDescription(sourceLabel, classId, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
                     $("#SourceEditor_NewClassSelect").val("");
@@ -146,7 +146,7 @@ var SourceEditor = (function () {
             async.series([
                     //initClassPropsAndAnnotations for type
                     function (callbackSeries) {
-                        OwlSchema.initClassProperties(source, type, function (err, result) {
+                        OwlSchema.getClassDescription(source, type, function (err, result) {
                             return callbackSeries(err)
                         })
                     }

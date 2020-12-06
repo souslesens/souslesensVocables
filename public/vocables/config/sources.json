@@ -200,5 +200,23 @@
     "controller": "Sparql_OWL",
     "schemaType": "OWL",
     "color": "#bcbd22"
+  },
+  "QUANTUM": {
+    "graphUri": "http://data.total.com/resource/GS_EP_DEV/vocab/",
+    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "controller": "Sparql_OWL",
+    "schemaType": "OWL",
+    "schema": "QUANTUM",
+    "color": "#bcbd22"
+  },
+  "CFIHOS": {
+    "graphUri": "",
+    "sparql_url": "http://data.15926.org/cfihos",
+    "controller": "Sparql_ISO_15926",
+    "schemaType": "OWL",
+    "schema": "ISO_15926",
+    "color": "#bcbd22"
   }
+
+
 }

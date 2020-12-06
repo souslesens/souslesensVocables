@@ -58,7 +58,7 @@ var Sparql_NPD = (function () {
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * from <" + self.graphUri + ">  where {" +
                 "?child1   rdfs:subClassOf ?concept. " + strFilter +
-                "?child1   rdfs:label ?child1Label. "+
+
                 "} order by ?child1 limit 10000";
 
 
@@ -70,7 +70,8 @@ var Sparql_NPD = (function () {
                 var bindings = []
                 result.results.bindings.forEach(function (item) {
                     item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-
+                    var id=item.child1.value
+                    item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
                 })
                 return callback(null, result.results.bindings)
 

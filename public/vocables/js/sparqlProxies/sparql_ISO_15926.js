@@ -54,15 +54,15 @@ var Sparql_ISO_15926 = (function () {
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select distinct *  where { ?child1 rdfs:subClassOf ?concept. " + strFilter +
-                "?child1 rdfs:label ?child1Label."+
-            "?child1 rdf:type ?child1Type."
+             ""//   "?child1 rdfs:label ?child1Label."+
+          //  "?child1 rdf:type ?child1Type."
 
 
             //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
             for (var i = 1; i < descendantsDepth; i++) {
 
                 query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." +
-                    "?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label."
+                  ""//  "?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label."
 
             }
             for (var i = 1; i < descendantsDepth; i++) {
@@ -73,16 +73,17 @@ var Sparql_ISO_15926 = (function () {
             query += "}" +
                 "LIMIT 10000"
 
-            var url = self.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+
+            self.execute_GET_query( query, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
                 var bindings = []
+
                 result.results.bindings.forEach(function (item) {
                     item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                    item.child1Label.value = prefixLabelWithScheme(item.child1.value, item.child1Label.value)
-
+                    var id=item.child1.value
+                    item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
                 })
                 return callback(null, result.results.bindings)
 
@@ -158,8 +159,7 @@ var Sparql_ISO_15926 = (function () {
             query += "}limit 1000 ";
 
 
-            var url = self.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+            self.execute_GET_query( query,  function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -184,8 +184,8 @@ var Sparql_ISO_15926 = (function () {
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim()
 
-            var url = self.sparql_url + "?output=json&query=" + query2;
-
+            var url = self.sparql_url + "?output=json&format=json&query=" + query2;
+//
             var body = {
                 headers: {
                     "Accept": "application/sparql-results+json",
@@ -213,8 +213,11 @@ var Sparql_ISO_15926 = (function () {
                  },*/
 
                 success: function (data, textStatus, jqXHR) {
-                    if (data.result && typeof data.result != "object")//cas GEMET
-                        data = JSON.parse(data.result)
+                    var xx=data
+                    if(typeof data==="string")
+                        data=JSON.parse(data)
+                   else if (data.result && typeof data.result != "object")//cas GEMET
+                        data = JSON.parse(data.result.trim())
                     //  $("#messageDiv").html("found : " + data.results.bindings.length);
                     $("#waitImg").css("display", "none");
                     /*  if (data.results.bindings.length == 0)

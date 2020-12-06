@@ -298,13 +298,19 @@ var OntologyBrowser = (function () {
 
     /********************************************************************************************************************************/
 
-    self.showProperties = function (classId) {
+    self.showProperties = function (classId,callback) {
         var newGraph = true
         if (!classId)
             classId = ThesaurusBrowser.currentTreeNode.id
         else
             newGraph = false;
         var properties = {};
+
+
+
+
+
+
 
         async.series([
 
@@ -416,6 +422,9 @@ var OntologyBrowser = (function () {
             }
 
         ], function (err) {
+
+            if(callback)
+                callback(err)
             if (err)
                 return MainController.UI.message(err);
 
@@ -424,8 +433,28 @@ var OntologyBrowser = (function () {
 
     }
     self.onNodeClick = function (node, point, event) {
+        if(event.ctrlKey){
+            Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource,null,node.id,5,{},function(err,children){
+
+                if(err)
+                    return MainController.UI.message(err);
+                async.eachSeries(children,function(item,callbackEach){
+                    self.showProperties(item.child1.value,function(err, result){
+                        callbackEach(err);
+                    })
+                })
+
+
+            },function(err){
+                if(err)
+                    return MainController.UI.message(err);
+            })
+        }
+        else{
+
         if(node && node.id)
         self.showProperties(node.id)
+        }
     }
 
     return self;

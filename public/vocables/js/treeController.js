@@ -13,38 +13,38 @@ var TreeController = (function () {
 
             var type = item[childNodeVar + "Type"]
             if (!type) {// force concept Type
-                type="http://www.w3.org/2004/02/skos/core#Concept"
-                 console.log("node " + item[childNodeVar].value + " has no type")
+                type = "http://www.w3.org/2004/02/skos/core#Concept"
+                console.log("node " + item[childNodeVar].value + " has no type")
             }
-            type=type.value;
-            type= jsTreeOptions.type || type
+            type = type.value;
+            type = jsTreeOptions.type || type
             if (childNodeVar && item[childNodeVar]) {
                 var childNodeId = item[childNodeVar].value;
-                var childNodeLabel = common.getItemLabel(item, childNodeVar)
-                if(false){
-                    console.log(childNodeLabel)
-                }
-if(true || jsTreeOptions.labelClass) {
-    var cssType=type
-    if(type=="http://www.w3.org/2004/02/skos/core#Concept")
-        cssType="concept"
-    var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
-}
 
-                if (!existingNodes[childNodeId]) {
+                if(!existingNodes[childNodeId]) {
                     existingNodes[childNodeId] = 1;
 
+                    var childNodeLabel = common.getItemLabel(item, childNodeVar)
+                    if (false) {
+                        console.log(childNodeLabel)
+                    }
+                    if (true || jsTreeOptions.labelClass) {
+                        var cssType = type
+                        if (type == "http://www.w3.org/2004/02/skos/core#Concept")
+                            cssType = "concept"
+                        var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
+                    }
                     var child = {
                         parent: parentNodeId,
-                        id: childNodeId,
+                        id: childNodeId + "_" + common.getRandomHexaId(4),
                         text: label,
-                        data: {type: type,source:jsTreeOptions.source,label:childNodeLabel}
+                        data: {type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId}
 
                     }
 
-                    jstreeData.push(child);
-
+                jstreeData.push(child);
                 }
+
 
             }
 

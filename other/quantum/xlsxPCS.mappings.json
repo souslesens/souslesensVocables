@@ -1,0 +1,399 @@
+{
+  "SystemCodes": [
+    "AttributePickListValue ID",
+    "Name",
+    "Code",
+    "CodeSource"
+  ],
+  "TelecomSystemIDCodes": [
+    "Attribute Picklist ID",
+    "Attribute Picklist Name",
+    "Code",
+    "CodeSource"
+  ],
+  "tblPermittedValuesDefinition": [
+    "SerialNumber",
+    "TableReference",
+    "TableName",
+    "ColumnName",
+    "PermitedValue",
+    "Definition"
+  ],
+  "tblGoldenRules": [
+    "Rule No",
+    "Golden Rules",
+    "Library",
+    "Table"
+  ],
+  "tblCoverSheet": [
+    "TableReferenceNumber",
+    "TableName",
+    "Identifier",
+    "TableReferenceGroup"
+  ],
+  "tblEntities": [
+    "ID",
+    "TableReferenceNumber",
+    "TableName",
+    "Identifier",
+    "TableDefinition",
+    "FieldName",
+    "FieldDescription",
+    "Example",
+    "DataType",
+    "DataLength",
+    "PermitedValue",
+    "CrossReferenceKey",
+    "UniqueConstraint",
+    "Nullable",
+    "Required",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblSSLChangeManagement": [
+    "ID",
+    "ItemID",
+    "ChangeType",
+    "InitialValue",
+    "NewValue",
+    "ModifiedBy",
+    "ModifiedDate",
+    "ReasonForChange",
+    "TableName",
+    "FieldName"
+  ],
+  "tblMappingSourceOrigin": [
+    "ID",
+    "Name",
+    "SheetName",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblMappingSource": [
+    "ID",
+    "SourceCode",
+    "SourceDescription",
+    "MappingSourceOriginID",
+    "EntitiesID",
+    "EntitiesTableName_Lookup",
+    "EntitiesFieldName_Lookup",
+    "FunctionalClassID",
+    "PhysicalClassID",
+    "AttributeID",
+    "AttributePickListValueID",
+    "AttributeID2",
+    "AttributePickListValueID2",
+    "PickListValueGroupingID",
+    "UnitOfMeasureID",
+    "UnitOfMeasureDimensionID",
+    "DisciplineID",
+    "DocumentTypeID",
+    "DisciplineDocumentTypeID",
+    "FunctionalClassToPhysicalClassID",
+    "FunctionalClassToAttributeID",
+    "PhysicalClassToAttributeID",
+    "FunctionalClassToDisciplineDocumentTypeID",
+    "PhysicalClassToDisciplineDocumentTypeID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblMappingSourceDetails": [
+    "ID",
+    "MappingSourceID",
+    "FieldName",
+    "FieldValue",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "SectorCodes": [
+    "AttributePickListValue ID",
+    "Name",
+    "Code",
+    "CodeSource"
+  ],
+  "tblTypicalAssemblyRequirement": [
+    "ID",
+    "Name",
+    "Definition",
+    "RequirementOriginID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblTypicalAssemblyPattern": [
+    "ID",
+    "Name",
+    "Code",
+    "TypicalAssemblyRequirementID",
+    "PrimaryFunctionalClassID",
+    "PrimaryAttributeID",
+    "LinkFunctionalClassID",
+    "LinkAttributeID",
+    "LinkType",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblTagToTagToTypicalAssemblyReq": [
+    "ID",
+    "TagToTagID",
+    "TypicalAssemblyRequirementID"
+  ],
+  "tblRLChangeManagement": [
+    "ID",
+    "ItemID",
+    "ChangeType",
+    "InitialValue",
+    "NewValue",
+    "ModifiedBy",
+    "ModifiedDate",
+    "ReasonForChange",
+    "TableName",
+    "FieldName"
+  ],
+  "tblRequirementOrigin": [
+    "ID",
+    "Name",
+    "Definition",
+    "DisciplineID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblUnitOfMeasureDimension": [
+    "ID",
+    "Name",
+    "Synonym",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblUnitOfMeasure": [
+    "ID",
+    "Unit",
+    "Name",
+    "UnitOfMeasureDimensionID",
+    "BaseUnitID",
+    "MeasurementSystemCode",
+    "ConversionFactor",
+    "UnitOfMeasureSource",
+    "Description",
+    "Synonym",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblTagFormatPermittedValue": [
+    "ID",
+    "TagFormatGroupID",
+    "PermittedValue",
+    "Meaning",
+    "PermittedValueField",
+    "MeaningField",
+    "PermittedValueFilter",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblTagFormatGroup": [
+    "ID",
+    "TagFormatID",
+    "Name",
+    "Order",
+    "Optional",
+    "IsFunctionalClass",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblTagFormat": [
+    "ID",
+    "Name",
+    "DefaultFunctionalClassID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblRDLChangeManagement": [
+    "ID",
+    "ItemID",
+    "ChangeType",
+    "InitialValue",
+    "NewValue",
+    "ModifiedBy",
+    "ModifiedDate",
+    "ReasonForChange",
+    "TableName",
+    "FieldName"
+  ],
+  "tblPickListValueGrouping": [
+    "ID",
+    "Name",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblPhysicalClassToDisDocType": [
+    "ID",
+    "PhysicalClassID",
+    "DisciplineDocumentTypeID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblPhysicalClassToAttribute": [
+    "ID",
+    "PhysicalClassID",
+    "AttributeID",
+    "DataProvider",
+    "Justification",
+    "LifeCycleDelivery",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblPhysicalClass": [
+    "ID",
+    "Name",
+    "ParentPhysicalClassID",
+    "Definition",
+    "DefinitionSource",
+    "DisciplineID",
+    "AbstractClass",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblFunctionalClToPhysicalCl": [
+    "ID",
+    "FunctionalClassID",
+    "PhysicalClassID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblFunctionalClassToDiscDocType": [
+    "ID",
+    "FunctionalClassID",
+    "DisciplineDocumentTypeID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblFunctionalClassToAttribute": [
+    "ID",
+    "FunctionalClassID",
+    "AttributeID",
+    "DataProvider",
+    "Justification",
+    "LifeCycleDelivery",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblFunctionalClass": {
+    "ID":[ {
+      "p":"rdf:type","o": "owl:Class",
+      "p":"rdf:type","o": "owl:Class"
+    }],
+    "Name",
+    "ParentFunctionalClassID",
+    "Definition",
+    "DefinitionSource",
+    "DisciplineID": {
+      "p": "http://data.posccaesar.org/rdl/Discipline",
+      "s": "ID"
+    },
+    "AbstractClass",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  },
+  "tblDocumentType": [
+    "ID",
+    "Name",
+    "EPCode",
+    "RCCode",
+    "AssetCode",
+    "Definition",
+    "DefinitionSource",
+    "AssetName",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblDisciplineDocumentType": [
+    "ID",
+    "DisciplineID",
+    "DocumentTypeID",
+    "EPName",
+    "RCName",
+    "Definition",
+    "DefinitionSource",
+    "RequiredDuringPreProject",
+    "RequiredDuringBasic",
+    "RequiredDuringDetailedDesign",
+    "RequiredHandoverStatusForDetailedDesign",
+    "RequiredDuringCommissionning",
+    "RequiredHandoverStatusForCommissionning",
+    "RequiredForStartUp",
+    "RequiredHandoverStatusForStartup",
+    "RepresentationTypeCode",
+    "StorageTypeCode",
+    "SecurityClassification",
+    "DuringProjectFormat",
+    "DuringProjectWhyHaveIt",
+    "RequiredForProjectSpecification",
+    "AssetTypeReference",
+    "RequiredForOffshore",
+    "RequiredForOnshore",
+    "RetentionPeriod",
+    "AfterProjectLiveNonLive",
+    "AfterProjectFormat",
+    "AfterProjectWhyHaveIt",
+    "DocumentReviewType",
+    "HardcopyDocumentRequired",
+    "TranslatedDocumentRequired",
+    "AsBuiltDocumentRequired",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblDiscipline": [
+    "ID",
+    "CodeEP",
+    "CodeRC",
+    "AssetCode",
+    "Name",
+    "AssetName",
+    "Description",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblCodification": [
+    "ID",
+    "CodeEP",
+    "CodeRC",
+    "AssetTagCode",
+    "TagDescription",
+    "TagType",
+    "TagFormatID",
+    "CodeEPSource",
+    "CodeRCSource",
+    "FunctionalClassID",
+    "PhysicalClassID",
+    "AttributeID1",
+    "AttributePickListValueID1",
+    "AttributeID2",
+    "AttributePickListValueID2",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblAttributePickListValue": [
+    "ID",
+    "Name",
+    "Code",
+    "CodeSource",
+    "Description",
+    "DescriptionSource",
+    "PickListValueGroupingID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblAttribute": [
+    "ID",
+    "Name",
+    "Definition",
+    "DefinitionSource",
+    "UnitOfMeasureDimensionID",
+    "DataType",
+    "ClassType",
+    "Synonym",
+    "PickListValueGroupingID",
+    "ChangeRequestNumber",
+    "ItemStatus",
+    "ApplicationStatus"
+  ]
+}

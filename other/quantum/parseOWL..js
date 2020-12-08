@@ -2,7 +2,6 @@ var fs = require('fs');
 const async = require('async');
 var sax = require("sax");
 const csv = require('csv-parser');
-var skosReader = require('../../backoffice/skosReader.')
 var distinctTags = {};
 var parseOWL = {
 

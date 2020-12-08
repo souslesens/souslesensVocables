@@ -17,26 +17,30 @@ var Sparql_ISO_15926 = (function () {
         }
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+
           /*  if( !self.sparql_url ) {
                 self.sparql_url = Config.sources[sourceLabel].sparql_url;
                 return self.selectGraphDialog()
             }*/
-
+            self.graphUri =  Config.sources[sourceLabel].graphUri ;
+            self.sparql_url =  Config.sources[sourceLabel].sparql_url;
 
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-            query += "select * where{" +
+            query += "select distinct ?topConcept  from <"+self.graphUri+"> where{" +
                // "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>." +
-                "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>."+
-                "?topConcept rdfs:label ?topConceptLabel." +
-                "?topConcept rdf:type ?topConceptType." +
+                "?x rdf:type  ?topConcept ."+
                 "}order by ?conceptLabel limit 5000"
 
             self.execute_GET_query(query, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
+                result.results.bindings.forEach(function(item){
+                    item.topConceptType = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
+                    var id=item.topConcept.value
+                    item.topConceptLabel={value:id.substring(id.lastIndexOf("#")+1)}
+                })
                 return callback(null, result.results.bindings);
             })
 
@@ -55,9 +59,8 @@ var Sparql_ISO_15926 = (function () {
             }
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
-                "select distinct *  where { ?child1 rdfs:subClassOf ?concept. " + strFilter +
-              "?child1 rdfs:label ?child1Label."+
-         "?child1 rdf:type ?child1Type."
+                "select distinct *  from <"+self.graphUri+"> where { ?child1 rdfs:subClassOf|rdf:type ?concept. " + strFilter ;
+
 
 
             //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
@@ -82,11 +85,11 @@ var Sparql_ISO_15926 = (function () {
                 }
                 var bindings = []
 
-               /* result.results.bindings.forEach(function (item) {
+                result.results.bindings.forEach(function (item) {
                     item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
                     var id=item.child1.value
                     item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
-                })*/
+                })
                 return callback(null, result.results.bindings)
 
             })
@@ -97,7 +100,7 @@ var Sparql_ISO_15926 = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
 
-            var query = "select *" +
+            var query = "select *  from <"+self.graphUri+">" +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
             self.execute_GET_query(query, function (err, result) {
                 if (err) {
@@ -123,7 +126,7 @@ var Sparql_ISO_15926 = (function () {
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"+
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 
-                " select distinct *   WHERE {{"
+                " select distinct *  from <"+self.graphUri+">  WHERE {{"
 
             query += "?concept rdfs:label ?conceptLabel. " + strFilter;
 
@@ -131,16 +134,15 @@ var Sparql_ISO_15926 = (function () {
             ancestorsDepth = self.ancestorsDepth
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  ?concept rdfs:subClassOf  ?broader" + i + "." +
-                        "?broader" + (i) + " rdfs:label ?broader" + (i) + "Label."
+                    query += "  ?concept rdfs:subClassOf|rdf:type  ?broader" + i + "."
+
 
 
                 } else {
 
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "."
+                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type ?broader" + i + "."
 
 
-                    query += "?broader" + (i) + " rdfs:label ?broader" + (i) + "Label."
 
                 }
 
@@ -168,11 +170,16 @@ var Sparql_ISO_15926 = (function () {
                 var bindings = []
                 result.results.bindings.forEach(function (item) {
                     item.broader1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                 /*   for (var i = 1; i < 20; i++) {
-                        if (item["broader" + i])
-                            item["broader" + i + "Label"].value = prefixLabelWithScheme(item["broader" + i].value, item["broader" + i + "Label"].value)
+
+
+                for (var i = 1; i < 20; i++) {
+                        if (item["broader" + i]){
+                            var id=item["broader" + i].value;
+                                item["broader" + i + "Label"]={value:id.substring(id.lastIndexOf("#")+1)}
+                        }
+                           // item["broader" + i + "Label"].value = prefixLabelWithScheme(item["broader" + i].value, item["broader" + i + "Label"].value)
                     }
-                    item.conceptLabel.value = prefixLabelWithScheme(item.concept.value, item.conceptLabel.value)*/
+                 //   item.conceptLabel.value = prefixLabelWithScheme(item.concept.value, item.conceptLabel.value)
 
                 })
                 return callback(null, result.results.bindings)

@@ -2,15 +2,24 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/quantum/ontologyExample.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/quantum/xlsxPCS.mappings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/schemas.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/schemas.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/import.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/import.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/treeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/treeController.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -42,22 +51,22 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../mail2pdfImap" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/sparqlProxies" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="project.scopes" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\GitHub\souslesensVocables\public\souslesensVocables\js" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\GitHub\souslesensVocables\other" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\sparqlProxies" />
+      <recent name="D:\GitHub\souslesensVocables\other\quantum" />
+      <recent name="D:\GitHub\souslesensVocables\other" />
       <recent name="D:\GitHub\souslesensVocables\config\users" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js" />
-      <recent name="D:\GitHub\souslesensVocables\bin\skosConverters" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\public\souslesensVocables\js" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -79,9 +88,17 @@
     <configuration name="mapQuatumCfihos..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="mapQuatumCfihos..js" working-dir="$PROJECT_DIR$/other/quantum">
       <method v="2" />
     </configuration>
+    <configuration name="parseOWL..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="parseOWL..js" working-dir="$PROJECT_DIR$/other/quantum">
+      <method v="2" />
+    </configuration>
+    <configuration name="parseXlsx..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="parseXlsx..js" working-dir="$PROJECT_DIR$/other/quantum">
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Node.js.mapQuatumCfihos..js" />
+        <item itemvalue="Node.js.parseXlsx..js" />
+        <item itemvalue="Node.js.parseOWL..js" />
         <item itemvalue="Node.js.CSVtoSKOS..js" />
       </list>
     </recent_temporary>
@@ -99,7 +116,9 @@
       <workItem from="1606388642624" duration="23277000" />
       <workItem from="1606585552303" duration="25056000" />
       <workItem from="1606804265723" duration="78864000" />
-      <workItem from="1607242310122" duration="8782000" />
+      <workItem from="1607242310122" duration="9380000" />
+      <workItem from="1607275657944" duration="6433000" />
+      <workItem from="1607420435071" duration="22443000" />
     </task>
     <servers />
   </component>
@@ -136,6 +155,12 @@
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js</url>
           <line>111</line>
           <option name="timeStamp" value="46" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>133</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="81" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

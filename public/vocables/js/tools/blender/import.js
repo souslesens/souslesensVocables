@@ -50,7 +50,7 @@ var Import = (function () {
 
          words2.push({id: newNodeId, label: word, type: skosType})
          if (type == "concept") {
-          triples.push({subject: newNodeId, predicate: predicate,object: parentNode.id , valueType: "uri"})
+          triples.push({subject: newNodeId, predicate: predicate,object: parentNode.data.id  , valueType: "uri"})
          }
         else if(type == "collection"){
           triples.push({subject: parentNode.id, predicate: predicate, object: newNodeId, valueType: "uri"})

@@ -301,7 +301,7 @@ var OntologyBrowser = (function () {
     self.showProperties = function (classId,callback) {
         var newGraph = true
         if (!classId)
-            classId = ThesaurusBrowser.currentTreeNode.id
+            classId = ThesaurusBrowser.currentTreeNode.data.id
         else
             newGraph = false;
         var properties = {};
@@ -365,7 +365,7 @@ var OntologyBrowser = (function () {
                 if (!existingVisjsIds[classId]) {
                     existingVisjsIds[classId] = 1
                     visjsData.nodes.push({
-                        id: ThesaurusBrowser.currentTreeNode.id,
+                        id: ThesaurusBrowser.currentTreeNode.data.id,
                         label: getLabelFromId(classId),
                         shape: "box"
 

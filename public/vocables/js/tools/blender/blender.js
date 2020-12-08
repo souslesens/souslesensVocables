@@ -238,10 +238,10 @@ var Blender = (function () {
                         }
                         Clipboard.copy({
                             type: "node",
-                            id: self.currentTreeNode.id,
+                            id: self.currentTreeNode.data.id,
                             label: self.currentTreeNode.text,
                             source: self.currentSource
-                        }, self.currentTreeNode.id + "_anchor", propertiesMap.event)
+                        }, self.currentTreeNode.data.id + "_anchor", propertiesMap.event)
                     }
 
                     if (self.currentTreeNode.children.length == 0)
@@ -535,8 +535,8 @@ var Blender = (function () {
                             Sparql_generic.copyNodes(fromSource, toGraphUri, id, {setObjectFn: Blender.menuActions.setCopiedNodeObjectFn}, function (err, result) {
                                 if (err)
                                     return MainController.UI.message(err);
-                                var jstreeData = [{id: id, text: label, parent: self.currentTreeNode.id, data: {type: "http://www.w3.org/2004/02/skos/core#Concept"}}]
-                                common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.id, jstreeData)
+                                var jstreeData = [{id: id, text: label, parent: self.currentTreeNode.data.id, data: {type: "http://www.w3.org/2004/02/skos/core#Concept"}}]
+                                common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.data.id, jstreeData)
                                 callbackEach()
 
                             })
@@ -785,16 +785,16 @@ var Blender = (function () {
 
                     var skosType = "http://www.w3.org/2004/02/skos/core#Concept"
                     if (self.displayMode == "centralPanel") {
-                        SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, self.currentTreeNode.id, skosType, false)
+                        SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
                     } else {
                         self.nodeEdition.openDialog()
-                        SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, self.currentTreeNode.id, skosType, false)
+                        SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
                     }
 
                 } else if (type == "collection") {
                     self.nodeEdition.openDialog()
                     var type = "http://www.w3.org/2004/02/skos/core#Collection"
-                    SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, Collection.currentTreeNode.id, type, false)
+                    SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, Collection.currentTreeNode.data.id, type, false)
                 }
 
                 return true;
@@ -822,7 +822,7 @@ var Blender = (function () {
                     treeDivId = 'Blender_conceptTreeDiv';
                     type = "http://www.w3.org/2004/02/skos/core#Concept"
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#ConceptScheme")
-                        initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{value: self.currentTreeNode.id, type: "uri"}]
+                        initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
 
                 } else if (type == "collection") {
                     parentNode = Collection.currentTreeNode;
@@ -890,12 +890,12 @@ var Blender = (function () {
                 if (editingObject.type.indexOf("Concept")>0) {
                     treeDiv = 'Blender_conceptTreeDiv'
                     if (Blender.currentTreeNode)
-                        currentNodeId = Blender.currentTreeNode.id
+                        currentNodeId = Blender.data.currentTreeNode.data.id
                 }
                     if (editingObject.type.indexOf("Collection")>0) {
                     treeDiv = 'Blender_collectionTreeDiv'
                     if (Collection.currentTreeNode)
-                        currentNodeId = Collection.currentTreeNode.id
+                        currentNodeId = Collection.currentTreeNode.data.id
                 }
 
                 var parent = editingObject.parent || "#"

@@ -186,14 +186,7 @@
     "schemaType": "OWL",
     "color": "#e377c2"
   },
-  "ISO_15926": {
-    "graphUri": "",
-    "sparql_url": "http://192.236.179.169/sparql",
-    "controller": "Sparql_ISO_15926",
-    "schemaType": "OWL",
-    "schema": "ISO_15926",
-    "color": "#bcbd22"
-  },
+
   "CIDOC": {
     "graphUri": "http://erlangen-crm.org/current/",
     "sparql_url": "http://51.178.139.80:8890/sparql",
@@ -216,7 +209,24 @@
     "schemaType": "OWL",
     "schema": "ISO_15926",
     "color": "#bcbd22"
+  },
+  "ISO_15926": {
+    "graphUri": "",
+    "sparql_url": "http://staging.data.posccaesar.org/rdl/",
+    "controller": "Sparql_ISO_15926",
+    "schemaType": "OWL",
+    "schema": "ISO_15926",
+    "color": "#bcbd22"
+  },
+  "ISO_15926_part4": {
+    "graphUri": "http://standards.iso.org/iso/15926/part4/",
+    "sparql_url":"http://51.178.139.80:8890/sparql",
+    "controller": "Sparql_ISO_15926",
+    "schemaType": "OWL",
+    "schema": "sparql_ISO_15926_part4",
+    "color": "#bcbd22"
   }
+
 
 
 }

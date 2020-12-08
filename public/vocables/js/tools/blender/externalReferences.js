@@ -125,7 +125,7 @@ var ExternalReferences = (function () {
                         }
                     )
 
-                    var triple = {subject: Blender.currentTreeNode.id, predicate: "http://www.w3.org/2004/02/skos/core#narrowMatch", object: objectUri, valueType: "uri"};
+                    var triple = {subject: Blender.currentTreeNode.data.id, predicate: "http://www.w3.org/2004/02/skos/core#narrowMatch", object: objectUri, valueType: "uri"};
                     Sparql_generic.insertTriples(Blender.currentSource, [triple], function (err, result) {
                         callbackEach(err);
                     })
@@ -134,7 +134,7 @@ var ExternalReferences = (function () {
                     if (err)
                         return MainController.UI.message(err);
                     var jsTreeOptions = {type: "externalReference", labelClass: "treeType_externalReference"}
-                    common.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.id, newTreeNodes)
+                    common.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.data.id, newTreeNodes)
                     Clipboard.clear();
                 }
             )
@@ -143,7 +143,7 @@ var ExternalReferences = (function () {
     self.showExternalReferenceChildren = function () {
         if (Blender.currentTreeNode.children.length > 0)
             return
-        var url = Blender.currentTreeNode.id;
+        var url = Blender.currentTreeNode.data.id;
         var params = self.parseExternalUrl(url)
 
         if (!params.sourceLabel)
@@ -153,7 +153,7 @@ var ExternalReferences = (function () {
                 return MainController.UI.message(err);
 
             var jsTreeOptions = {type: "externalReference", source: params.sourceLabel, labelClass: "treeType_externalReference"}
-            TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, Blender.currentTreeNode.id, "child1", jsTreeOptions)
+            TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, Blender.currentTreeNode.data.id, "child1", jsTreeOptions)
 
         })
 
@@ -161,7 +161,7 @@ var ExternalReferences = (function () {
     },
 
         self.showExternalReferenceNodeInfos = function () {
-            var url = Blender.currentTreeNode.id;
+            var url = Blender.currentTreeNode.data.id;
             var params = self.parseExternalUrl(url)
 
             if (!params.sourceLabel)
@@ -175,7 +175,7 @@ var ExternalReferences = (function () {
 
                 //   $(".ui-dialog-titlebar-close").css("display", "block")
                 $("#Blender_PopupEditButtonsDiv").css("display", "none")
-                SourceEditor.showNodeInfos("Blender_PopupEditDiv", "en", Blender.currentTreeNode.id, result);
+                SourceEditor.showNodeInfos("Blender_PopupEditDiv", "en", Blender.currentTreeNode.data.id, result);
             })
         }
         ,
@@ -208,7 +208,7 @@ var ExternalReferences = (function () {
 
 
     self.importReferenceNode = function (withDescendants) {
-        var url = Blender.currentTreeNode.id;
+        var url = Blender.currentTreeNode.data.id;
         var params = self.parseExternalUrl(url)
 
             Clipboard.copy({
@@ -232,13 +232,13 @@ var ExternalReferences = (function () {
     self.deleteReference=function(){
             if(confirm (" delete reference ")) {
                 var parentId = Blender.currentTreeNode.parent;
-                Sparql_generic.deleteTriples(Blender.currentSource, parentId, "http://www.w3.org/2004/02/skos/core#narrowMatch",  Blender.currentTreeNode.id, function (err, result) {
+                Sparql_generic.deleteTriples(Blender.currentSource, parentId, "http://www.w3.org/2004/02/skos/core#narrowMatch",  Blender.currentTreeNode.data.id, function (err, result) {
 
                     if (err) {
                         Blender.currentTreeNode=null;
                         return MainController.UI.message(err);
                     }
-                    $('#Blender_conceptTreeDiv').jstree(true).delete_node( Blender.currentTreeNode.id)
+                    $('#Blender_conceptTreeDiv').jstree(true).delete_node( Blender.currentTreeNode.data.id)
                     Blender.currentTreeNode=null;
 
 

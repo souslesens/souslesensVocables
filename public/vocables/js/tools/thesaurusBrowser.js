@@ -26,10 +26,10 @@ var ThesaurusBrowser = (function () {
         if (propertiesMap.event.ctrlKey)
             Clipboard.copy({
                 type: "node",
-                id: self.currentTreeNode.id,
+                id: self.currentTreeNode.data.id,
                 label: self.currentTreeNode.text,
                 source: source
-            }, self.currentTreeNode.id + "_anchor", propertiesMap.event)
+            }, self.currentTreeNode.data.id + "_anchor", propertiesMap.event)
 
 
         if (true || propertiesMap.event.ctrlKey) {
@@ -104,7 +104,7 @@ var ThesaurusBrowser = (function () {
                 action: function (e) {// pb avec source
                     Clipboard.copy({
                         type: "node",
-                        id: self.currentTreeNode.id,
+                        id: self.currentTreeNode.data.id,
                         label: self.currentTreeNode.text,
                         source: ThesaurusBrowser.currentTreeNode.data.source
                     }, self.currentTreeNode.id + "_anchor", e)
@@ -122,7 +122,7 @@ var ThesaurusBrowser = (function () {
             if (!options || !options.ctrlKey)
                 return;
 
-        Sparql_generic.getNodeChildren(thesaurusLabel, null, node.id, 1, options, function (err, result) {
+        Sparql_generic.getNodeChildren(thesaurusLabel, null, node.data.id, 1, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -135,7 +135,7 @@ var ThesaurusBrowser = (function () {
 
     self.editThesaurusConceptInfos = function (thesaurusLabel, node, callback) {
 
-        Sparql_generic.getNodeInfos(thesaurusLabel, node.id, null, function (err, result) {
+        Sparql_generic.getNodeInfos(thesaurusLabel, node.data.id, null, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -280,28 +280,53 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
             var existingNodes = {};
             var jstreeData = []
 
-            result.forEach(function (item) {
+            var allJstreeIds={}
+            result.forEach(function (item,index) {
+                for (var i = 20; i > 0; i--) {
+                    if (item["broader" + i]) {
+
+                        item["broader" + i].jstreeId= item["broader" + i].value+"_"+index
+                    }
+                }
+                item.concept.jstreeId=  item.concept.value+"_"+index;
+            })
+
+
+
+            result.forEach(function (item,index) {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
                         var id = item["broader" + i].value
+                        var jstreeId= item["broader" + i].value
                         if (!existingNodes[id]) {
                             existingNodes[id] = 1
                             var label = item["broader" + i + "Label"].value
-                            var parentId = options.rootId
+                            var parentId = options.rootId;
                             if (item["broader" + (i + 1)])
                                 parentId = item["broader" + (i + 1)].value
-                            jstreeData.push({id: id, text: label, parent: parentId, data: {source: sourceLabel}})
+
+                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel,id: id}})
                         }
                     }
                 }
-                var itemId = existingNodes[item.concept.value]
-                if (!existingNodes[itemId]) {
-                    existingNodes[itemId] = 1;
+            var itemId = item.concept.value
+                var jstreeId= item.concept.value+"_"+item["broader1"].value
+                if (!existingNodes[jstreeId]) {
+                    existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
-                    jstreeData.push({id: item.concept.value, text: text, parent: item["broader1"].value, data: {source: sourceLabel}})
+                    var id= item.concept.value;
+                    var jstreeId=itemId
+                    jstreeData.push({id:jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel,id:id}})
+                }else{
+                 /*
+                    if (!existingNodes[jstreeId]) {
+                        existingNodes[jstreeId] = 1;
+                        var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
+                        jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: itemId}})
+                    }*/
                 }
             })
-
+console.log(JSON.stringify(jstreeData))
             return callback(null, jstreeData)
 
 

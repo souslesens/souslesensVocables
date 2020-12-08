@@ -122,15 +122,15 @@ var Collection = (function () {
             newTreeNodes.push({
                 text: "<span class='searched_concept'>" + item.label + "</span>",
                 id: item.id,
-                parent: Collection.currentTreeNode.id,
+                parent: Collection.currentTreeNode.data.id,
                 data: {type: "treeType_concept"}
             })
         })
-        Collection.Sparql.setConceptsCollectionMembership(Blender.currentSource, conceptIds, Collection.currentTreeNode.id, function (err, result) {
+        Collection.Sparql.setConceptsCollectionMembership(Blender.currentSource, conceptIds, Collection.currentTreeNode.data.id, function (err, result) {
             if (err)
                 return MainController.UI.message(err)
             return MainController.UI.message(result)
-            common.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.id, newTreeNodes)
+            common.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
         })
 
     }

@@ -1,4 +1,4 @@
-var Sparql_ISO_15926 = (function () {
+var Sparql_ISO_15926_part4 = (function () {
         var self = {};
         self.ancestorsDepth = 6
 

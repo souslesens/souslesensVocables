@@ -2,24 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/quantum/ontologyExample.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/quantum/xlsxPCS.mappings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/parseOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/util..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/xlsxPCS.mappings.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/import.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/import.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/treeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/treeController.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +71,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.mapQuatumCfihos..js">
+  <component name="RunManager" selected="Node.js.parseXlsx..js">
     <configuration name="CSVtoSKOS..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="CSVtoSKOS..js" working-dir="$PROJECT_DIR$/bin/skosConverters">
       <method v="2" />
     </configuration>
@@ -94,10 +84,14 @@
     <configuration name="parseXlsx..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="parseXlsx..js" working-dir="$PROJECT_DIR$/other/quantum">
       <method v="2" />
     </configuration>
+    <configuration name="util..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="util..js" working-dir="$PROJECT_DIR$/bin/skosConverters">
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.mapQuatumCfihos..js" />
         <item itemvalue="Node.js.parseXlsx..js" />
+        <item itemvalue="Node.js.util..js" />
+        <item itemvalue="Node.js.mapQuatumCfihos..js" />
         <item itemvalue="Node.js.parseOWL..js" />
         <item itemvalue="Node.js.CSVtoSKOS..js" />
       </list>
@@ -118,7 +112,7 @@
       <workItem from="1606804265723" duration="78864000" />
       <workItem from="1607242310122" duration="9380000" />
       <workItem from="1607275657944" duration="6433000" />
-      <workItem from="1607420435071" duration="22443000" />
+      <workItem from="1607420435071" duration="37514000" />
     </task>
     <servers />
   </component>

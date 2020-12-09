@@ -195,7 +195,7 @@
     "color": "#bcbd22"
   },
   "QUANTUM": {
-    "graphUri": "http://data.total.com/resource/GS_EP_DEV/vocab/",
+    "graphUri": "http://data.total.com/quantum/vocab/",
     "sparql_url": "http://51.178.139.80:8890/sparql",
     "controller": "Sparql_OWL",
     "schemaType": "OWL",

@@ -2,6 +2,7 @@ var fs = require('fs');
 
 const async = require('async');
 const XLSX = require('xlsx');
+const util=require('../../bin/skosConverters/util.')
 
 
 var parseXlsx = {
@@ -20,7 +21,7 @@ var parseXlsx = {
                 sheet_name_list.forEach(function (sheetName) {
                     sheets[sheetName] = workbook.Sheets[sheetName];
                 })
-                callbackSeries(null, sheets)
+                callbackSeries(null, sheetNames)
 
             },
             function (callbackSeries) {
@@ -89,9 +90,9 @@ var parseXlsx = {
                     }
 
 
-                    if(sheetKey!="tblMappingSourceDetails")
-                    allData[sheetKey]=dataArray
-                    allModel[sheetKey]=header
+                    if (sheetKey != "tblMappingSourceDetails")
+                        allData[sheetKey] = dataArray
+                    allModel[sheetKey] = header
 
                 }
                 callbackSeries()
@@ -99,16 +100,107 @@ var parseXlsx = {
             }
         ], function (err) {
             var x = allData;
-            var str=JSON.stringify(allData,null,2)
-            fs.writeFileSync(filePath.replace("xlsx","json"),str)
-            var str=JSON.stringify(allModel,null,2)
-            fs.writeFileSync(filePath.replace("xlsx","model.json"),str)
+            var str = JSON.stringify(allData, null, 2)
+            fs.writeFileSync(filePath.replace("xlsx", "json"), str)
+            var str = JSON.stringify(allModel, null, 2)
+            fs.writeFileSync(filePath.replace("xlsx", "model.json"), str)
 
         })
 
     }
+    , loadSheet: function (filePath, callback) {
 
 
+    }
+    , generateTriples: function ( sheetNames) {
+        var graphUrisMap = {
+            quantumUri: "http://data.total.com/resource/quantum/vocab#"
+        }
+        var triplesPath="D:\\NLP\\ontologies\\quantum\\quantumVocabTriples.nt"
+        var graphUri = graphUrisMap["quantumUri"]
+        var prefixesMap = {
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "owl": "http://www.w3.org/2002/07/owl#"
+
+
+        }
+
+        function getUri(str,item,literal) {
+            if (str.indexOf("<") == 0)
+                return str;
+            if (str.indexOf(":") > 0) {
+                var array = str.split(":")
+                return "<" + prefixesMap[array[0]] + array[1] + ">"
+
+            } else {
+                if(literal){
+                    return "'"+util.formatStringForTriple(item[str])+"'"
+                }else
+                return "<" + graphUri + item[str] + ">"
+            }
+
+        }
+
+        var configPath = "D:\\GitHub\\souslesensVocables\\other\\quantum\\xlsxQuantumMappings.json"
+        var dataJsonPath = "D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.json"
+        var config = JSON.parse(fs.readFileSync(configPath));
+
+        var data = JSON.parse(fs.readFileSync(dataJsonPath));
+
+        var triples = "";
+        async.eachSeries(sheetNames, function (sheetName, callbackEach) {
+            var mappings = config[sheetName];
+            var sheetData = data[sheetName]
+
+            sheetData.forEach(function (item) {
+
+                for (var field in mappings) {
+                    var mapping = mappings[field]
+                    if(mapping) {
+
+                        if (typeof mapping === "object") {
+                            var s, p, o;
+
+
+                            if (mapping.s) {
+                                s = getUri(mapping.s, item);
+
+                            } else {
+                                s = getUri(field, item);
+                            }
+
+                            if (mapping.o) {
+                                o = getUri(mapping.o, item,mapping.literal);
+                            } else {
+                                o = getUri(field, item,mapping.literal);
+                            }
+
+                            p = getUri(mapping.p, item);
+
+                            triples += s + " " + p + " " + o + ".\n"
+
+
+                        }
+                    }
+                }
+            })
+            callbackEach();
+
+        }, function (err) {
+
+     //  triples+="<http://data.15926.org/lci/ClassOfPhysicalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>."
+         //   triples+="<http://data.15926.org/dm/ClassOfFunctionalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>"
+
+            fs.writeFileSync(triplesPath,triples)
+        })
+    }
 }
+
+
 module.exports = parseXlsx
-parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
+//parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
+var sheets = [
+    "tblFunctionalClass"
+]
+parseXlsx.generateTriples(["tblFunctionalClass","tblPhysicalClass"])

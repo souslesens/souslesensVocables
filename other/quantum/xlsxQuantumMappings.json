@@ -241,17 +241,34 @@
     "ChangeRequestNumber",
     "ItemStatus"
   ],
-  "tblPhysicalClass": [
-    "ID",
-    "Name",
-    "ParentPhysicalClassID",
-    "Definition",
-    "DefinitionSource",
-    "DisciplineID",
-    "AbstractClass",
-    "ChangeRequestNumber",
-    "ItemStatus"
-  ],
+  "tblPhysicalClass": {
+    "ID": {
+      "p": "rdf:type",
+      "o": "<http://data.15926.org/lci/ClassOfPhysicalObject>"
+    },
+    "Name": {
+      "literal": true,
+      "p": "rdfs:label",
+      "s": "ID"
+    },
+    "ParentPhysicalClassID": {
+      "p": "rdfs:subClassOf",
+      "s": "ID"
+    },
+    "Definition": {
+      "literal": true,
+      "p": "<http://posccaesar.org/rdl/hasDefinition>",
+      "s": "ID"
+    },
+    "DefinitionSource": null,
+    "DisciplineID": {
+      "p": "<http://data.posccaesar.org/rdl/Discipline>",
+      "s": "ID"
+    },
+    "AbstractClass": null,
+    "ChangeRequestNumber": null,
+    "ItemStatus": null
+  },
   "tblFunctionalClToPhysicalCl": [
     "ID",
     "FunctionalClassID",
@@ -277,21 +294,32 @@
     "ItemStatus"
   ],
   "tblFunctionalClass": {
-    "ID":[ {
-      "p":"rdf:type","o": "owl:Class",
-      "p":"rdf:type","o": "owl:Class"
-    }],
-    "Name",
-    "ParentFunctionalClassID",
-    "Definition",
-    "DefinitionSource",
-    "DisciplineID": {
-      "p": "http://data.posccaesar.org/rdl/Discipline",
+    "ID": {
+      "p": "rdf:type",
+      "o": "<http://data.15926.org/dm/ClassOfFunctionalObject>"
+    },
+    "Name": {
+      "literal": true,
+      "p": "rdfs:label",
       "s": "ID"
     },
-    "AbstractClass",
-    "ChangeRequestNumber",
-    "ItemStatus"
+    "ParentFunctionalClassID": {
+      "p": "rdfs:subClassOf",
+      "s": "ID"
+    },
+    "Definition": {
+      "literal": true,
+      "p": "<http://posccaesar.org/rdl/hasDefinition>",
+      "s": "ID"
+    },
+    "DefinitionSource": null,
+    "DisciplineID": {
+      "p": "<http://data.posccaesar.org/rdl/Discipline>",
+      "s": "ID"
+    },
+    "AbstractClass": null,
+    "ChangeRequestNumber": null,
+    "ItemStatus": null
   },
   "tblDocumentType": [
     "ID",

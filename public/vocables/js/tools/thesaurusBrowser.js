@@ -326,7 +326,7 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
                     }*/
                 }
             })
-console.log(JSON.stringify(jstreeData))
+//console.log(JSON.stringify(jstreeData))
             return callback(null, jstreeData)
 
 

@@ -3,13 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/util..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/xlsxPCS.mappings.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -71,7 +66,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.parseXlsx..js">
+  <component name="RunManager" selected="Node.js.mapQuatumCfihos..js">
     <configuration name="CSVtoSKOS..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="CSVtoSKOS..js" working-dir="$PROJECT_DIR$/bin/skosConverters">
       <method v="2" />
     </configuration>
@@ -89,9 +84,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.mapQuatumCfihos..js" />
         <item itemvalue="Node.js.parseXlsx..js" />
         <item itemvalue="Node.js.util..js" />
-        <item itemvalue="Node.js.mapQuatumCfihos..js" />
         <item itemvalue="Node.js.parseOWL..js" />
         <item itemvalue="Node.js.CSVtoSKOS..js" />
       </list>
@@ -112,7 +107,7 @@
       <workItem from="1606804265723" duration="78864000" />
       <workItem from="1607242310122" duration="9380000" />
       <workItem from="1607275657944" duration="6433000" />
-      <workItem from="1607420435071" duration="37514000" />
+      <workItem from="1607420435071" duration="47809000" />
     </task>
     <servers />
   </component>
@@ -152,9 +147,45 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
-          <line>133</line>
+          <line>126</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="81" />
+          <option name="timeStamp" value="96" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>127</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="97" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>143</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="106" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>233</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="111" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>136</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="122" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>185</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="135" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
+          <line>184</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="136" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

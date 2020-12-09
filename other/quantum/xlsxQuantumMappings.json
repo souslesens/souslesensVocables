@@ -296,7 +296,7 @@
   "tblFunctionalClass": {
     "ID": {
       "p": "rdf:type",
-      "o": "<http://data.15926.org/dm/ClassOfFunctionalObject>"
+      "o": "<o>"
     },
     "Name": {
       "literal": true,

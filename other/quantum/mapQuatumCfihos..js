@@ -190,28 +190,16 @@ var mapQuatumCfihos = {
 
 }
 
-var sourceConfig = {
-    query: "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " +
-        " from <http://standards.iso.org/iso/15926/part4/>" +
-        " where { ?concept rdfs:label ?label. }LIMIT 10000",
-    sparql_url: "http://51.178.139.80:8890/sparql",
-    labelProcessor: null,
-    filePath : "D:\\NLP\\ontologies\\quantum\\mappingPart4_PCS.nt"
-}
 
-var targetConfig = {
-
-    sparql_url: "http://staging.data.posccaesar.org/rdl/",
-    labelProcessor: null,
-    method:"POST"
-}
 
 
 
 var sourceConfig = {
     query: "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " +
         " from <http://data.total.com/quantum/vocab/>" +
-        " where { ?concept rdfs:label ?label. }LIMIT 10000",
+        " where { ?concept rdfs:label ?label." +
+      //  "?concept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.15926.org/dm/Property>" +
+        " }LIMIT 10000",
     sparql_url: "http://51.178.139.80:8890/sparql",
     labelProcessor: null,
     filePath : "D:\\NLP\\ontologies\\quantum\\mappingQuantum_Part4.nt"
@@ -219,10 +207,12 @@ var sourceConfig = {
 
 var targetConfig = {
 
-    graphUri: "http://standards.iso.org/iso/15926/part4/",
-    sparql_url: "http://51.178.139.80:8890/sparql",
+    // sparql_url: "http://staging.data.posccaesar.org/rdl/",
+    sparql_url: "http://data.15926.org/cfihos",
+   // graphUri: "http://standards.iso.org/iso/15926/part4/",
+    //sparql_url: "http://51.178.139.80:8890/sparql",
     labelProcessor: null,
-    method:"POST"
+    method:"GET"
 }
 
 if(true) {

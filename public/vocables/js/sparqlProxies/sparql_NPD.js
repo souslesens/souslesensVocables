@@ -195,10 +195,7 @@ var Sparql_NPD = (function () {
                 success: function (data, textStatus, jqXHR) {
                     if (data.result && typeof data.result != "object")//cas GEMET
                         data = JSON.parse(data.result)
-                    //  $("#messageDiv").html("found : " + data.results.bindings.length);
-                    $("#waitImg").css("display", "none");
-                    /*  if (data.results.bindings.length == 0)
-                          return callback({data.results.bindings:},[])*/
+
                     callback(null, data)
 
                 }

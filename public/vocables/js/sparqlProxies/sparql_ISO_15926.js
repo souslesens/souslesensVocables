@@ -60,11 +60,10 @@ var Sparql_ISO_15926 = (function () {
          "?child1 rdf:type ?child1Type."
 
 
-            //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
             for (var i = 1; i < descendantsDepth; i++) {
 
                 query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." +
-                  ""//  "?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label."
+                    "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
             }
             for (var i = 1; i < descendantsDepth; i++) {
@@ -82,7 +81,7 @@ var Sparql_ISO_15926 = (function () {
                 }
                 var bindings = []
 
-               /* result.results.bindings.forEach(function (item) {
+             /*  result.results.bindings.forEach(function (item) {
                     item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
                     var id=item.child1.value
                     item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
@@ -220,10 +219,7 @@ var Sparql_ISO_15926 = (function () {
                         data=JSON.parse(data)
                    else if (data.result && typeof data.result != "object")//cas GEMET
                         data = JSON.parse(data.result.trim())
-                    //  $("#messageDiv").html("found : " + data.results.bindings.length);
-                    $("#waitImg").css("display", "none");
-                    /*  if (data.results.bindings.length == 0)
-                          return callback({data.results.bindings:},[])*/
+
                     callback(null, data)
 
                 }

@@ -127,6 +127,7 @@ var ThesaurusBrowser = (function () {
                 return MainController.UI.message(err);
             }
             TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {source: thesaurusLabel, type: node.data.type})
+            $("#waitImg").css("display", "none");
 
         })
 
@@ -140,7 +141,7 @@ var ThesaurusBrowser = (function () {
                 return MainController.UI.message(err);
             }
             //    SkosConceptEditor.editConcept("graphDiv",result)
-            SourceEditor.showNodeInfos("graphDiv", "en", node.id, result)
+            SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
         })
@@ -254,6 +255,7 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
             setTimeout(function () {
                 MainController.UI.updateActionDivLabel("Multi source search :" + term)
                 MainController.UI.message("");
+                $("#waitImg").css("display", "none");
 
             }, 200)
 

@@ -87,11 +87,9 @@ var Sparql_generic = (function () {
         }
 
 
-
-
         setFilter = function (varName, ids, words, options) {
-            if(!options)
-                options={}
+            if (!options)
+                options = {}
             var filter = ";"
             if (words) {
                 if (Array.isArray(words)) {
@@ -130,7 +128,7 @@ var Sparql_generic = (function () {
             }
             return filter;
         }
-        self.setFilter=setFilter
+        self.setFilter = setFilter
 
         function getUriFilter(varName, uri) {
             var filterStr = ""
@@ -148,7 +146,8 @@ var Sparql_generic = (function () {
             }
             return filterStr;
         }
-        self.getUriFilter=getUriFilter
+
+        self.getUriFilter = getUriFilter
 
 
         self.formatString = function (str, forUri) {
@@ -182,11 +181,13 @@ var Sparql_generic = (function () {
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
-            if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
-                
-                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
-                     callback(err, result);
-                 })
+            $("#waitImg").css("display", "block");
+
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+
+                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function (err, result) {
+                    callback(err, result);
+                })
                 return;
             }
 
@@ -221,6 +222,8 @@ var Sparql_generic = (function () {
 
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+
+
                 if (err) {
                     return callback(err)
                 }
@@ -261,14 +264,15 @@ var Sparql_generic = (function () {
          */
 
 
-         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
+        self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
+            $("#waitImg").css("display", "block");
 
-             if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
-                 Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options,function(err,result){
-                     callback(err, result);
-                 })
-                 return;
-             }
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+                Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options, function (err, result) {
+                    callback(err, result);
+                })
+                return;
+            }
 
             setVariables(sourceLabel);
 
@@ -307,36 +311,31 @@ var Sparql_generic = (function () {
             }
 
 
-                
-                
-                
-                
-                
-                
-
             query += "}ORDER BY ?child1Label ";
             query += "limit " + limit + " ";
 
 
-             if ( options.filterCollections) {
-                 query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                     " select  distinct * FROM <http://souslesens/thesaurus/TEST/>   WHERE { " +
-                     "  ?child1 skos:broader ?concept.   "  + filterStr  +
-                     "   ?collection skos:member* ?acollection. "+ getUriFilter("collection", options.filterCollections) +
-                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?child1.  " +
-                     "  " +
-                     "   ?collection skos:prefLabel ?collectionLabel." +
-                     "   ?acollection skos:prefLabel ?acollectionLabel." +
-                     "   ?concept skos:prefLabel ?conceptLabel." +
-                     "   ?child1 skos:prefLabel ?child1Label." +
-                     "   ?child1 rdf:type ?child1Type." +
-                     "}order by ?concept"
-             }
+            if (options.filterCollections) {
+                query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                    " select  distinct * FROM <http://souslesens/thesaurus/TEST/>   WHERE { " +
+                    "  ?child1 skos:broader ?concept.   " + filterStr +
+                    "   ?collection skos:member* ?acollection. " + getUriFilter("collection", options.filterCollections) +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?child1.  " +
+                    "  " +
+                    "   ?collection skos:prefLabel ?collectionLabel." +
+                    "   ?acollection skos:prefLabel ?acollectionLabel." +
+                    "   ?concept skos:prefLabel ?conceptLabel." +
+                    "   ?child1 skos:prefLabel ?child1Label." +
+                    "   ?child1 rdf:type ?child1Type." +
+                    "}order by ?concept"
+            }
 
 
-             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+
+
                 if (err) {
                     return callback(err)
                 }
@@ -344,13 +343,15 @@ var Sparql_generic = (function () {
             })
         }
 
-         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
-             if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
-                 Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function(err,result){
-                     callback(err, result);
-                 })
-                 return;
-             }
+        self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+            $("#waitImg").css("display", "block");
+
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+                Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function (err, result) {
+                    callback(err, result);
+                })
+                return;
+            }
 
             if (!options) {
                 options = {depth: 0}
@@ -403,6 +404,7 @@ var Sparql_generic = (function () {
 
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+
                 if (err) {
                     return callback(err)
                 }
@@ -411,8 +413,10 @@ var Sparql_generic = (function () {
         }
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
-            if( Config.sources[sourceLabel].controllerName!="Sparql_generic"){
-                Config.sources[sourceLabel].controller.getNodeInfos  (sourceLabel, conceptId, options, function(err,result){
+            $("#waitImg").css("display", "block");
+
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+                Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
                     callback(err, result);
                 })
                 return;
@@ -430,6 +434,8 @@ var Sparql_generic = (function () {
 
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+
+
                 if (err) {
                     return callback(err);
                 }
@@ -443,8 +449,8 @@ var Sparql_generic = (function () {
         /*******************************************end basic requests (mode read) **************************************************************/
 
         self.getSingleNodeAllAncestors = function (sourceLabel, id, callback) {
-            if(Config.sources[sourceLabel].controllerName!="Sparql_generic"){
-                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function(err,result){
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function (err, result) {
                     callback(err, result);
                 })
                 return;
@@ -518,9 +524,6 @@ var Sparql_generic = (function () {
                 return callback(null, result.results.bindings);
             })
         }
-
-
-
 
 
         self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
@@ -775,6 +778,34 @@ var Sparql_generic = (function () {
                 return callback(err, newTriples.length)
 
             })
+
+        }
+
+        self.setBindingsOptionalProperties = function (bindings, _field) {
+            bindings.forEach(function (item) {
+
+                for (var i = 1; i < 20; i++) {
+                   var  field = _field + ""+i;
+                    if (!item[field]) {
+                        break;
+                    }
+                        if (!item[field + "Type"]) {
+                            if (!item[field + "Type"])
+                                item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
+                        }
+                        var id = item[field].value
+                        if (!item[field + "Label"]) {
+                            item[field + "Label"] = {value: id.substring(id.lastIndexOf("#") + 1)}
+                            item[field + "Label"] = {value: id.substring(id.lastIndexOf("/") + 1)}
+
+                        }
+
+                }
+
+                //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
+            })
+            return bindings;
+
 
         }
 

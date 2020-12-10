@@ -2,7 +2,7 @@ var fs = require('fs');
 
 const async = require('async');
 const XLSX = require('xlsx');
-const util=require('../../bin/skosConverters/util.')
+const util = require('../../bin/skosConverters/util.')
 
 
 var parseXlsx = {
@@ -112,11 +112,11 @@ var parseXlsx = {
 
 
     }
-    , generateTriples: function ( sheetNames) {
+    , generateTriples: function (sheetNames) {
         var graphUrisMap = {
             quantumUri: "http://data.total.com/resource/quantum/vocab#"
         }
-        var triplesPath="D:\\NLP\\ontologies\\quantum\\quantumVocabTriples.nt"
+        var triplesPath = "D:\\NLP\\ontologies\\quantum\\quantumVocabTriples.nt"
         var graphUri = graphUrisMap["quantumUri"]
         var prefixesMap = {
             "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -126,7 +126,7 @@ var parseXlsx = {
 
         }
 
-        function getUri(str,item,literal) {
+        function getUri(str, item, literal) {
             if (str.indexOf("<") == 0)
                 return str;
             if (str.indexOf(":") > 0) {
@@ -134,10 +134,10 @@ var parseXlsx = {
                 return "<" + prefixesMap[array[0]] + array[1] + ">"
 
             } else {
-                if(literal){
-                    return "'"+util.formatStringForTriple(item[str])+"'"
-                }else
-                return "<" + graphUri + item[str] + ">"
+                if (literal) {
+                    return "'" + util.formatStringForTriple(item[str]) + "'"
+                } else
+                    return "<" + graphUri + item[str] + ">"
             }
 
         }
@@ -157,31 +157,36 @@ var parseXlsx = {
 
                 for (var field in mappings) {
                     var mapping = mappings[field]
-                    if(mapping) {
+                    if (mapping) {
+                        var mappingArray;
+                        if (!Array.isArray(mapping))
+                            mappingArray = [mapping]
+                        else
+                            mappingArray = mapping
+                        mappingArray.forEach(function (mappingItem) {
 
-                        if (typeof mapping === "object") {
-                            var s, p, o;
+                            if (typeof mappingItem === "object") {
+                                var s, p, o;
 
 
-                            if (mapping.s) {
-                                s = getUri(mapping.s, item);
+                                if (mappingItem.s) {
+                                    s = getUri(mappingItem.s, item);
 
-                            } else {
-                                s = getUri(field, item);
+                                } else {
+                                    s = getUri(field, item);
+                                }
+
+                                if (mappingItem.o) {
+                                    o = getUri(mappingItem.o, item, mappingItem.literal);
+                                } else {
+                                    o = getUri(field, item, mappingItem.literal);
+                                }
+
+                                p = getUri(mappingItem.p, item);
+
+                                triples += s + " " + p + " " + o + ".\n"
                             }
-
-                            if (mapping.o) {
-                                o = getUri(mapping.o, item,mapping.literal);
-                            } else {
-                                o = getUri(field, item,mapping.literal);
-                            }
-
-                            p = getUri(mapping.p, item);
-
-                            triples += s + " " + p + " " + o + ".\n"
-
-
-                        }
+                        })
                     }
                 }
             })
@@ -189,10 +194,10 @@ var parseXlsx = {
 
         }, function (err) {
 
-     //  triples+="<http://data.15926.org/lci/ClassOfPhysicalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>."
-         //   triples+="<http://data.15926.org/dm/ClassOfFunctionalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>"
+            //  triples+="<http://data.15926.org/lci/ClassOfPhysicalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>."
+            //   triples+="<http://data.15926.org/dm/ClassOfFunctionalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>"
 
-            fs.writeFileSync(triplesPath,triples)
+            fs.writeFileSync(triplesPath, triples)
         })
     }
 }
@@ -201,6 +206,10 @@ var parseXlsx = {
 module.exports = parseXlsx
 //parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
 var sheets = [
-    "tblFunctionalClass"
+    // "tblFunctionalClass",
+    "tblAttribute",
+   // "tblAttributePickListValue",
+   // "tblFunctionalClToPhysicalCl",
+  //  "tblFunctionalClToPhysicalCl"
 ]
-parseXlsx.generateTriples(["tblFunctionalClass","tblPhysicalClass"])
+parseXlsx.generateTriples(sheets)

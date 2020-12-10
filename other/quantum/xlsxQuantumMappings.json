@@ -1,4 +1,153 @@
 {
+  "tblPhysicalClass": {
+    "ID": {
+      "p": "rdf:type",
+      "o": "<http://data.15926.org/lci/ClassOfPhysicalObject>"
+    },
+    "Name": {
+      "literal": true,
+      "p": "rdfs:label",
+      "s": "ID"
+    },
+    "ParentPhysicalClassID": {
+      "p": "rdfs:subClassOf",
+      "s": "ID"
+    },
+    "Definition": {
+      "literal": true,
+      "p": "<http://posccaesar.org/rdl/hasDefinition>",
+      "s": "ID"
+    },
+    "DefinitionSource": null,
+    "DisciplineID": {
+      "p": "<http://data.posccaesar.org/rdl/Discipline>",
+      "s": "ID"
+    },
+    "AbstractClass": null,
+    "ChangeRequestNumber": null,
+    "ItemStatus": null
+  },
+  "tblFunctionalClass": {
+    "ID": {
+      "p": "rdf:type",
+      "o": "<http://data.15926.org/dm/ClassOfFunctionalObject>"
+    },
+    "Name": {
+      "literal": true,
+      "p": "rdfs:label",
+      "s": "ID"
+    },
+    "ParentFunctionalClassID": {
+      "p": "rdfs:subClassOf",
+      "s": "ID"
+    },
+    "Definition": {
+      "literal": true,
+      "p": "<http://posccaesar.org/rdl/hasDefinition>",
+      "s": "ID"
+    },
+    "DefinitionSource": null,
+    "DisciplineID": {
+      "p": "<http://data.posccaesar.org/rdl/Discipline>",
+      "s": "ID"
+    },
+    "AbstractClass": null,
+    "ChangeRequestNumber": null,
+    "ItemStatus": null
+  },
+  "tblAttribute": {
+    "ID": [{
+      "p": "rdfs:subClassOf",
+      "o": "<http://data.15926.org/dm/Property>"
+    },
+      {
+        "p": "rdf:type",
+        "o": "<http://data.15926.org/dm/SinglePropertyDimension>"
+      }
+      ],
+    "Name":{
+      "literal": true,
+      "p": "rdfs:label",
+      "s": "ID"
+    },
+    "Definition": {
+      "literal": true,
+      "p": "<http://posccaesar.org/rdl/hasDefinition>",
+      "s": "ID"
+    },
+    "DefinitionSource": null,
+    "UnitOfMeasureDimensionID":{
+      "p": "<http://data.15926.org/cfihos/00000072>",
+      "s": "ID"
+    },
+    "DataType": null,
+    "ClassType": null,
+    "Synonym": null,
+    "PickListValueGroupingID": null,
+    "ChangeRequestNumber": null,
+    "ItemStatus": null,
+    "ApplicationStatus": null
+  },
+  "tblAttributePickListValue": {
+    "ID": {
+      "p": "rdf:type",
+      "o": "<http://data.15926.org/dm/Property>"
+    },
+    "Name": {
+      "literal": true,
+      "p": "rdfs:label",
+      "s": "ID"
+    },
+    "Code": null,
+    "CodeSource": null,
+    "Description": {
+      "literal": true,
+      "p": "<http://data.15926.org/dm/Description>",
+      "s": "ID"},
+    "DescriptionSource": null,
+    "PickListValueGroupingID": null,
+    "ChangeRequestNumber": null,
+    "ItemStatus": null
+  },
+  "tblFunctionalClToPhysicalCl": {
+
+    "FunctionalClassID": null,
+    "PhysicalClassID": {
+      "p": "rdfs:subClassOf",
+      "o": "FunctionalClassID"
+    },
+    "ChangeRequestNumber": null,
+    "ItemStatus": null
+  },
+  "tblFunctionalClassToDiscDocType": [
+    "ID",
+    "FunctionalClassID",
+    "DisciplineDocumentTypeID",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblFunctionalClassToAttribute": [
+    "ID",
+    "FunctionalClassID",
+    "AttributeID",
+    "DataProvider",
+    "Justification",
+    "LifeCycleDelivery",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
+  "tblDocumentType": [
+    "ID",
+    "Name",
+    "EPCode",
+    "RCCode",
+    "AssetCode",
+    "Definition",
+    "DefinitionSource",
+    "AssetName",
+    "ChangeRequestNumber",
+    "ItemStatus"
+  ],
   "SystemCodes": [
     "AttributePickListValue ID",
     "Name",
@@ -241,98 +390,6 @@
     "ChangeRequestNumber",
     "ItemStatus"
   ],
-  "tblPhysicalClass": {
-    "ID": {
-      "p": "rdf:type",
-      "o": "<http://data.15926.org/lci/ClassOfPhysicalObject>"
-    },
-    "Name": {
-      "literal": true,
-      "p": "rdfs:label",
-      "s": "ID"
-    },
-    "ParentPhysicalClassID": {
-      "p": "rdfs:subClassOf",
-      "s": "ID"
-    },
-    "Definition": {
-      "literal": true,
-      "p": "<http://posccaesar.org/rdl/hasDefinition>",
-      "s": "ID"
-    },
-    "DefinitionSource": null,
-    "DisciplineID": {
-      "p": "<http://data.posccaesar.org/rdl/Discipline>",
-      "s": "ID"
-    },
-    "AbstractClass": null,
-    "ChangeRequestNumber": null,
-    "ItemStatus": null
-  },
-  "tblFunctionalClToPhysicalCl": [
-    "ID",
-    "FunctionalClassID",
-    "PhysicalClassID",
-    "ChangeRequestNumber",
-    "ItemStatus"
-  ],
-  "tblFunctionalClassToDiscDocType": [
-    "ID",
-    "FunctionalClassID",
-    "DisciplineDocumentTypeID",
-    "ChangeRequestNumber",
-    "ItemStatus"
-  ],
-  "tblFunctionalClassToAttribute": [
-    "ID",
-    "FunctionalClassID",
-    "AttributeID",
-    "DataProvider",
-    "Justification",
-    "LifeCycleDelivery",
-    "ChangeRequestNumber",
-    "ItemStatus"
-  ],
-  "tblFunctionalClass": {
-    "ID": {
-      "p": "rdf:type",
-      "o": "<o>"
-    },
-    "Name": {
-      "literal": true,
-      "p": "rdfs:label",
-      "s": "ID"
-    },
-    "ParentFunctionalClassID": {
-      "p": "rdfs:subClassOf",
-      "s": "ID"
-    },
-    "Definition": {
-      "literal": true,
-      "p": "<http://posccaesar.org/rdl/hasDefinition>",
-      "s": "ID"
-    },
-    "DefinitionSource": null,
-    "DisciplineID": {
-      "p": "<http://data.posccaesar.org/rdl/Discipline>",
-      "s": "ID"
-    },
-    "AbstractClass": null,
-    "ChangeRequestNumber": null,
-    "ItemStatus": null
-  },
-  "tblDocumentType": [
-    "ID",
-    "Name",
-    "EPCode",
-    "RCCode",
-    "AssetCode",
-    "Definition",
-    "DefinitionSource",
-    "AssetName",
-    "ChangeRequestNumber",
-    "ItemStatus"
-  ],
   "tblDisciplineDocumentType": [
     "ID",
     "DisciplineID",
@@ -398,30 +455,5 @@
     "AttributePickListValueID2",
     "ChangeRequestNumber",
     "ItemStatus"
-  ],
-  "tblAttributePickListValue": [
-    "ID",
-    "Name",
-    "Code",
-    "CodeSource",
-    "Description",
-    "DescriptionSource",
-    "PickListValueGroupingID",
-    "ChangeRequestNumber",
-    "ItemStatus"
-  ],
-  "tblAttribute": [
-    "ID",
-    "Name",
-    "Definition",
-    "DefinitionSource",
-    "UnitOfMeasureDimensionID",
-    "DataType",
-    "ClassType",
-    "Synonym",
-    "PickListValueGroupingID",
-    "ChangeRequestNumber",
-    "ItemStatus",
-    "ApplicationStatus"
   ]
 }

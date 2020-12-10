@@ -28,7 +28,7 @@ var Sparql_ISO_15926_part4 = (function () {
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
             query += "select distinct ?topConcept  from <"+self.graphUri+"> where{" +
-               // "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>." +
+               "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>." +
                 "?x rdf:type  ?topConcept ."+
                 "}order by ?conceptLabel limit 5000"
 
@@ -227,10 +227,7 @@ var Sparql_ISO_15926_part4 = (function () {
                         data=JSON.parse(data)
                    else if (data.result && typeof data.result != "object")//cas GEMET
                         data = JSON.parse(data.result.trim())
-                    //  $("#messageDiv").html("found : " + data.results.bindings.length);
-                    $("#waitImg").css("display", "none");
-                    /*  if (data.results.bindings.length == 0)
-                          return callback({data.results.bindings:},[])*/
+
                     callback(null, data)
 
                 }

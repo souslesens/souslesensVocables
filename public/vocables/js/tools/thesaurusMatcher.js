@@ -36,11 +36,10 @@ var ThesaurusMatcher = (function () {
 
 
         self.compareConcepts = function () {
+            var sourceNodeId = ThesaurusBrowser.currentTreeNode.data.id
 
-            var sourceNodeId = $("#currentSourceTreeDiv").jstree(true).get_selected()
             if (!sourceNodeId || sourceNodeId.length == 0)
-                return
-            sourceNodeId = sourceNodeId[0];
+              alert( " no data.id field")
             self.targetSourceId = $("#ThesaurusMatcher_targetGraphUriSelect").val();
             if (!self.targetSourceId)
                 return MainController.UI.message("choose a target ressource");

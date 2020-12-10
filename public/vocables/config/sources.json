@@ -221,7 +221,7 @@
   "ISO_15926_part4": {
     "graphUri": "http://standards.iso.org/iso/15926/part4/",
     "sparql_url":"http://51.178.139.80:8890/sparql",
-    "controller": "Sparql_ISO_15926",
+    "controller": "Sparql_ISO_15926_part4",
     "schemaType": "OWL",
     "schema": "sparql_ISO_15926_part4",
     "color": "#bcbd22"

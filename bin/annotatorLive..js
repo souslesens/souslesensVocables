@@ -76,9 +76,11 @@ var annotatorLive = {
                             "SELECT * " +
                             "FROM <" + source.graphUri + "> " +
                             "WHERE {" +
-                            "?id skos:prefLabel|skos:altLabel ?prefLabel ." +
-                            "FILTER (lang(?prefLabel) = '" + source.predicates.lang + "')" +
-                            " filter " + filter + "} limit 10000";
+                            "?id skos:prefLabel|skos:altLabel ?prefLabel ."
+                            if(source.predicates && source.predicates.lang)
+                                query+= "FILTER (lang(?prefLabel) = '" + source.predicates.lang + "')"
+
+                           query+= " filter " + filter + "} limit 10000";
 
 
                         var url = source.sparql_url;
@@ -115,9 +117,10 @@ var annotatorLive = {
                     }, function (err) {
                         callbackEachSource(err)
                     })
-                }, function (err) {
-                    callbackSeries(err)
-                })
+                }
+                , function (err) {
+                        callbackSeries(err)
+                    })
 
             },
             //set Missing nouns

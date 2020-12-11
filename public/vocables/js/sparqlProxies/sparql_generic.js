@@ -88,6 +88,11 @@ var Sparql_generic = (function () {
 
 
         setFilter = function (varName, ids, words, options) {
+            function formatWord(str) {
+                var str2 = str.replace(/\\/g, "")
+                return str2
+            }
+
             if (!options)
                 options = {}
             var filter = ";"
@@ -98,9 +103,9 @@ var Sparql_generic = (function () {
                         if (index > 0)
                             conceptWordStr += "|"
                         if (options.exactMatch)
-                            conceptWordStr += "^" + word + "$";
+                            conceptWordStr += "^" + formatWord(word) + "$";
                         else
-                            conceptWordStr += "" + word + "";
+                            conceptWordStr += "" + formatWord(word) + "";
                     })
                     filter = " filter( regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ";
                 } else {
@@ -415,12 +420,12 @@ var Sparql_generic = (function () {
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
             $("#waitImg").css("display", "block");
 
-            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
-                Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
-                    callback(err, result);
-                })
-                return;
-            }
+            /*  if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+                  Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
+                      callback(err, result);
+                  })
+                  return;
+              }*/
             if (!options)
                 options = {}
             setVariables(sourceLabel);
@@ -715,29 +720,35 @@ var Sparql_generic = (function () {
                     self.getNodeInfos(fromSourceLabel, sourceIds, null, function (err, result) {
                         if (err)
                             return callbackSeries(err);
+                        var subject, prop, object;
+                        var valueStr = ""
                         result.forEach(function (item) {
-                            var subject = item.id.value
+
                             if (options.setSubjectFn)
-                                subject = options.setSubjectFn(item)
-                            var prop = item.prop.value;
+                                options.setSubjectFn(item)
+
                             if (options.setPredicateFn)
-                                prop = options.setPredicateFn(item)
+                                options.setPredicateFn(item)
+
+
                             if (options.setObjectFn)
-                                valueStr = options.setObjectFn(item)
+                                options.setObjectFn(item)
+
+                            subject = item.id.value
+                            prop = item.prop.value
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
 
-                                var valueStr = ""
                                 if (item.value.type == "uri")
-                                    valueStr = "<" + formatUrl(item.value.value) + ">"
+                                    valueStr = "<" + item.value.value + ">"
                                 else {
                                     var langStr = "";
                                     if (item.lang)
                                         langStr = "@" + item.value.lang
-                                    valueStr = "'" + self.formatString(item.value.value) + "'" + langStr
+                                    valueStr = "'" + self.formatString() + "'" + langStr
                                 }
 
-                                newTriples.push("<" + formatUrl(subject) + "> <" + formatUrl(prop) + "> " + valueStr + ".")
+                                newTriples.push("<" + subject + "> <" + prop + "> " + valueStr + ".")
                                 if (newTriples.length >= setSize) {
                                     newTriplesSets.push(newTriples)
                                     newTriples = []
@@ -785,20 +796,20 @@ var Sparql_generic = (function () {
             bindings.forEach(function (item) {
 
                 for (var i = 1; i < 20; i++) {
-                   var  field = _field + ""+i;
+                    var field = _field + "" + i;
                     if (!item[field]) {
                         break;
                     }
-                        if (!item[field + "Type"]) {
-                            if (!item[field + "Type"])
-                                item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                        }
-                        var id = item[field].value
-                        if (!item[field + "Label"]) {
-                            item[field + "Label"] = {value: id.substring(id.lastIndexOf("#") + 1)}
-                            item[field + "Label"] = {value: id.substring(id.lastIndexOf("/") + 1)}
+                    if (!item[field + "Type"]) {
+                        if (!item[field + "Type"])
+                            item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
+                    }
+                    var id = item[field].value
+                    if (!item[field + "Label"]) {
+                        item[field + "Label"] = {value: id.substring(id.lastIndexOf("#") + 1)}
+                        item[field + "Label"] = {value: id.substring(id.lastIndexOf("/") + 1)}
 
-                        }
+                    }
 
                 }
 

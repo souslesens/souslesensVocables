@@ -24,6 +24,8 @@ var Annotator = (function () {
 
 
         self.annotate = function () {
+            $("#waitImg").css("display", "block");
+            MainController.UI.message("querying Spacy library (can take time...)")
             var text = $("#Annotator_textArea").val();
             var sourcesLabels = self.selectedSources;
             var sources = [];
@@ -49,12 +51,15 @@ var Annotator = (function () {
                  },*/
 
                 success: function (data, textStatus, jqXHR) {
+                    MainController.UI.message("")
+                    $("#waitImg").css("display", "none");
                     var x = data
                     self.showAnnotationResult(data)
                 }
 
                 , error: function (err) {
                     MainController.UI.message(err)
+                    $("#waitImg").css("display", "none");
                 }
             })
 
@@ -103,13 +108,18 @@ var Annotator = (function () {
 
 
             var html = ""
+            var uniqueMissingNouns={}
             data.missingNouns.forEach(function (item) {
-                html += "<span class='Annotator_orphanNouns' id='Annotator_noun|" + "orphan" + "|" + item + "'>" + item + "</span>"
+                if(!uniqueMissingNouns[item]) {
+                    uniqueMissingNouns[item]=1
+                    html += "<span class='Annotator_orphanNouns' id='Annotator_noun|" + "orphan" + "|" + item + "'>" + item + "</span>"
+                }
 
             })
             $("#Annotator_orphanNounsDiv").html(html)
-            $(".Annotator_orphanNouns").bind("click", function () {
-                Clipboard.copy({type: "word", source: "none", label: $(this).html()}, $(this).attr("id"))
+            $(".Annotator_orphanNouns").bind("click", function (e) {
+                if(e.ctrlKey)
+                Clipboard.copy({type: "word", source: "none", label: $(this).html()}, $(this).attr("id"),e)
             })
 
         }
@@ -132,11 +142,12 @@ var Annotator = (function () {
             var array = id.split("|")
             var source = array[1]
             id = array[2]
-            Sparql_generic.getNodeInfos(source, id, null, function (err, result) {
+            MainController.UI.showNodeInfos(source, id,"Annotator_EntityDetailsDiv")
+          /*  Sparql_generic.getNodeInfos(source, id, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 SourceEditor.showNodeInfos("Annotator_EntityDetailsDiv", "en", id, result);
-            })
+            })*/
             Sparql_generic.getSingleNodeAllAncestors(source, id, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)

@@ -122,14 +122,15 @@ var TermTaxonomy = (function () {
         setTimeout(function () {
 
             $("#conceptsJstreeDiv").jstree(true).select_node(selectedIds);
+            $("#waitImg").css("display", "none");
 
-        }, 3000)
+        }, 1000)
 
 
     }
 
     self.displayGraph = function (direction) {
-        $("#TermTaxonomy_nodeInfosDiv").html("")
+        $("#TermTaxonomy_nodeInfosDialogDiv").html("")
         var maxDepth = 5
 
         drawRootNode = function (word) {
@@ -234,6 +235,7 @@ var TermTaxonomy = (function () {
 
         visjsGraph.data.nodes.add(visjsData.nodes)
         visjsGraph.data.edges.add(visjsData.edges)
+        $("#waitImg").css("display", "none");
 
     }
 
@@ -246,7 +248,7 @@ var TermTaxonomy = (function () {
             }
 
 
-        $("#TermTaxonomy_nodeInfosDiv").html("")
+        $("#TermTaxonomy_nodeInfosDialogDiv").html("")
         if (node) {
             self.graphActions.currentNode = node;
 
@@ -292,14 +294,15 @@ var TermTaxonomy = (function () {
         }
         ,
         showDetails: function (defaultLang) {
-            Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
+            MainController.UI.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id,"TermTaxonomy_nodeInfosDialogDiv")
+         /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
-                $("#TermTaxonomy_nodeInfosDiv").dialog("open");
-                SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDiv", "en", self.graphActions.currentNode.id, result)
+                $("#TermTaxonomy_nodeInfosDialogDiv").dialog("open");
+                SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 
-            })
+            })*/
         }
         ,
         setAsRootNode: function () {

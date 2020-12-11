@@ -280,7 +280,7 @@ var ChildHood = (function () {
             }
 
 
-        $("#TermTaxonomy_nodeInfosDiv").html("")
+        $("#TermTaxonomy_nodeInfosDialogDiv").html("")
         if (node) {
             self.graphActions.currentNode = node;
 
@@ -331,7 +331,7 @@ var ChildHood = (function () {
                     return MainController.UI.message(err);
                 }
 
-                SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDiv", "en", self.graphActions.currentNode.id, result)
+                SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 
             })
         }

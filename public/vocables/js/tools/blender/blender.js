@@ -64,6 +64,7 @@ var Blender = (function () {
             self.currentTreeNode = null;
             self.currentSource = null;
             $("#Blender_collectionTreeDiv").html("");
+            Collection.removeTaxonomyFilter();
             $("#Blender_tabs").tabs("option", "active", 1);
             Collection.currentTreeNode = null;
             if (source == "") {
@@ -532,11 +533,15 @@ var Blender = (function () {
                                 if (callback)
                                     return callback(null)
                             }
-                            Sparql_generic.copyNodes(fromSource, toGraphUri, id, {setObjectFn: Blender.menuActions.setCopiedNodeObjectFn}, function (err, result) {
+                            Sparql_generic.copyNodes(fromSource, toGraphUri, id,
+                                {setObjectFn: Blender.menuActions.setCopiedNodeObjectFn,
+                               // setPredicateFn: Blender.menuActions.setCopiedNodePredicateFn
+                                } ,
+                                function (err, result) {
                                 if (err)
                                     return MainController.UI.message(err);
                                 var jstreeData = [{id: id, text: label, parent: self.currentTreeNode.data.id, data: {type: "http://www.w3.org/2004/02/skos/core#Concept"}}]
-                                common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.data.id, jstreeData)
+                                common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.id, jstreeData)
                                 callbackEach()
 
                             })
@@ -556,12 +561,22 @@ var Blender = (function () {
             setCopiedNodeObjectFn: function (item) {
                 var newParent = self.currentTreeNode;
                 if (item.prop.value == "http://www.w3.org/2004/02/skos/core#broader")
-                    item.value.value = newParent.id;
+                    item.value.value = newParent.data.id;
+                else if (item.prop.value == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                    item.prop.value = "http://www.w3.org/2004/02/skos/core#broader"
+                    item.value.value = newParent.data.id;
+                }
+
                 return item
 
 
             }
             ,
+            setCopiedNodePredicateFn: function (item) {
+
+
+                return item
+            },
 
 
             pasteClipboardNodeDescendants: function (callback) {

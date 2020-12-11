@@ -2,10 +2,7 @@ var Sparql_ISO_15926_part4 = (function () {
         var self = {};
         self.ancestorsDepth = 6
 
-        var elasticUrl = "/elastic";
-        if (window.location.href.indexOf("https") > -1)
-            elasticUrl = "../elastic";
-
+        var elasticUrl=Config.serverUrl
 
         function prefixLabelWithScheme(id, label) {
             var array = id.split("/")

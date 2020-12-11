@@ -27,7 +27,7 @@ var NerEvaluator = (function () {
             $("#NerEvaluator_tabs").tabs({
                 activate: self.onTabActivate
 
-                });
+            });
 
             common.fillSelectOptions("nerEvaluator_graphUrisSelect", self.selectedSources, true)
             self.showWikiCategoriesTree();
@@ -42,14 +42,11 @@ var NerEvaluator = (function () {
         self.currentTreeNode = obj.node
 
 
-
-
-
         if (obj.node.data && obj.node.data.type == "wikiPage") {
 
             var activeTab = $('ul.tabs li a.active');
 
-            if(true || (activeTab && activeTab.data('id')=="OntologyBrowser_tabs_wikiPageContent")) {
+            if (true || (activeTab && activeTab.data('id') == "OntologyBrowser_tabs_wikiPageContent")) {
                 self.loadWikiPage()
             }
             return self.getWikipageMissingWords(obj.node)
@@ -63,17 +60,16 @@ var NerEvaluator = (function () {
         }
 
 
-
     }
 
-    self.onTabActivate=function(e,ui){
-       var divId=ui.newPanel.attr('id');
-       if( divId=="OntologyBrowser_tabs_wikiPageContent"){
-           self.loadWikiPage()
-       }
+    self.onTabActivate = function (e, ui) {
+        var divId = ui.newPanel.attr('id');
+        if (divId == "OntologyBrowser_tabs_wikiPageContent") {
+            self.loadWikiPage()
+        }
     }
 
-    self.loadWikiPage=function(){
+    self.loadWikiPage = function () {
         var selectedNode = $("#" + NerEvaluator.categoriesTreeId).jstree(true).get_selected(true);
         if (!selectedNode || !selectedNode[0].data)
             return MainController.UI.message("select a page ")
@@ -337,7 +333,7 @@ var NerEvaluator = (function () {
 
                 if (allnodes.indexOf(graphLabel) < 0) {
                     allnodes.push(graphLabel)
-                    visjsData.nodes.push({id: graphLabel, label: graphLabel, shape: "ellipse", color: color, fixed: {x: true}, x: 500, y: offsetY, data: {type: "graph",source:graphLabel}})
+                    visjsData.nodes.push({id: graphLabel, label: graphLabel, shape: "ellipse", color: color, fixed: {x: true}, x: 500, y: offsetY, data: {type: "graph", source: graphLabel}})
 
                 }
                 if (allnodes.indexOf(conceptId) < 0) {
@@ -345,7 +341,16 @@ var NerEvaluator = (function () {
                     if (member)
                         color = "#dac"
                     // visjsData.nodes.push({id: conceptId, label: conceptLabel, shape: "text", color: color,size:Math.round(20/countPages), fixed: {x: true, y: true}, x: -500, y: offsetY})
-                    visjsData.nodes.push({id: conceptId, label: conceptLabel, shape: "box", color: color, fixed: {x: true, y: true}, x: -500, y: offsetY, data: {type: "leafConcept",source:graphLabel}})
+                    visjsData.nodes.push({
+                        id: conceptId,
+                        label: conceptLabel,
+                        shape: "box",
+                        color: color,
+                        fixed: {x: true, y: true},
+                        x: -500,
+                        y: offsetY,
+                        data: {type: "leafConcept", source: graphLabel}
+                    })
 
                     offsetY += 30 + (20 / countPages);
                     //  visjsData.edges.push({id: nodeId + "_" + conceptId, from: nodeId, to: conceptId, color: color})
@@ -357,7 +362,7 @@ var NerEvaluator = (function () {
                         if (allnodes.indexOf(broaderId) < 0) {
                             allnodes.push(broaderId)
                             var broaderLabel = item["broader" + i + "Label"].value
-                            visjsData.nodes.push({id: broaderId, label: broaderLabel, shape: "box", color: color, data: {type: "broaderConcept",source:graphLabel}})
+                            visjsData.nodes.push({id: broaderId, label: broaderLabel, shape: "box", color: color, data: {type: "broaderConcept", source: graphLabel}})
                         }
                         if (i == 1) {
                             var edgeId = conceptId + "_" + broaderId
@@ -411,6 +416,7 @@ var NerEvaluator = (function () {
             $("#NerEvaluator_graphDiv").width($(window).width() - 20)
             $("#NerEvaluator_graphDiv").height($(window).height() - 20)
             visjsGraph.draw("NerEvaluator_graphDiv", visjsData, {onclickFn: NerEvaluator.onGraphNodeClick})
+            $("#waitImg").css("display", "none");
             return callback(null)
             /* $("#sliderCountPagesMax").slider("option", "max", maxPages);
              $("#sliderCountPagesMax").slider("option", "mmin", minPages);
@@ -421,10 +427,13 @@ var NerEvaluator = (function () {
     }
 
 
-    self.onGraphNodeClick = function ( node, point,event) {
-        if(event && event.ctrlKey){
-            Clipboard.copy({type: "node", source: node.data.source, id: node.id, label:node.label}, "_visjsNode", event)
+    self.onGraphNodeClick = function (node, point, event) {
+        if (event && event.ctrlKey) {
+            Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
+        } else {
+            MainController.UI.showNodeInfos(node.data.source, node.id, "mainDialogDiv")
         }
+
 
     }
 
@@ -492,8 +501,6 @@ var NerEvaluator = (function () {
     }
 
 
-
-
     self.addWikiPagesToTree = function (subject) {
         var query = "prefix skos: <http://www.w3.org/2004/02/skos/core#>  prefix foaf: <http://xmlns.com/foaf/0.1/>" +
             "SELECT  * WHERE {" +
@@ -535,7 +542,7 @@ var NerEvaluator = (function () {
         $("#nerEvaluator_missingWordsDiv").html("")
         $("#nerEvaluator_copiedWords").html("")
 
-        $( "#NerEvaluator_tabs" ).tabs("option", 'active', 1)
+        $("#NerEvaluator_tabs").tabs("option", 'active', 1)
         if (!page) {
             var selectedNode = $("#" + NerEvaluator.categoriesTreeId).jstree(true).get_selected(true);
             if (!selectedNode || !selectedNode[0].data)
@@ -543,7 +550,7 @@ var NerEvaluator = (function () {
             var type = selectedNode[0].data.type
             if (type != "wikiPage")
                 return MainController.UI.message("select a page ")
-            page = {text:selectedNode[0].id}
+            page = {text: selectedNode[0].id}
         }
 
 
@@ -613,8 +620,8 @@ var NerEvaluator = (function () {
 
 
         var word = event.currentTarget.id.substring(8)
-        if(event && event.ctrlKey){
-            return Clipboard.copy({type:"word",text:word},event.currentTarget.id,event)
+        if (event && event.ctrlKey) {
+            return Clipboard.copy({type: "word", text: word}, event.currentTarget.id, event)
 
         }
 

@@ -67,7 +67,7 @@ var Collection = (function () {
         menuItems.addChildNodeNode = {
             label: "Create child",
             action: function (obj, sss, cc) {
-                Blender.nodeEdition.createChildNode(null,"collection",);
+                Blender.nodeEdition.createChildNode(null, "collection",);
                 ;
             },
         },
@@ -89,7 +89,7 @@ var Collection = (function () {
 
         $("#Blender_collectionTreeDiv").jstree(true).settings.contextmenu.items = Collection.getJstreeContextMenu()
         if (Blender.displayMode == "centralPanel") {
-            if(!propertiesMap.event.ctrlKey) {
+            if (!propertiesMap.event.ctrlKey) {
                 self.filterConcepts()
             }
         }
@@ -102,7 +102,7 @@ var Collection = (function () {
         if (node.children.length > 0)
             return;
 
-        self.Sparql.getNodeChildren(thesaurusLabel, node.id, function (err, result) {
+        self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -140,13 +140,15 @@ var Collection = (function () {
     self.filterConcepts = function () {
         $(".blender_collectionFilter").remove();
         var collection = Collection.currentTreeNode;
+        if (collection.data.type != "http://www.w3.org/2004/02/skos/core#Collection")
+            return
         var options = {
-            filterCollections: collection.id,
+            filterCollections: collection.data.id,
         }
         if (true || !self.currentCollectionFilter)
             self.currentCollectionFilter = [];
         //  self.currentCollectionFilter.push(collection.id)
-        self.currentCollectionFilter = collection.id;
+        self.currentCollectionFilter = collection.data.id;
 
         var html = ("<div  class='blender_collectionFilter' onclick='Collection.removeTaxonomyFilter()'>" + collection.text + "</div>")
         $("#Blender_currentFilterDiv").append(html)
@@ -168,7 +170,7 @@ var Collection = (function () {
             TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
 
             setTimeout(function () {
-                if( $("#Blender_conceptTreeDiv").jstree(true)) {
+                if ($("#Blender_conceptTreeDiv").jstree(true)) {
                     var firstNodeId = $("#Blender_conceptTreeDiv").jstree(true).get_node("#").children[0];
                     var firstNode = $("#Blender_conceptTreeDiv").jstree(true).get_node(firstNodeId);
                     var options = {filterCollections: Collection.currentCollectionFilter};
@@ -179,7 +181,7 @@ var Collection = (function () {
                     ExternalReferences.openNarrowMatchNodes(Blender.currentSource, Blender.currentTreeNode)
                 if (Collection.currentTreeNode) {
                     var html = "<div  class='blender_collectionFilter'  onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>"
-                    $('#Blender_collectionFilterContainerDiv').html( html);
+                    $('#Blender_collectionFilterContainerDiv').html(html);
                 }
             }, 200)
 
@@ -191,11 +193,11 @@ var Collection = (function () {
         self.currentCollectionFilter = null;
 
         $(".blender_collectionFilter").remove();
+        if (Blender.currentSource)
+            Blender.showTopConcepts(null, function (err,) {
 
-        Blender.showTopConcepts(null, function (err,) {
 
-
-        })
+            })
 
 
     }

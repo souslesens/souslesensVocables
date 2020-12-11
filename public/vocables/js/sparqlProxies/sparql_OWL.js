@@ -5,9 +5,8 @@ var Sparql_OWL = (function () {
 
         self.ancestorsDepth = 6
 
-        var elasticUrl = "/elastic";
-        if (window.location.href.indexOf("https") > -1)
-            elasticUrl = "../elastic";
+        var elasticUrl =Config.serverUrl;
+
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
             self.graphUri = Config.sources[sourceLabel].graphUri;

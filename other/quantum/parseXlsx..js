@@ -112,7 +112,7 @@ var parseXlsx = {
 
 
     }
-    , generateTriples: function (sheetNames) {
+    , generateTriples: function (sheetNames,mappingFilter) {
         var graphUrisMap = {
             quantumUri: "http://data.total.com/resource/quantum/vocab#"
         }
@@ -156,37 +156,40 @@ var parseXlsx = {
             sheetData.forEach(function (item) {
 
                 for (var field in mappings) {
-                    var mapping = mappings[field]
-                    if (mapping) {
-                        var mappingArray;
-                        if (!Array.isArray(mapping))
-                            mappingArray = [mapping]
-                        else
-                            mappingArray = mapping
-                        mappingArray.forEach(function (mappingItem) {
-
-                            if (typeof mappingItem === "object") {
-                                var s, p, o;
+                    if(!mappingFilter || mappingFilter.indexOf(field)>-1) {
+                        var mapping = mappings[field]
+                        if (mapping) {
+                            var mappingArray;
+                            if (!Array.isArray(mapping))
+                                mappingArray = [mapping]
+                            else
+                                mappingArray = mapping
+                            mappingArray.forEach(function (mappingItem) {
 
 
-                                if (mappingItem.s) {
-                                    s = getUri(mappingItem.s, item);
+                                if (typeof mappingItem === "object") {
+                                    var s, p, o;
 
-                                } else {
-                                    s = getUri(field, item);
+
+                                    if (mappingItem.s) {
+                                        s = getUri(mappingItem.s, item);
+
+                                    } else {
+                                        s = getUri(field, item);
+                                    }
+
+                                    if (mappingItem.o) {
+                                        o = getUri(mappingItem.o, item, mappingItem.literal);
+                                    } else {
+                                        o = getUri(field, item, mappingItem.literal);
+                                    }
+
+                                    p = getUri(mappingItem.p, item);
+
+                                    triples += s + " " + p + " " + o + ".\n"
                                 }
-
-                                if (mappingItem.o) {
-                                    o = getUri(mappingItem.o, item, mappingItem.literal);
-                                } else {
-                                    o = getUri(field, item, mappingItem.literal);
-                                }
-
-                                p = getUri(mappingItem.p, item);
-
-                                triples += s + " " + p + " " + o + ".\n"
-                            }
-                        })
+                            })
+                        }
                     }
                 }
             })
@@ -207,9 +210,11 @@ module.exports = parseXlsx
 //parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
 var sheets = [
     // "tblFunctionalClass",
-    "tblAttribute",
+   // "tblAttribute",
+    "tblPhysicalClass",
    // "tblAttributePickListValue",
-   // "tblFunctionalClToPhysicalCl",
+   //"tblFunctionalClToPhysicalCl",
   //  "tblFunctionalClToPhysicalCl"
 ]
-parseXlsx.generateTriples(sheets)
+var mappingFilter=["ParentPhysicalClassID"]
+parseXlsx.generateTriples(sheets,mappingFilter)

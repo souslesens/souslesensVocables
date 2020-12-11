@@ -3,11 +3,11 @@
 
 var ThesaurusMatcher = (function () {
         var self = {}
-
+        self.maxSourceDescendants = 500;
         self.onSourceSelect = function (thesaurusLabel) {
 
-          //  $("#actionDivContolPanelDiv").html("<button onclick='ThesaurusMatcher.showcompareWithDialog()'>Compare with...</button>")
-        // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
+            //  $("#actionDivContolPanelDiv").html("<button onclick='ThesaurusMatcher.showcompareWithDialog()'>Compare with...</button>")
+            // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
 
             ThesaurusBrowser.showThesaurusTopConcepts(thesaurusLabel)
 
@@ -39,7 +39,7 @@ var ThesaurusMatcher = (function () {
             var sourceNodeId = ThesaurusBrowser.currentTreeNode.data.id
 
             if (!sourceNodeId || sourceNodeId.length == 0)
-              alert( " no data.id field")
+                alert(" no data.id field")
             self.targetSourceId = $("#ThesaurusMatcher_targetGraphUriSelect").val();
             if (!self.targetSourceId)
                 return MainController.UI.message("choose a target ressource");
@@ -51,16 +51,16 @@ var ThesaurusMatcher = (function () {
             var showOlderAncestorsOnly = $("#showOlderAncestorsOnlyCBX").prop("checked");
 
 
-            var lang = "en"
+            // var lang = "en"
 
 
             var sourceConceptAggrDepth = maxDescendantsDepth;
             var targetConceptAggrDepth = maxDescendantsDepth;
             var sliceSize = 20;
 
-var sourceConceptsCount=0;
-            var sourceConceptsProcessed=0;
-            var targetConceptsCount=0
+            var sourceConceptsCount = 0;
+            var sourceConceptsProcessed = 0;
+            var targetConceptsCount = 0
             var bindings = [];
             var allSourceConcepts = [];
             var commonConceptsMap = {};
@@ -82,7 +82,7 @@ var sourceConceptsCount=0;
                             if (err)
                                 return callbackSeries(err);
                             result.forEach(function (item) {
-                                sourceConceptsCount+=1
+                                sourceConceptsCount += 1
                                 for (var i = 0; i <= sourceConceptAggrDepth; i++) {
                                     var child = item["child" + i]
 
@@ -98,8 +98,11 @@ var sourceConceptsCount=0;
                                 }
 
                             })
-
-MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.currentSource)
+                            if (sourceConceptsCount > self.maxSourceDescendants) {
+                                alert("too many nodes : " + sourceConceptsCount + " Compare using a shortest set of concepts")
+                                callbackSeries("too many nodes");
+                            }
+                            MainController.UI.message(sourceConceptsCount + ' found in ' + MainController.currentSource)
                             callbackSeries();
                         })
 
@@ -129,7 +132,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                 "FROM <" + self.targetThesaurusGraphURI + "> " +
                                 "WHERE {" +
                                 "?id skos:prefLabel|skos:altLabel ?prefLabel ." +
-                                "FILTER (lang(?prefLabel) = '" + lang + "')" +
+                                //  "FILTER (lang(?prefLabel) = '" + lang + "')" +
                                 " filter " + filter + "} limit 10000";
 
 
@@ -163,64 +166,63 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
 
                         var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize)
                         async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
-                            sourceConceptsProcessed+=sourceConcepts.length
+                            sourceConceptsProcessed += sourceConcepts.length
                             var words = []
                             sourceConcepts.forEach(function (concept, index) {
                                 words.push(concept.label.replace(/[-"]/g, ""));
                             })
 
 
-                            Sparql_generic.getNodeParents(self.targetSourceId , words, null, targetConceptAggrDepth, {exactMatch:true}, function(err, result){
+                            Sparql_generic.getNodeParents(self.targetSourceId, words, null, targetConceptAggrDepth, {exactMatch: true}, function (err, result) {
                                 if (err) {
                                     return callbackEach(err);
                                 }
                                 var ids = [];
-                                targetConceptsCount+=result.length
+                                targetConceptsCount += result.length
 
-                                    result.forEach(function (item) {
+                                result.forEach(function (item) {
 
 
-                                        var targetObj = {
-                                            id: item.concept.value,
-                                            label: item.conceptLabel.value,
-                                        }
-                                        var targetBroaders = []
-                                        for (var i = 1; i < targetConceptAggrDepth; i++) {
+                                    var targetObj = {
+                                        id: item.concept.value,
+                                        label: item.conceptLabel.value,
+                                    }
+                                    var targetBroaders = []
+                                    for (var i = 1; i < targetConceptAggrDepth; i++) {
 
-                                            var broaderId = item["broader" + i]
-                                            if (typeof broaderId !== "undefined") {
-                                                if (targetBroaders.indexOf(broaderId.value) < 0) {
-                                                    var broaderLabel = item["broader"+ i+"Label" ];
-                                                    if (typeof broaderLabel !== "undefined")
-                                                        broaderLabel = item["broader"+ i+"Label" ].value
-                                                    else
-                                                        broaderLabel = broaderId.value
-                                                    targetBroaders.push({level: i, id: broaderId.value, label: broaderLabel});
-                                                }
-                                            } else {
-                                                //   targetBroaders.push({level: j, id:null, label: ""})
+                                        var broaderId = item["broader" + i]
+                                        if (typeof broaderId !== "undefined") {
+                                            if (targetBroaders.indexOf(broaderId.value) < 0) {
+                                                var broaderLabel = item["broader" + i + "Label"];
+                                                if (typeof broaderLabel !== "undefined")
+                                                    broaderLabel = item["broader" + i + "Label"].value
+                                                else
+                                                    broaderLabel = broaderId.value
+                                                targetBroaders.push({level: i, id: broaderId.value, label: broaderLabel});
                                             }
-
+                                        } else {
+                                            //   targetBroaders.push({level: j, id:null, label: ""})
                                         }
-                                        targetObj.broaders = targetBroaders;
-                                        if (!commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
-                                            return callbackEach();
-                                        }
-                                        commonConceptsMap[item.conceptLabel.value.toLowerCase()].target = targetObj
 
-                                    })
-                                MainController.UI.message(targetConceptsCount+" found  " +sourceConceptsProcessed+ '/'+ sourceConceptsCount+" processed")
+                                    }
+                                    targetObj.broaders = targetBroaders;
+                                    if (!commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
+                                        return callbackEach();
+                                    }
+                                    commonConceptsMap[item.conceptLabel.value.toLowerCase()].target = targetObj
+
+                                })
+                                MainController.UI.message(targetConceptsCount + " found  " + sourceConceptsProcessed + '/' + sourceConceptsCount + " processed")
                                 return callbackEach();
 
                             })
-
 
 
                         }, function (err) {
                             if (Object.keys(commonConceptsMap).length == 0) {
                                 alert(("no matching concepts"))
                             }
-                            MainController.UI.message("drawing"+ targetConceptsCount+'/'+ sourceConceptsCount+" concepts")
+                            MainController.UI.message("drawing" + targetConceptsCount + '/' + sourceConceptsCount + " concepts")
                             return callbackSeries(err);
                         })
 
@@ -240,36 +242,36 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                         if (conceptIds.length == 0)
                             return callbackSeries();
 
-                       var conceptIdsSlices=common.sliceArray(conceptIds,"50");
-                       async.eachSeries(conceptIdsSlices,function(conceptIds,callbackSeriesSourceBroaders){
-                        Sparql_generic.getNodeParents(MainController.currentSource, null, conceptIds, maxDescendantsDepth, null, function (err, result) {
-                            if(err){
-                                return callbackSeriesSourceBroaders(err)
-                            }
-                            var sourceBroaders = [];
-                            result.forEach(function (item) {
+                        var conceptIdsSlices = common.sliceArray(conceptIds, "50");
+                        async.eachSeries(conceptIdsSlices, function (conceptIds, callbackSeriesSourceBroaders) {
+                            Sparql_generic.getNodeParents(MainController.currentSource, null, conceptIds, maxDescendantsDepth, null, function (err, result) {
+                                if (err) {
+                                    return callbackSeriesSourceBroaders(err)
+                                }
+                                var sourceBroaders = [];
+                                result.forEach(function (item) {
 
 
-                                var sourceBroaders = []
-                                for (var i = 1; i < 8; i++) {
-                                    var broaderId = item["broader" + i]
-                                    if (typeof broaderId !== "undefined") {
-                                        if (sourceBroaders.indexOf(broaderId.value) < 0) {
-                                            sourceBroaders.push({level: i, id: broaderId.value, label: item["broader" + i + "Label"].value});
+                                    var sourceBroaders = []
+                                    for (var i = 1; i < 8; i++) {
+                                        var broaderId = item["broader" + i]
+                                        if (typeof broaderId !== "undefined") {
+                                            if (sourceBroaders.indexOf(broaderId.value) < 0) {
+                                                sourceBroaders.push({level: i, id: broaderId.value, label: item["broader" + i + "Label"].value});
+                                            }
                                         }
                                     }
-                                }
-                                if (item.conceptLabel && item.conceptLabel.value && commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
-                                    commonConceptsMap[item.conceptLabel.value.toLowerCase()].source.broaders = sourceBroaders;
-                                }
-                            })
+                                    if (item.conceptLabel && item.conceptLabel.value && commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
+                                        commonConceptsMap[item.conceptLabel.value.toLowerCase()].source.broaders = sourceBroaders;
+                                    }
+                                })
 
-                            callbackSeriesSourceBroaders()
-                        });
+                                callbackSeriesSourceBroaders()
+                            });
 
-                        },function(err){
-                           return callbackSeries();
-                       })
+                        }, function (err) {
+                            return callbackSeries();
+                        })
 
 
                     }
@@ -505,7 +507,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                 ],
 
                 function (err) {
-
+                    $("#waitImg").css("display", "none");
                     if (err)
                         return MainController.UI.message(err)
 
@@ -518,6 +520,9 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
         self.onGraphClickNode = function (node, point, event) {
             if (event && event.ctrlKey) {
                 Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
+            }
+            else{
+                MainController.UI.showNodeInfos(node.data.source, node.id,"mainDialogDiv")
             }
 
 
@@ -580,7 +585,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                     , function (callbackSeries) {
                         var allSourceConcepts = Object.keys(conceptLabelsMap);
                         var sliceSize = 50;
-                        var lang = "en"
+                        //  var lang = "en"
                         var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize);
                         async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
 
@@ -602,7 +607,7 @@ MainController.UI.message(sourceConceptsCount+ ' found in '+MainController.curre
                                 "FROM <" + self.targetThesaurusGraphURI + "> " +
                                 "WHERE {" +
                                 "?id skos:prefLabel ?prefLabel ." +
-                                "FILTER (lang(?prefLabel) = '" + lang + "')" +
+                                //  "FILTER (lang(?prefLabel) = '" + lang + "')" +
                                 " filter " + filter + "  } GROUP by ?id ?prefLabel   limit 10000"
 
 

@@ -2,22 +2,29 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/icons/souslesensIcon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotatorLive..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotatorLive..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/nerEvaluator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/nerEvaluator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusMatcher.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/termTaxonomy.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/termTaxonomy.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -42,14 +49,14 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/icons" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -79,7 +86,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JavaScript Debug.index.html">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://vps254642.ovh.net/http:/vps254642.ovh.net/public/vocables/index.html">
       <method v="2" />
     </configuration>
@@ -97,10 +104,10 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JavaScript Debug.index.html" />
         <item itemvalue="Node.js.exportRDF..js" />
-        <item itemvalue="Node.js.mapQuatumCfihos..js" />
         <item itemvalue="Node.js.parseXlsx..js" />
+        <item itemvalue="JavaScript Debug.index.html" />
+        <item itemvalue="Node.js.mapQuatumCfihos..js" />
         <item itemvalue="Node.js.util..js" />
       </list>
     </recent_temporary>
@@ -121,7 +128,7 @@
       <workItem from="1607242310122" duration="9380000" />
       <workItem from="1607275657944" duration="6433000" />
       <workItem from="1607420435071" duration="48405000" />
-      <workItem from="1607588457022" duration="18653000" />
+      <workItem from="1607588457022" duration="41416000" />
     </task>
     <servers />
   </component>
@@ -163,6 +170,24 @@
           <url>file://$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js</url>
           <line>185</line>
           <option name="timeStamp" value="135" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/exportRDF..js</url>
+          <line>16</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="163" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/exportRDF..js</url>
+          <line>86</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="165" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
+          <line>95</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="167" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

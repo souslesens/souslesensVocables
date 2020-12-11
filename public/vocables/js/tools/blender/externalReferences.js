@@ -167,7 +167,8 @@ var ExternalReferences = (function () {
             if (!params.sourceLabel)
                 return MainController.UI.message("no sourceLabel found from node id url params")
             var sourceLabel = Blender.currentTreeNode.data.source
-            Sparql_generic.getNodeInfos(params.sourceLabel, params.id, null, function (err, result) {
+            MainController.UI.showNodeInfos(params.sourceLabel, params.id,"mainDialogDiv")
+          /*  Sparql_generic.getNodeInfos(params.sourceLabel, params.id, null, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
@@ -176,7 +177,7 @@ var ExternalReferences = (function () {
                 //   $(".ui-dialog-titlebar-close").css("display", "block")
                 $("#Blender_PopupEditButtonsDiv").css("display", "none")
                 SourceEditor.showNodeInfos("Blender_PopupEditDiv", "en", Blender.currentTreeNode.data.id, result);
-            })
+            })*/
         }
         ,
 

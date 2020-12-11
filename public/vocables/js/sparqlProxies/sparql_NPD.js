@@ -7,9 +7,8 @@ var Sparql_NPD = (function () {
 
         self.ancestorsDepth = 6
         self.sparql_url = "http://51.178.139.80:8890/sparql";
-        var elasticUrl = "/elastic";
-        if (window.location.href.indexOf("https") > -1)
-            elasticUrl = "../elastic";
+        self.serverUrl=Config.serverUrl;
+
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
             self.graphUri =  Config.sources[sourceLabel].graphUri ;

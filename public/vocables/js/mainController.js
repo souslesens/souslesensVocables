@@ -4,11 +4,9 @@ var MainController = (function () {
     self.currentTool = null
 
 
+    self.loadSources = function () {
 
-
-    self.loadSources= function () {
-
-        $.getJSON("config/sources.json", function(json) {
+        $.getJSON("config/sources.json", function (json) {
             Config.sources = json;
 
         });
@@ -16,22 +14,20 @@ var MainController = (function () {
     }
 
 
-
-
     self.UI = {
 
-        showSources:function(treeDiv, withCBX){
+        showSources: function (treeDiv, withCBX) {
             var treeData = [];
-            Object.keys(Config.sources).sort().forEach(function (sourceLabel,index) {
-                if(Config.currentProfile.allowedSourceSchemas.indexOf( Config.sources[sourceLabel].schemaType)<0)
+            Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
+                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
-                Config.sources[sourceLabel].name=sourceLabel
-                if(! Config.sources[sourceLabel].controllerName) {
-                    Config.sources[sourceLabel].controllerName = ""+Config.sources[sourceLabel].controller
+                Config.sources[sourceLabel].name = sourceLabel
+                if (!Config.sources[sourceLabel].controllerName) {
+                    Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
                     Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
                 }
                 if (!Config.sources[sourceLabel].color)
-                    Config.sources[sourceLabel].color = common.palette[index%common.palette.length];
+                    Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
 
                 treeData.push({id: sourceLabel, text: sourceLabel, parent: "#", data: Config.sources[sourceLabel]})
             })
@@ -46,8 +42,8 @@ var MainController = (function () {
         },
 
         showToolsList: function (treeDiv) {
-            var x=$(window).height()
-            $(".max-height").height($(window).height()-300)
+            var x = $(window).height()
+            $(".max-height").height($(window).height() - 300)
             var treeData = []
             for (var key in Config.tools) {
                 // Object.keys(Config.tools).forEach(function (toolLabel) {
@@ -65,13 +61,13 @@ var MainController = (function () {
                     var controller = Config.tools[self.currentTool].controller
                     $("#actionDivContolPanelDiv").html("")
                     self.UI.updateActionDivLabel();
-                  if (Config.tools[self.currentTool].multiSources)
+                    if (Config.tools[self.currentTool].multiSources)
                         controller.onSourceSelect(self.currentSource)
-                    if(controller.onLoaded)
+                    if (controller.onLoaded)
                         controller.onLoaded()
-                    if(Config.tools[self.currentTool].toolDescriptionImg){
-                        $("#graphDiv").html("<img src='"+Config.tools[self.currentTool].toolDescriptionImg+"' width='600px' style='toolDescriptionImg'>")
-                    }else
+                    if (Config.tools[self.currentTool].toolDescriptionImg) {
+                        $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>")
+                    } else
                         $("#graphDiv").html(self.currentTool);
 
                 }
@@ -79,13 +75,13 @@ var MainController = (function () {
 
         },
         onSourceSelect: function () {
-           // $("#actionDivContolPanelDiv").html("");
-          //  $("#sourceDivControlPanelDiv").html("");
+            // $("#actionDivContolPanelDiv").html("");
+            //  $("#sourceDivControlPanelDiv").html("");
 
             if (Config.tools[self.currentTool].multiSources)
                 return
-         /*   if (!self.currentSource)
-                return MainController.UI.message("select a source");*/
+            /*   if (!self.currentSource)
+                   return MainController.UI.message("select a source");*/
 
             self.UI.updateActionDivLabel()
             var controller = Config.tools[self.currentTool].controller
@@ -97,16 +93,32 @@ var MainController = (function () {
 
 
         },
+        showNodeInfos: function (sourceLabel, nodeId, divId, callback) {
+
+            Sparql_generic.getNodeInfos(sourceLabel, nodeId, null, function (err, result) {
+                if (err) {
+                    return MainController.UI.message(err);
+                }
+                if (divId.indexOf("Dialog") > -1) {
+                    $("#"+divId).dialog("open");
+                }
+                SourceEditor.showNodeInfos(divId, "en",nodeId, result)
+
+                if (callback)
+                    return callback()
+            })
+
+
+        },
 
         message: function (message) {
             $("#messageDiv").html(message)
         },
 
 
+        setCredits: function () {
 
-        setCredits:function(){
-
-            var html="<div><span class='topTitle'>SousLeSens Vocables</span><br>" +
+            var html = "<div><span class='topTitle'>SousLeSens Vocables</span><br>" +
                 "  <img src=\"images/description.png\"></div>"
             $("#graphDiv").html(html)
 
@@ -114,7 +126,7 @@ var MainController = (function () {
         },
 
         updateActionDivLabel: function (html) {
-            if(html)
+            if (html)
                 $("#sourcePanelLabel").html(html)
             if (self.currentSource)
                 $("#sourcePanelLabel").html(Config.tools[self.currentTool].label + " : " + self.currentSource)
@@ -124,28 +136,27 @@ var MainController = (function () {
 
         },
 
-        showPopup: function (point,popupDiv) {
-            if(!popupDiv)
-                popupDiv="popupDiv"
-            $("#"+popupDiv).css("left", point.x+leftPanelWidth)
-            $("#"+popupDiv).css("top", point.y)
-            $("#"+popupDiv).css("display", "flex")
+        showPopup: function (point, popupDiv) {
+            if (!popupDiv)
+                popupDiv = "popupDiv"
+            $("#" + popupDiv).css("left", point.x + leftPanelWidth)
+            $("#" + popupDiv).css("top", point.y)
+            $("#" + popupDiv).css("display", "flex")
         },
         hidePopup: function (popupDiv) {
-            if(!popupDiv)
-                popupDiv="popupDiv"
-            $("#"+popupDiv).css("display", "none")
+            if (!popupDiv)
+                popupDiv = "popupDiv"
+            $("#" + popupDiv).css("display", "none")
         },
 
 
-        showInCentralPanelDiv:function(divId){
-            if(divId=="graphDiv"){
-                $("#graphDiv").css("display","block")
-                $("#blendDiv").css("display","none")
-            }
-            else  if(divId="blendDiv" && Blender.displayMode=="centralPanel"){
-                $("#graphDiv").css("display","none")
-                $("#blendDiv").css("display","block")
+        showInCentralPanelDiv: function (divId) {
+            if (divId == "graphDiv") {
+                $("#graphDiv").css("display", "block")
+                $("#blendDiv").css("display", "none")
+            } else if (divId = "blendDiv" && Blender.displayMode == "centralPanel") {
+                $("#graphDiv").css("display", "none")
+                $("#blendDiv").css("display", "block")
             }
 
         }

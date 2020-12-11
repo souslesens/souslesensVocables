@@ -135,8 +135,9 @@ var ThesaurusBrowser = (function () {
 
 
     self.editThesaurusConceptInfos = function (thesaurusLabel, node, callback) {
+        MainController.UI.showNodeInfos(thesaurusLabel, node.data.id,"graphDiv")
 
-        Sparql_generic.getNodeInfos(thesaurusLabel, node.data.id, null, function (err, result) {
+      /*  Sparql_generic.getNodeInfos(thesaurusLabel, node.data.id, null, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -144,7 +145,7 @@ var ThesaurusBrowser = (function () {
             SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
-        })
+        })*/
 
 
     }

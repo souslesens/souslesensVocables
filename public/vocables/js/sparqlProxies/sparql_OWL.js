@@ -5,22 +5,32 @@ var Sparql_OWL = (function () {
 
         self.ancestorsDepth = 6
 
-        var elasticUrl =Config.serverUrl;
+        var elasticUrl = Config.serverUrl;
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.topClass = "http://www.w3.org/2002/07/owl#Thing"
+            if (Config.sources[sourceLabel].topClass)
+                self.topClass = Config.sources[sourceLabel].topClass;
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
                 "" +
-                "select   distinct * from <" + self.graphUri + ">   where {" +
-                " ?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>. " +
-                " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}" +
+                "select   distinct ?topConcept  ?topConceptLabel  from <" + self.graphUri + ">   where {" +
+                " ?topConcept rdfs:subClassOf <" + self.topClass + ">. " +
+                " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
 
-                "}limit 1000"
+            if (options.filterCollections)
+                query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + Sparql_generic.getUriFilter("collection", options.filterCollections)
+
+            query +="}order by ?topConceptLabel limit 1000"
+
+
+
+
 
             // query+="  ?prop   rdf:type owl:ObjectProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.  filter( not EXISTS {?topConcept rdfs:subClassOf ?d}) }limit 1000"
             self.execute_GET_query(query, function (err, result) {
@@ -47,7 +57,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, null)
+                strFilter = Sparql_generic.setFilter("concept", null, words, options)
             } else if (ids) {
                 strFilter = Sparql_generic.setFilter("concept", ids, null)
             }
@@ -71,12 +81,35 @@ var Sparql_OWL = (function () {
             query += "} order by ?child1 limit 10000";
 
 
+            if (options.filterCollections) {
+                var fromStr = ""
+                if (self.graphUri)
+                    fromStr = " FROM <" + self.graphUri + ">"
+
+
+                query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                    " select  distinct * " + fromStr + "   WHERE { " +
+                    "  ?child1 rdfs:subClassOf ?concept.   " + strFilter +
+                    "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                    "  " +
+                    "   ?collection skos:prefLabel ?collectionLabel." +
+                    "   ?acollection skos:prefLabel ?acollectionLabel." +
+                    "   ?concept rdfs:label ?conceptLabel." +
+                    "   ?child1 rdfs:label ?child1Label." +
+                    "   ?child1 rdf:type ?child1Type." +
+                    "}order by ?concept"
+            }
+
+
             var url = self.sparql_url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings=Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"child")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "child")
                 return callback(null, result.results.bindings)
 
             })
@@ -105,7 +138,7 @@ var Sparql_OWL = (function () {
                 options = {}
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words,)
+                strFilter = Sparql_generic.setFilter("concept", null, words, options)
             } else if (ids) {
                 strFilter = Sparql_generic.setFilter("concept", ids, null)
             }
@@ -155,7 +188,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings=Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"broader")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "broader")
                 return callback(null, result.results.bindings)
 
             })

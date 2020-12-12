@@ -232,10 +232,13 @@ var Collection = (function () {
 
         getVariables: function (sourceLabel) {
             var source = Config.sources[sourceLabel]
+            var lang=null;
+            if(source.predicates && source.predicates.lang)
+                lang=source.predicates.lang
             var vars = {
                 serverUrl: source.sparql_url + "?query=&format=json",
                 graphUri: source.graphUri,
-                lang: source.predicates.lang,
+                lang: lang,
                 limit: 1000
             }
             return vars;

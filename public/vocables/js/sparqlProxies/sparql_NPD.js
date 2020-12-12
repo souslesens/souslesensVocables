@@ -184,7 +184,7 @@ var Sparql_NPD = (function () {
 
             $.ajax({
                 type: "POST",
-                url: elasticUrl,
+                url: self.serverUrl,
                 data: payload,
                 dataType: "json",
                 /* beforeSend: function(request) {

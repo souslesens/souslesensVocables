@@ -12,13 +12,25 @@
 var Config = (function () {
     var self = {};
     self.serverUrl = "/elastic";
-    if (window.location.href.indexOf("localhost") <0)
+    if (window.location.href.indexOf("localhost") < 0)
         self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
+    self.loginMode = "none";
+    self.appName = "VOCABLES";
+    self.hideBlender = false;
+    if (self.hideBlender) {
+        setTimeout(function(){
+           // $('#accordion').accordion().children('b:eq(3), div:eq(1)').hide();
+      //  $("#blenderPanelLabel").css("display", "none")
+     //   $("#blenderPanelDiv").css("display", "none")
+            $("#ui-id-7").remove()
+          //  $("#blenderPanelDiv").remove()
+        },2000)
+    }
 
     self.currentProfile = {
-        allowedSourceSchemas: ["SKOS","OWL"]
+        allowedSourceSchemas: ["SKOS", "OWL"]
     }
 
 
@@ -35,8 +47,8 @@ var Config = (function () {
     // self.tools["ontologyBrowser"] = {label: "Ontology", multiSources: 0, controller: OntologyBrowser,toolDescriptionImg:null}
 
     self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
-   // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
-  //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
+    // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
+    //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
 
     // moved self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender,toolDescriptionImg:null}
 

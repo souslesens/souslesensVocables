@@ -32,6 +32,7 @@ var TreeController = (function () {
                         var cssType = type
                         if (type == "http://www.w3.org/2004/02/skos/core#Concept")
                             cssType = "concept"
+
                         var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
                     }
                     var child = {

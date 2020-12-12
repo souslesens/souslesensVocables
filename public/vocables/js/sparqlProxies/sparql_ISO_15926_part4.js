@@ -25,8 +25,7 @@ var Sparql_ISO_15926_part4 = (function () {
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
             query += "select distinct ?topConcept  from <"+self.graphUri+"> where{" +
-               "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>." +
-                "?x rdf:type  ?topConcept ."+
+               "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>." +
                 "}order by ?conceptLabel limit 5000"
 
             self.execute_GET_query(query, function (err, result) {
@@ -60,11 +59,9 @@ var Sparql_ISO_15926_part4 = (function () {
 
 
 
-            //   descendantsDepth = Math.min(descendantsDepth, optionalDepth);
             for (var i = 1; i < descendantsDepth; i++) {
-
                 query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." +
-                  ""//  "?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label."
+                  "OPTIONAL{?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
             }
             for (var i = 1; i < descendantsDepth; i++) {
@@ -75,18 +72,11 @@ var Sparql_ISO_15926_part4 = (function () {
             query += "}" +
                 "LIMIT 10000"
 
-
             self.execute_GET_query( query, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
-                var bindings = []
-
-                result.results.bindings.forEach(function (item) {
-                    item.child1Type = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                    var id=item.child1.value
-                    item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
-                })
+                result.results.bindings=Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"child")
                 return callback(null, result.results.bindings)
 
             })
@@ -131,13 +121,14 @@ var Sparql_ISO_15926_part4 = (function () {
             ancestorsDepth = self.ancestorsDepth
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  ?concept rdfs:subClassOf|rdf:type  ?broader" + i + "."
+                    query += "  ?concept rdfs:subClassOf  ?broader" + i + "."
 
 
 
                 } else {
 
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf|rdf:type ?broader" + i + "."
+                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "."+
+                    "OPTIONAL { ?broader" + (i ) + " rdfs:subClassOf ?broader" + i + "."
 
 
 

@@ -219,8 +219,7 @@ var Sparql_generic = (function () {
                     query += "filter(lang(?conceptLabel )='" + lang + "')"
             }
             if (options.filterCollections)
-            // query+="?collection skos:member+ ?aCollection.?acollection skos:member ?aConcept.?aConcept skos:broader* ?topConcept." + getUriFilter("collection", options.filterCollections)
-                query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + getUriFilter("collection", options.filterCollections)
+                     query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + getUriFilter("collection", options.filterCollections)
 
             query += "  } ORDER BY ?topConceptLabel ";
             query += "limit " + limit + " ";
@@ -321,10 +320,13 @@ var Sparql_generic = (function () {
 
 
             if (options.filterCollections) {
+                var fromStr = ""
+                if (self.graphUri)
+                    fromStr = " FROM <" + self.graphUri + ">"
                 query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                    " select  distinct * FROM <http://souslesens/thesaurus/TEST/>   WHERE { " +
+                    " select  distinct * "+fromStr+"   WHERE { " +
                     "  ?child1 skos:broader ?concept.   " + filterStr +
                     "   ?collection skos:member* ?acollection. " + getUriFilter("collection", options.filterCollections) +
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?child1.  " +

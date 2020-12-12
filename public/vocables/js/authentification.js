@@ -1,7 +1,7 @@
 var authentication = (function () {
 
     var self = {}
-// pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir config version antérieure déployéee
+// pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir Config version antérieure déployéee
     // self.authenticationUrl = "../authentication";
     var authenticationDBUrl = Config.serverUrl;
     self.userIndexes = [];
@@ -10,7 +10,7 @@ var authentication = (function () {
 
     self.init = function (activate) {
         var url = window.location.host;
-        if (config.loginMode != "none") {//  && url.indexOf("localhost")<0 && url.indexOf("127.0.0.1")<0){
+        if (Config.loginMode != "none") {//  && url.indexOf("localhost")<0 && url.indexOf("127.0.0.1")<0){
 
 
             $("#loginDiv").css("visibility", "visible");
@@ -45,14 +45,14 @@ var authentication = (function () {
         var user = null;
         async.series([
             function (callbackSeries) {
-                if (config.loginMode == "none") {
+                if (Config.loginMode == "none") {
                     user = {
                         identifiant: "none",
                         login: "none",
                         groupes: "admin"
                     }
                 }
-                if (config.loginMode != "database")
+                if (Config.loginMode != "database")
                     return callbackSeries();
                 self.doLoginDatabase(login, password, function (err, result) {
                     if (err)
@@ -63,7 +63,7 @@ var authentication = (function () {
 
             },
             function (callbackSeries) {
-                if (config.loginMode != "json")
+                if (Config.loginMode != "json")
                     return callbackSeries();
                 self.doLoginJson(login, password, function (err, result) {
                     if (err)

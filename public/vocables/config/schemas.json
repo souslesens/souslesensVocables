@@ -21,7 +21,7 @@
       ]
     }
   },
-  "ISO_15926": {
+  "OWL": {
     "sparql_url": "http://51.178.139.80:8890/sparql",
     "graphUri":"http://data.15926.org/dm/",
     "label": "NPD",

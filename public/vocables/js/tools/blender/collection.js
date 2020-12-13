@@ -2,7 +2,8 @@ var Collection = (function () {
 
     var self = {}
     self.currentTreeNode;
-    self.currentCollectionFilter
+    self.currentCollectionFilter={}
+    self.currentCollectionMemberIds=null;
     self.broaderProperty = "http://www.w3.org/2004/02/skos/core#member"
 
     self.getJstreeContextMenu = function () {
@@ -89,9 +90,10 @@ var Collection = (function () {
 
         $("#Blender_collectionTreeDiv").jstree(true).settings.contextmenu.items = Collection.getJstreeContextMenu()
         if (Blender.displayMode == "centralPanel") {
-            if (!propertiesMap.event.ctrlKey) {
-                self.filterConcepts()
-            }
+
+        }
+        if (propertiesMap.event.ctrlKey) {
+            self.filterConcepts()
         }
         self.openTreeNode("Blender_collectionTreeDiv", Blender.currentSource, self.currentTreeNode)
     }
@@ -102,7 +104,7 @@ var Collection = (function () {
         if (node.children.length > 0)
             return;
 
-        self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, function (err, result) {
+        self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, {onlyCollectionType:true}, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -167,23 +169,26 @@ var Collection = (function () {
 
             var jsTreeOptions = Blender.getConceptJstreeOptions()
 
+
             TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
 
-            setTimeout(function () {
-                if ($("#Blender_conceptTreeDiv").jstree(true)) {
-                    var firstNodeId = $("#Blender_conceptTreeDiv").jstree(true).get_node("#").children[0];
-                    var firstNode = $("#Blender_conceptTreeDiv").jstree(true).get_node(firstNodeId);
-                    var options = {filterCollections: Collection.currentCollectionFilter};
-                    ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", Blender.currentSource, firstNode, options);
-                }
+            /*   setTimeout(function () {
+                   if ($("#Blender_conceptTreeDiv").jstree(true)) {
+                       var firstNodeId = $("#Blender_conceptTreeDiv").jstree(true).get_node("#").children[0];
+                       var firstNode = $("#Blender_conceptTreeDiv").jstree(true).get_node(firstNodeId);
+                       var options = {filterCollections: Collection.currentCollectionFilter};
+                       ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", Blender.currentSource, firstNode, options);
+                   }
 
-                if (Blender.currentTreeNode && Blender.currentTreeNode.children.length == 0)
-                    ExternalReferences.openNarrowMatchNodes(Blender.currentSource, Blender.currentTreeNode)
-                if (Collection.currentTreeNode) {
-                    var html = "<div  class='blender_collectionFilter'  onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>"
-                    $('#Blender_collectionFilterContainerDiv').html(html);
-                }
-            }, 200)
+                   if (Blender.currentTreeNode && Blender.currentTreeNode.children.length == 0)
+                       ExternalReferences.openNarrowMatchNodes(Blender.currentSource, Blender.currentTreeNode)
+                   if (Collection.currentTreeNode) {
+                       var html = "<div  class='blender_collectionFilter'  onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>"
+                       $('#Blender_collectionFilterContainerDiv').html(html);
+                   }
+               }, 200)
+               */
+
 
         })
     }
@@ -232,9 +237,9 @@ var Collection = (function () {
 
         getVariables: function (sourceLabel) {
             var source = Config.sources[sourceLabel]
-            var lang=null;
-            if(source.predicates && source.predicates.lang)
-                lang=source.predicates.lang
+            var lang = null;
+            if (source.predicates && source.predicates.lang)
+                lang = source.predicates.lang
             var vars = {
                 serverUrl: source.sparql_url + "?query=&format=json",
                 graphUri: source.graphUri,
@@ -254,7 +259,7 @@ var Collection = (function () {
                 "?collection skos:prefLabel ?collectionLabel."
             if (variables.lang)
                 query += "filter( lang(?collectionLabel)=\"" + variables.lang + "\")"
-            if (true)
+            if (!options.all)
                 query += "FILTER (  NOT EXISTS {?child skos:member ?collection})"
 
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
@@ -284,7 +289,9 @@ var Collection = (function () {
 
         }
         ,
-        getNodeChildren: function (sourceLabel, collectionId, callback) {
+        getNodeChildren: function (sourceLabel, collectionId, options, callback) {
+            if(!options)
+                options={}
             var variables = self.Sparql.getVariables(sourceLabel);
 
             var query = "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>";
@@ -298,8 +305,14 @@ var Collection = (function () {
                 query += "filter( lang(?child1Label)=\"" + variables.lang + "\")"
             query += "}"
 
-            query += "OPTIONAL{?child1 rdf:type ?child1Type.}" +
-                "}" +
+            query += "?child1 rdf:type ?child1Type."
+            if (options.onlyCollectionType)
+                query += "filter (?child1Type=<http://www.w3.org/2004/02/skos/core#Collection>)"
+            else if (options.excludeCollectionType)
+                query += " filter(?child1Type!=<http://www.w3.org/2004/02/skos/core#Collection>)"
+
+
+            query += "}" +
                 "limit " + variables.limit;
 
             Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, {}, null, function (err, result) {
@@ -312,15 +325,23 @@ var Collection = (function () {
 
 
         ,
-        getSingleNodeAllDescendants: function (sourceLabel, id, callback) {
+        getSingleNodeAllDescendants: function (sourceLabel, id,options, callback) {
+            if(!options)
+                options={}
             var variables = self.Sparql.getVariables(sourceLabel);
             var query = "";
-            query += "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>"
+            query += "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
             query += " select distinct * FROM <" + variables.graphUri + ">  WHERE {"
             query += "  ?collection   skos:member*  ?narrower." +
                 "filter (?collection=<" + id + ">) " +
-                "?narrower skos:prefLabel ?narrowerLabel." +
+                "?narrower skos:prefLabel|rdfs:label ?narrowerLabel." +
                 "?narrower rdf:type ?narrowerType."
+            if(options.withBroaders)
+                query += "?narrower   rdfs:subClassOf*  ?broader."
+            if (options.onlyCollectionType)
+                query += "filter (?narrower=<http://www.w3.org/2004/02/skos/core#Collection>)"
+            else if (options.excludeCollectionType)
+                query += " filter(?narrower!=<http://www.w3.org/2004/02/skos/core#Collection>)"
 
             query += "  }";
             query += "limit " + variables.limit + " ";
@@ -338,6 +359,56 @@ var Collection = (function () {
 
     }
 
+    self.initBrowserCollectionSelect = function () {
+        var source = MainController.currentSource
+        MainController.currentSourceAllcollections = {}
+        self.Sparql.getCollections(source, {all: true}, function (err, result) {
+            if (err)
+                return MainController.UI.message(err)
+            if (result.length == 0)
+                return MainController.UI.message("no collections for this source")
+            var array = []
+            result.forEach(function (item) {
+                MainController.currentSourceAllcollections[item.collectionLabel.value] = item.collection.value;
+                array.push({id: item.collection.value, label: item.collectionLabel.value})
 
-    return self;
+            })
+            common.fillSelectOptions("ThesaurusBrowser_collectionSelect", array, true, "label", "id")
+
+        })
+    }
+
+    self.filterBrowserCollection = function () {
+        var collection = $("#ThesaurusBrowser_collectionSelect").val();
+        if (!collection || collection == "") {
+            return self.currentCollectionMemberIds=null;
+        }
+
+        self.Sparql.getSingleNodeAllDescendants(MainController.currentSource, collection, { excludeCollectionType: 1,withBroaders:1}, function(err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+                self.currentCollectionMemberIds={};
+                result.forEach(function (item) {
+                        self.currentCollectionMemberIds[item.narrower.value]=1
+                    self.currentCollectionMemberIds[item.broader.value]=1
+
+                })
+            ThesaurusBrowser.showThesaurusTopConcepts( MainController.currentSource)
+
+
+
+        })
+
+    }
+    self.isNodeOk=function(nodeId){
+        if (!Collection.currentCollectionMemberIds )
+            return true;
+        if(Collection.currentCollectionMemberIds[nodeId])
+            return true
+
+         return false;
+        }
+
+return self;
+
 })()

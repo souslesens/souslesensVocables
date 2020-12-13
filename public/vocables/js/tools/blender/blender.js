@@ -458,7 +458,7 @@ var Blender = (function () {
                                     return callbackSeries();
 
 
-                                Collection.Sparql.getSingleNodeAllDescendants(self.currentSource, node.id, function (err, result) {
+                                Collection.Sparql.getSingleNodeAllDescendants(self.currentSource, node.id, {onlyCollectionType:true} ,function (err, result) {
                                     if (err) {
                                         return callbackSeries(err);
                                     }

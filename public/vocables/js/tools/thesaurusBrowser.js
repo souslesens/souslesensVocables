@@ -9,11 +9,17 @@ var ThesaurusBrowser = (function () {
     }
     self.onSourceSelect = function (thesaurusLabel) {
         MainController.currentSource = thesaurusLabel;
-        OwlSchema.currentSourceSchema=null;
+        OwlSchema.currentSourceSchema = null;
         self.showThesaurusTopConcepts(thesaurusLabel)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'ThesaurusBrowser_exactMatchSearchCBX'>Exact Match" +
-            "<button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
+            "<button onclick='ThesaurusBrowser.searchTerm()'>Search</button>" +
+            "<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>")
+
+        setTimeout(function () {
+            Collection.initBrowserCollectionSelect()
+        }, 1000)
+
     }
 
     self.selectNodeFn = function (event, propertiesMap) {
@@ -85,10 +91,10 @@ var ThesaurusBrowser = (function () {
     }
     self.getJstreeConceptsContextMenu = function () {
         // return {}
-        var items={}
+        var items = {}
         ;
-        if(MainController.currentSource && Config.sources[MainController.currentSource].schemaType== "OWL") {
-            items.showProperties= {
+        if (MainController.currentSource && Config.sources[MainController.currentSource].schemaType == "OWL") {
+            items.showProperties = {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
                     OntologyBrowser.showProperties()
@@ -99,20 +105,20 @@ var ThesaurusBrowser = (function () {
             }
 
         }
-        items.copyNode= {
-                label: "Copy Node",
-                action: function (e) {// pb avec source
-                    Clipboard.copy({
-                        type: "node",
-                        id: self.currentTreeNode.data.id,
-                        label: self.currentTreeNode.text,
-                        source: ThesaurusBrowser.currentTreeNode.data.source
-                    }, self.currentTreeNode.id + "_anchor", e)
+        items.copyNode = {
+            label: "Copy Node",
+            action: function (e) {// pb avec source
+                Clipboard.copy({
+                    type: "node",
+                    id: self.currentTreeNode.data.id,
+                    label: self.currentTreeNode.text,
+                    source: ThesaurusBrowser.currentTreeNode.data.source
+                }, self.currentTreeNode.id + "_anchor", e)
 
-
-                }
 
             }
+
+        }
         return items;
     }
 
@@ -135,17 +141,17 @@ var ThesaurusBrowser = (function () {
 
 
     self.editThesaurusConceptInfos = function (thesaurusLabel, node, callback) {
-        MainController.UI.showNodeInfos(thesaurusLabel, node.data.id,"graphDiv")
+        MainController.UI.showNodeInfos(thesaurusLabel, node.data.id, "graphDiv")
 
-      /*  Sparql_generic.getNodeInfos(thesaurusLabel, node.data.id, null, function (err, result) {
-            if (err) {
-                return MainController.UI.message(err);
-            }
-            //    SkosConceptEditor.editConcept("graphDiv",result)
-            SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
+        /*  Sparql_generic.getNodeInfos(thesaurusLabel, node.data.id, null, function (err, result) {
+              if (err) {
+                  return MainController.UI.message(err);
+              }
+              //    SkosConceptEditor.editConcept("graphDiv",result)
+              SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
-        })*/
+          })*/
 
 
     }
@@ -163,13 +169,13 @@ var ThesaurusBrowser = (function () {
     self.searchTerm = function (sourceLabel, term, rootId, callback) {
         if (!term)
             term = $("#GenericTools_searchTermInput").val()
-var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
+        var exactMatch = $("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
         if (!term || term == "")
             return
         var options = {
             term: term,
             rootId: rootId,
-            exactMatch:exactMatch
+            exactMatch: exactMatch
         }
         ThesaurusBrowser.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
             if (callback)
@@ -195,10 +201,10 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
             var term = $("#SourceEditor_searchAllSourcesTermInput").val()
         if (!term || term == "")
             return
-        var exactMatch=$("#ThesaurusBrowser_allExactMatchSearchCBX").prop("checked")
+        var exactMatch = $("#ThesaurusBrowser_allExactMatchSearchCBX").prop("checked")
         var searchedSources = [];
         for (var sourceLabel in Config.sources) {
-            if(Config.currentProfile.allowedSourceSchemas.indexOf( Config.sources[sourceLabel].schemaType)>-1){
+            if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
                 searchedSources.push(sourceLabel)
             }
         }
@@ -217,7 +223,7 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
             var options2 = {
                 term: term,
                 rootId: sourceLabel,
-                exactMatch:exactMatch
+                exactMatch: exactMatch
             }
             ThesaurusBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
                 if (err)
@@ -270,7 +276,6 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
             options.term = $("#GenericTools_searchTermInput").val()
 
 
-
         if (!options.rootId)
             options.rootId = "#"
         if (!sourceLabel)
@@ -283,24 +288,23 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
             var existingNodes = {};
             var jstreeData = []
 
-            var allJstreeIds={}
-            result.forEach(function (item,index) {
+            var allJstreeIds = {}
+            result.forEach(function (item, index) {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
 
-                        item["broader" + i].jstreeId= item["broader" + i].value+"_"+index
+                        item["broader" + i].jstreeId = item["broader" + i].value + "_" + index
                     }
                 }
-                item.concept.jstreeId=  item.concept.value+"_"+index;
+                item.concept.jstreeId = item.concept.value + "_" + index;
             })
 
 
-
-            result.forEach(function (item,index) {
+            result.forEach(function (item, index) {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
                         var id = item["broader" + i].value
-                        var jstreeId= item["broader" + i].value
+                        var jstreeId = item["broader" + i].value
                         if (!existingNodes[id]) {
                             existingNodes[id] = 1
                             var label = item["broader" + i + "Label"].value
@@ -308,25 +312,25 @@ var exactMatch=$("#ThesaurusBrowser_exactMatchSearchCBX").prop("checked")
                             if (item["broader" + (i + 1)])
                                 parentId = item["broader" + (i + 1)].value
 
-                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel,id: id}})
+                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel, id: id}})
                         }
                     }
                 }
-            var itemId = item.concept.value
-                var jstreeId= item.concept.value+"_"+item["broader1"].value
+                var itemId = item.concept.value
+                var jstreeId = item.concept.value + "_" + item["broader1"].value
                 if (!existingNodes[jstreeId]) {
                     existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
-                    var id= item.concept.value;
-                    var jstreeId=itemId
-                    jstreeData.push({id:jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel,id:id}})
-                }else{
-                 /*
-                    if (!existingNodes[jstreeId]) {
-                        existingNodes[jstreeId] = 1;
-                        var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
-                        jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: itemId}})
-                    }*/
+                    var id = item.concept.value;
+                    var jstreeId = itemId
+                    jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: id}})
+                } else {
+                    /*
+                       if (!existingNodes[jstreeId]) {
+                           existingNodes[jstreeId] = 1;
+                           var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
+                           jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: itemId}})
+                       }*/
                 }
             })
 //console.log(JSON.stringify(jstreeData))

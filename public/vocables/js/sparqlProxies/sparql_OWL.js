@@ -2,7 +2,7 @@ var Sparql_OWL = (function () {
 
         var self = {};
 
-
+        var filterCollectionsAncestorsDepth=4
         self.ancestorsDepth = 6
 
         var elasticUrl = Config.serverUrl;
@@ -23,13 +23,46 @@ var Sparql_OWL = (function () {
                 " ?topConcept rdfs:subClassOf <" + self.topClass + ">. " +
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
 
-            if (options.filterCollections)
-                query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + Sparql_generic.getUriFilter("collection", options.filterCollections)
 
-            query +="}order by ?topConceptLabel limit 1000"
+            query += "}order by ?topConceptLabel limit 1000"
 
 
+            if (options.filterCollections) {
+                var fromStr = ""
+                if (self.graphUri)
+                    fromStr = " FROM <" + self.graphUri + ">"
 
+
+                query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                    " select  distinct * " + fromStr + "   WHERE { " +
+                    "  ?child1 rdfs:subClassOf ?concept.   "+
+                    "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                    "  " +
+                    "   ?collection skos:prefLabel ?collectionLabel." +
+                    "   ?acollection skos:prefLabel ?acollectionLabel." +
+                    "   ?concept rdfs:label ?conceptLabel." +
+                    "   ?child1 rdfs:label ?child1Label." +
+                    "   ?child1 rdf:type ?child1Type."
+
+
+                for (var i = 1; i < filterCollectionsAncestorsDepth; i++) {
+
+                    query += "OPTIONAL { ?child" + (i) + " rdfs:subClassOf ?child" + (i + 1) + "." +
+                        "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"+
+                    "OPTIONAL {?child" + (i + 1) + " rdf:type  ?child" + (i + 1) + "Type.}"
+
+                }
+                for (var i = 1; i < filterCollectionsAncestorsDepth; i++) {
+                    query += "} "
+                }
+
+
+                query += "}order by ?concept"
+
+            }
 
 
             // query+="  ?prop   rdf:type owl:ObjectProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.  filter( not EXISTS {?topConcept rdfs:subClassOf ?d}) }limit 1000"
@@ -37,14 +70,38 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings.forEach(function (item) {
-                    item.topConceptType = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                    var id = item.topConcept.value;
-                    if (!item.topConceptLabel) {
-                        item.topConceptLabel = {value: id.substring(id.lastIndexOf("#") + 1)}
-                        item.topConceptLabel = {value: id.substring(id.lastIndexOf("/") + 1)}
-                    }
-                })
+
+                result.results.bindings= Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"child",{type:"http://www.w3.org/2002/07/owl#Class"})
+
+                if(options.filterCollections) {
+                    var newBindings=[];
+                    var uniqueIds={}
+                    result.results.bindings.forEach(function (item) {
+                        var done=false
+                        for(var i=filterCollectionsAncestorsDepth;i>1;i--){
+                            var id=item["child"+i]
+                            if(!done && id  && !uniqueIds[id]){
+                                uniqueIds[id]=1
+                                done=true;
+                                newBindings.push({
+                                    topConcept:{
+                                        value:item["child"+i].value,
+                                    },
+                                    topConceptLabel:{
+                                        value:item["child"+i+"Label"].value,
+                                    },
+                                    topConceptType:{
+                                        value:item["child"+i+"Type"].value,
+                                    }
+                                })
+                            }
+                        }
+
+                    })
+                    result.results.bindings=newBindings;
+                }
+
+
 
                 return callback(null, result.results.bindings);
             })

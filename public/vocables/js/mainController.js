@@ -82,7 +82,7 @@ var MainController = (function () {
                 return
             /*   if (!self.currentSource)
                    return MainController.UI.message("select a source");*/
-
+            Collection.currentCollectionMemberIds=null;
             self.UI.updateActionDivLabel()
             var controller = Config.tools[self.currentTool].controller
             controller.onSourceSelect(self.currentSource)

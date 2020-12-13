@@ -794,7 +794,9 @@ var Sparql_generic = (function () {
 
         }
 
-        self.setBindingsOptionalProperties = function (bindings, _field) {
+        self.setBindingsOptionalProperties = function (bindings, _field,options) {
+            if(!options)
+                options={}
             bindings.forEach(function (item) {
 
                 for (var i = 1; i < 20; i++) {
@@ -803,7 +805,9 @@ var Sparql_generic = (function () {
                         break;
                     }
                     if (!item[field + "Type"]) {
-                        if (!item[field + "Type"])
+                     if(options.type)
+                         item[field + "Type"] = {value:options.type}
+                     else
                             item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
                     }
                     var id = item[field].value

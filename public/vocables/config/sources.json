@@ -222,7 +222,7 @@
     "sparql_url": "http://51.178.139.80:8890/sparql",
     "controller": "Sparql_OWL",
     "schemaType": "OWL",
-    "schema": "OWL",
+    "schema": "NPD",
     "color": "#bcbd22"
   }
 }

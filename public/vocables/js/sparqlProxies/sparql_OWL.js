@@ -22,12 +22,14 @@ var Sparql_OWL = (function () {
                 "select   distinct ?topConcept  ?topConceptLabel  from <" + self.graphUri + ">   where {" +
                 " ?topConcept rdfs:subClassOf <" + self.topClass + ">. " +
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
+            if (options.filterCollections)
+                query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_generic.setFilter("collection", options.filterCollections)
 
 
             query += "}order by ?topConceptLabel limit 1000"
 
 
-            if (options.filterCollections) {
+            if (false && options.filterCollections) {
                 var fromStr = ""
                 if (self.graphUri)
                     fromStr = " FROM <" + self.graphUri + ">"
@@ -39,11 +41,12 @@ var Sparql_OWL = (function () {
                     " select  distinct * " + fromStr + "   WHERE { " +
                     "  ?child1 rdfs:subClassOf ?concept.   "+
                     "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                  //  "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
                     "  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
-                    "   ?concept rdfs:label ?conceptLabel." +
+                    "   optional{?concept rdfs:label ?conceptLabel.}" +
                     "   ?child1 rdfs:label ?child1Label." +
                     "   ?child1 rdf:type ?child1Type."
 
@@ -73,7 +76,7 @@ var Sparql_OWL = (function () {
 
                 result.results.bindings= Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"child",{type:"http://www.w3.org/2002/07/owl#Class"})
 
-                if(options.filterCollections) {
+                if(false && options.filterCollections) {
                     var newBindings=[];
                     var uniqueIds={}
                     result.results.bindings.forEach(function (item) {
@@ -150,11 +153,12 @@ var Sparql_OWL = (function () {
                     " select  distinct * " + fromStr + "   WHERE { " +
                     "  ?child1 rdfs:subClassOf ?concept.   " + strFilter +
                     "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                 //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                 "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
                     "  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
-                    "   ?concept rdfs:label ?conceptLabel." +
+                    "   optional{?concept rdfs:label ?conceptLabel.}" +
                     "   ?child1 rdfs:label ?child1Label." +
                     "   ?child1 rdf:type ?child1Type." +
                     "}order by ?concept"

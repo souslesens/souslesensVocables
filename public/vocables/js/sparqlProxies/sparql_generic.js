@@ -812,8 +812,9 @@ var Sparql_generic = (function () {
                     }
                     var id = item[field].value
                     if (!item[field + "Label"]) {
-                        item[field + "Label"] = {value: id.substring(id.lastIndexOf("#") + 1)}
+
                         item[field + "Label"] = {value: id.substring(id.lastIndexOf("/") + 1)}
+                        item[field + "Label"] = {value: id.substring(id.lastIndexOf("#") + 1)}
 
                     }
 

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+
+	<style>
+		body {
+			font-family: 'Roboto', sans-serif;
+			margin: 0px;
+		}
+		.navItem a {
+			color: #555;
+			text-decoration: none;
+			padding: 5px;
+			padding-right:15px;
+		}
+		.navItem a:hover {
+			color:#222
+		}
+		.navItem.active a {
+			color: black;
+			font-size:110%;
+		}
+	</style>
+	<script src="https://cesiumjs.org/releases/1.60/Build/Cesium/Cesium.js" charset="UTF-8"></script>
+	<script src="yasgui.polyfill.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+	<title></title>
+<link href="yasgui.min.css" rel="stylesheet"><link href="yasqe.min.css" rel="stylesheet"><link href="yasr.min.css" rel="stylesheet"></head>
+
+<body>
+  <div style="background:#eee">
+    <nav style="display: flex">
+      <img src="webpack/yasgui.png" style="max-height:50px;padding:5px;margin-left: 10px" alt="Yasgui Logo">
+			<ul style="display: flex; list-style: none; align-self: center">
+				<li class="navItem active"><a class="nav-link" href="yasgui.html">Yasgui</a></li><li class="navItem false"><a class="nav-link" href="yasqe.html">Yasqe</a></li><li class="navItem false"><a class="nav-link" href="yasr.html">Yasr</a></li>
+			</ul>
+    </nav>
+	</div>
+
+  <!--https://github.com/TriplyDB/Documentation/blob/master/docs/yasgui-api/index.md-->
+      <div id="yasgui"></div>
+      <script>
+          window.onpageshow = function () {
+              window.yasgui = new Yasgui(document.getElementById("yasgui"), {
+                  corsProxy: "",
+                  requestConfig: {
+                      endpoint: "https://dbpedia.org/sparql",
+                  }
+              });
+          };
+      </script>
+
+  <script type="text/javascript" src="yasgui.min.js"></script><script type="text/javascript" src="yasqe.min.js"></script><script type="text/javascript" src="yasr.min.js"></script></script></body>
+
+  </html>

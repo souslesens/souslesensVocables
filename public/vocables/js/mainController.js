@@ -75,14 +75,11 @@ var MainController = (function () {
 
         },
         onSourceSelect: function () {
-            // $("#actionDivContolPanelDiv").html("");
-            //  $("#sourceDivControlPanelDiv").html("");
 
             if (Config.tools[self.currentTool].multiSources)
                 return
-            /*   if (!self.currentSource)
-                   return MainController.UI.message("select a source");*/
-            Collection.currentCollectionMemberIds=null;
+
+            Collection.currentCollectionFilter=null;
             self.UI.updateActionDivLabel()
             var controller = Config.tools[self.currentTool].controller
             controller.onSourceSelect(self.currentSource)

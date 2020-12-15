@@ -2,8 +2,8 @@ var Collection = (function () {
 
     var self = {}
     self.currentTreeNode;
-    self.currentCollectionFilter={}
-    self.currentCollectionMemberIds=null;
+    self.currentCollectionFilter=null;
+
     self.broaderProperty = "http://www.w3.org/2004/02/skos/core#member"
 
     self.getJstreeContextMenu = function () {
@@ -262,6 +262,7 @@ var Collection = (function () {
             if (!options.all)
                 query += "FILTER (  NOT EXISTS {?child skos:member ?collection})"
 
+
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
 
 
@@ -365,14 +366,21 @@ var Collection = (function () {
         self.Sparql.getCollections(source, {all: true}, function (err, result) {
             if (err)
                 return MainController.UI.message(err)
-            if (result.length == 0)
+            if (result.length == 0) {
+                Collection.currentCollectionFilter=null;
+                $("#waitImg").css("display", "none");
+                $("#ThesaurusBrowser_collectionDiv").css("display","none")
                 return MainController.UI.message("no collections for this source")
+
+            }
+
             var array = []
             result.forEach(function (item) {
                 MainController.currentSourceAllcollections[item.collectionLabel.value] = item.collection.value;
                 array.push({id: item.collection.value, label: item.collectionLabel.value})
 
             })
+            $("#ThesaurusBrowser_collectionDiv").css("display","block")
             common.fillSelectOptions("ThesaurusBrowser_collectionSelect", array, true, "label", "id")
 
         })
@@ -381,33 +389,17 @@ var Collection = (function () {
     self.filterBrowserCollection = function () {
         var collection = $("#ThesaurusBrowser_collectionSelect").val();
         if (!collection || collection == "") {
-            return self.currentCollectionMemberIds=null;
+            return Collection.currentCollectionFilter=null;;
         }
-
-        self.Sparql.getSingleNodeAllDescendants(MainController.currentSource, collection, { excludeCollectionType: 1,withBroaders:1}, function(err, result) {
-                if (err)
-                    return MainController.UI.message(err);
-                self.currentCollectionMemberIds={};
-                result.forEach(function (item) {
-                        self.currentCollectionMemberIds[item.narrower.value]=1
-                    self.currentCollectionMemberIds[item.broader.value]=1
-
-                })
-            ThesaurusBrowser.showThesaurusTopConcepts( MainController.currentSource)
+        Collection.currentCollectionFilter=collection;
+        ThesaurusBrowser.showThesaurusTopConcepts( MainController.currentSource,{filterCollections:collection})
 
 
 
-        })
+
+
 
     }
-    self.isNodeOk=function(nodeId){
-        if (!Collection.currentCollectionMemberIds )
-            return true;
-        if(Collection.currentCollectionMemberIds[nodeId])
-            return true
-
-         return false;
-        }
 
 return self;
 

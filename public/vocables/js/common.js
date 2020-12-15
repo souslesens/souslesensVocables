@@ -50,6 +50,11 @@ var common = (function () {
             return idList;
         }
 
+        self.getjsTreeNodeObj = function (jstreeDiv,id) {
+           return $('#' + jstreeDiv).jstree(true).get_node(id);
+
+        }
+
 
         self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
             if (!options)

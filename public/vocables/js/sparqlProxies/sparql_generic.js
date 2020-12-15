@@ -186,7 +186,11 @@ var Sparql_generic = (function () {
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
+
             $("#waitImg").css("display", "block");
+            if (!options) {
+                options = {}
+            }
 
             if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
 
@@ -197,12 +201,7 @@ var Sparql_generic = (function () {
             }
 
 
-            if (!options) {
-                options = {}
-            }
-
             setVariables(sourceLabel);
-
 
             var query = "";
             query += prefixesStr
@@ -219,7 +218,7 @@ var Sparql_generic = (function () {
                     query += "filter(lang(?conceptLabel )='" + lang + "')"
             }
             if (options.filterCollections)
-                     query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + getUriFilter("collection", options.filterCollections)
+                query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + getUriFilter("collection", options.filterCollections)
 
             query += "  } ORDER BY ?topConceptLabel ";
             query += "limit " + limit + " ";
@@ -271,6 +270,15 @@ var Sparql_generic = (function () {
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
             $("#waitImg").css("display", "block");
 
+            setVariables(sourceLabel);
+
+            var filterStr = setFilter("concept", ids, words, options)
+            if(filterStr=="")
+                return alert ("no parent specified for getNodeChildren ")
+            if (!options) {
+                options = {depth: 0}
+            }
+
             if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
                 Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options, function (err, result) {
                     callback(err, result);
@@ -278,14 +286,6 @@ var Sparql_generic = (function () {
                 return;
             }
 
-            setVariables(sourceLabel);
-
-
-            var filterStr = setFilter("concept", ids, words, options)
-
-            if (!options) {
-                options = {depth: 0}
-            }
 
             var query = "";
             query += prefixesStr;
@@ -320,13 +320,11 @@ var Sparql_generic = (function () {
 
 
             if (options.filterCollections) {
-                var fromStr = ""
-                if (self.graphUri)
-                    fromStr = " FROM <" + self.graphUri + ">"
+
                 query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                    " select  distinct * "+fromStr+"   WHERE { " +
+                    " select  distinct * " + fromStr + "   WHERE { " +
                     "  ?child1 skos:broader ?concept.   " + filterStr +
                     "   ?collection skos:member* ?acollection. " + getUriFilter("collection", options.filterCollections) +
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?child1.  " +
@@ -353,6 +351,15 @@ var Sparql_generic = (function () {
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
             $("#waitImg").css("display", "block");
 
+            if (!options) {
+                options = {depth: 0}
+            }
+            setVariables(sourceLabel);
+            var filterStr = setFilter("concept", ids, words, options)
+
+            if(filterStr=="")
+                return alert ("no child specified for getNodeParents ")
+
             if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
                 Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function (err, result) {
                     callback(err, result);
@@ -360,11 +367,6 @@ var Sparql_generic = (function () {
                 return;
             }
 
-            if (!options) {
-                options = {depth: 0}
-            }
-            setVariables(sourceLabel);
-            var filterStr = setFilter("concept", ids, words, options)
 
             var query = "";
             query += prefixesStr;
@@ -717,6 +719,7 @@ var Sparql_generic = (function () {
             var newTriples = [];
             var setSize = 100
             async.series([
+
                 // get sources nodes properties
                 function (callbackSeries) {
                     self.getNodeInfos(fromSourceLabel, sourceIds, null, function (err, result) {
@@ -745,12 +748,14 @@ var Sparql_generic = (function () {
                                     valueStr = "<" + item.value.value + ">"
                                 else {
                                     var langStr = "";
-                                    if (item.lang)
-                                        langStr = "@" + item.value.lang
-                                    valueStr = "'" + self.formatString() + "'" + langStr
+                                    if (item.value["xml:lang"])
+                                        langStr = "@" + item.value["xml:lang"]
+                                    valueStr = "'" + self.formatString(item.value.value) + "'" + langStr
                                 }
+                                var triple = "<" + subject + "> <" + prop + "> " + valueStr + "."
+                                newTriples.push(triple)
 
-                                newTriples.push("<" + subject + "> <" + prop + "> " + valueStr + ".")
+
                                 if (newTriples.length >= setSize) {
                                     newTriplesSets.push(newTriples)
                                     newTriples = []
@@ -764,7 +769,17 @@ var Sparql_generic = (function () {
 
 
                 },
+                // add additionalTriplesNt
+                function (callbackSeries) {
+                    if (options.additionalTriplesNt) {
+                        options.additionalTriplesNt.forEach(function (triple) {
+                            if (newTriples.indexOf(triple) < 0)
+                                newTriples.push(triple)
+                        })
 
+                    }
+                    return callbackSeries();
+                },
                 //write new triples
                 function (callbackSeries) {
                     async.eachSeries(newTriplesSets, function (newTriples, callbackEach) {
@@ -794,9 +809,9 @@ var Sparql_generic = (function () {
 
         }
 
-        self.setBindingsOptionalProperties = function (bindings, _field,options) {
-            if(!options)
-                options={}
+        self.setBindingsOptionalProperties = function (bindings, _field, options) {
+            if (!options)
+                options = {}
             bindings.forEach(function (item) {
 
                 for (var i = 1; i < 20; i++) {
@@ -805,9 +820,9 @@ var Sparql_generic = (function () {
                         break;
                     }
                     if (!item[field + "Type"]) {
-                     if(options.type)
-                         item[field + "Type"] = {value:options.type}
-                     else
+                        if (options.type)
+                            item[field + "Type"] = {value: options.type}
+                        else
                             item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
                     }
                     var id = item[field].value

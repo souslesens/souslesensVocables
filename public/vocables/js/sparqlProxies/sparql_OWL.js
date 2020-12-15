@@ -9,6 +9,8 @@ var Sparql_OWL = (function () {
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
+            if(!options)
+                options={}
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
             self.topClass = "http://www.w3.org/2002/07/owl#Thing"
@@ -113,6 +115,9 @@ var Sparql_OWL = (function () {
 
 
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
+            if(!options)
+                options={}
+
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
             var strFilter;
@@ -178,6 +183,8 @@ var Sparql_OWL = (function () {
         }
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
+            if(!options)
+                options={}
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
 

@@ -32,7 +32,7 @@ var TreeController = (function () {
                     if (true || jsTreeOptions.labelClass) {
                         var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
                     }
-       if(Collection.isNodeOk(childNodeId)){
+
                            var child = {
                             parent: parentNodeId,
                             id: childNodeId + "_" + common.getRandomHexaId(4),
@@ -41,7 +41,7 @@ var TreeController = (function () {
 
                         }
                         jstreeData.push(child);
-                    }
+
 
 
                 }
@@ -59,6 +59,7 @@ var TreeController = (function () {
         } else {
             common.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions)
         }
+        $("#waitImg").css("display", "none");
 
 
     }

@@ -14,7 +14,9 @@ var ThesaurusBrowser = (function () {
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'ThesaurusBrowser_exactMatchSearchCBX'>Exact Match" +
             "<button onclick='ThesaurusBrowser.searchTerm()'>Search</button>" +
-            "<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>")
+            "<div id='ThesaurusBrowser_collectionDiv'>" +
+            "Collection<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
+            "</div>")
 
         setTimeout(function () {
             Collection.initBrowserCollectionSelect()
@@ -30,12 +32,7 @@ var ThesaurusBrowser = (function () {
             source = MainController.currentSource// coming from  specific tool current surce
         self.currentTreeNode = propertiesMap.node;
         if (propertiesMap.event.ctrlKey)
-            Clipboard.copy({
-                type: "node",
-                id: self.currentTreeNode.data.id,
-                label: self.currentTreeNode.text,
-                source: source
-            }, self.currentTreeNode.data.id + "_anchor", propertiesMap.event)
+            self.copyNode(propertiesMap.event);
 
 
         if (true || propertiesMap.event.ctrlKey) {
@@ -47,11 +44,33 @@ var ThesaurusBrowser = (function () {
 
     }
 
+    self.copyNode = function (event) {
+        Clipboard.copy({
+                type: "node",
+                id: self.currentTreeNode.data.id,
+                label: self.currentTreeNode.text,
+                source: self.currentTreeNode.data.source,
+                data: self.currentTreeNode.data
+            },
+            self.currentTreeNode.id + "_anchor",
+            event)
+    }
+
     self.showThesaurusTopConcepts = function (thesaurusLabel, options) {
         if (!options)
             options = {}
-
+        options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getTopConcepts(thesaurusLabel, options, function (err, result) {
+            if (err)
+                return MainController.UI.message(err);
+            if (result.length == 0) {
+                Collection.currentCollectionFilter = null;
+                $("#waitImg").css("display", "none");
+                var html = "<div id='currentSourceTreeDiv'>no data found</div>"
+                $("#actionDiv").html(html);
+                return MainController.UI.message("")
+            }
+
             if (!options)
                 options = {}
             if (err) {
@@ -89,6 +108,8 @@ var ThesaurusBrowser = (function () {
 
 
     }
+
+
     self.getJstreeConceptsContextMenu = function () {
         // return {}
         var items = {}
@@ -108,13 +129,7 @@ var ThesaurusBrowser = (function () {
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
-                Clipboard.copy({
-                    type: "node",
-                    id: self.currentTreeNode.data.id,
-                    label: self.currentTreeNode.text,
-                    source: ThesaurusBrowser.currentTreeNode.data.source
-                }, self.currentTreeNode.id + "_anchor", e)
-
+                ThesaurusBrowser.copyNode(e)
 
             }
 
@@ -123,11 +138,14 @@ var ThesaurusBrowser = (function () {
     }
 
     self.openTreeNode = function (divId, thesaurusLabel, node, options) {
+        if (!options)
+            options = {}
         var existingNodes = common.getjsTreeNodes(divId, true)
         if (node.children.length > 0)
-            if (!options || !options.ctrlKey)
+            if (!options.ctrlKey)
                 return;
 
+        options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getNodeChildren(thesaurusLabel, null, node.data.id, 1, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);

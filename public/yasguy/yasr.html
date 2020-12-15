@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0px;
+      }
+      .navItem a {
+  			color: #555;
+  			text-decoration: none;
+  			padding: 5px;
+  			padding-right:15px;
+  		}
+  		.navItem a:hover {
+  			color:#222
+  		}
+  		.navItem.active a {
+  			color: black;
+  			font-size:110%;
+  		}
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+
+    <script src="../../packages/yasgui/static/yasgui.polyfill.min.js"></script>
+  <link href="/yasqe.min.css" rel="stylesheet"><link href="/yasr.min.css" rel="stylesheet"></head>
+
+  <body>
+    <div style="background:#eee">
+      <nav style="display: flex">
+        <img src="webpack/yasgui.png" style="max-height:50px;padding:5px;margin-left: 10px" alt="Yasgui Logo">
+        <ul style="display: flex; list-style: none; align-self: center">
+  				<li class="navItem false"><a class="nav-link" href="yasgui.html">Yasgui</a></li><li class="navItem false"><a class="nav-link" href="yasqe.html">Yasqe</a></li><li class="navItem active"><a class="nav-link" href="yasr.html">Yasr</a></li>
+  			</ul>
+      </nav>
+    </div>
+
+    <div id="yasqe"></div>
+    <div id="yasr"></div>
+    <script>
+      window.onpageshow = function() {
+        window.yasqe = new Yasqe(document.getElementById("yasqe"), {
+          requestConfig: {
+            endpoint: "https://dbpedia.org/sparql"
+          }
+        });
+        yasqe.on("queryResponse", function(yasqe, response, duration) {
+          console.log({ response: response });
+          window.yasr.setResponse(response, duration);
+        });
+        window.yasr = new Yasr(document.getElementById("yasr"), {
+          prefixes: function() {
+            return yasqe.getPrefixesFromQuery();
+          }
+        });
+      };
+    </script>
+  <script type="text/javascript" src="/yasqe.min.js"></script><script type="text/javascript" src="/yasr.min.js"></script></body>
+</html>

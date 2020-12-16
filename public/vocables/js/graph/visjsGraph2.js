@@ -35,8 +35,8 @@ var visjsGraph = (function () {
         };
         var options = {
             interaction: {hover: true},
-            width: "" + $("#graphDiv").width() + "px",
-            height: "" + $("#graphDiv").height() + "px",
+            width: "" + $("#"+divId).width() + "px",
+            height: "" + $("#"+divId).height() + "px",
             nodes: {
                 shape: 'dot',
                 size: 12,

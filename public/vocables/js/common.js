@@ -77,6 +77,16 @@ var common = (function () {
                 plugins.push("dnd")
 
 
+               var check_callbackFn=function (op, node, parent, position, more) {
+                if(op== 'move_node' && options.dropAllowedFn){
+                   return options.dropAllowedFn(op, node, parent, position, more)
+                }
+               else{
+                   return true;
+                }
+               }
+
+
             if ($('#' + jstreeDiv).jstree)
                 $('#' + jstreeDiv).jstree("destroy")
             $('#' + jstreeDiv).jstree({
@@ -87,14 +97,7 @@ var common = (function () {
                 "plugins": plugins,
                 "core": {
                     'data': jstreeData,
-                    'check_callback': true,
-                }, 'checkbox': {
-                    /*   three_state: options.three_state,
-                      cascade: options.cascade,
-                      // tie_selection : false,*/
-                    whole_node: false,
-                    tie_selection: false,
-                    three_state: false,
+                    'check_callback': check_callbackFn
                 },
                 'dnd': options.dnd,
                 types: options.types,

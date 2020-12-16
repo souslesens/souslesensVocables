@@ -116,7 +116,7 @@ var Blender = (function () {
                             var jsTreeOptions = {};
                             jsTreeOptions.contextMenu = Collection.getJstreeContextMenu()
                             jsTreeOptions.selectNodeFn = Collection.selectNodeFn;
-                            jsTreeOptions.onMoveNodeFn = Blender.dnd.moveNode;
+
                             jsTreeOptions.dnd = Blender.dnd
                             TreeController.drawOrUpdateTree("Blender_collectionTreeDiv", result, "#", "collection", jsTreeOptions, function () {
                                 var firstNodeId = $("#Blender_collectionTreeDiv").jstree(true).get_node("#").children[0];
@@ -170,7 +170,8 @@ var Blender = (function () {
             jsTreeOptions.contextMenu = Blender.getJstreeConceptsContextMenu()
             jsTreeOptions.selectNodeFn = Blender.selectNodeFn
             if (withDnd) {
-                jsTreeOptions.onMoveNodeFn = Blender.dnd.moveNode
+
+                jsTreeOptions.dropAllowedFn = Blender.dnd.dropAllowed
             }
             jsTreeOptions.dnd = self.dnd
             return jsTreeOptions;
@@ -180,39 +181,27 @@ var Blender = (function () {
         self.dnd = {
 
             "drag_start": function (data, element, helper, event) {
+                Blender.currentDNDstartNodeId = element.data.nodes[0]
                 return true;
             },
             "drag_move": function (data, element, helper, event) {
-
                 return true;
-
-
             },
             "drag_stop": function (data, element, helper, event) {
-                if (!Blender.menuActions.movingNode || !Blender.menuActions.movingNode.data)
-                    return false;
-                var type = Blender.menuActions.movingNode.data.type;
-                if (!type)
-                    alert("no type")
-                if (type == "concept") {
-                    Blender.menuActions.dropNode()
-                } else if (type == "collection") {
-                    Collection.dropNode()
-                }
-                // return true;
 
 
-                return false;
+                Blender.menuActions.dropNode(function (err, result) {
+                    return;
+                })
+                return true;
 
 
             },
-            checkTreeOperations: function (operation, node, parent, position, more) {
-                Blender.currentOperation = {operation: operation, node: node, parent: parent, position: position, more, more}
+            dropAllowed: function (operation, node, parent, position, more) {
+                console.log(operation)
+                Blender.currentDNDoperation = {operation: operation, node: node, parent: parent, position: position, more, more}
 
                 return true;
-            },
-            moveNode: function (event, obj) {
-                Blender.menuActions.movingNode = {id: obj.node.id,data:obj.node.data, newParent: obj.parent, oldParent: obj.old_parent}
             },
 
         },
@@ -378,35 +367,83 @@ var Blender = (function () {
         self.menuActions = {
 
 
-            dropNode: function () {
-                if (!self.menuActions.movingNode)
-                    return;
+            dropNode: function (callback) {
+                var date = new Date();// sinon exécuté plusieurs fois!!!
+                if (Blender.startDNDtime && date - Blender.startDNDtime < 2000)
+                    return true;
+                Blender.startDNDtime = date;
 
-                var newParent = common.getjsTreeNodeObj("Blender_conceptTreeDiv",self.menuActions.movingNode.newParent);
-                var oldParent = ommon.getjsTreeNodeObj("Blender_conceptTreeDiv",self.menuActions.movingNode.oldParent);
-             //   var jstreeNodeId = self.menuActions.movingNode.id
-                var nodeData= self.menuActions.movingNode.data
+                var newParentData = Blender.currentDNDoperation.parent.data;
+                var nodeData = Blender.currentDNDoperation.node.data
+                var oldParentData = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId).data;
+                //   var oldParentData = Blender.currentTreeNode.data;
+                var broaderPredicate;
 
 
                 if (!confirm("Confirm : move concept node and descendants :" + nodeData.label + "?")) {
                     return
                 }
 
-                var broaderPredicate = "http://www.w3.org/2004/02/skos/core#broader"
-
-
-                Sparql_generic.deleteTriples(self.currentSource, nodeData.id, broaderPredicate, oldParent.data.id, function (err, result) {
-                    if (err) {
-                        return MainController.UI.message(err)
-                    }
-                    var triple = {subject: nodeData.id, predicate: broaderPredicate, object: newParent.data.id, valueType: "uri"}
-                    Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
+                function execMoveQuery(subject, broaderPredicate, oldParentId, newParentId, callback) {
+                    Sparql_generic.deleteTriples(self.currentSource, subject, broaderPredicate, oldParentId, function (err, result) {
                         if (err) {
-                            return MainController.UI.message(err)
+                            return callback(err)
                         }
-                        $("#waitImg").css("display", "none");
+                        var triple = {subject: subject, predicate: broaderPredicate, object: newParentId, valueType: "uri"}
+                        Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
+                            if (err) {
+                                callback(err)
+                            }
+                            callback()
+
+                        })
                     })
-                })
+
+
+                }
+
+                function processCallBack(err, result) {
+                    if (err) {
+                        MainController.UI.message(err)
+                        return false;
+                    }
+                    MainController.UI.message("node moved")
+                    return true;
+                }
+
+
+                if (Config.sources[nodeData.source].schemaType == "OWL") {
+
+                    var broaderPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+                    execMoveQuery(nodeData.id, broaderPredicate, oldParentData.id, newParentData.id, function (err, result) {
+                        return processCallBack(err, result)
+                    })
+                } else if (Config.sources[nodeData.source].schemaType == "SKOS") {
+                    if (nodeData.type == "http://www.w3.org/2004/02/skos/core#Collection") {
+                        broaderPredicate = "http://www.w3.org/2004/02/skos/core#member"
+                        Sparql_generic.deleteTriples(self.currentSource, oldParentData.id, broaderPredicate, nodeData.id, function (err, result) {
+                            if (err) {
+                                return processCallBack(err, result)
+                            }
+                            var triple = {subject: newParentData.id, predicate: broaderPredicate, object: nodeData.id, valueType: "uri"}
+                            Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
+                                if (err) {
+                                    callback(err)
+                                }
+                                callback()
+
+                            })
+                            return processCallBack(err, result)
+                        })
+                    } else {
+                        broaderPredicate = "http://www.w3.org/2004/02/skos/core#broader"
+                        execMoveQuery(nodeData.id, broaderPredicate, oldParentData.id, newParentData.id, function (err, result) {
+                            return processCallBack(err, result)
+                        })
+                    }
+                } else {
+                    return false;
+                }
 
 
             },

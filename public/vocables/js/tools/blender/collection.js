@@ -206,7 +206,7 @@ var Collection = (function () {
 
 
     }
-    self.dropNode = function () {
+  /*  self.dropNode = function () {
         if (!Blender.menuActions.movingNode)
             return
         var newParent = Blender.menuActions.movingNode.newParent
@@ -230,7 +230,7 @@ var Collection = (function () {
             })
         })
 
-    }
+    }*/
 
 
     self.Sparql = {

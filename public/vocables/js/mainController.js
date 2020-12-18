@@ -4,10 +4,12 @@ var MainController = (function () {
     self.currentTool = null
 
 
-    self.loadSources = function () {
+    self.loadSources = function (callback) {
 
         $.getJSON("config/sources.json", function (json) {
             Config.sources = json;
+            if(callback)
+                return callback()
 
         });
 
@@ -157,6 +159,15 @@ var MainController = (function () {
             }
 
         }
+    }
+
+    self.test=function(){
+        self.loadSources(function(){
+            MainController.currentSource="NPD"
+            ThesaurusBrowser.currentTreeNode={data:{id:"http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
+            OntologyBrowser.showProperties()
+        })
+
     }
 
 

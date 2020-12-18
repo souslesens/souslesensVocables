@@ -8,6 +8,8 @@ var OntologyBrowser = (function () {
     self.currentSelectedProps = {}
     self.classColors = {}
     self.currentJstreeNode;
+    self.queryClassPath = {};
+    self.queryLimit = 500;
 
     var dataTypes = {
         "http://www.w3.org/2001/XMLSchema#decimal": "number",
@@ -311,7 +313,7 @@ var OntologyBrowser = (function () {
 
     /********************************************************************************************************************************/
 
-    self.init=function(callback){
+    self.init = function (callback) {
         $("#graphDiv").load("snippets/ontologyBrowser.html")
         setTimeout(function () {
             var rightPanelDiv = 300
@@ -322,32 +324,29 @@ var OntologyBrowser = (function () {
             $("#OntologyBrowser_selectionDiv").height(h - 100)
             $("#OntologyBrowser_graphDiv").width(w - rightPanelDiv)
             $("#OntologyBrowser_selectionDiv").width(rightPanelDiv);
+            $("#OntologyBrowser_tabs_result").width(w);
+            $("#OntologyBrowser_tabs_result").height(h - 100);
 
-           $("#OntologyBrowser_dataPropertyFilterDialog").dialog({
-               autoOpen: false,
-               height: 300,
-               width: 300,
-               modal: false,
-           })
+            $("#OntologyBrowser_dataPropertyFilterDialog").dialog({
+                autoOpen: false,
+                height: 300,
+                width: 300,
+                modal: false,
+            })
 
-
-            var jsTreeOptions = {};
-            jsTreeOptions.contextMenu = OntologyBrowser.getJstreeConceptsContextMenu()
-           // jsTreeOptions.selectNodeFn = ontologyBrowser.selectTreeNodeFn;
-          //  jsTreeOptions.onCheckNodeFn = OntologyBrowser.checkTreeNodeFn;
-          //  jsTreeOptions.withCheckboxes=true
-
-           common.loadJsTree("OntologyBrowser_queryTreeDiv", {}, jsTreeOptions)
-
-            callback()
+            if (callback)
+                callback()
         }, 500)
     }
-    self.getJstreeConceptsContextMenu=function(){
+    self.getJstreeConceptsContextMenu = function () {
         var items = {}
+        /*   if(!OntologyBrowser.currentTreeNode)
+               return items;*/
+
         items.addQueryFilter = {
             label: "Add Query Filter...",
             action: function (e) {// pb avec source
-               OntologyBrowser.query.addQueryFilterShowDialog()
+                OntologyBrowser.query.addQueryFilterShowDialog()
             }
         }
         items.removeQueryFilter = {
@@ -356,21 +355,21 @@ var OntologyBrowser = (function () {
                 OntologyBrowser.query.removeQueryFilter()
             }
         }
-            items.unselectNode = {
-                label: "Unselect Node",
-                action: function (e) {// pb avec source
-                   // OntologyBrowser.showProperties()
-                }
+        items.setOptional = {
+            label: "Optional",
+            action: function (e) {// pb avec source
+                OntologyBrowser.query.setOptional()
             }
-            return items;
-
-
         }
-    self.selectTreeNodeFn=function(){
+        return items;
+
 
     }
-    self.checkTreeNodeFn=function(item,xx){
-        var range=  OntologyBrowser.currentJstreeNode.dataProperties[item]
+    self.selectTreeNodeFn = function (xx, obj) {
+        self.currentTreeNode = obj.node;
+    }
+    self.checkTreeNodeFn = function (item, xx) {
+        var range = OntologyBrowser.currentJstreeNode.dataProperties[item]
 
 
     }
@@ -379,15 +378,8 @@ var OntologyBrowser = (function () {
     self.showProperties = function (classId, callback) {
 
 
-        self.init(function() {
-            var newGraph = true
-            if (!classId)
-                classId = ThesaurusBrowser.currentTreeNode.data.id
-            else
-                newGraph = false;
-            var properties = {};
-
-
+        function execute(classId) {
+            var properties = {}
             async.series([
 
                 function (callbackSeries) {
@@ -452,7 +444,8 @@ var OntologyBrowser = (function () {
                                 id: property.domain,
                                 label: getLabelFromId(property.domain),
                                 shape: "box",
-                                color: self.classColors[property.domain]
+                                color: self.classColors[property.domain],
+                                data: {}
                             })
                             var edgeId = classId + "_" + property.domain
                             visjsData.edges.push({
@@ -460,6 +453,7 @@ var OntologyBrowser = (function () {
                                 from: classId,
                                 to: property.domain,
                                 label: getLabelFromId(key),
+                                data: {propertyId: key}
 
 
                             })
@@ -473,7 +467,8 @@ var OntologyBrowser = (function () {
                                 id: property.range,
                                 label: getLabelFromId(property.range),
                                 shape: "box",
-                                color: self.classColors[property.range]
+                                color: self.classColors[property.range],
+                                data: {}
                             })
                             var edgeId = classId + "_" + property.range
                             visjsData.edges.push({
@@ -481,6 +476,7 @@ var OntologyBrowser = (function () {
                                 from: classId,
                                 to: property.range,
                                 label: getLabelFromId(key),
+                                data: {propertyId: key}
 
 
                             })
@@ -506,7 +502,21 @@ var OntologyBrowser = (function () {
                     return MainController.UI.message(err);
 
             })
-        })
+
+        }
+
+        var newGraph = true;
+
+        if (!classId) {
+            self.queryClassPath = {};
+            classId = ThesaurusBrowser.currentTreeNode.data.id
+            self.init(function () {
+                execute(classId)
+            })
+        } else {
+            newGraph = false;
+            execute(classId)
+        }
 
 
     }
@@ -536,10 +546,10 @@ var OntologyBrowser = (function () {
             self.setGraphPopupMenus()
             MainController.UI.showPopup(point, "graphPopupDiv")
         } else {
-            
+
 
         }
-        self.currentJstreeNode.dataProperties={}
+        self.currentJstreeNode.dataProperties = {}
         self.graphActions.showDataTypeProperties()
     }
 
@@ -552,16 +562,30 @@ var OntologyBrowser = (function () {
         showDataTypeProperties: function () {
             var schema = Config.sources[MainController.currentSource].schema;
             Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentJstreeNode.id, function (err, result) {
-                var html = "<B>" +getLabelFromId( OntologyBrowser.currentJstreeNode.id)+"</B>"+
+                var html = "<B>" + getLabelFromId(OntologyBrowser.currentJstreeNode.id) + "</B>" +
                     "<div style='display:flex;flex-direction:column'>"
+                var existingItems = []
                 result.forEach(function (item) {
-                    if (!item.range)
+
+
+                    var range = null;
+
+                    if (item.rangeDataType) {
+                        range = item.rangeDataType
+                    } else if (item.rangeRestriction) {
+                        range = item.rangeRestriction
+                    }
+                    if (!range)
                         return;
-                    OntologyBrowser.currentJstreeNode.dataProperties[item.property.value]=item.range
+                    var id = OntologyBrowser.currentJstreeNode.id + "|" + item.property.value;
+                    if (!OntologyBrowser.currentJstreeNode.dataProperties[id]) {
+                        OntologyBrowser.currentJstreeNode.dataProperties[id] = range
+                    }
 
-
-                    html += "<div class='OntologyBrowser_propertyDiv' onclick='OntologyBrowser.graphActions.addPropertyToTree($(this))' id='" + item.property.value + "'>" + getLabelFromId(item.property.value) + "</div>"
-
+                    if (existingItems.indexOf(id) < 0) {
+                        existingItems.push(id)
+                        html += "<div class='OntologyBrowser_propertyDiv' onclick='OntologyBrowser.graphActions.addPropertyToTree($(this))' id='" + id + "'>" + getLabelFromId(item.property.value) + "</div>"
+                    }
 
                 })
                 html += "</div>"
@@ -605,84 +629,284 @@ var OntologyBrowser = (function () {
             })
         },
 
-        addPropertyToTree:function(div){
-            var id=$(div).attr("id");
-            var existingNodes=common.getjsTreeNodes("OntologyBrowser_queryTreeDiv",true)
-            var jstreeData=[];
+        addPropertyToTree: function (div) {
+            var id = $(div).attr("id");
+            var isNewTree = $("#OntologyBrowser_queryTreeDiv").is(':empty');
+            var existingNodes = []
+            if (!isNewTree)
+                existingNodes = common.getjsTreeNodes("OntologyBrowser_queryTreeDiv", true)
+            var jstreeData = [];
 
-            if(existingNodes.indexOf( OntologyBrowser.currentJstreeNode.id)<0) {
+            if (existingNodes.indexOf(OntologyBrowser.currentJstreeNode.id) < 0) {
                 jstreeData.push({
                     id: OntologyBrowser.currentJstreeNode.id,
                     text: getLabelFromId(OntologyBrowser.currentJstreeNode.id),
-                    parent: '#'
+                    parent: '#',
+                    data: {
+                        type: "Class",
+                        id: OntologyBrowser.currentJstreeNode.id,
+                    }
                 })
-                common.addNodesToJstree("OntologyBrowser_queryTreeDiv","#",jstreeData)
+                if (!isNewTree) {
+
+                    common.addNodesToJstree("OntologyBrowser_queryTreeDiv", "#", jstreeData)
+                    jstreeData = []
+                }
+
 
             }
-            if(existingNodes.indexOf( id)<0) {
+            if (existingNodes.indexOf(id) < 0) {
+                var propId = id.split("|")[1]
                 jstreeData.push({
                     id: id,
                     text: getLabelFromId(id),
                     parent: OntologyBrowser.currentJstreeNode.id,
-                    data:OntologyBrowser.currentJstreeNode.dataProperties[id]
+                    data: {
+
+                        propId: propId,
+                        type: "DataTypeProperty",
+                        parent: OntologyBrowser.currentJstreeNode.id,
+                        range: OntologyBrowser.currentJstreeNode.dataProperties[id]
+                    }
                 })
 
-                common.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentJstreeNode.id, jstreeData)
+                if (isNewTree) {
+                    var jsTreeOptions = {};
+                    jsTreeOptions.contextMenu = OntologyBrowser.getJstreeConceptsContextMenu()
+                    jsTreeOptions.selectNodeFn = OntologyBrowser.selectTreeNodeFn;
+                    //  jsTreeOptions.onCheckNodeFn = OntologyBrowser.checkTreeNodeFn;
+                    //  jsTreeOptions.withCheckboxes=true
+
+                    common.loadJsTree("OntologyBrowser_queryTreeDiv", jstreeData, jsTreeOptions)
+                } else {
+                    common.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentJstreeNode.id, jstreeData)
+                }
+
             }
 
+        },
+        resetFilters: function () {
+            $("#OntologyBrowser_queryTreeDiv").html("")
         }
 
     }
 
-    self.query={
+    self.query = {
 
-        addQueryFilterShowDialog:function(){
-            var node=$("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0]
-            var property=node.data
+        addQueryFilterShowDialog: function () {
+            var node = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0]
+            var range = node.data.range
 
-
+            var operators = []
             $("#OntologyBrowser_dataPropertyFilterDialog").dialog("open");
 
 
-            if(property.value.indexOf("XMLSchema#string")){
-
+            if (range.value.indexOf("XMLSchema#string") > -1 || range.value.indexOf("Literal") > -1) {
+                operators = ["=", "#", "contains", "beginsWith", "endsWith"]
+            } else if (range.value.indexOf("XMLSchema#decimal") > -1 || range.value.indexOf("XMLSchema#integer") > -1) {
+                operators = ["=", "#", ">", "<", ">=", "<="]
+            } else {
+                alert("else ?  " + range.value)
             }
+
+            common.fillSelectOptions("OntologyBrowser_dataPropertyFilterDialog_operator", operators, true)
 
 
         },
 
-        validateFilterDialog:function(){
-            var operator=$("#OntologyBrowser_dataPropertyFilterDialog_operator").val()
-            var value=$("#OntologyBrowser_dataPropertyFilterDialog_value").val()
+        validateFilterDialog: function () {
+            var operator = $("#OntologyBrowser_dataPropertyFilterDialog_operator").val()
+            var value = $("#OntologyBrowser_dataPropertyFilterDialog_value").val()
             $("#OntologyBrowser_dataPropertyFilterDialog").dialog("close");
 
-            var node=$("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0]
-            var property=node.data
-            var jstreeData=[]
+            var node = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0]
+            var property = node.data
+            var jstreeData = []
             jstreeData.push({
-                id: ""+Math.random(),
-                text: operator+" "+value,
-                parent:node.id,
+                id: "" + Math.random(),
+                text: operator + " " + value,
+                parent: node.id,
+                data: {
+                    operator: operator,
+                    value: value
+
+                }
 
             })
 
-            common.addNodesToJstree("OntologyBrowser_queryTreeDiv",node.id, jstreeData)
+            common.addNodesToJstree("OntologyBrowser_queryTreeDiv", node.id, jstreeData)
 
 
         },
-        cancelFilterDialog:function(){
+        cancelFilterDialog: function () {
             $("#OntologyBrowser_dataPropertyFilterDialog").dialog("close");
         },
-        removeQueryFilter:function(){
-            var nodeId=$("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected()[0]
+        removeQueryFilter: function () {
+            var nodeId = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected()[0]
             $("#OntologyBrowser_queryTreeDiv").jstree(true).delete_node(nodeId)
         },
+        setOptional: function () {
+           // var node = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0];
+            var node=self.currentTreeNode
+                $('#OntologyBrowser_queryTreeDiv').jstree('rename_node', node, node.text + " (OPTIONAL)")
+            node.data.optional = true
+            //  node.text=node.text+"optional"
 
-        executeQuery:function(){
+        },
+
+        executeQuery: function () {
+            var nodes = common.getjsTreeNodes("OntologyBrowser_queryTreeDiv")
+            var nodesMap = {}
+            nodes.forEach(function (item) {
+                nodesMap[item.id] = item;
+            })
+
+
+            var classNodeIds = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", "#").children;
+
+            var filters = [];
+            var selectFields = []
+            var previousClassId = null;
+            var previousClassLabel = null;
+            var selectStr=" * "
+            var showIds=$('OntologyBrowser_queryShowItemsIdsCBX').prop("checked")
+            var query="";
+               if(!showIds)
+                   selectStr=" ";
+               classNodeIds.forEach(function (classNodeId, index) {
+                // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
+
+
+
+                var propertyNodes = []
+                var propertyNodes = []
+                var classNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId])
+
+                if (index > 0) {// join classes
+                    var edges = visjsGraph.data.edges.get();
+                    edges.forEach(function (edge) {
+                        var done = false;
+                        for (var previousClassId in self.queryClassPath) {
+                            var p = edge.id.indexOf(classNodeId);
+                            var q = edge.id.indexOf(previousClassId)
+                            if (!done && p > -1 && q > -1) {
+                                done = true
+                                var previousClassLabel = self.queryClassPath[previousClassId].label
+                                //   if (p < q)
+                                query += "?" + previousClassLabel + " <" + edge.data.propertyId + ">|^<" + edge.data.propertyId + "> ?" + classNode.text + " . "
+                                /*    else
+                                        query += "?" + classNode.text + " <" + edge.data.propertyId + "> ?" + previousClassLabel + " . "*/
+                            }
+                        }
+
+
+                    })
+
+                }
+
+
+                self.queryClassPath[classNodeId] = {id: classNodeId, label: classNode.text}
+
+
+                query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . "
+                classNode.children.forEach(function (propertyNodeId) {
+                    var propertyNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [propertyNodeId])
+                    if (propertyNode.data.optional) {
+                        query += "OPTIONAL {"
+                        propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "")
+                    }
+                    if(!showIds)
+                        selectStr+=" ?" + propertyNode.text ;
+
+                    query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . "
+                    propertyNode.children.forEach(function (filterNodeId) {
+                        var filterNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [filterNodeId])
+                        var operator = filterNode.data.operator;
+                        var value = filterNode.data.value;
+                        var range = propertyNode.data.range.value
+                        if (range.indexOf("string") > -1) {
+                            if (operator == "contains")
+                                query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "','i')) "
+                            if (operator == "beginsWith")
+                                query += "FILTER (REGEX(?" + propertyNode.text + ",'^" + value + "','i')) "
+
+                            if (operator == "beginsWith")
+                                query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "$','i')) "
+                            else
+                                query += "FILTER (?" + propertyNode.text + operator + "'" + value + "'" + ")"
+
+                        } else if (value.indexOf("http") > 0) {
+
+                        } else {
+                            query += "FILTER (?" + propertyNode.text + operator + value + ")"
+                        }
+
+
+                    })
+
+                    if (propertyNode.data.optional) {
+                        query += "} "
+                    }
+
+
+                })
+            })
+            var fromStr = "FROM <http://sws.ifi.uio.no/vocab/npd-v2/> FROM <http://sws.ifi.uio.no/data/npd-v2/> "
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+                "Select "+selectStr +" "+ fromStr + " where {"+query;
+
+            query += "} limit " + self.queryLimit
+            //  return;
+            var url = Config.sources[MainController.currentSource].sparql_url + "?query=&format=json";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {}, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err)
+                if (result.length >= self.queryLimit)
+                    return MainController.UI.message("result too long >" + self.queryLimit + " lines ")
+                self.query.showQueryResultInDataTable(result)
+            })
+
 
         }
+        , showQueryResultInDataTable: function (result) {
+
+            var dataSet = [];
+            var cols = [];
+            result.head.vars.forEach(function (item) {
+                cols.push({title: item})
+            })
+            result.results.bindings.forEach(function (item, indexRow) {
+                var line = []
+                result.head.vars.forEach(function (col, indexCol) {
+                    if (item[col])
+                        line.push(item[col].value);
+                    else
+                        line.push("");
+                })
+                dataSet.push(line)
+            })
+            $("#OntologyBrowser_tabs").tabs("option", "active", 1);
+
+            $('#OntologyBrowser_tabs_result').html("<table id='dataTableDiv'></table>");
+            setTimeout(function () {
+
+                $('#dataTableDiv').DataTable({
+                    data: dataSet,
+                    columns: cols,
+                    // async: false,
+                    "pageLength": 15,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf', 'print'
+                    ]
 
 
+                })
+                    , 500
+            })
+
+
+        }
 
 
     }

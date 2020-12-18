@@ -21,8 +21,7 @@
     }
 
     #OntologyBrowser_tabs_result {
-        width: 500px;
-        height: 500px;
+
         overflow: auto;
     }
 
@@ -33,6 +32,12 @@
         border: blue solid 1px;
         background-color: #bdbdbd;
     }
+#OntologyBrowser_queryTreeDiv {
+    background-color: #cdd;
+    height: 45%;
+    overflow: auto;
+    border: blue solid 1px;
+}
 
 
 </style>
@@ -58,73 +63,33 @@
     <div id="OntologyBrowser_tabs_selection" style="display: flex;flex-direction: row">
 
 
-        <!--  <div class="OntologyBrowser_majorDiv">Object Properties<select id="OntologyBrowser_filter_ObjectpropertiesSelect" onchange="OntologyBrowser.showDatatypeProperties($(this).val())"></select>
-          </div>
-          <div class="OntologyBrowser_majorDiv" style="display: flex;flex-direction: row">
-              <div id="OntologyBrowser_PropertiesDiv">
-
-              </div>
-              <div id="OntologyBrowser_PropertiesFilterInputDiv" style="display: none">
-
-                  filter Properties
-                  <table>
-                      <tr>
-                          <td>Properties</td>
-                               <td><input id="OntologyBrowser_filter_DataPropertiesSelect"></input></td>
-                      </tr>
-                      <tr>
-                          <td>Operator</td>
-                          <td><select id="OntologyBrowser_filter_operators"></select></td>
-                      </tr>
-                      <tr>
-                          <td>value</td>
-                          <td><input id="OntologyBrowser_filter_value"/><select id="OntologyBrowser_filter_choice"></select></td>
-                      </tr>
-                      <tr>
-                          <td>
-                              <button onclick="OntologyBrowser.addFilter()">Add filter</button>
-                          </td>
-                      </tr>
-
-                  </table>
-              </div>
-          </div>
-
-          <div class="OntologyBrowser_majorDiv">
-              Query
-              <div id="OntologyBrowser_filtersContainerDiv" style="display: flex;flex-direction: column">
-
-
-              </div>
-              <button onclick="OntologyBrowser.executeFilterQuery()">Query</button>
-
-          </div>-->
         <div id="OntologyBrowser_graphDiv"></div>
         <div id="OntologyBrowser_selectionDiv" style="border: blue;margin-left: 5px">
             <div id="OntologyBrowser_propertiesDiv" style="width: 100%;height: 45%;overflow: auto"></div>
             <div><B>Query Fields</B></div>
             <div id="OntologyBrowser_queryTreeDiv" style="width: 100%;height: 45%;overflow: auto"></div>
             <div id="OntologyBrowser_actionDiv" style="width: 100%;height: 5%;overflow: auto">
+                <input type="checkbox" checked="checked" id="OntologyBrowser_queryShowItemsIdsCBX">show Ids
                 <button onclick="OntologyBrowser.query.executeQuery()">Execute Query</button>
+                <button onclick="OntologyBrowser.graphActions.resetFilters()">Reset</button>
             </div>
         </div>
     </div>
 
 
     <div id="OntologyBrowser_tabs_result">
-        <table id='dataTableDiv'></table>
+
     </div>
 
     <div id="OntologyBrowser_dataPropertyFilterDialog">
         <span id="OntologyBrowser_dataPropertyFilterDialog_name"></span>
         <select id="OntologyBrowser_dataPropertyFilterDialog_operator">
-            <option>=</option>
-            <option>#</option>
-            <option>contains</option>
+
         </select>
         <input id="OntologyBrowser_dataPropertyFilterDialog_value"></input>
+        <br>
         <button onclick="OntologyBrowser.query.validateFilterDialog()">Add filter</button>
-        <button onclick="OntologyBrowser.query.cancelFilterDialog()">Add filter</button>
+        <button onclick="OntologyBrowser.query.cancelFilterDialog()">Cancel</button>
     </div>
 
 

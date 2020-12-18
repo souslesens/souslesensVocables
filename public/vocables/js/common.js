@@ -41,13 +41,16 @@ var common = (function () {
         self.getjsTreeNodes = function (jstreeDiv, IdsOnly) {
             var idList = [];
             var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json('#', {flat: true});
-            $.each(jsonNodes, function (i, val) {
-                if (IdsOnly)
-                    idList.push($(val).attr('id'));
-                else
-                    idList.push($(val));
-            })
-            return idList;
+            if(IdsOnly){
+                jsonNodes.forEach(function(item){
+                    idList.push(item.id)
+                })
+                return idList
+            }
+            else{
+                return jsonNodes;
+            }
+
         }
 
         self.getjsTreeNodeObj = function (jstreeDiv,id) {

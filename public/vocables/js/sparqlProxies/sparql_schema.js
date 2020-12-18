@@ -173,23 +173,17 @@ var Sparql_schema = (function () {
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
             " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-            "select distinct ?property ?range  " + fromStr + " WHERE  { " +
-            /*   "{" +
-               "    ?property rdf:type owl:DatatypeProperty>." +
-            " ?property rdfs:domain  <"+classId+">." +
-               "  optional{?property rdfs:range ?range}" +
-               "}" +
-
-               "UNION*/"{" +
+            "select distinct ?property ?rangeDataType ?rangeRestriction " + fromStr + " WHERE  { " +
+           "{" +
             "      <" + classId + "> rdfs:subClassOf* ?overClass." +
             "     ?property rdf:type <http://www.w3.org/2002/07/owl#DatatypeProperty>. ?property rdfs:domain  ?overClass." +
-            "     optional{?property rdfs:range ?range}" +
+            "     optional{?property rdfs:range ?rangeDataType}" +
             "  }" +
 
             "UNION{" +
             "      <" + classId + ">     rdfs:subClassOf* ?anonymNode." +
             " ?anonymNode owl:onProperty ?property." +
-            "?anonymNode owl:someValuesFrom ?range." +
+            "?anonymNode owl:someValuesFrom ?rangeRestriction." +
             " OPTIONAL {?property  owl:onProperty  ?anonymNode .}" +
 
             "  }" +

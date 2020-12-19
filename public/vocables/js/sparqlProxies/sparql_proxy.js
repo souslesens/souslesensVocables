@@ -85,32 +85,36 @@ var Sparql_proxy = (function () {
         if (!options)
             options = {}
 
-        var body = {
-            params: {query: query},
-            headers:{
-                "Accept": "application/sparql-results+json",
-                "Content-Type": "application/x-www-form-urlencoded"
-
-            }
-        }
-
 
         $("#waitImg").css("display", "block");
 
 
         var payload = {
             httpProxy: 1,
-            url: url,
-            body: JSON.stringify(body),
             options: queryOptions
-
-
         }
 
-        if (options.method && options.method == "GET")
+
+        if (options.method && options.method == "GET") {
             payload.GET = true;
-        else
+            var query2 = encodeURIComponent(query);
+            query2 = query2.replace(/%2B/g, "+").trim()
+            payload.url = url + query2
+            if(Config.sources[MainController.currentSource].server_header){
+                payload.options=JSON.stringify({headers:Config.sources[MainController.currentSource].server_header})
+            }
+        } else {
             payload.POST = true;
+            var body = {
+                params: {query: query},
+                headers: {
+                    "Accept": "application/sparql-results+json",
+                    "Content-Type": "application/x-www-form-urlencoded"
+                }
+            }
+            payload.body = JSON.stringify(body);
+            payload.url = url
+        }
 
         $.ajax({
             type: "POST",
@@ -122,10 +126,16 @@ var Sparql_proxy = (function () {
              },*/
 
             success: function (data, textStatus, jqXHR) {
-                var xx = data;
 
-                if (!data.results )
-                    var x=3
+
+
+                if (data.result && typeof data.result != "object")
+                    data = JSON.parse(data.result.trim())
+
+                if (!data.results)
+                    return null;
+
+
                 if (data.results.bindings.length == 0)
                     ;
 
@@ -136,11 +146,12 @@ var Sparql_proxy = (function () {
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) { //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data")
                 } else
-                    $("#messageDiv").html(err.responseText);
+                   MainController.UI.message(err.responseText);
 
                 $("#waitImg").css("display", "none");
                 console.log(JSON.stringify(err))
                 console.log(JSON.stringify(query))
+                MainController.UI.message(err.responseText);
                 if (callback) {
                     return callback(err)
                 }

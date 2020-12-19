@@ -2,112 +2,50 @@ var Sparql_OWL = (function () {
 
         var self = {};
 
-        var filterCollectionsAncestorsDepth=4
+        var filterCollectionsAncestorsDepth = 4
         self.ancestorsDepth = 6
 
         var elasticUrl = Config.serverUrl;
 
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
-            if(!options)
-                options={}
+            if (!options)
+                options = {}
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
+
+            var strFilterTopConcept;
+            self.topClass = Config.sources[sourceLabel].topClass
+            if (self.topClass)
+                strFilterTopConcept = " ?topConcept rdfs:subClassOf <" + self.topClass + ">. "
+            else
+                strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
+
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
-            self.topClass = "http://www.w3.org/2002/07/owl#Thing"
+
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
-                "" +
-                "select   distinct ?topConcept  ?topConceptLabel  from <" + self.graphUri + ">   where {" +
-                " ?topConcept rdfs:subClassOf <" + self.topClass + ">. " +
-                " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
+            "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {" +
+            strFilterTopConcept +
+            " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
                 query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_generic.setFilter("collection", options.filterCollections)
 
-
             query += "}order by ?topConceptLabel limit 1000"
 
-
-            if (false && options.filterCollections) {
-                var fromStr = ""
-                if (self.graphUri)
-                    fromStr = " FROM <" + self.graphUri + ">"
-
-
-                query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                    " select  distinct * " + fromStr + "   WHERE { " +
-                    "  ?child1 rdfs:subClassOf ?concept.   "+
-                    "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
-                  //  "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
-                    "  " +
-                    "   ?collection skos:prefLabel ?collectionLabel." +
-                    "   ?acollection skos:prefLabel ?acollectionLabel." +
-                    "   optional{?concept rdfs:label ?conceptLabel.}" +
-                    "   ?child1 rdfs:label ?child1Label." +
-                    "   ?child1 rdf:type ?child1Type."
-
-
-                for (var i = 1; i < filterCollectionsAncestorsDepth; i++) {
-
-                    query += "OPTIONAL { ?child" + (i) + " rdfs:subClassOf ?child" + (i + 1) + "." +
-                        "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"+
-                    "OPTIONAL {?child" + (i + 1) + " rdf:type  ?child" + (i + 1) + "Type.}"
-
-                }
-                for (var i = 1; i < filterCollectionsAncestorsDepth; i++) {
-                    query += "} "
-                }
-
-
-                query += "}order by ?concept"
-
-            }
-
-
-            // query+="  ?prop   rdf:type owl:ObjectProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.  filter( not EXISTS {?topConcept rdfs:subClassOf ?d}) }limit 1000"
-            self.execute_GET_query(query, function (err, result) {
+            var url = self.sparql_url + "?format=json&query=";
+            var method=Config.sources[sourceLabel].server_method;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
-
-                result.results.bindings= Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"child",{type:"http://www.w3.org/2002/07/owl#Class"})
-
-                if(false && options.filterCollections) {
-                    var newBindings=[];
-                    var uniqueIds={}
-                    result.results.bindings.forEach(function (item) {
-                        var done=false
-                        for(var i=filterCollectionsAncestorsDepth;i>1;i--){
-                            var id=item["child"+i]
-                            if(!done && id  && !uniqueIds[id]){
-                                uniqueIds[id]=1
-                                done=true;
-                                newBindings.push({
-                                    topConcept:{
-                                        value:item["child"+i].value,
-                                    },
-                                    topConceptLabel:{
-                                        value:item["child"+i+"Label"].value,
-                                    },
-                                    topConceptType:{
-                                        value:item["child"+i+"Type"].value,
-                                    }
-                                })
-                            }
-                        }
-
-                    })
-                    result.results.bindings=newBindings;
-                }
-
-
-
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "child", {type: "http://www.w3.org/2002/07/owl#Class"})
                 return callback(null, result.results.bindings);
             })
 
@@ -115,8 +53,12 @@ var Sparql_OWL = (function () {
 
 
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
-            if(!options)
-                options={}
+            if (!options)
+                options = {}
+
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
@@ -129,7 +71,7 @@ var Sparql_OWL = (function () {
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "select   distinct * from <" + self.graphUri + ">  where {" +
+                "select   distinct * " + fromStr + " where {" +
                 "?child1   rdfs:subClassOf ?concept. " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
 
@@ -148,7 +90,7 @@ var Sparql_OWL = (function () {
 
             if (options.filterCollections) {
                 var fromStr = ""
-                if (self.graphUri)
+                if (self.graphUri && self.graphUri != "")
                     fromStr = " FROM <" + self.graphUri + ">"
 
 
@@ -158,8 +100,8 @@ var Sparql_OWL = (function () {
                     " select  distinct * " + fromStr + "   WHERE { " +
                     "  ?child1 rdfs:subClassOf ?concept.   " + strFilter +
                     "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
-                 //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
-                 "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
+                    //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
                     "  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
@@ -171,7 +113,8 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+            var method=Config.sources[sourceLabel].server_method;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -183,14 +126,21 @@ var Sparql_OWL = (function () {
         }
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
-            if(!options)
-                options={}
+            if (!options)
+                options = {}
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
+
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_url;
 
-            var query = "select *  from <" + self.graphUri + "> " +
+            var query = "select * " + fromStr +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
-            self.execute_GET_query(query, function (err, result) {
+
+            var url = self.sparql_url + "?format=json&query=";
+            var method=Config.sources[sourceLabel].server_method;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -210,10 +160,15 @@ var Sparql_OWL = (function () {
             } else if (ids) {
                 strFilter = Sparql_generic.setFilter("concept", ids, null)
             }
+
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
+
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 
-                " select distinct *  from <" + self.graphUri + ">   WHERE {{"
+                " select distinct *  " + fromStr + "  WHERE {{"
 
             query += "?concept rdfs:label ?conceptLabel. " + strFilter;
 
@@ -252,7 +207,8 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+            var method=Config.sources[sourceLabel].server_method;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -267,7 +223,7 @@ var Sparql_OWL = (function () {
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim()
 
-            var url = self.sparql_url + "?output=json&query=" + query2;
+            var url = self.sparql_url + "?format=json&query=" + query2;
 
             var body = {
                 headers: {
@@ -297,7 +253,7 @@ var Sparql_OWL = (function () {
 
                 success: function (data, textStatus, jqXHR) {
                     if (data.result && typeof data.result != "object")//cas GEMET
-                        data = JSON.parse(data.result)
+                        data = JSON.parse(data.result.trim())
                     //  $("#messageDiv").html("found : " + data.results.bindings.length);
 
                     /*  if (data.results.bindings.length == 0)

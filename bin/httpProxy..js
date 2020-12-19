@@ -32,7 +32,7 @@ var httpProxy = {
             if (err)
                 return callback(err);
             if (res.text)
-                return callback(null, res.text);
+                return callback(null, res.text.trim());
             callback(null, res.body)
         })
 
@@ -80,6 +80,9 @@ var httpProxy = {
             try {
 
                 if (typeof body=="string") {
+                    body=body.trim()
+                    if(body.indexOf("{")<0)
+                        return callback(body);//error
                     var obj = JSON.parse(body);
                     return callback(null, obj)
                 } else {

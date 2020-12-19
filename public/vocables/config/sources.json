@@ -200,29 +200,68 @@
     "schema": "OWL",
     "color": "#bcbd22"
   },
-  "CFIHOS": {
+  "CFIHOS__X": {
     "graphUri": "",
     "sparql_url": "http://data.15926.org/cfihos",
-    "controller": "Sparql_ISO_15926",
-    "schemaType": "OWL",
-    "schema": "OWL",
-    "color": "#bcbd22"
-  },
-  "ISO_15926": {
-    "graphUri": "",
-    "sparql_url": "http://staging.data.posccaesar.org/rdl/",
-    "controller": "Sparql_ISO_15926",
-    "schemaType": "OWL",
-    "schema": "OWL",
-    "color": "#bcbd22"
-  },
-  "ISO_15926_part4": {
-    "editable": true,
-    "graphUri": "http://standards.iso.org/iso/15926/part4/",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "server_method": "GET",
     "controller": "Sparql_OWL",
+    "topClass": "http://data.15926.org/dm/Thing",
     "schemaType": "OWL",
-    "schema": "NPD",
+    "schema": "OWL",
     "color": "#bcbd22"
-  }
+  },
+  "CFIHOS": {
+    "graphUri": "",
+    "sparql_url": "https://demo-irm-dnvgl.northeurope.cloudapp.azure.com/readidemo/sparql/readi-Z018",
+    "server_method": "GET",
+    "server_header": {
+      "Authorization": "Basic cmVhZGlkZW1vOm1pa3NvbHlkaXNr",
+      "Connection": "keep-alive"
+    },
+    "controller": "Sparql_OWL",
+    "topClass": "http://data.15926.org/dm/Thing",
+    "schemaType": "OWL",
+    "schema": "OWL",
+    "color": "#bcbd22"
+  },
+  "CFIHOS_equipment": {
+  "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
+  "sparql_url": "http://51.178.139.80:8890/sparql",
+  "controller": "Sparql_OWL",
+  "topClass": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+  "schemaType": "OWL",
+  "schema": null,
+  "color": "#bcbd22"
+},
+
+"ISO_15926": {
+"graphUri": "",
+"sparql_url": "http://staging.data.posccaesar.org/rdl/",
+"server_method": "GET",
+"controller": "Sparql_OWL",
+"topClass": "http://data.posccaesar.org/dm/Thing",
+"schemaType": "OWL",
+"schema": null,
+"color": "#bcbd22"
+},
+"ISO_15926_part_4": {
+"editable": true,
+"graphUri": "http://standards.iso.org/iso/15926/part4/",
+"sparql_url": "http://51.178.139.80:8890/sparql",
+"topClass": "http://standards.iso.org/iso/15926/part14#class",
+"controller": "Sparql_OWL",
+"schemaType": "OWL",
+"schema": "NPD",
+"color": "#bcbd22"
+},
+"ISO_15926_part_12": {
+"editable": true,
+"graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
+"sparql_url": "http://51.178.139.80:8890/sparql",
+"controller": "Sparql_OWL",
+"topClass": null,
+"schemaType": "OWL",
+"schema": null,
+"color": "#bcbd22"
+}
 }

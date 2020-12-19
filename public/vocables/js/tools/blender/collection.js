@@ -2,7 +2,7 @@ var Collection = (function () {
 
     var self = {}
     self.currentTreeNode;
-    self.currentCollectionFilter=null;
+    self.currentCollectionFilter = null;
 
     self.broaderProperty = "http://www.w3.org/2004/02/skos/core#member"
 
@@ -104,7 +104,7 @@ var Collection = (function () {
         if (node.children.length > 0)
             return;
 
-        self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, {onlyCollectionType:true}, function (err, result) {
+        self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, {onlyCollectionType: true}, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -206,31 +206,31 @@ var Collection = (function () {
 
 
     }
-  /*  self.dropNode = function () {
-        if (!Blender.menuActions.movingNode)
-            return
-        var newParent = Blender.menuActions.movingNode.newParent
-        var oldParent = Blender.menuActions.movingNode.oldParent
-        var id = Blender.menuActions.movingNode.id
-        if (Blender.menuActions.lastDroppedNodeId == id)
-            return
-        Blender.menuActions.lastDroppedNodeId = id;
-        var broaderPredicate = self.broaderProperty
+    /*  self.dropNode = function () {
+          if (!Blender.menuActions.movingNode)
+              return
+          var newParent = Blender.menuActions.movingNode.newParent
+          var oldParent = Blender.menuActions.movingNode.oldParent
+          var id = Blender.menuActions.movingNode.id
+          if (Blender.menuActions.lastDroppedNodeId == id)
+              return
+          Blender.menuActions.lastDroppedNodeId = id;
+          var broaderPredicate = self.broaderProperty
 
-        Sparql_generic.deleteTriples(Blender.currentSource, oldParent, "http://www.w3.org/2004/02/skos/core#member", id, function (err, result) {
+          Sparql_generic.deleteTriples(Blender.currentSource, oldParent, "http://www.w3.org/2004/02/skos/core#member", id, function (err, result) {
 
-            if (err) {
-                return MainController.UI.message(err)
-            }
-            var triple = {subject: newParent, predicate: "http://www.w3.org/2004/02/skos/core#member", object: id, valueType: "uri"}
-            Sparql_generic.insertTriples(Blender.currentSource, [triple], function (err, result) {
-                if (err) {
-                    return MainController.UI.message(err)
-                }
-            })
-        })
+              if (err) {
+                  return MainController.UI.message(err)
+              }
+              var triple = {subject: newParent, predicate: "http://www.w3.org/2004/02/skos/core#member", object: id, valueType: "uri"}
+              Sparql_generic.insertTriples(Blender.currentSource, [triple], function (err, result) {
+                  if (err) {
+                      return MainController.UI.message(err)
+                  }
+              })
+          })
 
-    }*/
+      }*/
 
 
     self.Sparql = {
@@ -252,9 +252,14 @@ var Collection = (function () {
         getCollections: function (sourceLabel, options, callback) {
             if (!options)
                 options = {}
+
             var variables = self.Sparql.getVariables(sourceLabel);
+            var fromStr = ""
+            if (variables.graphUri && variables.graphUri != "")
+                fromStr = " FROM <" + variables.graphUri + ">"
+
             var query = "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
-                " select    distinct * from  <" + variables.graphUri + ">  WHERE {" +
+                " select    distinct * "+fromStr+" WHERE {" +
                 "?collection rdf:type  ?collectionType. filter( ?collectionType =skos:Collection). " +
                 "?collection skos:prefLabel ?collectionLabel."
             if (variables.lang)
@@ -265,8 +270,11 @@ var Collection = (function () {
 
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
 
+            var options={
+                method:Config.sources[sourceLabel].server_method
+            }
 
-            Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, null, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, null, options, function (err, result) {
                 if (err)
                     return callback(err);
 
@@ -291,8 +299,8 @@ var Collection = (function () {
         }
         ,
         getNodeChildren: function (sourceLabel, collectionId, options, callback) {
-            if(!options)
-                options={}
+            if (!options)
+                options = {}
             var variables = self.Sparql.getVariables(sourceLabel);
 
             var query = "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>";
@@ -326,9 +334,9 @@ var Collection = (function () {
 
 
         ,
-        getSingleNodeAllDescendants: function (sourceLabel, id,options, callback) {
-            if(!options)
-                options={}
+        getSingleNodeAllDescendants: function (sourceLabel, id, options, callback) {
+            if (!options)
+                options = {}
             var variables = self.Sparql.getVariables(sourceLabel);
             var query = "";
             query += "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
@@ -337,7 +345,7 @@ var Collection = (function () {
                 "filter (?collection=<" + id + ">) " +
                 "?narrower skos:prefLabel|rdfs:label ?narrowerLabel." +
                 "?narrower rdf:type ?narrowerType."
-            if(options.withBroaders)
+            if (options.withBroaders)
                 query += "?narrower   rdfs:subClassOf*  ?broader."
             if (options.onlyCollectionType)
                 query += "filter (?narrower=<http://www.w3.org/2004/02/skos/core#Collection>)"
@@ -367,9 +375,9 @@ var Collection = (function () {
             if (err)
                 return MainController.UI.message(err)
             if (result.length == 0) {
-                Collection.currentCollectionFilter=null;
+                Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
-                $("#ThesaurusBrowser_collectionDiv").css("display","none")
+                $("#ThesaurusBrowser_collectionDiv").css("display", "none")
                 return MainController.UI.message("no collections for this source")
 
             }
@@ -380,7 +388,7 @@ var Collection = (function () {
                 array.push({id: item.collection.value, label: item.collectionLabel.value})
 
             })
-            $("#ThesaurusBrowser_collectionDiv").css("display","block")
+            $("#ThesaurusBrowser_collectionDiv").css("display", "block")
             common.fillSelectOptions("ThesaurusBrowser_collectionSelect", array, true, "label", "id")
 
         })
@@ -389,18 +397,15 @@ var Collection = (function () {
     self.filterBrowserCollection = function () {
         var collection = $("#ThesaurusBrowser_collectionSelect").val();
         if (!collection || collection == "") {
-            return Collection.currentCollectionFilter=null;;
+            return Collection.currentCollectionFilter = null;
+            ;
         }
-        Collection.currentCollectionFilter=collection;
-        ThesaurusBrowser.showThesaurusTopConcepts( MainController.currentSource,{filterCollections:collection})
-
-
-
-
+        Collection.currentCollectionFilter = collection;
+        ThesaurusBrowser.showThesaurusTopConcepts(MainController.currentSource, {filterCollections: collection})
 
 
     }
 
-return self;
+    return self;
 
 })()

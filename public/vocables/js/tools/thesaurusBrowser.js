@@ -306,6 +306,9 @@ var ThesaurusBrowser = (function () {
             var existingNodes = {};
             var jstreeData = []
 
+            if(result.length==0)
+                return $("#currentSourceTreeDiv").html("No data found")
+
             var allJstreeIds = {}
             result.forEach(function (item, index) {
                 for (var i = 20; i > 0; i--) {

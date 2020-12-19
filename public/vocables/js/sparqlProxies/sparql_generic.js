@@ -273,8 +273,8 @@ var Sparql_generic = (function () {
             setVariables(sourceLabel);
 
             var filterStr = setFilter("concept", ids, words, options)
-            if(filterStr=="")
-                return alert ("no parent specified for getNodeChildren ")
+            if (filterStr == "")
+                return alert("no parent specified for getNodeChildren ")
             if (!options) {
                 options = {depth: 0}
             }
@@ -357,8 +357,8 @@ var Sparql_generic = (function () {
             setVariables(sourceLabel);
             var filterStr = setFilter("concept", ids, words, options)
 
-            if(filterStr=="")
-                return alert ("no child specified for getNodeParents ")
+            if (filterStr == "")
+                return alert("no child specified for getNodeParents ")
 
             if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
                 Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function (err, result) {
@@ -424,12 +424,12 @@ var Sparql_generic = (function () {
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
             $("#waitImg").css("display", "block");
 
-            /*  if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
                   Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
                       callback(err, result);
                   })
                   return;
-              }*/
+              }
             if (!options)
                 options = {}
             setVariables(sourceLabel);
@@ -827,9 +827,14 @@ var Sparql_generic = (function () {
                     }
                     var id = item[field].value
                     if (!item[field + "Label"]) {
+                        var p = id.lastIndexOf("#")
+                        if (p > -1)
+                            item[field + "Label"] = {value: id.substring(p + 1)}
+                        else {
+                            p = id.lastIndexOf("/")
+                            item[field + "Label"] = {value: id.substring(p + 1)}
+                        }
 
-                        item[field + "Label"] = {value: id.substring(id.lastIndexOf("/") + 1)}
-                        item[field + "Label"] = {value: id.substring(id.lastIndexOf("#") + 1)}
 
                     }
 

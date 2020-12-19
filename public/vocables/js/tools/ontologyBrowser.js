@@ -23,7 +23,13 @@ var OntologyBrowser = (function () {
     }
 
     function getLabelFromId(id) {
-        return id.substring(id.lastIndexOf("#") + 1)
+        var p=id.lastIndexOf("#")
+        if(p>-1)
+        return id.substring(p + 1)
+        else{
+            var p=id.lastIndexOf("/")
+            return id.substring(p + 1)
+        }
     }
 
     self.onLoaded = function () {

@@ -94,24 +94,35 @@ var Sparql_proxy = (function () {
             options: queryOptions
         }
 
+        var sourceParams
+        if( options.source)
+            sourceParams=Config.sources[options.source];
+            else
+            sourceParams=Config.sources[MainController.currentSource];
 
-        if (options.method && options.method == "GET") {
+
+
+        if (sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
             payload.GET = true;
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim()
             payload.url = url + query2
-            if(Config.sources[MainController.currentSource].server_header){
-                payload.options=JSON.stringify({headers:Config.sources[MainController.currentSource].server_header})
+            if(sourceParams.sparql_server.headers){
+                payload.options=JSON.stringify({headers:sourceParams.sparql_server.headers})
             }
         } else {
             payload.POST = true;
+            var headers={}
+            if(sourceParams.sparql_server.headers){
+                body=JSON.stringify({headers:sourceParams.server.headers})
+            }
+            headers["Accept"]= "application/sparql-results+json";
+            headers["Content-Type"]="application/x-www-form-urlencoded"
             var body = {
                 params: {query: query},
-                headers: {
-                    "Accept": "application/sparql-results+json",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                }
+                headers: headers,
             }
+
             payload.body = JSON.stringify(body);
             payload.url = url
         }

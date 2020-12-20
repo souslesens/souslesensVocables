@@ -11,8 +11,9 @@ var Sparql_schema = (function () {
             fromStr = "FROM <" + schema.graphUri + "> ";
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "select distinct *  " + fromStr + "  WHERE  {  ?class  rdf:type owl:Class. OPTIONAL {?class rdfs:label ?classLabel}"
+            "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> "+
+            " select distinct *  " + fromStr + "  WHERE  {  ?class  rdf:type owl:Class. OPTIONAL {?class rdfs:label ?classLabel}"
         if (schema.allSubclasses)
             query += " OPTIONAL{?childClass rdfs:subClassOf* ?class. ?childClass rdfs:label ?childClassLabel } "
 

@@ -16,11 +16,11 @@ var Sparql_ISO_15926_part4 = (function () {
         self.getTopConcepts = function (sourceLabel, options, callback) {
 
           /*  if( !self.sparql_url ) {
-                self.sparql_url = Config.sources[sourceLabel].sparql_url;
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 return self.selectGraphDialog()
             }*/
             self.graphUri =  Config.sources[sourceLabel].graphUri ;
-            self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+            self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
 
 
             var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
@@ -46,7 +46,7 @@ var Sparql_ISO_15926_part4 = (function () {
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             var strFilter;
             if (words) {
                 strFilter = Sparql_generic.setFilter("concept", null, words, options)
@@ -85,7 +85,7 @@ var Sparql_ISO_15926_part4 = (function () {
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
             var query = "select *  from <"+self.graphUri+">" +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
@@ -100,7 +100,7 @@ var Sparql_ISO_15926_part4 = (function () {
         }
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
             if (!options)
                 options = {}

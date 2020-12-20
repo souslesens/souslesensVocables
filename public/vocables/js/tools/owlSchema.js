@@ -17,7 +17,7 @@ var OwlSchema=(function(){
 
                         else// default SKOS
                             self.currentSourceSchema={
-                                sparql_url: Config.sources[sourceLabel].sparql_url,
+                                sparql_url: Config.sources[sourceLabel].sparql_server.url,
                                 graphUri:Config.sources[sourceLabel].graphUri,
                             }
                           //  self.currentSourceSchema = self.schemasConfig["SKOS"];

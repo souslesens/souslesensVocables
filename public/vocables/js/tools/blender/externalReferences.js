@@ -112,7 +112,7 @@ var ExternalReferences = (function () {
                     var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
                     var fromSource = data.source;
                     var fromGraphUri = Config.sources[fromSource].graphUri
-                    var fromSparql_url = Config.sources[fromSource].sparql_url
+                    var fromSparql_url = Config.sources[fromSource].sparql_server.url
                     var id = data.id;
 
                     var objectUri = self.generateExternalUrl(id, fromSparql_url, fromGraphUri, data.label)
@@ -196,7 +196,7 @@ var ExternalReferences = (function () {
             })
             var sourceLabel = null;
             for (var key in Config.sources) {
-                if (Config.sources[key].sparql_url == obj.sparql_url && Config.sources[key].graphUri == obj.graphUri)
+                if (Config.sources[key].sparql_server.url == obj.sparql_url && Config.sources[key].graphUri == obj.graphUri)
                     obj.sourceLabel = key
             }
             return obj

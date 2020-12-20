@@ -241,7 +241,7 @@ var Collection = (function () {
             if (source.predicates && source.predicates.lang)
                 lang = source.predicates.lang
             var vars = {
-                serverUrl: source.sparql_url + "?query=&format=json",
+                serverUrl: source.sparql_server.url + "?format=json&query=",
                 graphUri: source.graphUri,
                 lang: lang,
                 limit: 1000
@@ -271,7 +271,7 @@ var Collection = (function () {
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
 
             var options={
-                method:Config.sources[sourceLabel].server_method
+               source:sourceLabel
             }
 
             Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, null, options, function (err, result) {
@@ -378,7 +378,7 @@ var Collection = (function () {
                 Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
                 $("#ThesaurusBrowser_collectionDiv").css("display", "none")
-                return MainController.UI.message("no collections for this source")
+                return ;//MainController.UI.message("no collections for this source")
 
             }
 

@@ -5,7 +5,7 @@ var Transform = (function () {
     self.substituteUris = function (source, options, callback) {
 
         var graphUri = Config.sources[source].graphUri;
-        var sparql_url = Config.sources[source].sparql_url
+        var sparql_url = Config.sources[source].sparql_server.url
 
         if (!graphUri)
             return callback("no graphUri for source " + source)

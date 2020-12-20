@@ -90,7 +90,7 @@ var Blender = (function () {
                         self.currentSource = "_blenderTempSource"
                         Config.sources[self.currentSource] = {
                             "controller": Sparql_generic,
-                            "sparql_url": Config.sources[source].sparql_url,// on the same server !!!
+                            "sparql_url": Config.sources[source].sparql_server.url,// on the same server !!!
                             "graphUri": "http://souslesens/_backup/" + source,
                             "schema": "SKOS",
                             "predicates": {

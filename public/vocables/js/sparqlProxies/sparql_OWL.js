@@ -16,14 +16,14 @@ var Sparql_OWL = (function () {
                 fromStr = " FROM <" + self.graphUri + ">"
 
             var strFilterTopConcept;
-            self.topClass = Config.sources[sourceLabel].topClass
-            if (self.topClass)
-                strFilterTopConcept = " ?topConcept rdfs:subClassOf <" + self.topClass + ">. "
+            self.topClassFilter = Config.sources[sourceLabel].topClassFilter
+            if (self.topClassFilter)
+                strFilterTopConcept =self.topClassFilter;
             else
                 strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;
@@ -40,8 +40,8 @@ var Sparql_OWL = (function () {
             query += "}order by ?topConceptLabel limit 1000"
 
             var url = self.sparql_url + "?format=json&query=";
-            var method=Config.sources[sourceLabel].server_method;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -61,7 +61,7 @@ var Sparql_OWL = (function () {
                 fromStr = " FROM <" + self.graphUri + ">"
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             var strFilter;
             if (words) {
                 strFilter = Sparql_generic.setFilter("concept", null, words, options)
@@ -133,7 +133,7 @@ var Sparql_OWL = (function () {
                 fromStr = " FROM <" + self.graphUri + ">"
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
             var query = "select * " + fromStr +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
@@ -151,7 +151,7 @@ var Sparql_OWL = (function () {
         }
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
             self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_url;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             if (!options)
                 options = {}
             var strFilter;

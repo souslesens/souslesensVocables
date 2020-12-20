@@ -80,7 +80,7 @@ var MainController = (function () {
 
             if (Config.tools[self.currentTool].multiSources)
                 return
-
+            OwlSchema.currentSourceSchema=null;
             Collection.currentCollectionFilter=null;
             self.UI.updateActionDivLabel()
             var controller = Config.tools[self.currentTool].controller

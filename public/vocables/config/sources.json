@@ -2,7 +2,9 @@
   "TEST": {
     "editable": true,
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://souslesens/thesaurus/TEST/",
     "schemaType": "SKOS",
     "predicates": {
@@ -12,7 +14,9 @@
   "POC-EP": {
     "editable": true,
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://data.total.com/resource/thesaurus/POC-EP/",
     "schemaType": "SKOS",
     "predicates": {
@@ -22,7 +26,9 @@
   "Total-CTG": {
     "editable": true,
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://data.total.com/resource/thesaurus/ctg/",
     "schemaType": "SKOS",
     "predicates": {
@@ -33,7 +39,9 @@
   "IEC": {
     "editable": true,
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://souslesens.org/vocabulary/iec/",
     "schemaType": "SKOS",
     "predicates": {
@@ -43,7 +51,9 @@
   },
   "Oil&Gas-Upstream": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://souslesens.org/oil-gas/upstream/",
     "schemaType": "SKOS",
     "predicates": {
@@ -53,7 +63,9 @@
   },
   "Gaia": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://data.total.com/resource/dictionary/gaia/",
     "schemaType": "SKOS",
     "predicates": {
@@ -63,7 +75,9 @@
   },
   "GEMET": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "graphUri": "http://www.eionet.europa.eu/gemet/",
     "schemaType": "SKOS",
     "predicates": {
@@ -77,7 +91,9 @@
   },
   "BNF": {
     "controller": "Sparql_generic",
-    "sparql_url": "https://data.bnf.fr/sparql",
+    "sparql_server": {
+      "url": "https://data.bnf.fr/sparql"
+    },
     "graphUri": "http://data.bnf.fr",
     "schemaType": "SKOSXXX",
     "predicates": {
@@ -88,7 +104,9 @@
   },
   "Dbpedia": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://dbpedia.org/sparql",
+    "sparql_server": {
+      "url": "http://dbpedia.org/sparql"
+    },
     "graphUri": "http://dbpedia.org",
     "ancestorsDepth": 4,
     "schemaType": "SKOS",
@@ -102,7 +120,9 @@
   },
   "USGS": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "sparql_server": {
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+    },
     "graphUri": "https://www2.usgs.gov/science/USGSThesaurus/",
     "schemaType": "SKOS",
     "predicates": {
@@ -113,7 +133,9 @@
   },
   "GEOSCMIL": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "sparql_server": {
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+    },
     "graphUri": "http://resource.geosciml.org/",
     "schemaType": "SKOS",
     "predicates": {
@@ -124,7 +146,9 @@
   },
   "TermSciences": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "sparql_server": {
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+    },
     "graphUri": "http://api.termsciences.fr/termsciences/",
     "schemaType": "SKOS",
     "predicates": {
@@ -135,7 +159,9 @@
   },
   "ThesaurusIngenieur": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "sparql_server": {
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+    },
     "graphUri": "http://www.souslesens.org/thesaurusIngenieur/",
     "schemaType": "SKOS",
     "predicates": {
@@ -146,7 +172,9 @@
   },
   "Unesco": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "sparql_server": {
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+    },
     "graphUri": "http://skos.um.es/unesco6/",
     "schemaType": "SKOS",
     "predicates": {
@@ -157,7 +185,9 @@
   },
   "LibraryOfCongress": {
     "controller": "Sparql_generic",
-    "sparql_url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/",
+    "sparql_server": {
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+    },
     "graphUri": "http://www.loc.gov/",
     "schemaType": "SKOS!!!",
     "predicates": {
@@ -172,96 +202,130 @@
   "_comment": "**************************************************************ontologies***************************************",
   "NPD": {
     "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "controller": "Sparql_NPD",
     "schemaType": "OWL",
-    "schema": "NPD",
+    "schema": null,
     "color": "#e377c2"
   },
   "WORDNET": {
     "graphUri": "",
-    "sparql_url": "http://wordnet.rkbexplorer.com/sparql/",
+    "sparql_server": {
+      "url": "http://wordnet.rkbexplorer.com/sparql/"
+    },
     "controller": "Sparql_WORDNET",
     "schemaType": "OWL",
+    "schema": null,
     "color": "#e377c2"
   },
   "CIDOC": {
     "graphUri": "http://erlangen-crm.org/current/",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "controller": "Sparql_OWL",
-    "schemaType": "OWL",
+    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+    "schema": null,
     "color": "#bcbd22"
   },
   "QUANTUM": {
     "graphUri": "http://data.total.com/quantum/vocab/",
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
     "controller": "Sparql_OWL",
+    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
     "schemaType": "OWL",
-    "schema": "OWL",
+    "schema": null,
     "color": "#bcbd22"
   },
   "CFIHOS__X": {
     "graphUri": "",
-    "sparql_url": "http://data.15926.org/cfihos",
-    "server_method": "GET",
+    "sparql_server": {
+      "url": "http://data.15926.org/cfihos",
+      "method": "GET"
+    },
     "controller": "Sparql_OWL",
-    "topClass": "http://data.15926.org/dm/Thing",
+    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
     "schemaType": "OWL",
-    "schema": "OWL",
+    "schema": null,
     "color": "#bcbd22"
   },
   "CFIHOS": {
     "graphUri": "",
-    "sparql_url": "https://demo-irm-dnvgl.northeurope.cloudapp.azure.com/readidemo/sparql/readi-Z018",
-    "server_method": "GET",
-    "server_header": {
-      "Authorization": "Basic cmVhZGlkZW1vOm1pa3NvbHlkaXNr",
-      "Connection": "keep-alive"
+    "sparql_server": {
+      "url": "https://demo-irm-dnvgl.northeurope.cloudapp.azure.com/readidemo/sparql/readi-Z018",
+      "method": "GET",
+      "headers": {
+        "Authorization": "Basic cmVhZGlkZW1vOm1pa3NvbHlkaXNr",
+        "Connection": "keep-alive"
+      }
     },
     "controller": "Sparql_OWL",
-    "topClass": "http://data.15926.org/dm/Thing",
+    "topClassFilter": "?x rdfs:subClassOf ?topConcept filter(regex(str(?topConcept),'iso','i')) filter(not exists{?topConcept rdfs:subClassOf ?z})",
     "schemaType": "OWL",
-    "schema": "OWL",
+    "schema": null,
     "color": "#bcbd22"
   },
   "CFIHOS_equipment": {
-  "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
-  "sparql_url": "http://51.178.139.80:8890/sparql",
-  "controller": "Sparql_OWL",
-  "topClass": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
-  "schemaType": "OWL",
-  "schema": null,
-  "color": "#bcbd22"
-},
-
-"ISO_15926": {
-"graphUri": "",
-"sparql_url": "http://staging.data.posccaesar.org/rdl/",
-"server_method": "GET",
-"controller": "Sparql_OWL",
-"topClass": "http://data.posccaesar.org/dm/Thing",
-"schemaType": "OWL",
-"schema": null,
-"color": "#bcbd22"
-},
-"ISO_15926_part_4": {
-"editable": true,
-"graphUri": "http://standards.iso.org/iso/15926/part4/",
-"sparql_url": "http://51.178.139.80:8890/sparql",
-"topClass": "http://standards.iso.org/iso/15926/part14#class",
-"controller": "Sparql_OWL",
-"schemaType": "OWL",
-"schema": "NPD",
-"color": "#bcbd22"
-},
-"ISO_15926_part_12": {
-"editable": true,
-"graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
-"sparql_url": "http://51.178.139.80:8890/sparql",
-"controller": "Sparql_OWL",
-"topClass": null,
-"schemaType": "OWL",
-"schema": null,
-"color": "#bcbd22"
-}
+    "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926_PCA": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://staging.data.posccaesar.org/rdl/",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926_.org": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://192.236.179.169/sparql",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926_part_4": {
+    "editable": true,
+    "graphUri": "http://standards.iso.org/iso/15926/part4/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
+    "controller": "Sparql_OWL",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926_part_12": {
+    "editable": true,
+    "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) ",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  }
 }

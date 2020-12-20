@@ -161,7 +161,7 @@ var ThesaurusMatcher = (function () {
                         if (output == "stats")
                             return callbackSeries();
 
-                        var targetSparql_url = Config.sources[self.targetSourceId].sparql_url
+                        var targetSparql_url = Config.sources[self.targetSourceId].sparql_server.url
                         var targetGraphURI = Config.sources[self.targetSourceId].graphUri
 
                         var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize)

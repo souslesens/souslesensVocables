@@ -20,7 +20,7 @@ var ThesaurusBrowser = (function () {
 
         setTimeout(function () {
             Collection.initBrowserCollectionSelect()
-        }, 1000)
+        }, 200)
 
     }
 
@@ -63,9 +63,11 @@ var ThesaurusBrowser = (function () {
         Sparql_generic.getTopConcepts(thesaurusLabel, options, function (err, result) {
             if (err)
                 return MainController.UI.message(err);
+            $("#accordion").accordion("option", {active: 2});
             if (result.length == 0) {
                 Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
+
                 var html = "<div id='currentSourceTreeDiv'>no data found</div>"
                 $("#actionDiv").html(html);
                 return MainController.UI.message("")
@@ -86,7 +88,7 @@ var ThesaurusBrowser = (function () {
             }
 
 
-            $("#accordion").accordion("option", {active: 2});
+
             var html = "<div id='currentSourceTreeDiv'></div>"
 
             $("#actionDiv").html(html);

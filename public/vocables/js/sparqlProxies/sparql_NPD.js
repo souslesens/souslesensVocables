@@ -12,7 +12,7 @@ var Sparql_NPD = (function () {
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
             self.graphUri =  Config.sources[sourceLabel].graphUri ;
-            self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+            self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -45,7 +45,7 @@ var Sparql_NPD = (function () {
 
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
             self.graphUri =  Config.sources[sourceLabel].graphUri ;
-            self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+            self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
             var strFilter;
             if (words) {
                 strFilter = Sparql_generic.setFilter("concept", null, words, null)
@@ -80,7 +80,7 @@ var Sparql_NPD = (function () {
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
             self.graphUri =  Config.sources[sourceLabel].graphUri ;
-            self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+            self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
 
             var query = "select *" +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";

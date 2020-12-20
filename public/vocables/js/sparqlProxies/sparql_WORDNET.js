@@ -8,7 +8,7 @@ var Sparql_WORDNET = (function () {
     self.ancestorsDepth =3
     self.getTopConcepts = function (sourceLabel, options, callback) {
         self.graphUri =  Config.sources[sourceLabel].graphUri ;
-        self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+        self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "SELECT * WHERE { ?topConcept rdfs:label ?topConceptLabel. filter (?topConcept=<http://wordnet.rkbexplorer.com/id/synset-entity-noun-1>) } LIMIT 10"
 
@@ -29,7 +29,7 @@ var Sparql_WORDNET = (function () {
 
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         self.graphUri =  Config.sources[sourceLabel].graphUri ;
-        self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+        self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
 
         var strFilter;
         if (words) {
@@ -64,7 +64,7 @@ var Sparql_WORDNET = (function () {
 
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         self.graphUri =  Config.sources[sourceLabel].graphUri ;
-        self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+        self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
         if (!options)
             options = {}
         var filter = Sparql_generic.getUriFilter("id", conceptId);
@@ -87,7 +87,7 @@ var Sparql_WORDNET = (function () {
     }
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         self.graphUri =  Config.sources[sourceLabel].graphUri ;
-        self.sparql_url =  Config.sources[sourceLabel].sparql_url;
+        self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
         if (!options)
             options = {}
         var strFilter;

@@ -144,11 +144,11 @@ var Sparql_proxy = (function () {
                     data = JSON.parse(data.result.trim())
 
                 if (!data.results)
-                    return null;
+                    return callback(null, {results:{bindings:[]}});
 
 
-                if (data.results.bindings.length == 0)
-                    ;
+
+
 
                 callback(null, data)
 

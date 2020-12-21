@@ -23,11 +23,11 @@ var OntologyBrowser = (function () {
     }
 
     function getLabelFromId(id) {
-        var p=id.lastIndexOf("#")
-        if(p>-1)
-        return id.substring(p + 1)
-        else{
-            var p=id.lastIndexOf("/")
+        var p = id.lastIndexOf("#")
+        if (p > -1)
+            return id.substring(p + 1)
+        else {
+            var p = id.lastIndexOf("/")
             return id.substring(p + 1)
         }
     }
@@ -150,7 +150,7 @@ var OntologyBrowser = (function () {
                     var visjsData = {nodes: [], edges: []}
                     var existingVisjsIds = {}
                     if (!newGraph) {
-                        existingVisjsIds = self.getExistingVisjsIds()
+                        existingVisjsIds = visjsGraph.getExistingIdsMap()
                     }
 
                     if (!existingVisjsIds[classId]) {
@@ -257,15 +257,7 @@ var OntologyBrowser = (function () {
         $("#graphPopupDiv").html(html);
 
     }
-    self.getExistingVisjsIds = function () {
-        var existingVisjsIds = {}
-        var oldIds = visjsGraph.data.nodes.getIds()
-        oldIds = oldIds.concat(visjsGraph.data.edges.getIds())
-        oldIds.forEach(function (id) {
-            existingVisjsIds[id] = 1;
-        })
-        return existingVisjsIds;
-    }
+
     self.onNodeClick = function (node, point, event) {
         if (!node)
             return;
@@ -328,7 +320,7 @@ var OntologyBrowser = (function () {
             Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, OntologyBrowser.currentJstreeNode.id, 1, {}, function (err, children) {
                 if (err)
                     return MainController.UI.message(err);
-                var existingVisjsIds = self.getExistingVisjsIds()
+                var existingVisjsIds = visjsGraph.getExistingIdsMap()
                 var visjsData = {nodes: [], edges: []}
                 children.forEach(function (item) {
                     if (!existingVisjsIds[item.child1.value]) {
@@ -474,9 +466,9 @@ var OntologyBrowser = (function () {
             $("#OntologyBrowser_queryTreeDiv").jstree(true).delete_node(nodeId)
         },
         setOptional: function () {
-           // var node = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0];
-            var node=self.currentTreeNode
-                $('#OntologyBrowser_queryTreeDiv').jstree('rename_node', node, node.text + " (OPTIONAL)")
+            // var node = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0];
+            var node = self.currentTreeNode
+            $('#OntologyBrowser_queryTreeDiv').jstree('rename_node', node, node.text + " (OPTIONAL)")
             node.data.optional = true
             //  node.text=node.text+"optional"
 
@@ -496,14 +488,13 @@ var OntologyBrowser = (function () {
             var selectFields = []
             var previousClassId = null;
             var previousClassLabel = null;
-            var selectStr=" * "
-            var showIds=$('OntologyBrowser_queryShowItemsIdsCBX').prop("checked")
-            var query="";
-               if(!showIds)
-                   selectStr=" ";
-               classNodeIds.forEach(function (classNodeId, index) {
+            var selectStr = " * "
+            var showIds = $('OntologyBrowser_queryShowItemsIdsCBX').prop("checked")
+            var query = "";
+            if (!showIds)
+                selectStr = " ";
+            classNodeIds.forEach(function (classNodeId, index) {
                 // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
-
 
 
                 var propertyNodes = []
@@ -511,25 +502,20 @@ var OntologyBrowser = (function () {
                 var classNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId])
 
                 if (index > 0) {// join classes
-                    var edges = visjsGraph.data.edges.get();
-                    edges.forEach(function (edge) {
-                        var done = false;
-                        for (var previousClassId in self.queryClassPath) {
-                            var p = edge.id.indexOf(classNodeId);
-                            var q = edge.id.indexOf(previousClassId)
-                            if (!done && p > -1 && q > -1) {
-                                done = true
-                                var previousClassLabel = self.queryClassPath[previousClassId].label
-                                //   if (p < q)
-                                query += "?" + previousClassLabel + " <" + edge.data.propertyId + ">|^<" + edge.data.propertyId + "> ?" + classNode.text + " . "
-                                /*    else
-                                        query += "?" + classNode.text + " <" + edge.data.propertyId + "> ?" + previousClassLabel + " . "*/
+
+                    var previousClasses = Object.keys(self.queryClassPath);
+                    var classes = OwlSchema.currentSourceSchema.classes
+                    for (var aClass in classes) {
+                        var properties = classes[aClass].ObjectProperties
+                        for (var property in properties) {
+                            if (property.domain == classNodeId && previousClasses.indexOf(property.range)) {
+                                query += "?" + classNode.text + " <" + edge.data.propertyId + "> ?" + previousClassLabel + " . "
+                            }
+                            if (property.range == classNodeId && previousClasses.indexOf(property.domain)) {
+                                query += "?" + previousClassLabel + " <" + edge.data.propertyId + "> ?" + classNode.text + " . "
                             }
                         }
-
-
-                    })
-
+                    }
                 }
 
 
@@ -543,8 +529,8 @@ var OntologyBrowser = (function () {
                         query += "OPTIONAL {"
                         propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "")
                     }
-                    if(!showIds)
-                        selectStr+=" ?" + propertyNode.text ;
+                    if (!showIds)
+                        selectStr += " ?" + propertyNode.text;
 
                     query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . "
                     propertyNode.children.forEach(function (filterNodeId) {
@@ -581,7 +567,7 @@ var OntologyBrowser = (function () {
             })
             var fromStr = "FROM <http://sws.ifi.uio.no/vocab/npd-v2/> FROM <http://sws.ifi.uio.no/data/npd-v2/> "
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-                "Select "+selectStr +" "+ fromStr + " where {"+query;
+                "Select " + selectStr + " " + fromStr + " where {" + query;
 
             query += "} limit " + self.queryLimit
             //  return;

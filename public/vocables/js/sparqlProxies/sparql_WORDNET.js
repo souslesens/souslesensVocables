@@ -13,7 +13,7 @@ var Sparql_WORDNET = (function () {
             "SELECT * WHERE { ?topConcept rdfs:label ?topConceptLabel. filter (?topConcept=<http://wordnet.rkbexplorer.com/id/synset-entity-noun-1>) } LIMIT 10"
 
         var url = self.sparql_url + "?format=json&query=";// + query + queryOptions
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -48,7 +48,7 @@ var Sparql_WORDNET = (function () {
             "LIMIT 10000"
 
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -76,7 +76,7 @@ var Sparql_WORDNET = (function () {
             " ?id ?prop ?value. " + filter + "} limit 10000";
 
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, null, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source:sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -143,7 +143,7 @@ var Sparql_WORDNET = (function () {
 
 
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err)
             }

@@ -12,8 +12,7 @@ var Sparql_OWL = (function () {
             if (!options)
                 options = {}
             var fromStr = ""
-            if (self.graphUri && self.graphUri != "")
-                fromStr = " FROM <" + self.graphUri + ">"
+
 
             var strFilterTopConcept;
             self.topClassFilter = Config.sources[sourceLabel].topClassFilter
@@ -24,6 +23,9 @@ var Sparql_OWL = (function () {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
+
 
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;
@@ -57,8 +59,7 @@ var Sparql_OWL = (function () {
                 options = {}
 
             var fromStr = ""
-            if (self.graphUri && self.graphUri != "")
-                fromStr = " FROM <" + self.graphUri + ">"
+
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -68,6 +69,8 @@ var Sparql_OWL = (function () {
             } else if (ids) {
                 strFilter = Sparql_generic.setFilter("concept", ids, null)
             }
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -113,8 +116,8 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
-            var method=Config.sources[sourceLabel].server_method;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -129,18 +132,20 @@ var Sparql_OWL = (function () {
             if (!options)
                 options = {}
             var fromStr = ""
-            if (self.graphUri && self.graphUri != "")
-                fromStr = " FROM <" + self.graphUri + ">"
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
+
 
             var query = "select * " + fromStr +
                 " where {<" + conceptId + "> ?prop ?value. } limit 500";
 
             var url = self.sparql_url + "?format=json&query=";
-            var method=Config.sources[sourceLabel].server_method;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -208,7 +213,7 @@ var Sparql_OWL = (function () {
 
             var url = self.sparql_url + "?format=json&query=";
             var method=Config.sources[sourceLabel].server_method;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {method:method}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }

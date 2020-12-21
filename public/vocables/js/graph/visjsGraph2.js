@@ -280,6 +280,16 @@ var visjsGraph = (function () {
         self.currentScale = scale;
     }
 
+    self.getExistingIdsMap = function () {
+        var existingVisjsIds = {}
+        var oldIds = visjsGraph.data.nodes.getIds()
+        oldIds = oldIds.concat(visjsGraph.data.edges.getIds())
+        oldIds.forEach(function (id) {
+            existingVisjsIds[id] = 1;
+        })
+        return existingVisjsIds;
+    }
+
 
     return self;
 

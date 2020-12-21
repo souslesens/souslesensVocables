@@ -224,7 +224,7 @@ var Sparql_generic = (function () {
             query += "limit " + limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
 
 
                 if (err) {
@@ -338,7 +338,7 @@ var Sparql_generic = (function () {
             }
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
 
 
                 if (err) {
@@ -354,6 +354,7 @@ var Sparql_generic = (function () {
             if (!options) {
                 options = {depth: 0}
             }
+            options.source=sourceLabel
             setVariables(sourceLabel);
             var filterStr = setFilter("concept", ids, words, options)
 
@@ -412,7 +413,7 @@ var Sparql_generic = (function () {
             query += "}limit " + limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {
 
                 if (err) {
                     return callback(err)
@@ -423,15 +424,16 @@ var Sparql_generic = (function () {
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
             $("#waitImg").css("display", "block");
-
+            if (!options)
+                options = {}
+            options.source=sourceLabel;
             if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
                   Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
                       callback(err, result);
                   })
                   return;
               }
-            if (!options)
-                options = {}
+
             setVariables(sourceLabel);
             var filter = getUriFilter("id", conceptId);
             if (options.propertyFilter) {
@@ -442,7 +444,7 @@ var Sparql_generic = (function () {
                 " ?id ?prop ?value. " + filter + "} limit 10000";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {
 
 
                 if (err) {
@@ -459,7 +461,7 @@ var Sparql_generic = (function () {
 
         self.getSingleNodeAllAncestors = function (sourceLabel, id, callback) {
             if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
-                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, options, function (err, result) {
+                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, {source:sourceLabel}, function (err, result) {
                     callback(err, result);
                 })
                 return;
@@ -478,7 +480,7 @@ var Sparql_generic = (function () {
             query += "limit " + limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -502,7 +504,7 @@ var Sparql_generic = (function () {
             query += "limit " + limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -526,7 +528,7 @@ var Sparql_generic = (function () {
             query += "}limit " + limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -551,7 +553,7 @@ var Sparql_generic = (function () {
 
                 var query = " select    distinct * " + fromStr + "  WHERE {" +
                     "?subject ?prop ?value. FILTER (?subject in" + filterStr + ")} limit " + sliceSize + 1;
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -584,7 +586,7 @@ var Sparql_generic = (function () {
                 " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}"
 
             url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -631,7 +633,7 @@ var Sparql_generic = (function () {
 
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:sourceLabel}, function (err, result) {
                 return callback(err);
             })
         }
@@ -668,7 +670,7 @@ var Sparql_generic = (function () {
 
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:sourceLabel}, function (err, result) {
                 return callback(err);
             })
         }
@@ -679,7 +681,7 @@ var Sparql_generic = (function () {
 
             var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}"
             url = Config.sources[sourceLabel].serverUrl + "?query=&format=json";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:sourceLabel}, function (err, result) {
                 return callback(err);
             })
         }
@@ -688,7 +690,7 @@ var Sparql_generic = (function () {
             var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
             var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;"
             url = Config.sources[fromSourceLabel].sparql_server.url + "?query=&format=json";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:fromSourceLabel}, function (err, result) {
                 return callback(err);
             })
 
@@ -794,7 +796,7 @@ var Sparql_generic = (function () {
                             "  }"
 
                         url = Config.sources[fromSourceLabel].sparql_server.url + "?query=&format=json";
-                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, null, function (err, result) {
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:fromSourceLabel}, function (err, result) {
                             return callbackEach(err);
                         })
                     }, function (err) {

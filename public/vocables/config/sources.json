@@ -205,7 +205,8 @@
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },
-    "controller": "Sparql_NPD",
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
     "schemaType": "OWL",
     "schema": null,
     "color": "#e377c2"
@@ -241,7 +242,7 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "CFIHOS__X": {
+  "CFIHOS_0": {
     "graphUri": "",
     "sparql_server": {
       "url": "http://data.15926.org/cfihos",

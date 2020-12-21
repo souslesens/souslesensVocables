@@ -131,6 +131,7 @@ var TermTaxonomy = (function () {
 
     self.displayGraph = function (direction) {
         $("#TermTaxonomy_nodeInfosDialogDiv").html("")
+        visjsGraph.clearGraph()
         var maxDepth = 5
 
         drawRootNode = function (word) {
@@ -202,14 +203,20 @@ var TermTaxonomy = (function () {
     self.addAncestorsGraph = function (sourceId,rootNodeId, bindings, depth) {
         var visjsData = {nodes: [], edges: []}
 
+        var existingIds=visjsGraph.getExistingIdsMap()
        // edge beetwen word and concept
         var conceptId = bindings[0].concept.value;
-        visjsData.edges.push({
-            id: rootNodeId + "_" + conceptId,
-            from: rootNodeId,
-            to: conceptId,
-            label: sourceId
-        })
+       var id= rootNodeId + "_" + conceptId
+        if(!existingIds[id]) {
+            existingIds[id]=1
+
+            visjsData.edges.push({
+                id: id,
+                from: rootNodeId,
+                to: conceptId,
+                label: sourceId
+            })
+        }
 
 
         for (var i = 1; i < depth; i++) {
@@ -230,7 +237,7 @@ var TermTaxonomy = (function () {
 
 
 
-            visjsData = GraphController.toVisjsData(visjsData, bindings, null, fromVar, toVar, options)
+           visjsData = GraphController.toVisjsData(visjsData, bindings, null, fromVar, toVar, options)
         }
 
         visjsGraph.data.nodes.add(visjsData.nodes)

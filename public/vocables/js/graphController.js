@@ -9,8 +9,18 @@ var GraphController = (function () {
             visjOptions = {from: {}, to: {}}
         }
 
+        var  existingIds= visjsGraph.getExistingIdsMap()
+
         if (!visjsData) {
             visjsData = {nodes: [],edges:[]}
+        }else {
+            visjsData.nodes.forEach(function(item){
+                existingIds[item.id]=1;
+            })
+            visjsData.edges.forEach(function(item){
+                existingIds[item.id]=1;
+            })
+
         }
 
         function getShape(target,nodeData) {
@@ -23,29 +33,11 @@ var GraphController = (function () {
             return  "dot";
         }
 
-        var existingNodes = {}
-        var existingEdges = {};
-        if (parentNodeId) {// add to existingGraph
-            visjsGraph.data.nodes.getIds().forEach(function (id) {
-                existingNodes[id] = id
-            });
-            visjsGraph.data.edges.getIds().forEach(function (id) {
-                existingEdges[id] = id
-            });
 
-        } else {// new Graph
-            if (!visjsData) //new visjsData
-                visjsData = {nodes: [], edges: []};
-            else {//add to existing  visjsData
-                visjsData.nodes.forEach(function (item) {
-                    existingNodes[item.id] = item.id
-                })
-                visjsData.edges.forEach(function (item) {
-                    existingEdges[item.id] = item.id
-                })
-            }
 
-        }
+
+
+
 
         data.forEach(function (item) {
 
@@ -67,8 +59,8 @@ var GraphController = (function () {
                 }
 
 
-                if (!existingNodes[fromId]) {
-                    existingNodes[fromId] = 1;
+                if (!existingIds[fromId]) {
+                    existingIds[fromId] = 1;
                     var node = {
                         id: fromId,
                         label: fromLabel,
@@ -85,8 +77,8 @@ var GraphController = (function () {
                 var toId = item[toVar].value || "#";
                 var toLabel = item[toVar + "Label"].value;
 
-                if (!existingNodes[toId]) {
-                    existingNodes[toId] = 1;
+                if (!existingIds[toId]) {
+                    existingIds[toId] = 1;
 
                     var node = {
                         id: toId,
@@ -100,8 +92,8 @@ var GraphController = (function () {
                 }
 
                 var edgeId = fromId + "_" + toId;
-                if (!existingEdges[edgeId]) {
-                    existingEdges[edgeId] = 1
+                if (!existingIds[edgeId]) {
+                    existingIds[edgeId] = 1
                     var edge = {
                         id: edgeId,
                         from: fromId,

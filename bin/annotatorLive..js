@@ -83,7 +83,7 @@ var annotatorLive = {
                            query+= " filter " + filter + "} limit 10000";
 
 
-                        var url = source.sparql_url;
+                        var url = source.sparql_server.url;
                         var queryOptions = "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
 
                         var params = {query: query}

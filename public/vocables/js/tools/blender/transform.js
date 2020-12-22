@@ -28,7 +28,7 @@ var Transform = (function () {
 
                     newTriples = []
                     oldTriples = []
-                    Sparql_proxy.querySPARQL_GET_proxy(sparql_url + "?query=&format=json", query, null, function (err, result) {
+                    Sparql_proxy.querySPARQL_GET_proxy(sparql_url + "?format=json&query=", query, null, function (err, result) {
                         if (err)
                             return callbackSeries(err);
                         result.results.bindings.forEach(function (item) {

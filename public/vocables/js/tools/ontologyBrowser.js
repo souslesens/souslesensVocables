@@ -23,6 +23,10 @@ var OntologyBrowser = (function () {
     }
 
     function getLabelFromId(id) {
+
+        if (OwlSchema.currentSourceSchema.labelsMap[id])
+            return OwlSchema.currentSourceSchema.labelsMap[id];
+
         var p = id.lastIndexOf("#")
         if (p > -1)
             return id.substring(p + 1)
@@ -30,6 +34,8 @@ var OntologyBrowser = (function () {
             var p = id.lastIndexOf("/")
             return id.substring(p + 1)
         }
+
+
     }
 
     self.onLoaded = function () {
@@ -89,6 +95,8 @@ var OntologyBrowser = (function () {
                 OntologyBrowser.query.setOptional()
             }
         }
+
+
         return items;
 
 
@@ -103,7 +111,7 @@ var OntologyBrowser = (function () {
     }
 
 
-    self.showProperties = function (classId, callback) {
+    self.showProperties = function (classId, classLabel, callback) {
 
 
         function execute(classId) {
@@ -112,6 +120,7 @@ var OntologyBrowser = (function () {
 
                 function (callbackSeries) {
                     OwlSchema.initSourceSchema(MainController.currentSource, function (err, result) {
+                        OwlSchema.currentSourceSchema.labelsMap[classId] = classLabel;
                         callbackSeries(err)
                     })
                 },
@@ -238,8 +247,9 @@ var OntologyBrowser = (function () {
         if (!classId) {
             self.queryClassPath = {};
             classId = ThesaurusBrowser.currentTreeNode.data.id
+            classLabel = ThesaurusBrowser.currentTreeNode.data.label
             self.init(function () {
-                execute(classId)
+                execute(classId, classLabel)
             })
         } else {
             newGraph = false;
@@ -250,10 +260,15 @@ var OntologyBrowser = (function () {
     }
 
 
-    self.setGraphPopupMenus = function () {
-        var html = "    <span class=\"popupMenuItem\" onclick=\"OntologyBrowser.graphActions.expandObjectProperties();\"> Object properties</span>\n" +
-            "    <span class=\"popupMenuItem\" onclick=\"OntologyBrowser.graphActions.showDataTypeProperties();\"> Data properties</span>\n" +
-            "    <span  class=\"popupMenuItem\"onclick=\"OntologyBrowser.graphActions.expandSubclasses();\">Subclasses</span>"
+    self.setGraphPopupMenus = function (node) {
+        if(!node)
+            return;
+        if(!node.from) {
+            var html = "    <span class=\"popupMenuItem\" onclick=\"OntologyBrowser.graphActions.expandObjectProperties();\"> Object properties</span>\n" +
+                "    <span class=\"popupMenuItem\" onclick=\"OntologyBrowser.graphActions.showDataTypeProperties();\"> Data properties</span>\n" +
+                "    <span  class=\"popupMenuItem\"onclick=\"OntologyBrowser.graphActions.expandSubclasses();\">Subclasses</span>"
+        }
+        html += "    <span  class=\"popupMenuItem\"onclick=\"OntologyBrowser.graphActions.showNodeInfo();\">showNodeInfo</span>"
         $("#graphPopupDiv").html(html);
 
     }
@@ -261,28 +276,40 @@ var OntologyBrowser = (function () {
     self.onNodeClick = function (node, point, event) {
         if (!node)
             return;
-        self.currentJstreeNode = node;
-        if (event.ctrlKey) {
-            self.setGraphPopupMenus()
+        if(node.from){//edge
+            self.setGraphPopupMenus(node)
+            self.currentJstreeNode = node;
             MainController.UI.showPopup(point, "graphPopupDiv")
-        } else {
-
-
         }
-        self.currentJstreeNode.dataProperties = {}
-        self.graphActions.showDataTypeProperties()
+        OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, result) {
+            if (err) {
+                self.currentJstreeNode = null;
+                return MainController.UI.message(err)
+            }
+            self.currentJstreeNode = node;
+            if (true ||  event.ctrlKey) {
+                self.setGraphPopupMenus(node)
+                MainController.UI.showPopup(point, "graphPopupDiv")
+            } else {
+
+
+            }
+            self.currentJstreeNode.dataProperties = {}
+            self.graphActions.showDataTypeProperties()
+
+        })
     }
 
 
     self.graphActions = {
         expandObjectProperties: function () {
 
-            self.showProperties(OntologyBrowser.currentJstreeNode.id)
+            self.showProperties(OntologyBrowser.currentJstreeNode.id, OntologyBrowser.currentJstreeNode.text)
         },
         showDataTypeProperties: function () {
             var schema = Config.sources[MainController.currentSource].schema;
             Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentJstreeNode.id, function (err, result) {
-                var html = "<B>" + getLabelFromId(OntologyBrowser.currentJstreeNode.id) + "</B>" +
+                var html = "<B>" + OntologyBrowser.currentJstreeNode.text + "</B>" +
                     "<div style='display:flex;flex-direction:column'>"
                 var existingItems = []
                 result.forEach(function (item) {
@@ -379,7 +406,7 @@ var OntologyBrowser = (function () {
                 var propId = id.split("|")[1]
                 jstreeData.push({
                     id: id,
-                    text: getLabelFromId(id),
+                    text: getLabelFromId(propId),
                     parent: OntologyBrowser.currentJstreeNode.id,
                     data: {
 
@@ -407,7 +434,13 @@ var OntologyBrowser = (function () {
         },
         resetFilters: function () {
             $("#OntologyBrowser_queryTreeDiv").html("")
+        },
+
+        showNodeInfo: function(){
+
+            MainController.UI.showNodeInfos(MainController.currentSource, OntologyBrowser.currentJstreeNode.id, "mainDialogDiv")
         }
+
 
     }
 
@@ -505,14 +538,25 @@ var OntologyBrowser = (function () {
 
                     var previousClasses = Object.keys(self.queryClassPath);
                     var classes = OwlSchema.currentSourceSchema.classes
+                    var done = false
                     for (var aClass in classes) {
-                        var properties = classes[aClass].ObjectProperties
-                        for (var property in properties) {
-                            if (property.domain == classNodeId && previousClasses.indexOf(property.range)) {
-                                query += "?" + classNode.text + " <" + edge.data.propertyId + "> ?" + previousClassLabel + " . "
-                            }
-                            if (property.range == classNodeId && previousClasses.indexOf(property.domain)) {
-                                query += "?" + previousClassLabel + " <" + edge.data.propertyId + "> ?" + classNode.text + " . "
+                        if (!done) {
+                            var properties = classes[aClass].objectProperties
+                            for (var propertyId in properties) {
+                                var property = properties[propertyId]
+                                var p = previousClasses.indexOf(property.range)
+                                if (p > -1) {
+                                    var previousClassLabel = self.queryClassPath[previousClasses[p]].label
+
+                                    if (property.domain == classNodeId) {
+                                        query += "?" + classNode.text + " <" + propertyId + "> ?" + previousClassLabel + " . "
+                                        done = true;
+                                    }
+                                    if (property.range == classNodeId && previousClasses.indexOf(property.domain)) {
+                                        query += "?" + previousClassLabel + " <" + propertyId + "> ?" + classNode.text + " . "
+                                        done = true;
+                                    }
+                                }
                             }
                         }
                     }
@@ -541,10 +585,10 @@ var OntologyBrowser = (function () {
                         if (range.indexOf("string") > -1) {
                             if (operator == "contains")
                                 query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "','i')) "
-                            if (operator == "beginsWith")
+                            else if (operator == "beginsWith")
                                 query += "FILTER (REGEX(?" + propertyNode.text + ",'^" + value + "','i')) "
 
-                            if (operator == "beginsWith")
+                            else if (operator == "beginsWith")
                                 query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "$','i')) "
                             else
                                 query += "FILTER (?" + propertyNode.text + operator + "'" + value + "'" + ")"
@@ -571,7 +615,7 @@ var OntologyBrowser = (function () {
 
             query += "} limit " + self.queryLimit
             //  return;
-            var url = Config.sources[MainController.currentSource].sparql_server.url + "?query=&format=json";
+            var url = Config.sources[MainController.currentSource].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)

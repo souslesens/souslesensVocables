@@ -83,7 +83,7 @@ var Sparql_generic = (function () {
             lang = predicates.lang;
             limit = predicates.limit || defaultPredicates.limit;
             optionalDepth = predicates.optionalDepth || defaultPredicates.optionalDepth;
-            url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
+            url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         }
 
 
@@ -585,7 +585,7 @@ var Sparql_generic = (function () {
             var query = "with <" + Config.sources[sourceLabel].graphUri + "> " +
                 " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}"
 
-            url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
+            url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -632,7 +632,7 @@ var Sparql_generic = (function () {
 
 
             // console.log(query)
-            url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
+            url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:sourceLabel}, function (err, result) {
                 return callback(err);
             })
@@ -669,7 +669,7 @@ var Sparql_generic = (function () {
 
 
             // console.log(query)
-            url = Config.sources[sourceLabel].sparql_server.url + "?query=&format=json";
+            url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:sourceLabel}, function (err, result) {
                 return callback(err);
             })
@@ -680,7 +680,7 @@ var Sparql_generic = (function () {
 
 
             var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}"
-            url = Config.sources[sourceLabel].serverUrl + "?query=&format=json";
+            url = Config.sources[sourceLabel].serverUrl + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:sourceLabel}, function (err, result) {
                 return callback(err);
             })
@@ -689,7 +689,7 @@ var Sparql_generic = (function () {
         self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
             var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
             var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;"
-            url = Config.sources[fromSourceLabel].sparql_server.url + "?query=&format=json";
+            url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:fromSourceLabel}, function (err, result) {
                 return callback(err);
             })
@@ -795,7 +795,7 @@ var Sparql_generic = (function () {
                             insertTriplesStr +
                             "  }"
 
-                        url = Config.sources[fromSourceLabel].sparql_server.url + "?query=&format=json";
+                        url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source:fromSourceLabel}, function (err, result) {
                             return callbackEach(err);
                         })

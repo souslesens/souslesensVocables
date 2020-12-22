@@ -338,7 +338,7 @@ var ThesaurusBrowser = (function () {
                             if (item["broader" + (i + 1)])
                                 parentId = item["broader" + (i + 1)].value
 
-                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel, id: id}})
+                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel, id: id,label:item["broader" + i + "Label"].value}})
                         }
                     }
                 }
@@ -349,7 +349,7 @@ var ThesaurusBrowser = (function () {
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
                     var id = item.concept.value;
                     var jstreeId = itemId
-                    jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: id}})
+                    jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: id,label:item.conceptLabel.value}})
                 } else {
                     /*
                        if (!existingNodes[jstreeId]) {

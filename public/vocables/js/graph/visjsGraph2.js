@@ -116,6 +116,9 @@ var visjsGraph = (function () {
                 var edge = self.data.edges.get(edgeId);
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
+                var point = params.pointer.DOM;
+                if(_options.onclickFn)
+                    _options.onclickFn(edge, point,options)
 
             }
 

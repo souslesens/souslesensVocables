@@ -25,8 +25,8 @@ var visjsGraph = (function () {
     self.simulationOn = false;
 
     self.draw = function (divId, visjsData, _options, callback) {
-        if(!_options)
-            _options={}
+        if (!_options)
+            _options = {}
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
         self.data = {
@@ -35,8 +35,8 @@ var visjsGraph = (function () {
         };
         var options = {
             interaction: {hover: true},
-            width: "" + $("#"+divId).width() + "px",
-            height: "" + $("#"+divId).height() + "px",
+            width: "" + $("#" + divId).width() + "px",
+            height: "" + $("#" + divId).height() + "px",
             nodes: {
                 shape: 'dot',
                 size: 12,
@@ -45,7 +45,7 @@ var visjsGraph = (function () {
             edges: {
                 //  scaling:{min:1,max:8}
             },
-           layout: { improvedLayout: false }
+            layout: {improvedLayout: false}
 
         };
         if (_options.notSmoothEdges) {
@@ -58,10 +58,9 @@ var visjsGraph = (function () {
             }
 
         }
-        if (_options.groups){
-            options.groups=_options.groups
+        if (_options.groups) {
+            options.groups = _options.groups
         }
-
 
 
         self.network = new vis.Network(container, self.data, options);
@@ -69,15 +68,34 @@ var visjsGraph = (function () {
         window.setTimeout(function () {
             self.network.stopSimulation();
             self.simulationOn = false;
-            if(_options.afterDrawing)
+            if (_options.afterDrawing)
                 _options.afterDrawing()
         }, self.simulationTimeOut)
 
+        self.network.on("oncontext", function (params) {
+
+            params.event.preventDefault();
+            if (params.event.which == 3) {
+                if (_options.onRightClickFn) {
+                    var point = params.pointer.DOM;
+                    var objId = self.network.getNodeAt(params.pointer.DOM)
+                    if (!objId)
+                        return
+                    var obj = self.data.nodes.get(objId);
+                    if (!obj)
+                        var obj = self.data.edges.get(objId);
+
+                    if (obj)
+                        _options.onRightClickFn(obj, point, params.event)
+                }
+            }//rigth click
+
+        });
 
         self.network.on("click", function (params) {
             if (params.edges.length == 0 && params.nodes.length == 0) {//simple click stop animation
 
-                if ( self.simulationOn || _options.fixedLayout)
+                if (self.simulationOn || _options.fixedLayout)
                     self.network.stopSimulation();
                 else {
 
@@ -87,8 +105,8 @@ var visjsGraph = (function () {
                 self.simulationOn = !self.simulationOn;
                 // graphController.hideNodePopover();
 
-                if(_options.onclickFn)
-                    _options.onclickFn(null, point,options)
+                if (_options.onclickFn)
+                    _options.onclickFn(null, point, options)
             }
 
             // select node
@@ -102,10 +120,10 @@ var visjsGraph = (function () {
                 var options = {
                     ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
                     altKey: (params.event.srcEvent.altKey ? 1 : 0),
-                    shiftKey:(params.event.srcEvent.shiftKey ? 1 : 0),
+                    shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
                 }
-                if(_options.onclickFn)
-                    _options.onclickFn(node, point,options)
+                if (_options.onclickFn)
+                    _options.onclickFn(node, point, options)
 
 
             }
@@ -117,8 +135,8 @@ var visjsGraph = (function () {
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
                 var point = params.pointer.DOM;
-                if(_options.onclickFn)
-                    _options.onclickFn(edge, point,options)
+                if (_options.onclickFn)
+                    _options.onclickFn(edge, point, options)
 
             }
 
@@ -129,11 +147,11 @@ var visjsGraph = (function () {
             var point = params.pointer.DOM;
             self.context.currentNode = node;
             var options = {}
-            if(_options.onHoverNodeFn)
-                _options.onHoverNodeFn(node, point,options)
+            if (_options.onHoverNodeFn)
+                _options.onHoverNodeFn(node, point, options)
 
         }).on("blurNode", function (params) {
-           // $("#graphPopupDiv").css("display", "none")
+            // $("#graphPopupDiv").css("display", "none")
 
         }).on("zoom", function (params) {
             self.onScaleChange()
@@ -155,26 +173,23 @@ var visjsGraph = (function () {
         })
 
 
+            .on("dragEnd", function (params) {
+                if (params.nodes.length == 1) {
 
+                    var nodeId = params.nodes[0];
+                    var node = self.data.nodes.get(nodeId);
+                    node._graphPosition = params.pointer.DOM;
+                    var point = params.pointer.DOM;
+                    var newNode = {id: nodeId}
+                    newNode.fixed = {x: true, y: true}
+                    newNode.x = point.x;
+                    newNode.y = point.y;
+                    visjsGraph.network.stopSimulation();
+                    visjsGraph.simulationOn = false;
+                    //   visjsGraph.data.nodes.update(newNode);
 
-       .on("dragEnd", function (params) {
-           if (params.nodes.length == 1) {
-
-               var nodeId = params.nodes[0];
-               var node = self.data.nodes.get(nodeId);
-               node._graphPosition = params.pointer.DOM;
-               var point = params.pointer.DOM;
-               var newNode={id:nodeId}
-               newNode.fixed={x:true,y:true}
-               newNode.x=point.x;
-               newNode.y=point.y;
-               visjsGraph.network.stopSimulation();
-               visjsGraph.simulationOn = false;
-            //   visjsGraph.data.nodes.update(newNode);
-
-           }
-        });
-
+                }
+            });
 
 
         /*   window.setTimeout(function () {
@@ -200,7 +215,7 @@ var visjsGraph = (function () {
         if (self.network)
             self.network.destroy();
         $("#graph_legendDiv").html("");
-        self.data={};
+        self.data = {};
 
     }
 

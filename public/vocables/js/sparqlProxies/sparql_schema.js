@@ -184,12 +184,12 @@ var Sparql_schema = (function () {
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
             " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-            "select distinct ?property ?rangeDataType ?rangeRestriction ?propertyLabel ?rangeDataTypeLabel ?rangeRestrictionLabel" + fromStr + " WHERE  { " +
+            "select distinct ?property ?rangeDataType ?rangeRestriction ?propertyLabel ?rangeDataTypeLabel ?rangeRestrictionLabel " + fromStr + " WHERE  { " +
            "{" +
             "      <" + classId + "> rdfs:subClassOf* ?overClass." +
             "     ?property rdf:type <http://www.w3.org/2002/07/owl#DatatypeProperty>. ?property rdfs:domain  ?overClass." +
+            "     optional{?property rdfs:range ?rangeDataType. OPTIONAL {?rangeDataType rdfs:label ?rangeDataTypeLabel.}}" +
             "OPTIONAL {?property rdfs:label ?propertyLabel}"+
-            "     optional{?property rdfs:range ?rangeDataType OPTIONAL {?rangeDataType rdfs:label ?rangeDataTypeLabel}}" +
             "  }" +
 
             "UNION{" +
@@ -197,7 +197,7 @@ var Sparql_schema = (function () {
             " ?anonymNode owl:onProperty ?property." +
             "OPTIONAL {?property rdfs:label ?propertyLabel}"+
             "?anonymNode owl:someValuesFrom ?rangeRestriction. OPTIONAL {?rangeRestriction rdfs:label ?rangeRestrictionLabel}" +
-            " OPTIONAL {?property  owl:onProperty  ?anonymNode .}" +
+
 
             "  }" +
 

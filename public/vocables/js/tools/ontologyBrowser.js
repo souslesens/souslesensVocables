@@ -120,7 +120,7 @@ var OntologyBrowser = (function () {
 
                 function (callbackSeries) {
                     OwlSchema.initSourceSchema(MainController.currentSource, function (err, result) {
-                        OwlSchema.currentSourceSchema.labelsMap[classId] = classLabel;
+                      //  OwlSchema.currentSourceSchema.labelsMap[classId] = classLabel;
                         callbackSeries(err)
                     })
                 },
@@ -223,7 +223,11 @@ var OntologyBrowser = (function () {
                     }
                     if (newGraph) {
                         self.setGraphPopupMenus()
-                        visjsGraph.draw("OntologyBrowser_graphDiv", visjsData, {onclickFn: OntologyBrowser.onNodeClick})
+                        visjsGraph.draw("OntologyBrowser_graphDiv", visjsData,
+                            {
+                                onclickFn: OntologyBrowser.onNodeClick,
+                                onRightClickFn:OntologyBrowser.showGraphPopupMenu
+                            })
                     } else {
                         visjsGraph.data.nodes.update(visjsData.nodes);
                         visjsGraph.data.edges.update(visjsData.edges);
@@ -275,29 +279,24 @@ var OntologyBrowser = (function () {
 
     self.onNodeClick = function (node, point, event) {
         if (!node)
-            return;
-        if(node.from){//edge
-            self.setGraphPopupMenus(node)
-            self.currentJstreeNode = node;
-            MainController.UI.showPopup(point, "graphPopupDiv")
-        }
+            return MainController.UI.hidePopup("graphPopupDiv")
+
         OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, result) {
             if (err) {
                 self.currentJstreeNode = null;
                 return MainController.UI.message(err)
             }
             self.currentJstreeNode = node;
-            if (true ||  event.ctrlKey) {
-                self.setGraphPopupMenus(node)
-                MainController.UI.showPopup(point, "graphPopupDiv")
-            } else {
-
-
-            }
             self.currentJstreeNode.dataProperties = {}
             self.graphActions.showDataTypeProperties()
 
         })
+    }
+    self.showGraphPopupMenu = function (node, point, event) {
+            self.setGraphPopupMenus(node)
+            self.currentJstreeNode = node;
+            MainController.UI.showPopup(point, "graphPopupDiv")
+
     }
 
 
@@ -309,7 +308,8 @@ var OntologyBrowser = (function () {
         showDataTypeProperties: function () {
             var schema = Config.sources[MainController.currentSource].schema;
             Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentJstreeNode.id, function (err, result) {
-                var html = "<B>" + OntologyBrowser.currentJstreeNode.text + "</B>" +
+                OwlSchema.setLabelsFromQueryResult(result)
+                var html = "<B>" + OntologyBrowser.currentJstreeNode.label + "</B>" +
                     "<div style='display:flex;flex-direction:column'>"
                 var existingItems = []
                 result.forEach(function (item) {

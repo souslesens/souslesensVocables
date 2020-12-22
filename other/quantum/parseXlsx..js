@@ -7,7 +7,7 @@ const util = require('../../bin/skosConverters/util.')
 
 var parseXlsx = {
 
-    parse: function (filePath) {
+    parse: function (filePath, options) {
         var sheets = {};
         var allData = {};
         var allModel = {};
@@ -18,10 +18,11 @@ var parseXlsx = {
 
                 var sheet_name_list = workbook.SheetNames;
 
-                sheet_name_list.forEach(function (sheetName) {
-                    sheets[sheetName] = workbook.Sheets[sheetName];
+                sheet_name_list.forEach(function (sheetName, sheetIndex) {
+                    if (!options.firstSheetNumber ||sheetIndex >=options.firstSheetNumber -1)
+                        sheets[sheetName] = workbook.Sheets[sheetName];
                 })
-                callbackSeries(null, sheetNames)
+                callbackSeries()
 
             },
             function (callbackSeries) {
@@ -57,7 +58,8 @@ var parseXlsx = {
                             break;
 
                     }
-
+                    if (options.firstLineNumber)
+                        lineDebut = options.firstLineNumber
                     for (var i = lineDebut; i <= lineFin; i++) {
                         for (var j = 0; j < colNames.length; j++) {
 
@@ -90,7 +92,7 @@ var parseXlsx = {
                     }
 
 
-                    if (sheetKey != "tblMappingSourceDetails")
+
                         allData[sheetKey] = dataArray
                     allModel[sheetKey] = header
 
@@ -112,7 +114,7 @@ var parseXlsx = {
 
 
     }
-    , generateTriples: function (sheetNames,mappingFilter) {
+    , generateTriples: function (sheetNames, mappingFilter) {
         var graphUrisMap = {
             quantumUri: "http://data.total.com/resource/quantum/vocab#"
         }
@@ -156,7 +158,7 @@ var parseXlsx = {
             sheetData.forEach(function (item) {
 
                 for (var field in mappings) {
-                    if(!mappingFilter || mappingFilter.indexOf(field)>-1) {
+                    if (!mappingFilter || mappingFilter.indexOf(field) > -1) {
                         var mapping = mappings[field]
                         if (mapping) {
                             var mappingArray;
@@ -207,14 +209,22 @@ var parseXlsx = {
 
 
 module.exports = parseXlsx
+
+if (false) {
 //parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
-var sheets = [
-    // "tblFunctionalClass",
-   // "tblAttribute",
-    "tblPhysicalClass",
-   // "tblAttributePickListValue",
-   //"tblFunctionalClToPhysicalCl",
-  //  "tblFunctionalClToPhysicalCl"
-]
-var mappingFilter=["ParentPhysicalClassID"]
-parseXlsx.generateTriples(sheets,mappingFilter)
+    var sheets = [
+        // "tblFunctionalClass",
+        // "tblAttribute",
+        "tblPhysicalClass",
+        // "tblAttributePickListValue",
+        //"tblFunctionalClToPhysicalCl",
+        //  "tblFunctionalClToPhysicalCl"
+    ]
+    var mappingFilter = ["ParentPhysicalClassID"]
+    parseXlsx.generateTriples(sheets, mappingFilter)
+}
+
+if (true) {
+   var  options = {firstSheetNumber: 4, firstLineNumber: 7}
+    parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options)
+}

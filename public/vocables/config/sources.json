@@ -270,6 +270,17 @@
     "schema": null,
     "color": "#bcbd22"
   },
+  "CFIHOS_READI": {
+    "graphUri": "http://w3id.org/readi/rdl/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
   "CFIHOS_equipment": {
     "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
     "sparql_server": {

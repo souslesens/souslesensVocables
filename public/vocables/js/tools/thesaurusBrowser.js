@@ -14,6 +14,7 @@ var ThesaurusBrowser = (function () {
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'ThesaurusBrowser_exactMatchSearchCBX'>Exact Match" +
             "<button onclick='ThesaurusBrowser.searchTerm()'>Search</button>" +
+            "<button onclick='ThesaurusBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>"+
             "<div id='ThesaurusBrowser_collectionDiv'>" +
             "Collection<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
             "</div>")
@@ -116,7 +117,7 @@ var ThesaurusBrowser = (function () {
         // return {}
         var items = {}
         ;
-        if (MainController.currentSource && Config.sources[MainController.currentSource].schemaType == "OWL") {
+        if (Config.sources[MainController.currentSource].schemaType == "OWL") {
             items.showProperties = {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
@@ -274,6 +275,7 @@ var ThesaurusBrowser = (function () {
                 openAll: true, selectNodeFn: function (event, propertiesMap) {
                     if (Config.tools[MainController.currentTool].controller.selectNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectNodeFn(event, propertiesMap);
+                    ThesaurusBrowser.currentTreeNode=propertiesMap.node;
                     self.editThesaurusConceptInfos(propertiesMap.node.data.source, propertiesMap.node)
                 }, contextMenu: self.getJstreeConceptsContextMenu()
             }

@@ -69,7 +69,7 @@ var OwlSchema = (function () {
                 //check if classType already loaded
                 function (callbackSeries) {
                     if (self.currentSourceSchema.classes[classId])
-                        return callback();
+                        return callback(self.currentSourceSchema.classes[classId]);
                     return callbackSeries()
                 },
                 // load classes

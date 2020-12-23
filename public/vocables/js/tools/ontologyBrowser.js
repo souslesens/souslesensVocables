@@ -120,7 +120,7 @@ var OntologyBrowser = (function () {
 
                 function (callbackSeries) {
                     OwlSchema.initSourceSchema(MainController.currentSource, function (err, result) {
-                      //  OwlSchema.currentSourceSchema.labelsMap[classId] = classLabel;
+                  OwlSchema.currentSourceSchema.labelsMap[classId] = classLabel;
                         callbackSeries(err)
                     })
                 },
@@ -345,6 +345,7 @@ var OntologyBrowser = (function () {
         },
         expandSubclasses: function () {
             Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, OntologyBrowser.currentJstreeNode.id, 1, {}, function (err, children) {
+                OwlSchema.setLabelsFromQueryResult(children)
                 if (err)
                     return MainController.UI.message(err);
                 var existingVisjsIds = visjsGraph.getExistingIdsMap()

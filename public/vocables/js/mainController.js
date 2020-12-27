@@ -2,13 +2,14 @@ var MainController = (function () {
     var self = {}
 
     self.currentTool = null
-
+    self.currentSchemaType = null;
+    self.currentSource = null;
 
     self.loadSources = function (callback) {
 
         $.getJSON("config/sources.json", function (json) {
             Config.sources = json;
-            if(callback)
+            if (callback)
                 return callback()
 
         });
@@ -20,24 +21,40 @@ var MainController = (function () {
 
         showSources: function (treeDiv, withCBX) {
             var treeData = [];
+            var distinctNodes = {}
+
+            Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
+                treeData.push({id: item, text: item, parent: "#"})
+            })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
+
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
-                Config.sources[sourceLabel].name = sourceLabel
-                if (!Config.sources[sourceLabel].controllerName) {
-                    Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
-                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
-                }
-                if (!Config.sources[sourceLabel].color)
-                    Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
+                Config.sources[sourceLabel].name = sourceLabel;
 
-                treeData.push({id: sourceLabel, text: sourceLabel, parent: "#", data: Config.sources[sourceLabel]})
+                if (!distinctNodes[sourceLabel]) {
+                    distinctNodes[sourceLabel] = 1
+                    if (!Config.sources[sourceLabel].controllerName) {
+                        Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
+                        Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
+                    }
+                    if (!Config.sources[sourceLabel].color)
+                        Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
+
+                    treeData.push({id: sourceLabel, text: sourceLabel, parent: Config.sources[sourceLabel].schemaType, data: Config.sources[sourceLabel]})
+                }
             })
             common.loadJsTree(treeDiv, treeData, {
                 withCheckboxes: withCBX,
                 selectNodeFn: function (evt, obj) {
-                    self.currentSource = obj.node.id;
-                    MainController.UI.onSourceSelect()
+                    if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
+                        MainController.currentSchemaType = obj.node.id;
+                        $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
+                        return;
+                    } else {
+                        self.currentSource = obj.node.id;
+                        MainController.UI.onSourceSelect()
+                    }
 
                 }
             })
@@ -80,8 +97,8 @@ var MainController = (function () {
 
             if (Config.tools[self.currentTool].multiSources)
                 return
-            OwlSchema.currentSourceSchema=null;
-            Collection.currentCollectionFilter=null;
+            OwlSchema.currentSourceSchema = null;
+            Collection.currentCollectionFilter = null;
             self.UI.updateActionDivLabel()
             var controller = Config.tools[self.currentTool].controller
             controller.onSourceSelect(self.currentSource)
@@ -99,9 +116,9 @@ var MainController = (function () {
                     return MainController.UI.message(err);
                 }
                 if (divId.indexOf("Dialog") > -1) {
-                    $("#"+divId).dialog("open");
+                    $("#" + divId).dialog("open");
                 }
-                SourceEditor.showNodeInfos(divId, "en",nodeId, result)
+                SourceEditor.showNodeInfos(divId, "en", nodeId, result)
 
                 if (callback)
                     return callback()
@@ -161,10 +178,10 @@ var MainController = (function () {
         }
     }
 
-    self.test=function(){
-        self.loadSources(function(){
-            MainController.currentSource="NPD"
-            ThesaurusBrowser.currentTreeNode={data:{id:"http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
+    self.test = function () {
+        self.loadSources(function () {
+            MainController.currentSource = "NPD"
+            ThesaurusBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
             OntologyBrowser.showProperties()
         })
 

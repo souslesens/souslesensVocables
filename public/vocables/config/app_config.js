@@ -19,6 +19,8 @@ var Config = (function () {
     self.loginMode = "none";
     self.appName = "VOCABLES";
     self.hideBlender = false;
+    self.enableCollections=false;
+
     if (self.hideBlender) {
         setTimeout(function(){
            // $('#accordion').accordion().children('b:eq(3), div:eq(1)').hide();
@@ -43,6 +45,8 @@ var Config = (function () {
     self.tools["thesauriMatcher"] = {label: "Match", multiSources: 0, controller: ThesaurusMatcher, toolDescriptionImg: null}//"images/match.png"}
     self.tools["nerEvaluator"] = {label: "Evaluate", multiSources: 1, controller: NerEvaluator, toolDescriptionImg: null}//"images/evaluate.png"}
     self.tools["termTaxonomy"] = {label: "Taxonomy", multiSources: 1, controller: TermTaxonomy, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+    self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     // self.tools["ontologyBrowser"] = {label: "Ontology", multiSources: 0, controller: OntologyBrowser,toolDescriptionImg:null}
 

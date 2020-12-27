@@ -60,6 +60,11 @@ export async function executeQuery(yasqe: Yasqe, config?: YasqeAjaxConfig): Prom
     }
     var queryStart = Date.now();
 
+    if(souslesens_sparql_url){
+      populatedConfig.args.sparql_server_url=souslesens_sparql_url
+    }
+
+
     if (populatedConfig.reqMethod === "POST") {
       req = superagent
         .post(populatedConfig.url)

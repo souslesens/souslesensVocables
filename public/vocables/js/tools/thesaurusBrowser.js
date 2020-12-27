@@ -19,13 +19,17 @@ var ThesaurusBrowser = (function () {
             "Collection<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
             "</div>")
 
-        setTimeout(function () {
-            Collection.initBrowserCollectionSelect()
-        }, 200)
+        if(Config.enableCollections) {
+            setTimeout(function () {
+                Collection.initBrowserCollectionSelect()
+            }, 200)
+        }
 
     }
 
     self.selectNodeFn = function (event, propertiesMap) {
+
+
         var source;
         if (propertiesMap.node.data && propertiesMap.node.data.source)
             source = propertiesMap.node.data && propertiesMap.node.data.source // coming from search all sources
@@ -117,7 +121,7 @@ var ThesaurusBrowser = (function () {
         // return {}
         var items = {}
         ;
-        if (Config.sources[MainController.currentSource].schemaType == "OWL") {
+        if (MainController.currentSource && Config.sources[MainController.currentSource].schemaType == "OWL") {
             items.showProperties = {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
@@ -137,6 +141,14 @@ var ThesaurusBrowser = (function () {
             }
 
         }
+       /* , items.toCSV = {
+            label: "toCSV",
+            action: function () {
+                var node = skosEditor.editSkosMenuNode;
+                skosEditor.toCsv(node)
+            }
+
+        }*/
         return items;
     }
 
@@ -226,6 +238,7 @@ var ThesaurusBrowser = (function () {
         var searchedSources = [];
         for (var sourceLabel in Config.sources) {
             if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                if(!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType==MainController.currentSchemaType)
                 searchedSources.push(sourceLabel)
             }
         }

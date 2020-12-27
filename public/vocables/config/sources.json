@@ -196,10 +196,68 @@
     },
     "color": "#ffbb78"
   },
+
+  "WORDNET": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://wordnet.rkbexplorer.com/sparql/"
+    },
+    "controller": "Sparql_WORDNET",
+    "schemaType": "SKOS",
+    "schema": null,
+    "color": "#e377c2"
+  },
   "_comment": "**************************************************************ontologies***************************************",
   "_comment": "**************************************************************ontologies***************************************",
   "_comment": "**************************************************************ontologies***************************************",
   "_comment": "**************************************************************ontologies***************************************",
+
+
+
+  "ISO 15926-14": {
+    "graphUri": "http://standards.iso.org/iso/15926/part14/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+  "ISO_15926_PCA": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://staging.data.posccaesar.org/rdl/",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+
+
+
+
+
+  "_comment": "**************************************************************ontologies***************************************",
+  "_comment": "**************************************************************ontologies***************************************",
+
+
+
+
+
+
+
+
+
+
+
+
   "NPD": {
     "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
     "sparql_server": {
@@ -211,16 +269,7 @@
     "schema": null,
     "color": "#e377c2"
   },
-  "WORDNET": {
-    "graphUri": "",
-    "sparql_server": {
-      "url": "http://wordnet.rkbexplorer.com/sparql/"
-    },
-    "controller": "Sparql_WORDNET",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#e377c2"
-  },
+
   "CIDOC": {
     "graphUri": "http://erlangen-crm.org/current/",
     "sparql_server": {
@@ -228,6 +277,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+    "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -292,18 +342,7 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "ISO_15926_PCA": {
-    "graphUri": "",
-    "sparql_server": {
-      "url": "http://staging.data.posccaesar.org/rdl/",
-      "method": "GET"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
+
   "ISO_15926_.org": {
     "graphUri": "",
     "sparql_server": {

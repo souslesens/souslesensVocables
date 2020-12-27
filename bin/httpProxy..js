@@ -40,15 +40,6 @@ var httpProxy = {
 
     post: function (url, headers, params, callback) {
 
-
-        /*   var query = "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>select *  where{   ?resource skos:prefLabel ?resourceLabel .?resource <http://www.w3.org/2004/02/skos/core#inScheme> <http://data.total.com/resource/ontology/ctg/Domain>OPTIONAL {?child1 skos:broader ?resource .?child1 skos:prefLabel ?childLabel1 .optional {?child2 skos:broader ?child1 .?child2 skos:prefLabel ?childLabel2 .}} }limit 2000"
-
-           query = encodeURIComponent(query)
-           query = query.replace(/%2B/g, "+").trim()
-
-           params = {query: "PREFIX skos:<http://www.w3.org/2004/02/skos/core#>select *  where{   ?resource skos:prefLabel ?resourceLabel .?resource <http://www.w3.org/2004/02/skos/core#inScheme> <http://data.total.com/resource/ontology/ctg/Domain>OPTIONAL {?child1 skos:broader ?resource .?child1 skos:prefLabel ?childLabel1 .optional {?child2 skos:broader ?child1 .?child2 skos:prefLabel ?childLabel2 .}} }limit 2000"}
-   */
-
         var options = {
             method: 'POST',
 

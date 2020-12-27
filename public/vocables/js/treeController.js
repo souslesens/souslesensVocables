@@ -64,6 +64,66 @@ var TreeController = (function () {
 
     }
 
+    /*  a revoir
+    self.toCsv = function (topNode,treeDivId,resultDivId) {
+
+        function copyToClipboard(element) {
+            var $temp = $("<input>");
+            $("body").append($temp);
+            $temp.val($(element).text()).select();
+            document.execCommand("copy");
+            $temp.remove();
+        }
+
+        var depth = prompt("depth", "2")
+        if (isNaN(depth))
+            return;
+        depth = parseInt(depth)
+        var str = "";
+        for (var i = 1; i <= depth; i++) {
+            str += "\tlevel_" + i + "\t"
+        }
+        str += "\n";
+
+        var descendants = topNode.children_d;
+        var treeDivId = topNode.data.treeDivId;
+        var map = {}
+
+
+
+        var recurseChildren = function (nodeId, lineStr, level) {
+            var node = $("#" + treeDivId).jstree(true).get_node(nodeId);
+            var children = node.children;
+            lineStr += node.text + "\t";
+            if (level > depth || !children || children.length == 0) {
+
+                str += lineStr + "\n";
+                return;
+            } else {
+
+
+            }
+            if (!children)
+                return;
+            children.forEach(function (child) {
+                recurseChildren(child, lineStr, level + 1)
+            })
+
+        }
+
+
+        recurseChildren(topNode.id, "", 1)
+        $("#"+resultDivId).html("<textArea id='commonConceptsTA' rows='50' cols='80'>" + str + "</textArea>")
+        $("#popupDiv").css("display", "block")
+        // copyToClipboard("#editorDivId");
+        //  alert ("csv  is copied on clipboard")
+
+    }*/
+
+
+
+
+
 
     return self;
 

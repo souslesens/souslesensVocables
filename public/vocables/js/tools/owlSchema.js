@@ -22,7 +22,7 @@ var OwlSchema = (function () {
         async.series([
             // load schema sconfig
             function (callbackSeries) {
-                if (self.schemasConfig)
+                if (self.schemasConfig && self.schemasConfig[sourceLabel])
                     return callbackSeries();
 
 
@@ -37,8 +37,10 @@ var OwlSchema = (function () {
                             graphUri: Config.sources[sourceLabel].graphUri,
                         }
                     }
+
                     self.currentSourceSchema.classes = {}
                     self.currentSourceSchema.labelsMap = {}
+                    self.schemasConfig[sourceLabel]=self.currentSourceSchema;
                     return callbackSeries();
                 })
 

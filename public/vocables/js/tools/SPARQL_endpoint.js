@@ -8,7 +8,7 @@ var SPARQL_endpoint = (function () {
     self.onSourceSelect = function (sourceLabel) {
         self.currentSource=sourceLabel
         self.currentSparql_server=Config.sources[sourceLabel].sparql_server
-    //  localStorage.clear()
+   localStorage.clear()
      //   var html = "<iframe id='sparql_iframe' style='width:100%;height:100%' src='snippets/SPARQLendpoint.html?"+new Date()/1+"'></iframe>"
       //  $("#graphDiv").html(html);
         $("#graphDiv").html("")

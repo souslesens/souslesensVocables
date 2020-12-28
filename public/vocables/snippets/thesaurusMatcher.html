@@ -1,3 +1,7 @@
+
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
+
 <input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>
 <div id="ThesaurusMatcher_actionDiv"><table><tbody>
 <tr>
@@ -19,8 +23,11 @@
             <option>
                 table</option>
             <option>
+                triples</option>
+            <option>
                 stats</option>
         </select>
+        <input type="checkbox" id="ThesaurusMatcher_compareAllCBX">compare all
     </td>
 </tr>
 <tr>

@@ -172,7 +172,7 @@ var Sparql_OWL = (function () {
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>"+
                 " select distinct *  " + fromStr + "  WHERE {{"
 
             query += "?concept rdfs:label ?conceptLabel. " + strFilter;
@@ -182,13 +182,14 @@ var Sparql_OWL = (function () {
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
                     query += "  ?concept rdfs:subClassOf  ?broader" + i + "." +
+                       // "?broader" + i +" rdf:type owl:Class." +
                         "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
 
                 } else {
 
                     query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "."
-
+                   "?broader" + i +" rdf:type owl:Class."
 
                     query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
@@ -222,6 +223,53 @@ var Sparql_OWL = (function () {
 
             })
         }
+
+        self.getItems = function (sourceLabel, options, callback) {
+
+            if (!options) {
+                options = {}
+            }
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "")
+                fromStr = " FROM <" + self.graphUri + ">"
+
+
+            var query = "";
+            query += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
+
+
+            query += " select distinct * " + fromStr + "  WHERE { "
+            query += "?concept rdfs:label ?conceptLabel.";
+
+            if(options.filter)
+                query += options.filter;
+            if (options.lang)
+                query += "filter(lang(?conceptLabel )='" + lang + "')"
+
+            query += "  } ";
+           // query += "limit " + limit + " ";
+
+            var url = self.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+
+                return callback(null, result.results.bindings)
+
+            })
+        }
+
+
+
 
 
         self.execute_GET_query = function (query, callback) {

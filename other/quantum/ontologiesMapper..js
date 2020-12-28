@@ -8,6 +8,15 @@ var distinctTags = {};
 var ontologiesMapper = {
 
 
+
+
+
+
+
+
+
+
+
     mapClasses: function (sourceConfig, targetConfig,callback) {
         function decapitalize(str) {
             var str2 = "";
@@ -186,6 +195,25 @@ var ontologiesMapper = {
         fs.writeFileSync(filePath.replace(".json", "nt"), triples)
 
     }
+    ,extractlabelsFromJsonData:function(filePath){
+
+        var json = JSON.parse(fs.readFileSync(filePath));
+        var str=""
+        for(var table in json) {
+
+            json[table].forEach(function (item) {
+                for (var key in item) {
+                    if (key.toLowerCase().indexOf("name") > -1) {
+                        str +=table+"\t"+key+"\t"+ item[key] + "\n"
+                    }
+                }
+
+            })
+        }
+        fs.writeFileSync(filePath.replace(".json","Labels.txt"),str)
+
+
+    }
 
 
 }
@@ -215,19 +243,57 @@ var targetConfig = {
     method:"GET"
 }
 
-if(true) {
+if(false) {
     module.exports = mapQuatumCfihos;
 
 
-    mapQuatumCfihos.mapClasses(sourceConfig,targetConfig,function(err,sourceClasses ){
+    ontologiesMapper.mapClasses(sourceConfig,targetConfig,function(err,sourceClasses ){
         if(err)
             return console.log(err);
-        mapQuatumCfihos.writeMappings(sourceClasses,sourceConfig.filePath)
+        ontologiesMapper.writeMappings(sourceClasses,sourceConfig.filePath)
     });
 
 }if(false){
     var filePath = "D:\\NLP\\ontologies\\quantum\\mappingPart4_PCS.json";
-    mapQuatumCfihos.writeMappings(filePath)
+    ontologiesMapper.writeMappings(filePath)
+}
+
+if(false){
+    var filePath = "D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.json";
+    var filePath = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.json";
+
+
+    ontologiesMapper.extractlabelsFromJsonData(filePath)
+}
+
+
+
+if( true){
+
+
+    var map={
+         "CFIHOS unique id" :{
+             "p": "rdf:type",
+             "o": "<http://data.15926.org/lci/ClassOfPhysicalObject>"
+         }
+            "ISO15926 part4 unique number",
+        "ISO15926-4 Unique name",
+        "ISO15926-4 Synonym 1",
+        "ISO15926-4 Text definition",
+        "ISO15926-4 Source",
+        "ISO15926-4 Notes",
+        "ISO15926-4 superclass 1",
+        "ISO 15926-2 entity",
+        "created date",
+        "modified date",
+        "terminated date""
+
+
+    }
+
+
+
+
 }
 
 

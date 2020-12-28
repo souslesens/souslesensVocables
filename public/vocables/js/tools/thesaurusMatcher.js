@@ -15,13 +15,9 @@ var ThesaurusMatcher = (function () {
             $("#actionDivContolPanelDiv").load("snippets/thesaurusMatcher.html")
             setTimeout(function () {
                 $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option("", ""));
-                for (var key in Config.sources) {
-                    var selected = ""
-                    if (key != MainController.currentSource) {
-                        $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option(key, key));
+                var sourceLabels = Object.keys(Config.sources).sort()
+                common.fillSelectOptions("ThesaurusMatcher_targetGraphUriSelect", sourceLabels, true)
 
-                    }
-                }
                 $("#ThesaurusMatcher_actionDiv").css('display', 'none')
                 $("#accordion").accordion("option", {active: 2});
             }, 200)
@@ -50,13 +46,15 @@ var ThesaurusMatcher = (function () {
             var showAllSourceNodes = $("#showAllSourceNodesCBX").prop("checked");
             var showOlderAncestorsOnly = $("#showOlderAncestorsOnlyCBX").prop("checked");
 
+           var compareAll= $("#ThesaurusMatcher_compareAllCBX").prop("checked");
+
 
             // var lang = "en"
 
 
             var sourceConceptAggrDepth = maxDescendantsDepth;
             var targetConceptAggrDepth = maxDescendantsDepth;
-            var sliceSize = 20;
+            var sliceSize = 100;
 
             var sourceConceptsCount = 0;
             var sourceConceptsProcessed = 0;
@@ -66,16 +64,14 @@ var ThesaurusMatcher = (function () {
             var commonConceptsMap = {};
             $("#dialogDiv").dialog("close")
 
-            if (output == "stats") {
-                return self.getdescendantsMatchingStats(sourceConceptAggrDepth, targetConceptAggrDepth)
-
-
-            }
+            self.targetSparql_url = Config.sources[self.targetSourceId].sparql_server.url
+            self.targetGraphURI = Config.sources[self.targetSourceId].graphUri
             async.series([
 
                     //get source source Descendants
                     function (callbackSeries) {
-
+if(compareAll)
+   return callbackSeries();
 
                         Sparql_generic.getNodeChildren(MainController.currentSource, null, sourceNodeId, sourceConceptAggrDepth, null, function (err, result) {
                             //                       Concepts.getConceptDescendants({depth: sourceConceptAggrDepth, selectLabels: true}, function (err, conceptsSets) {
@@ -98,9 +94,21 @@ var ThesaurusMatcher = (function () {
                                 }
 
                             })
-                            if (sourceConceptsCount > self.maxSourceDescendants) {
-                                alert("too many nodes : " + sourceConceptsCount + " Compare using a shortest set of concepts")
-                                callbackSeries("too many nodes");
+                            if (sourceConceptsCount > self.maxSourceDescendants && output == "graph") {
+
+                                var ok = confirm("too many nodes  to draw graph: " + sourceConceptsCount + " continue ?")
+                                if (!ok)
+                                    return callbackSeries("too many nodes");
+                                var ok = confirm("Generate same as triples")
+                                if (!ok) {
+
+                                    return callbackSeries("too many nodes");
+                                }
+                                output = "triples"
+
+                                return callbackSeries();
+
+
                             }
                             MainController.UI.message(sourceConceptsCount + ' found in ' + MainController.currentSource)
                             callbackSeries();
@@ -109,64 +117,45 @@ var ThesaurusMatcher = (function () {
                     },
 
 
-                    //count matching target concept for each source concept
-                    function (callbackSeries) {
-                        if (output != "stats")
-                            return callbackSeries();
-                        var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize)
-                        async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
-
-                            var regexStr = ""
-                            sourceConcepts.forEach(function (concept, index) {
-                                if (index > 0)
-                                    regexStr += "|";
-                                regexStr += "^" + concept.label.replace(/[-"]/g, "") + "$";
-                            })
-                            regexStr += ")"
+                // compare all
+                function(callbackSeries){
 
 
-                            var filter = "  regex(?prefLabel, \"" + regexStr + "\", \"i\")";
 
-                            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                                "SELECT count(*) " +
-                                "FROM <" + self.targetThesaurusGraphURI + "> " +
-                                "WHERE {" +
-                                "?id skos:prefLabel|skos:altLabel ?prefLabel ." +
-                                //  "FILTER (lang(?prefLabel) = '" + lang + "')" +
-                                " filter " + filter + "} limit 10000";
-
-
-                            var url = self.targetSparql_url + "?default-graph-uri=" + encodeURIComponent(self.targetThesaurusGraphURI) + "&query=";// + query + queryOptions
-                            var queryOptions = "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
-                            sparql.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
-                                if (err) {
-                                    return callbackEach(err);
-                                }
-                                var bindings = [];
-                                var ids = [];
-                                if (result.results.bindings.length > 0) {
-                                    result.results.bindings.forEach(function (item) {
-                                    })
-                                }
-                                return callbackEach(err);
-                            })
-                        }, function (err) {
-                            callbackSeries(err)
+                    if(!compareAll)
+                        return callbackSeries();
+                    Sparql_generic.getItems(MainController.currentSource,{filter:"?concept rdf:type owl:Class. "},function(err, result){
+                        if(err){
+                            return callbackSeries(err);
+                        }
+                        result.forEach(function(item){
+                            commonConceptsMap[item.conceptLabel.value.toLowerCase()] = {source: {id: concept.value, label: item.conceptLabel.value, broaders: []}}
                         })
-                    },
+                        callbackSeries()
+
+                    } )
+
+
+
+
+
+
+
+
+                },
+
+
 
 
                     //search selected concepts  and descendants in targetThesaurus
                     function (callbackSeries) {
-                        if (output == "stats")
+                        if (false && output == "stats")
                             return callbackSeries();
 
-                        var targetSparql_url = Config.sources[self.targetSourceId].sparql_server.url
-                        var targetGraphURI = Config.sources[self.targetSourceId].graphUri
 
                         var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize)
                         async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
-                            sourceConceptsProcessed += sourceConcepts.length
+                            sourceConceptsProcessed = sourceConcepts.length
                             var words = []
                             sourceConcepts.forEach(function (concept, index) {
                                 words.push(concept.label.replace(/[-"]/g, ""));
@@ -206,10 +195,9 @@ var ThesaurusMatcher = (function () {
 
                                     }
                                     targetObj.broaders = targetBroaders;
-                                    if (!commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
-                                        return callbackEach();
+                                    if (commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
+                                        commonConceptsMap[item.conceptLabel.value.toLowerCase()].target = targetObj
                                     }
-                                    commonConceptsMap[item.conceptLabel.value.toLowerCase()].target = targetObj
 
                                 })
                                 MainController.UI.message(targetConceptsCount + " found  " + sourceConceptsProcessed + '/' + sourceConceptsCount + " processed")
@@ -230,7 +218,7 @@ var ThesaurusMatcher = (function () {
                     },
                     //get source broaders
                     function (callbackSeries) {
-                        if (output == "stats")
+                        if (output == "stats" || output == "triples")
                             return callbackSeries();
                         var conceptIds = []
 
@@ -487,20 +475,107 @@ var ThesaurusMatcher = (function () {
                         })
 
                         $('#graphDiv').html("<table id='dataTableDiv'></table>");
+                        setTimeout(function () {
+                                $('#dataTableDiv').DataTable({
+                                    data: dataSet,
+                                    columns: colnames,
+                                    // async: false,
+                                    dom: 'Bfrtip',
+                                    buttons: [
+                                        'copy', 'csv', 'excel', 'pdf', 'print'
+                                    ]
 
-                        $('#dataTableDiv').DataTable({
-                            data: dataSet,
-                            columns: colnames,
-                            // async: false,
-                            dom: 'Bfrtip',
-                            buttons: [
-                                'copy', 'csv', 'excel', 'pdf', 'print'
-                            ]
+
+                                });
+                                //     console.log(csv);
+
+                            }, 1000
+                        )
+                    }
+                    ,//draw triples
+                    function (callbackSeries) {
+
+                        if (output != "triples")
+                            return callbackSeries();
+                        var str = "";
+                        for (var key in commonConceptsMap) {
+                            var item = commonConceptsMap[key];
+                            if (item.target) {
+                                str += "<" + item.target.id + "> <http://www.w3.org/2002/07/owl#sameAs> <" + item.source.id + ">.\n";
+                            }
 
 
-                        });
-                        //     console.log(csv);
+                        }
+                        var html = "<textarea cols='80' rows='30'>" + str + "</textarea>"
+                        $("#graphDiv").html(html)
+                        callbackSeries()
+                    },
 
+
+                    //draw stats
+                    function (callbackSeries) {
+
+                        if (output != "stats")
+                            return callbackSeries();
+
+                        // count total individuals in target
+                        var query = "";
+                        var schemaType = Config.sources[self.targetSourceId].schemaType
+                        if (schemaType == "SKOS") {
+                            query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> "
+                            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                            " SELECT (count(distinct ?id)  as ?countItems) "
+
+                            if (self.targetGraphURI && self.targetGraphURI != "")
+                                query += " FROM <" + self.targetGraphURI + "> "
+
+                            query += " WHERE {" +
+                                "?id skos:prefLabel ?prefLabel ." +
+                                "?id rdf:type skos:concept." +
+                                "} limit 10000";
+
+                        } else if (schemaType == "OWL") {
+                            query = " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+                                " PREFIX  owl: <http://www.w3.org/2002/07/owl#> "+
+                            " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                            " SELECT (count(distinct ?id)  as ?countItems) "
+
+                            if (self.targetGraphURI && self.targetGraphURI != "")
+                                query += " FROM <" + self.targetGraphURI + "> "
+
+                            query += " WHERE {" +
+                                "?id rdfs:label ?prefLabel ." +
+                                "?id rdf:type owl:Class." +
+                                "} limit 10000";
+                        } else
+                            return alert("incorrect schema type  for target source")
+
+
+                        var url = self.targetSparql_url + "?format=json&query=";// + query + queryOptions
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: self.targetSourceId}, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+
+                            var countTargetItems = result.results.bindings[0].countItems.value
+                            var countSourceItems = 0;
+                            var countMatchingItems = 0;
+                            for (var key in commonConceptsMap) {
+                                var item = commonConceptsMap[key];
+                                countSourceItems += 1;
+                                if (item.target) {
+                                    countMatchingItems += 1;
+                                }
+
+
+                            }
+                            var html = "<table border='1'>" +
+                                "<tr><td>" + MainController.currentSource + "</td><td>" + countSourceItems + "</td></tr>" +
+                                "<tr><td>" + self.targetSourceId + "</td><td>" + countTargetItems + "</td></tr>"+
+                            "<tr><td>Matching items</td><td>" + countMatchingItems + "</td></tr>"
+                            $("#graphDiv").html(html)
+                            callbackSeries();
+                        })
                     }
 
 
@@ -508,8 +583,10 @@ var ThesaurusMatcher = (function () {
 
                 function (err) {
                     $("#waitImg").css("display", "none");
+
                     if (err)
                         return MainController.UI.message(err)
+                    MainController.UI.message("")
 
                 }
             )
@@ -518,178 +595,15 @@ var ThesaurusMatcher = (function () {
         }
 
         self.onGraphClickNode = function (node, point, event) {
-            if(!node)
+            if (!node)
                 return;
             if (event && event.ctrlKey) {
                 Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
+            } else {
+                MainController.UI.showNodeInfos(node.data.source, node.id, "mainDialogDiv")
             }
-            else{
-                MainController.UI.showNodeInfos(node.data.source, node.id,"mainDialogDiv")
-            }
 
 
-        }
-
-
-        self.getdescendantsMatchingStats = function (sourceConceptAggrDepth, targetConceptAggrDepth) {
-            var conceptLabelsMap = {};
-            var matchingConceptsTreeArray = [];
-            var uniqueConceptIds = []
-            async.series([
-                    function (callbackSeries) {
-                        Concepts.getConceptDescendants({depth: sourceConceptAggrDepth, selectLabels: true, rawData: true}, function (err, conceptsSets) {
-                            if (err)
-                                return callbackSeries(err);
-
-
-                            var minIndex;
-                            conceptsSets.forEach(function (conceptSet) {
-                                conceptSet.forEach(function (item) {
-                                    for (var i = 0; i < 10; i++) {
-                                        if (typeof item["concept" + i] != "undefined") {
-                                            if (!minIndex) {
-                                                minIndex = i;
-                                            }
-
-                                            var parentId;
-                                            var parentLabel;
-                                            if (i == minIndex) {
-                                                parentId = "#";
-                                                parentLabel = "#"
-                                            } else {
-                                                parentId = item["concept" + (i - 1)].value
-                                                parentLabel = item["conceptLabel" + (i - 1)].value
-                                            }
-                                            var label = item["conceptLabel" + i].value;
-                                            if (!conceptLabelsMap[label.toLowerCase()])
-                                                conceptLabelsMap[label.toLowerCase()] = ({
-                                                    parentId: parentId,
-                                                    parentLabel: parentLabel,
-                                                    parentLabel,
-                                                    id: item["concept" + i].value,
-                                                    label: label,
-                                                    count: 0
-                                                })
-
-
-                                        }
-
-                                    }
-                                })
-
-
-                            })
-                            callbackSeries();
-                        })
-                    }
-
-                    // get matching target concepts
-                    , function (callbackSeries) {
-                        var allSourceConcepts = Object.keys(conceptLabelsMap);
-                        var sliceSize = 50;
-                        //  var lang = "en"
-                        var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize);
-                        async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
-
-                            var regexStr = "("
-                            sourceConcepts.forEach(function (concept, index) {
-                                if (index > 0)
-                                    regexStr += "|";
-                                regexStr += +concept.label.replace(/[-"]/g, "") + "$";
-                            })
-                            regexStr += ")"
-
-
-                            var filter = "  regex(?prefLabel, \"^" + regexStr + "$\", \"i\")";
-                            if (false) {
-                                filter = "  regex(?prefLabel, \"" + regexStr + "\", \"i\")";
-                            }
-                            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                                "SELECT ?id ?prefLabel  count(?id as ?count) " +
-                                "FROM <" + self.targetThesaurusGraphURI + "> " +
-                                "WHERE {" +
-                                "?id skos:prefLabel ?prefLabel ." +
-                                //  "FILTER (lang(?prefLabel) = '" + lang + "')" +
-                                " filter " + filter + "  } GROUP by ?id ?prefLabel   limit 10000"
-
-
-                            var url = self.targetSparql_url + "?default-graph-uri=" + encodeURIComponent(self.targetThesaurusGraphURI) + "&query=";// + query + queryOptions
-                            var queryOptions = "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
-                            sparql.querySPARQL_GET_proxy(url, query, queryOptions, null, function (err, result) {
-                                if (err) {
-                                    return callbackEach(err);
-                                }
-                                var bindings = [];
-                                var ids = [];
-
-                                if (result.results.bindings.length > 0) {
-                                    result.results.bindings.forEach(function (item) {
-                                        var sourceConcept = conceptLabelsMap[item.prefLabel.value.toLowerCase()]
-                                        if (sourceConcept && uniqueConceptIds.indexOf(sourceConcept.id) < 0) {
-                                            uniqueConceptIds.push(sourceConcept.id)
-                                            matchingConceptsTreeArray.push({
-                                                id: sourceConcept.id,
-                                                text: sourceConcept.label,
-                                                parent: sourceConcept.parentId,
-                                                data: {count: 1, parentLabel: sourceConcept.parentLabel}
-
-
-                                            })
-
-                                        }
-                                    })
-                                }
-                                // add missing parents
-                                matchingConceptsTreeArray.forEach(function (item) {
-                                    if (uniqueConceptIds.indexOf(item.parent) < 0) {
-
-                                        var parentConcept = conceptLabelsMap[item.data.parentLabel]
-                                        if (item.data.parentId == "#" || !parentConcept)
-                                            return;
-                                        matchingConceptsTreeArray.push({
-                                            id: parentConcept.id,
-                                            text: parentConcept.label,
-                                            parent: parentConcept.parentId,
-                                            data: {count: 0}
-                                        })
-                                    }
-
-                                })
-                                return callbackEach(err);
-
-                            })
-                        }, function (err) {
-                            //    var x=matchingConceptsTreeArray;
-                            callbackSeries(err)
-                        })
-
-
-                    },
-                    function (callbackSeries) {
-
-                        console.log(JSON.stringify(matchingConceptsTreeArray, null, 2))
-                        $("#lefTabs").tabs("option", "active", 1);
-                        common.loadJsTree("jstreeFilterConceptsDiv", matchingConceptsTreeArray, {
-                            withCheckboxes: 1,
-                            //  openAll: true,
-                            selectDescendants: true,
-                            searchPlugin: true,
-                            onCheckNodeFn: function (evt, obj) {
-                                filterGraph.alterGraph.onFilterConceptsChecked(evt, obj);
-                            },
-                            onUncheckNodeFn: function (evt, obj) {
-                                filterGraph.alterGraph.onFilterConceptsChecked(evt, obj);
-                            }
-
-                        })
-
-
-                    }
-
-                ], function (err) {
-                    return common.message(err);
-                }
-            )
         }
 
 

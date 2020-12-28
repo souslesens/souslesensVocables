@@ -14,12 +14,12 @@ var ThesaurusBrowser = (function () {
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'ThesaurusBrowser_exactMatchSearchCBX'>Exact Match" +
             "<button onclick='ThesaurusBrowser.searchTerm()'>Search</button>" +
-            "<button onclick='ThesaurusBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>"+
+            "<button onclick='ThesaurusBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>" +
             "<div id='ThesaurusBrowser_collectionDiv'>" +
             "Collection<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
             "</div>")
 
-        if(Config.enableCollections) {
+        if (Config.enableCollections) {
             setTimeout(function () {
                 Collection.initBrowserCollectionSelect()
             }, 200)
@@ -93,7 +93,6 @@ var ThesaurusBrowser = (function () {
             }
 
 
-
             var html = "<div id='currentSourceTreeDiv'></div>"
 
             $("#actionDiv").html(html);
@@ -141,14 +140,14 @@ var ThesaurusBrowser = (function () {
             }
 
         }
-       /* , items.toCSV = {
-            label: "toCSV",
-            action: function () {
-                var node = skosEditor.editSkosMenuNode;
-                skosEditor.toCsv(node)
-            }
+        /* , items.toCSV = {
+             label: "toCSV",
+             action: function () {
+                 var node = skosEditor.editSkosMenuNode;
+                 skosEditor.toCsv(node)
+             }
 
-        }*/
+         }*/
         return items;
     }
 
@@ -214,6 +213,11 @@ var ThesaurusBrowser = (function () {
             if (callback)
                 return (err, jstreeData)
             MainController.UI.message("")
+            if (jstreeData.length == 0) {
+                $("#waitImg").css("display", "none");
+                return $("#currentSourceTreeDiv").html("No data found")
+            }
+
             common.loadJsTree("currentSourceTreeDiv", jstreeData, {
                 openAll: true, selectNodeFn: function (event, propertiesMap) {
                     if (Config.tools[MainController.currentTool].controller.selectNodeFn)
@@ -238,8 +242,8 @@ var ThesaurusBrowser = (function () {
         var searchedSources = [];
         for (var sourceLabel in Config.sources) {
             if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                if(!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType==MainController.currentSchemaType)
-                searchedSources.push(sourceLabel)
+                if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == MainController.currentSchemaType)
+                    searchedSources.push(sourceLabel)
             }
         }
         var jstreeData = []
@@ -288,7 +292,7 @@ var ThesaurusBrowser = (function () {
                 openAll: true, selectNodeFn: function (event, propertiesMap) {
                     if (Config.tools[MainController.currentTool].controller.selectNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectNodeFn(event, propertiesMap);
-                    ThesaurusBrowser.currentTreeNode=propertiesMap.node;
+                    ThesaurusBrowser.currentTreeNode = propertiesMap.node;
                     self.editThesaurusConceptInfos(propertiesMap.node.data.source, propertiesMap.node)
                 }, contextMenu: self.getJstreeConceptsContextMenu()
             }
@@ -323,11 +327,13 @@ var ThesaurusBrowser = (function () {
             var existingNodes = {};
             var jstreeData = []
 
-            if(result.length==0)
-                if(callback)
-                    return callback(null,[]);
+            if (result.length == 0) {
+                if (callback)
+                    return callback(null, []);
                 else
+                    $("#waitImg").css("display", "none");
                 return $("#currentSourceTreeDiv").html("No data found")
+            }
 
             var allJstreeIds = {}
             result.forEach(function (item, index) {
@@ -353,7 +359,7 @@ var ThesaurusBrowser = (function () {
                             if (item["broader" + (i + 1)])
                                 parentId = item["broader" + (i + 1)].value
 
-                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel, id: id,label:item["broader" + i + "Label"].value}})
+                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {source: sourceLabel, id: id, label: item["broader" + i + "Label"].value}})
                         }
                     }
                 }
@@ -364,7 +370,7 @@ var ThesaurusBrowser = (function () {
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
                     var id = item.concept.value;
                     var jstreeId = itemId
-                    jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: id,label:item.conceptLabel.value}})
+                    jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: id, label: item.conceptLabel.value}})
                 } else {
                     /*
                        if (!existingNodes[jstreeId]) {

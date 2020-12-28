@@ -89,9 +89,15 @@ var Sparql_generic = (function () {
 
         setFilter = function (varName, ids, words, options) {
             function formatWord(str) {
-                var str2 = str.replace(/\\/g, "")
-                return str2
+            var str = str.replace(/\\/g, "")
+                 str = str.replace(/\(/gm, "")
+                  str = str.replace(/\)/gm, "")
+                str = str.replace(/\[/gm, "")
+                str = str.replace(/\]/gm, "")
+
+                return str
             }
+
 
             if (!options)
                 options = {}
@@ -452,6 +458,57 @@ var Sparql_generic = (function () {
                 }
                 return callback(null, result.results.bindings)
 
+
+            })
+        }
+
+
+        self.getItems = function (sourceLabel, options, callback) {
+
+            $("#waitImg").css("display", "block");
+            if (!options) {
+                options = {}
+            }
+
+            if (Config.sources[sourceLabel].controllerName != "Sparql_generic") {
+
+                Config.sources[sourceLabel].controller.getItems(sourceLabel, options, function (err, result) {
+                    callback(err, result);
+                })
+                return;
+            }
+
+
+            setVariables(sourceLabel);
+
+            var query = "";
+            query += prefixesStr
+            query += " select distinct * " + fromStr + "  WHERE { "
+
+            query += "?concept " + prefLabelPredicate + " ?conceptLabel.";
+
+            if(options.filter)
+                query += options.filter;
+
+
+            if (options.lang)
+                query += "filter(lang(?conceptLabel )='" + lang + "')"
+
+            if (options.filterCollections)
+                query += "?collection skos:member ?concept. " + getUriFilter("collection", options.filterCollections)
+
+            query += "  } ";
+            query += "limit " + limit + " ";
+
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source:sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+
+                return callback(null, result.results.bindings)
 
             })
         }

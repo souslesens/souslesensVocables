@@ -99,6 +99,8 @@ var GraphController = (function () {
                         from: fromId,
                         to: toId
                     }
+                    if(visjOptions.arrows)
+                        edge.arrows= visjOptions.arrows
                     visjsData.edges.push(edge);
 
                 }

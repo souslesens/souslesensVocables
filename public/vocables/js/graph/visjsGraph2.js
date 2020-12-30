@@ -51,6 +51,9 @@ var visjsGraph = (function () {
         if (_options.notSmoothEdges) {
             options.edges.smooth = false;
         }
+        if (_options.arrows) {
+            options.edges.arrows = _options.arrows;
+        }
         if (_options.layoutHierarchical) {
 
             options.layout = {

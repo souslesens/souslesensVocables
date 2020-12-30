@@ -15,10 +15,11 @@ var ThesaurusMatcher = (function () {
             $("#actionDivContolPanelDiv").load("snippets/thesaurusMatcher.html")
             setTimeout(function () {
                 $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option("", ""));
-                var sourceLabels = Object.keys(Config.sources).sort()
+                var sourceLabels = Object.keys(Config.sources).sort();
+                //  console.log(JSON.stringify(sourceLabels))
                 common.fillSelectOptions("ThesaurusMatcher_targetGraphUriSelect", sourceLabels, true)
 
-                $("#ThesaurusMatcher_actionDiv").css('display', 'none')
+                //  $("#ThesaurusMatcher_actionDiv").css('display', 'none')
                 $("#accordion").accordion("option", {active: 2});
             }, 200)
 
@@ -26,35 +27,64 @@ var ThesaurusMatcher = (function () {
         }
         self.selectNodeFn = function (event, propertiesMap) {
             $("#ThesaurusMatcher_actionDiv").css('display', 'block')
-            ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", MainController.currentSource, propertiesMap.node)
+            ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", propertiesMap.node.data.source, propertiesMap.node)
             ThesaurusBrowser.currentTreeNode = propertiesMap.node
         }
 
 
-        self.compareConcepts = function () {
-            var sourceNodeId = ThesaurusBrowser.currentTreeNode.data.id
+        self.compareConcepts = function (compareAll, output, rdfType, fromSourceId, toSourceId, callback) {
+            var sourceNodeId
 
-            if (!sourceNodeId || sourceNodeId.length == 0)
-                alert(" no data.id field")
-            self.targetSourceId = $("#ThesaurusMatcher_targetGraphUriSelect").val();
-            if (!self.targetSourceId)
+
+            if (!fromSourceId)
+                fromSourceId = MainController.currentSource;
+
+
+            if (!toSourceId)
+                toSourceId = $("#ThesaurusMatcher_targetGraphUriSelect").val();
+            if (!fromSourceId)
                 return MainController.UI.message("choose a target ressource");
 
+            if (!output)
+                output = $("#ThesaurusMatcher_outputTypeSelect").val();
 
-            var output = $("#ThesaurusMatcher_outputTypeSelect").val();
-            var maxDescendantsDepth = parseInt($("#ThesaurusMatcher_maxDescendantsDepth").val());
+
+            if (!rdfType)
+                rdfType = ($("#ThesaurusMatcher_rdfTypeSelect").val());
+
+
+            if (!compareAll)
+                compareAll = $("#ThesaurusMatcher_compareAllCBX").prop("checked");
+
+
+            if (!ThesaurusBrowser.currentTreeNode) {
+                if (!compareAll) {
+                    if (confirm("compare all  items")) {
+                        $("#showOlderAncestorsOnlyCBX").prop("checked", "checked");
+                        compareAll = true;
+                    } else {
+                        $("#waitImg").css("display", "none");
+                        return;
+                    }
+                }
+            } else {
+                sourceNodeId = ThesaurusBrowser.currentTreeNode.data.id
+
+                if (!sourceNodeId || sourceNodeId.length == 0) {
+                    $("#waitImg").css("display", "none");
+                    return alert(" no data.id field")
+                }
+            }
+
             var showAllSourceNodes = $("#showAllSourceNodesCBX").prop("checked");
-            var showOlderAncestorsOnly = $("#showOlderAncestorsOnlyCBX").prop("checked");
-
-           var compareAll= $("#ThesaurusMatcher_compareAllCBX").prop("checked");
-
-
+            // var showOlderAncestorsOnly = $("#showOlderAncestorsOnlyCBX").prop("checked");
+            var maxDescendantsDepth = parseInt($("#ThesaurusMatcher_maxDescendantsDepth").val());
             // var lang = "en"
 
 
             var sourceConceptAggrDepth = maxDescendantsDepth;
             var targetConceptAggrDepth = maxDescendantsDepth;
-            var sliceSize = 100;
+            var sliceSize = 30;
 
             var sourceConceptsCount = 0;
             var sourceConceptsProcessed = 0;
@@ -64,16 +94,18 @@ var ThesaurusMatcher = (function () {
             var commonConceptsMap = {};
             $("#dialogDiv").dialog("close")
 
-            self.targetSparql_url = Config.sources[self.targetSourceId].sparql_server.url
-            self.targetGraphURI = Config.sources[self.targetSourceId].graphUri
+            var targetSparql_url = Config.sources[toSourceId].sparql_server.url
+            var targetGraphURI = Config.sources[toSourceId].graphUri;
+
+            var matchResult = "";
             async.series([
 
                     //get source source Descendants
                     function (callbackSeries) {
-if(compareAll)
-   return callbackSeries();
+                        if (compareAll)
+                            return callbackSeries();
 
-                        Sparql_generic.getNodeChildren(MainController.currentSource, null, sourceNodeId, sourceConceptAggrDepth, null, function (err, result) {
+                        Sparql_generic.getNodeChildren(fromSourceId, null, sourceNodeId, sourceConceptAggrDepth, null, function (err, result) {
                             //                       Concepts.getConceptDescendants({depth: sourceConceptAggrDepth, selectLabels: true}, function (err, conceptsSets) {
                             if (err)
                                 return callbackSeries(err);
@@ -110,41 +142,39 @@ if(compareAll)
 
 
                             }
-                            MainController.UI.message(sourceConceptsCount + ' found in ' + MainController.currentSource)
+                            MainController.UI.message(sourceConceptsCount + ' found in ' + fromSourceId)
                             callbackSeries();
                         })
 
                     },
 
 
-                // compare all
-                function(callbackSeries){
+                    // compare all
+                    function (callbackSeries) {
 
 
+                        if (!compareAll)
+                            return callbackSeries();
+                        var options = {}
+                        if (rdfType && rdfType != "")
+                            options = {filter: "?concept rdf:type " + rdfType}
+                        Sparql_generic.getItems(fromSourceId, options, function (err, result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            result.forEach(function (item) {
+                                allSourceConcepts.push({
+                                    id: item.concept.value,
+                                    label: item.conceptLabel.value,
+                                });
+                                commonConceptsMap[item.conceptLabel.value.toLowerCase()] = {source: {id: item.concept.value, label: item.conceptLabel.value, broaders: []}}
+                            })
+                            callbackSeries()
 
-                    if(!compareAll)
-                        return callbackSeries();
-                    Sparql_generic.getItems(MainController.currentSource,{filter:"?concept rdf:type owl:Class. "},function(err, result){
-                        if(err){
-                            return callbackSeries(err);
-                        }
-                        result.forEach(function(item){
-                            commonConceptsMap[item.conceptLabel.value.toLowerCase()] = {source: {id: concept.value, label: item.conceptLabel.value, broaders: []}}
                         })
-                        callbackSeries()
-
-                    } )
 
 
-
-
-
-
-
-
-                },
-
-
+                    },
 
 
                     //search selected concepts  and descendants in targetThesaurus
@@ -162,7 +192,7 @@ if(compareAll)
                             })
 
 
-                            Sparql_generic.getNodeParents(self.targetSourceId, words, null, targetConceptAggrDepth, {exactMatch: true}, function (err, result) {
+                            Sparql_generic.getNodeParents(toSourceId, words, null, targetConceptAggrDepth, {exactMatch: true}, function (err, result) {
                                 if (err) {
                                     return callbackEach(err);
                                 }
@@ -208,7 +238,7 @@ if(compareAll)
 
                         }, function (err) {
                             if (Object.keys(commonConceptsMap).length == 0) {
-                                alert(("no matching concepts"))
+                                ;//  alert(("no matching concepts"))
                             }
                             MainController.UI.message("drawing" + targetConceptsCount + '/' + sourceConceptsCount + " concepts")
                             return callbackSeries(err);
@@ -223,16 +253,16 @@ if(compareAll)
                         var conceptIds = []
 
                         for (var key in commonConceptsMap) {
-                            var sourceId = commonConceptsMap[key].source.id
-                            if (conceptIds.indexOf(sourceId) < 0)
-                                conceptIds.push(sourceId)
+                            var fromSourceId = commonConceptsMap[key].source.id
+                            if (conceptIds.indexOf(fromSourceId) < 0)
+                                conceptIds.push(fromSourceId)
                         }
                         if (conceptIds.length == 0)
                             return callbackSeries();
 
-                        var conceptIdsSlices = common.sliceArray(conceptIds, "50");
+                        var conceptIdsSlices = common.sliceArray(conceptIds, sliceSize);
                         async.eachSeries(conceptIdsSlices, function (conceptIds, callbackSeriesSourceBroaders) {
-                            Sparql_generic.getNodeParents(MainController.currentSource, null, conceptIds, maxDescendantsDepth, null, function (err, result) {
+                            Sparql_generic.getNodeParents(toSourceId, null, conceptIds, maxDescendantsDepth, null, function (err, result) {
                                 if (err) {
                                     return callbackSeriesSourceBroaders(err)
                                 }
@@ -340,7 +370,7 @@ if(compareAll)
                                         label: item.source.label,
                                         color: "#add",
                                         shape: "box",
-                                        data: {source: MainController.currentSource},
+                                        data: {source: fromSourceId},
                                         fixed: {x: true, y: true},
                                         x: currentX,
                                         y: currentY
@@ -354,7 +384,7 @@ if(compareAll)
                                                 label: item.target.label,
                                                 color: "#dda",
                                                 shape: "box",
-                                                data: {source: self.targetSourceId},
+                                                data: {source: fromSourceId},
                                                 fixed: {x: true, y: true},
                                                 x: currentX + xOffset,
                                                 y: currentY
@@ -372,9 +402,9 @@ if(compareAll)
                                             })
                                         }
                                     }
-                                    addBroaderNodes(item.source.broaders, item.source.id, currentX, -1, "#add", MainController.currentSource);
+                                    addBroaderNodes(item.source.broaders, item.source.id, currentX, -1, "#add", fromSourceId);
                                     if (item.target && item.target.broaders)
-                                        addBroaderNodes(item.target.broaders, item.target.id, currentX + xOffset, +1, "#dda", self.targetSourceId)
+                                        addBroaderNodes(item.target.broaders, item.target.id, currentX + xOffset, +1, "#dda", fromSourceId)
 
                                 }
                                 currentY += yOffset;
@@ -492,6 +522,8 @@ if(compareAll)
                             }, 1000
                         )
                     }
+
+
                     ,//draw triples
                     function (callbackSeries) {
 
@@ -520,14 +552,14 @@ if(compareAll)
 
                         // count total individuals in target
                         var query = "";
-                        var schemaType = Config.sources[self.targetSourceId].schemaType
+                        var schemaType = Config.sources[toSourceId].schemaType
                         if (schemaType == "SKOS") {
                             query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> "
                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                             " SELECT (count(distinct ?id)  as ?countItems) "
 
-                            if (self.targetGraphURI && self.targetGraphURI != "")
-                                query += " FROM <" + self.targetGraphURI + "> "
+                            if (targetGraphURI && targetGraphURI != "")
+                                query += " FROM <" + targetGraphURI + "> "
 
                             query += " WHERE {" +
                                 "?id skos:prefLabel ?prefLabel ." +
@@ -536,28 +568,29 @@ if(compareAll)
 
                         } else if (schemaType == "OWL") {
                             query = " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-                                " PREFIX  owl: <http://www.w3.org/2002/07/owl#> "+
-                            " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                            " SELECT (count(distinct ?id)  as ?countItems) "
+                                " PREFIX  owl: <http://www.w3.org/2002/07/owl#> " +
+                                " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                                " SELECT (count(distinct ?id)  as ?countItems) "
 
-                            if (self.targetGraphURI && self.targetGraphURI != "")
-                                query += " FROM <" + self.targetGraphURI + "> "
+                            if (targetGraphURI && targetGraphURI != "")
+                                query += " FROM <" + targetGraphURI + "> "
 
-                            query += " WHERE {" +
-                                "?id rdfs:label ?prefLabel ." +
-                                "?id rdf:type owl:Class." +
-                                "} limit 10000";
+                            query += " WHERE {" + "?id rdfs:label ?prefLabel .";
+                            if (rdfType && rdfType != "")
+                                query += "?id rdf:type " + rdfType + "."
+                            query += "} limit 10000";
                         } else
                             return alert("incorrect schema type  for target source")
 
 
-                        var url = self.targetSparql_url + "?format=json&query=";// + query + queryOptions
-                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: self.targetSourceId}, function (err, result) {
+                        var url = targetSparql_url + "?format=json&query=";// + query + queryOptions
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: toSourceId}, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
-
-                            var countTargetItems = result.results.bindings[0].countItems.value
+                            var countTargetItems = 0
+                            if (result.results.bindings.length > 0)
+                                countTargetItems = result.results.bindings[0].countItems.value
                             var countSourceItems = 0;
                             var countMatchingItems = 0;
                             for (var key in commonConceptsMap) {
@@ -566,30 +599,38 @@ if(compareAll)
                                 if (item.target) {
                                     countMatchingItems += 1;
                                 }
-
+                            }
+                            var html = "<BR>" + rdfType + "<br> <table border='1'>" +
+                                "<tr><td>" + fromSourceId + "</td><td>" + toSourceId + "</td><td>Matching items</td></tr>" +
+                                "<tr><td>" + countSourceItems + "</td><td>" + countTargetItems + "</td><td>" + countMatchingItems + "</td></tr>"
+                            if (callback)
+                                $("#graphDiv").append(html)
+                            else {
+                                $("#graphDiv").html(html)
 
                             }
-                            var html = "<table border='1'>" +
-                                "<tr><td>" + MainController.currentSource + "</td><td>" + countSourceItems + "</td></tr>" +
-                                "<tr><td>" + self.targetSourceId + "</td><td>" + countTargetItems + "</td></tr>"+
-                            "<tr><td>Matching items</td><td>" + countMatchingItems + "</td></tr>"
-                            $("#graphDiv").html(html)
-                            callbackSeries();
+
+                            matchResult = {rdfType: rdfType, from: fromSourceId, to: toSourceId, matchingCount: countMatchingItems, fromCount: countSourceItems, toCount: countTargetItems}
+                            return callbackSeries(null)
                         })
-                    }
+                    },
 
 
                 ],
 
                 function (err) {
                     $("#waitImg").css("display", "none");
-
-                    if (err)
-                        return MainController.UI.message(err)
+                    if (err) {
+                        MainController.UI.message(err)
+                    }
                     MainController.UI.message("")
+                    if (err) {
+                        matchResult = {rdfType: rdfType, from: fromSourceId, to: toSourceId, error: err}
+                    }
+                    if (callback)
+                        callback(null, matchResult)
 
-                }
-            )
+                })
 
 
         }
@@ -602,6 +643,321 @@ if(compareAll)
             } else {
                 MainController.UI.showNodeInfos(node.data.source, node.id, "mainDialogDiv")
             }
+
+
+        }
+
+
+        self.generateAllOwlStats = function () {
+
+            var fromSources = [
+                "ISO 15926-14",
+                "ISO_15926_part_12",
+                "CFIHOS-ISO",
+                "ISO_15926_.org",
+                "CFIHOS_equipment",
+                "CFIHOS_READI",
+                "ISO_15926_part_4",
+                "ISO_15926_PCA",
+                "QUANTUM"
+            ];
+            //  var fromSources=[ "ISO_15926_part_12"]
+            var toSources = [
+                "ISO 15926-14",
+                "ISO_15926_part_12",
+                "CFIHOS-ISO",
+                "ISO_15926_.org",
+                "CFIHOS_equipment",
+                "CFIHOS_READI",
+                "ISO_15926_part_4",
+                "ISO_15926_PCA",
+                "QUANTUM"
+            ];
+            var rdfTypes = [
+                //  "owl:Class",
+                //"owl:ObjectProperty",
+                "owl:DatatypeProperty"
+            ]
+            $("#graphDiv").append("")
+            var resultArray = [];
+            var fromArray = []
+            async.eachSeries(rdfTypes, function (rdfType, callbackRdfType) {
+
+                async.eachSeries(fromSources, function (fromSourceId, callbackStart) {
+                    fromArray.push(fromSourceId)
+                    async.eachSeries(toSources, function (toSourceId, callbackEnd) {
+
+                            if (fromArray.indexOf(toSourceId) < 0) {
+                                $("#graphDiv").append("running " + rdfType + " from " + fromSourceId + " to " + toSourceId)
+                                MainController.UI.message("running " + rdfType + " from " + fromSourceId + " to " + toSourceId)
+                                self.compareConcepts(true, "stats", rdfType, fromSourceId, toSourceId, function (err, result) {
+                                    if (result) {
+                                        resultArray = resultArray.concat(result)
+                                    }
+
+
+                                    return callbackEnd(err)
+
+                                })
+                            } else
+                                return callbackEnd()
+
+                        }, function (err) {
+                            return callbackStart();
+                        }
+                    )
+                }, function (err) {
+                    return callbackRdfType();
+                })
+
+
+            }, function (err) {
+                if (err)
+                    MainController.UI.message(err)
+                console.log(JSON.stringify(resultArray, null, 2))
+                $("#graphDiv").html(JSON.stringify(resultArray, null, 2))
+                MainController.UI.message("Done")
+
+            })
+        }
+
+
+        self.generateMatchingMatrix = function () {
+            var json =
+                [{"rdfType": "owl:DatatypeProperty", "from": "ISO 15926-14", "to": "ISO_15926_part_12", "matchingCount": 0, "fromCount": 3, "toCount": "9"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO 15926-14",
+                    "to": "CFIHOS-ISO",
+                    "matchingCount": 0,
+                    "fromCount": 3,
+                    "toCount": "23"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO 15926-14", "to": "ISO_15926_.org", "matchingCount": 0, "fromCount": 3, "toCount": "555"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO 15926-14",
+                    "to": "CFIHOS_equipment",
+                    "matchingCount": 0,
+                    "fromCount": 3,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO 15926-14", "to": "CFIHOS_READI", "matchingCount": 0, "fromCount": 3, "toCount": "93"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO 15926-14",
+                    "to": "ISO_15926_part_4",
+                    "matchingCount": 0,
+                    "fromCount": 3,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO 15926-14", "to": "ISO_15926_PCA", "matchingCount": 0, "fromCount": 3, "toCount": "2360"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO 15926-14",
+                    "to": "QUANTUM",
+                    "matchingCount": 0,
+                    "fromCount": 3,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_part_12", "to": "CFIHOS-ISO", "matchingCount": 1, "fromCount": 9, "toCount": "23"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_part_12",
+                    "to": "ISO_15926_.org",
+                    "matchingCount": 1,
+                    "fromCount": 9,
+                    "toCount": "555"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_part_12", "to": "CFIHOS_equipment", "matchingCount": 0, "fromCount": 9, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_part_12",
+                    "to": "CFIHOS_READI",
+                    "matchingCount": 0,
+                    "fromCount": 9,
+                    "toCount": "93"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_part_12", "to": "ISO_15926_part_4", "matchingCount": 0, "fromCount": 9, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_part_12",
+                    "to": "ISO_15926_PCA",
+                    "matchingCount": 0,
+                    "fromCount": 9,
+                    "toCount": "2360"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_part_12", "to": "QUANTUM", "matchingCount": 0, "fromCount": 9, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "CFIHOS-ISO",
+                    "to": "ISO_15926_.org",
+                    "matchingCount": 0,
+                    "fromCount": 23,
+                    "toCount": "555"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS-ISO", "to": "CFIHOS_equipment", "matchingCount": 0, "fromCount": 23, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "CFIHOS-ISO",
+                    "to": "CFIHOS_READI",
+                    "matchingCount": 0,
+                    "fromCount": 23,
+                    "toCount": "93"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS-ISO", "to": "ISO_15926_part_4", "matchingCount": 0, "fromCount": 23, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "CFIHOS-ISO",
+                    "to": "ISO_15926_PCA",
+                    "matchingCount": 0,
+                    "fromCount": 23,
+                    "toCount": "2360"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS-ISO", "to": "QUANTUM", "matchingCount": 0, "fromCount": 23, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_.org",
+                    "to": "CFIHOS_equipment",
+                    "matchingCount": 0,
+                    "fromCount": 266,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_.org", "to": "CFIHOS_READI", "matchingCount": 0, "fromCount": 266, "toCount": "93"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_.org",
+                    "to": "ISO_15926_part_4",
+                    "matchingCount": 5,
+                    "fromCount": 266,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_.org", "to": "ISO_15926_PCA", "matchingCount": 4, "fromCount": 266, "toCount": "2360"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_.org",
+                    "to": "QUANTUM",
+                    "matchingCount": 19,
+                    "fromCount": 266,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS_equipment", "to": "CFIHOS_READI", "matchingCount": 0, "fromCount": 0, "toCount": "93"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "CFIHOS_equipment",
+                    "to": "ISO_15926_part_4",
+                    "matchingCount": 0,
+                    "fromCount": 0,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS_equipment", "to": "ISO_15926_PCA", "matchingCount": 0, "fromCount": 0, "toCount": "2360"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "CFIHOS_equipment",
+                    "to": "QUANTUM",
+                    "matchingCount": 0,
+                    "fromCount": 0,
+                    "toCount": "0"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS_READI", "to": "ISO_15926_part_4", "matchingCount": 3, "fromCount": 102, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "CFIHOS_READI",
+                    "to": "ISO_15926_PCA",
+                    "matchingCount": 2,
+                    "fromCount": 102,
+                    "toCount": "2360"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "CFIHOS_READI", "to": "QUANTUM", "matchingCount": 34, "fromCount": 102, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_part_4",
+                    "to": "ISO_15926_PCA",
+                    "matchingCount": 0,
+                    "fromCount": 0,
+                    "toCount": "2360"
+                }, {"rdfType": "owl:DatatypeProperty", "from": "ISO_15926_part_4", "to": "QUANTUM", "matchingCount": 0, "fromCount": 0, "toCount": "0"}, {
+                    "rdfType": "owl:DatatypeProperty",
+                    "from": "ISO_15926_PCA",
+                    "to": "QUANTUM",
+                    "matchingCount": 2,
+                    "fromCount": 2346,
+                    "toCount": "0"
+                }]
+            //listSources
+            var sources = {}
+            json.forEach(function (item) {
+                if (!sources[item.from])
+                    sources[item.from] = {}
+
+                sources[item.from][item.to] = item
+                var total;
+                if (item.fromCount === null)
+                    total = "error"
+                else
+                    total = item.fromCount;
+
+
+                sources[item.from].total = total
+            })
+
+            var str = "Source\tTotal";
+
+            for (var keyFrom in sources) {
+
+                str += "\t" + keyFrom
+
+
+            }
+            str += "\n"
+
+
+            for (var keyFrom in sources) {
+                var total = sources[keyFrom].total;
+                str += keyFrom + "\t" + total
+
+                for (var keyTo in sources) {
+                    var value = ""
+                    var item = sources[keyFrom][keyTo]
+
+                    if (item) {
+                        if (item.matchingCount != null)
+                            value = item.matchingCount
+                        else if (item.error)
+                            value = "Error"
+                    }
+
+
+                    str += "\t" + value
+                }
+                str += "\n"
+
+            }
+            console.log(str)
+        }
+
+        self.drawMatchingGraph = function () {
+            var str = "Classes,ISO 15926-14,ISO_15926_part_12,CFIHOS-ISO,ISO_15926_.org,CFIHOS_equipment,CFIHOS_READI,ISO_15926_part_4,ISO_15926_PCA\n" +
+                "ISO 15926-14,0,25,0,0,0,0,0,0\n" +
+                "ISO_15926_part_12,0,0,0,0,0,0,0,0\n" +
+                "CFIHOS-ISO,58,63,0,0,0,0,0,0\n" +
+                "ISO_15926_.org,64,63,99,0,0,0,0,0\n" +
+                "CFIHOS_equipment,0,2,0,1,0,0,0,0\n" +
+                "CFIHOS_READI,88,26,7,14,99,0,0,0\n" +
+                "ISO_15926_part_4,9,5,0,2,20,10,0,0\n" +
+                "ISO_15926_PCA,42,22,6,8,26,14,77,0"
+
+            var lines = str.split("\n");
+            var visjsData = {nodes: [], edges: []}
+            var header = lines[0].split(",")
+            var maxLength = 500;
+            var minLength = 100;
+
+            header.forEach(function (source, indexLine) {
+                if (indexLine > 0) {
+                    visjsData.nodes.push({
+                        id: source,
+                        label: source,
+                        shape: "box"
+                    })
+                }
+            })
+
+            lines.forEach(function (line, indexLine) {
+                if (indexLine > 0) {
+
+                    var cells = line.split(",")
+
+                    cells.forEach(function (cell, indexCell) {
+                        if (indexCell > 0) {
+                            var length;
+
+                            if (cell == 0) {
+                                return
+                            } else
+                                var value = cell
+                            length = minLength + 1 / (cell * 400);
+
+                            visjsData.edges.push({
+                                from: cells[0],
+                                to: header[indexCell],
+                                value: value
+                            })
+                        }
+
+
+                    })
+                }
+            })
+
+            visjsGraph.draw("graphDiv", visjsData)
 
 
         }

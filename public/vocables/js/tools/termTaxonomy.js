@@ -32,6 +32,8 @@ var TermTaxonomy = (function () {
         var jsTreesourceLabels = $("#sourcesTreeDiv").jstree(true).get_checked();
         sourceLabels = []
         jsTreesourceLabels.forEach(function (sourceId) {
+            if(!Config.sources[sourceId])
+                return
             if (!Config.sources[sourceId].color)
                 Config.sources[sourceId].color = common.palette[Object.keys(sourceLabels).length];
             sourceLabels.push(sourceId)
@@ -112,9 +114,10 @@ var TermTaxonomy = (function () {
 
 
         }, function (err) {
+
+
             if (err)
                 return $("#messageDiv").html(err)
-            $("#messageDiv").html("done")
         })
         return;
 
@@ -122,6 +125,7 @@ var TermTaxonomy = (function () {
         setTimeout(function () {
 
             $("#conceptsJstreeDiv").jstree(true).select_node(selectedIds);
+            $("#messageDiv").html("done")
             $("#waitImg").css("display", "none");
 
         }, 1000)
@@ -149,6 +153,7 @@ var TermTaxonomy = (function () {
             visjsData.nodes.push(self.rootNode);
             visjsGraph.draw("graphDiv", visjsData, {
                 onclickFn: TermTaxonomy.onGraphNodeClick,
+                arrows:"to",
                 //  onHoverNodeFn: multiSkosGraph3.onNodeClick,
                 afterDrawing: function () {
                     $("#waitImg").css("display", "none")
@@ -232,7 +237,8 @@ var TermTaxonomy = (function () {
             var options={
                 from:{shape:"box",color:color},
                 to:{shape:"box",color:color},
-                data:{source:sourceId}
+                data:{source:sourceId},
+               // arrows:{to:1},
             }
 
 
@@ -285,7 +291,7 @@ var TermTaxonomy = (function () {
                 })
 
               var visjsData= GraphController.toVisjsData  (null, result, self.graphActions.currentNode.id,"concept","child1",
-                  {from:{},to:{shape:TermTaxonomy.graphActions.getVisjsGraphColor,color:self.graphActions.currentNode.color},data:self.graphActions.currentNode.data } )
+                  {from:{},to:{shape:TermTaxonomy.graphActions.getVisjsGraphColor,color:self.graphActions.currentNode.color},  data:self.graphActions.currentNode.data } )
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
               //  self.addChildrenNodesToGraph(self.graphActions.currentNode, children)

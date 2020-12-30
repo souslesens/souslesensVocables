@@ -27,6 +27,8 @@
     "ChangeRequestNumber": null,
     "ItemStatus": null
   },
+
+
   "tblFunctionalClass": {
     "ID": {
       "p": "rdf:type",
@@ -55,6 +57,8 @@
     "ChangeRequestNumber": null,
     "ItemStatus": null
   },
+
+
   "tblAttribute": {
     "ID": [{
       "p": "rdfs:subClassOf",
@@ -80,7 +84,7 @@
       "p": "<http://data.15926.org/cfihos/00000072>",
       "s": "ID"
     },
-    "DataType": null,
+    "DataType": "",
     "ClassType": null,
     "Synonym": null,
     "PickListValueGroupingID": null,

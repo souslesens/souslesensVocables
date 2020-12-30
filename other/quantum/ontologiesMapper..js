@@ -275,11 +275,15 @@ if( true){
          "CFIHOS unique id" :{
              "p": "rdf:type",
              "o": "<http://data.15926.org/lci/ClassOfPhysicalObject>"
-         }
+         },
             "ISO15926 part4 unique number",
         "ISO15926-4 Unique name",
         "ISO15926-4 Synonym 1",
-        "ISO15926-4 Text definition",
+        "ISO15926-4 Text definition": {
+            "literal": true,
+            "p": "<http://posccaesar.org/rdl/hasDefinition>",
+            "s": "ID"
+        },
         "ISO15926-4 Source",
         "ISO15926-4 Notes",
         "ISO15926-4 superclass 1",

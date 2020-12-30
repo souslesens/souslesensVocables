@@ -215,7 +215,7 @@ var common = (function () {
                 slice.push(item)
             })
             slices.push(slice);
-            return slices;ormat
+            return slices;
 
 
         }

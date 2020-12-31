@@ -69,6 +69,7 @@ var GraphController = (function () {
                         id: fromId,
                         label: fromLabel,
                         shape: getShape("from",fromId),
+                        size:  visjOptions.to.size || 5,
                         color: visjOptions.from.color || self.defaultNodeColor
                     }
                     if(visjOptions.data)
@@ -88,6 +89,7 @@ var GraphController = (function () {
                         id: toId,
                         label: toLabel,
                         shape: getShape("to",toId),
+                        size: visjOptions.to.size || 5,
                         color: visjOptions.to.color || self.defaultNodeColor
                     }
                     if(visjOptions.data)

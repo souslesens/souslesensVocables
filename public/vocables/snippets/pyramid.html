@@ -1,9 +1,29 @@
+<style>
+
+    .Pyramid_paramsDiv {
+        margin-bottom: 15px;
+    }
 
 
-<button onclick="Pyramid.drawTopConcepts()">draw top concepts</button><br>
-<button onclick="Pyramid.addChildrenToGraph()">Add children</button><br>
-<button onclick="Pyramid.removeLastChildrenFromGraph()">remove last children</button><br>
+</style>
+<div id="ThesaurusMatcher_actionDiv" style="display: flex;flex-direction: column">
+    <div class="ThesaurusMatcher_paramsDiv">
+        <button onclick="Pyramid.drawTopConcepts()">draw top concepts</button>
+    </div>
+    <div class="ThesaurusMatcher_paramsDiv">
+        children
+        <button onclick="Pyramid.addChildrenToGraph()">expand</button>
+        <button onclick="Pyramid.removeLastChildrenFromGraph()">collapse</button>
+    </div>
+    <div class="ThesaurusMatcher_paramsDiv">
 
 
-<select id="Pyramid_toSource"></select>
+        <select id="Pyramid_toSource"></select>
+        <button onclick="Pyramid.drawAllsimilars()">drawAllsimilars</button>
+        <button onclick="Pyramid.addSourceChildrenToGraph()">expand source</button>
 
+        <button onclick="Pyramid.removesimilars()">drawAllsimilars</button>
+    </div>
+
+
+</div>

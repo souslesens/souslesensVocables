@@ -1,7 +1,15 @@
 var Pyramid = (function () {
         var self = {}
         var bottomIds = [];
-        orphanShape="dot"
+        var sourceColors = {}
+        var orphanShape = "dot";
+        var defaultShape = "dot";
+        var defaultShapeSize = 10;
+
+
+        var maxChildrenDrawn = 15
+
+
         self.onSourceSelect = function (thesaurusLabel) {
 
 
@@ -19,8 +27,9 @@ var Pyramid = (function () {
 
         self.drawTopConcepts = function () {
             bottomIds = [];
+            var source = MainController.currentSource
             var depth = parseInt($("#Pyramid_topDepth").val())
-            Sparql_generic.getTopConcepts(MainController.currentSource, null, function (err, result) {
+            Sparql_generic.getTopConcepts(source, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var ids = []
@@ -28,28 +37,38 @@ var Pyramid = (function () {
                     ids.push(item.topConcept.value)
                 })
                 bottomIds.push(ids);
-
-
+                var color = self.getSourceColor(source)
+                var shape = defaultShape
                 var visjsData = GraphController.toVisjsData(null, result, null, "#", "topConcept",
                     {
                         from: {
                             shape: "box",
-                            color: "#ddd"
+                            color: color,
+                            size: defaultShapeSize
                         },
                         to: {
-                            shape: "box",
-                            color: "#ddd"
-                        }
+                            shape: shape,
+                            color: color,
+                            size: defaultShapeSize
+                        },
+                        data: {source: MainController.currentSource}
                     })
 
                 var options = {
-                    nodes: {
-                        shape: "box",
-                        color: "#ddd"
-                    },
+                    /*   nodes: {
+                           shape: "box",
+                           color: "#ddd"
+                       },*/
                     onclickFn: Pyramid.graphActions.onNodeClick,
                     onRightClickFn: Pyramid.graphActions.showGraphPopupMenu,
-                    layoutHierarchical: {direction: "LR", sortMethod: "directed"}
+                    "physics":  {
+                    "barnesHut": {
+                        "springLength": 0,
+                            "damping": 0.15
+                    },
+                    "minVelocity": 0.75
+                }
+                    //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
                 }
                 visjsGraph.draw("graphDiv", visjsData, options)
@@ -59,17 +78,36 @@ var Pyramid = (function () {
 
         }
 
-        self.addChildrenToGraph = function (nodeId) {
-            var ids
-            if (nodeId) {
-                ids = nodeId
+        self.addSourceChildrenToGraph=function(){
+            var toSource = $("#Pyramid_toSource").val()
+            if (toSource == "")
+                return alert("select a source");
+            var existingNodes=visjsGraph.data.nodes.get();
+            var sourceNodes=[]
+            existingNodes.forEach(function(item){
+                if(item.data && item.data.source==toSource){
+                    sourceNodes.push(item.data.id
+
+                    )
+                }
+            })
+            self.addChildrenToGraph  (sourceNodes, toSource)
+
+        }
+
+        self.addChildrenToGraph = function (nodeIds, source) {
+            var parentIds
+            if (nodeIds) {
+                parentIds = nodeIds
             } else {
-                ids = bottomIds[bottomIds.length - 1];
+                parentIds = bottomIds[bottomIds.length - 1];
             }
+            if (!source) {
 
-            Sparql_generic.getNodeChildren(MainController.currentSource, null, ids, 1, null, function (err, result) {
+                    source = MainController.currentSource;
 
-
+            }
+            Sparql_generic.getNodeChildren(source, null, parentIds, 1, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var map = [];
@@ -82,67 +120,112 @@ var Pyramid = (function () {
                     map[item.concept.value].push(item)
                     ids.push(item.child1.value)
                 })
-                if (!nodeId && result.length > 0)// si on est dans touts les cousins et non pas sur un noeud particulier
+                if (!nodeIds && result.length > 0)// si on est dans touts les cousins et non pas sur un noeud particulier
                     bottomIds.push(ids);
 
-
+                var color = self.getSourceColor(source)
                 for (var key in map) {
 
-                    if (map[key].length > 50) {
+                    if (map[key].length > maxChildrenDrawn) {
                         var node = {
-                            id: key + "_children",
+                            id: key + "_cluster",
                             label: map[key].length + "children",
-                            shape: "database"
+                            shape: "star",
+
+                            value: map[key].length,
+                            color: color,
+                            data: {cluster: map[key], source: source, parent: key}
                         }
                         var edge = {
                             from: key,
-                            to: key + "_children",
+                            to: key + "_cluster",
                         }
                         visjsGraph.data.nodes.add(node)
                         visjsGraph.data.edges.add(edge)
 
 
+                    } else {
+
+
+                        var visjsData = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
+                            from: {
+                                shape: defaultShape,
+                                color: color
+                            },
+                            to: {
+                                shape: defaultShape,
+                                color: color
+                            },
+                            data: {source: MainController.currentSource}
+                        })
+
+                        visjsGraph.data.nodes.add(visjsData.nodes)
+                        visjsGraph.data.edges.add(visjsData.edges)
                     }
-
-
-                    var visjsData = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
-                        from: {
-                            shape: "box",
-                            color: "#ddd"
-                        },
-                        to: {
-                            shape: "box",
-                            color: "#ddd"
-                        }
-                    })
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
                 }
-                var keys=Object.keys(map)
-                var orphans=[]
-                ids.forEach(function(id){
-                    if(keys.indexOf(id)<0){
-                        orphans.push({id:id,shape:orphanShape})
-                    }
-                })
-                visjsGraph.data.nodes.update(orphans)
+                var keys = Object.keys(map)
+                var orphans = []
+                /*     parentIds.forEach(function (id) {
+                         if (keys.indexOf(id) < 0) {
+                             orphans.push({id: id, shape: orphanShape})
+                         }
+                     })
+                     visjsGraph.data.nodes.update(orphans)*/
 
 
             })
         }
 
-        self.drawSimilarsNodes=function(node){
-            var sourceSchematype=Config.sources[MainController.currentSource].schemaType;
-            var similars=[];
-            var sources=Object.keys(Config.sources)
-            async.eachSeries(sources,function(source,callbackEach) {
+        self.openCluster = function (cluster) {
+            var color = self.getSourceColor(cluster.data.source)
+            var visjsData = GraphController.toVisjsData(null, cluster.data.cluster, cluster.data.parent, "concept", "child1", {
+                from: {
+                    shape: defaultShape,
+                    color: color
+                },
+                to: {
+                    shape: defaultShape,
+                    color: color
+                },
+                data: {source: cluster.data.source}
+            })
+
+            visjsGraph.data.nodes.add(visjsData.nodes)
+            visjsGraph.data.edges.add(visjsData.edges)
+            visjsGraph.data.nodes.remove(cluster.id)
+
+
+        }
+
+        self.drawSimilarsNodes = function (node, sources) {
+            var sourceSchematype = Config.sources[MainController.currentSource].schemaType;
+            var similars = [];
+            if (!sources)
+                sources = Object.keys(Config.sources)
+            var words = []
+            var wordsMap = {}
+            if (!node) {
+                var nodeObjs = visjsGraph.data.nodes.get()
+                nodeObjs.forEach(function (item) {
+                    words.push(item.label)
+                    wordsMap[item.label.toLowerCase()] = item.id
+                })
+            } else {
+                words = [node.label]
+            }
+
+            var filter = Sparql_generic.setFilter("concept", null, words, {exactMatch: true})
+            var options = {filter: filter}
+
+            //   var options = {filter: "filter (  regex(?conceptLabel,'^" + node.label + "$','i'))"}
+
+            async.eachSeries(sources, function (source, callbackEach) {
                 if (source == MainController.currentSource)
                     return callbackEach();
                 if (sourceSchematype != Config.sources[source].schemaType)
                     return callbackEach();
 
-                var options = {filter: "filter (  regex(?conceptLabel,'^" + node.label + "$','i'))"}
-console.log(source)
+
                 Sparql_generic.getItems(source, options, function (err, result) {
                     if (err) {
                         return callbackEach(err);
@@ -157,26 +240,54 @@ console.log(source)
 
                     callbackEach();
                 })
-            },function(err){
-                if(err)
+            }, function (err) {
+                if (err)
                     return MainController.UI.message(err);
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                similars.forEach(function (item) {
+                    if (!existingNodes[item.id]) {
+                        existingNodes[item.id] = 1
+                        var color = self.getSourceColor(item.source)
+                        visjsData.nodes.push({
+                            id: item.id,
+                            label: item.source,
+                            color: color,
+                            shape: "square",
+                            data: item
+                        })
+                        visjsData.edges.push({
+                            from: wordsMap[item.label.toLowerCase()],
+                            to: item.id
+                        })
+                    }
+                })
+
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
 
             })
 
 
+        }
 
+        self.drawAllsimilars = function () {
+            var source = $("#Pyramid_toSource").val()
+            if (source == "")
+                self.drawSimilarsNodes(null, null)
+            else
+                self.drawSimilarsNodes(null, [source])
         }
 
 
         self.removeLastChildrenFromGraph = function (nodeId) {
 
-            if(nodeId){
-               var children= visjsGraph.network.getConnectedNodes(nodeId,"to");
+            if (nodeId) {
+                var children = visjsGraph.network.getConnectedNodes(nodeId, "to");
                 visjsGraph.data.nodes.remove(children)
 
 
-
-            }else {
+            } else {
                 if (bottomIds.length > 0)
                     visjsGraph.data.nodes.remove(bottomIds[bottomIds.length - 1])
                 bottomIds.splice(bottomIds.length - 1, 1)
@@ -188,10 +299,15 @@ console.log(source)
             if (!node)
                 return;
 
-            var html = "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.drawChildren();\"> Object properties</span>\n" +
+            var html = "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.drawChildren();\"> draw children</span>\n" +
                 "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.drawSimilars();\"> draw similars</span>\n" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Pyramid.graphActions.hideChildren();\">hide children</span>"
+                "    <span  class=\"popupMenuItem\"onclick=\"Pyramid.graphActions.hideChildren();\">hide children</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Pyramid.graphActions.showNodeInfos();\">show node infos</span>"
 
+
+            if (node.id.indexOf("_cluster") > 0) {
+                var html = "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.openCluster();\"> open cluster</span>\n"
+            }
             $("#graphPopupDiv").html(html);
 
         }
@@ -201,7 +317,7 @@ console.log(source)
 
             showGraphPopupMenu: function (node, point, event) {
                 self.setGraphPopupMenus(node)
-                self.currentJstreeNode = node;
+                self.currentGraphNode = node;
                 MainController.UI.showPopup(point, "graphPopupDiv")
 
             },
@@ -212,15 +328,28 @@ console.log(source)
             },
             drawChildren: function () {
 
-                Pyramid.addChildrenToGraph(self.currentJstreeNode.id)
+                Pyramid.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)
             },
 
             drawSimilars: function () {
-                Pyramid.drawSimilarsNodes(self.currentJstreeNode)
+                Pyramid.drawSimilarsNodes(self.currentGraphNode)
             },
             hideChildren: function () {
-                Pyramid.removeLastChildrenFromGraph(self.currentJstreeNode.id)
+                Pyramid.removeLastChildrenFromGraph(self.currentGraphNode.id)
             }
+            , openCluster: function () {
+                Pyramid.openCluster(self.currentGraphNode)
+
+            },
+            showNodeInfos: function () {
+                MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+            }
+        }
+
+        self.getSourceColor = function (source) {
+            if (!sourceColors[source])
+                sourceColors[source] = common.palette[Object.keys(sourceColors).length]
+            return sourceColors[source];
         }
 
 

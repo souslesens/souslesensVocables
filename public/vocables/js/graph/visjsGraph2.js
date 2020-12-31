@@ -74,6 +74,9 @@ var visjsGraph = (function () {
         if (_options.edges) {
             options.edges = _options.edges
         }
+        if(_options.physics){
+            options.physics=_options.physics
+        }
 
         self.globalOptions = options
         self.network = new vis.Network(container, self.data, options);
@@ -313,7 +316,7 @@ var visjsGraph = (function () {
 
     self.getExistingIdsMap = function () {
         var existingVisjsIds = {}
-        if (!visjsGraph.data || visjsGraph.data.nodes)
+        if (!visjsGraph.data || !visjsGraph.data.nodes)
             return {}
         var oldIds = visjsGraph.data.nodes.getIds()
         oldIds = oldIds.concat(visjsGraph.data.edges.getIds())

@@ -2,9 +2,13 @@ var GraphController = (function () {
 
     var self = {};
     self.defaultNodeColor = "blue"
+    defaultNodeShape="dot"
 
 
     self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions) {
+        self.defaultNodeColor=visjsGraph.globalOptions.nodes.color ||self.defaultNodeColor
+        self.defaultNodeShape=visjsGraph.globalOptions.nodes.coshapelor || defaultNodeShape
+
         if (!visjOptions) {
             visjOptions = {from: {}, to: {}}
         }
@@ -30,7 +34,7 @@ var GraphController = (function () {
                 else//fn
                     return visjOptions[target].shape(nodeData)
                     }
-            return  "dot";
+            return  self.defaultNodeShape;
         }
 
 

@@ -20,6 +20,7 @@ var visjsGraph = (function () {
     self.context = {};
     self.currentScale;
     self.simulationOn;
+    self.globalOptions={nodes:{},edges:{}};
 
 
     self.simulationOn = false;
@@ -48,16 +49,17 @@ var visjsGraph = (function () {
             layout: {improvedLayout: false}
 
         };
-        if (_options.notSmoothEdges) {
-            options.edges.smooth = false;
+        if (_options.nodes) {
+            options.nodes = _options.nodes
         }
-        if (_options.arrows) {
-            options.edges.arrows = _options.arrows;
+        if (_options.edges) {
+            options.edges = _options.edges
         }
+
         if (_options.layoutHierarchical) {
 
             options.layout = {
-                hierarchical: {}
+                hierarchical:_options.layoutHierarchical
             }
 
         }
@@ -65,7 +67,15 @@ var visjsGraph = (function () {
             options.groups = _options.groups
         }
 
+        if (_options.nodes) {
+            options.nodes = _options.nodes
+        }
 
+        if (_options.edges) {
+            options.edges = _options.edges
+        }
+
+        self.globalOptions = options
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
         window.setTimeout(function () {
@@ -303,6 +313,8 @@ var visjsGraph = (function () {
 
     self.getExistingIdsMap = function () {
         var existingVisjsIds = {}
+        if (!visjsGraph.data || visjsGraph.data.nodes)
+            return {}
         var oldIds = visjsGraph.data.nodes.getIds()
         oldIds = oldIds.concat(visjsGraph.data.edges.getIds())
         oldIds.forEach(function (id) {

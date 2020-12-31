@@ -153,7 +153,7 @@ var TermTaxonomy = (function () {
             visjsData.nodes.push(self.rootNode);
             visjsGraph.draw("graphDiv", visjsData, {
                 onclickFn: TermTaxonomy.onGraphNodeClick,
-                arrows:"to",
+                edges:{arrows:"to"},
                 //  onHoverNodeFn: multiSkosGraph3.onNodeClick,
                 afterDrawing: function () {
                     $("#waitImg").css("display", "none")

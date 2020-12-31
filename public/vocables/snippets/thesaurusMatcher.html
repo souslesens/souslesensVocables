@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
 <style>
 
-    .ThesaurusMatcher_paramsDiv{
+    .ThesaurusMatcher_paramsDiv {
         margin-bottom: 15px;
     }
 
@@ -68,22 +68,21 @@
     <div class="ThesaurusMatcher_paramsDiv">
 
         <button onclick='ThesaurusMatcher.compareConcepts()'>Compare with...</button>
-        <button onclick='ThesaurusMatcher.generateAllOwlStats()'>X</button>
-        <button onclick='ThesaurusMatcher.generateMatchingMatrix()'>Y</button>
-        <button onclick='ThesaurusMatcher.drawMatchingGraph()'>Y</button>
 
 
         <select id="ThesaurusMatcher_targetGraphUriSelect">
 
-        </select>
+        </select><br>
+        <button onclick='ThesaurusMatcher.generateAllOwlStats()'>X</button>
+        <button onclick='ThesaurusMatcher.generateMatchingMatrix()'>Y</button>
+        <button onclick='ThesaurusMatcher.drawMatchingGraph()'>Z</button>
+
+
+        depth</td>
+        <input size="3" value="4" id="ThesaurusMatcher_maxDescendantsDepth"/>
 
 
         <hr>
-        <div class="ThesaurusMatcher_paramsDiv">
-            depth</td>
-            <input value="4" id="ThesaurusMatcher_maxDescendantsDepth"/>
-
-        </div>
         <input id='GenericTools_searchTermInput'>
         <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>
     </div>

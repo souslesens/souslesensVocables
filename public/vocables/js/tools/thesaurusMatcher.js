@@ -14,12 +14,8 @@ var ThesaurusMatcher = (function () {
 
             $("#actionDivContolPanelDiv").load("snippets/thesaurusMatcher.html")
             setTimeout(function () {
-                $("#ThesaurusMatcher_targetGraphUriSelect").append(new Option("", ""));
                 var sourceLabels = Object.keys(Config.sources).sort();
-                //  console.log(JSON.stringify(sourceLabels))
                 common.fillSelectOptions("ThesaurusMatcher_targetGraphUriSelect", sourceLabels, true)
-
-                //  $("#ThesaurusMatcher_actionDiv").css('display', 'none')
                 $("#accordion").accordion("option", {active: 2});
             }, 200)
 
@@ -162,6 +158,7 @@ var ThesaurusMatcher = (function () {
                             if (err) {
                                 return callbackSeries(err);
                             }
+                            sourceConceptsCount=result.length
                             result.forEach(function (item) {
                                 allSourceConcepts.push({
                                     id: item.concept.value,
@@ -230,7 +227,7 @@ var ThesaurusMatcher = (function () {
                                     }
 
                                 })
-                                MainController.UI.message(targetConceptsCount + " found  " + sourceConceptsProcessed + '/' + sourceConceptsCount + " processed")
+                                MainController.UI.message(targetConceptsCount +  " processed" + sourceConceptsProcessed + '/' + sourceConceptsCount )
                                 return callbackEach();
 
                             })

@@ -42,7 +42,7 @@ var Pyramid = (function () {
                 var visjsData = GraphController.toVisjsData(null, result, null, "#", "topConcept",
                     {
                         from: {
-                            shape: "box",
+                            shape: "hexagon",
                             color: color,
                             size: defaultShapeSize
                         },
@@ -51,7 +51,8 @@ var Pyramid = (function () {
                             color: color,
                             size: defaultShapeSize
                         },
-                        data: {source: MainController.currentSource}
+                        data: {source: MainController.currentSource},
+                        rootLabel:source,
                     })
 
                 var options = {
@@ -61,13 +62,13 @@ var Pyramid = (function () {
                        },*/
                     onclickFn: Pyramid.graphActions.onNodeClick,
                     onRightClickFn: Pyramid.graphActions.showGraphPopupMenu,
-                    "physics":  {
-                    "barnesHut": {
-                        "springLength": 0,
+                    "physics": {
+                        "barnesHut": {
+                            "springLength": 0,
                             "damping": 0.15
-                    },
-                    "minVelocity": 0.75
-                }
+                        },
+                        "minVelocity": 0.75
+                    }
                     //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
                 }
@@ -78,20 +79,26 @@ var Pyramid = (function () {
 
         }
 
-        self.addSourceChildrenToGraph=function(){
+
+        self.getGraphIdsFromSource=function(source){
+
+            var existingNodes = visjsGraph.data.nodes.get();
+            var sourceNodes = []
+            existingNodes.forEach(function (item) {
+                if ( item.id!="#" && item.data && item.data.source == source) {
+                    sourceNodes.push(item.data.id || item.id)
+                }
+            })
+            return sourceNodes;
+        }
+
+
+        self.addSourceChildrenToGraph = function () {
             var toSource = $("#Pyramid_toSource").val()
             if (toSource == "")
                 return alert("select a source");
-            var existingNodes=visjsGraph.data.nodes.get();
-            var sourceNodes=[]
-            existingNodes.forEach(function(item){
-                if(item.data && item.data.source==toSource){
-                    sourceNodes.push(item.data.id
-
-                    )
-                }
-            })
-            self.addChildrenToGraph  (sourceNodes, toSource)
+           var  sourceNodes= self.getGraphIdsFromSource(toSource)
+            self.addChildrenToGraph(sourceNodes, toSource)
 
         }
 
@@ -104,7 +111,7 @@ var Pyramid = (function () {
             }
             if (!source) {
 
-                    source = MainController.currentSource;
+                source = MainController.currentSource;
 
             }
             Sparql_generic.getNodeChildren(source, null, parentIds, 1, null, function (err, result) {
@@ -124,10 +131,12 @@ var Pyramid = (function () {
                     bottomIds.push(ids);
 
                 var color = self.getSourceColor(source)
+
+                var visjsData={nodes:[],edges:[]}
                 for (var key in map) {
 
                     if (map[key].length > maxChildrenDrawn) {
-                        var node = {
+                        visjsData.nodes.push({
                             id: key + "_cluster",
                             label: map[key].length + "children",
                             shape: "star",
@@ -135,19 +144,18 @@ var Pyramid = (function () {
                             value: map[key].length,
                             color: color,
                             data: {cluster: map[key], source: source, parent: key}
-                        }
-                        var edge = {
+                        })
+                        visjsData.edges.push({
                             from: key,
                             to: key + "_cluster",
-                        }
-                        visjsGraph.data.nodes.add(node)
-                        visjsGraph.data.edges.add(edge)
+                        })
+
 
 
                     } else {
 
 
-                        var visjsData = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
+                         var visjsData2 = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
                             from: {
                                 shape: defaultShape,
                                 color: color
@@ -159,10 +167,16 @@ var Pyramid = (function () {
                             data: {source: MainController.currentSource}
                         })
 
-                        visjsGraph.data.nodes.add(visjsData.nodes)
-                        visjsGraph.data.edges.add(visjsData.edges)
+                        visjsData.nodes= visjsData.nodes.concat( visjsData2.nodes)
+                        visjsData.edges= visjsData.edges.concat( visjsData2.edges)
+
+
                     }
+
                 }
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+
                 var keys = Object.keys(map)
                 var orphans = []
                 /*     parentIds.forEach(function (id) {
@@ -253,7 +267,7 @@ var Pyramid = (function () {
                             id: item.id,
                             label: item.source,
                             color: color,
-                            shape: "square",
+                            shape: "hexagon",
                             data: item
                         })
                         visjsData.edges.push({
@@ -277,6 +291,63 @@ var Pyramid = (function () {
                 self.drawSimilarsNodes(null, null)
             else
                 self.drawSimilarsNodes(null, [source])
+        }
+
+
+
+
+        self.drawObjectProperties = function (classIds) {
+            var source = $("#Pyramid_toSource").val()
+            if (source == "")
+                return alert("select a source");
+            if(!classIds){
+                classIds=self.getGraphIdsFromSource(source)
+
+            }
+
+            OwlSchema.initSourceSchema(source, function (err, schema) {
+                if(err)
+                    return MainController.UI.message(err)
+                Sparql_schema.getClassPropertiesAndRanges(schema, classIds, function (err, result) {
+                    if(err)
+                        return MainController.UI.message(err)
+                    var visjsData={nodes:[],edges:[]}
+                    var existingNodes=visjsGraph.getExistingIdsMap()
+                    var color = self.getSourceColor(source)
+                    result.forEach(function(item) {
+                        if(! item.range){
+                            item.range={value:Math.random()}
+                            item.rangeLabel={value :"?"}
+                        }
+                        if (!existingNodes[item.range.value]) {
+                            existingNodes[item.range.value] = 1;
+                            visjsData.nodes.push({
+                                id: item.range.value,
+                                label: item.rangeLabel.value,
+                                shape: defaultShape,
+                                size: defaultShapeSize,
+                                color: color,
+                                data:{source:source}
+                            })
+
+                        }
+                        visjsData.edges.push({
+                            from:item.classId.value,
+                            to:item.range.value,
+                            label:item.propertyLabel.value,
+                         //   physics:false,
+                            arrows:"to",
+                            dashes:true
+
+                        })
+
+                    })
+
+                    visjsGraph.data.nodes.add( visjsData.nodes)
+                    visjsGraph.data.edges.add( visjsData.edges)
+
+                })
+            })
         }
 
 

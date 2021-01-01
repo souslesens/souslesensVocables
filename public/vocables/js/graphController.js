@@ -54,7 +54,7 @@ var GraphController = (function () {
 
                 if (fromVar == "#") {
                     fromId = "#"
-                    fromLabel = "#"
+                    fromLabel = visjOptions.rootLabel || "#"
                 } else {
                     if (!item[fromVar])
                         return console.log(JSON.stringify(item));

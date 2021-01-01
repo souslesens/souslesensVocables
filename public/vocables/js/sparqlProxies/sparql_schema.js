@@ -6,20 +6,16 @@ var Sparql_schema = (function () {
     self.npdOntologyUri = "http://sws.ifi.uio.no/vocab/npd-v2/"
 
 
-
-
-
-    self.getClasses = function (schema,classId, callback) {
+    self.getClasses = function (schema, classIds, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
-
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> "+
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             " select distinct *  " + fromStr + "  WHERE  {  ?class  rdf:type owl:Class. OPTIONAL {?class rdfs:label ?classLabel}"
-        if(classId)
-            query+="filter (?class =<"+classId+">)"
+        if (classId)
+            query +=  Sparql_generic.setFilter("classId", classIds)
         if (schema.allSubclasses)
             query += " OPTIONAL{?childClass rdfs:subClassOf* ?class. OPTIONAL{?childClass rdfs:label ?childClassLabel} } "
 
@@ -37,15 +33,16 @@ var Sparql_schema = (function () {
 
 
     }
-    self.getClassProperties = function (schema, classId, callback) {
+    self.getClassProperties = function (schema, classIds, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
-
+        var classIdsFilter = Sparql_generic.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct *  " + fromStr + "  WHERE  {" +
-            "{  ?property rdfs:range|rdfs:domain <" + classId + "> . OPTIONAL{?property rdfs:label ?propertyLabel.} " +
+            "{  ?property rdfs:range|rdfs:domain ?classId. OPTIONAL{?property rdfs:label ?propertyLabel.} " +
+            classIdsFilter +
             " OPTIONAL{ ?subProperty rdfs:subPropertyOf* ?property. OPTIONAL{?subProperty rdfs:label ?subPropertyLabel}}" +
             "}" +
 
@@ -62,11 +59,11 @@ var Sparql_schema = (function () {
 
 
     }
-    self.getObjectAnnotations = function (schema, classId, callback) {
+    self.getObjectAnnotations = function (schema, classIds, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
-
+        var classIdsFilter = Sparql_generic.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct * " + fromStr + "   WHERE  " +
@@ -90,16 +87,16 @@ var Sparql_schema = (function () {
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
 
-        var filterStr=Sparql_generic.setFilter("property",propertyIds)
+        var filterStr = Sparql_generic.setFilter("property", propertyIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct *  " + fromStr + "  WHERE  {" +
             "?property rdfs:range ?range." +
             "OPTIONAL{?property rdfs:label ?propertyLabel.}" +
-            " OPTIONAL{?range rdfs:label ?rangeLabel.} "+
-            filterStr+
-            "?property rdfs:domain ?domain."+
-            " OPTIONAL{?domain rdfs:label ?domainLabel.} "+
+            " OPTIONAL{?range rdfs:label ?rangeLabel.} " +
+            filterStr +
+            "?property rdfs:domain ?domain." +
+            " OPTIONAL{?domain rdfs:label ?domainLabel.} " +
             "} limit 10000"
 
         var url = schema.sparql_url + "?format=json&query=";
@@ -118,19 +115,22 @@ var Sparql_schema = (function () {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
+
+        fromStr = "FROM <" + schema.graphUri + "> ";
+        var classIdsFilter = Sparql_generic.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct *  " + fromStr + "   WHERE  " +
-            "{ ?prop rdfs:domain <" + classId + ">. " +
-            "?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel }} " +
+            "{ ?prop rdfs:domain ?classId. " +classIdsFilter+
+            " ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel }} " +
             // cf member of in SKOS
-         /*   "      UNION{" +
-            "{ ?prop rdfs:domain <" + classId + ">. " +
-            " ?prop rdfs:range  ?union. " +
-            "filter (?property in  <" + classId + ">) "+
-            " ?union owl:unionOf ?id . ?id ?z  ?range." +
-            " OPTIONAL{?range rdfs:label ?rangeLabel.}"+
-            "   }" +*/
+            /*   "      UNION{" +
+               "{ ?prop rdfs:domain <" + classId + ">. " +
+               " ?prop rdfs:range  ?union. " +
+               "filter (?property in  <" + classId + ">) "+
+               " ?union owl:unionOf ?id . ?id ?z  ?range." +
+               " OPTIONAL{?range rdfs:label ?rangeLabel.}"+
+               "   }" +*/
             "limit 10000"
 
         var url = schema.sparql_url + "?format=json&query=";
@@ -144,23 +144,25 @@ var Sparql_schema = (function () {
 
 
     }
-    self.getObjectDomainProperties = function (schema, classId, callback) {
+    self.getObjectDomainProperties = function (schema, classIds, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
+        var classIdsFilter = Sparql_generic.setFilter("classId", classIds)
+
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct *  " + fromStr + "   WHERE  " +
             "{" +
-            "{ ?prop rdfs:range <" + classId + ">. " +
-            "?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel } " +
+            "{ ?prop rdfs:range ?classId. " +classIdsFilter+
+            " ?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel } " +
 
             "}" +
 
             "UNION{" +
-            "      <" + classId + "> rdfs:subClassOf* ?overClass." +
-            "        ?prop rdfs:range  ?overClass." +
-            "?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel } " +
+            " ?classId rdfs:subClassOf* ?overClass." +classIdsFilter+
+            "  ?prop rdfs:range  ?overClass." +
+            " ?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel } " +
             "  }" +
             "}limit 10000 "
 
@@ -176,34 +178,69 @@ var Sparql_schema = (function () {
 
     }
 
-    self.getClassPropertiesAndRanges = function (schema, classId, callback) {
+    self.getClassPropertiesAndRanges = function (schema, classIds, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
+        var classIdsFilter = Sparql_generic.setFilter("classId", classIds)
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
             " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-            "select distinct ?property ?rangeDataType ?rangeRestriction ?propertyLabel ?rangeDataTypeLabel ?rangeRestrictionLabel " + fromStr + " WHERE  { " +
-           "{" +
-            "      <" + classId + "> rdfs:subClassOf* ?overClass." +
-            "     ?property rdf:type <http://www.w3.org/2002/07/owl#DatatypeProperty>. ?property rdfs:domain  ?overClass." +
-            "     optional{?property rdfs:range ?rangeDataType. OPTIONAL {?rangeDataType rdfs:label ?rangeDataTypeLabel.}}" +
-            "OPTIONAL {?property rdfs:label ?propertyLabel}"+
+            " PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+            " select distinct ?classId ?property ?range ?propertyLabel ?rangeLabel " + fromStr + " WHERE  { " +
+            "{" +
+            // " ?classId rdfs:subClassOf* ?overClass." +
+            //  "  ?property rdf:type <http://www.w3.org/2002/07/owl#ObjectProperty>. " +
+            "?property rdfs:domain  ?classId." +
+            "  optional{?property rdfs:range ?range. OPTIONAL {?range rdfs:label ?rangeLabel.}}" +
+            classIdsFilter+
+            " OPTIONAL {?property rdfs:label ?propertyLabel}" +
             "  }" +
 
             "UNION{" +
-            "      <" + classId + ">     rdfs:subClassOf* ?anonymNode." +
+            " ?classId  rdfs:subClassOf* ?anonymNode." +
+            classIdsFilter+
             " ?anonymNode owl:onProperty ?property." +
-            "OPTIONAL {?property rdfs:label ?propertyLabel}"+
-            "?anonymNode owl:someValuesFrom ?rangeRestriction. OPTIONAL {?rangeRestriction rdfs:label ?rangeRestrictionLabel}" +
+            " OPTIONAL {?property rdfs:label ?property}" +
+            " ?anonymNode owl:someValuesFrom ?range. OPTIONAL {?range rdfs:label ?range}" +
 
 
             "  }" +
 
             "}limit 10000 "
 
-        self.executeQuery(schema, query, callback);
+
+    /*    var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
+            " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            " PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+            " select distinct ?property ?rangeDataType ?rangeRestriction ?propertyLabel ?rangeDataTypeLabel ?rangeRestrictionLabel " + fromStr + " WHERE  { " +
+            "{" +
+           // " ?classId rdfs:subClassOf* ?overClass." +
+          //  "  ?property rdf:type <http://www.w3.org/2002/07/owl#ObjectProperty>. " +
+            "?property rdfs:domain  ?classId." +
+            "  optional{?property rdfs:range ?rangeDataType. OPTIONAL {?rangeDataType rdfs:label ?rangeDataTypeLabel.}}" +
+            classIdsFilter+
+            " OPTIONAL {?property rdfs:label ?propertyLabel}" +
+            "  }" +
+
+            "UNION{" +
+            " ?classId  rdfs:subClassOf* ?anonymNode." +
+            classIdsFilter+
+            " ?anonymNode owl:onProperty ?property." +
+            " OPTIONAL {?property rdfs:label ?propertyLabel}" +
+            " ?anonymNode owl:someValuesFrom ?rangeRestriction. OPTIONAL {?rangeRestriction rdfs:label ?rangeRestrictionLabel}" +
+
+
+            "  }" +
+
+            "}limit 10000 "*/
+
+        self.executeQuery(schema, query, function(err, result){
+            if(err)
+                callback(err);
+           var bindings= Sparql_generic.setBindingsOptionalProperties(result,"property",{type:"Property"})
+            return callback(null,bindings)
+        });
 
     }
 

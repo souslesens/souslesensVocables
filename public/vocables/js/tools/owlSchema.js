@@ -19,36 +19,25 @@ var OwlSchema = (function () {
     }
 
     self.initSourceSchema = function (sourceLabel, callback) {
-        async.series([
-            // load schema sconfig
-            function (callbackSeries) {
-                if (self.schemasConfig && self.schemasConfig[sourceLabel])
-                    return callbackSeries();
+        if (self.schemasConfig && self.schemasConfig[sourceLabel])
+            return callback(null, self.currentSourceSchema);
 
+        $.getJSON("config/schemas.json", function (json) {
+            self.schemasConfig = json;
+            if (Config.sources[sourceLabel].schema) {
+                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schema]
 
-                $.getJSON("config/schemas.json", function (json) {
-                    self.schemasConfig = json;
-                    if (Config.sources[sourceLabel].schema) {
-                        self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schema]
+            } else {
+                self.currentSourceSchema = {
+                    sparql_url: Config.sources[sourceLabel].sparql_server.url,
+                    graphUri: Config.sources[sourceLabel].graphUri,
+                }
 
-                    } else {// default SKOS
-                        self.currentSourceSchema = {
-                            sparql_url: Config.sources[sourceLabel].sparql_server.url,
-                            graphUri: Config.sources[sourceLabel].graphUri,
-                        }
-                    }
-
-                    self.currentSourceSchema.classes = {}
-                    self.currentSourceSchema.labelsMap = {}
-                    self.schemasConfig[sourceLabel]=self.currentSourceSchema;
-                    return callbackSeries();
-                })
-
-
-            },
-
-        ], function (err) {
-            callback(err)
+                self.currentSourceSchema.classes = {}
+                self.currentSourceSchema.labelsMap = {}
+                self.schemasConfig[sourceLabel] = self.currentSourceSchema;
+                return callback(null, self.currentSourceSchema);
+            }
         })
     }
 

@@ -60,6 +60,7 @@ var common = (function () {
 
 
         self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
+
             if (!options)
                 options = {}
 
@@ -218,6 +219,44 @@ var common = (function () {
             return slices;
 
 
+        }
+
+        self.concatArraysWithoutDuplicate=function(array,addedArray,key){
+            addedArray.forEach(function(addedItem){
+                var refuse=false
+                array.forEach(function(item){
+                    if(key){
+                        refuse=(item[key]==addedItem[key])
+                    }else{
+                        refuse=(item==addedItem)
+                    }
+
+                })
+                if(!refuse)
+                    array.push(addedItem)
+            })
+            return  array;
+        }
+
+
+
+        self.removeDuplicatesFromArray=function(array,key,uniques){
+            if(!uniques)
+             uniques=[];
+            var cleanedArray=[]
+            array.forEach(function(item){
+                var value;
+                if(key)
+                    value=item[key];
+                else
+                    value=item;
+                if(!uniques[value]){
+                    uniques[value]=1
+                    cleanedArray.push(item)
+                }
+
+            })
+            return cleanedArray;
         }
 
         self.formatUriToJqueryId = function (uri) {

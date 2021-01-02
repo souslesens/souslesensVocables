@@ -7,17 +7,15 @@ var Sparql_OWL = (function () {
 
         var elasticUrl = Config.serverUrl;
 
-
         self.getTopConcepts = function (sourceLabel, options, callback) {
             if (!options)
                 options = {}
             var fromStr = ""
 
-
             var strFilterTopConcept;
-            self.topClassFilter = Config.sources[sourceLabel].topClassFilter
-            if (self.topClassFilter)
-                strFilterTopConcept =self.topClassFilter;
+           var topClassFilter = Config.sources[sourceLabel].topClassFilter
+            if (topClassFilter)
+                strFilterTopConcept =topClassFilter;
             else
                 strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
 
@@ -37,20 +35,17 @@ var Sparql_OWL = (function () {
             strFilterTopConcept +
             " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
-                query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_generic.setFilter("collection", options.filterCollections)
-
+                query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
             query += "}order by ?topConceptLabel limit 1000"
-
             var url = self.sparql_url + "?format=json&query=";
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "child", {type: "http://www.w3.org/2002/07/owl#Class"})
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {type: "http://www.w3.org/2002/07/owl#Class"})
                 return callback(null, result.results.bindings);
             })
-
         }
 
 
@@ -65,9 +60,9 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, options)
+                strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
-                strFilter = Sparql_generic.setFilter("concept", ids, null)
+                strFilter = Sparql_common.setFilter("concept", ids, null)
             }
             if (self.graphUri && self.graphUri != "")
                 fromStr = " FROM <" + self.graphUri + ">"
@@ -102,7 +97,7 @@ var Sparql_OWL = (function () {
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
                     " select  distinct * " + fromStr + "   WHERE { " +
                     "  ?child1 rdfs:subClassOf ?concept.   " + strFilter +
-                    "   ?collection skos:member* ?acollection. " + Sparql_generic.getUriFilter("collection", options.filterCollections) +
+                    "   ?collection skos:member* ?acollection. " + Sparql_generic.Sparql_common.getUriFilter("collection", options.filterCollections) +
                     //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
                     "  " +
@@ -161,9 +156,9 @@ var Sparql_OWL = (function () {
                 options = {}
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, options)
+                strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
-                strFilter = Sparql_generic.setFilter("concept", ids, null)
+                strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
             var fromStr = ""
@@ -207,7 +202,7 @@ var Sparql_OWL = (function () {
             query += "  }";
 
             if (options.filterCollections) {
-                query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + getUriFilter("collection", options.filterCollections)
+                query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
             }
             query += "}limit 1000 ";
 

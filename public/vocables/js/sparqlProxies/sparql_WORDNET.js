@@ -33,9 +33,9 @@ var Sparql_WORDNET = (function () {
 
         var strFilter;
         if (words) {
-            strFilter = Sparql_generic.setFilter("concept", null, words, null)
+            strFilter = Sparql_common.setFilter("concept", null, words, null)
         } else if (ids) {
-            strFilter = Sparql_generic.setFilter("concept", ids, null)
+            strFilter = Sparql_common.setFilter("concept", ids, null)
         }
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "  PREFIX wordnet: <http://www.w3.org/2006/03/wn/wn20/schema/>" +
@@ -67,9 +67,9 @@ var Sparql_WORDNET = (function () {
         self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
         if (!options)
             options = {}
-        var filter = Sparql_generic.getUriFilter("id", conceptId);
+        var filter = Sparql_generic.Sparql_common.getUriFilter("id", conceptId);
         if (options.propertyFilter) {
-            filter += Sparql_generic.getUriFilter("prop", options.propertyFilter);
+            filter += Sparql_generic.Sparql_common.getUriFilter("prop", options.propertyFilter);
         }
 
         var query = " select distinct *   WHERE {" +
@@ -92,9 +92,9 @@ var Sparql_WORDNET = (function () {
             options = {}
         var strFilter;
         if (words) {
-            strFilter = Sparql_generic.setFilter("concept", null, words, {exactMatch:true})
+            strFilter = Sparql_common.setFilter("concept", null, words, {exactMatch:true})
         } else if (ids) {
-            strFilter = Sparql_generic.setFilter("concept", ids, null)
+            strFilter = Sparql_common.setFilter("concept", ids, null)
         }
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "  PREFIX wordnet: <http://www.w3.org/2006/03/wn/wn20/schema/>" +
@@ -137,7 +137,7 @@ var Sparql_WORDNET = (function () {
         query += "  }";
 
         if (options.filterCollections) {
-            query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + getUriFilter("collection", options.filterCollections)
+            query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
         }
         query += "}limit 1000 ";
 

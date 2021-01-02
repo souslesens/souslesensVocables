@@ -1,8 +1,8 @@
 var Pyramid = (function () {
         var self = {}
-        var bottomIds = [];
+        var expandedLevels = [];
         var sourceColors = {}
-        var orphanShape = "dot";
+        var orphanShape = "triangleDown";
         var defaultShape = "dot";
         var defaultShapeSize = 10;
 
@@ -26,7 +26,7 @@ var Pyramid = (function () {
         }
 
         self.drawTopConcepts = function () {
-            bottomIds = [];
+            expandedLevels = [];
             var source = MainController.currentSource
             var depth = parseInt($("#Pyramid_topDepth").val())
             Sparql_generic.getTopConcepts(source, null, function (err, result) {
@@ -36,13 +36,13 @@ var Pyramid = (function () {
                 result.forEach(function (item) {
                     ids.push(item.topConcept.value)
                 })
-                bottomIds.push(ids);
+                expandedLevels.push(ids);
                 var color = self.getSourceColor(source)
                 var shape = defaultShape
                 var visjsData = GraphController.toVisjsData(null, result, null, "#", "topConcept",
                     {
                         from: {
-                            shape: "hexagon",
+                            shape: "ellipse",
                             color: color,
                             size: defaultShapeSize
                         },
@@ -52,7 +52,7 @@ var Pyramid = (function () {
                             size: defaultShapeSize
                         },
                         data: {source: MainController.currentSource},
-                        rootLabel:source,
+                        rootLabel: source,
                     })
 
                 var options = {
@@ -80,12 +80,12 @@ var Pyramid = (function () {
         }
 
 
-        self.getGraphIdsFromSource=function(source){
+        self.getGraphIdsFromSource = function (source) {
 
             var existingNodes = visjsGraph.data.nodes.get();
             var sourceNodes = []
             existingNodes.forEach(function (item) {
-                if ( item.id!="#" && item.data && item.data.source == source) {
+                if (item.id != "#" && item.data && item.data.source == source) {
                     sourceNodes.push(item.data.id || item.id)
                 }
             })
@@ -97,7 +97,7 @@ var Pyramid = (function () {
             var toSource = $("#Pyramid_toSource").val()
             if (toSource == "")
                 return alert("select a source");
-           var  sourceNodes= self.getGraphIdsFromSource(toSource)
+            var sourceNodes = self.getGraphIdsFromSource(toSource)
             self.addChildrenToGraph(sourceNodes, toSource)
 
         }
@@ -107,7 +107,7 @@ var Pyramid = (function () {
             if (nodeIds) {
                 parentIds = nodeIds
             } else {
-                parentIds = bottomIds[bottomIds.length - 1];
+                parentIds = expandedLevels[expandedLevels.length - 1];
             }
             if (!source) {
 
@@ -127,35 +127,50 @@ var Pyramid = (function () {
                     map[item.concept.value].push(item)
                     ids.push(item.child1.value)
                 })
-                if (!nodeIds && result.length > 0)// si on est dans touts les cousins et non pas sur un noeud particulier
-                    bottomIds.push(ids);
+             /*   if (!nodeIds && result.length > 0)// si on est dans touts les cousins et non pas sur un noeud particulier
+                   expandedLevels.push(result);*/
 
                 var color = self.getSourceColor(source)
+                var existingNodes = visjsGraph.getExistingIdsMap();
+                var visjsData = {nodes: [], edges: []}
 
-                var visjsData={nodes:[],edges:[]}
+                var expandedLevel=[]
                 for (var key in map) {
 
+
                     if (map[key].length > maxChildrenDrawn) {
-                        visjsData.nodes.push({
-                            id: key + "_cluster",
-                            label: map[key].length + "children",
-                            shape: "star",
+                        //on enleve les cluster du dernier bootomIds dsiono on cree des orphelins au niveau suivant
 
-                            value: map[key].length,
-                            color: color,
-                            data: {cluster: map[key], source: source, parent: key}
-                        })
-                        visjsData.edges.push({
-                            from: key,
-                            to: key + "_cluster",
-                        })
-
+                        var nodeId = key + "_cluster"
+                        if (!existingNodes[nodeId]) {
+                            existingNodes[nodeId] = 1
+                            visjsData.nodes.push({
+                                id: key + "_cluster",
+                                label: map[key].length + "children",
+                                shape: "star",
+                                size: defaultShapeSize,
+                                value: map[key].length,
+                                color: color,
+                                data: {cluster: map[key], source: source, parent: key}
+                            })
+                        }
+                        var edgeId=key+"_"+key + "_cluster"
+                        if ( !existingNodes[edgeId]) {
+                            existingNodes[edgeId]=1
+                            visjsData.edges.push({
+                                id:edgeId,
+                                from: key,
+                                to: key + "_cluster",
+                            })
+                        }
 
 
                     } else {
+                        map[key].forEach(function(item){
+                            expandedLevel.push(item.child1.value)
+                        })
 
-
-                         var visjsData2 = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
+                        var visjsData2 = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
                             from: {
                                 shape: defaultShape,
                                 color: color
@@ -164,27 +179,35 @@ var Pyramid = (function () {
                                 shape: defaultShape,
                                 color: color
                             },
-                            data: {source: MainController.currentSource}
+                            data: {source: MainController.currentSource},
+
                         })
 
-                        visjsData.nodes= visjsData.nodes.concat( visjsData2.nodes)
-                        visjsData.edges= visjsData.edges.concat( visjsData2.edges)
+
+
+                        visjsData.nodes =  visjsData.nodes.concat(visjsData2.nodes)
+                        visjsData.edges =  visjsData.edges.concat(visjsData2.edges)
+
+
 
 
                     }
 
                 }
+
+                expandedLevels.push(expandedLevel)
+                visjsData.nodes=common.removeDuplicatesFromArray( visjsData.nodes,"id")
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
 
                 var keys = Object.keys(map)
                 var orphans = []
-                /*     parentIds.forEach(function (id) {
-                         if (keys.indexOf(id) < 0) {
-                             orphans.push({id: id, shape: orphanShape})
-                         }
-                     })
-                     visjsGraph.data.nodes.update(orphans)*/
+                parentIds.forEach(function (id) {
+                    if (keys.indexOf(id) < 0 &&   map[key].length && map[key].length > maxChildrenDrawn) {
+                        orphans.push({id: id, shape: orphanShape})
+                    }
+                })
+           //     visjsGraph.data.nodes.update(orphans)
 
 
             })
@@ -228,7 +251,7 @@ var Pyramid = (function () {
                 words = [node.label]
             }
 
-            var filter = Sparql_generic.setFilter("concept", null, words, {exactMatch: true})
+            var filter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
             var options = {filter: filter}
 
             //   var options = {filter: "filter (  regex(?conceptLabel,'^" + node.label + "$','i'))"}
@@ -294,30 +317,28 @@ var Pyramid = (function () {
         }
 
 
-
-
         self.drawObjectProperties = function (classIds) {
             var source = $("#Pyramid_toSource").val()
             if (source == "")
                 return alert("select a source");
-            if(!classIds){
-                classIds=self.getGraphIdsFromSource(source)
+            if (!classIds) {
+                classIds = self.getGraphIdsFromSource(source)
 
             }
 
             OwlSchema.initSourceSchema(source, function (err, schema) {
-                if(err)
+                if (err)
                     return MainController.UI.message(err)
                 Sparql_schema.getClassPropertiesAndRanges(schema, classIds, function (err, result) {
-                    if(err)
+                    if (err)
                         return MainController.UI.message(err)
-                    var visjsData={nodes:[],edges:[]}
-                    var existingNodes=visjsGraph.getExistingIdsMap()
+                    var visjsData = {nodes: [], edges: []}
+                    var existingNodes = visjsGraph.getExistingIdsMap()
                     var color = self.getSourceColor(source)
-                    result.forEach(function(item) {
-                        if(! item.range){
-                            item.range={value:Math.random()}
-                            item.rangeLabel={value :"?"}
+                    result.forEach(function (item) {
+                        if (!item.range) {
+                            item.range = {value: Math.random()}
+                            item.rangeLabel = {value: "?"}
                         }
                         if (!existingNodes[item.range.value]) {
                             existingNodes[item.range.value] = 1;
@@ -327,24 +348,24 @@ var Pyramid = (function () {
                                 shape: defaultShape,
                                 size: defaultShapeSize,
                                 color: color,
-                                data:{source:source}
+                                data: {source: source}
                             })
 
                         }
                         visjsData.edges.push({
-                            from:item.classId.value,
-                            to:item.range.value,
-                            label:item.propertyLabel.value,
-                         //   physics:false,
-                            arrows:"to",
-                            dashes:true
+                            from: item.classId.value,
+                            to: item.range.value,
+                            label: item.propertyLabel.value,
+                            //   physics:false,
+                            arrows: "to",
+                            dashes: true
 
                         })
 
                     })
 
-                    visjsGraph.data.nodes.add( visjsData.nodes)
-                    visjsGraph.data.edges.add( visjsData.edges)
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
 
                 })
             })
@@ -359,9 +380,9 @@ var Pyramid = (function () {
 
 
             } else {
-                if (bottomIds.length > 0)
-                    visjsGraph.data.nodes.remove(bottomIds[bottomIds.length - 1])
-                bottomIds.splice(bottomIds.length - 1, 1)
+                if (expandedLevels.length > 0)
+                    visjsGraph.data.nodes.remove(expandedLevels[expandedLevels.length - 1])
+                expandedLevels.splice(expandedLevels.length - 1, 1)
             }
 
         }

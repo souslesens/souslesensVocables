@@ -40,8 +40,8 @@ var MainController = (function () {
                     }
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
-
-                    treeData.push({id: sourceLabel, text: sourceLabel, parent: Config.sources[sourceLabel].schemaType, data: Config.sources[sourceLabel]})
+                  //  console.log(JSON.stringify(jstreeData,null,2))
+                    treeData.push({id: sourceLabel, text: sourceLabel, parent: Config.sources[sourceLabel].schemaType,})// data: Config.sources[sourceLabel]})
                 }
             })
             common.loadJsTree(treeDiv, treeData, {

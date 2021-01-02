@@ -2,53 +2,47 @@ var GraphController = (function () {
 
     var self = {};
     self.defaultNodeColor = "blue"
-    defaultNodeShape="dot"
+    defaultNodeShape = "dot"
 
 
     self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions) {
-        self.defaultNodeColor=visjsGraph.globalOptions.nodes.color ||self.defaultNodeColor
-        self.defaultNodeShape=visjsGraph.globalOptions.nodes.coshapelor || defaultNodeShape
+        self.defaultNodeColor = visjsGraph.globalOptions.nodes.color || self.defaultNodeColor
+        self.defaultNodeShape = visjsGraph.globalOptions.nodes.coshapelor || defaultNodeShape
 
         if (!visjOptions) {
             visjOptions = {from: {}, to: {}}
         }
 
-        var  existingIds= visjsGraph.getExistingIdsMap()
+        var existingIds = visjsGraph.getExistingIdsMap()
 
         if (!visjsData) {
-            visjsData = {nodes: [],edges:[]}
-        }else {
-            visjsData.nodes.forEach(function(item){
-                existingIds[item.id]=1;
+            visjsData = {nodes: [], edges: []}
+        } else {
+            visjsData.nodes.forEach(function (item) {
+                existingIds[item.id] = 1;
             })
-            visjsData.edges.forEach(function(item){
-                existingIds[item.id]=1;
+            visjsData.edges.forEach(function (item) {
+                existingIds[item.id] = 1;
             })
 
         }
 
-        function getShape(target,nodeData) {
+        function getShape(target, nodeData) {
             if (visjOptions[target] && visjOptions[target].shape) {
                 if (typeof visjOptions[target].shape == "string")
                     return visjOptions[target].shape
                 else//fn
                     return visjOptions[target].shape(nodeData)
-                    }
-            return  self.defaultNodeShape;
+            }
+            return self.defaultNodeShape;
         }
-
-
-
-
-
 
 
         data.forEach(function (item) {
 
             if (parentNodeId) {
                 fromId = parentNodeId
-            }
-            else{
+            } else {
                 var fromId = ""
                 var fromLabel = "";
 
@@ -68,19 +62,23 @@ var GraphController = (function () {
                     var node = {
                         id: fromId,
                         label: fromLabel,
-                        shape: getShape("from",fromId),
-                        size:  visjOptions.to.size || 5,
+                        shape: getShape("from", fromId),
+                        size: visjOptions.to.size || 5,
                         color: visjOptions.from.color || self.defaultNodeColor
                     }
-                    if(visjOptions.data)
-                        node.data=visjOptions.data
+                    if (visjOptions.data)
+                        node.data = visjOptions.data
                     visjsData.nodes.push(node)
                 }
             }
 
             if (toVar && item[toVar]) {
                 var toId = item[toVar].value || "#";
-                var toLabel = item[toVar + "Label"].value;
+                var toLabel
+                if (!item[toVar + "Label"])
+                    toLabel = toId
+                else
+                    toLabel = item[toVar + "Label"].value;
 
                 if (!existingIds[toId]) {
                     existingIds[toId] = 1;
@@ -88,12 +86,12 @@ var GraphController = (function () {
                     var node = {
                         id: toId,
                         label: toLabel,
-                        shape: getShape("to",toId),
+                        shape: getShape("to", toId),
                         size: visjOptions.to.size || 5,
                         color: visjOptions.to.color || self.defaultNodeColor
                     }
-                    if(visjOptions.data)
-                        node.data=visjOptions.data
+                    if (visjOptions.data)
+                        node.data = visjOptions.data
                     visjsData.nodes.push(node);
                 }
 
@@ -105,14 +103,13 @@ var GraphController = (function () {
                         from: fromId,
                         to: toId
                     }
-                    if(visjOptions.arrows)
-                        edge.arrows= visjOptions.arrows
+                    if (visjOptions.arrows)
+                        edge.arrows = visjOptions.arrows
                     visjsData.edges.push(edge);
 
                 }
 
             }
-
 
 
         })

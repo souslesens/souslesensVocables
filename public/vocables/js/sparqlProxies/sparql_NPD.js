@@ -48,9 +48,9 @@ var Sparql_NPD = (function () {
             self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, null)
+                strFilter = Sparql_common.setFilter("concept", null, words, null)
             } else if (ids) {
-                strFilter = Sparql_generic.setFilter("concept", ids, null)
+                strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -98,9 +98,9 @@ var Sparql_NPD = (function () {
                 options = {}
             var strFilter;
             if (words) {
-                strFilter = Sparql_generic.setFilter("concept", null, words, {exactMatch: true})
+                strFilter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
             } else if (ids) {
-                strFilter = Sparql_generic.setFilter("concept", ids, null)
+                strFilter = Sparql_common.setFilter("concept", ids, null)
             }
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -138,7 +138,7 @@ var Sparql_NPD = (function () {
             query += "  }";
 
             if (options.filterCollections) {
-                query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + getUriFilter("collection", options.filterCollections)
+                query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
             }
             query += "}limit 1000 ";
 

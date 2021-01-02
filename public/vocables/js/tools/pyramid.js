@@ -1,42 +1,56 @@
 var Pyramid = (function () {
         var self = {}
-        var expandedLevels = [];
+        var expandedLevels = {};
         var sourceColors = {}
-        var orphanShape = "triangleDown";
+        var orphanShape = "square";
         var defaultShape = "dot";
-        var defaultShapeSize = 10;
+        var defaultShapeSize = 7;
 
 
         var maxChildrenDrawn = 15
+        self.currentSource;
 
 
-        self.onSourceSelect = function (thesaurusLabel) {
+        self.onSourceSelect = function (sourceLabel) {
 
 
-            ThesaurusBrowser.showThesaurusTopConcepts(thesaurusLabel)
+            ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel)
             $("#actionDivContolPanelDiv").load("snippets/pyramid.html")
 
             setTimeout(function () {
                 var sourceLabels = Object.keys(Config.sources).sort();
                 common.fillSelectOptions("Pyramid_toSource", sourceLabels, true)
+                $("#Pyramid_toSource").val(sourceLabel)
+
+                Pyramid.drawTopConcepts(sourceLabel)
+
+                self.addSourceToList(sourceLabel)
 
 
             }, 200)
 
         }
 
-        self.drawTopConcepts = function () {
-            expandedLevels = [];
-            var source = MainController.currentSource
+        self.drawTopConcepts = function (source) {
+            visjsGraph.clearGraph()
+            if (!source)
+                source = MainController.currentSource
+            self.currentSource = source
+            expandedLevels = {}
+            expandedLevels[source] = [];
+            $("#pyramid_drawnSources").html("");
+
             var depth = parseInt($("#Pyramid_topDepth").val())
             Sparql_generic.getTopConcepts(source, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
+                if (result.length == 0)
+                    return MainController.UI.message("No data found")
                 var ids = []
                 result.forEach(function (item) {
                     ids.push(item.topConcept.value)
                 })
-                expandedLevels.push(ids);
+                expandedLevels[source].push(ids);
                 var color = self.getSourceColor(source)
                 var shape = defaultShape
                 var visjsData = GraphController.toVisjsData(null, result, null, "#", "topConcept",
@@ -72,7 +86,10 @@ var Pyramid = (function () {
                     //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
                 }
+
+
                 visjsGraph.draw("graphDiv", visjsData, options)
+                $("#waitImg").css("display", "none");
 
 
             })
@@ -94,32 +111,33 @@ var Pyramid = (function () {
 
 
         self.addSourceChildrenToGraph = function () {
-            var toSource = $("#Pyramid_toSource").val()
-            if (toSource == "")
+            var source = self.currentSource;
+            if (source == "")
                 return alert("select a source");
-            var sourceNodes = self.getGraphIdsFromSource(toSource)
-            self.addChildrenToGraph(sourceNodes, toSource)
+            var sourceNodes = self.getGraphIdsFromSource(source)
+            self.addChildrenToGraph(sourceNodes, source)
 
         }
 
         self.addChildrenToGraph = function (nodeIds, source) {
             var parentIds
+            if (!source) {
+                source = self.currentSource;
+            }
             if (nodeIds) {
                 parentIds = nodeIds
             } else {
-                parentIds = expandedLevels[expandedLevels.length - 1];
+                parentIds = expandedLevels[source][expandedLevels[source].length - 1];
             }
-            if (!source) {
 
-                source = MainController.currentSource;
-
-            }
             Sparql_generic.getNodeChildren(source, null, parentIds, 1, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var map = [];
-                var ids = []
+                var ids = [];
 
+                if (result.length == 0)
+                    return MainController.UI.message("No data found")
 
                 result.forEach(function (item) {
                     if (!map[item.concept.value])
@@ -127,14 +145,13 @@ var Pyramid = (function () {
                     map[item.concept.value].push(item)
                     ids.push(item.child1.value)
                 })
-             /*   if (!nodeIds && result.length > 0)// si on est dans touts les cousins et non pas sur un noeud particulier
-                   expandedLevels.push(result);*/
+
 
                 var color = self.getSourceColor(source)
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 var visjsData = {nodes: [], edges: []}
 
-                var expandedLevel=[]
+                var expandedLevel = []
                 for (var key in map) {
 
 
@@ -154,11 +171,11 @@ var Pyramid = (function () {
                                 data: {cluster: map[key], source: source, parent: key}
                             })
                         }
-                        var edgeId=key+"_"+key + "_cluster"
-                        if ( !existingNodes[edgeId]) {
-                            existingNodes[edgeId]=1
+                        var edgeId = key + "_" + key + "_cluster"
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
                             visjsData.edges.push({
-                                id:edgeId,
+                                id: edgeId,
                                 from: key,
                                 to: key + "_cluster",
                             })
@@ -166,17 +183,19 @@ var Pyramid = (function () {
 
 
                     } else {
-                        map[key].forEach(function(item){
+                        map[key].forEach(function (item) {
                             expandedLevel.push(item.child1.value)
                         })
 
                         var visjsData2 = GraphController.toVisjsData(null, map[key], key, "concept", "child1", {
                             from: {
                                 shape: defaultShape,
+                                size: defaultShapeSize,
                                 color: color
                             },
                             to: {
                                 shape: defaultShape,
+                                size: defaultShapeSize,
                                 color: color
                             },
                             data: {source: MainController.currentSource},
@@ -184,30 +203,33 @@ var Pyramid = (function () {
                         })
 
 
-
-                        visjsData.nodes =  visjsData.nodes.concat(visjsData2.nodes)
-                        visjsData.edges =  visjsData.edges.concat(visjsData2.edges)
-
-
+                        visjsData.nodes = visjsData.nodes.concat(visjsData2.nodes)
+                        visjsData.edges = visjsData.edges.concat(visjsData2.edges)
 
 
                     }
 
                 }
 
-                expandedLevels.push(expandedLevel)
-                visjsData.nodes=common.removeDuplicatesFromArray( visjsData.nodes,"id")
+                expandedLevels[source].push(expandedLevel)
+                visjsData.nodes = common.removeDuplicatesFromArray(visjsData.nodes, "id")
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
 
-                var keys = Object.keys(map)
-                var orphans = []
-                parentIds.forEach(function (id) {
-                    if (keys.indexOf(id) < 0 &&   map[key].length && map[key].length > maxChildrenDrawn) {
-                        orphans.push({id: id, shape: orphanShape})
-                    }
-                })
-           //     visjsGraph.data.nodes.update(orphans)
+
+// on cherche les parents qui n'ont pas trouvé d'enfant (I.E concept de SPARQL.getChildren
+                {
+                    var keys = Object.keys(map)
+                    var orphans = []
+                    parentIds.forEach(function (parentId) {
+                        if (keys.indexOf(parentId) < 0)
+                            orphans.push({id: parentId, size: 3})
+                    })
+                    visjsGraph.data.nodes.update(orphans)
+                }
+
+
+                $("#waitImg").css("display", "none");
 
 
             })
@@ -218,10 +240,12 @@ var Pyramid = (function () {
             var visjsData = GraphController.toVisjsData(null, cluster.data.cluster, cluster.data.parent, "concept", "child1", {
                 from: {
                     shape: defaultShape,
+                    size: defaultShapeSize,
                     color: color
                 },
                 to: {
                     shape: defaultShape,
+                    size: defaultShapeSize,
                     color: color
                 },
                 data: {source: cluster.data.source}
@@ -230,18 +254,25 @@ var Pyramid = (function () {
             visjsGraph.data.nodes.add(visjsData.nodes)
             visjsGraph.data.edges.add(visjsData.edges)
             visjsGraph.data.nodes.remove(cluster.id)
+            $("#waitImg").css("display", "none");
 
 
         }
 
         self.drawSimilarsNodes = function (node, sources) {
+
             var sourceSchematype = Config.sources[MainController.currentSource].schemaType;
             var similars = [];
-            if (!sources)
-                sources = Object.keys(Config.sources)
+            /* if (!sources)
+                 sources = Object.keys(Config.sources)*/
+
+
             var words = []
             var wordsMap = {}
             if (!node) {
+                if (!sources)
+                    return alert("select a source")
+                sources
                 var nodeObjs = visjsGraph.data.nodes.get()
                 nodeObjs.forEach(function (item) {
                     words.push(item.label)
@@ -249,6 +280,7 @@ var Pyramid = (function () {
                 })
             } else {
                 words = [node.label]
+                sources = Object.keys(Config.sources)
             }
 
             var filter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
@@ -267,13 +299,27 @@ var Pyramid = (function () {
                     if (err) {
                         return callbackEach(err);
                     }
+                    if (result.length == 0)
+                        return MainController.UI.message("No data found")
+
+                    var ids = []
                     result.forEach(function (item) {
                         similars.push({
                             id: item.concept.value,
                             label: item.conceptLabel.value,
                             source: source
                         });
+                        ids.push(item.concept.value)
                     })
+
+                    if (!expandedLevels[source]) {
+                        expandedLevels[source] = []
+                        self.addSourceToList(source)
+
+
+                    }
+                    expandedLevels[source].push(ids)
+
 
                     callbackEach();
                 })
@@ -288,38 +334,48 @@ var Pyramid = (function () {
                         var color = self.getSourceColor(item.source)
                         visjsData.nodes.push({
                             id: item.id,
-                            label: item.source,
+                            label: item.label,
                             color: color,
-                            shape: "hexagon",
+                            shape: "dot",
+                            size: defaultShapeSize,
                             data: item
                         })
                         visjsData.edges.push({
                             from: wordsMap[item.label.toLowerCase()],
-                            to: item.id
+                            to: item.id,
+                            color: color,
+                            //   label: item.source,
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: "curve",
+                                },
+                            },
                         })
                     }
                 })
 
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
+                $("#waitImg").css("display", "none");
 
             })
 
 
         }
 
-        self.drawAllsimilars = function () {
-            var source = $("#Pyramid_toSource").val()
-            if (source == "")
-                self.drawSimilarsNodes(null, null)
-            else
-                self.drawSimilarsNodes(null, [source])
-        }
+        /*   self.drawAllsimilars = function () {
+               var source = $("#Pyramid_toSource").val()
+               if (source == "")
+                   self.drawSimilarsNodes(null, null)
+               else
+                   self.drawSimilarsNodes(null, [source])
+           }*/
 
 
         self.drawObjectProperties = function (classIds) {
-            var source = $("#Pyramid_toSource").val()
-            if (source == "")
+            var source = self.currentSource
+            if (!source)
                 return alert("select a source");
             if (!classIds) {
                 classIds = self.getGraphIdsFromSource(source)
@@ -332,6 +388,8 @@ var Pyramid = (function () {
                 Sparql_schema.getClassPropertiesAndRanges(schema, classIds, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
+                    if (result.length == 0)
+                        return MainController.UI.message("No data found")
                     var visjsData = {nodes: [], edges: []}
                     var existingNodes = visjsGraph.getExistingIdsMap()
                     var color = self.getSourceColor(source)
@@ -366,6 +424,7 @@ var Pyramid = (function () {
 
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
+                    $("#waitImg").css("display", "none");
 
                 })
             })
@@ -374,15 +433,17 @@ var Pyramid = (function () {
 
         self.removeLastChildrenFromGraph = function (nodeId) {
 
+
             if (nodeId) {
                 var children = visjsGraph.network.getConnectedNodes(nodeId, "to");
                 visjsGraph.data.nodes.remove(children)
 
 
             } else {
-                if (expandedLevels.length > 0)
-                    visjsGraph.data.nodes.remove(expandedLevels[expandedLevels.length - 1])
-                expandedLevels.splice(expandedLevels.length - 1, 1)
+                var source = self.currentSource;
+                if (expandedLevels[source].length > 0)
+                    visjsGraph.data.nodes.remove(expandedLevels[source][expandedLevels[source].length - 1])
+                expandedLevels[source].splice(expandedLevels[source].length - 1, 1)
             }
 
         }
@@ -440,10 +501,28 @@ var Pyramid = (function () {
 
         self.getSourceColor = function (source) {
             if (!sourceColors[source])
-                sourceColors[source] = common.palette[Object.keys(sourceColors).length]
+                sourceColors[source] = common.paletteIntense[Object.keys(sourceColors).length]
             return sourceColors[source];
         }
 
+
+        self.addSourceToList = function (source) {
+            var id = "Pyramid_source_" + encodeURIComponent(source)
+            var html = "<div  id='" + id + "' style='color: " + self.getSourceColor(source) + "'" +
+                " class='Pyramid_sourceLabelDiv' " +
+                "onclick='Pyramid.setCurrentSource(\"" + encodeURIComponent(source) + "\")'>" + source + "</div>"
+            $("#pyramid_drawnSources").append(html)
+            self.setCurrentSource(encodeURIComponent(source))
+
+        }
+        self.setCurrentSource = function (sourceId) {
+
+            $(".Pyramid_sourceLabelDiv").removeClass("Pyramid_selectedSourceDiv")
+            $("#Pyramid_source_" + sourceId).addClass("Pyramid_selectedSourceDiv")
+            Pyramid.currentSource = encodeURIComponent(sourceId)
+
+
+        }
 
         return self;
 

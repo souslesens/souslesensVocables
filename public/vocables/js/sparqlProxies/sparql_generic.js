@@ -515,41 +515,45 @@ var Sparql_generic = (function () {
 
         }
 
-        self.setBindingsOptionalProperties = function (bindings, _field, options) {
+        self.setBindingsOptionalProperties = function (bindings, _fields, options) {
             if (!options)
                 options = {}
-            bindings.forEach(function (item) {
+            if(!Array.isArray(_fields))
+                _fields=[_fields];
+            _fields.forEach(function(_field) {
+                bindings.forEach(function (item) {
 
-                for (var i = 0; i < 20; i++) {
-                    var iStr = "" + i;
-                    if (i == 0)
-                        iStr = ""
-                    var field = _field + "" + iStr;
-                    if (!item[field]) {
-                        break;
-                    }
-                    if (!item[field + "Type"]) {
-                        if (options.type)
-                            item[field + "Type"] = {value: options.type}
-                        else
-                            item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                    }
-                    var id = item[field].value
-                    if (!item[field + "Label"]) {
-                        var p = id.lastIndexOf("#")
-                        if (p > -1)
-                            item[field + "Label"] = {value: id.substring(p + 1)}
-                        else {
-                            p = id.lastIndexOf("/")
-                            item[field + "Label"] = {value: id.substring(p + 1)}
+                    for (var i = 0; i < 20; i++) {
+                        var iStr = "" + i;
+                        if (i == 0)
+                            iStr = ""
+                        var field = _field + "" + iStr;
+                        if (!item[field]) {
+                            break;
+                        }
+                        if (!item[field + "Type"]) {
+                            if (options.type)
+                                item[field + "Type"] = {value: options.type}
+                            else
+                                item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
+                        }
+                        var id = item[field].value
+                        if (!item[field + "Label"]) {
+                            var p = id.lastIndexOf("#")
+                            if (p > -1)
+                                item[field + "Label"] = {value: id.substring(p + 1)}
+                            else {
+                                p = id.lastIndexOf("/")
+                                item[field + "Label"] = {value: id.substring(p + 1)}
+                            }
+
+
                         }
 
-
                     }
 
-                }
-
-                //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
+                    //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
+                })
             })
             return bindings;
 

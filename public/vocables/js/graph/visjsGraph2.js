@@ -23,6 +23,11 @@ var visjsGraph = (function () {
     self.globalOptions={nodes:{},edges:{}};
 
 
+
+    self.defaultTextSize=14;
+    self.defaultNodeSize=7;
+    self.showNodesLabelMinScale=0.5
+
     self.simulationOn = false;
 
     self.draw = function (divId, visjsData, _options, callback) {
@@ -263,18 +268,18 @@ var visjsGraph = (function () {
 
 
     self.onScaleChange = function () {
-        return;
+       // return;
         var scale = self.network.getScale();
         if (!self.currentScale || Math.abs(scale - self.currentScale) > .01) {
 
             var scaleCoef = scale >= 1 ? (scale * .9) : (scale * 2)
 
-            var size = Config.visjs.defaultNodeSize / scaleCoef;
-            var fontSize = (Config.visjs.defaultTextSize / (scaleCoef));
+            var size = self.defaultNodeSize / scaleCoef;
+            var fontSize = (self.defaultTextSize / (scaleCoef));
             if (scale < 1)
-                fontSize = (Config.visjs.defaultTextSize / (scaleCoef * 0.8));
+                fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
             else
-                fontSize = (Config.visjs.defaultTextSize / (scaleCoef * 1.3));
+                fontSize = (self.defaultTextSize / (scaleCoef * 1.3));
 
             var nodes = self.data.nodes.get();
             nodes.forEach(function (node) {
@@ -287,10 +292,10 @@ var visjsGraph = (function () {
                     node.hiddenLabel = node.label
                 var shape = node.shape;
                 if (!shape)
-                    shape = Config.visjs.defaultNodeShape;
+                    shape = self.defaultNodeShape;
                 if (shape != "box") {
 
-                    if (scale > Config.visjs.showNodesLabelMinScale) {
+                    if (scale > self.showNodesLabelMinScale) {
                         node.label = node.hiddenLabel;
                         node.size = size;
                         node.font = {size: fontSize}

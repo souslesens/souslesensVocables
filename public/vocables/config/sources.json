@@ -214,7 +214,7 @@
 
 
 
-  "ISO 15926-14": {
+  "ISO_15926-part-14": {
     "graphUri": "http://standards.iso.org/iso/15926/part14/",
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
@@ -226,7 +226,7 @@
     "color": "#bcbd22"
   },
 
-  "ISO_15926_PCA": {
+  "ISO_15926-PCA": {
     "graphUri": "",
     "sparql_server": {
       "url": "http://staging.data.posccaesar.org/rdl/",
@@ -331,7 +331,7 @@
     "color": "#bcbd22"
   },
 
-  "ISO_15926_.org": {
+  "ISO_15926-org": {
     "graphUri": "",
     "sparql_server": {
       "url": "http://192.236.179.169/sparql",
@@ -343,7 +343,7 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "ISO_15926_part_4": {
+  "ISO_15926-part-4": {
     "editable": true,
     "graphUri": "http://standards.iso.org/iso/15926/part4/",
     "sparql_server": {
@@ -355,7 +355,7 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "ISO_15926_part_12": {
+  "ISO_15926-part-12": {
     "editable": true,
     "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
     "sparql_server": {

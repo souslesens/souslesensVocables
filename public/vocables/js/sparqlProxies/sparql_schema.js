@@ -245,7 +245,9 @@ var Sparql_schema = (function () {
             self.executeQuery(schema, query, function (err, result) {
                 if (err)
                     callbackEach(err);
-                var bindings = Sparql_generic.setBindingsOptionalProperties(result, "property", {type: "Property"})
+                var bindings = Sparql_generic.setBindingsOptionalProperties(result, ["property","range"], {type: "Property"})
+
+
                 bulkResult = bulkResult.concat(bindings)
                 return callbackEach(null, bindings)
             });

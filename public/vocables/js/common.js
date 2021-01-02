@@ -336,7 +336,7 @@ var common = (function () {
             '#2ca02c',
         ]
 
-        self.paletteX = [
+        self.paletteIntense = [
 
             "#0072d5",
             '#FF7D07',

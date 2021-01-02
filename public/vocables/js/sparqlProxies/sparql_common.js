@@ -22,12 +22,14 @@ var Sparql_common = (function () {
             if (Array.isArray(words)) {
                 var conceptWordStr = ""
                 words.forEach(function (word, index) {
-                    if (index > 0)
-                        conceptWordStr += "|"
-                    if (options.exactMatch)
-                        conceptWordStr += "^" + formatWord(word) + "$";
-                    else
-                        conceptWordStr += "" + formatWord(word) + "";
+                    if(word!="") {
+                        if (conceptWordStr != "")
+                            conceptWordStr += "|"
+                        if (options.exactMatch)
+                            conceptWordStr += "^" + formatWord(word) + "$";
+                        else
+                            conceptWordStr += "" + formatWord(word) + "";
+                    }
                 })
                 filter = " filter( regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ";
             } else {
@@ -41,10 +43,13 @@ var Sparql_common = (function () {
             if (Array.isArray(ids)) {
                 var conceptIdsStr = ""
                 ids.forEach(function (id, index) {
-                    if (index > 0)
-                        conceptIdsStr += ","
-                    conceptIdsStr += "<" + id + ">"
+                    if(id!="") {
+                        if (conceptIdsStr!="")
+                            conceptIdsStr += ","
+                        conceptIdsStr += "<" + id + ">"
+                    }
                 })
+
                 filter = "filter(  ?" + varName + " in( " + conceptIdsStr + "))";
             } else {
                 filter = " filter( ?" + varName + " =<" + ids + ">)";

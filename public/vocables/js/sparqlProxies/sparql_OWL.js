@@ -172,8 +172,8 @@ var Sparql_OWL = (function () {
 
             query += "?concept rdfs:label ?conceptLabel. " + strFilter;
 
+            ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 
-            ancestorsDepth = self.ancestorsDepth
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
                     query += "  ?concept rdfs:subClassOf  ?broader" + i + "." +

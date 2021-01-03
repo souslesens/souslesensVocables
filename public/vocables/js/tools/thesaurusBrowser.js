@@ -354,6 +354,8 @@ var ThesaurusBrowser = (function () {
                         var jstreeId = item["broader" + i].value
                         if (!existingNodes[id]) {
                             existingNodes[id] = 1
+                            if(!item["broader" + i + "Label"])
+                                var x=3
                             var label = item["broader" + i + "Label"].value
                             var parentId = options.rootId;
                             if (item["broader" + (i + 1)])

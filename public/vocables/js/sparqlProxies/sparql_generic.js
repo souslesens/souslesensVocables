@@ -2,7 +2,7 @@
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
 var Sparql_generic = (function () {
         var self = {};
-        var slicesSize = 25;
+       self.slicesSize = 25;
 
         /**********************************************************************************************************************************/
         /**********************************************************************************************************************************/
@@ -88,12 +88,12 @@ var Sparql_generic = (function () {
                 if (!Array.isArray(ids))
                     ids = [ids];
                 fitlerType = "ids"
-                slices = common.sliceArray(ids, slicesSize)
+                slices = common.sliceArray(ids, self.slicesSize)
             }
             if (words && !Array.isArray(words)) {
                 words = [words]
                 fitlerType = "words"
-                slices = common.sliceArray(words, slicesSize)
+                slices = common.sliceArray(words, self.slicesSize)
             }
 
             var bulkResult = [];
@@ -130,12 +130,12 @@ var Sparql_generic = (function () {
                 if (!Array.isArray(ids))
                     ids = [ids];
                 fitlerType = "ids"
-                slices = common.sliceArray(ids, slicesSize)
+                slices = common.sliceArray(ids, self.slicesSize)
             }
             if (words && !Array.isArray(words)) {
                 words = [words]
                 fitlerType = "words"
-                slices = common.sliceArray(words, slicesSize)
+                slices = common.sliceArray(words, self.slicesSize)
             }
 
             var bulkResult = [];
@@ -524,12 +524,14 @@ var Sparql_generic = (function () {
                 bindings.forEach(function (item) {
 
                     for (var i = 0; i < 20; i++) {
+                        if(i==5)
+                            var x=9
                         var iStr = "" + i;
                         if (i == 0)
                             iStr = ""
                         var field = _field + "" + iStr;
                         if (!item[field]) {
-                            break;
+                            continue;
                         }
                         if (!item[field + "Type"]) {
                             if (options.type)

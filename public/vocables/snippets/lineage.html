@@ -16,25 +16,32 @@
     .Lineage_selectedSourceDiv {
         border: solid 3px blue;
     }
+   .lineage_button{
+       margin: 3px;
+       padding: 2px;
+   }
 
 
 </style>
 <div style="display: flex;flex-direction: column">
 
     <div class="ThesaurusMatcher_paramsDiv">
+        <button onclick="Lineage.drawTopConcepts()">reset</button>
         <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
-            <button onclick="Lineage.drawTopConcepts()">reset</button>
+
         </div>
     </div>
-    <div class="Lineage_paramsDiv">
+    <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
         children
-        <button onclick="Lineage.addChildrenToGraph()">expand</button>
-        <button onclick="Lineage.removeLastChildrenFromGraph()">collapse</button>
-        <button onclick="Lineage.drawObjectProperties()">drawObjectProperties</button>
+        <button class="lineage_button" onclick="Lineage.addChildrenToGraph()">expand</button>
+        <button  class="lineage_button"  onclick="Lineage.removeLastChildrenFromGraph()">collapse</button>
+        <button  class="lineage_button" onclick="Lineage.addParentsToGraph()">parents</button>
+        <button  class="lineage_button" onclick="Lineage.drawObjectProperties()">Properties</button>
 
     </div>
     <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
-        similars in source <select id="Lineage_toSource" onchange="Lineage.drawSimilarsNodes(null,[$(this).val()])"></select>
+        <B>similars in source </B><select id="Lineage_toSource" onchange="Lineage.drawSimilarsNodes(null,[$(this).val()])"></select>
+
     </div>
 
 

@@ -20,7 +20,7 @@ var OwlSchema = (function () {
 
     self.initSourceSchema = function (sourceLabel, callback) {
         if (self.schemasConfig && self.schemasConfig[sourceLabel])
-            return callback(null, self.currentSourceSchema);
+            return callback(null, self.schemasConfig[sourceLabel]);
 
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;

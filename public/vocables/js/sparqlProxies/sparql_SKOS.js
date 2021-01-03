@@ -23,6 +23,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept")
                 return callback(null, result.results.bindings)
             })
         }
@@ -68,13 +69,6 @@ var Sparql_SKOS = (function () {
                 return alert("no parent specified for getNodeChildren ")
             if (!options) {
                 options = {depth: 0}
-            }
-
-            if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
-                Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options, function (err, result) {
-                    callback(err, result);
-                })
-                return;
             }
 
 
@@ -135,6 +129,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "child")
                 return callback(null, result.results.bindings);
             })
         }
@@ -148,50 +143,6 @@ var Sparql_SKOS = (function () {
             options.source = sourceLabel
             setVariables(sourceLabel);
 
-            var fitlerType;
-            var slices;
-            if (ids) {
-                if (!Array.isArray(ids))
-                    ids = [ids];
-                fitlerType = "ids"
-                slices = common.sliceArray(ids, slicesSize)
-            }
-            if (words && !Array.isArray(words)) {
-                words = [words]
-                fitlerType = "words"
-                slices = common.sliceArray(words, slicesSize)
-            }
-
-
-            async.eachSeries(slices, function (slice, callbackEach) {
-                var words = null;
-                var ids = null;
-                if (fitlerType == "ids")
-                    ids = slice;
-                else if (fitlerType == "words")
-                    words = slice;
-
-
-                if (filterStr == "")
-                    return alert("no child specified for getNodeParents ")
-
-                if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
-                    Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function (err, result) {
-                        callback(err, result);
-                    })
-                    return;
-                } else {
-                    _getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function (err, result) {
-                        if (err)
-                            callbackEach(err);
-
-                    })
-                }
-            })
-        }
-
-
-        _getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
             var filterStr = Sparql_common.setFilter("concept", sliceIds, sliceWords, options)
             var query = "";
             query += prefixesStr;
@@ -242,9 +193,15 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "broader")
                 return callback(null, result.results.bindings);
             })
         }
+
+
+
+
+
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
             $("#waitImg").css("display", "block");

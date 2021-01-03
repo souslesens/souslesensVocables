@@ -14,7 +14,7 @@ var Lineage = (function () {
 
         self.onSourceSelect = function (sourceLabel) {
 
-          
+
             ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel)
             $("#actionDivContolPanelDiv").load("snippets/lineage.html")
 
@@ -24,8 +24,6 @@ var Lineage = (function () {
                 $("#Lineage_toSource").val(sourceLabel)
 
                 Lineage.drawTopConcepts(sourceLabel)
-
-                self.addSourceToList(sourceLabel)
 
 
             }, 200)
@@ -41,6 +39,7 @@ var Lineage = (function () {
             expandedLevels = {}
             expandedLevels[source] = [];
             $("#lineage_drawnSources").html("");
+            self.addSourceToList(source)
 
             var depth = parseInt($("#Lineage_topDepth").val())
             Sparql_generic.getTopConcepts(source, null, function (err, result) {
@@ -110,7 +109,7 @@ var Lineage = (function () {
 
 
         self.getGraphIdsFromSource = function (source) {
-          
+
             var existingNodes = visjsGraph.data.nodes.get();
             var sourceNodes = []
             existingNodes.forEach(function (item) {
@@ -306,7 +305,7 @@ var Lineage = (function () {
                 sources
                 var nodeObjs = visjsGraph.data.nodes.get()
                 nodeObjs.forEach(function (item) {
-                    if(item.label && item.label.toLowerCase) {
+                    if (item.label && item.label.toLowerCase) {
                         words.push(item.label)
                         wordsMap[item.label.toLowerCase()] = item.id
                     }
@@ -316,44 +315,45 @@ var Lineage = (function () {
                 sources = Object.keys(Config.sources)
             }
 
-            var filter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
-            var options = {filter: filter}
+            var wordSlices = common.sliceArray(words, Sparql_generic.slicesSize);
 
-            //   var options = {filter: "filter (  regex(?conceptLabel,'^" + node.label + "$','i'))"}
+            async.eachSeries(sources, function (source, callbackEachSource) {
 
-            async.eachSeries(sources, function (source, callbackEach) {
+                async.eachSeries(wordSlices, function (words, callbackEachSlice) {
+                    var filter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
+                    var options = {filter: filter}
+                    Sparql_generic.getItems(source, options, function (err, result) {
+                        if (err) {
+                            return callbackEachSlice(err);
+                        }
+                        if (result.length == 0) {
+                            $("#waitImg").css("display", "none");
+                            return MainController.UI.message("No data found")
+
+                        }
+                        var ids = []
+                        result.forEach(function (item) {
+                            similars.push({
+                                id: item.concept.value,
+                                label: item.conceptLabel.value,
+                                source: source
+                            });
+                            ids.push(item.concept.value)
+                        })
+
+                        if (!expandedLevels[source]) {
+                            expandedLevels[source] = []
+                            self.addSourceToList(source)
 
 
+                        }
+                        expandedLevels[source].push(ids)
 
-                Sparql_generic.getItems(source, options, function (err, result) {
-                    if (err) {
-                        return callbackEach(err);
-                    }
-                    if (result.length == 0) {
-                        $("#waitImg").css("display", "none");
-                        return MainController.UI.message("No data found")
 
-                    }
-                    var ids = []
-                    result.forEach(function (item) {
-                        similars.push({
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
-                            source: source
-                        });
-                        ids.push(item.concept.value)
+                        callbackEachSlice();
                     })
-
-                    if (!expandedLevels[source]) {
-                        expandedLevels[source] = []
-                        self.addSourceToList(source)
-
-
-                    }
-                    expandedLevels[source].push(ids)
-
-
-                    callbackEach();
+                }, function (err) {
+                    callbackEachSource(err)
                 })
             }, function (err) {
                 if (err)
@@ -387,6 +387,7 @@ var Lineage = (function () {
                     }
                 })
 
+
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
                 $("#waitImg").css("display", "none");
@@ -395,14 +396,6 @@ var Lineage = (function () {
 
 
         }
-
-        /*   self.drawAllsimilars = function () {
-               var source = $("#Lineage_toSource").val()
-               if (source == "")
-                   self.drawSimilarsNodes(null, null)
-               else
-                   self.drawSimilarsNodes(null, [source])
-           }*/
 
 
         self.drawObjectProperties = function (classIds) {
@@ -430,7 +423,7 @@ var Lineage = (function () {
                     var color = self.getSourceColor(source)
                     result.forEach(function (item) {
                         if (!item.range) {
-                            item.range = {value: "?_"+item.property.value}
+                            item.range = {value: "?_" + item.property.value}
                             item.rangeLabel = {value: "?"}
                         }
                         if (!existingNodes[item.range.value]) {
@@ -445,7 +438,7 @@ var Lineage = (function () {
                             })
 
                         }
-                        var edgeId=item.classId.value+"_"+item.range.value
+                        var edgeId = item.classId.value + "_" + item.range.value
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
 
@@ -453,8 +446,9 @@ var Lineage = (function () {
                                 id: edgeId,
                                 from: item.classId.value,
                                 to: item.range.value,
-                                label: item.propertyLabel.value,
-                                font: {align: "middle", ital: objectPropertyColor, mod: "italic", size: 12},
+                                label: "<i>" + item.propertyLabel.value + "</i>",
+                                font: {multi: true, size: 10},
+                                // font: {align: "middle", ital: {color:objectPropertyColor, mod: "italic", size: 10}},
                                 //   physics:false,
                                 arrows: {
                                     to: {
@@ -477,6 +471,60 @@ var Lineage = (function () {
 
                 })
             })
+        }
+
+        self.addParentsToGraph = function (nodeIds) {
+
+            var source = self.currentSource;
+
+            var chilIds;
+            if (nodeIds) {
+                chilIds = nodeIds
+            } else {
+                chilIds = expandedLevels[source][0];
+            }
+            MainController.UI.message("")
+            Sparql_generic.getNodeParents(source, null, chilIds, 1, null, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+                var map = [];
+                var ids = [];
+
+                if (result.length == 0) {
+                    $("#waitImg").css("display", "none");
+                    return MainController.UI.message("No data found")
+
+                }
+
+                var color = self.getSourceColor(source)
+                var visjsData = GraphController.toVisjsData(null, result, null,"concept", "broader1", {
+                    from: {
+                        shape: defaultShape,
+                        size: defaultShapeSize,
+                        color: color
+                    },
+                    to: {
+                        shape: defaultShape,
+                        size: defaultShapeSize,
+                        color: color
+                    },
+                    data: {source: MainController.currentSource},
+                    arrows: {
+                        from: {
+                            enabled: true,
+                            type: "arrow",
+                            scaleFactor: 0.5
+                        },
+                    },
+
+                })
+
+
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+
+            })
+
         }
 
 
@@ -572,6 +620,7 @@ var Lineage = (function () {
 
 
         }
+
 
         return self;
 

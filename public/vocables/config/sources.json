@@ -362,7 +362,7 @@
       "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) ",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"

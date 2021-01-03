@@ -22,7 +22,7 @@ var Sparql_common = (function () {
             if (Array.isArray(words)) {
                 var conceptWordStr = ""
                 words.forEach(function (word, index) {
-                    if(word!="") {
+                    if(word.length>2) {
                         if (conceptWordStr != "")
                             conceptWordStr += "|"
                         if (options.exactMatch)

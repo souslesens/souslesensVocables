@@ -1,0 +1,45 @@
+<style>
+
+    .Lineage_paramsDiv {
+        margin: 10px;
+        padding: 10px;
+    }
+
+    .Lineage_sourceLabelDiv {
+        margin: 5px;
+        padding: 5px;
+        font-size: 14px;
+        border: solid 1px black;
+        border-radius: 5px;
+    }
+
+    .Lineage_selectedSourceDiv {
+        border: solid 3px blue;
+    }
+
+
+</style>
+<div style="display: flex;flex-direction: column">
+
+    <div class="ThesaurusMatcher_paramsDiv">
+        <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
+            <button onclick="Lineage.drawTopConcepts()">reset</button>
+        </div>
+    </div>
+    <div class="Lineage_paramsDiv">
+        children
+        <button onclick="Lineage.addChildrenToGraph()">expand</button>
+        <button onclick="Lineage.removeLastChildrenFromGraph()">collapse</button>
+        <button onclick="Lineage.drawObjectProperties()">drawObjectProperties</button>
+
+    </div>
+    <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
+        similars in source <select id="Lineage_toSource" onchange="Lineage.drawSimilarsNodes(null,[$(this).val()])"></select>
+    </div>
+
+
+    <!--   <button onclick="Lineage.removesimilars()">drawAllsimilars</button>-->
+</div>
+
+
+</div>

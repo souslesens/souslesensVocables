@@ -47,7 +47,7 @@ var Config = (function () {
     self.tools["termTaxonomy"] = {label: "Taxonomy", multiSources: 1, controller: TermTaxonomy, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
-    self.tools["pyramyd"] = {label: "Pyramyd", multiSources: 0, controller: Pyramid, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["lineage"] = {label: "Lineage", multiSources: 0, controller: Lineage, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
 

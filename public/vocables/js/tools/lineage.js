@@ -1,10 +1,11 @@
-var Pyramid = (function () {
+var Lineage = (function () {
         var self = {}
         var expandedLevels = {};
         var sourceColors = {}
         var orphanShape = "square";
         var defaultShape = "dot";
         var defaultShapeSize = 7;
+        var objectPropertyColor = "#aaa"
 
 
         var maxChildrenDrawn = 15
@@ -13,16 +14,16 @@ var Pyramid = (function () {
 
         self.onSourceSelect = function (sourceLabel) {
 
-
+          
             ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel)
-            $("#actionDivContolPanelDiv").load("snippets/pyramid.html")
+            $("#actionDivContolPanelDiv").load("snippets/lineage.html")
 
             setTimeout(function () {
                 var sourceLabels = Object.keys(Config.sources).sort();
-                common.fillSelectOptions("Pyramid_toSource", sourceLabels, true)
-                $("#Pyramid_toSource").val(sourceLabel)
+                common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
+                $("#Lineage_toSource").val(sourceLabel)
 
-                Pyramid.drawTopConcepts(sourceLabel)
+                Lineage.drawTopConcepts(sourceLabel)
 
                 self.addSourceToList(sourceLabel)
 
@@ -32,20 +33,24 @@ var Pyramid = (function () {
         }
 
         self.drawTopConcepts = function (source) {
+            MainController.UI.message("")
             visjsGraph.clearGraph()
             if (!source)
                 source = MainController.currentSource
             self.currentSource = source
             expandedLevels = {}
             expandedLevels[source] = [];
-            $("#pyramid_drawnSources").html("");
+            $("#lineage_drawnSources").html("");
 
-            var depth = parseInt($("#Pyramid_topDepth").val())
+            var depth = parseInt($("#Lineage_topDepth").val())
             Sparql_generic.getTopConcepts(source, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
-                if (result.length == 0)
+                if (result.length == 0) {
+                    $("#waitImg").css("display", "none");
                     return MainController.UI.message("No data found")
+
+                }
                 var ids = []
                 result.forEach(function (item) {
                     ids.push(item.topConcept.value)
@@ -67,6 +72,13 @@ var Pyramid = (function () {
                         },
                         data: {source: MainController.currentSource},
                         rootLabel: source,
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "arrow",
+                                scaleFactor: 0.5
+                            },
+                        },
                     })
 
                 var options = {
@@ -74,8 +86,8 @@ var Pyramid = (function () {
                            shape: "box",
                            color: "#ddd"
                        },*/
-                    onclickFn: Pyramid.graphActions.onNodeClick,
-                    onRightClickFn: Pyramid.graphActions.showGraphPopupMenu,
+                    onclickFn: Lineage.graphActions.onNodeClick,
+                    onRightClickFn: Lineage.graphActions.showGraphPopupMenu,
                     "physics": {
                         "barnesHut": {
                             "springLength": 0,
@@ -98,7 +110,7 @@ var Pyramid = (function () {
 
 
         self.getGraphIdsFromSource = function (source) {
-
+          
             var existingNodes = visjsGraph.data.nodes.get();
             var sourceNodes = []
             existingNodes.forEach(function (item) {
@@ -129,15 +141,18 @@ var Pyramid = (function () {
             } else {
                 parentIds = expandedLevels[source][expandedLevels[source].length - 1];
             }
-
+            MainController.UI.message("")
             Sparql_generic.getNodeChildren(source, null, parentIds, 1, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var map = [];
                 var ids = [];
 
-                if (result.length == 0)
+                if (result.length == 0) {
+                    $("#waitImg").css("display", "none");
                     return MainController.UI.message("No data found")
+
+                }
 
                 result.forEach(function (item) {
                     if (!map[item.concept.value])
@@ -178,6 +193,13 @@ var Pyramid = (function () {
                                 id: edgeId,
                                 from: key,
                                 to: key + "_cluster",
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "arrow",
+                                        scaleFactor: 0.5
+                                    },
+                                },
                             })
                         }
 
@@ -199,6 +221,13 @@ var Pyramid = (function () {
                                 color: color
                             },
                             data: {source: MainController.currentSource},
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: "arrow",
+                                    scaleFactor: 0.5
+                                },
+                            },
 
                         })
 
@@ -236,6 +265,7 @@ var Pyramid = (function () {
         }
 
         self.openCluster = function (cluster) {
+            MainController.UI.message("")
             var color = self.getSourceColor(cluster.data.source)
             var visjsData = GraphController.toVisjsData(null, cluster.data.cluster, cluster.data.parent, "concept", "child1", {
                 from: {
@@ -255,13 +285,14 @@ var Pyramid = (function () {
             visjsGraph.data.edges.add(visjsData.edges)
             visjsGraph.data.nodes.remove(cluster.id)
             $("#waitImg").css("display", "none");
+            MainController.UI.message("")
 
 
         }
 
         self.drawSimilarsNodes = function (node, sources) {
+            MainController.UI.message("")
 
-            var sourceSchematype = Config.sources[MainController.currentSource].schemaType;
             var similars = [];
             /* if (!sources)
                  sources = Object.keys(Config.sources)*/
@@ -275,8 +306,10 @@ var Pyramid = (function () {
                 sources
                 var nodeObjs = visjsGraph.data.nodes.get()
                 nodeObjs.forEach(function (item) {
-                    words.push(item.label)
-                    wordsMap[item.label.toLowerCase()] = item.id
+                    if(item.label && item.label.toLowerCase) {
+                        words.push(item.label)
+                        wordsMap[item.label.toLowerCase()] = item.id
+                    }
                 })
             } else {
                 words = [node.label]
@@ -289,19 +322,18 @@ var Pyramid = (function () {
             //   var options = {filter: "filter (  regex(?conceptLabel,'^" + node.label + "$','i'))"}
 
             async.eachSeries(sources, function (source, callbackEach) {
-                if (source == MainController.currentSource)
-                    return callbackEach();
-                if (sourceSchematype != Config.sources[source].schemaType)
-                    return callbackEach();
+
 
 
                 Sparql_generic.getItems(source, options, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
-                    if (result.length == 0)
+                    if (result.length == 0) {
+                        $("#waitImg").css("display", "none");
                         return MainController.UI.message("No data found")
 
+                    }
                     var ids = []
                     result.forEach(function (item) {
                         similars.push({
@@ -365,7 +397,7 @@ var Pyramid = (function () {
         }
 
         /*   self.drawAllsimilars = function () {
-               var source = $("#Pyramid_toSource").val()
+               var source = $("#Lineage_toSource").val()
                if (source == "")
                    self.drawSimilarsNodes(null, null)
                else
@@ -381,21 +413,24 @@ var Pyramid = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
-
+            MainController.UI.message("")
             OwlSchema.initSourceSchema(source, function (err, schema) {
                 if (err)
                     return MainController.UI.message(err)
                 Sparql_schema.getClassPropertiesAndRanges(schema, classIds, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
-                    if (result.length == 0)
+                    if (result.length == 0) {
+                        $("#waitImg").css("display", "none");
                         return MainController.UI.message("No data found")
+
+                    }
                     var visjsData = {nodes: [], edges: []}
                     var existingNodes = visjsGraph.getExistingIdsMap()
                     var color = self.getSourceColor(source)
                     result.forEach(function (item) {
                         if (!item.range) {
-                            item.range = {value: Math.random()}
+                            item.range = {value: "?_"+item.property.value}
                             item.rangeLabel = {value: "?"}
                         }
                         if (!existingNodes[item.range.value]) {
@@ -410,15 +445,29 @@ var Pyramid = (function () {
                             })
 
                         }
-                        visjsData.edges.push({
-                            from: item.classId.value,
-                            to: item.range.value,
-                            label: item.propertyLabel.value,
-                            //   physics:false,
-                            arrows: "to",
-                            dashes: true
+                        var edgeId=item.classId.value+"_"+item.range.value
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
 
-                        })
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: item.classId.value,
+                                to: item.range.value,
+                                label: item.propertyLabel.value,
+                                font: {align: "middle", ital: objectPropertyColor, mod: "italic", size: 12},
+                                //   physics:false,
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "bar",
+                                        scaleFactor: 0.5
+                                    },
+                                },
+                                dashes: true,
+                                color: objectPropertyColor
+
+                            })
+                        }
 
                     })
 
@@ -452,14 +501,14 @@ var Pyramid = (function () {
             if (!node)
                 return;
 
-            var html = "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.drawChildren();\"> draw children</span>\n" +
-                "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.drawSimilars();\"> draw similars</span>\n" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Pyramid.graphActions.hideChildren();\">hide children</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Pyramid.graphActions.showNodeInfos();\">show node infos</span>"
+            var html = "    <span class=\"popupMenuItem\" onclick=\"Lineage.graphActions.drawChildren();\"> draw children</span>\n" +
+                "    <span class=\"popupMenuItem\" onclick=\"Lineage.graphActions.drawSimilars();\"> draw similars</span>\n" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage.graphActions.hideChildren();\">hide children</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage.graphActions.showNodeInfos();\">show node infos</span>"
 
 
             if (node.id.indexOf("_cluster") > 0) {
-                var html = "    <span class=\"popupMenuItem\" onclick=\"Pyramid.graphActions.openCluster();\"> open cluster</span>\n"
+                var html = "    <span class=\"popupMenuItem\" onclick=\"Lineage.graphActions.openCluster();\"> open cluster</span>\n"
             }
             $("#graphPopupDiv").html(html);
 
@@ -481,17 +530,17 @@ var Pyramid = (function () {
             },
             drawChildren: function () {
 
-                Pyramid.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)
+                Lineage.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)
             },
 
             drawSimilars: function () {
-                Pyramid.drawSimilarsNodes(self.currentGraphNode)
+                Lineage.drawSimilarsNodes(self.currentGraphNode)
             },
             hideChildren: function () {
-                Pyramid.removeLastChildrenFromGraph(self.currentGraphNode.id)
+                Lineage.removeLastChildrenFromGraph(self.currentGraphNode.id)
             }
             , openCluster: function () {
-                Pyramid.openCluster(self.currentGraphNode)
+                Lineage.openCluster(self.currentGraphNode)
 
             },
             showNodeInfos: function () {
@@ -507,19 +556,19 @@ var Pyramid = (function () {
 
 
         self.addSourceToList = function (source) {
-            var id = "Pyramid_source_" + encodeURIComponent(source)
+            var id = "Lineage_source_" + encodeURIComponent(source)
             var html = "<div  id='" + id + "' style='color: " + self.getSourceColor(source) + "'" +
-                " class='Pyramid_sourceLabelDiv' " +
-                "onclick='Pyramid.setCurrentSource(\"" + encodeURIComponent(source) + "\")'>" + source + "</div>"
-            $("#pyramid_drawnSources").append(html)
+                " class='Lineage_sourceLabelDiv' " +
+                "onclick='Lineage.setCurrentSource(\"" + encodeURIComponent(source) + "\")'>" + source + "</div>"
+            $("#lineage_drawnSources").append(html)
             self.setCurrentSource(encodeURIComponent(source))
 
         }
         self.setCurrentSource = function (sourceId) {
 
-            $(".Pyramid_sourceLabelDiv").removeClass("Pyramid_selectedSourceDiv")
-            $("#Pyramid_source_" + sourceId).addClass("Pyramid_selectedSourceDiv")
-            Pyramid.currentSource = encodeURIComponent(sourceId)
+            $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv")
+            $("#Lineage_source_" + sourceId).addClass("Lineage_selectedSourceDiv")
+            Lineage.currentSource = encodeURIComponent(sourceId)
 
 
         }

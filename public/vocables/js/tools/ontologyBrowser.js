@@ -317,12 +317,9 @@ var OntologyBrowser = (function () {
 
                     var range = null;
 
-                    if (item.rangeDataType) {
-                        range = item.rangeDataType
-                    } else if (item.rangeRestriction) {
-                        range = item.rangeRestriction
-                    }
-                    if (!range)
+                    if (item.range) {
+                        range = item.range
+                    } else
                         return;
                     var id = OntologyBrowser.currentJstreeNode.id + "|" + item.property.value;
                     if (!OntologyBrowser.currentJstreeNode.dataProperties[id]) {

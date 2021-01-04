@@ -15,8 +15,8 @@ var Sparql_schema = (function () {
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             " select distinct *  " + fromStr + "  WHERE  {  ?class  rdf:type owl:Class. OPTIONAL {?class rdfs:label ?classLabel}"
-        if (classId)
-            query += Sparql_common.setFilter("classId", classIds)
+        if (classIds)
+            query += Sparql_common.setFilter("class", classIds)
         if (schema.allSubclasses)
             query += " OPTIONAL{?childClass rdfs:subClassOf* ?class. OPTIONAL{?childClass rdfs:label ?childClassLabel} } "
 
@@ -180,7 +180,8 @@ var Sparql_schema = (function () {
     }
 
     self.getClassPropertiesAndRanges = function (schema, classIds, callback) {
-
+if(!Array.isArray(classIds))
+    classIds=[classIds]
         var slices = common.sliceArray(classIds, slicesSize);
         var bulkResult = []
         async.eachSeries(slices, function (classIds, callbackEach) {

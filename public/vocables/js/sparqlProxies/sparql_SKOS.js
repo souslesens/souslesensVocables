@@ -143,7 +143,7 @@ var Sparql_SKOS = (function () {
             options.source = sourceLabel
             setVariables(sourceLabel);
 
-            var filterStr = Sparql_common.setFilter("concept", sliceIds, sliceWords, options)
+            var filterStr = Sparql_common.setFilter("concept", ids, words, options)
             var query = "";
             query += prefixesStr;
             query += " select distinct * " + fromStr + "  WHERE {{"

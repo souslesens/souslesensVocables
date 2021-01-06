@@ -16,6 +16,7 @@ var Config = (function () {
         self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
+   // self.loginMode = "json";
     self.loginMode = "none";
     self.appName = "VOCABLES";
     self.hideBlender = false;
@@ -47,7 +48,7 @@ var Config = (function () {
     self.tools["termTaxonomy"] = {label: "Taxonomy", multiSources: 1, controller: TermTaxonomy, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
-    self.tools["lineage"] = {label: "Lineage", multiSources: 0, controller: Lineage, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["lineage"] = {label: "Lineage", multiSources: 0, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
 

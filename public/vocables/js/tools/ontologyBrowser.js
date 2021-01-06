@@ -120,7 +120,9 @@ var OntologyBrowser = (function () {
 
                 function (callbackSeries) {
                     OwlSchema.initSourceSchema(MainController.currentSource, function (err, result) {
-                  OwlSchema.currentSourceSchema.labelsMap[classId] = classLabel;
+                        OwlSchema.currentSourceSchema=result;
+
+
                         callbackSeries(err)
                     })
                 },
@@ -128,6 +130,7 @@ var OntologyBrowser = (function () {
                     OwlSchema.getClassDescription(MainController.currentSource, classId, function (err, description) {
                         if (err)
                             return callbackSeries(err);
+                        OwlSchema.currentSourceSchema.labelsMap[classId] = description.label.value;
                         for (var key in description.objectProperties) {
                             properties[key] = description.objectProperties[key];
                         }

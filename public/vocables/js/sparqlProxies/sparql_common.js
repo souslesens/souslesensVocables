@@ -20,8 +20,11 @@ var Sparql_common = (function () {
         var filter = ";"
         if (words) {
             if (Array.isArray(words)) {
+                if(words[0]==null)
+                    return ""
                 var conceptWordStr = ""
                 words.forEach(function (word, index) {
+
                     if(word.length>2) {
                         if (conceptWordStr != "")
                             conceptWordStr += "|"
@@ -33,6 +36,8 @@ var Sparql_common = (function () {
                 })
                 filter = " filter( regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ";
             } else {
+                if(words==null)
+                    return "";
                 var filter = "  filter( regex(?" + varName + "Label, \"^" + words + "$\", \"i\"))";
                 if (!options.exactMatch) {
                     filter = " filter( regex(?" + varName + "Label, \"" + words + "\", \"i\"))";
@@ -40,7 +45,10 @@ var Sparql_common = (function () {
                 }
             }
         } else if (ids) {
+
             if (Array.isArray(ids)) {
+                if(ids[0]==null)
+                    return ""
                 var conceptIdsStr = ""
                 ids.forEach(function (id, index) {
                     if(id!="") {
@@ -52,6 +60,8 @@ var Sparql_common = (function () {
 
                 filter = "filter(  ?" + varName + " in( " + conceptIdsStr + "))";
             } else {
+                if(ids==null)
+                    return "";
                 filter = " filter( ?" + varName + " =<" + ids + ">)";
             }
 

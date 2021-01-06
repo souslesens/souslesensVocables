@@ -105,6 +105,7 @@ var Sparql_schema = (function () {
             if (err) {
                 return callback(err)
             }
+            result.results.bindings=Sparql_generic.setBindingsOptionalProperties( result.results.bindings,["property","range","domain"])
             return callback(null, result.results.bindings)
 
         })
@@ -132,7 +133,7 @@ var Sparql_schema = (function () {
                " ?union owl:unionOf ?id . ?id ?z  ?range." +
                " OPTIONAL{?range rdfs:label ?rangeLabel.}"+
                "   }" +*/
-            "limit 10000"
+            " order by ?propertyLabel limit 10000"
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
@@ -255,6 +256,33 @@ if(!Array.isArray(classIds))
 
         }, function (err) {
             return callback(err, bulkResult)
+        })
+
+    }
+
+    self.getAllTypes=function(sourceLabel,callback){
+        var graphUri=Config.sources[sourceLabel].graphUri
+        var fromStr = ""
+        if (graphUri && graphUri != "")
+            fromStr = " FROM <" + graphUri + ">"
+
+        var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
+            "SELECT ?type ?typeLabel (count(distinct ?s) as ?count) "+fromStr+" WHERE {" +
+            "" +
+            " ?s rdf:type ?type " +
+            "optional{?type rdfs:label ?typeLabel.} " +
+            "} group by ?type ?typeLabel order by desc (?count)"
+
+
+        var server=Config.sources[sourceLabel].sparql_server
+        var url = server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "type")
+            return callback(null, result.results.bindings)
         })
 
     }

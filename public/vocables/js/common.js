@@ -20,9 +20,24 @@ var common = (function () {
             }
             if (Array.isArray(data)) {
                 data.forEach(function (item, index) {
+                    var text,value;
+                    if(textfield){
+                        if(item[textfield].value && item[valueField].value ) {
+                            text = item[textfield].value;
+                            value =  item[valueField].value;
+                        }
+                        else{
+                            text = item[textfield];
+                            value =  item[valueField];
+                        }
+                    }else{
+                        text=item;
+                        value=item;
+
+                    }
                     $("#" + selectId).append($('<option>', {
-                        text: item[textfield] || item,
-                        value: item[valueField] || item
+                        text: text,
+                        value: value
                     }));
                 });
             } else {

@@ -2,13 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologiesStats.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusMatcher.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/thesaurusMatcher.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/thesaurusMatcher.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -23,8 +31,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="HTML File" />
-        <option value="JavaScript File" />
         <option value="JS module" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -54,6 +62,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
       <recent name="D:\GitHub\souslesensVocables\public\souslesensVocables\js" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
@@ -76,7 +85,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.dirContentAnnotator..js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://vps254642.ovh.net/http:/vps254642.ovh.net/public/vocables/index.html">
       <method v="2" />
     </configuration>
@@ -124,7 +133,9 @@
       <workItem from="1608033621034" duration="258000" />
       <workItem from="1608033899777" duration="21193000" />
       <workItem from="1608188517427" duration="50134000" />
-      <workItem from="1608448255113" duration="220592000" />
+      <workItem from="1608448255113" duration="235613000" />
+      <workItem from="1609850999084" duration="38000" />
+      <workItem from="1609851061196" duration="12236000" />
     </task>
     <servers />
   </component>
@@ -179,12 +190,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js</url>
-          <line>420</line>
+          <line>423</line>
           <option name="timeStamp" value="168" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js</url>
-          <line>625</line>
+          <line>628</line>
           <option name="timeStamp" value="169" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -195,55 +206,46 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
           <line>38</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="184" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
           <line>21</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="187" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
           <line>161</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="188" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routes/index.js</url>
           <line>327</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="211" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/SPARQL_endpoint.js</url>
           <line>23</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="214" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/snippets/SPARQLendpoint.html</url>
           <line>18</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="230" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage.js</url>
-          <line>178</line>
-          <properties lambdaOrdinal="-1" />
+          <line>183</line>
           <option name="timeStamp" value="244" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>125</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="299" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>119</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="303" />
         </line-breakpoint>
       </breakpoints>

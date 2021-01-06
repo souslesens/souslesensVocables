@@ -37,6 +37,9 @@ var ontologiesMapper = {
 
         var sourceClasses = {}
         async.series([
+
+
+            //************************************* query sparql source*************************
             function (callbackSeries) {
                 var query =sourceConfig.query;
                 var body = {
@@ -61,7 +64,7 @@ var ontologiesMapper = {
 
 
             },
-
+            //************************************* slice labels and get same labels in target*************************
             function (callbackSeries) {
                 var quantumLabels = Object.keys(sourceClasses);
                 var slices = util.sliceArray(quantumLabels, 100);
@@ -232,6 +235,7 @@ var sourceConfig = {
     labelProcessor: null,
     filePath : "D:\\NLP\\ontologies\\quantum\\mappingQuantum_Part4.nt"
 }
+source
 
 var targetConfig = {
 

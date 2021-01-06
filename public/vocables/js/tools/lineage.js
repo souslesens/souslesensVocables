@@ -264,7 +264,7 @@ var Lineage_classes = (function () {
 
 
 // on cherche les parents qui n'ont pas trouvé d'enfant (I.E concept de SPARQL.getChildren
-                {
+                if (false) {
                     var keys = Object.keys(map)
                     var orphans = []
                     parentIds.forEach(function (parentId) {
@@ -628,11 +628,43 @@ var Lineage_classes = (function () {
 
         }
         self.zoomGraphOnNode = function (nodeId) {
+
+
+            var nodes = visjsGraph.data.nodes.getIds();
+            if (nodes.indexOf(nodeId) < 0)
+                return;
             visjsGraph.network.focus(nodeId, {
                 scale: 1,
                 locked: false,
                 animation: true
             })
+
+
+            var newNodes = []
+            var nodes = visjsGraph.data.nodes.get();
+            nodes.forEach(function (node) {
+                if (!node.data)
+                    return;
+                    if ( !node.data.initialParams) {
+                    node.data.initialParams = {
+                        shape: node.shape,
+                        size: node.size,
+                    }
+                }
+                var size,shape;
+                var font = {color: "black"}
+                if (node.id == nodeId) {
+                    size = node.data.initialParams.size * 2
+                    shape = "hexagon"
+                    font = {color: "red"}
+                }else{
+                    size=node.data.initialParams.size ;
+                    shape=node.data.initialParams.shape ;
+                }
+                newNodes.push({id: node.id, size: size, shape: shape, font: font})
+                //  newNodes.push({id: id, opacity:opacity})
+            })
+            visjsGraph.data.nodes.update(newNodes)
         }
 
         self.addArbitraryNodeToGraph = function (nodeData) {
@@ -664,6 +696,7 @@ var Lineage_classes = (function () {
                         visjsData.nodes.push({
                             id: item.concept.value,
                             label: item.conceptLabel.value,
+                            data: nodeData,
                             shape: defaultShape,
                             color: color,
                             size: defaultShapeSize
@@ -678,7 +711,7 @@ var Lineage_classes = (function () {
                             visjsData.nodes.push({
                                 id: item["broader" + i].value,
                                 label: item["broader" + i + "Label"].value,
-                                data: nodeData,
+                                data: {source:nodeData.source,label:item["broader" + i + "Label"].value,id:item["broader" + i ].value},
                                 shape: defaultShape,
                                 color: color,
                                 size: defaultShapeSize
@@ -709,10 +742,12 @@ var Lineage_classes = (function () {
                                 })
                             }
                         } else {  //join an existing node
-                            if (i == i)
+                            if (i == 1)
                                 fromId = item.concept.value
                             else
-                                fromId = item["broader" + (i - 1)].value.edgeId = fromId + "_" + item["broader" + i].value
+                                fromId = item["broader" + (i - 1)].value
+
+                            edgeId = fromId + "_" + item["broader" + i].value
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1
                                 visjsData.edges.push({
@@ -739,6 +774,9 @@ var Lineage_classes = (function () {
 
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
+                setTimeout(function(){
+                    self.zoomGraphOnNode(nodeData.id)
+                },500)
                 $("#waitImg").css("display", "none");
                 return MainController.UI.message("No data found")
             })

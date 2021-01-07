@@ -12,6 +12,10 @@ var Lineage_classes = (function () {
         self.currentSource;
 
 
+
+
+
+
         self.onSourceSelect = function (sourceLabel) {
             MainController.UI.message("");
             $("#accordion").accordion("option", {active: 2});
@@ -312,16 +316,17 @@ var Lineage_classes = (function () {
             $("#Lineage_toSource").val("")
 
             var similars = [];
-            /* if (!sources)
-                 sources = Object.keys(Config.sources)*/
-
+             if (!sources)
+                 sources = common.getAllsourcesWithType("OWL")
+            if(!Array.isArray(sources))
+                sources=[sources]
 
             var words = []
             var wordsMap = {}
             if (!node) {
                 if (!sources)
                     return alert("select a source")
-                sources
+
                 var nodeObjs = visjsGraph.data.nodes.get()
                 nodeObjs.forEach(function (item) {
                     if (item.label && item.label.toLowerCase) {
@@ -331,7 +336,7 @@ var Lineage_classes = (function () {
                 })
             } else {
                 words = [node.label]
-                sources = Object.keys(Config.sources)
+
             }
 
             var wordSlices = common.sliceArray(words, Sparql_generic.slicesSize);
@@ -645,21 +650,21 @@ var Lineage_classes = (function () {
             nodes.forEach(function (node) {
                 if (!node.data)
                     return;
-                    if ( !node.data.initialParams) {
+                if (!node.data.initialParams) {
                     node.data.initialParams = {
                         shape: node.shape,
                         size: node.size,
                     }
                 }
-                var size,shape;
+                var size, shape;
                 var font = {color: "black"}
                 if (node.id == nodeId) {
                     size = node.data.initialParams.size * 2
                     shape = "hexagon"
                     font = {color: "red"}
-                }else{
-                    size=node.data.initialParams.size ;
-                    shape=node.data.initialParams.shape ;
+                } else {
+                    size = node.data.initialParams.size;
+                    shape = node.data.initialParams.shape;
                 }
                 newNodes.push({id: node.id, size: size, shape: shape, font: font})
                 //  newNodes.push({id: id, opacity:opacity})
@@ -711,7 +716,7 @@ var Lineage_classes = (function () {
                             visjsData.nodes.push({
                                 id: item["broader" + i].value,
                                 label: item["broader" + i + "Label"].value,
-                                data: {source:nodeData.source,label:item["broader" + i + "Label"].value,id:item["broader" + i ].value},
+                                data: {source: nodeData.source, label: item["broader" + i + "Label"].value, id: item["broader" + i].value},
                                 shape: defaultShape,
                                 color: color,
                                 size: defaultShapeSize
@@ -774,12 +779,129 @@ var Lineage_classes = (function () {
 
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
-                setTimeout(function(){
+                setTimeout(function () {
                     self.zoomGraphOnNode(nodeData.id)
-                },500)
+                }, 500)
                 $("#waitImg").css("display", "none");
                 return MainController.UI.message("No data found")
             })
+        }
+
+        self.drawCfihosQuantumMapping = function (node, sources) {
+
+            MainController.UI.message("")
+            $("#Lineage_toSource").val("")
+
+            var similars = [];
+            if (!sources)
+                sources = common.getAllsourcesWithType("OWL")
+            if(!Array.isArray(sources))
+                sources=[sources]
+
+
+            var words = []
+            var wordsMap = {}
+            var sourceIds=[]
+            if (!node) {
+
+
+                var nodeObjs = visjsGraph.data.nodes.get()
+                nodeObjs.forEach(function (item) {
+                    sourceIds.push(item.id)//.replace("vocab#",""));
+                    if (item.label && item.label.toLowerCase) {
+                        words.push(item.label)
+                        wordsMap[item.label.toLowerCase()] = item.id
+
+                    }
+                })
+            } else {
+                words = [node.label]
+                sourceIds.push(node.id)//.replace("vocab#",""));
+            }
+
+            var wordSlices = common.sliceArray(words, Sparql_generic.slicesSize);
+
+            async.eachSeries(sources, function (source, callbackEachSource) {
+
+                async.eachSeries(wordSlices, function (words, callbackEachSlice) {
+                    var filter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
+                    var options = {filter: filter, graphUri: ["http://data.total.com/resource/quantum/mappings/"]}
+                    Sparql_generic.getItems(source, options, function (err, result) {
+                        if (err) {
+                            return callbackEachSlice(err);
+                        }
+
+                        var ids = []
+                        result.forEach(function (item) {
+                            similars.push({
+                                id: item.concept.value,
+                                label: item.conceptLabel.value,
+                                source: source
+                            });
+                            ids.push(item.concept.value)
+                        })
+
+                        if (!expandedLevels[source]) {
+                            expandedLevels[source] = []
+                            self.addSourceToList(source)
+
+
+                        }
+                        expandedLevels[source].push(ids)
+
+
+                        callbackEachSlice();
+                    })
+                }, function (err) {
+                    callbackEachSource(err)
+                })
+            }, function (err) {
+                if (err)
+                    return MainController.UI.message(err);
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                if (similars.length == 0) {
+                    $("#waitImg").css("display", "none");
+                    return MainController.UI.message("No data found")
+
+                }
+                similars.forEach(function (item) {
+                    if (!existingNodes[item.id]) {
+                        existingNodes[item.id] = 1
+                        var color = self.getSourceColor(item.source)
+                        visjsData.nodes.push({
+                            id: item.id,
+                            label: item.label,
+                            color: color,
+                            shape: "dot",
+                            size: defaultShapeSize,
+                            data: item
+                        })
+                        visjsData.edges.push({
+                            from: wordsMap[item.label.toLowerCase()],
+                            to: item.id,
+                            color: color,
+                            width: 3,
+                            //   label: item.source,
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: "curve",
+                                },
+                            },
+                        })
+                    }
+                })
+
+
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+                $("#waitImg").css("display", "none");
+
+
+            })
+
+
         }
 
 

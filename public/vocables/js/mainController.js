@@ -187,6 +187,16 @@ var MainController = (function () {
 
     }
 
+    self.getAllsourcesWithType = function (type) {
+
+        var sources = [];
+        Object.keys(Config.sources).sort().forEach(function (item) {
+            if (!type || Config.sources[item].schemaType == type)
+                sources.push(item)
+        })
+        return sources;
+    }
+
 
     return self;
 

@@ -57,6 +57,7 @@
         </div>
         <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
             <B>similars in source </B><select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>
+            <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>
 
         </div>
 
@@ -77,7 +78,7 @@
      domain only <select id="LineageProperties_properties_D_Select" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>
         orphans <select id="LineageProperties_properties_O_Select" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>
         <div id="LineageProperties_propertyInfosDiv"></div>
-        "
+
     </div>
     <hr>
     <input id='GenericTools_searchTermInput'>

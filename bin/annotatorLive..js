@@ -13,6 +13,7 @@ var httpProxy = require('../bin/httpProxy.')
 var async = require('async')
 var spacyServerUrl = "http://vps475829.ovh.net/spacy/pos"
 var Inflector = require('inflected');
+const util = require("../bin/skosConverters/util.");
 
 
 var annotatorLive = {
@@ -55,7 +56,7 @@ var annotatorLive = {
 
                 if (textNouns.length == 0)
                     return callbackSeries();
-                var textNounsSlices = [textNouns]
+                var textNounsSlices =util.sliceArray(textNouns,30);
 
                 async.eachSeries(sources, function (source, callbackEachSource) {
 

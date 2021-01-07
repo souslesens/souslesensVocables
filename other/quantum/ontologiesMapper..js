@@ -218,6 +218,53 @@ var ontologiesMapper = {
 
     }
 
+   ,extractMappingsFromMDM:function(){
+        var totalFields=[
+            "FunctionalClassID",
+            "PhysicalClassID",
+            "AttributeID",
+            "AttributePickListValueID",
+            "AttributeID2",
+            "AttributePickListValueID2",
+            "PickListValueGroupingID",
+            "UnitOfMeasureID",
+            "UnitOfMeasureDimensionID",
+            "DisciplineID",
+            "DocumentTypeID",
+            "DisciplineDocumentTypeID",
+            "FunctionalClassToPhysicalClassID",
+            "FunctionalClassToAttributeID",
+            "PhysicalClassToAttributeID",
+            "FunctionalClassToDisciplineDocumentTypeID",
+            "PhysicalClassToDisciplineDocumentTypeID"
+        ]
+
+        var json=JSON.parse(fs.readFileSync(filePath))
+        var data=json["tblMappingSource"];
+
+        var triples="";
+        data.forEach(function(item){
+            var sourceCode=item["SourceCode"]
+            if(sourceCode &&sourceCode.indexOf("CFIHOS")<0)
+return
+                totalFields.forEach(function(field){
+
+                    if(item[field] && item[field]!="") {
+                        var cfhosArrray = sourceCode.split("|")
+                        cfhosArrray.forEach(function (code,indexCode) {
+                            code=code.replace("CFIHOS-","")
+                            triples += "<http://data.total.com/resource/quantum/" + item[field] + ">  <http://data.total.com/resource/quantum/mappings#mappingSourceCode"+(indexCode+1)+"> <http://data.15926.org/cfihos/"+code+">.\n"
+                        })
+                    }
+
+
+                })
+        })
+
+        fs.writeFileSync(filePath.replace(".json","mappingCFIHOS.nt"),triples)
+
+    }
+
 
 }
 
@@ -235,7 +282,7 @@ var sourceConfig = {
     labelProcessor: null,
     filePath : "D:\\NLP\\ontologies\\quantum\\mappingQuantum_Part4.nt"
 }
-source
+
 
 var targetConfig = {
 
@@ -274,30 +321,9 @@ if(false){
 
 if( true){
 
+   var  filePath ="D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.json"
+ ontologiesMapper.extractMappingsFromMDM()
 
-    var map={
-         "CFIHOS unique id" :{
-             "p": "rdf:type",
-             "o": "<http://data.15926.org/lci/ClassOfPhysicalObject>"
-         },
-            "ISO15926 part4 unique number",
-        "ISO15926-4 Unique name",
-        "ISO15926-4 Synonym 1",
-        "ISO15926-4 Text definition": {
-            "literal": true,
-            "p": "<http://posccaesar.org/rdl/hasDefinition>",
-            "s": "ID"
-        },
-        "ISO15926-4 Source",
-        "ISO15926-4 Notes",
-        "ISO15926-4 superclass 1",
-        "ISO 15926-2 entity",
-        "created date",
-        "modified date",
-        "terminated date""
-
-
-    }
 
 
 

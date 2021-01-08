@@ -25,14 +25,15 @@ var OwlSchema = (function () {
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
             if (Config.sources[sourceLabel].schema) {
-                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schema]
+                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schema];
+                self.currentSourceSchema.source=sourceLabel
 
             } else {
                 self.currentSourceSchema = {
                     sparql_url: Config.sources[sourceLabel].sparql_server.url,
                     graphUri: Config.sources[sourceLabel].graphUri,
                 }
-
+                self.currentSourceSchema.source=sourceLabel
                 self.currentSourceSchema.classes = {}
                 self.currentSourceSchema.labelsMap = {}
                 self.schemasConfig[sourceLabel] = self.currentSourceSchema;

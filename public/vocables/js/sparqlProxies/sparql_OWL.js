@@ -67,16 +67,21 @@ var Sparql_OWL = (function () {
             if (self.graphUri && self.graphUri != "")
                 fromStr = " FROM <" + self.graphUri + ">"
 
+
+            var owlPredicate="subClassOf";
+            if(options.owlType)
+                owlPredicate=options.owlType
+
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * " + fromStr + " where {" +
-                "?child1   rdfs:subClassOf ?concept. " + strFilter +
+                "?child1   rdfs:"+owlPredicate+" ?concept. " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
 
 
             for (var i = 1; i < descendantsDepth; i++) {
 
-                query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." +
+                query += "OPTIONAL { ?child" + (i + 1) + " rdfs:"+owlPredicate+" ?child" + i + "." +
                     "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
             }
@@ -102,10 +107,10 @@ var Sparql_OWL = (function () {
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
                     " select  distinct * " + fromStr + "   WHERE { " +
-                    "  ?child1 rdfs:subClassOf ?concept.   " + strFilter +
+                    "  ?child1 rdfs:"+owlPredicate+" ?concept.   " + strFilter +
                     "   ?collection skos:member* ?acollection. " + Sparql_generic.Sparql_common.getUriFilter("collection", options.filterCollections) +
                     //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:subClassOf*) ?child1.  " +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:"+owlPredicate+"*) ?child1.  " +
                     "  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
@@ -180,6 +185,9 @@ var Sparql_OWL = (function () {
                     fromStr = " FROM <" + graphUri + "> "
                 })
             }
+            var owlPredicate="subClassOf";
+            if(options.owlType)
+                owlPredicate=options.owlType
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -192,14 +200,14 @@ var Sparql_OWL = (function () {
 
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  ?concept rdfs:subClassOf  ?broader" + i + "." +
+                    query += "  ?concept rdfs:"+owlPredicate+"  ?broader" + i + "." +
                        // "?broader" + i +" rdf:type owl:Class." +
                         "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
 
                 } else {
 
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "."
+                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:"+owlPredicate+" ?broader" + i + "."
                    "?broader" + i +" rdf:type owl:Class."
 
                     query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"

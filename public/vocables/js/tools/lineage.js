@@ -24,10 +24,13 @@ var Lineage_classes = (function () {
                 common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
                 $("#Lineage_Tabs").tabs({
                     activate: function (e, ui) {
+                        self.currentOwlType = "Class"
                         var divId = ui.newPanel.selector;
                         if (divId == "#LineageTypesTab") {
+                            self.currentOwlType = "Type"
                             Lineage_types.init()
                         } else if (divId == "#LineagePropertiesTab") {
+                            self.currentOwlType = "ObjectProperty"
                             Lineage_properties.init()
                         }
                     }
@@ -159,6 +162,9 @@ var Lineage_classes = (function () {
                 parentIds = expandedLevels[source][expandedLevels[source].length - 1];
             }
             MainController.UI.message("")
+            var options = {}
+            if (self.currentOwlType == "ObjectProperty")
+                options.owlType = "ObjectProperty"
             Sparql_generic.getNodeChildren(source, null, parentIds, 1, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
@@ -934,9 +940,9 @@ var Lineage_classes = (function () {
             }
         }
 
-        self.getSourceColor = function (source,palette) {
-            if(!palette)
-                palette="paletteIntense"
+        self.getSourceColor = function (source, palette) {
+            if (!palette)
+                palette = "paletteIntense"
             if (!sourceColors[source])
                 sourceColors[source] = common[palette][Object.keys(sourceColors).length]
             return sourceColors[source];
@@ -973,9 +979,11 @@ var Lineage_classes = (function () {
 
 Lineage_properties = (function () {
     var self = {}
-    sourceColors={}
+    sourceColors = {}
     self.propertyDefaultShape = "box";
-    self.classDefaultShape = "ellipse";
+    self.classDefaultShape = "dot";
+    self.subPropertyDefaultShape = "square";
+    self.defaultShapeSize = 8
     self.init = function () {
         self.graphInited = false
         self.currentSource = MainController.currentSource
@@ -1053,7 +1061,7 @@ Lineage_properties = (function () {
         }
     }
 
-    self.onTreeNodeClick=function(event,obj){
+    self.onTreeNodeClick = function (event, obj) {
         self.drawGraph(obj.node.id)
     }
 
@@ -1072,7 +1080,7 @@ Lineage_properties = (function () {
                 var existingNodes = {}
                 if (self.graphInited)
                     existingNodes = visjsGraph.getExistingIdsMap()
-                var color = Lineage_classes.getSourceColor(self.currentSource,"palette")
+                var color = Lineage_classes.getSourceColor(self.currentSource, "palette")
 
                 result.forEach(function (item) {
 
@@ -1082,13 +1090,14 @@ Lineage_properties = (function () {
                         visjsData.nodes.push({
                             id: item.property.value,
                             label: item.propertyLabel.value,
-                            data:  {
+                            data: {
                                 id: item.property.value,
                                 label: item.propertyLabel.value,
                                 subProperties: [],
-                                source:self.currentSource
+                                source: self.currentSource
 
                             },
+                            size: self.defaultShapeSize,
                             color: color,
                             shape: self.propertyDefaultShape
                         })
@@ -1107,14 +1116,22 @@ Lineage_properties = (function () {
                             visjsData.nodes.push({
                                 id: item.range.value,
                                 label: item.rangeLabel.value,
-                                data:   {
+                                data: {
                                     id: item.range.value,
                                     label: item.rangeLabel.value,
-                                    source:self.currentSource
+                                    source: self.currentSource
 
                                 },
+                                size: self.defaultShapeSize,
                                 color: color,
-                                shape: shape
+                                shape: shape,
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "arrow",
+                                        scaleFactor: 0.5
+                                    },
+                                },
                             })
                         }
                         var edgeId = item.property.value + "_" + item.range.value
@@ -1143,13 +1160,14 @@ Lineage_properties = (function () {
                             visjsData.nodes.push({
                                 id: item.domain.value,
                                 label: item.domain.value,
-                                data:   {
+                                data: {
                                     id: item.domain.value,
                                     label: item.domain.value,
-                                    source:self.currentSource
+                                    source: self.currentSource
 
                                 },
                                 color: color,
+                                size: self.defaultShapeSize,
                                 shape: shape
                             })
                         }
@@ -1158,9 +1176,16 @@ Lineage_properties = (function () {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: item.domain.value,
+                                from: item.property.value,
                                 to: item.domain.value,
-                                label: "domain"
+                                label: "domain",
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "arrow",
+                                        scaleFactor: 0.5
+                                    },
+                                },
                             })
                         }
 
@@ -1179,13 +1204,14 @@ Lineage_properties = (function () {
                             visjsData.nodes.push({
                                 id: item.range.value,
                                 label: item.rangeLabel.value,
-                                data:   {
+                                data: {
                                     id: item.range.value,
                                     label: item.rangeLabel.value,
-                                    source:self.currentSource
+                                    source: self.currentSource
 
                                 },
                                 color: color,
+                                size: self.defaultShapeSize,
                                 shape: shape
                             })
                         }
@@ -1196,60 +1222,76 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.range.value,
-                                label: "range"
-                            })
-                        }
-
-                    }
-
-
-
-                })
-
-                result.forEach(function (item) {
-                    if (item.subProperty) {
-                        if (!existingNodes[item.subProperty.value]) {
-
-                            existingNodes[item.subProperty.value] = 1
-
-                            visjsData.nodes.push({
-                                id: item.subProperty.value,
-                                label: item.subPropertyLabel.value,
-                                data: {
-                                    id: item.subProperty.value,
-                                    label: item.subProperty.value,
-                                    source: self.currentSource
-
+                                label: "range",
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "arrow",
+                                        scaleFactor: 0.5
+                                    },
                                 },
-                                color: color,
-                                shape: "star"
                             })
                         }
-                        var edgeId = item.property.value + "_" + item.subProperty.value
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.property.value,
-                                to: item.subProperty.value,
-                                label: "subProperty"
-                            })
-                        }
+
                     }
+
+
                 })
+                if (false) {
+                    result.forEach(function (item) {
+                        if (item.subProperty) {
+                            if (!existingNodes[item.subProperty.value]) {
+
+                                existingNodes[item.subProperty.value] = 1
+
+                                visjsData.nodes.push({
+                                    id: item.subProperty.value,
+                                    label: item.subPropertyLabel.value,
+                                    data: {
+                                        id: item.subProperty.value,
+                                        label: item.subProperty.value,
+                                        source: self.currentSource
+
+                                    },
+                                    color: color,
+                                    size: self.defaultShapeSize,
+                                    shape: self.subPropertyDefaultShape
+                                })
+                            }
+                            var edgeId = item.property.value + "_" + item.subProperty.value
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.property.value,
+                                    to: item.subProperty.value,
+                                    dashes: true,
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "arrow",
+                                            scaleFactor: 0.5
+                                        },
+                                    },
+                                    //label: "subProperty"
+                                })
+                            }
+                        }
+                    })
+                }
 
                 if (!self.graphInited) {
                     var options = {
-                      onclickFn: Lineage_properties.graphActions.onNodeClick,
+                        onclickFn: Lineage_properties.graphActions.onNodeClick,
                         onRightClickFn: Lineage_properties.graphActions.showGraphPopupMenu,
                     }
-                    visjsGraph.draw("graphDiv", visjsData,options)
+                    visjsGraph.draw("graphDiv", visjsData, options)
                 } else {
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
                 }
 
-                self.graphInited
+                self.graphInited=true
                 /*  var html = JSON.stringify(self.properties[propertyId], null, 2)
                   $("#LineageProperties_propertyInfosDiv").html(html);*/
             })
@@ -1265,7 +1307,12 @@ Lineage_properties = (function () {
 
         },
         onNodeClick: function (node, point, event) {
-            self.currentGraphNode=node
+            if (event && event.altKey) {
+            }
+            self.currentGraphNode = node
+        },
+        expandNode: function (node, point, event) {
+            self.drawGraph(node.id)
         },
         showNodeInfos: function () {
             MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
@@ -1276,7 +1323,8 @@ Lineage_properties = (function () {
         if (!node)
             return;
 
-        var html =   "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.showNodeInfos();\">show node infos</span>"
+        var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.showNodeInfos();\">show node infos</span>"+
+        "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.expandNode();\">expand node</span>"
 
         $("#graphPopupDiv").html(html);
 

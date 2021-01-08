@@ -384,16 +384,18 @@
     "ChangeRequestNumber",
     "ItemStatus"
   ],
-  "tblPhysicalClassToAttribute": [
+  "tblPhysicalClassToAttribute": {
     "ID",
-    "PhysicalClassID",
+    "PhysicalClassID": {
+      "p": "http://standards.iso.org/iso/15926/part14/physicalQuantityOf"
+    },
     "AttributeID",
     "DataProvider",
     "Justification",
     "LifeCycleDelivery",
     "ChangeRequestNumber",
     "ItemStatus"
-  ],
+  },
   "tblDisciplineDocumentType": [
     "ID",
     "DisciplineID",

@@ -3,8 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/xlsxQuantumMappings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" afterDir="false" />
@@ -127,7 +128,7 @@
       <workItem from="1608188517427" duration="50134000" />
       <workItem from="1608448255113" duration="235613000" />
       <workItem from="1609850999084" duration="38000" />
-      <workItem from="1609851061196" duration="53089000" />
+      <workItem from="1609851061196" duration="63824000" />
     </task>
     <servers />
   </component>
@@ -192,7 +193,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js</url>
-          <line>45</line>
+          <line>46</line>
           <option name="timeStamp" value="172" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -217,7 +218,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage.js</url>
-          <line>183</line>
+          <line>189</line>
           <option name="timeStamp" value="244" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">

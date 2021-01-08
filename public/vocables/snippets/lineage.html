@@ -30,60 +30,62 @@
 
 </style>
 
-<div id="Lineage_Tabs" style="width:360px;height:80%">
 
-    <ul>
-        <li><a href="#Lineage_ClassesTab">Classes</a></li>
-        <li><a href="#LineageTypesTab">Types</a></li>
-        <li><a href="#LineagePropertiesTab">Properties</a></li>
-    </ul>
+<div class="ThesaurusMatcher_paramsDiv">
+    <button onclick="Lineage_classes.drawTopConcepts()">reset</button>
+    <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
+
+    </div>
+</div>
+<div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
+
+    <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
+    <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>
+    <button class="lineage_button" onclick="Lineage_classes.addParentsToGraph()">parents</button>
+    <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
+
+</div>
+<div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
+    <B>similars in source </B><select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>
+</div>
+    <div id="Lineage_Tabs" style="width:360px;height:80%">
+
+        <ul>
+            <li><a href="#Lineage_ClassesTab">Classes</a></li>
+            <li><a href="#LineageTypesTab">Types</a></li>
+            <li><a href="#LineagePropertiesTab">Properties</a></li>
+        </ul>
 
 
-    <div id="Lineage_ClassesTab" style="display: flex;flex-direction: column">
+        <div id="Lineage_ClassesTab" style="display: flex;flex-direction: column">
 
-        <div class="ThesaurusMatcher_paramsDiv">
-            <button onclick="Lineage_classes.drawTopConcepts()">reset</button>
-            <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
 
-            </div>
-        </div>
-        <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
-
-            <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
-            <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>
-            <button class="lineage_button" onclick="Lineage_classes.addParentsToGraph()">parents</button>
-            <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
-
-        </div>
-        <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
-            <B>similars in source </B><select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>
             <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>
 
         </div>
 
 
         <!--   <button onclick="Lineage_classes.removesimilars()">drawAllsimilars</button>-->
+
+
+        <div id="LineageTypesTab" style="width:100%;height:800px">
+            <button onclick='Lineage_types.drawGraph()'>draw</button>
+            <select id="LineageTypes_typesSelect" onchange="Lineage_types.drawGraph($(this).val())"> </select>
+
+        </div>
+
+        <div id="LineagePropertiesTab">
+            <button onclick='Lineage_properties.drawGraph()'>draw</button>
+            <div class="jstree" id="Lineage_propertiesTree"></div>
+            <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
+
+                <div id="LineageProperties_propertyInfosDiv"></div>-->
+
+        </div>
     </div>
-
-
-    <div id="LineageTypesTab" style="width:100%;height:800px">
-        <button onclick='Lineage_types.drawGraph()'>draw</button>
-        <select id="LineageTypes_typesSelect" onchange="Lineage_types.drawGraph($(this).val())"> </select>
-
-    </div>
-
-    <div id="LineagePropertiesTab">
-        <button onclick='Lineage_properties.drawGraph()'>draw</button>
-        <div class="jstree" id="Lineage_propertiesTree"> </div>
-    <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
-
-        <div id="LineageProperties_propertyInfosDiv"></div>-->
-
-    </div>
-</div>
     <hr>
     <input id='GenericTools_searchTermInput'>
     <button onclick='ThesaurusBrowser.searchTerm(Lineage_classes.currentSource)'>Search</button>
-    <input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match
+    <input type='checkbox' checked='checked' id='GenericTools_exactMatchSearchCBX'>Exact Match
 
 </div>

@@ -20,13 +20,12 @@ var visjsGraph = (function () {
     self.context = {};
     self.currentScale;
     self.simulationOn;
-    self.globalOptions={nodes:{},edges:{}};
+    self.globalOptions = {nodes: {}, edges: {}};
 
 
-
-    self.defaultTextSize=14;
-    self.defaultNodeSize=7;
-    self.showNodesLabelMinScale=0.5
+    self.defaultTextSize = 14;
+    self.defaultNodeSize = 7;
+    self.showNodesLabelMinScale = 0.5
 
     self.simulationOn = false;
 
@@ -64,7 +63,7 @@ var visjsGraph = (function () {
         if (_options.layoutHierarchical) {
 
             options.layout = {
-                hierarchical:_options.layoutHierarchical
+                hierarchical: _options.layoutHierarchical
             }
 
         }
@@ -79,8 +78,8 @@ var visjsGraph = (function () {
         if (_options.edges) {
             options.edges = _options.edges
         }
-        if(_options.physics){
-            options.physics=_options.physics
+        if (_options.physics) {
+            options.physics = _options.physics
         }
 
         self.globalOptions = options
@@ -196,17 +195,32 @@ var visjsGraph = (function () {
 
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
+                    var nodeId = params.nodes[0]
+                 //   var nodes = self.data.nodes.getIds();
+                    var newNodes = [];
+                    var fixed=true;
+                    if(params.event.srcEvent.altKey)
+                        fixed=false;
+                    newNodes.push({id: nodeId, fixed: fixed})
+                 /*   nodes.forEach(function (id) {
+                        var fixed = true;
+                        if (id == nodeId)
+                            fixed = true;
+                        newNodes.push({id: id, fixed: fixed})
 
-                    var nodeId = params.nodes[0];
-                    var node = self.data.nodes.get(nodeId);
-                    node._graphPosition = params.pointer.DOM;
-                    var point = params.pointer.DOM;
-                    var newNode = {id: nodeId}
-                    newNode.fixed = {x: true, y: true}
-                    newNode.x = point.x;
-                    newNode.y = point.y;
-                    visjsGraph.network.stopSimulation();
-                    visjsGraph.simulationOn = false;
+                    })*/
+                    visjsGraph.data.nodes.update(newNodes)
+
+                    /*      var nodeId = params.nodes[0];
+                          var node = self.data.nodes.get(nodeId);
+                          node._graphPosition = params.pointer.DOM;
+                          var point = params.pointer.DOM;
+                          var newNode = {id: nodeId}
+                          newNode.fixed = {x: true, y: true}
+                          newNode.x = point.x;
+                          newNode.y = point.y;
+                          visjsGraph.network.stopSimulation();
+                          visjsGraph.simulationOn = false;*/
                     //   visjsGraph.data.nodes.update(newNode);
 
                 }
@@ -268,7 +282,7 @@ var visjsGraph = (function () {
 
 
     self.onScaleChange = function () {
-       // return;
+        // return;
         var scale = self.network.getScale();
         if (!self.currentScale || Math.abs(scale - self.currentScale) > .01) {
 

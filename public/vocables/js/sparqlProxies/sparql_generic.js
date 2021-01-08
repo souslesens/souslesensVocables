@@ -522,6 +522,8 @@ var Sparql_generic = (function () {
                 _fields=[_fields];
             _fields.forEach(function(_field) {
                 bindings.forEach(function (item) {
+                    if(!item["range"])
+                        var x=3
 
                     for (var i = 0; i < 20; i++) {
                         if(i==5)
@@ -533,7 +535,7 @@ var Sparql_generic = (function () {
                         if (!item[field]) {
                             continue;
                         }
-                        if (!item[field + "Type"]) {
+                        if (!options.noType && !item[field + "Type"]) {
                             if (options.type)
                                 item[field + "Type"] = {value: options.type}
                             else
@@ -541,6 +543,7 @@ var Sparql_generic = (function () {
                         }
                         var id = item[field].value
                         if (!item[field + "Label"]) {
+
                             var p = id.lastIndexOf("#")
                             if (p > -1)
                                 item[field + "Label"] = {value: id.substring(p + 1)}

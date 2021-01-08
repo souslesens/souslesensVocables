@@ -83,29 +83,33 @@ var Sparql_schema = (function () {
 
     }
 
-    self.getPropertiesRangeAndDomain = function (schema, propertyIds, callback) {
+    self.getPropertiesRangeAndDomain = function (schema, propertyIds,options, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
 
+        if(!options)
+            options={}
         var filterStr = Sparql_common.setFilter("property", propertyIds)
+        if(options.filter)
+            filterStr+=options.filter
+
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            " select distinct *  " + fromStr + "  WHERE  {" +
-            "?property rdfs:range ?range." +
-            "OPTIONAL{?property rdfs:label ?propertyLabel.}" +
-            " OPTIONAL{?range rdfs:label ?rangeLabel.} " +
+            " select distinct *  " + fromStr + " WHERE  {" +
+            "    ?property rdf:type owl:ObjectProperty OPTIONAL" +
+            "{?property rdfs:label ?propertyLabel.}" +
             filterStr +
-            "?property rdfs:domain ?domain." +
-            " OPTIONAL{?domain rdfs:label ?domainLabel.} " +
-            "} limit 10000"
+            "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
+            "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
+            "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } limit 1000"
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
             if (err) {
                 return callback(err)
             }
-            result.results.bindings=Sparql_generic.setBindingsOptionalProperties( result.results.bindings,["property","range","domain"])
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "range", "domain", "subProperty"],{noType:1})
             return callback(null, result.results.bindings)
 
         })
@@ -181,8 +185,8 @@ var Sparql_schema = (function () {
     }
 
     self.getClassPropertiesAndRanges = function (schema, classIds, callback) {
-if(!Array.isArray(classIds))
-    classIds=[classIds]
+        if (!Array.isArray(classIds))
+            classIds = [classIds]
         var slices = common.sliceArray(classIds, slicesSize);
         var bulkResult = []
         async.eachSeries(slices, function (classIds, callbackEach) {
@@ -247,7 +251,7 @@ if(!Array.isArray(classIds))
             self.executeQuery(schema, query, function (err, result) {
                 if (err)
                     callbackEach(err);
-                var bindings = Sparql_generic.setBindingsOptionalProperties(result, ["property","range"], {type: "Property"})
+                var bindings = Sparql_generic.setBindingsOptionalProperties(result, ["property", "range"], {type: "Property"})
 
 
                 bulkResult = bulkResult.concat(bindings)
@@ -260,24 +264,24 @@ if(!Array.isArray(classIds))
 
     }
 
-    self.getAllTypes=function(sourceLabel,callback){
-        var graphUri=Config.sources[sourceLabel].graphUri
+    self.getAllTypes = function (sourceLabel, callback) {
+        var graphUri = Config.sources[sourceLabel].graphUri
         var fromStr = ""
         if (graphUri && graphUri != "")
             fromStr = " FROM <" + graphUri + ">"
 
-        var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+        var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "SELECT ?type ?typeLabel (count(distinct ?s) as ?count) "+fromStr+" WHERE {" +
+            "SELECT ?type ?typeLabel (count(distinct ?s) as ?count) " + fromStr + " WHERE {" +
             "" +
             " ?s rdf:type ?type " +
             "optional{?type rdfs:label ?typeLabel.} " +
             "} group by ?type ?typeLabel order by desc (?count)"
 
 
-        var server=Config.sources[sourceLabel].sparql_server
+        var server = Config.sources[sourceLabel].sparql_server
         var url = server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
             if (err) {
                 return callback(err)
             }

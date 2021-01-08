@@ -66,20 +66,21 @@
     </div>
 
 
-    <div id="LineageTypesTab">
-
+    <div id="LineageTypesTab" style="width:100%;height:800px">
+        <button onclick='Lineage_types.drawGraph()'>draw</button>
         <select id="LineageTypes_typesSelect" onchange="Lineage_types.drawGraph($(this).val())"> </select>
 
     </div>
 
     <div id="LineagePropertiesTab">
-       range and domain <select id="LineageProperties_properties_RD_Select" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>
-        range only <select id="LineageProperties_properties_R_Select" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>
-     domain only <select id="LineageProperties_properties_D_Select" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>
-        orphans <select id="LineageProperties_properties_O_Select" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>
-        <div id="LineageProperties_propertyInfosDiv"></div>
+        <button onclick='Lineage_properties.drawGraph()'>draw</button>
+        <div class="jstree" id="Lineage_propertiesTree"> </div>
+    <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
+
+        <div id="LineageProperties_propertyInfosDiv"></div>-->
 
     </div>
+</div>
     <hr>
     <input id='GenericTools_searchTermInput'>
     <button onclick='ThesaurusBrowser.searchTerm(Lineage_classes.currentSource)'>Search</button>

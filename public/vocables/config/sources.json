@@ -49,7 +49,7 @@
     },
     "color": "#9edae5"
   },
-  "Oil&Gas-Upstream": {
+  "Oil-Gas-Upstream": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"

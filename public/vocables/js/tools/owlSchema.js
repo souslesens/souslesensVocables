@@ -111,7 +111,7 @@ var OwlSchema = (function () {
                 },
                 function (callbackSeries) {
                     var properties = Object.keys(self.currentSourceSchema.classes[classId].objectProperties)
-                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, function (err, result) {
+                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, null,function (err, result) {
                         if (err)
                             return callbackSeries(err)
                         self.setLabelsFromQueryResult(result)

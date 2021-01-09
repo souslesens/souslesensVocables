@@ -50,6 +50,8 @@ var Lineage_classes = (function () {
         }
 
         self.drawTopConcepts = function (source) {
+            if (source == "QUANTUM_MODEL")
+                self.QuantumModelMapping = true
             MainController.UI.message("")
             visjsGraph.clearGraph()
             if (!source)
@@ -159,7 +161,10 @@ var Lineage_classes = (function () {
             if (nodeIds) {
                 parentIds = nodeIds
             } else {
-                parentIds = expandedLevels[source][expandedLevels[source].length - 1];
+                var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
+                parentIds = sourcesIdsMap[source]
+                if (!parentIds  || parentIds.length == 0)
+                    parentIds = expandedLevels[source][expandedLevels[source].length - 1];
             }
             MainController.UI.message("")
             var options = {}
@@ -364,7 +369,7 @@ var Lineage_classes = (function () {
                         })
 
                         if (!expandedLevels[source]) {
-                            expandedLevels[source] = []
+
                             self.addSourceToList(source)
 
 
@@ -506,96 +511,105 @@ var Lineage_classes = (function () {
 
         self.addParentsToGraph = function (nodeIds) {
 
-            var source = self.currentSource;
+            //    var source = self.currentSource;
 
-            var chilIds;
-            if (nodeIds) {
-                chilIds = nodeIds
-            } else {
-                chilIds = expandedLevels[source][0];
-            }
-            MainController.UI.message("")
-            Sparql_generic.getNodeParents(source, null, chilIds, 1, {exactMatch: 1}, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err);
-                var map = [];
-                var ids = [];
+            MainController.UI.message("");
 
-                if (result.length == 0) {
+            var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
+            self.QuantumModelMapping = false;
+            var sources = Object.keys(sourcesIdsMap)
+
+            async.eachSeries(sources, function (source, callbackEach) {
+                self.addSourceToList(source)
+                Sparql_generic.getNodeParents(source, null, sourcesIdsMap[source], 1, {exactMatch: 1}, function (err, result) {
+                    if (err)
+                        return callbackEach(err)
+                    var map = [];
+                    var ids = [];
+
+                    if (result.length == 0) {
 
 
-                    /*     var existingNodes=visjsGraph.getExistingIdsMap()
-                         var visjsData={nodes:[],edges:[]}
+                        /*     var existingNodes=visjsGraph.getExistingIdsMap()
+                             var visjsData={nodes:[],edges:[]}
 
-                         if(!existingNodes[source]) {
-                             existingNodes[source]=1
+                             if(!existingNodes[source]) {
+                                 existingNodes[source]=1
 
-                             var color = self.getSourceColor(source)
-                             visjsData.nodes.push({
-                                 id: source,
-                                 label: source,
-                                 shape: "box",
-                                 color: color,
-                                 size: defaultShapeSize
-                             })
-                         }
-                         chilIds.forEach(function(childId) {
-                             var edgeId = childId + "_" + source;
-                             if (!existingNodes[edgeId]) {
-                                 existingNodes[edgeId] = 1
-                                 visjsData.edges.push({
-                                     id: edgeId,
-                                     from: childId,
-                                     to: source,
-
-                                     data: {source: MainController.currentSource},
-
-                                     arrows: {
-                                         from: {
-                                             enabled: true,
-                                             type: "arrow",
-                                             scaleFactor: 0.5
-                                         },
-                                     },
+                                 var color = self.getSourceColor(source)
+                                 visjsData.nodes.push({
+                                     id: source,
+                                     label: source,
+                                     shape: "box",
+                                     color: color,
+                                     size: defaultShapeSize
                                  })
                              }
-                         })
+                             chilIds.forEach(function(childId) {
+                                 var edgeId = childId + "_" + source;
+                                 if (!existingNodes[edgeId]) {
+                                     existingNodes[edgeId] = 1
+                                     visjsData.edges.push({
+                                         id: edgeId,
+                                         from: childId,
+                                         to: source,
+
+                                         data: {source: MainController.currentSource},
+
+                                         arrows: {
+                                             from: {
+                                                 enabled: true,
+                                                 type: "arrow",
+                                                 scaleFactor: 0.5
+                                             },
+                                         },
+                                     })
+                                 }
+                             })
 
 
-                         visjsGraph.data.nodes.add(visjsData.nodes)
-                         visjsGraph.data.edges.add(visjsData.edges)*/
-                    $("#waitImg").css("display", "none");
-                    return MainController.UI.message("No data found")
+                             visjsGraph.data.nodes.add(visjsData.nodes)
+                             visjsGraph.data.edges.add(visjsData.edges)*/
+                        $("#waitImg").css("display", "none");
+                        return MainController.UI.message("No data found")
 
-                }
+                    }
 
-                var color = self.getSourceColor(source)
-                var visjsData = GraphController.toVisjsData(null, result, null, "concept", "broader1", {
-                    from: {
-                        shape: defaultShape,
-                        size: defaultShapeSize,
-                        color: color
-                    },
-                    to: {
-                        shape: defaultShape,
-                        size: defaultShapeSize,
-                        color: color
-                    },
-                    data: {source: MainController.currentSource},
-                    arrows: {
+                    var color = self.getSourceColor(source)
+                    var visjsData = GraphController.toVisjsData(null, result, null, "concept", "broader1", {
                         from: {
-                            enabled: true,
-                            type: "arrow",
-                            scaleFactor: 0.5
+                            shape: defaultShape,
+                            size: defaultShapeSize,
+                            color: color
                         },
-                    },
+                        to: {
+                            shape: defaultShape,
+                            size: defaultShapeSize,
+                            color: color
+                        },
+                        data: {source: source},
+                        arrows: {
+                            from: {
+                                enabled: true,
+                                type: "arrow",
+                                scaleFactor: 0.5
+                            },
+                        },
+
+                    })
+
+
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
 
                 })
+                callbackEach();
+            }, function (err) {
+                $("#waitImg").css("display", "none");
+                if (err)
+                    return MainController.UI.message("No data found")
 
-
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-
+                return MainController.UI.message("")
             })
 
         }
@@ -906,6 +920,42 @@ var Lineage_classes = (function () {
 
         }
 
+        self.getGraphSourcesIdsMap = function (nodeIds) {
+            var nodes = visjsGraph.data.nodes.get();
+            var sourcesIdsMap = {}
+            nodes.forEach(function (node) {
+                if (!nodeIds || nodeIds.indexOf(node.id)) {
+                    if (self.QuantumModelMapping) {
+
+                        var source = common.quantumModelmappingSources[node.id]
+                        if (!source)
+                            return;
+                        if (!sourcesIdsMap[source]) {
+                            sourcesIdsMap[source] = []
+                        }
+                        sourcesIdsMap[source].push(node.id)
+
+                    } else if (node.data && node.data.source) {
+                        var source = node.data.source
+                        if (!source)
+                            return;
+                        if (!sourcesIdsMap[source]) {
+                            sourcesIdsMap[source] = []
+                        }
+                        sourcesIdsMap[source].push(node.id)
+                    } else {
+
+                        ;//  console.log ("no source ")
+                    }
+
+                }
+
+            })
+
+            return sourcesIdsMap;
+
+        }
+
 
         self.graphActions = {
 
@@ -950,12 +1000,16 @@ var Lineage_classes = (function () {
 
 
         self.addSourceToList = function (source) {
+
             var id = "Lineage_source_" + encodeURIComponent(source)
+            if (document.getElementById(id) !== null)
+                return;
             var html = "<div  id='" + id + "' style='color: " + self.getSourceColor(source) + "'" +
                 " class='Lineage_sourceLabelDiv' " +
                 "onclick='Lineage_classes.setCurrentSource(\"" + encodeURIComponent(source) + "\")'>" + source + "</div>"
             $("#lineage_drawnSources").append(html)
             self.setCurrentSource(encodeURIComponent(source))
+            expandedLevels[source] = []
 
         }
         self.setCurrentSource = function (sourceId) {
@@ -1291,7 +1345,7 @@ Lineage_properties = (function () {
                     visjsGraph.data.edges.add(visjsData.edges)
                 }
 
-                self.graphInited=true
+                self.graphInited = true
                 /*  var html = JSON.stringify(self.properties[propertyId], null, 2)
                   $("#LineageProperties_propertyInfosDiv").html(html);*/
             })
@@ -1323,8 +1377,8 @@ Lineage_properties = (function () {
         if (!node)
             return;
 
-        var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.showNodeInfos();\">show node infos</span>"+
-        "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.expandNode();\">expand node</span>"
+        var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.showNodeInfos();\">show node infos</span>" +
+            "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.expandNode();\">expand node</span>"
 
         $("#graphPopupDiv").html(html);
 

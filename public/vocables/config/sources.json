@@ -389,5 +389,19 @@
     "schemaType": "OWLXXXX",
     "schema": null,
     "color": "#bcbd22"
+  },
+  "QUANTUM_MODEL": {
+    "editable": true,
+    "graphUri": "http://data.total.com/resource/quantum/model/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.total.com/resource/quantum/model/>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+
   }
+
 }

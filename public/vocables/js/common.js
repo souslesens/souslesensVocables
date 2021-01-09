@@ -373,6 +373,38 @@ var common = (function () {
             '#B3B005',
         ]
 
+        self.quantumModelmappingSources={
+            'http://standards.iso.org/iso/15926/part14/PhysicalQuantity': 'ISO_15926-part-14',
+            'http://data.posccaesar.org/dm/ClassOfQuantity': 'ISO_15926-PCA',
+            'http://w3id.org/readi/rdl/D101001516': 'CFIHOS_READI',
+            'http://data.posccaesar.org/rdl/RDS2216440288': 'ISO_15926-PCA',
+            'http://data.15926.org/rdl/RDS2216440288': 'CFIHOS-ISO',
+            'http://data.posccaesar.org/rdl/Discipline': 'ISO_15926-PCA',
+            'http://w3id.org/readi/z018-rdl/Discipline': 'CFIHOS_READI',
+            'http://data.posccaesar.org/rdl/RDS1138994': 'ISO_15926-PCA',
+            'http://w3id.org/readi/rdl/D101001188': 'CFIHOS_READI',
+            'http://data.15926.org/rdl/RDS1138994': 'CFIHOS-ISO',
+            'http://standards.iso.org/iso/15926/part14/FunctionalObject': 'ISO_15926-part-14',
+            'http://w3id.org/readi/rdl/D101001516': 'CFIHOS_READI',
+            'http://data.posccaesar.org/rdl/RDS11984375': 'ISO_15926-PCA',
+            'http://data.15926.org/rdl/RDS11984375': 'CFIHOS-ISO',
+            'http://standards.iso.org/iso/15926/part14/PhysicalObject': 'ISO_15926-part-14',
+            'http://w3id.org/readi/rdl/CFIHOS-60001285': 'CFIHOS_READI',
+            'http://data.15926.org/cfihos/60001285': 'CFIHOS-ISO',
+            'http://standards.iso.org/iso/15926/part14/UnitOfMeasure': 'ISO_15926-part-14',
+            'http://data.posccaesar.org/dm/PhysicalQuantity': 'ISO_15926-PCA',
+            'http://w3id.org/readi/rdl/CFIHOS-50000112': 'CFIHOS_READI',
+            'http://data.posccaesar.org/dm/DocumentType': 'ISO_15926-PCA',
+            'http://w3id.org/readi/rdl/D101001447': 'CFIHOS_READI',
+            'http://data.posccaesar.org/rdl/RDS332864': 'ISO_15926-PCA',
+            'http://w3id.org/readi/rdl/CFIHOS-70000406': 'CFIHOS_READI',
+            'http://standards.iso.org/iso/15926/part14#purchase_order': 'ISO_15926-part-4',
+            'http://standards.iso.org/iso/15926/part14#document': 'ISO_15926-part-4',
+            'http://w3id.org/readi/rdl/D101001535': 'CFIHOS_READI',
+            'http://data.15926.org/cfihos/Picklist': 'CFIHOS-ISO',
+
+        }
+
 
         return self;
 

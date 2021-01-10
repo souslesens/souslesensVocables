@@ -132,8 +132,12 @@ var common = (function () {
 
                     if (options.selectNodeFn)
                         options.selectNodeFn(evt, obj);
-                }).on('open_node.jstree', function () {
+                }).on('open_node.jstree', function (evt,obj) {
                 self.setTreeAppearance()
+                if (options.onOpenNodeFn) {
+                    options.onOpenNodeFn(evt, obj);
+                }
+
             }).on("check_node.jstree", function (evt, obj) {
 
                 if (options.onCheckNodeFn) {

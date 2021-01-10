@@ -60,8 +60,9 @@ var Lineage_classes = (function () {
                 source = MainController.currentSource
             self.currentSource = source
             expandedLevels = {}
-            self.registerSource(source)
             $("#lineage_drawnSources").html("");
+            self.registerSource(source)
+
 
 
             $("#Lineage_toSource").val("")

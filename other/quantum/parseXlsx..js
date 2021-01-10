@@ -26,8 +26,9 @@ var parseXlsx = {
 
             },
             function (callbackSeries) {
-
+                allData={}
                 for (var sheetKey in sheets) {
+                    console.log("processing "+sheetKey)
                     var worksheet = sheets[sheetKey];
                     var dataArray = [];
 
@@ -96,16 +97,22 @@ var parseXlsx = {
                         allData[sheetKey] = dataArray
                     allModel[sheetKey] = header
 
+                    console.log("saving "+filePath.replace("xlsx", "json"))
+                    var str = JSON.stringify(allData[sheetKey], null, 2)
+                    fs.writeFileSync(filePath.replace("xlsx", "_"+sheetKey+".json"), str)
+                    console.log("done")
+
                 }
-                callbackSeries()
+                callbackSeries();
 
             }
-        ], function (err) {
+        ], function (err) {    console.log("done")
             var x = allData;
-            var str = JSON.stringify(allData, null, 2)
-            fs.writeFileSync(filePath.replace("xlsx", "json"), str)
+
+            console.log("saving "+filePath.replace("xlsx", "model.json"))
             var str = JSON.stringify(allModel, null, 2)
             fs.writeFileSync(filePath.replace("xlsx", "model.json"), str)
+            console.log("done")
 
         })
 
@@ -229,8 +236,110 @@ if (false) {
     parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options)
 }
 
-if (true) {
+if (false) {
     var options = {firstSheetNumber: 1, firstLineNumber: 1}
-    parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx");
+ parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx",options);
+ //   parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\test.xlsx",options);
 }
+
+if(true){
+
+    var groups={
+        mainObjects:['tblAttribute',
+            'tblCompany',
+            'tblDiscipline',
+            'tblDocument',
+            'tblDocumentType',
+            'tblFunctionalClass',
+            'tblModel',
+            'tblPhysicalClass',
+            'tblPickListValueGrouping',
+            'tblPurchaseOrder',
+            'tblTag',
+            'tblTagAttribute',
+            'tblUnitOfMeasure',
+        ],
+        objects:['tblAttributePickListValue',
+            'tblDocumentAttribute',
+            'tblModelAttribute',
+            'tblModelItem',
+            'tblModelItemAttribute',
+            'tblTagFormat',
+            'tblTagFormatGroup',
+            'tblTagFormatPermittedValue',
+            'tblUnitOfMeasureDimension',
+        ],
+        relations:['tblDisciplineDocumentType',
+            'tblDocumentToDocument',
+            'tblFunctionalClassToAttribute',
+            'tblFunctionalClassToDiscDocType',
+            'tblFunctionalClToPhysicalCl',
+            'tblModelItemToDocument',
+            'tblModelToDocument',
+            'tblPhysicalClassToAttribute',
+            'tblPhysicalClassToDiscDocType',
+            'tblTagToAlias',
+            'tblTagToDocument',
+            'tblTagToModel',
+            'tblTagToModelItem',
+            'tblTagToTag',
+        ]
+        ,util:[
+            //'tblADLChangeManagement',
+            'tblBreakdownAttribute',
+            'tblBreakdownToBreakdown',
+            'tblBreakdownToDocument',
+            'tblCodification',
+            'tblComments',
+            'tblEntities',
+          //  'tblMappingSource',
+          //  'tblMappingSourceDetails',
+            'tblMappingSourceOrigin',
+            'tblRDLChangeManagement',
+            'tblRequirementOrigin',
+            'tblRLChangeManagement',
+            'tblSource',
+            'tblSSLChangeManagement',
+            'tblTagToTagToTypicalAssemblyReq',
+            'tblTypicalAssemblyPattern',
+            'tblTypicalAssemblyRequirement',
+
+
+        ]
+
+
+    }
+if( true){
+    var model="D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json"
+    var data=JSON.parse(fs.readFileSync(model))
+    var obj={}
+    for (var key in groups){
+        obj[key]={}
+        groups[key].forEach(function(fileName) {
+            obj[key][fileName]=data[fileName]
+        })
+        }
+    var file=model.replace(".json","2.json")
+    fs.writeFileSync(file,JSON.stringify(obj,null,2))
+}
+
+
+    if( false){
+    for (var key in groups){
+
+        var obj={}
+
+        groups[key].forEach(function(fileName){
+            var file="D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._"+fileName+".json"
+            if(!fs.existsSync(file)){
+               return  console.log(file)
+            }
+            var data=JSON.parse(fs.readFileSync(file))
+            obj[fileName]=(data);
+
+        })
+        var file="D:\\NLP\\ontologies\\quantum\\__"+key+".json"
+        fs.writeFileSync(file,JSON.stringify(obj,null,2))
+    }
+}}
 

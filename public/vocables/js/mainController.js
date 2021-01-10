@@ -79,6 +79,13 @@ var MainController = (function () {
                         MainController.UI.onSourceSelect()
                     }
 
+                },
+                onOpenNodeFn: function (evt, obj) {
+                    if (obj.node.parent == "#") {//first level group by schema type
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
+                            MainController.currentSchemaType = obj.node.id;
+                        }
+                    }
                 }
             })
         },

@@ -3,11 +3,19 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/logger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/logger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graphController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,7 +52,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/other/quantum" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bailletArchives" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -76,7 +84,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.ontologiesMapper..js">
+  <component name="RunManager" selected="Node.js.parseXlsx..js">
     <configuration name="dirContentAnnotator..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="dirContentAnnotator..js" working-dir="$PROJECT_DIR$/bin/annotator">
       <method v="2" />
     </configuration>
@@ -94,10 +102,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.parseXlsx..js" />
         <item itemvalue="Node.js.ontologiesMapper..js" />
         <item itemvalue="Node.js.dirContentAnnotator..js" />
         <item itemvalue="Node.js.httpProxy..js" />
-        <item itemvalue="Node.js.parseXlsx..js" />
         <item itemvalue="Node.js.exportRDF..js" />
       </list>
     </recent_temporary>
@@ -126,7 +134,8 @@
       <workItem from="1608188517427" duration="50134000" />
       <workItem from="1608448255113" duration="235613000" />
       <workItem from="1609850999084" duration="38000" />
-      <workItem from="1609851061196" duration="74854000" />
+      <workItem from="1609851061196" duration="85375000" />
+      <workItem from="1610260629705" duration="15490000" />
     </task>
     <servers />
   </component>
@@ -201,7 +210,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routes/index.js</url>
-          <line>327</line>
+          <line>343</line>
           <option name="timeStamp" value="211" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -216,31 +225,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage.js</url>
-          <line>194</line>
+          <line>206</line>
           <option name="timeStamp" value="244" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>186</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="353" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>27</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="357" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>170</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="359" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js</url>
           <line>525</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="362" />
         </line-breakpoint>
       </breakpoints>

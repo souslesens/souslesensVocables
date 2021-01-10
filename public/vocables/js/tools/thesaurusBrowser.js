@@ -3,8 +3,8 @@ var ThesaurusBrowser = (function () {
 
 
     self.onLoaded = function () {
-        $("#sourceDivControlPanelDiv").html("<input id='SourceEditor_searchAllSourcesTermInput'>" +
-            "<input type='checkbox' checked='checked' id= 'ThesaurusBrowser_allExactMatchSearchCBX'>Exact Match" +
+        $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
+            "<input type='checkbox' checked='checked' id= 'GenericTools_allExactMatchSearchCBX'>Exact Match" +
             "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")
     }
     self.onSourceSelect = function (thesaurusLabel) {
@@ -235,10 +235,10 @@ var ThesaurusBrowser = (function () {
             options = {}
         }
         if (!term)
-            var term = $("#SourceEditor_searchAllSourcesTermInput").val()
+            var term = $("#GenericTools_searchAllSourcesTermInput").val()
         if (!term || term == "")
             return
-        var exactMatch = $("#ThesaurusBrowser_allExactMatchSearchCBX").prop("checked")
+        var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
         var searchedSources = [];
         for (var sourceLabel in Config.sources) {
             if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {

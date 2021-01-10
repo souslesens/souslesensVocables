@@ -224,7 +224,13 @@ if (false) {
     parseXlsx.generateTriples(sheets, mappingFilter)
 }
 
-if (true) {
+if (false) {
    var  options = {firstSheetNumber: 4, firstLineNumber: 7}
     parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options)
 }
+
+if (true) {
+    var options = {firstSheetNumber: 1, firstLineNumber: 1}
+    parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx");
+}
+

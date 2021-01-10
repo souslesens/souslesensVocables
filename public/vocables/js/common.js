@@ -20,19 +20,18 @@ var common = (function () {
             }
             if (Array.isArray(data)) {
                 data.forEach(function (item, index) {
-                    var text,value;
-                    if(textfield){
-                        if(item[textfield].value && item[valueField].value ) {
+                    var text, value;
+                    if (textfield) {
+                        if (item[textfield].value && item[valueField].value) {
                             text = item[textfield].value;
-                            value =  item[valueField].value;
-                        }
-                        else{
+                            value = item[valueField].value;
+                        } else {
                             text = item[textfield];
-                            value =  item[valueField];
+                            value = item[valueField];
                         }
-                    }else{
-                        text=item;
-                        value=item;
+                    } else {
+                        text = item;
+                        value = item;
 
                     }
                     $("#" + selectId).append($('<option>', {
@@ -56,20 +55,19 @@ var common = (function () {
         self.getjsTreeNodes = function (jstreeDiv, IdsOnly) {
             var idList = [];
             var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json('#', {flat: true});
-            if(IdsOnly){
-                jsonNodes.forEach(function(item){
+            if (IdsOnly) {
+                jsonNodes.forEach(function (item) {
                     idList.push(item.id)
                 })
                 return idList
-            }
-            else{
+            } else {
                 return jsonNodes;
             }
 
         }
 
-        self.getjsTreeNodeObj = function (jstreeDiv,id) {
-           return $('#' + jstreeDiv).jstree(true).get_node(id);
+        self.getjsTreeNodeObj = function (jstreeDiv, id) {
+            return $('#' + jstreeDiv).jstree(true).get_node(id);
 
         }
 
@@ -96,14 +94,13 @@ var common = (function () {
                 plugins.push("dnd")
 
 
-               var check_callbackFn=function (op, node, parent, position, more) {
-                if(op== 'move_node' && options.dropAllowedFn){
-                   return options.dropAllowedFn(op, node, parent, position, more)
+            var check_callbackFn = function (op, node, parent, position, more) {
+                if (op == 'move_node' && options.dropAllowedFn) {
+                    return options.dropAllowedFn(op, node, parent, position, more)
+                } else {
+                    return true;
                 }
-               else{
-                   return true;
-                }
-               }
+            }
 
 
             if ($('#' + jstreeDiv).jstree)
@@ -210,12 +207,12 @@ var common = (function () {
             self.setTreeAppearance()
         }
 
-        self.onAllTreeCbxChange=function( allCBX,jstreeDiv){
-            var checked=$(allCBX).prop("checked")
-            if(checked){
-                $("#"+jstreeDiv).jstree(true).check_all ()
-            }else{
-                $("#"+jstreeDiv).jstree(true).uncheck_all ()
+        self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
+            var checked = $(allCBX).prop("checked")
+            if (checked) {
+                $("#" + jstreeDiv).jstree(true).check_all()
+            } else {
+                $("#" + jstreeDiv).jstree(true).uncheck_all()
             }
         }
 
@@ -237,38 +234,36 @@ var common = (function () {
         }
 
 
-
-        self.concatArraysWithoutDuplicate=function(array,addedArray,key){
-            addedArray.forEach(function(addedItem){
-                var refuse=false
-                array.forEach(function(item){
-                    if(key){
-                        refuse=(item[key]==addedItem[key])
-                    }else{
-                        refuse=(item==addedItem)
+        self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
+            addedArray.forEach(function (addedItem) {
+                var refuse = false
+                array.forEach(function (item) {
+                    if (key) {
+                        refuse = (item[key] == addedItem[key])
+                    } else {
+                        refuse = (item == addedItem)
                     }
 
                 })
-                if(!refuse)
+                if (!refuse)
                     array.push(addedItem)
             })
-            return  array;
+            return array;
         }
 
 
-
-        self.removeDuplicatesFromArray=function(array,key,uniques){
-            if(!uniques)
-             uniques=[];
-            var cleanedArray=[]
-            array.forEach(function(item){
+        self.removeDuplicatesFromArray = function (array, key, uniques) {
+            if (!uniques)
+                uniques = [];
+            var cleanedArray = []
+            array.forEach(function (item) {
                 var value;
-                if(key)
-                    value=item[key];
+                if (key)
+                    value = item[key];
                 else
-                    value=item;
-                if(!uniques[value]){
-                    uniques[value]=1
+                    value = item;
+                if (!uniques[value]) {
+                    uniques[value] = 1
                     cleanedArray.push(item)
                 }
 
@@ -317,9 +312,9 @@ var common = (function () {
                 return uri
 
         }
-        self.getNewUri = function (sourceLabel,length) {
-            if(!length)
-                length=10
+        self.getNewUri = function (sourceLabel, length) {
+            if (!length)
+                length = 10
             var sourceUri = Config.sources[sourceLabel].graphUri
             if (sourceUri.lastIndexOf("/") != sourceUri.length - 1)
                 sourceUri += "/"
@@ -327,7 +322,50 @@ var common = (function () {
             return nodeId;
         }
 
+        self.copyTextToClipboard = function (text) {
+            var textArea = document.createElement("textarea");
+            textArea.style.position = 'fixed';
+            textArea.style.top = 0;
+            textArea.style.left = 0;
 
+            // Ensure it has a small width and height. Setting to 1px / 1em
+            // doesn't work as this gives a negative w/h on some browsers.
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+
+            // We don't need padding, reducing the size if it does flash render.
+            textArea.style.padding = 0;
+
+            // Clean up any borders.
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+
+            // Avoid flash of the white box if rendered for any reason.
+            textArea.style.background = 'transparent';
+
+
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                var msg = successful ? 'successful' : 'unsuccessful';
+                document.body.removeChild(textArea);
+                if (successful)
+                    return "graph copied in clipboard"
+                else
+
+                    return "graph copy faild"
+            } catch (err) {
+                console.log(err);
+                return "graph copy faild"
+            }
+
+
+        }
 
 
         self.palette = [
@@ -373,7 +411,7 @@ var common = (function () {
             '#B3B005',
         ]
 
-        self.quantumModelmappingSources={
+        self.quantumModelmappingSources = {
             'http://standards.iso.org/iso/15926/part14/PhysicalQuantity': 'ISO_15926-part-14',
             'http://data.posccaesar.org/dm/ClassOfQuantity': 'ISO_15926-PCA',
             'http://w3id.org/readi/rdl/D101001516': 'CFIHOS_READI',

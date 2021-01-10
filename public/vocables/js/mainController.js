@@ -17,6 +17,26 @@ var MainController = (function () {
     }
 
 
+    self.writeUserLog = function (user, tool, source) {
+        var payload = {
+            writeUserLog: 1,
+            infos: user.identifiant + "," + tool + "," + source
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+
+            success: function (data, textStatus, jqXHR) {
+                ;
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        })
+    }
+
     self.UI = {
 
         showSources: function (treeDiv, withCBX) {
@@ -40,17 +60,20 @@ var MainController = (function () {
                     }
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
-                  //  console.log(JSON.stringify(jstreeData,null,2))
+                    //  console.log(JSON.stringify(jstreeData,null,2))
                     treeData.push({id: sourceLabel, text: sourceLabel, parent: Config.sources[sourceLabel].schemaType,})// data: Config.sources[sourceLabel]})
                 }
             })
             common.loadJsTree(treeDiv, treeData, {
                 withCheckboxes: withCBX,
                 selectNodeFn: function (evt, obj) {
-                    if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                        MainController.currentSchemaType = obj.node.id;
-                        $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
-                        return;
+                    if (obj.node.parent == "#") {//first level group by schema type
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
+                            MainController.currentSchemaType = obj.node.id;
+
+                            $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
+                            return;
+                        }
                     } else {
                         self.currentSource = obj.node.id;
                         MainController.UI.onSourceSelect()
@@ -80,8 +103,11 @@ var MainController = (function () {
                     var controller = Config.tools[self.currentTool].controller
                     $("#actionDivContolPanelDiv").html("")
                     self.UI.updateActionDivLabel();
-                    if (Config.tools[self.currentTool].multiSources)
+                    if (Config.tools[self.currentTool].multiSources) {
+                        self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
                         controller.onSourceSelect(self.currentSource)
+
+                    }
                     if (controller.onLoaded)
                         controller.onLoaded()
                     if (Config.tools[self.currentTool].toolDescriptionImg) {
@@ -95,11 +121,14 @@ var MainController = (function () {
         },
         onSourceSelect: function () {
 
-            if (Config.tools[self.currentTool].multiSources)
+            if (Config.tools[self.currentTool].multiSources) {
+
                 return
+            }
             OwlSchema.currentSourceSchema = null;
             Collection.currentCollectionFilter = null;
-            self.UI.updateActionDivLabel()
+            self.UI.updateActionDivLabel();
+            self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource)
             var controller = Config.tools[self.currentTool].controller
             controller.onSourceSelect(self.currentSource)
 
@@ -179,11 +208,12 @@ var MainController = (function () {
     }
 
     self.test = function () {
-        self.loadSources(function () {
-            MainController.currentSource = "NPD"
-            ThesaurusBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
-            OntologyBrowser.showProperties()
-        })
+
+        /*    self.loadSources(function () {
+                MainController.currentSource = "NPD"
+                ThesaurusBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
+                OntologyBrowser.showProperties()
+            })*/
 
     }
 

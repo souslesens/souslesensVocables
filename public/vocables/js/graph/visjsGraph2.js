@@ -87,6 +87,7 @@ var visjsGraph = (function () {
         self.simulationOn = true;
         window.setTimeout(function () {
             self.network.stopSimulation();
+            self.network.fit()
             self.simulationOn = false;
             if (_options.afterDrawing)
                 _options.afterDrawing()
@@ -196,19 +197,19 @@ var visjsGraph = (function () {
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
                     var nodeId = params.nodes[0]
-                 //   var nodes = self.data.nodes.getIds();
+                    //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
-                    var fixed=true;
-                    if(params.event.srcEvent.altKey)
-                        fixed=false;
+                    var fixed = true;
+                    if (params.event.srcEvent.altKey)
+                        fixed = false;
                     newNodes.push({id: nodeId, fixed: fixed})
-                 /*   nodes.forEach(function (id) {
-                        var fixed = true;
-                        if (id == nodeId)
-                            fixed = true;
-                        newNodes.push({id: id, fixed: fixed})
+                    /*   nodes.forEach(function (id) {
+                           var fixed = true;
+                           if (id == nodeId)
+                               fixed = true;
+                           newNodes.push({id: id, fixed: fixed})
 
-                    })*/
+                       })*/
                     visjsGraph.data.nodes.update(newNodes)
 
                     /*      var nodeId = params.nodes[0];
@@ -236,6 +237,11 @@ var visjsGraph = (function () {
                   self.data.nodes.update(newNodes);
 
               }, 3000)*/
+
+
+        var html = "<button onclick='visjsGraph.graphCsvToClipBoard()' style='position: relative; top:10px;left:10px'>CSV</button>"
+        $("#" + divId).append(html)
+
 
         if (callback)
             return callback()
@@ -291,7 +297,7 @@ var visjsGraph = (function () {
             var size = self.defaultNodeSize / scaleCoef;
             var fontSize = (self.defaultTextSize / (scaleCoef));
             if (scale < 1)
-                fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
+                fontSize = (self.defaultTextSize / 1); //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
             else
                 fontSize = (self.defaultTextSize / (scaleCoef * 1.3));
 
@@ -343,6 +349,59 @@ var visjsGraph = (function () {
             existingVisjsIds[id] = 1;
         })
         return existingVisjsIds;
+    }
+
+
+    self.graphCsvToClipBoard = function () {
+        var csv = visjsGraph.toCsv()
+        var result=common.copyTextToClipboard(csv)
+        MainController.UI.message(result);
+    }
+
+    self.toCsv = function (dataFields) {
+        var sep = ","
+        if (dataFields && !Array.isArray(dataFields))
+            dataFields = [dataFields]
+
+        var nodes = self.data.nodes.get();
+        var edges = self.data.edges.get();
+        var nodesMap = {};
+        var csvStr = "";
+
+        function getNodeStr(node) {
+            if (node)
+                var str = node.id + sep + node.label;
+            if (dataFields && node.data) {
+                sep + dataFields.forEach(function (field) {
+                    str += node.data[field]
+                })
+            }
+
+            return str;
+        }
+
+        nodes.forEach(function (node) {
+            nodesMap[node.id] = node
+            if (edges.length == 0) {
+                csvStr += getNodeStr(node) + "\n"
+            }
+        })
+        edges.sort(function (a, b) {
+            if (a.from > b.from)
+                return 1;
+            if (a.from < b.from)
+                return -1;
+            return 0;
+        })
+        edges.forEach(function (edge) {
+            var edgeLabel = "->";
+            if (edge.label)
+                edgeLabel = edge.label;
+            csvStr += getNodeStr(nodesMap[edge.from]) + sep + edgeLabel + sep + getNodeStr(nodesMap[edge.to]) + "\n"
+
+        })
+
+        return csvStr;
     }
 
 

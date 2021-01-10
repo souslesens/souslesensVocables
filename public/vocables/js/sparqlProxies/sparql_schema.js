@@ -248,11 +248,11 @@ var Sparql_schema = (function () {
                     "  }" +
 
                     "}limit 10000 "*/
-
-            self.executeQuery(schema, query, function (err, result) {
+            var url = schema.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "",{source:schema.source},function(err, result) {
                 if (err)
-                    callbackEach(err);
-                var bindings = Sparql_generic.setBindingsOptionalProperties(result, ["property", "range"], {type: "Property"})
+                  return  callbackEach(err);
+                var bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "range"], {type: "Property"})
 
 
                 bulkResult = bulkResult.concat(bindings)

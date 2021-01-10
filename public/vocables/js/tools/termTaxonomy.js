@@ -141,8 +141,8 @@ var TermTaxonomy = (function () {
         drawRootNode = function (word) {
             var rootNodeColor = "#dda";
             var rootNodeSize = 20
-            $("#graphDiv").width($(window).width() - 20)
-            $("#graphDiv").height($(window).height() - 20)
+         /*   $("#graphDiv").width($(window).width() - 20)
+            $("#graphDiv").height($(window).height() - 20)*/
             self.rootNode = {
                 label: word,
                 id: word,

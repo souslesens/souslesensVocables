@@ -274,6 +274,22 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
             })
         }
+
+        if (req.body.writeUserLog) {
+            var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+            req.body.infos+=","+ip
+
+            logger.info(req.body.infos)
+                processResponse(response,null,{done:1})
+
+
+
+
+        }
+
+
+
+
     if (req.query.SPARQLquery) {
 
         var query=req.body.query;

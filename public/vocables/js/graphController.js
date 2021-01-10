@@ -96,7 +96,8 @@ var GraphController = (function () {
                 }
 
                 var edgeId = fromId + "_" + toId;
-                if (!existingIds[edgeId]) {
+                var inverseEdge=toId + "_" + fromId;
+                if (!existingIds[edgeId] && !existingIds[inverseEdge]) {
                     existingIds[edgeId] = 1
                     var edge = {
                         id: edgeId,

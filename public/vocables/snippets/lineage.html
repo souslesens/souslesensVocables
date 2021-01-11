@@ -60,7 +60,7 @@
         <div id="Lineage_ClassesTab" style="display: flex;flex-direction: column">
 
 
-            <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>
+       <!--     <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
 
         </div>
 
@@ -83,10 +83,9 @@
 
         </div>
     </div>
-    <hr>
-    <input id='GenericTools_searchAllSourcesTermInput'>
-<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>
- <!--   <button onclick='ThesaurusBrowser.searchTerm(Lineage_classes.currentSource)'>Search</button>-->
-    <input type='checkbox' checked='checked' id='GenericTools_allExactMatchSearchCBX'>Exact Match
+<div id="GenericTools_searchAllDiv"></div>
+<script>
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+</script>
 
 </div>

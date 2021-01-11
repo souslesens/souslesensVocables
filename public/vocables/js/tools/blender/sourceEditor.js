@@ -15,7 +15,7 @@ var SourceEditor = (function () {
 
 
         self.onLoaded = function () {
-            $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'> <button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")
+                $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
 
         }
 

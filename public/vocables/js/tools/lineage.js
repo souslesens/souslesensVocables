@@ -6,19 +6,23 @@ var Lineage_classes = (function () {
         var defaultShape = "dot";
         var defaultShapeSize = 5;
 
-        self.maxClusterOpeningLength=50
+        self.maxClusterOpeningLength = 50
         var objectPropertyColor = "#aaa"
 
 
         var maxChildrenDrawn = 15
         self.currentSource;
 
+        self.onLoaded = function () {
+            $("#sourceDivControlPanelDiv").html("<button onclick='Lineage_classes.onSourceSelect()'>ok</button>")
+        }
+
 
         self.onSourceSelect = function (sourceLabel) {
             MainController.UI.message("");
-            $("#accordion").accordion("option", {active: 2});
 
-            ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel)
+
+            $("#accordion").accordion("option", {active: 2});
             $("#actionDivContolPanelDiv").load("snippets/lineage.html")
 
             setTimeout(function () {
@@ -38,9 +42,11 @@ var Lineage_classes = (function () {
                     }
 
                 });
-
-                Lineage_classes.drawTopConcepts(sourceLabel)
-
+                $("#GenericTools_searchSchemaType").val("OWL")
+                if (sourceLabel) {
+                    ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel)
+                    Lineage_classes.drawTopConcepts(sourceLabel)
+                }
 
             }, 200)
 
@@ -50,22 +56,31 @@ var Lineage_classes = (function () {
             var data = propertiesMap.node.data;
             self.addArbitraryNodeToGraph(data)
         }
-
-        self.drawTopConcepts = function (source) {
-            if (source == "QUANTUM_MODEL")
-                self.QuantumModelMapping = true
+        self.initUI=function(){
             MainController.UI.message("")
             visjsGraph.clearGraph()
+            expandedLevels = {}
+            self.currentSource =null;
+            $("#lineage_drawnSources").html("");
+            $("#Lineage_toSource").val("")
+        }
+
+
+
+        self.drawTopConcepts = function (source) {
+            self.initUI();
+
             if (!source)
                 source = MainController.currentSource
+            if(!source)
+                return;
+            if (source == "QUANTUM_MODEL")
+                self.QuantumModelMapping = true
             self.currentSource = source
-            expandedLevels = {}
-            $("#lineage_drawnSources").html("");
+
             self.registerSource(source)
 
 
-
-            $("#Lineage_toSource").val("")
 
             var depth = parseInt($("#Lineage_topDepth").val())
             Sparql_generic.getTopConcepts(source, null, function (err, result) {
@@ -106,31 +121,31 @@ var Lineage_classes = (function () {
                         },
                     })
 
-                var options = {
-                    /*   nodes: {
-                           shape: "box",
-                           color: "#ddd"
-                       },*/
-                    onclickFn: Lineage_classes.graphActions.onNodeClick,
-                    onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
-                    "physics": {
-                        "barnesHut": {
-                            "springLength": 0,
-                            "damping": 0.15
-                        },
-                        "minVelocity": 0.75
-                    }
-                    //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
-                }
-
-
-                visjsGraph.draw("graphDiv", visjsData, options)
-                $("#waitImg").css("display", "none");
-
+                self.drawNewGraph(visjsData)
 
             })
 
+        }
+        self.drawNewGraph=function(visjsData){
+            var options = {
+
+                onclickFn: Lineage_classes.graphActions.onNodeClick,
+                onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
+                "physics": {
+                    "barnesHut": {
+                        "springLength": 0,
+                        "damping": 0.15
+                    },
+                    "minVelocity": 0.75
+                }
+                //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
+
+            }
+
+
+            visjsGraph.draw("graphDiv", visjsData, options)
+            $("#waitImg").css("display", "none");
         }
 
 
@@ -287,7 +302,7 @@ var Lineage_classes = (function () {
                                 })
                             }
                             var edgeId = item.concept.value + "_" + item.child1.value
-                            var inverseEdge=item.child1.value + "_" + item.concept.value
+                            var inverseEdge = item.child1.value + "_" + item.concept.value
                             if (!existingIds[edgeId] && !existingIds[inverseEdge]) {
                                 existingIds[edgeId] = 1
                                 visjsData2.edges.push({
@@ -341,21 +356,21 @@ var Lineage_classes = (function () {
             })
         }
 
-        self.listClusterToClipboard= function (clusterNode) {
-            var text="";
-            clusterNode.data.cluster.forEach(function(item,index){
-                text+=item.child1.value+","+item.child1Label.value+"\n"
+        self.listClusterToClipboard = function (clusterNode) {
+            var text = "";
+            clusterNode.data.cluster.forEach(function (item, index) {
+                text += item.child1.value + "," + item.child1Label.value + "\n"
             })
 
-            var result=common.copyTextToClipboard(text)
+            var result = common.copyTextToClipboard(text)
             MainController.UI.message(result);
         }
 
         self.openCluster = function (clusterNode) {
             MainController.UI.message("")
-            if(clusterNode.length>self.maxClusterOpeningLength)
+            if (clusterNode.length > self.maxClusterOpeningLength)
                 self.listClusterToClipboard(clusterNode)
-            return alert( "cluster content copied to clipboard( too large to draw)")
+            return alert("cluster content copied to clipboard( too large to draw)")
 
             var color = self.getSourceColor(clusterNode.data.source)
             var visjsData = GraphController.toVisjsData(null, clusterNode.data.cluster, clusterNode.data.parent, "concept", "child1", {
@@ -724,7 +739,7 @@ var Lineage_classes = (function () {
 
             if (node.id.indexOf("_cluster") > 0) {
                 var html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> open cluster</span>"
-              html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"
+                html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"
 
 
             }
@@ -794,6 +809,8 @@ var Lineage_classes = (function () {
                 var color = self.getSourceColor(nodeData.source)
                 var nodesToDraw = []
                 var newNodeIds = []
+                var upperNodeIds=[];
+                var existingNodes = visjsGraph.getExistingIdsMap()
                 result.forEach(function (item) {
                     if (!existingNodes[item.concept.value]) {
                         existingNodes[item.concept.value] = 1
@@ -873,13 +890,34 @@ var Lineage_classes = (function () {
                                 break;
                             }
                         }
+                        else{
+                        /*    var id=item["broader" + (i-1)].value;
+                            if(upperNodeIds.indexOf(id)<0) {
+                                upperNodeIds.push(id);
+
+                            }*/
+                        }
                     }
                 })
-             self.registerSource(nodeData.source)
-              /*  expandedLevels[nodeData.source][expandedLevels[nodeData.source].length ].push(newNodeIds);*/
 
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
+                var existingNodes=visjsGraph.getExistingIdsMap()
+                if(!existingNodes[nodeData.source]){
+                    visjsData.nodes.forEach(function(item){
+
+                    })
+
+                }
+
+                self.registerSource(nodeData.source)
+                /*  expandedLevels[nodeData.source][expandedLevels[nodeData.source].length ].push(newNodeIds);*/
+
+                if(!visjsGraph.data){
+                    self.drawNewGraph(visjsData)
+                }else {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                }
+
 
                 setTimeout(function () {
                     self.zoomGraphOnNode(nodeData.id)
@@ -1075,7 +1113,7 @@ var Lineage_classes = (function () {
                 Lineage_classes.openCluster(self.currentGraphNode)
 
             },
-            listClusterToClipboard:function () {
+            listClusterToClipboard: function () {
                 Lineage_classes.listClusterToClipboard(self.currentGraphNode)
 
             },

@@ -3,9 +3,10 @@ var ThesaurusBrowser = (function () {
 
 
     self.onLoaded = function () {
-        $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
+        $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
+    /*    $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
             "<input type='checkbox' checked='checked' id= 'GenericTools_allExactMatchSearchCBX'>Exact Match" +
-            "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")
+            "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")*/
     }
     self.onSourceSelect = function (thesaurusLabel) {
         MainController.currentSource = thesaurusLabel;
@@ -140,6 +141,13 @@ var ThesaurusBrowser = (function () {
             }
 
         }
+        items.nodeInfos = {
+            label: "Node infos",
+            action: function (e) {// pb avec source
+                MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
+            }
+
+        }
         /* , items.toCSV = {
              label: "toCSV",
              action: function () {
@@ -240,9 +248,12 @@ var ThesaurusBrowser = (function () {
             return
         var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
         var searchedSources = [];
+        if(MainController.currentSchemaType)
+            $("#GenericTools_searchSchemaType").val(MainController.currentSchemaType)
+       var schemaType= $("#GenericTools_searchSchemaType").val()
         for (var sourceLabel in Config.sources) {
             if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == MainController.currentSchemaType)
+                if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
                     searchedSources.push(sourceLabel)
             }
         }
@@ -290,9 +301,10 @@ var ThesaurusBrowser = (function () {
 
             var jstreeOptions = {
                 openAll: true, selectNodeFn: function (event, propertiesMap) {
+                    ThesaurusBrowser.currentTreeNode = propertiesMap.node;
                     if (Config.tools[MainController.currentTool].controller.selectNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectNodeFn(event, propertiesMap);
-                    ThesaurusBrowser.currentTreeNode = propertiesMap.node;
+
                     self.editThesaurusConceptInfos(propertiesMap.node.data.source, propertiesMap.node)
                 }, contextMenu: self.getJstreeConceptsContextMenu()
             }

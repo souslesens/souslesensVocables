@@ -1,0 +1,23 @@
+
+
+<div style="display: flex;flex-direction: row;height: 20px">
+    <input id='GenericTools_searchAllSourcesTermInput' style="width: 100px">
+    <button id="ThesaurusBrowser_onSearchInput" onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>
+    <!--   <button onclick='ThesaurusBrowser.searchTerm(Lineage_classes.currentSource)'>Search</button>-->
+    <input type='checkbox' checked='checked' id='GenericTools_allExactMatchSearchCBX'>Exact Match
+    <select id="GenericTools_searchSchemaType">
+        <option></option>
+        <option>OWL</option>
+        <option>SKOS</option>
+    </select>
+
+</div>
+
+<script>
+    $('#GenericTools_searchAllSourcesTermInput').keypress(function(e) {
+
+        if(e.which == 13) {
+            ThesaurusBrowser.searchAllSourcesTerm()
+        }
+    })
+</script>

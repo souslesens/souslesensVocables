@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,9 +22,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="JS module" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -75,7 +77,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.parseXlsx..js">
+  <component name="RunManager" selected="Node.js.ontologiesMapper..js">
     <configuration name="dirContentAnnotator..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="dirContentAnnotator..js" working-dir="$PROJECT_DIR$/bin/annotator">
       <method v="2" />
     </configuration>
@@ -93,8 +95,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.parseXlsx..js" />
         <item itemvalue="Node.js.ontologiesMapper..js" />
+        <item itemvalue="Node.js.parseXlsx..js" />
         <item itemvalue="Node.js.dirContentAnnotator..js" />
         <item itemvalue="Node.js.httpProxy..js" />
         <item itemvalue="Node.js.exportRDF..js" />
@@ -127,7 +129,7 @@
       <workItem from="1609850999084" duration="38000" />
       <workItem from="1609851061196" duration="85375000" />
       <workItem from="1610260629705" duration="16639000" />
-      <workItem from="1610290742772" duration="7589000" />
+      <workItem from="1610290742772" duration="32616000" />
     </task>
     <servers />
   </component>
@@ -217,7 +219,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage.js</url>
-          <line>207</line>
+          <line>222</line>
           <option name="timeStamp" value="244" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -257,6 +259,18 @@
           <line>321</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="384" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>81</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="393" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>148</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="457" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

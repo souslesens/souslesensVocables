@@ -368,9 +368,10 @@ var Lineage_classes = (function () {
 
         self.openCluster = function (clusterNode) {
             MainController.UI.message("")
-            if (clusterNode.length > self.maxClusterOpeningLength)
+            if (clusterNode.data.cluster.length > self.maxClusterOpeningLength) {
                 self.listClusterToClipboard(clusterNode)
-            return alert("cluster content copied to clipboard( too large to draw)")
+                return alert("cluster content copied to clipboard( too large to draw)")
+            }
 
             var color = self.getSourceColor(clusterNode.data.source)
             var visjsData = GraphController.toVisjsData(null, clusterNode.data.cluster, clusterNode.data.parent, "concept", "child1", {

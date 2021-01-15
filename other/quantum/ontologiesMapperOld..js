@@ -3,10 +3,36 @@ const async = require('async');
 var httpProxy = require('../../bin/httpProxy.')
 var util = require('../../bin/skosConverters/util.')
 var distinctTags = {};
-var sliceSize = 50
 
 
 var ontologiesMapper = {
+
+
+    loadCsvFile: function (file, sep) {
+
+
+        var str = "" + fs.readFileSync(file);
+        var lines = str.split("\n")
+
+        var headers = lines[0].trim().split(sep)
+
+
+        var jsonArray = []
+        lines.forEach(function (line) {
+            var values = line.trim().split(sep)
+            if (values.length > headers.length)
+                return "error"
+            var obj = {}
+            values.forEach(function (value, index) {
+                obj[headers[index]] = value
+            })
+            jsonArray.push(obj)
+
+
+        })
+        return {headers: headers, data: jsonArray}
+
+    },
 
 
     mapClasses: function (sourceConfig, targetConfigs, callback) {
@@ -63,8 +89,8 @@ var ontologiesMapper = {
                         var label = item.label.value.toLowerCase();  //id.substring(id.indexOf("#") + 1)
                         if (sourceConfig.labelProcessor)
                             label = sourceConfig.labelProcessor(label)
-                        sourceClassesLabels[label] = {label: label, sourceId: id, targetIds: [], targetLabels: []}
-                        sourceClassesIds[label] = {label: label, sourceId: id, sourceLabel: item[sourceConfig.labelKey].trim(), targets: {}}
+                        sourceClassesLabels[label] = {label: label,sourceId: id, targetIds: [], targetLabels: []}
+                        sourceClassesIds[label] = {label: label,sourceId: id, sourceLabel: item[sourceConfig.labelKey].trim(), targets: {}}
                     })
                     callbackSeries()
                 })
@@ -83,13 +109,10 @@ var ontologiesMapper = {
 
                         var label = formatLabel(item[sourceConfig.labelKey])
                         var id = item[sourceConfig.idKey]
-                        if (id == "TOTAL-P0000002823")
-                            var x = 3
-                        var parent = item[sourceConfig.table.replace("tbl", "Parent") + "ID"]
-                        if (!parent)
-                            parent = null;
-                        sourceClassesLabels[label] = {label: label, sourceId: id, parent: parent, sourceLabel: item[sourceConfig.labelKey].trim(), targets: {}}
-                        sourceClassesIds[label] = {label: label, sourceId: id, parent: parent, sourceLabel: item[sourceConfig.labelKey].trim(), targets: {}}
+                        if(id=="TOTAL-P0000002823")
+                            var x=3
+                        sourceClassesLabels[label] = {label: label,sourceId: id, sourceLabel: item[sourceConfig.labelKey].trim(), targets: {}}
+                        sourceClassesIds[label] = {label: label,sourceId: id, sourceLabel: item[sourceConfig.labelKey].trim(), targets: {}}
                         targetConfigs.forEach(function (target) {
                             sourceClassesLabels[label].targets[target.name] = []
                             sourceClassesIds[label].targets[target.name] = []
@@ -102,12 +125,11 @@ var ontologiesMapper = {
             },
             //************************************* slice labels and get same labels in target*************************
             function (callbackSeries) {
-                var quantumLabels = [];
-                Object.keys(sourceClassesLabels);
-                for (var id in sourceClassesIds) {
-                    quantumLabels.push(sourceClassesIds[id].label)
+                var quantumLabels =[]; Object.keys(sourceClassesLabels);
+              for(var id in sourceClassesIds){
+                  quantumLabels.push(sourceClassesIds[id].label)
                 }
-                var slices = util.sliceArray(quantumLabels, sliceSize);
+                var slices = util.sliceArray(quantumLabels, 30);
 
 
                 async.eachSeries(targetConfigs, function (targetConfig, callbackEachSource) {
@@ -139,11 +161,11 @@ var ontologiesMapper = {
                                     var x = item;
                                     var id = item.concept.value;
                                     var label = formatLabel(item.conceptLabel.value)
-                                    for (var id2 in sourceClassesIds)
-                                        if (sourceClassesIds[id2].label == label)
+                                    for( var id2 in sourceClassesIds)
+                                     if(sourceClassesIds[id2].label==label)
 
-                                            sourceClassesIds[id2].targets[source].push({id: id, label: item.conceptLabel.value})
-                                    // sourceClassesLabels[label].targets[source].push({id: id, label: item.conceptLabel.value});
+                                    sourceClassesIds[id2].targets[source].push({id: id, label: item.conceptLabel.value})
+                                   // sourceClassesLabels[label].targets[source].push({id: id, label: item.conceptLabel.value});
 
                                 })
                             }
@@ -217,13 +239,12 @@ var ontologiesMapper = {
 
         ], function (err) {
 
-            callback(err, sourceClassesIds);
+            callback(err,  sourceClassesIds);
             //   console.log(JSON.stringify(sourceClassesLabels, null, 2))
         })
 
+
     }
-
-
     , writeMappings: function (sources, table, json, mappingSourceArray, filePath,) {
 
         //    var json = JSON.parse(fs.readFileSync(filePath));
@@ -277,34 +298,9 @@ var ontologiesMapper = {
             'TOTAL-SA0000000047': 'MEL'
 
         }
-        var mappingSourceFields = [
-            'SourceCode',
-            'SourceDescription',
-            'MappingSourceOriginID',
-            'ChangeRequestNumber',
-            'ItemStatus'
-        ]
-
-
-        var matchingFieldsMap = {
-            "tblPhysicalClass": "PhysicalClassID",
-            "tblPickListValueGrouping": "PickListValueGroupingID",
-            "tblAttributePickListValue": "AttributePickListValueID",
-            "tblFunctionalClass": "FunctionalClassID",
-            "tblAttribute": "AttributeID",
-            "tblDiscipline": "DisciplineID",
-            "tblTag": "TagId",
-
-        }
-        var mappingSourceEntityFields = []
-        for (var key in matchingFieldsMap) {
-            mappingSourceEntityFields.push(matchingFieldsMap[key])
-        }
-
         var triplesMapping = ""
         var triplesLabel = ""
-        var triplesSubClassOf = ""
-        var triplesType = ""
+        var triplesSubClasssOf = ""
 
 
         var mappingLabelMap = {}
@@ -314,88 +310,79 @@ var ontologiesMapper = {
 
         }
 
+        var mappingSourceFields = [
+            'entityId',
+            'SourceCode',
+            'SourceDescription',
+            'MappingSourceOriginID',
+            'ChangeRequestNumber',
+            'ItemStatus'
+        ]
 
-        var mappingSourceNormalMap = {} // keys =sum of all tables id fields
-        var entityIdField = matchingFieldsMap[table]
+        var matchingTablesPrefix = {
+            "tblPhysicalClass": "TOTAL-P",
+            "tblPickListValueGrouping":"TOTAL-G",
+            "tblAttributePickListValue": "TOTAL-L",
+            "tblFunctionalClass": "TOTAL-F",
+            "tblAttribute": "TOTAL-A",
+            //  "tblDiscipline",
+            //   "tblTag",
 
-
-        mappingSourceArray.forEach(function (item) {
-            var obj = {}
-
-            mappingSourceEntityFields.forEach(function (entityField) {
-
-                if (item[entityField]) {
-                    var obj = {entityId: item[entityField]}
-
-                    mappingSourceFields.forEach(function (sourceField) {
-                        obj[sourceField] = item[sourceField]
-                    })
-                    mappingSourceNormalMap[obj.entityId] = obj
-                }
-            })
-
-        })
+        }
 
 
-        var orphans = 'table\tQuantumId\tQuantumLabel'
-        sources.forEach(function (source) {
-            orphans += "\t" + source.name;
-        })
+        var orphans = ''
         orphans += 'entityId' +
             '\tSourceCode' +
             '\tSourceDescription' +
             '\tMappingSourceOriginID' +
             '\tChangeRequestNumber' +
-            '\tItemStatus' +
-            "\tMappingSourceOriginType\t"
+            '\tItemStatus' + "\tQuantumId" + "\tQuantumLabel"+
+            "MappingSourceOriginType\t"
 
-
+        sources.forEach(function (source) {
+            orphans += "\t" + source.name;
+        })
         orphans += "\n"
-        var tableType = "http://data.total.com/resource/quantum/table/" + table + "";
-        for (var id in mappingLabelMap) {
 
 
-            var mappingLabelItem = mappingLabelMap[id];
-            var mappingSourceItem = mappingSourceNormalMap[id];
+        mappingSourceArray.forEach(function (item0) {
 
+            if (item0.entityId.indexOf(matchingTablesPrefix[table])<0)
+                return;
 
-            orphans += table + '\t' + mappingLabelItem.sourceId + "\t" + mappingLabelItem.sourceLabel + "\t"
-          if(mappingLabelItem.parent)
-                triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/"+ mappingLabelItem.parent+">.\n"
-            else
-                triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n"
-            triplesType += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#type> <" + tableType + "> .\n"
-
-
-            triplesLabel += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + mappingLabelItem.sourceLabel + "'.\n"
-
-            sources.forEach(function (source, indexSource) {
-                var orphansMatch = ""
-                if (mappingLabelItem.targets[source.name].length == 0) {
-                    orphans += orphansMatch + "\t"
-                } else {
-
-                    mappingLabelItem.targets[source.name].forEach(function (target, index) {
-                        triplesMapping += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://data.total.com/resource/quantum/mappings/" + source.name + "#sameAs> <" + target.id + ">.\n"
-
-
-                        if (index > 0)
-                            orphans += "|"
-                        orphans += target.id + ""
-                    })
-                    orphans += "\t"
-                }
-            })
-
-
-            if (mappingSourceItem) {
-
+            var item = mappingLabelMap[item0.entityId]
+            if(item0.entityId=="TOTAL-P0000002823")
+                var x=3
+            if (item) {
 
                 mappingSourceFields.forEach(function (field) {
-                    orphans += "" + (mappingSourceItem[field].replace(/[\n\r\t]/g, " ")) + "\t";
+                    orphans += item0[field] + "\t";
                 })
-                orphans += originMap[mappingSourceItem["MappingSourceOriginID"]] + "\t"
+                orphans+=originMap[item0["MappingSourceOriginID"]]+"\t"
 
+
+                orphans += item.sourceId + "\t" + item.sourceLabel + "\t"
+                triplesSubClasssOf += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n"
+                triplesLabel += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + item.sourceLabel + "'.\n"
+
+                sources.forEach(function (source, indexSource) {
+                    var orphansMatch = ""
+                    if (item.targets[source.name].length == 0) {
+                        orphans += orphansMatch + "\t"
+                    } else {
+
+                        item.targets[source.name].forEach(function (target, index) {
+                            triplesMapping += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://data.total.com/resource/quantum/mappings/" + source.name + "#sameAs> <" + target.id + ">.\n"
+
+
+                            if (index > 0)
+                                orphans += "|"
+                            orphans += target.id + ""
+                        })
+                        orphans += "\t"
+                    }
+                })
 
             } else {
                 sources.forEach(function (source, indexSource) {
@@ -405,15 +392,118 @@ var ontologiesMapper = {
             orphans += "\n"
 
 
-        }
+        })
 
-        var triples = triplesMapping + triplesLabel + triplesSubClassOf+triplesType
+
+        var triples = triplesMapping + triplesLabel + triplesSubClasssOf
         fs.writeFileSync(filePath.replace(".json", "_" + table + ".nt"), triples)
         fs.writeFileSync(filePath.replace(".json", "_" + table + "_orphans.txt"), orphans)
+
+
+    }
+    , extractlabelsFromJsonData: function (filePath) {
+
+        var json = JSON.parse(fs.readFileSync(filePath));
+        var str = ""
+        for (var table in json) {
+
+            json[table].forEach(function (item) {
+                for (var key in item) {
+                    if (key.toLowerCase().indexOf("name") > -1) {
+                        str += table + "\t" + key + "\t" + item[key] + "\n"
+                    }
+                }
+
+            })
+        }
+        fs.writeFileSync(filePath.replace(".json", "Labels.txt"), str)
+
+
     }
 
+    , extractMappingsFromMDM: function () {
+        var totalFields = [
+            "FunctionalClassID",
+            "PhysicalClassID",
+            "AttributeID",
+            "AttributePickListValueID",
+            "AttributeID2",
+            "AttributePickListValueID2",
+            "PickListValueGroupingID",
+            "UnitOfMeasureID",
+            "UnitOfMeasureDimensionID",
+            "DisciplineID",
+            "DocumentTypeID",
+            "DisciplineDocumentTypeID",
+            "FunctionalClassToPhysicalClassID",
+            "FunctionalClassToAttributeID",
+            "PhysicalClassToAttributeID",
+            "FunctionalClassToDisciplineDocumentTypeID",
+            "PhysicalClassToDisciplineDocumentTypeID"
+        ]
 
-    , setMappingsSourceAttrs: function (labelsMap, filePath, table) {
+        var json = JSON.parse(fs.readFileSync(filePath))
+        var data = json["tblMappingSource"];
+
+        var triples = "";
+        data.forEach(function (item) {
+            var sourceCode = item["SourceCode"]
+            if (sourceCode && sourceCode.indexOf("CFIHOS") < 0)
+                return
+            totalFields.forEach(function (field) {
+
+                if (item[field] && item[field] != "") {
+                    var cfhosArrray = sourceCode.split("|")
+                    cfhosArrray.forEach(function (code, indexCode) {
+                        code = code.replace("CFIHOS-", "")
+                        triples += "<http://data.total.com/resource/quantum/" + item[field] + ">  <http://data.total.com/resource/quantum/mappings#mappingSourceCode" + (indexCode + 1) + "> <http://data.15926.org/cfihos/" + code + ">.\n"
+                    })
+                }
+
+
+            })
+        })
+
+        fs.writeFileSync(filePath.replace(".json", "mappingCFIHOS.nt"), triples)
+
+    }
+    ,
+
+    generateMDMtablesMappings: function (filePath) {
+        var json = ontologiesMapper.loadCsvFile(filePath, "\t")
+
+
+        var sources = json.headers.slice(2)
+        var triples = ""
+        var sourcesMap = ""
+        triples += " <http://data.total.com/resource/quantum/model/table/> <http://www.w3.org/2000/01/rdf-schema#label> 'TABLE'.\n"
+        triples += " <http://data.total.com/resource/quantum/model/table/> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/model/>.\n"
+
+        json.data.forEach(function (item) {
+            if (item.type != "mainObj")
+                return;
+            triples += "  <http://data.total.com/resource/quantum/model/table/" + item["QuantumTable"] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/model/table/> .\n"
+
+            triples += "  <http://data.total.com/resource/quantum/model/table/" + item["QuantumTable"] + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + item["QuantumTable"] + "'.\n"
+
+
+            sources.forEach(function (source) {
+                if (item[source] && item[source] != "") {
+
+                    triples += "<" + item[source] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf>  <http://data.total.com/resource/quantum/model/table/" + item["QuantumTable"] + ">.\n"
+                    triples += "<http://data.total.com/resource/quantum/model/table/" + item["QuantumTable"] + "> <http://data.total.com/resource/quantum/model/mapping#" + source + "> <" + item[source] + ">.\n"
+                    sourcesMap += "'" + item[source] + "': '" + source + "',\n"
+
+                }
+
+            })
+        })
+        console.log(sourcesMap)
+
+
+    },
+
+    setMappingsSourceAttrs(labelsMap, filePath, table) {
 
         var sourceConfig = {
             type: "jsonMap",
@@ -487,8 +577,8 @@ var ontologiesMapper = {
             "tblAttributePickListValue": "AttributePickListValueID",
             "tblFunctionalClass": "FunctionalClassID",
             "tblAttribute": "AttributeID",
-            "tblDiscipline": "DisciplineID",
-            "tblTag": "TagId",
+            //  "tblDiscipline",
+            //   "tblTag",
 
         }
 
@@ -569,95 +659,77 @@ var ontologiesMapper = {
         }
 
 
-    },
-
-
-    normalizeMappingSources: function () {
-
-
-        var tableFields = [
-            'FunctionalClassID',
-            'PhysicalClassID',
-            'AttributeID',
-            'AttributePickListValueID',
-            'AttributeID2',
-            'AttributePickListValueID2',
-            'PickListValueGroupingID',
-            'UnitOfMeasureID',
-            /*     'UnitOfMeasureDimensionID',
-                 'DisciplineID',
-                 'DocumentTypeID',
-                 'DisciplineDocumentTypeID',
-                 'FunctionalClassToPhysicalClassID',
-                 'FunctionalClassToAttributeID',
-                 'PhysicalClassToAttributeID',
-                 'FunctionalClassToDisciplineDocumentTypeID',
-                 'PhysicalClassToDisciplineDocumentTypeID',*/
-
-
-        ]
-        var mappedFields = ['ID',
-            'SourceCode',
-            'SourceDescription',
-            'MappingSourceOriginID',
-            'ChangeRequestNumber',
-            'ItemStatus',
-        ]
-
-        var multipleFields = ["PhysicalClassID", "FunctionalClassID", "AttributeID", "AttributePickListValueID", "PickListValueGroupingID"]
-        var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json"
-        var data = JSON.parse(fs.readFileSync(filePath))
-
-
-        var data2 = []
-        data.forEach(function (item) {
-            tableFields.forEach(function (field, fieldIndex) {
-                if (item[field]) {
-                    if (item[field].indexOf('-F00') > -1)
-                        var x = 3;
-                    if (fieldIndex == 6)
-                        var x = 3
-                    if ((fieldIndex < tableFields.length - 1 && !item[tableFields[fieldIndex + 1]])) {
-                        if (multipleFields.indexOf(field) > -1) {
-                            var obj = {entityId: item[field]}
-
-                            mappedFields.forEach(function (field2) {
-                                if (item[field2])
-                                    obj[field2] = item[field2]
-                            })
-
-                            data2.push(obj)
-
-                        } else {
-                            var x = 3
-                        }
-                    }
-                }
-            })
-
-
-        })
-        fs.writeFileSync(filePath.replace(".json", "._normal.json"), JSON.stringify(data2, null, 2))
-
-
     }
+
+
 }
 module.exports = ontologiesMapper;
 
 
-if (true) {//mapClasses
+var sourceConfig = {
+    type: "sparql",
+    query: "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " +
+        " from <http://data.total.com/quantum/vocab/>" +
+        " where { ?concept rdfs:label ?label." +
+        //  "?concept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.15926.org/dm/Property>" +
+        " }LIMIT 10000",
+    sparql_url: "http://51.178.139.80:8890/sparql",
+    labelProcessor: null,
+    filePath: "D:\\NLP\\ontologies\\quantum\\mappingQuantum_Part4.nt"
+}
+
+
+var targetConfig = {
+
+    // sparql_url: "http://staging.data.posccaesar.org/rdl/",
+    "sparql_server": {url: "http://data.15926.org/cfihos"},
+    // graphUri: "http://standards.iso.org/iso/15926/part4/",
+    //sparql_url: "http://51.178.139.80:8890/sparql",
+    labelProcessor: null,
+    method: "GET"
+}
+
+
+if (false) {
+    var filePath = "D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.json";
+    var filePath = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.json";
+
+
+    ontologiesMapper.extractlabelsFromJsonData(filePath)
+}
+
+
+if (false) {
+
+    var filePath = "D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.json"
+    ontologiesMapper.extractMappingsFromMDM()
+
+
+}
+
+
+if (false) {
+
+    var filePath = "D:\\NLP\\ontologies\\quantum\\mappings\\MDMablesMapping.txt"
+    ontologiesMapper.generateMDMtablesMappings(filePath)
+
+
+}
+
+
+if (true) {
     var sourceConfig = {
         type: "jsonMap",
         filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__mainObjects.json",
         // filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__objects.json",
 
-     // table: "tblPhysicalClass",
-     //  table: "tblPickListValueGrouping",
-     //  table: "tblAttributePickListValue",
-   //table: "tblFunctionalClass",
-        table: "tblAttribute",
-        //table: "tblDiscipline",
-        //table: "tblTag",
+      // table: "tblPhysicalClass",
+   table: "tblPickListValueGrouping",
+        //  table: "tblAttributePickListValue",
+     //  table: "tblFunctionalClass",
+      //  table: "tblAttribute",
+        // table: "tblDiscipline",
+        // table: "tblTag",
 
 
         labelKey: "Name",
@@ -727,45 +799,6 @@ if (true) {//mapClasses
             "color": "#bcbd22"
         },
     ]
-    var targetConfigs=[
-        {name:"ISO_15926-part-4",
-        "editable": true,
-            "graphUri": "http://standards.iso.org/iso/15926/part4/",
-            "sparql_server": {
-            "url": "http://51.178.139.80:8890/sparql"
-        },
-        "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
-            "controller": "Sparql_OWL",
-            "schemaType": "OWL",
-            "schema": null,
-            "color": "#bcbd22"
-    },
-        {name:"ISO_15926-part-12",
-        "editable": true,
-            "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
-            "sparql_server": {
-            "url": "http://51.178.139.80:8890/sparql"
-        },
-        "controller": "Sparql_OWL",
-            "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-            "schemaType": "OWL",
-            "schema": null,
-            "color": "#bcbd22"
-    },
-        {name:"ISO_15926-org",
-        "graphUri": "",
-            "sparql_server": {
-            "url": "http://192.236.179.169/sparql",
-                "method": "GET"
-        },
-        "controller": "Sparql_OWL",
-            "topClassFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
-            "schemaType": "OWL",
-            "schema": null,
-            "color": "#bcbd22"
-    },
-
-]
 
 
     sourceConfig.filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__mainObjects.json"
@@ -780,7 +813,7 @@ if (true) {//mapClasses
 
         // ontologiesMapper.setMappingsSourceAttrs(result.labelsMap, sourceConfig.filePath, sourceConfig.table)
 
-        var mappingSourceArrayPath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json"
+        var mappingSourceArrayPath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource._normal.json"
         var mappingSourceArray = JSON.parse(fs.readFileSync(mappingSourceArrayPath))
 
         ontologiesMapper.writeMappings(
@@ -795,5 +828,74 @@ if (true) {//mapClasses
 
 }
 
+if (false) {
+
+
+    var tableFields = [
+        'FunctionalClassID',
+        'PhysicalClassID',
+        'AttributeID',
+        'AttributePickListValueID',
+        'AttributeID2',
+        'AttributePickListValueID2',
+        'PickListValueGroupingID',
+        'UnitOfMeasureID',
+        /*     'UnitOfMeasureDimensionID',
+             'DisciplineID',
+             'DocumentTypeID',
+             'DisciplineDocumentTypeID',
+             'FunctionalClassToPhysicalClassID',
+             'FunctionalClassToAttributeID',
+             'PhysicalClassToAttributeID',
+             'FunctionalClassToDisciplineDocumentTypeID',
+             'PhysicalClassToDisciplineDocumentTypeID',*/
+
+
+    ]
+    var mappedFields = ['ID',
+        'SourceCode',
+        'SourceDescription',
+        'MappingSourceOriginID',
+        'ChangeRequestNumber',
+        'ItemStatus',
+    ]
+
+    var multipleFields = ["PhysicalClassID", "FunctionalClassID","AttributeID", "AttributePickListValueID", "PickListValueGroupingID"]
+    var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json"
+    var data = JSON.parse(fs.readFileSync(filePath))
+
+
+    var data2 = []
+    data.forEach(function (item) {
+        tableFields.forEach(function (field, fieldIndex) {
+            if (item[field]) {
+                if (item[field].indexOf('-F00')>-1)
+                    var x = 3;
+                if (fieldIndex == 6)
+                    var x = 3
+                if ((fieldIndex < tableFields.length - 1 && !item[tableFields[fieldIndex + 1]])) {
+                    if (multipleFields.indexOf(field) > -1) {
+                        var obj = {entityId: item[field]}
+
+                        mappedFields.forEach(function (field2) {
+                            if (item[field2])
+                                obj[field2] = item[field2]
+                        })
+
+                        data2.push(obj)
+
+                    } else {
+                        var x = 3
+                    }
+                }
+            }
+        })
+
+
+    })
+    fs.writeFileSync(filePath.replace(".json", "._normal.json"), JSON.stringify(data2, null, 2))
+
+
+}
 
 //mapQuatumCfihos.writeMappings()

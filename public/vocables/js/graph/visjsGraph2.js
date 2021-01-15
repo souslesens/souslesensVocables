@@ -100,14 +100,20 @@ var visjsGraph = (function () {
                 if (_options.onRightClickFn) {
                     var point = params.pointer.DOM;
                     var objId = self.network.getNodeAt(params.pointer.DOM)
-                    if (!objId)
-                        return
-                    var obj = self.data.nodes.get(objId);
-                    if (!obj)
-                        var obj = self.data.edges.get(objId);
+                    if (objId) {
 
-                    if (obj)
-                        _options.onRightClickFn(obj, point, params.event)
+                        var obj = self.data.nodes.get(objId);
+                        if (obj)
+                            _options.onRightClickFn(obj, point, params.event)
+                    } else {
+                        objId = self.network.getEdgeAt(params.pointer.DOM)
+                            var obj = self.data.edges.get(objId);
+                            if (obj)
+                                _options.onRightClickFn(obj, point, params.event)
+                        }
+
+
+
                 }
             }//rigth click
 
@@ -354,7 +360,7 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv()
-        var result=common.copyTextToClipboard(csv)
+        var result = common.copyTextToClipboard(csv)
         MainController.UI.message(result);
     }
 

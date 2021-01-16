@@ -1,12 +1,13 @@
 var ThesaurusBrowser = (function () {
     var self = {}
+    self.currentTargetDiv = "currentSourceTreeDiv"
 
 
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
-    /*    $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
-            "<input type='checkbox' checked='checked' id= 'GenericTools_allExactMatchSearchCBX'>Exact Match" +
-            "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")*/
+        /*    $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
+                "<input type='checkbox' checked='checked' id= 'GenericTools_allExactMatchSearchCBX'>Exact Match" +
+                "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")*/
     }
     self.onSourceSelect = function (thesaurusLabel) {
         MainController.currentSource = thesaurusLabel;
@@ -45,7 +46,7 @@ var ThesaurusBrowser = (function () {
             self.editThesaurusConceptInfos(source, propertiesMap.node)
         }
         {
-            self.openTreeNode("currentSourceTreeDiv", source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
+            self.openTreeNode(self.currentTargetDiv, source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
         }
 
     }
@@ -65,6 +66,13 @@ var ThesaurusBrowser = (function () {
     self.showThesaurusTopConcepts = function (thesaurusLabel, options) {
         if (!options)
             options = {}
+
+        if (options.targetDiv)
+            self.currentTargetDiv = options.targetDiv
+        if ($("#" + self.currentTargetDiv).length == 0) {
+            var html = "<div id='" + self.currentTargetDiv + "'></div>"
+            $("#actionDiv").html(html);
+        }
         options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getTopConcepts(thesaurusLabel, options, function (err, result) {
             if (err)
@@ -74,8 +82,9 @@ var ThesaurusBrowser = (function () {
                 Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
 
-                var html = "<div id='currentSourceTreeDiv'>no data found</div>"
-                $("#actionDiv").html(html);
+                var html = "<div id='" + self.currentTargetDiv + "'>no data found</div>"
+                $("#" + self.currentTargetDiv).html(html);
+
                 return MainController.UI.message("")
             }
 
@@ -85,25 +94,17 @@ var ThesaurusBrowser = (function () {
                 return MainController.UI.message(err);
             }
 
-            if (false) {
-                var str = ""
-                result.forEach(function (item) {
-                    str += thesaurusLabel + "\t" + item.topConcept.value + "\t" + item.topConceptLabel.value + "\n"
-                })
-                console.log(str)
-            }
 
-
-            var html = "<div id='currentSourceTreeDiv'></div>"
-
-            $("#actionDiv").html(html);
+            /*  var html = "<div id='"+self.currentTargetDiv+"'></div>"
+              $("#actionDiv").html(html);*/
 
 
             var jsTreeOptions = options;
             jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu()
             jsTreeOptions.selectNodeFn = Config.tools[MainController.currentTool].controller.selectNodeFn;
             jsTreeOptions.source = thesaurusLabel;
-            TreeController.drawOrUpdateTree("currentSourceTreeDiv", result, "#", "topConcept", jsTreeOptions)
+
+            TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions)
 
 
             /* Collection.Sparql.getCollections(thesaurusLabel, options, function (err, result) {
@@ -223,10 +224,10 @@ var ThesaurusBrowser = (function () {
             MainController.UI.message("")
             if (jstreeData.length == 0) {
                 $("#waitImg").css("display", "none");
-                return $("#currentSourceTreeDiv").html("No data found")
+                return $("#" + self.currentTargetDiv).html("No data found")
             }
 
-            common.loadJsTree("currentSourceTreeDiv", jstreeData, {
+            common.loadJsTree(self.currentTargetDiv, jstreeData, {
                 openAll: true, selectNodeFn: function (event, propertiesMap) {
                     if (Config.tools[MainController.currentTool].controller.selectNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectNodeFn(event, propertiesMap);
@@ -248,9 +249,9 @@ var ThesaurusBrowser = (function () {
             return
         var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
         var searchedSources = [];
-        if(MainController.currentSchemaType)
+        if (MainController.currentSchemaType)
             $("#GenericTools_searchSchemaType").val(MainController.currentSchemaType)
-       var schemaType= $("#GenericTools_searchSchemaType").val()
+        var schemaType = $("#GenericTools_searchSchemaType").val()
         for (var sourceLabel in Config.sources) {
             if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
                 if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
@@ -294,10 +295,14 @@ var ThesaurusBrowser = (function () {
 
         }, function (err) {
             $("#accordion").accordion("option", {active: 2});
-            var html = "<div id='currentSourceTreeDiv'></div>"
+            var html = "<div id='" + self.currentTargetDiv + "'></div>"
 
+            if ($("#" + self.currentTargetDiv).length == 0) {
+                var html = "<div id='" + self.currentTargetDiv + "'></div>"
+                $("#actionDiv").html(html);
+            }
+            $("#" + self.currentTargetDiv).html(html)
 
-            $("#actionDiv").html(html);
 
             var jstreeOptions = {
                 openAll: true, selectNodeFn: function (event, propertiesMap) {
@@ -309,7 +314,7 @@ var ThesaurusBrowser = (function () {
                 }, contextMenu: self.getJstreeConceptsContextMenu()
             }
 
-            common.loadJsTree("currentSourceTreeDiv", jstreeData, jstreeOptions)
+            common.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
             setTimeout(function () {
                 MainController.UI.updateActionDivLabel("Multi source search :" + term)
                 MainController.UI.message("");
@@ -344,7 +349,7 @@ var ThesaurusBrowser = (function () {
                     return callback(null, []);
                 else
                     $("#waitImg").css("display", "none");
-                return $("#currentSourceTreeDiv").html("No data found")
+                return $("#" + self.currentTargetDiv).html("No data found")
             }
 
             var allJstreeIds = {}
@@ -366,8 +371,8 @@ var ThesaurusBrowser = (function () {
                         var jstreeId = item["broader" + i].value
                         if (!existingNodes[id]) {
                             existingNodes[id] = 1
-                            if(!item["broader" + i + "Label"])
-                                var x=3
+                            if (!item["broader" + i + "Label"])
+                                var x = 3
                             var label = item["broader" + i + "Label"].value
                             var parentId = options.rootId;
                             if (item["broader" + (i + 1)])

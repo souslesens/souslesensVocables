@@ -26,10 +26,18 @@ var visjsGraph = (function () {
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
     self.showNodesLabelMinScale = 0.5
+    var currentDrawParams;
 
     self.simulationOn = false;
+self.redraw=function(){
+    if(!currentDrawParams)
+        return;
+   var  visjsData={nodes:self.data.nodes.get(),edges:self.data.edges.get()}
+    self.draw(currentDrawParams.divId,visjsData, currentDrawParams.options, currentDrawParams.callback)
 
+}
     self.draw = function (divId, visjsData, _options, callback) {
+        currentDrawParams={divId:divId,options:_options,callback:callback}
         if (!_options)
             _options = {}
         self.legendLabels = self.legendLabels.concat(visjsData.labels)

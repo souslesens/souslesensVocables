@@ -223,7 +223,7 @@ var Blender = (function () {
                     if (type == "externalReferenceTopConcept")
                         return;
                     if (propertiesMap.event.ctrlKey) {
-                        if (Blender.displayMode == "centralPanel") {
+                        if (Blender.displayMode == "centralPanelDiv") {
                             self.nodeEdition.editNode("concept")
                         }
                         Clipboard.copy({
@@ -863,7 +863,7 @@ var Blender = (function () {
                 if (type == "concept") {
 
                     var skosType = "http://www.w3.org/2004/02/skos/core#Concept"
-                    if (self.displayMode == "centralPanel") {
+                    if (self.displayMode == "centralPanelDiv") {
                         SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
                     } else {
                         self.nodeEdition.openDialog()
@@ -918,7 +918,7 @@ var Blender = (function () {
                 initData[parentProperty] = [{value: parentNode.id, type: "uri"}];
 
 
-                if (self.displayMode == "centralPanel") {
+                if (self.displayMode == "centralPanelDiv") {
 
                     SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, type, childClass, initData);
                 } else {
@@ -1014,7 +1014,7 @@ var Blender = (function () {
             if (fromMode)
                 self.displayMode = fromMode
             if (self.displayMode == "leftPanel") {
-                self.displayMode = "centralPanel"
+                self.displayMode = "centralPanelDiv"
                 $("#Blender_tabs").tabs("disable", 0);
 
                 MainController.UI.showInCentralPanelDiv("blendDiv")

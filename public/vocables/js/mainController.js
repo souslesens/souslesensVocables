@@ -167,6 +167,35 @@ var MainController = (function () {
             $("#messageDiv").html(message)
         },
 
+        toogleRightPanel:function(){
+            var display=$("#rightPanelDiv").css("display")
+
+            if(display=="flex"){//open->close
+                var w2= $("#graphDiv").width()+rightPanelWidth
+                $("#rightPanelDiv").css("display","none")
+                $("#centralPanelDiv").width(w2)
+                $("#graphDiv").animate({width:w2})
+                setTimeout(function(){
+                    visjsGraph.redraw()
+                },200)
+
+
+
+            }
+           else{//closeclose
+                var w2= $("#graphDiv").width()-rightPanelWidth
+                $("#rightPanelDiv").css("display","flex")
+                $("#centralPanelDiv").width(w2)
+                $("#graphDiv").animate({width:w2})
+                setTimeout(function(){
+                    visjsGraph.redraw()
+                },200)
+
+
+
+            }
+        },
+
 
         setCredits: function () {
 
@@ -206,7 +235,7 @@ var MainController = (function () {
             if (divId == "graphDiv") {
                 $("#graphDiv").css("display", "block")
                 $("#blendDiv").css("display", "none")
-            } else if (divId = "blendDiv" && Blender.displayMode == "centralPanel") {
+            } else if (divId = "blendDiv" && Blender.displayMode == "centralPanelDiv") {
                 $("#graphDiv").css("display", "none")
                 $("#blendDiv").css("display", "block")
             }

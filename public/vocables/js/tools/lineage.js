@@ -23,15 +23,27 @@ var Lineage_classes = (function () {
 
 
             $("#accordion").accordion("option", {active: 2});
-            $("#actionDivContolPanelDiv").load("snippets/lineage.html")
+            $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
+            $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")
+            ThesaurusBrowser.currentTargetDiv = "LineagejsTreeDiv"
+
+
+            var w = $(document).width()-leftPanelWidth
+            var h = $(document).height()-30;
+            // $("#centralPanel").width(w)
+            $("#centralPanelDiv").width(w - rightPanelWidth)
+            $("#rightPanelDiv").width(rightPanelWidth)
+
+
+
 
             setTimeout(function () {
                 var sourceLabels = []
 
 
-              for (var key in Config.sources){
-                  if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType)>-1)
-                      sourceLabels.push(key)
+                for (var key in Config.sources) {
+                    if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1)
+                        sourceLabels.push(key)
                 }
                 sourceLabels.sort()
                 common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
@@ -51,7 +63,7 @@ var Lineage_classes = (function () {
                 });
                 $("#GenericTools_searchSchemaType").val("OWL")
                 if (sourceLabel) {
-                    ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel)
+                    ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel,{targetDiv:"LineagejsTreeDiv"})
                     Lineage_classes.drawTopConcepts(sourceLabel)
                 }
 
@@ -62,6 +74,7 @@ var Lineage_classes = (function () {
         self.selectNodeFn = function (event, propertiesMap) {
             var data = propertiesMap.node.data;
             self.addArbitraryNodeToGraph(data)
+            ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv,data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
         }
         self.initUI = function () {
             MainController.UI.message("")
@@ -421,7 +434,7 @@ var Lineage_classes = (function () {
 
             var similars = [];
             if (!sources)
-                sources =self.currentSource;// common.getAllsourcesWithType("OWL")
+                sources = self.currentSource;// common.getAllsourcesWithType("OWL")
             if (!Array.isArray(sources))
                 sources = [sources]
 
@@ -559,66 +572,64 @@ var Lineage_classes = (function () {
                             return callbackSeries()
 
                         }
-                        var newEdges=[]
-                        if(true){
-                        similars.forEach(function (item) {
-                                if (!existingNodes[item.id]) {
-                                    existingNodes[item.id] = 1
-                                    var color = self.getSourceColor(item.source)
-                                    visjsData.nodes.push({
-                                        id: item.id,
-                                        label: item.label,
-                                        color: color,
-                                        shape: "dot",
-                                        size: defaultShapeSize,
-                                        data: item
-                                    })
-                                }
-
-
-                                var from;
-                                var width, arrows;
-                                if (similarType == "labels") {
-                                    from = sourceItemsMap[item.label.toLowerCase()]
-                                    width = 1
-                                    arrows = {
-                                        to: {
-                                            enabled: true,
-                                            type: "curve",
-                                        },
+                        var newEdges = []
+                        if (true) {
+                            similars.forEach(function (item) {
+                                    if (!existingNodes[item.id]) {
+                                        existingNodes[item.id] = 1
+                                        var color = self.getSourceColor(item.source)
+                                        visjsData.nodes.push({
+                                            id: item.id,
+                                            label: item.label,
+                                            color: color,
+                                            shape: "dot",
+                                            size: defaultShapeSize,
+                                            data: item
+                                        })
                                     }
-                                } else if (similarType == "sameAs") {
-                                    from = sourceItemsMap[item.id]
-                                    width = 2
-                                    arrows = null
 
+
+                                    var from;
+                                    var width, arrows;
+                                    if (similarType == "labels") {
+                                        from = sourceItemsMap[item.label.toLowerCase()]
+                                        width = 1
+                                        arrows = {
+                                            to: {
+                                                enabled: true,
+                                                type: "curve",
+                                            },
+                                        }
+                                    } else if (similarType == "sameAs") {
+                                        from = sourceItemsMap[item.id]
+                                        width = 2
+                                        arrows = null
+
+                                    }
+                                    if (from == item.id)
+                                        return;
+                                    var edgeId = from + "_" + item.id + "_" + item.source + "_" + similarType
+
+                                    if (!existingNodes[edgeId]) {
+                                        existingNodes[edgeId] = 1
+                                        newEdges.push({id: edgeId, length: 45, color: "blue"})
+                                        visjsData.edges.push({
+                                            id: edgeId,
+                                            from: from,
+                                            to: item.id,
+                                            color: color,
+                                            width: width,
+                                            //   label: item.source,
+                                            arrows: arrows,
+                                            data: {source: item.source},
+                                            length: 30,
+                                            //     physics:false
+                                        })
+
+                                    }
                                 }
-                                if (from == item.id)
-                                    return;
-                                var edgeId = from + "_" + item.id + "_" + item.source+"_"+similarType
-
-                                if (!existingNodes[edgeId]) {
-                                    existingNodes[edgeId] = 1
-                                    newEdges.push( {id:edgeId,length:45,color:"blue"})
-                                    visjsData.edges.push({
-                                        id: edgeId,
-                                        from: from,
-                                        to: item.id,
-                                        color: color,
-                                        width: width,
-                                        //   label: item.source,
-                                        arrows: arrows,
-                                        data: {source: item.source},
-                                      length:30,
-                                   //     physics:false
-                                    })
-
-                                }
-                            }
-                        )
-                        }
-
-                          else {
+                            )
+                        } else {
 
 
                         }
@@ -627,9 +638,9 @@ var Lineage_classes = (function () {
                         visjsGraph.data.nodes.add(visjsData.nodes)
                         visjsGraph.data.edges.add(visjsData.edges)
                         visjsGraph.network.fit()
-                     /*   setTimeout(function() {
-                            visjsGraph.data.edges.update(newEdges)
-                        },1000)*/
+                        /*   setTimeout(function() {
+                               visjsGraph.data.edges.update(newEdges)
+                           },1000)*/
                         $("#waitImg").css("display", "none");
 
 
@@ -1419,14 +1430,7 @@ Lineage_properties = (function () {
                                 },
                                 size: self.defaultShapeSize,
                                 color: color,
-                                shape: shape,
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "arrow",
-                                        scaleFactor: 0.5
-                                    },
-                                },
+                                shape: shape
                             })
                         }
                         var edgeId = item.property.value + "_" + item.range.value
@@ -1436,7 +1440,16 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.range.value,
-                                label: "range"
+                               // label: "range"
+                                color:"brown",
+                                dashes:true,
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "arrow",
+                                        scaleFactor: 0.5
+                                    },
+                                },
                             })
                         }
 
@@ -1473,9 +1486,11 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.domain.value,
-                                label: "domain",
+                               // label: "domain",
+                                color:"green",
+                                dashes:true,
                                 arrows: {
-                                    to: {
+                                    from: {
                                         enabled: true,
                                         type: "arrow",
                                         scaleFactor: 0.5
@@ -1517,7 +1532,8 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.range.value,
-                                label: "range",
+                                color:"brown",
+                                dashes:true,
                                 arrows: {
                                     to: {
                                         enabled: true,

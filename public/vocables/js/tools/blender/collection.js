@@ -89,7 +89,7 @@ var Collection = (function () {
             self.currentTreeNode = propertiesMap.node
 
         $("#Blender_collectionTreeDiv").jstree(true).settings.contextmenu.items = Collection.getJstreeContextMenu()
-        if (Blender.displayMode == "centralPanel") {
+        if (Blender.displayMode == "centralPanelDiv") {
 
         }
         if (propertiesMap.event.ctrlKey) {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title>SouslesensVocables</title>
-    <link rel="icon" href="../icons/souslesensIcon.png" />
+    <link rel="icon" href="../icons/souslesensIcon.png"/>
 
     <script src="./js/external/jquery/jquery.min.js"></script>
     <script src="./js/external/jquery/jquery-ui.min.js"></script>
@@ -27,13 +27,6 @@
     <script src="js/treeController.js"></script>
     <script src="js/skosConceptEditor.js"></script>
     <script src="js/clipboard.js"></script>
-
-
-
-
-
-
-
 
 
     <script src="js/tools/thesaurusBrowser.js"></script>
@@ -77,26 +70,28 @@
     <script src="js/sparqlProxies/sparql_NPD.js"></script>
 
 
-
-
-
     <!--  <script src="js/authentification.js"></script>-->
 
 
     <script>
 
         var leftPanelWidth = 400
+        var rightPanelWidth =400
         $(function () {
-            config={loginMode:"none",appName:"VOCABLES"};
+            config = {loginMode: "none", appName: "VOCABLES"};
             authentication.init()
 
-            var w = $(document).width() - leftPanelWidth;
-            var h = $(document).height();
+            var w = $(document).width() - leftPanelWidth-30;
+            var h = $(document).height()-20;
             // $("#centralPanel").width(w)
             $("#graphDiv").width(w)
             $("#blendDiv").width(w)
-            $("#graphDiv").height(h - 100)
-            $("#blendDiv").height(h - 100)
+            $("#graphDiv").height(h - 70)
+            $("#blendDiv").height(h - 70)
+            $("#leftPanelDiv").height(h-50)
+            $("#rightPanelDiv").height(h-50)
+       //   $('.jstree').attr("height",800)
+         //   $(".jstree").css({ "max-height": 600 });
 
 
             $("#accordion").accordion()
@@ -129,24 +124,35 @@
         body {
             font-size: 14px;
             font-family: Arial;
+            overflow: hidden;
         }
 
 
         .jstree {
             margin: 5px;
-            height: 500px;
-            width: 380px;
+          max-height: 600px;
+            width: 360px;
             overflow: auto;
 
+
+        }
+        .ui-accordion-content-active{
+            margin-left: -30px !important;
+            heightWW: 300px !important;
         }
 
         #graphDiv {
-            margin: 5px;
+            margin: 3px;
+            border: 2px solid #ddd;
+        }
+        .jstree-default{
+           min-height: 300px !important;
         }
 
         .jstree-node {
             font-weight: bold;
         }
+
         #currentSourceTreeDiv {
             overflow: auto;
         }
@@ -203,8 +209,9 @@
         .searched_conceptSource {
             color: blueviolet;
         }
-        .popupMenuItem{
-            border: #3b13ef 1px solid ;
+
+        .popupMenuItem {
+            border: #3b13ef 1px solid;
             border-radius: 3px;
             padding: 5px;
             margin: 5px;
@@ -220,16 +227,19 @@
 
 
 <div style="height: 20px;display: flex;    flex-flow: row;">
-    <div style="width:90%">
+    <div style="width:97%">
         <table>
             <tr>
-               <td><button onclick="MainController.test()">T</button> </td><td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
+                <td>
+                    <button onclick="MainController.test()">T</button>
+                </td>
+                <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
                 <td><span id="messageDiv"></span></td>
             </tr>
         </table>
 
-
     </div>
+    <button style="justify-content: right" onclick="MainController.UI.toogleRightPanel()">X</button>
 
 
 </div>
@@ -261,46 +271,47 @@
 
             </div>
 
-                 <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
-                  <div id="blenderPanelDiv" class='max-height'>
+            <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
+            <div id="blenderPanelDiv" class='max-height'>
 
-                  </div>
+            </div>
 
-              </div>
-          </div>
-          <div id="centralPanel" style="display: flex;flex-direction: row">
-              <div id="graphDiv">
-              </div>
+        </div>
+    </div>
 
-              <div id="blendDiv">
+    <div id="centralPanelDiv" style="display: flex;flex-direction: row">
+        <div id="graphDiv">
+        </div>
 
-                  <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
-                  <div style='display: flex;flex-direction: row;background-color: #ccc;'>
-                      <div id='Blender_conceptTreeContainerDiv'></div>
-                      <div>
-                          <div id="Blender_nodeEditionButtonsDiv" style="display: none">
-                          <button onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
-                          <button onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
-                          </div>
-                          <div id='Blender_nodeEditionContainerDiv'></div>
-                      </div>
+        <div id="blendDiv">
 
-                  </div>
-              </div>
+            <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
+            <div style='display: flex;flex-direction: row;background-color: #ccc;'>
+                <div id='Blender_conceptTreeContainerDiv'></div>
+                <div>
+                    <div id="Blender_nodeEditionButtonsDiv" style="display: none">
+                        <button onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
+                        <button onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
+                    </div>
+                    <div id='Blender_nodeEditionContainerDiv'></div>
+                </div>
 
-
-
-          </div>
+            </div>
+        </div>
 
 
-      </div>
-      <div id="loginDiv"
-           style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
-          <div> login<input id="loginInput">
-              password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
+    </div>
+    <div id="rightPanelDiv" style="display: flex;flex-direction: column">
+    </div>
+
+</div>
+<div id="loginDiv"
+     style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
+    <div> login<input id="loginInput">
+        password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
                               document.getElementById('loginButton').click()">
-              <button id="loginButton" onclick="authentication.doLogin()">OK</button>
-              <!--   <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>-->
+        <button id="loginButton" onclick="authentication.doLogin()">OK</button>
+        <!--   <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>-->
 
         <div id="loginMessage" style="margin: 20px; font-size: 14px; color:saddlebrown"></div>
     </div>
@@ -310,7 +321,8 @@
 
 </div>
 
-<div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');" style=" z-index:20;position:absolute;flex-direction:column;padding:5px;border-radius:5px;text-align:center;display: none;background-color: #ddd">
+<div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"
+     style=" z-index:20;position:absolute;flex-direction:column;padding:5px;border-radius:5px;text-align:center;display: none;background-color: #ddd">
 </div>
 
 

@@ -13,9 +13,9 @@ var Sparql_OWL = (function () {
             var fromStr = ""
 
             var strFilterTopConcept;
-           var topClassFilter = Config.sources[sourceLabel].topClassFilter
+            var topClassFilter = Config.sources[sourceLabel].topClassFilter
             if (topClassFilter)
-                strFilterTopConcept =topClassFilter;
+                strFilterTopConcept = topClassFilter;
             else
                 strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
 
@@ -31,15 +31,15 @@ var Sparql_OWL = (function () {
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
-            "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {" +
-            strFilterTopConcept +
-            " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
+                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {" +
+                strFilterTopConcept +
+                " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
                 query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
             query += "}order by ?topConceptLabel limit 1000"
             var url = self.sparql_url + "?format=json&query=";
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -68,20 +68,20 @@ var Sparql_OWL = (function () {
                 fromStr = " FROM <" + self.graphUri + ">"
 
 
-            var owlPredicate="subClassOf";
-            if(options.owlType)
-                owlPredicate=options.owlType
+            var owlPredicate = "subClassOf";
+            if (options.owlType)
+                owlPredicate = options.owlType
 
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * " + fromStr + " where {" +
-                "?child1   rdfs:"+owlPredicate+" ?concept. " + strFilter +
+                "?child1   rdfs:" + owlPredicate + " ?concept. " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
 
 
             for (var i = 1; i < descendantsDepth; i++) {
 
-                query += "OPTIONAL { ?child" + (i + 1) + " rdfs:"+owlPredicate+" ?child" + i + "." +
+                query += "OPTIONAL { ?child" + (i + 1) + " rdfs:" + owlPredicate + " ?child" + i + "." +
                     "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
             }
@@ -102,15 +102,14 @@ var Sparql_OWL = (function () {
                 }
 
 
-
                 query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
                     " select  distinct * " + fromStr + "   WHERE { " +
-                    "  ?child1 rdfs:"+owlPredicate+" ?concept.   " + strFilter +
+                    "  ?child1 rdfs:" + owlPredicate + " ?concept.   " + strFilter +
                     "   ?collection skos:member* ?acollection. " + Sparql_generic.Sparql_common.getUriFilter("collection", options.filterCollections) +
                     //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:"+owlPredicate+"*) ?child1.  " +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:" + owlPredicate + "*) ?child1.  " +
                     "  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
@@ -123,7 +122,7 @@ var Sparql_OWL = (function () {
 
             var url = self.sparql_url + "?format=json&query=";
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -142,7 +141,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            if (self.graphUri && self.graphUri != ""){
+            if (self.graphUri && self.graphUri != "") {
                 if (!Array.isArray(self.graphUri))
                     self.graphUri = [self.graphUri]
                 self.graphUri.forEach(function (graphUri) {
@@ -156,7 +155,7 @@ var Sparql_OWL = (function () {
 
             var url = self.sparql_url + "?format=json&query=";
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -178,20 +177,20 @@ var Sparql_OWL = (function () {
             }
 
             var fromStr = ""
-            if (self.graphUri && self.graphUri != ""){
+            if (self.graphUri && self.graphUri != "") {
                 if (!Array.isArray(self.graphUri))
                     self.graphUri = [self.graphUri]
                 self.graphUri.forEach(function (graphUri) {
                     fromStr = " FROM <" + graphUri + "> "
                 })
             }
-            var owlPredicate="subClassOf";
-            if(options.owlType)
-                owlPredicate=options.owlType
+            var owlPredicate = "subClassOf";
+            if (options.owlType)
+                owlPredicate = options.owlType
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>"+
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 " select distinct *  " + fromStr + "  WHERE {{"
 
             query += "?concept rdfs:label ?conceptLabel. " + strFilter;
@@ -200,15 +199,15 @@ var Sparql_OWL = (function () {
 
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  ?concept rdfs:"+owlPredicate+"  ?broader" + i + "." +
-                       // "?broader" + i +" rdf:type owl:Class." +
+                    query += "  ?concept rdfs:" + owlPredicate + "  ?broader" + i + "." +
+                        // "?broader" + i +" rdf:type owl:Class." +
                         "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
 
                 } else {
 
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:"+owlPredicate+" ?broader" + i + "."
-                   "?broader" + i +" rdf:type owl:Class."
+                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + "."
+                    "?broader" + i + " rdf:type owl:Class."
 
                     query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
@@ -232,8 +231,8 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
-            var method=Config.sources[sourceLabel].server_method;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+            var method = Config.sources[sourceLabel].server_method;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -253,7 +252,7 @@ var Sparql_OWL = (function () {
 
 
             var fromStr = ""
-            if (self.graphUri && self.graphUri != ""){
+            if (self.graphUri && self.graphUri != "") {
                 if (!Array.isArray(self.graphUri))
                     self.graphUri = [self.graphUri]
                 self.graphUri.forEach(function (graphUri) {
@@ -271,16 +270,17 @@ var Sparql_OWL = (function () {
             query += " select distinct * " + fromStr + "  WHERE { "
             query += "?concept rdfs:label ?conceptLabel.";
 
-            if(options.filter)
+            if (options.filter)
                 query += options.filter;
             if (options.lang)
                 query += "filter(lang(?conceptLabel )='" + lang + "')"
 
             query += "  } ";
-           // query += "limit " + limit + " ";
+            if (options.limit)
+                query += "limit " + options.limit;
 
             var url = self.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
 
 
                 if (err) {
@@ -295,63 +295,6 @@ var Sparql_OWL = (function () {
 
 
 
-
-        self.execute_GET_query = function (query, callback) {
-            var query2 = encodeURIComponent(query);
-            query2 = query2.replace(/%2B/g, "+").trim()
-
-            var url = self.sparql_url + "?format=json&query=" + query2;
-
-            var body = {
-                headers: {
-                    "Accept": "application/sparql-results+json",
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Referer": self.graphUri,
-                }
-            }
-            var payload = {
-                httpProxy: 1,
-                url: url,
-                body: body,
-                options: {a: 1},
-                GET: true
-
-
-            }
-            $("#waitImg").css("display", "block");
-            $.ajax({
-                type: "POST",
-                url: elasticUrl,
-                data: payload,
-                dataType: "json",
-                /* beforeSend: function(request) {
-                     request.setRequestHeader('Age', '10000');
-                 },*/
-
-                success: function (data, textStatus, jqXHR) {
-                    if (data.result && typeof data.result != "object")//cas GEMET
-                        data = JSON.parse(data.result.trim())
-                    //  $("#messageDiv").html("found : " + data.results.bindings.length);
-
-                    /*  if (data.results.bindings.length == 0)
-                          return callback({data.results.bindings:},[])*/
-                    callback(null, data)
-
-                }
-                , error: function (err) {
-                    $("#messageDiv").html(err.responseText);
-
-                    $("#waitImg").css("display", "none");
-                    console.log(JSON.stringify(err))
-                    console.log(JSON.stringify(query))
-                    if (callback) {
-                        return callback(err)
-                    }
-                    return (err);
-                }
-
-            });
-        }
 
 
         return self;

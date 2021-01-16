@@ -45,7 +45,7 @@ var exportRDF = {
     }
     , POST_cursor: function (url, query, callback) {
         var offset = 0;
-        var limit = 5000;
+        var limit = 10000;
         var resultSize = 1;
         var allData = []
 

@@ -30,6 +30,7 @@
 
 <div class="ThesaurusMatcher_paramsDiv">
     <button onclick="Lineage_classes.drawTopConcepts()">reset</button>
+    <button onclick="Lineage_classes.initUI()">clear</button>
     <span id="Lineage_levelDepthSpan"></span>
     <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
 
@@ -53,6 +54,12 @@
     </div>
     <select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>
     <!-- <button onclick="Lineage_classes.onPlusButton()">+</button>-->
+</div>
+<div id="Lineage_sources">
+
+
+
+
 </div>
 
 

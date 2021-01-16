@@ -15,6 +15,7 @@ var Lineage_classes = (function () {
 
         self.onLoaded = function () {
             $("#sourceDivControlPanelDiv").html("<button onclick='Lineage_classes.onSourceSelect()'>ok</button>")
+
         }
 
 
@@ -22,19 +23,20 @@ var Lineage_classes = (function () {
             MainController.UI.message("");
 
 
+
             $("#accordion").accordion("option", {active: 2});
             $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
+            //   MainController.UI.toogleRightPanel("open");
             $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")
             ThesaurusBrowser.currentTargetDiv = "LineagejsTreeDiv"
 
 
-            var w = $(document).width()-leftPanelWidth
-            var h = $(document).height()-30;
+            var w = $(document).width() - leftPanelWidth
+            var h = $(document).height() - 30;
             // $("#centralPanel").width(w)
             $("#centralPanelDiv").width(w - rightPanelWidth)
+            $("#rightPanelToogleButton").css("display", "block")
             $("#rightPanelDiv").width(rightPanelWidth)
-
-
 
 
             setTimeout(function () {
@@ -62,9 +64,11 @@ var Lineage_classes = (function () {
 
                 });
                 $("#GenericTools_searchSchemaType").val("OWL")
+                MainController.UI.showSources("Lineage_sources", false)
                 if (sourceLabel) {
-                    ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel,{targetDiv:"LineagejsTreeDiv"})
+                    ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
                     Lineage_classes.drawTopConcepts(sourceLabel)
+
                 }
 
             }, 200)
@@ -74,7 +78,7 @@ var Lineage_classes = (function () {
         self.selectNodeFn = function (event, propertiesMap) {
             var data = propertiesMap.node.data;
             self.addArbitraryNodeToGraph(data)
-            ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv,data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
+            ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
         }
         self.initUI = function () {
             MainController.UI.message("")
@@ -1440,9 +1444,9 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.range.value,
-                               // label: "range"
-                                color:"brown",
-                                dashes:true,
+                                // label: "range"
+                                color: "brown",
+                                dashes: true,
                                 arrows: {
                                     to: {
                                         enabled: true,
@@ -1486,9 +1490,9 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.domain.value,
-                               // label: "domain",
-                                color:"green",
-                                dashes:true,
+                                // label: "domain",
+                                color: "green",
+                                dashes: true,
                                 arrows: {
                                     from: {
                                         enabled: true,
@@ -1532,8 +1536,8 @@ Lineage_properties = (function () {
                                 id: edgeId,
                                 from: item.property.value,
                                 to: item.range.value,
-                                color:"brown",
-                                dashes:true,
+                                color: "brown",
+                                dashes: true,
                                 arrows: {
                                     to: {
                                         enabled: true,
@@ -1650,16 +1654,69 @@ Lineage_properties = (function () {
 
 Lineage_types = (function () {
     var self = {}
-
+    self.currenttypesMap = {}
     self.init = function () {
         self.currentSource = MainController.currentSource
         Sparql_schema.getAllTypes(self.currentSource, function (err, result) {
             if (err)
                 return MainController.UI.message(err)
-
+            self.currenttypesMap = {}
+            result.forEach(function (item) {
+                self.currenttypesMap[item.type.value] = item.typeLabel.value
+            })
             common.fillSelectOptions("LineageTypes_typesSelect", result, true, "typeLabel", "type")
 
         })
+
+    }
+
+    self.drawGraph = function (typeId) {
+        var filter = " ?concept rdf:type <" + typeId + ">"
+
+
+        var options = {filter: filter, limit: 50}
+        Sparql_generic.getItems(Lineage_classes.currentSource, options, function (err, result) {
+            if (err) {
+                return MainController.UI.message(err)
+            }
+
+
+            var color = Lineage_classes.getSourceColor(Lineage_classes.currentSource)
+            var visjsData = GraphController.toVisjsData(null, result, typeId, null, "concept", {
+                from: {
+                    shape: Lineage_classes.classDefaultShape,
+                    size: Lineage_classes.defaultShapeSize,
+                    color: color
+                },
+                to: {
+                    shape: Lineage_classes.classDefaultShape,
+                    size: Lineage_classes.defaultShapeSize,
+                    color: color
+                },
+                data: {source: Lineage_classes.currentSource}
+            })
+            var existingNodes = visjsGraph.getExistingIdsMap()
+            if (!existingNodes[typeId]) {
+                existingNodes[typeId] = 1
+                visjsData.nodes.push({
+                    id: typeId,
+                    label: self.currenttypesMap[typeId]
+
+                })
+            }
+
+                if (!visjsGraph.data) {
+                    visjsGraph.draw("graphId", visjsData)
+                } else {
+
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                    visjsGraph.network.fit()
+                }
+
+
+            }
+        )
 
     }
 

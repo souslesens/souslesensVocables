@@ -477,7 +477,7 @@ var mediaWikiTagger = {
 
     generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
 
-        var limit = 1000;
+        var limit =10000;
         var offset = 0;
         var length = 1;
         var catWordsMap = {};

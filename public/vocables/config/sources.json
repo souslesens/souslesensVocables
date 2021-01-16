@@ -271,7 +271,7 @@
 
 
   "NPD": {
-    "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
+    "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/> from <http://sws.ifi.uio.no/data/npd-v2/",
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },

@@ -104,17 +104,29 @@ var MainController = (function () {
                 selectNodeFn: function (evt, obj) {
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
-                    MainController.UI.showSources("sourcesTreeDiv", obj.node.data.multiSources);
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
                     var controller = Config.tools[self.currentTool].controller
                     $("#actionDivContolPanelDiv").html("")
+                    $("#currentSourceTreeDiv").html("")
+
                     self.UI.updateActionDivLabel();
-                    if (Config.tools[self.currentTool].multiSources) {
-                        self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
-                        controller.onSourceSelect(self.currentSource)
+
+                    if (Config.tools[self.currentTool].noSource) {
+                        MainController.currentSource=null;
+                        MainController.UI.onSourceSelect();
 
                     }
+                    else{
+                        MainController.UI.showSources("sourcesTreeDiv", obj.node.data.multiSources);
+                        if (Config.tools[self.currentTool].multiSources) {
+                            self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
+                            controller.onSourceSelect(self.currentSource)
+
+                        }
+                    }
+
+
                     if (controller.onLoaded)
                         controller.onLoaded()
                     if (Config.tools[self.currentTool].toolDescriptionImg) {
@@ -138,10 +150,6 @@ var MainController = (function () {
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource)
             var controller = Config.tools[self.currentTool].controller
             controller.onSourceSelect(self.currentSource)
-
-            /*    if (self.currentTool == 0) {
-                    ThesaurusBrowser.showThesaurusTopConcepts(self.currentSource)
-                }*/
 
 
         },
@@ -167,7 +175,7 @@ var MainController = (function () {
             $("#messageDiv").html(message)
         },
 
-        toogleRightPanel:function(){
+        toogleRightPanel:function(status){
             var display=$("#rightPanelDiv").css("display")
 
             if(display=="flex"){//open->close
@@ -182,7 +190,7 @@ var MainController = (function () {
 
 
             }
-           else{//closeclose
+           else{//close->open
                 var w2= $("#graphDiv").width()-rightPanelWidth
                 $("#rightPanelDiv").css("display","flex")
                 $("#centralPanelDiv").width(w2)

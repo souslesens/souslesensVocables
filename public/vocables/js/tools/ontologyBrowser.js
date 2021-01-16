@@ -51,8 +51,8 @@ var OntologyBrowser = (function () {
         $("#graphDiv").load("snippets/ontologyBrowser.html")
         setTimeout(function () {
             var rightPanelDiv = 300
-            var w = $("#graphDiv").width()
-            var h = $(window).height();
+        /*    var w = $("#graphDiv").width()
+            var h = $(window).height();*/
 
             $("#OntologyBrowser_graphDiv").height(h - 100)
             $("#OntologyBrowser_selectionDiv").height(h - 100)

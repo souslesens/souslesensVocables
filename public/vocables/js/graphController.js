@@ -49,6 +49,8 @@ var GraphController = (function () {
                 if (fromVar == "#") {
                     fromId = "#"
                     fromLabel = visjOptions.rootLabel || "#"
+                } else if (!fromVar) {
+                    ;
                 } else {
                     if (!item[fromVar])
                         return console.log(JSON.stringify(item));
@@ -96,7 +98,7 @@ var GraphController = (function () {
                 }
 
                 var edgeId = fromId + "_" + toId;
-                var inverseEdge=toId + "_" + fromId;
+                var inverseEdge = toId + "_" + fromId;
                 if (!existingIds[edgeId] && !existingIds[inverseEdge]) {
                     existingIds[edgeId] = 1
                     var edge = {

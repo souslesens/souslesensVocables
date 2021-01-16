@@ -129,16 +129,22 @@
 
 
         .jstree {
-            margin: 5px;
-          max-height: 600px;
-            width: 360px;
+            margin: 2px;
+          max-height: 550px;
+
             overflow: auto;
+            min-width: 300px;
 
 
         }
+        #actionDiv{
+            width: 385px;
+        }
+
         .ui-accordion-content-active{
             margin-left: -30px !important;
-            heightWW: 300px !important;
+            overflow: auto;
+            Xwidth: 400px;
         }
 
         #graphDiv {
@@ -154,7 +160,7 @@
         }
 
         #currentSourceTreeDiv {
-            overflow: auto;
+            overflow: hidden;
         }
 
         .infosTable {
@@ -231,7 +237,7 @@
         <table>
             <tr>
                 <td>
-                    <button onclick="MainController.test()">T</button>
+                  <!-- <button onclick="MainController.test()">T</button>-->
                 </td>
                 <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
                 <td><span id="messageDiv"></span></td>
@@ -239,7 +245,7 @@
         </table>
 
     </div>
-    <button style="justify-content: right" onclick="MainController.UI.toogleRightPanel()">X</button>
+    <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
 
 
 </div>

@@ -14,14 +14,7 @@ var Lineage_classes = (function () {
         self.currentSource;
 
         self.onLoaded = function () {
-            $("#sourceDivControlPanelDiv").html("<button onclick='Lineage_classes.onSourceSelect()'>ok</button>")
-
-        }
-
-
-        self.onSourceSelect = function (sourceLabel) {
             MainController.UI.message("");
-
 
 
             $("#accordion").accordion("option", {active: 2});
@@ -48,7 +41,7 @@ var Lineage_classes = (function () {
                         sourceLabels.push(key)
                 }
                 sourceLabels.sort()
-                common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
+                //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
                 $("#Lineage_Tabs").tabs({
                     activate: function (e, ui) {
                         self.currentOwlType = "Class"
@@ -65,19 +58,63 @@ var Lineage_classes = (function () {
                 });
                 $("#GenericTools_searchSchemaType").val("OWL")
                 MainController.UI.showSources("Lineage_sources", false)
-                if (sourceLabel) {
-                    ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
-                    Lineage_classes.drawTopConcepts(sourceLabel)
+                /* if (sourceLabel) {
+                     ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
+                     Lineage_classes.drawTopConcepts(sourceLabel)
 
-                }
+                 }*/
 
             }, 200)
 
         }
 
+
+        self.onSourceSelect = function (sourceLabel) {
+
+            if (sourceLabel != self.currentSource) {
+                ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
+                Lineage_classes.drawTopConcepts(sourceLabel)
+            }
+            self.currentSource = sourceLabel
+
+        }
+        self.jstreeContextMenu = function () {
+            var items = {}
+
+            items.drawTopConcepts = {
+                label: "draw taxonomy",
+                action: function (e) {// pb avec source
+                    $("#Lineage_topClassesRadio").prop("checked", true)
+                    Lineage_classes.drawTopConcepts()
+                    ThesaurusBrowser.showThesaurusTopConcepts(self.currentSource, {targetDiv: "LineagejsTreeDiv"})
+
+                }
+            }
+                , items.addSimilarlabels = {
+                label: "add similars (label)",
+                action: function (e) {// pb avec source
+                    $("#Lineage_similarTypeRadio_Labels").prop("checked", true)
+                    Lineage_classes.drawSimilarsNodes()
+
+                }
+            },
+                items.addSameAs = {
+                    label: "add similars (sameAs)",
+                    action: function (e) {// pb avec source
+                        $("#Lineage_similarTypeRadio_SameAs").prop("checked", true)
+                        Lineage_classes.drawSimilarsNodes()
+
+                    }
+                }
+
+            return items;
+
+        }
+
         self.selectNodeFn = function (event, propertiesMap) {
             var data = propertiesMap.node.data;
-            self.addArbitraryNodeToGraph(data)
+            if (propertiesMap.event.ctrlKey)
+                self.addArbitraryNodeToGraph(data)
             ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
         }
         self.initUI = function () {
@@ -86,7 +123,7 @@ var Lineage_classes = (function () {
             expandedLevels = {}
             self.currentSource = null;
             $("#lineage_drawnSources").html("");
-            $("#Lineage_toSource").val("")
+            // $("#Lineage_toSource").val("")
         }
 
 
@@ -393,6 +430,26 @@ var Lineage_classes = (function () {
             MainController.UI.message(result);
         }
 
+        self.listClusterContent = function (clusterNode) {
+            var text = "";
+            var jstreeData = []
+            clusterNode.data.cluster.forEach(function (item, index) {
+                jstreeData.push({id: item.child1.value, text: item.child1Label.value, parent: "#",
+                    data:{source:self.currentSource,id:item.child1.value, label: item.child1Label.value}})
+            })
+
+            var jstreeOptions = {
+                openAll: true, selectNodeFn: function (event, propertiesMap) {
+
+                    return Lineage_classes.selectNodeFn(event, propertiesMap);
+
+
+                },
+            }
+
+            common.loadJsTree(ThesaurusBrowser.currentTargetDiv, jstreeData, jstreeOptions)
+        }
+
         self.openCluster = function (clusterNode) {
             MainController.UI.message("")
             if (clusterNode.data.cluster.length > self.maxClusterOpeningLength) {
@@ -428,7 +485,7 @@ var Lineage_classes = (function () {
 
         self.drawSimilarsNodes = function (node, sources) {
             MainController.UI.message("")
-            $("#Lineage_toSource").val("")
+            //    $("#Lineage_toSource").val("")
 
             var similarType
             if ($("#Lineage_similarTypeRadio_Labels").prop("checked"))
@@ -847,7 +904,10 @@ var Lineage_classes = (function () {
 
 
             if (node.id.indexOf("_cluster") > 0) {
-                var html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> open cluster</span>"
+                var html=""
+                if (node.data.cluster.length <=Lineage_classes.maxClusterOpeningLength)
+                    html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> open cluster</span>"
+                html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterContent();\"> list cluster content</span>"
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"
 
 
@@ -1038,7 +1098,7 @@ var Lineage_classes = (function () {
         self.drawCfihosQuantumMapping = function (node, sources) {
 
             MainController.UI.message("")
-            $("#Lineage_toSource").val("")
+            //   $("#Lineage_toSource").val("")
 
             var similars = [];
             if (!sources)
@@ -1195,7 +1255,7 @@ var Lineage_classes = (function () {
             showGraphPopupMenu: function (node, point, event) {
                 if (node.from) {
                     self.currentGraphEdge = node;
-                    if (self.currentGraphEdge.data.propertyId)
+                    if (!self.currentGraphEdge.data.propertyId)
                         return;
                     MainController.UI.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv")
                 } else {
@@ -1230,6 +1290,10 @@ var Lineage_classes = (function () {
             },
             listClusterToClipboard: function () {
                 Lineage_classes.listClusterToClipboard(self.currentGraphNode)
+
+            },
+            listClusterContent: function () {
+                Lineage_classes.listClusterContent(self.currentGraphNode)
 
             },
 
@@ -1676,37 +1740,37 @@ Lineage_types = (function () {
 
         var options = {filter: filter, limit: 50}
         Sparql_generic.getItems(Lineage_classes.currentSource, options, function (err, result) {
-            if (err) {
-                return MainController.UI.message(err)
-            }
+                if (err) {
+                    return MainController.UI.message(err)
+                }
 
 
-            var color = Lineage_classes.getSourceColor(Lineage_classes.currentSource)
-            var visjsData = GraphController.toVisjsData(null, result, typeId, null, "concept", {
-                from: {
-                    shape: Lineage_classes.classDefaultShape,
-                    size: Lineage_classes.defaultShapeSize,
-                    color: color
-                },
-                to: {
-                    shape: Lineage_classes.classDefaultShape,
-                    size: Lineage_classes.defaultShapeSize,
-                    color: color
-                },
-                data: {source: Lineage_classes.currentSource}
-            })
-            var existingNodes = visjsGraph.getExistingIdsMap()
-            if (!existingNodes[typeId]) {
-                existingNodes[typeId] = 1
-                visjsData.nodes.push({
-                    id: typeId,
-                    label: self.currenttypesMap[typeId]
-
+                var color = Lineage_classes.getSourceColor(Lineage_classes.currentSource)
+                var visjsData = GraphController.toVisjsData(null, result, typeId, null, "concept", {
+                    from: {
+                        shape: Lineage_classes.classDefaultShape,
+                        size: Lineage_classes.defaultShapeSize,
+                        color: color
+                    },
+                    to: {
+                        shape: Lineage_classes.classDefaultShape,
+                        size: Lineage_classes.defaultShapeSize,
+                        color: color
+                    },
+                    data: {source: Lineage_classes.currentSource}
                 })
-            }
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                if (!existingNodes[typeId]) {
+                    existingNodes[typeId] = 1
+                    visjsData.nodes.push({
+                        id: typeId,
+                        label: self.currenttypesMap[typeId]
+
+                    })
+                }
 
                 if (!visjsGraph.data) {
-                    visjsGraph.draw("graphId", visjsData)
+                    visjsGraph.draw("graphDiv", visjsData)
                 } else {
 
                     visjsGraph.data.nodes.add(visjsData.nodes)

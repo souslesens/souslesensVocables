@@ -65,13 +65,14 @@ var MainController = (function () {
                 }
             })
             common.loadJsTree(treeDiv, treeData, {
+                contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,
                 selectNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
                             MainController.currentSchemaType = obj.node.id;
-
-                            $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
+                            if ($("#sourcesTreeDiv").children().length > 0)
+                                $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
                             return;
                         }
                     } else {
@@ -90,6 +91,7 @@ var MainController = (function () {
             })
         },
 
+
         showToolsList: function (treeDiv) {
             var x = $(window).height()
             $(".max-height").height($(window).height() - 300)
@@ -101,6 +103,7 @@ var MainController = (function () {
             }
             //})
             common.loadJsTree(treeDiv, treeData, {
+
                 selectNodeFn: function (evt, obj) {
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
@@ -113,11 +116,10 @@ var MainController = (function () {
                     self.UI.updateActionDivLabel();
 
                     if (Config.tools[self.currentTool].noSource) {
-                        MainController.currentSource=null;
+                        MainController.currentSource = null;
                         MainController.UI.onSourceSelect();
 
-                    }
-                    else{
+                    } else {
                         MainController.UI.showSources("sourcesTreeDiv", obj.node.data.multiSources);
                         if (Config.tools[self.currentTool].multiSources) {
                             self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
@@ -137,7 +139,15 @@ var MainController = (function () {
                 }
             })
 
+        }
+
+        , getJstreeConceptsContextMenu: function () {
+            var controller = Config.tools[self.currentTool].controller
+            if (controller.jstreeContextMenu)
+               return controller.jstreeContextMenu()
+
         },
+
         onSourceSelect: function () {
 
             if (Config.tools[self.currentTool].multiSources) {
@@ -175,30 +185,27 @@ var MainController = (function () {
             $("#messageDiv").html(message)
         },
 
-        toogleRightPanel:function(status){
-            var display=$("#rightPanelDiv").css("display")
+        toogleRightPanel: function (status) {
+            var display = $("#rightPanelDiv").css("display")
 
-            if(display=="flex"){//open->close
-                var w2= $("#graphDiv").width()+rightPanelWidth
-                $("#rightPanelDiv").css("display","none")
+            if (display == "flex") {//open->close
+                var w2 = $("#graphDiv").width() + rightPanelWidth
+                $("#rightPanelDiv").css("display", "none")
                 $("#centralPanelDiv").width(w2)
-                $("#graphDiv").animate({width:w2})
-                setTimeout(function(){
+                $("#graphDiv").animate({width: w2})
+                setTimeout(function () {
                     visjsGraph.redraw()
-                },200)
+                }, 200)
 
 
-
-            }
-           else{//close->open
-                var w2= $("#graphDiv").width()-rightPanelWidth
-                $("#rightPanelDiv").css("display","flex")
+            } else {//close->open
+                var w2 = $("#graphDiv").width() - rightPanelWidth
+                $("#rightPanelDiv").css("display", "flex")
                 $("#centralPanelDiv").width(w2)
-                $("#graphDiv").animate({width:w2})
-                setTimeout(function(){
+                $("#graphDiv").animate({width: w2})
+                setTimeout(function () {
                     visjsGraph.redraw()
-                },200)
-
+                }, 200)
 
 
             }
@@ -260,8 +267,6 @@ var MainController = (function () {
             })*/
 
     }
-
-
 
 
     return self;

@@ -364,7 +364,7 @@ var ontologiesMapper = {
                 triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/"+ mappingLabelItem.parent+">.\n"
             else
                 triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n"
-            triplesType += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#type> <" + tableType + "> .\n"
+            triplesType += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + tableType + "> .\n"
 
 
             triplesLabel += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + mappingLabelItem.sourceLabel + "'.\n"
@@ -653,9 +653,9 @@ if (true) {//mapClasses
 
      // table: "tblPhysicalClass",
      //  table: "tblPickListValueGrouping",
-     //  table: "tblAttributePickListValue",
-   //table: "tblFunctionalClass",
-        table: "tblAttribute",
+      table: "tblAttributePickListValue",
+ //  table: "tblFunctionalClass",
+    //  table: "tblAttribute",
         //table: "tblDiscipline",
         //table: "tblTag",
 
@@ -726,8 +726,7 @@ if (true) {//mapClasses
             "schema": null,
             "color": "#bcbd22"
         },
-    ]
-    var targetConfigs=[
+
         {name:"ISO_15926-part-4",
         "editable": true,
             "graphUri": "http://standards.iso.org/iso/15926/part4/",

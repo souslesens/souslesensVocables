@@ -126,6 +126,7 @@ var ThesaurusBrowser = (function () {
             items.showProperties = {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
+
                     OntologyBrowser.showProperties()
 
 
@@ -137,6 +138,7 @@ var ThesaurusBrowser = (function () {
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
+
                 ThesaurusBrowser.copyNode(e)
 
             }

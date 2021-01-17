@@ -29,7 +29,7 @@
 
 
 <div class="ThesaurusMatcher_paramsDiv">
-    <button onclick="Lineage_classes.drawTopConcepts()">reset</button>
+
     <button onclick="Lineage_classes.initUI()">clear</button>
     <span id="Lineage_levelDepthSpan"></span>
     <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
@@ -39,6 +39,7 @@
 <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
 
     <div>
+        <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
         <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>
 
@@ -48,11 +49,13 @@
     </div>
 
 
-    <div><B>similar in source </B>
-        <input type='radio' id='Lineage_similarTypeRadio_Labels' name='Lineage_similarTypeRadio' checked="checked"/> Labels
+    <div>
+
+        <input type='radio' id='Lineage_topClassesRadio' name='Lineage_similarTypeRadio' checked="checked"/> topClasses
+        <input type='radio' id='Lineage_similarTypeRadio_Labels' name='Lineage_similarTypeRadio' /> Labels
         <input type='radio' id='Lineage_similarTypeRadio_SameAs' name='Lineage_similarTypeRadio'/> SameAs
     </div>
-    <select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>
+  <!--  <select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>-->
     <!-- <button onclick="Lineage_classes.onPlusButton()">+</button>-->
 </div>
 <div id="Lineage_sources">

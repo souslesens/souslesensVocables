@@ -1,9 +1,9 @@
 <style>
-#Lineage_Tabs{
-    height: 100%;
-}
+    #Lineage_Tabs {
+        height: 100%;
+    }
 
-    .Lineage_Tab{
+    .Lineage_Tab {
         overflow: auto;
         max-height: 500px;
     }
@@ -13,52 +13,50 @@
 <div>
 
 
+    <div id="Lineage_Tabs" style="width:360px;">
 
-            <div id="Lineage_Tabs" style="width:360px;">
-
-                <ul>
-                    <li><a href="#Lineage_ClassesTab">Classes</a></li>
-                    <li><a href="#LineageTypesTab">Types</a></li>
-                    <li><a href="#LineagePropertiesTab">Properties</a></li>
-                </ul>
-
-
-                <div class="" id="Lineage_ClassesTab" style="display: flex;flex-direction: column">
-                    <div id="GenericTools_searchAllDiv"></div>
-                    <div class="jstree" id="LineagejsTreeDiv"></div>
-
-                    <!--     <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
-
-                </div>
+        <ul>
+            <li><a href="#Lineage_ClassesTab">Classes</a></li>
+            <li><a href="#LineageTypesTab">Types</a></li>
+            <li><a href="#LineagePropertiesTab">Properties</a></li>
+        </ul>
 
 
-                <!--   <button onclick="Lineage_classes.removesimilars()">drawAllsimilars</button>-->
+        <div class="" id="Lineage_ClassesTab" >
 
-
-                <div id="LineageTypesTab" style="width:100%;height:800px">
-                    <button onclick='Lineage_types.drawGraph()'>draw</button>
-                    <select id="LineageTypes_typesSelect" onchange="Lineage_types.drawGraph($(this).val())"> </select>
-
-                </div>
-
-                <div id="LineagePropertiesTab">
-                    <button onclick='Lineage_properties.drawGraph()'>draw</button>
-                    <div class="jstree" id="Lineage_propertiesTree"></div>
-                    <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
-
-                        <div id="LineageProperties_propertyInfosDiv"></div>-->
-
-                </div>
+            <div id="GenericTools_searchAllDiv"  style="height: 50px"></div>
+            <div style="width: 360px;height: 500px">
+                <div class="jstree" id="LineagejsTreeDiv"></div>
             </div>
 
+            <!--     <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
+
+        </div>
 
 
+        <!--   <button onclick="Lineage_classes.removesimilars()">drawAllsimilars</button>-->
 
+
+        <div id="LineageTypesTab" style="width:100%;height:800px">
+            <button onclick='Lineage_types.drawGraph()'>draw</button>
+            <select id="LineageTypes_typesSelect" onchange="Lineage_types.drawGraph($(this).val())"> </select>
+
+        </div>
+
+        <div id="LineagePropertiesTab">
+            <button onclick='Lineage_properties.drawGraph()'>draw</button>
+            <div class="jstree" id="Lineage_propertiesTree"></div>
+            <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
+
+                <div id="LineageProperties_propertyInfosDiv"></div>-->
+
+        </div>
+    </div>
 
 
 </div>
 
-        <script>
-            $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
-            $("#Lineage_RighPanelTabs").tabs()
-        </script>
+<script>
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+    $("#Lineage_RighPanelTabs").tabs()
+</script>

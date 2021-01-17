@@ -4,6 +4,7 @@ var Sparql_schema = (function () {
     var self = {}
     self.skosUri = "http://www.w3.org/2004/02/skos/core/"
     self.npdOntologyUri = "http://sws.ifi.uio.no/vocab/npd-v2/"
+    self.queryLimit=10000
 
     var slicesSize = 25
 
@@ -20,7 +21,7 @@ var Sparql_schema = (function () {
         if (schema.allSubclasses)
             query += " OPTIONAL{?childClass rdfs:subClassOf* ?class. OPTIONAL{?childClass rdfs:label ?childClassLabel} } "
 
-        query += " }order by ?classLabel ?childClassLabel limit 10000"
+        query += " }order by ?classLabel ?childClassLabel limit "+self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         ;
@@ -47,7 +48,7 @@ var Sparql_schema = (function () {
             " OPTIONAL{ ?subProperty rdfs:subPropertyOf* ?property. OPTIONAL{?subProperty rdfs:label ?subPropertyLabel}}" +
             "}" +
 
-            "} limit 10000"
+            "} limit "+self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
@@ -69,7 +70,7 @@ var Sparql_schema = (function () {
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct * " + fromStr + "   WHERE  " +
             "{ ?annotation rdf:type <http://www.w3.org/2002/07/owl#AnnotationProperty>. OPTIONAL{?annotation rdfs:label ?annotationLabel} } " +
-            "limit 10000"
+            "limit "+self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
@@ -103,7 +104,7 @@ var Sparql_schema = (function () {
             filterStr +
             "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
             "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
-            "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } order by ?propertyLabel limit 1000"
+            "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } order by ?propertyLabel limit "+self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
@@ -138,7 +139,7 @@ var Sparql_schema = (function () {
                " ?union owl:unionOf ?id . ?id ?z  ?range." +
                " OPTIONAL{?range rdfs:label ?rangeLabel.}"+
                "   }" +*/
-            " order by ?propertyLabel limit 10000"
+            " order by ?propertyLabel limit "+self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
@@ -171,7 +172,7 @@ var Sparql_schema = (function () {
             "  ?prop rdfs:range  ?overClass." +
             " ?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel } " +
             "  }" +
-            "}limit 10000 "
+            "}limit "+self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
@@ -221,7 +222,7 @@ var Sparql_schema = (function () {
 
                 "  }" +
 
-                "}limit 10000 "
+                "}limit "+self.queryLimit
 
 
             /*    var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
@@ -247,7 +248,7 @@ var Sparql_schema = (function () {
 
                     "  }" +
 
-                    "}limit 10000 "*/
+                    "}limit "+self.queryLimit */
             var url = schema.sparql_url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "",{source:schema.source},function(err, result) {
                 if (err)

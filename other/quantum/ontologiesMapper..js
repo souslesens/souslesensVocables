@@ -49,7 +49,7 @@ var ontologiesMapper = {
                     return callbackSeries();
                 var query = sourceConfig.query;
                 var body = {
-                    url: sourceConfig.sparql_url,
+                    url: sourceConfig.sparql_server.url,
                     params: {query: query},
                     headers: {
                         "Accept": "application/sparql-results+json",
@@ -360,8 +360,8 @@ var ontologiesMapper = {
 
 
             orphans += table + '\t' + mappingLabelItem.sourceId + "\t" + mappingLabelItem.sourceLabel + "\t"
-          if(mappingLabelItem.parent)
-                triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/"+ mappingLabelItem.parent+">.\n"
+            if (mappingLabelItem.parent)
+                triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/" + mappingLabelItem.parent + ">.\n"
             else
                 triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n"
             triplesType += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + tableType + "> .\n"
@@ -407,7 +407,7 @@ var ontologiesMapper = {
 
         }
 
-        var triples = triplesMapping + triplesLabel + triplesSubClassOf+triplesType
+        var triples = triplesMapping + triplesLabel + triplesSubClassOf + triplesType
         fs.writeFileSync(filePath.replace(".json", "_" + table + ".nt"), triples)
         fs.writeFileSync(filePath.replace(".json", "_" + table + "_orphans.txt"), orphans)
     }
@@ -569,10 +569,10 @@ var ontologiesMapper = {
         }
 
 
-    },
+    }
 
 
-    normalizeMappingSources: function () {
+    , normalizeMappingSources: function () {
 
 
         var tableFields = [
@@ -641,21 +641,295 @@ var ontologiesMapper = {
 
 
     }
+
+
+    // donne aux attributs de Quantum les attributs parents d'une classe de la sources
+    , setQuantumAttributesParents: function (sourceLabel) {
+
+        var readiPhysicalQuantities = {
+            "http://w3id.org/readi/rdl/CFIHOS-45000001": "Capacitance",
+            "http://w3id.org/readi/rdl/CFIHOS-45000002": "Density",
+            "http://w3id.org/readi/rdl/CFIHOS-45000004": "Dynamic Viscosity",
+            "http://w3id.org/readi/rdl/CFIHOS-45000005": "Electrical Charge",
+            "http://w3id.org/readi/rdl/CFIHOS-45000007": "Electrical Current / Amperage",
+            "http://w3id.org/readi/rdl/CFIHOS-45000009": "Frequency",
+            "http://w3id.org/readi/rdl/CFIHOS-45000010": "Kinematic Viscosity",
+            "http://w3id.org/readi/rdl/CFIHOS-45000011": "Length",
+            "http://w3id.org/readi/rdl/CFIHOS-45000012": "Linear Electric Current Density",
+            "http://w3id.org/readi/rdl/CFIHOS-45000013": "Mass / Weight",
+            "http://w3id.org/readi/rdl/CFIHOS-45000014": "Mass Flow Rate",
+            "http://w3id.org/readi/rdl/CFIHOS-45000015": "Mass Proportion",
+            "http://w3id.org/readi/rdl/CFIHOS-45000016": "Power",
+            "http://w3id.org/readi/rdl/CFIHOS-45000017": "Pressure",
+            "http://w3id.org/readi/rdl/CFIHOS-45000018": "Pressure Rate Change",
+            "http://w3id.org/readi/rdl/CFIHOS-45000019": "Ratio",
+            "http://w3id.org/readi/rdl/CFIHOS-45000020": "Resistance",
+            "http://w3id.org/readi/rdl/CFIHOS-45000021": "Sound",
+            "http://w3id.org/readi/rdl/CFIHOS-45000022": "Specific Energy",
+            "http://w3id.org/readi/rdl/CFIHOS-45000023": "Specific Heat Capacity",
+            "http://w3id.org/readi/rdl/CFIHOS-45000025": "Speed",
+            "http://w3id.org/readi/rdl/CFIHOS-45000026": "Surface / area",
+            "http://w3id.org/readi/rdl/CFIHOS-45000027": "Surface Tension",
+            "http://w3id.org/readi/rdl/CFIHOS-45000028": "Temperature",
+            "http://w3id.org/readi/rdl/CFIHOS-45000029": "Thermal Conductivity",
+            "http://w3id.org/readi/rdl/CFIHOS-45000030": "Thermal Insulation",
+            "http://w3id.org/readi/rdl/CFIHOS-45000031": "Time",
+            "http://w3id.org/readi/rdl/CFIHOS-45000033": "Volume",
+            "http://w3id.org/readi/rdl/CFIHOS-45000034": "Volume Flow Rate",
+            "http://w3id.org/readi/rdl/CFIHOS-45000036": "Angular velocity",
+            "http://w3id.org/readi/rdl/CFIHOS-45000037": "Count",
+            "http://w3id.org/readi/rdl/CFIHOS-45000038": "Electrical Tension / Voltage",
+            "http://w3id.org/readi/rdl/CFIHOS-45000039": "Force",
+            "http://w3id.org/readi/rdl/CFIHOS-45000041": "Moment of force",
+            "http://w3id.org/readi/rdl/CFIHOS-45000044": "Volume proportion",
+
+        }
+
+
+        var sourceConfig = ontologiesMapper.sources[sourceLabel]
+        var quantumConfig = ontologiesMapper.sources["QUANTUM"]
+        var map = {}
+        async.series([
+
+
+            // Quantum attr sameAs
+            function (callbackSeries) {
+
+                var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct *  FROM <http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/>   WHERE {" +
+                    "  ?concept <http://data.total.com/resource/quantum/mappings/" + sourceLabel + "#sameAs> ?similar. " +
+                    "?concept rdfs:label ?conceptLabel" +
+                    "} limit 100"
+
+
+                var body = {
+                    url: quantumConfig.sparql_server.url,
+                    params: {query: query},
+                    headers: {
+                        "Accept": "application/sparql-results+json",
+                        "Content-Type": "application/x-www-form-urlencoded"
+
+                    }
+                }
+                httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                    if (err)
+                        return console.log(err)
+                    result.results.bindings.forEach(function (item) {
+                        if (!map[item.similar.value])
+                            map[item.similar.value] = {quantumId: item.concept.value, quantumLabel: item.conceptLabel.value}
+
+
+                    })
+                    callbackSeries()
+                })
+            },
+            function (callbackSeries) {
+
+                function processResult(bindings) {
+                    bindings.forEach(function (item) {
+
+                    })
+                }
+
+                var filter = ""
+                var slices = util.sliceArray(Object.keys(map), 40)
+                async.eachSeries(slices,function(ids,callbackEach){
+                ids.forEach(function (item,index) {
+                    if(index>0)
+                    filter += ","
+                    filter += "<" + item + ">"
+                })
+                filter = "filter (?concept in(" + filter + "))"
+
+
+                var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct *   WHERE {" +
+                    "?concept rdfs:subClassOf ?parent. ?parent rdfs:label ?parentLabel " +
+                    filter +
+                    "} limit 100"
+
+                if (sourceConfig.method == "GET") {
+                    var query2 = encodeURIComponent(query);
+                    query2 = query2.replace(/%2B/g, "+").trim()
+
+                    var body = {
+                        url: targetConfig.sparql_server.url + "?output=json&format=json&query=" + query2,
+                        params: {query: query},
+                        headers: {
+                            "Accept": "application/sparql-results+json",
+                            "Content-Type": "application/x-www-form-urlencoded"
+
+                        }
+                    }
+                    httpProxy.get(body.url, body, function (err, data) {
+                        if (err)
+                            return callbackEach(err)
+                        if (typeof data === "string")
+                            data = JSON.parse(data.trim())
+                        else if (data.result && typeof data.result != "object")//cas GEMET
+                            data = JSON.parse(data.result.trim())
+
+                        processResult(result.results.bindings)
+
+
+                        callbackEach()
+
+                    })
+                } else {
+                    var body = {
+                        url: sourceConfig.sparql_server.url,
+                        params: {query: query},
+                        headers: {
+                            "Accept": "application/sparql-results+json",
+                            "Content-Type": "application/x-www-form-urlencoded"
+
+                        }
+                    }
+                    httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                        if (err)
+                            return console.log(err)
+                        processResult(result.results.bindings)
+                        callbackEach()
+                    })
+                }
+            },function(err){
+                    callbackSeries()
+            })
+            }
+
+
+        ], function (err) {
+            var x = map
+            console.log(err);
+        })
+
+
+    }
+    , sources: {
+        "QUANTUM": {
+            "graphUri": ["http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"],
+            "sparql_server": {
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        }, "ISO_15926-part-14": {
+            "graphUri": "http://standards.iso.org/iso/15926/part14/",
+            "sparql_server": {
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+
+        "ISO_15926-PCA": {
+            "graphUri": "",
+            "sparql_server": {
+                "url": "http://staging.data.posccaesar.org/rdl/",
+                "method": "GET"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+
+        "CFIHOS_READI": {
+            "graphUri": "http://w3id.org/readi/rdl/",
+            "sparql_server": {
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+
+        "CFIHOS-ISO": {
+            "graphUri": "",
+            "sparql_server": {
+                "url": "http://data.15926.org/cfihos",
+                "method": "GET"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+
+
+        "CFIHOS_equipment": {
+            "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
+            "sparql_server": {
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+
+        "ISO_15926-org": {
+            "graphUri": "",
+            "sparql_server": {
+                "url": "http://192.236.179.169/sparql",
+                "method": "GET"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+        "ISO_15926-part-4": {
+            "editable": true,
+            "graphUri": "http://standards.iso.org/iso/15926/part4/",
+            "sparql_server": {
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
+            "controller": "Sparql_OWL",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+        "ISO_15926-part-12": {
+            "editable": true,
+            "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
+            "sparql_server": {
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "controller": "Sparql_OWL",
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+            "schemaType": "OWL",
+            "schema": null,
+            "color": "#bcbd22"
+        },
+
+    }
 }
 module.exports = ontologiesMapper;
 
 
-if (true) {//mapClasses
+if (false) {//mapClasses
     var sourceConfig = {
         type: "jsonMap",
         filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__mainObjects.json",
         // filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__objects.json",
 
-     // table: "tblPhysicalClass",
-     //  table: "tblPickListValueGrouping",
-      table: "tblAttributePickListValue",
- //  table: "tblFunctionalClass",
-    //  table: "tblAttribute",
+        // table: "tblPhysicalClass",
+        //  table: "tblPickListValueGrouping",
+        table: "tblAttributePickListValue",
+        //  table: "tblFunctionalClass",
+        //  table: "tblAttribute",
         //table: "tblDiscipline",
         //table: "tblTag",
 
@@ -727,44 +1001,47 @@ if (true) {//mapClasses
             "color": "#bcbd22"
         },
 
-        {name:"ISO_15926-part-4",
-        "editable": true,
+        {
+            name: "ISO_15926-part-4",
+            "editable": true,
             "graphUri": "http://standards.iso.org/iso/15926/part4/",
             "sparql_server": {
-            "url": "http://51.178.139.80:8890/sparql"
-        },
-        "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
             "controller": "Sparql_OWL",
             "schemaType": "OWL",
             "schema": null,
             "color": "#bcbd22"
-    },
-        {name:"ISO_15926-part-12",
-        "editable": true,
+        },
+        {
+            name: "ISO_15926-part-12",
+            "editable": true,
             "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
             "sparql_server": {
-            "url": "http://51.178.139.80:8890/sparql"
-        },
-        "controller": "Sparql_OWL",
+                "url": "http://51.178.139.80:8890/sparql"
+            },
+            "controller": "Sparql_OWL",
             "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
             "schemaType": "OWL",
             "schema": null,
             "color": "#bcbd22"
-    },
-        {name:"ISO_15926-org",
-        "graphUri": "",
-            "sparql_server": {
-            "url": "http://192.236.179.169/sparql",
-                "method": "GET"
         },
-        "controller": "Sparql_OWL",
+        {
+            name: "ISO_15926-org",
+            "graphUri": "",
+            "sparql_server": {
+                "url": "http://192.236.179.169/sparql",
+                "method": "GET"
+            },
+            "controller": "Sparql_OWL",
             "topClassFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
             "schemaType": "OWL",
             "schema": null,
             "color": "#bcbd22"
-    },
+        },
 
-]
+    ]
 
 
     sourceConfig.filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__mainObjects.json"
@@ -792,6 +1069,10 @@ if (true) {//mapClasses
 
     });
 
+}
+
+if (true) {
+    ontologiesMapper.setQuantumAttributesParents("CFIHOS_READI")
 }
 
 

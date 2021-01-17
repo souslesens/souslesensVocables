@@ -4,10 +4,11 @@
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapper..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -131,7 +132,7 @@
       <workItem from="1610260629705" duration="16639000" />
       <workItem from="1610290742772" duration="65843000" />
       <workItem from="1610612770480" duration="63332000" />
-      <workItem from="1610872673300" duration="8618000" />
+      <workItem from="1610872673300" duration="20852000" />
     </task>
     <servers />
   </component>
@@ -155,15 +156,46 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage.js</url>
-          <line>485</line>
-          <option name="timeStamp" value="498" />
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>801</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="514" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage.js</url>
-          <line>917</line>
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>749</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="499" />
+          <option name="timeStamp" value="515" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>762</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="518" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>763</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="519" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>787</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="522" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>689</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="523" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/ontologiesMapper..js</url>
+          <line>789</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="524" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

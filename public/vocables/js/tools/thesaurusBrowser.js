@@ -245,21 +245,30 @@ var ThesaurusBrowser = (function () {
         if (!options) {
             options = {}
         }
-        if (!term)
-            var term = $("#GenericTools_searchAllSourcesTermInput").val()
+
+        var term = $("#GenericTools_searchAllSourcesTermInput").val()
+
         if (!term || term == "")
             return
         var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
+        var searchAllSources = $("#GenericTools_searchInAllSources").prop("checked")
+
         var searchedSources = [];
         if (MainController.currentSchemaType)
             $("#GenericTools_searchSchemaType").val(MainController.currentSchemaType)
         var schemaType = $("#GenericTools_searchSchemaType").val()
-        for (var sourceLabel in Config.sources) {
-            if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                    searchedSources.push(sourceLabel)
-            }
-        }
+
+       if(searchAllSources) {
+           for (var sourceLabel in Config.sources) {
+               if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                   if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                       searchedSources.push(sourceLabel)
+               }
+           }
+       }
+        else{
+           searchedSources.push(MainController.currentSource)
+       }
         var jstreeData = []
         var uniqueIds = {}
         async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {

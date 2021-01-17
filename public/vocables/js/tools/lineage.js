@@ -71,11 +71,14 @@ var Lineage_classes = (function () {
 
         self.onSourceSelect = function (sourceLabel) {
 
-            if (sourceLabel != self.currentSource) {
+
+            if(sourceLabel && !self.currentSource) {
                 ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
                 Lineage_classes.drawTopConcepts(sourceLabel)
             }
             self.currentSource = sourceLabel
+            MainController.currentSource=sourceLabel
+            $("#GenericTools_onSearchCurrentSourceInput").css("display","block")
 
         }
         self.jstreeContextMenu = function () {
@@ -550,7 +553,7 @@ var Lineage_classes = (function () {
                             "  ?concept ?prop ?similar " + filter
 
                         var options = {filter: filter}
-                        Sparql_generic.getItems(self.currentSource, options, function (err, result) {
+                        Sparql_generic.getItems("QUANTUM", options, function (err, result) {
                             if (err) {
                                 return callbackEachSlice(err);
                             }
@@ -1079,7 +1082,7 @@ var Lineage_classes = (function () {
                 self.registerSource(nodeData.source)
                 /*  expandedLevels[nodeData.source][expandedLevels[nodeData.source].length ].push(newNodeIds);*/
 
-                if (!visjsGraph.data) {
+                if (!visjsGraph.data.nodes) {
                     self.drawNewGraph(visjsData)
                 } else {
                     visjsGraph.data.nodes.add(visjsData.nodes)
@@ -1681,8 +1684,9 @@ Lineage_properties = (function () {
 
         showGraphPopupMenu: function (node, point, event) {
 
-            self.setGraphPopupMenus(node)
+            Lineage_classes.setGraphPopupMenus(node)
             self.currentGraphNode = node;
+            Lineage_classes.currentGraphNode = node
             MainController.UI.showPopup(point, "graphPopupDiv")
 
         },
@@ -1690,6 +1694,7 @@ Lineage_properties = (function () {
             if (event && event.altKey) {
             }
             self.currentGraphNode = node
+            Lineage_classes.currentGraphNode = node
         },
         expandNode: function (node, point, event) {
             self.drawGraph(node.id)
@@ -1699,7 +1704,7 @@ Lineage_properties = (function () {
         }
 
     }
-    self.setGraphPopupMenus = function (node) {
+   /* self.setGraphPopupMenus = function (node) {
         if (!node)
             return;
 
@@ -1708,7 +1713,7 @@ Lineage_properties = (function () {
 
         $("#graphPopupDiv").html(html);
 
-    }
+    }*/
 
 
     return self;
@@ -1769,7 +1774,7 @@ Lineage_types = (function () {
                     })
                 }
 
-                if (!visjsGraph.data) {
+                if (!visjsGraph.data.nodes) {
                     visjsGraph.draw("graphDiv", visjsData)
                 } else {
 

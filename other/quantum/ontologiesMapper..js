@@ -709,17 +709,13 @@ var ontologiesMapper = {
         })
 
 
-
         for (var key in dimensionsMap) {
             triples += "<http://w3id.org/readi/rdl/" + dimensionsMap[key] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
                 " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n"
         }
 
 
-
-
-     //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
-
+        //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
 
 
         fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\attributesSubClassOf.nt", triples)
@@ -777,162 +773,162 @@ var ontologiesMapper = {
             return callbackSeries("no key " + sourceConfig.table)
         var triples = ""
 
-        pickListMap={
-            'TOTAL-G0000000043':'LOV',
-            'TOTAL-G0000000047':'LOV',
-            'TOTAL-G0000000187':'LOV',
-            'TOTAL-G0000000100':'LOV',
-            'TOTAL-G0000000185':'LOV',
-            'TOTAL-G0000000130':'LOV',
-            'TOTAL-G0000000184':'LOV',
-            'TOTAL-G0000000191':'LOV',
-            'TOTAL-G0000000192':'LOV',
-            'TOTAL-G0000000053':'LOV',
-            'TOTAL-G0000000199':'LOV',
-            'TOTAL-G0000000268':'LOV',
-            'TOTAL-G0000000017':'LOV',
-            'TOTAL-G0000000176':'LOV',
-            'TOTAL-G0000000186':'LOV',
-            'TOTAL-G0000000233':'LOV',
-            'TOTAL-G0000000188':'LOV',
-            'TOTAL-G0000000279':'LOV',
-            'TOTAL-G0000000234':'LOV',
-            'TOTAL-G0000000001':'LOV',
-            'TOTAL-G0000000002':'LOV',
-            'TOTAL-G0000000003':'LOV',
-            'TOTAL-G0000000004':'LOV',
-            'TOTAL-G0000000005':'LOV',
-            'TOTAL-G0000000006':'LOV',
-            'TOTAL-G0000000007':'LOV',
-            'TOTAL-G0000000008':'LOV',
-            'TOTAL-G0000000009':'LOV',
-            'TOTAL-G0000000010':'LOV',
-            'TOTAL-G0000000011':'LOV',
-            'TOTAL-G0000000012':'LOV',
-            'TOTAL-G0000000013':'LOV',
-            'TOTAL-G0000000014':'LOV',
-            'TOTAL-G0000000015':'LOV',
-            'TOTAL-G0000000016':'LOV',
-            'TOTAL-G0000000018':'LOV',
-            'TOTAL-G0000000019':'LOV',
-            'TOTAL-G0000000020':'LOV',
-            'TOTAL-G0000000021':'LOV',
-            'TOTAL-G0000000022':'LOV',
-            'TOTAL-G0000000023':'LOV',
-            'TOTAL-G0000000024':'LOV',
-            'TOTAL-G0000000025':'LOV',
-            'TOTAL-G0000000026':'LOV',
-            'TOTAL-G0000000027':'LOV',
-            'TOTAL-G0000000028':'LOV',
-            'TOTAL-G0000000029':'LOV',
-            'TOTAL-G0000000030':'LOV',
-            'TOTAL-G0000000031':'LOV',
-            'TOTAL-G0000000032':'LOV',
-            'TOTAL-G0000000033':'LOV',
-            'TOTAL-G0000000034':'LOV',
-            'TOTAL-G0000000035':'LOV',
-            'TOTAL-G0000000036':'LOV',
-            'TOTAL-G0000000037':'LOV',
-            'TOTAL-G0000000038':'LOV',
-            'TOTAL-G0000000039':'LOV',
-            'TOTAL-G0000000040':'LOV',
-            'TOTAL-G0000000041':'LOV',
-            'TOTAL-G0000000042':'LOV',
-            'TOTAL-G0000000044':'LOV',
-            'TOTAL-G0000000045':'LOV',
-            'TOTAL-G0000000046':'LOV',
-            'TOTAL-G0000000048':'LOV',
-            'TOTAL-G0000000049':'LOV',
-            'TOTAL-G0000000050':'LOV',
-            'TOTAL-G0000000051':'LOV',
-            'TOTAL-G0000000052':'LOV',
-            'TOTAL-G0000000054':'LOV',
-            'TOTAL-G0000000055':'LOV',
-            'TOTAL-G0000000056':'LOV',
-            'TOTAL-G0000000057':'LOV',
-            'TOTAL-G0000000058':'LOV',
-            'TOTAL-G0000000059':'LOV',
-            'TOTAL-G0000000060':'LOV',
-            'TOTAL-G0000000061':'LOV',
-            'TOTAL-G0000000062':'LOV',
-            'TOTAL-G0000000063':'LOV',
-            'TOTAL-G0000000064':'LOV',
-            'TOTAL-G0000000065':'LOV',
-            'TOTAL-G0000000066':'LOV',
-            'TOTAL-G0000000067':'LOV',
-            'TOTAL-G0000000068':'LOV',
-            'TOTAL-G0000000069':'LOV',
-            'TOTAL-G0000000070':'LOV',
-            'TOTAL-G0000000071':'LOV',
-            'TOTAL-G0000000072':'LOV',
-            'TOTAL-G0000000073':'LOV',
-            'TOTAL-G0000000074':'LOV',
-            'TOTAL-G0000000075':'LOV',
-            'TOTAL-G0000000076':'LOV',
-            'TOTAL-G0000000077':'LOV',
-            'TOTAL-G0000000078':'LOV',
-            'TOTAL-G0000000079':'LOV',
-            'TOTAL-G0000000080':'LOV',
-            'TOTAL-G0000000081':'LOV',
-            'TOTAL-G0000000082':'LOV',
-            'TOTAL-G0000000083':'LOV',
-            'TOTAL-G0000000084':'LOV',
-            'TOTAL-G0000000085':'LOV',
-            'TOTAL-G0000000086':'LOV',
-            'TOTAL-G0000000087':'LOV',
-            'TOTAL-G0000000088':'LOV',
-            'TOTAL-G0000000089':'LOV',
-            'TOTAL-G0000000090':'LOV',
-            'TOTAL-G0000000091':'LOV',
-            'TOTAL-G0000000092':'LOV',
-            'TOTAL-G0000000093':'LOV',
-            'TOTAL-G0000000094':'LOV',
-            'TOTAL-G0000000095':'LOV',
-            'TOTAL-G0000000096':'LOV',
-            'TOTAL-G0000000097':'LOV',
-            'TOTAL-G0000000098':'LOV',
-            'TOTAL-G0000000099':'LOV',
-            'TOTAL-G0000000101':'LOV',
-            'TOTAL-G0000000102':'LOV',
-            'TOTAL-G0000000103':'LOV',
-            'TOTAL-G0000000104':'LOV',
-            'TOTAL-G0000000105':'LOV',
-            'TOTAL-G0000000106':'LOV',
-            'TOTAL-G0000000107':'LOV',
-            'TOTAL-G0000000108':'LOV',
-            'TOTAL-G0000000109':'LOV',
-            'TOTAL-G0000000110':'LOV',
-            'TOTAL-G0000000111':'LOV',
-            'TOTAL-G0000000112':'LOV',
-            'TOTAL-G0000000113':'LOV',
-            'TOTAL-G0000000114':'LOV',
-            'TOTAL-G0000000115':'LOV',
-            'TOTAL-G0000000116':'LOV',
-            'TOTAL-G0000000117':'LOV',
-            'TOTAL-G0000000118':'LOV',
-            'TOTAL-G0000000119':'LOV',
-            'TOTAL-G0000000120':'LOV',
-            'TOTAL-G0000000121':'LOV',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000157',
-            'TOTAL-G0000000137':'CFIHOS-10000001',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000106':'CFIHOS-10000147',
-            'TOTAL-G0000000106':'CFIHOS-10000147',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000106':'CFIHOS-10000147',
-            'TOTAL-G0000000134':'CFIHOS-10000003',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000135':'CFIHOS-10000157',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
-            'TOTAL-G0000000137':'CFIHOS-10000001',
-            'TOTAL-G0000000135':'CFIHOS-10000005',
+        var pickListMap = {
+            'TOTAL-G0000000043': 'LOV',
+            'TOTAL-G0000000047': 'LOV',
+            'TOTAL-G0000000187': 'LOV',
+            'TOTAL-G0000000100': 'LOV',
+            'TOTAL-G0000000185': 'LOV',
+            'TOTAL-G0000000130': 'LOV',
+            'TOTAL-G0000000184': 'LOV',
+            'TOTAL-G0000000191': 'LOV',
+            'TOTAL-G0000000192': 'LOV',
+            'TOTAL-G0000000053': 'LOV',
+            'TOTAL-G0000000199': 'LOV',
+            'TOTAL-G0000000268': 'LOV',
+            'TOTAL-G0000000017': 'LOV',
+            'TOTAL-G0000000176': 'LOV',
+            'TOTAL-G0000000186': 'LOV',
+            'TOTAL-G0000000233': 'LOV',
+            'TOTAL-G0000000188': 'LOV',
+            'TOTAL-G0000000279': 'LOV',
+            'TOTAL-G0000000234': 'LOV',
+            'TOTAL-G0000000001': 'LOV',
+            'TOTAL-G0000000002': 'LOV',
+            'TOTAL-G0000000003': 'LOV',
+            'TOTAL-G0000000004': 'LOV',
+            'TOTAL-G0000000005': 'LOV',
+            'TOTAL-G0000000006': 'LOV',
+            'TOTAL-G0000000007': 'LOV',
+            'TOTAL-G0000000008': 'LOV',
+            'TOTAL-G0000000009': 'LOV',
+            'TOTAL-G0000000010': 'LOV',
+            'TOTAL-G0000000011': 'LOV',
+            'TOTAL-G0000000012': 'LOV',
+            'TOTAL-G0000000013': 'LOV',
+            'TOTAL-G0000000014': 'LOV',
+            'TOTAL-G0000000015': 'LOV',
+            'TOTAL-G0000000016': 'LOV',
+            'TOTAL-G0000000018': 'LOV',
+            'TOTAL-G0000000019': 'LOV',
+            'TOTAL-G0000000020': 'LOV',
+            'TOTAL-G0000000021': 'LOV',
+            'TOTAL-G0000000022': 'LOV',
+            'TOTAL-G0000000023': 'LOV',
+            'TOTAL-G0000000024': 'LOV',
+            'TOTAL-G0000000025': 'LOV',
+            'TOTAL-G0000000026': 'LOV',
+            'TOTAL-G0000000027': 'LOV',
+            'TOTAL-G0000000028': 'LOV',
+            'TOTAL-G0000000029': 'LOV',
+            'TOTAL-G0000000030': 'LOV',
+            'TOTAL-G0000000031': 'LOV',
+            'TOTAL-G0000000032': 'LOV',
+            'TOTAL-G0000000033': 'LOV',
+            'TOTAL-G0000000034': 'LOV',
+            'TOTAL-G0000000035': 'LOV',
+            'TOTAL-G0000000036': 'LOV',
+            'TOTAL-G0000000037': 'LOV',
+            'TOTAL-G0000000038': 'LOV',
+            'TOTAL-G0000000039': 'LOV',
+            'TOTAL-G0000000040': 'LOV',
+            'TOTAL-G0000000041': 'LOV',
+            'TOTAL-G0000000042': 'LOV',
+            'TOTAL-G0000000044': 'LOV',
+            'TOTAL-G0000000045': 'LOV',
+            'TOTAL-G0000000046': 'LOV',
+            'TOTAL-G0000000048': 'LOV',
+            'TOTAL-G0000000049': 'LOV',
+            'TOTAL-G0000000050': 'LOV',
+            'TOTAL-G0000000051': 'LOV',
+            'TOTAL-G0000000052': 'LOV',
+            'TOTAL-G0000000054': 'LOV',
+            'TOTAL-G0000000055': 'LOV',
+            'TOTAL-G0000000056': 'LOV',
+            'TOTAL-G0000000057': 'LOV',
+            'TOTAL-G0000000058': 'LOV',
+            'TOTAL-G0000000059': 'LOV',
+            'TOTAL-G0000000060': 'LOV',
+            'TOTAL-G0000000061': 'LOV',
+            'TOTAL-G0000000062': 'LOV',
+            'TOTAL-G0000000063': 'LOV',
+            'TOTAL-G0000000064': 'LOV',
+            'TOTAL-G0000000065': 'LOV',
+            'TOTAL-G0000000066': 'LOV',
+            'TOTAL-G0000000067': 'LOV',
+            'TOTAL-G0000000068': 'LOV',
+            'TOTAL-G0000000069': 'LOV',
+            'TOTAL-G0000000070': 'LOV',
+            'TOTAL-G0000000071': 'LOV',
+            'TOTAL-G0000000072': 'LOV',
+            'TOTAL-G0000000073': 'LOV',
+            'TOTAL-G0000000074': 'LOV',
+            'TOTAL-G0000000075': 'LOV',
+            'TOTAL-G0000000076': 'LOV',
+            'TOTAL-G0000000077': 'LOV',
+            'TOTAL-G0000000078': 'LOV',
+            'TOTAL-G0000000079': 'LOV',
+            'TOTAL-G0000000080': 'LOV',
+            'TOTAL-G0000000081': 'LOV',
+            'TOTAL-G0000000082': 'LOV',
+            'TOTAL-G0000000083': 'LOV',
+            'TOTAL-G0000000084': 'LOV',
+            'TOTAL-G0000000085': 'LOV',
+            'TOTAL-G0000000086': 'LOV',
+            'TOTAL-G0000000087': 'LOV',
+            'TOTAL-G0000000088': 'LOV',
+            'TOTAL-G0000000089': 'LOV',
+            'TOTAL-G0000000090': 'LOV',
+            'TOTAL-G0000000091': 'LOV',
+            'TOTAL-G0000000092': 'LOV',
+            'TOTAL-G0000000093': 'LOV',
+            'TOTAL-G0000000094': 'LOV',
+            'TOTAL-G0000000095': 'LOV',
+            'TOTAL-G0000000096': 'LOV',
+            'TOTAL-G0000000097': 'LOV',
+            'TOTAL-G0000000098': 'LOV',
+            'TOTAL-G0000000099': 'LOV',
+            'TOTAL-G0000000101': 'LOV',
+            'TOTAL-G0000000102': 'LOV',
+            'TOTAL-G0000000103': 'LOV',
+            'TOTAL-G0000000104': 'LOV',
+            'TOTAL-G0000000105': 'LOV',
+            'TOTAL-G0000000106': 'LOV',
+            'TOTAL-G0000000107': 'LOV',
+            'TOTAL-G0000000108': 'LOV',
+            'TOTAL-G0000000109': 'LOV',
+            'TOTAL-G0000000110': 'LOV',
+            'TOTAL-G0000000111': 'LOV',
+            'TOTAL-G0000000112': 'LOV',
+            'TOTAL-G0000000113': 'LOV',
+            'TOTAL-G0000000114': 'LOV',
+            'TOTAL-G0000000115': 'LOV',
+            'TOTAL-G0000000116': 'LOV',
+            'TOTAL-G0000000117': 'LOV',
+            'TOTAL-G0000000118': 'LOV',
+            'TOTAL-G0000000119': 'LOV',
+            'TOTAL-G0000000120': 'LOV',
+            'TOTAL-G0000000121': 'LOV',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000157',
+            'TOTAL-G0000000137': 'CFIHOS-10000001',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000106': 'CFIHOS-10000147',
+            'TOTAL-G0000000106': 'CFIHOS-10000147',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000106': 'CFIHOS-10000147',
+            'TOTAL-G0000000134': 'CFIHOS-10000003',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000135': 'CFIHOS-10000157',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
+            'TOTAL-G0000000137': 'CFIHOS-10000001',
+            'TOTAL-G0000000135': 'CFIHOS-10000005',
 
         }
         tableData.forEach(function (item) {
@@ -940,10 +936,12 @@ var ontologiesMapper = {
 
             var id = item.ID;
             var pickListGroup = item.PickListValueGroupingID
-            if (pickListGroup && dimensionsMap[pickListGroup]) {
-                triples += "<http://data.total.com/resource/quantum/" + id + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
-
-                    "<http://w3id.org/readi/rdl/" + dimensionsMap[dimension] + ">.\n"
+            if (pickListGroup && pickListMap[pickListGroup]) {
+                triples += "<http://data.total.com/resource/quantum/" + id + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> "
+                if (pickListMap[pickListGroup] == "LOV")
+                    triples += "<http://data.total.com/resource/quantum/pickList#LOV>.\n"
+                else
+                    triples += "<http://w3id.org/readi/rdl/" + pickListMap[pickListGroup] + ">.\n"
 
 
             }
@@ -951,69 +949,36 @@ var ontologiesMapper = {
 
         })
 
+var uniques={}
+        for (var key in pickListMap) {
+            if(!uniques[pickListMap[key]]){
+                uniques[pickListMap[key]]=1
 
-
-        for (var key in dimensionsMap) {
-            triples += "<http://w3id.org/readi/rdl/" + dimensionsMap[key] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
-                "<http://w3id.org/readi/rdl/CFIHOS-00000019>"
-                " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n"
+            if (pickListMap[key] == "LOV")
+                triples += "<http://data.total.com/resource/quantum/pickList#LOV>"
+            else
+                triples += "<http://w3id.org/readi/rdl/" + pickListMap[key]+ ">"
+            triples += " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
+            " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n"
         }
-
-
-
+        }
 
         //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
 
 
-
-        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\attributesSubClassOf.nt", triples)
+        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\pickListSubClassOf.nt", triples)
 
     }
 
     , getQuantumClassToAttributeTriples: function () {
-        var dimensionsMap = {
-            'TOTAL-UD0000000035': 'CFIHOS-45000001',
-            'TOTAL-UD0000000114': 'CFIHOS-45000002',
-            'TOTAL-UD0000000043': 'CFIHOS-45000004',
-            'TOTAL-UD0000000044': 'CFIHOS-45000005',
-            'TOTAL-UD0000000050': 'CFIHOS-45000007',
-            'TOTAL-UD0000000074': 'CFIHOS-45000009',
-            'TOTAL-UD0000000082': 'CFIHOS-45000010',
-            'TOTAL-UD0000000083': 'CFIHOS-45000011',
-            'TOTAL-UD0000000051': 'CFIHOS-45000012',
-            'TOTAL-UD0000000107': 'CFIHOS-45000013',
-            'TOTAL-UD0000000113': 'CFIHOS-45000014',
-            'TOTAL-UD0000000112': 'CFIHOS-45000015',
-            'TOTAL-UD0000000130': 'CFIHOS-45000016',
-            'TOTAL-UD0000000134': 'CFIHOS-45000017',
-            'TOTAL-UD0000000135': 'CFIHOS-45000018',
-            'TOTAL-UD0000000143': 'CFIHOS-45000019',
-            'TOTAL-UD0000000055': 'CFIHOS-45000020',
-            'TOTAL-UD0000000093': 'CFIHOS-45000021',
-            'TOTAL-UD0000000064': 'CFIHOS-45000022',
-            'TOTAL-UD0000000156': 'CFIHOS-45000023',
-            'TOTAL-UD0000000088': 'CFIHOS-45000025',
-            'TOTAL-UD0000000028': 'CFIHOS-45000026',
-            'TOTAL-UD0000000072': 'CFIHOS-45000027',
-            'TOTAL-UD0000000165': 'CFIHOS-45000028',
-            'TOTAL-UD0000000162': 'CFIHOS-45000029',
-            'TOTAL-UD0000000163': 'CFIHOS-45000030',
-            'TOTAL-UD0000000166': 'CFIHOS-45000031',
-            'TOTAL-UD0000000171': 'CFIHOS-45000033',
-            'TOTAL-UD0000000178': 'CFIHOS-45000034',
-            'TOTAL-UD0000000024': 'CFIHOS-45000036',
-            'TOTAL-UD0000000037': 'CFIHOS-45000037',
-            'TOTAL-UD0000000054': 'CFIHOS-45000038',
-            'TOTAL-UD0000000068': 'CFIHOS-45000039',
-            'TOTAL-UD0000000120': 'CFIHOS-45000041',
-            'TOTAL-UD0000000179': 'CFIHOS-45000044',
 
-        }
         var sourceConfig = {
             type: "jsonMap",
             filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__relations.json",
-            table: "tblPhysicalClassToAttribute",
+            table: "tblFunctionalClassToAttribute",
         }
+
+
 
         var data = JSON.parse(fs.readFileSync(sourceConfig.filePath))
         var tableData = data[sourceConfig.table]
@@ -1024,19 +989,21 @@ var ontologiesMapper = {
 
 
             var objIdF = item.FunctionalClassID;
-            var objIdP= item.PhysicalClassID;
-            var attrId= item.AttributeID;
+            var objIdP = item.PhysicalClassID;
+            var attrId = item.AttributeID;
 
-         if(objIdF && attrId){
+            var predicate='<http://data.total.com/resource/quantum#hasAttribute>'
+
+            if (objIdF && attrId) {
                 triples += "<http://data.total.com/resource/quantum/" + objIdF +
-                    "> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity> " +
-                    "<http://data.total.com/resource/quantum/" + attrId +  ">.\n"
+                    "> "+predicate+" " +
+                    "<http://data.total.com/resource/quantum/" + attrId + ">.\n"
 
             }
-            if(objIdP && attrId){
+            if (objIdP && attrId) {
                 triples += "<http://data.total.com/resource/quantum/" + objIdP +
                     "> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity> " +
-                    "<http://data.total.com/resource/quantum/" + attrId +  ">.\n"
+                    "<http://data.total.com/resource/quantum/" + attrId + ">.\n"
 
             }
 
@@ -1044,10 +1011,7 @@ var ontologiesMapper = {
         })
 
 
-
-
-
-        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\"+sourceConfig.table+".nt", triples)
+        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\" + sourceConfig.table + "2Attribute.nt", triples)
 
     }
 
@@ -1497,13 +1461,12 @@ if (false) {
 if (false) {
     ontologiesMapper.getQuantumAttributesSuperclassesTriples()
 }
-if (false) {
+if (true) {
     ontologiesMapper.getQuantumClassToAttributeTriples()
 }
-if (true) {
+if (false) {
     ontologiesMapper.getQuantumPickListSuperclassesTriples()
 }
-
 
 
 //mapQuatumCfihos.writeMappings()

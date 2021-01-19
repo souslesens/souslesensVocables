@@ -49,7 +49,7 @@ var SourceEditor = (function () {
                 if (err)
                     return MainController.UI.message(err)
                 var contextMenu = self.getJstreeConceptsContextMenu()
-                ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {treeSelectNodeFn: SourceEditor.editjstreeNode, contextMenu: contextMenu})
+                ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {treeselectTreeNodeFn: SourceEditor.editjstreeNode, contextMenu: contextMenu})
                 $("#graphDiv").load("snippets/sourceEditor.html")
                 $("#SourceEditor_NewObjectDiv").css("display", "none")
                 // $("#actionDivContolPanelDiv").html("<button onclick='SourceEditor.onAddNewObject()'>+</button>")
@@ -57,7 +57,7 @@ var SourceEditor = (function () {
             })
         }
 
-        self.selectNodeFn = function (event, propertiesMap) {
+        self.selectTreeNodeFn = function (event, propertiesMap) {
             self.editjstreeNode(event, propertiesMap)
             ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", MainController.currentSource, propertiesMap.node)
 

@@ -67,7 +67,7 @@ var MainController = (function () {
             common.loadJsTree(treeDiv, treeData, {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,
-                selectNodeFn: function (evt, obj) {
+                selectTreeNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
                             MainController.currentSchemaType = obj.node.id;
@@ -104,7 +104,7 @@ var MainController = (function () {
             //})
             common.loadJsTree(treeDiv, treeData, {
 
-                selectNodeFn: function (evt, obj) {
+                selectTreeNodeFn: function (evt, obj) {
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
                     Clipboard.clear();

@@ -23,10 +23,13 @@ var visjsGraph = (function () {
     self.globalOptions = {nodes: {}, edges: {}};
 
 
+
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
     self.showNodesLabelMinScale = 0.5
     var currentDrawParams;
+    var lastClickTime=new Date();
+    var dbleClickIntervalDuration=500
 
     self.simulationOn = false;
 self.redraw=function(){
@@ -128,6 +131,12 @@ self.redraw=function(){
         });
 
         self.network.on("click", function (params) {
+            var dbleClick=false;
+            var now=new Date()
+            if(lastClickTime-now<dbleClickIntervalDuration)
+                dbleClick=1
+            lastClickTime=now;
+
             if (params.edges.length == 0 && params.nodes.length == 0) {//simple click stop animation
 
                 if (self.simulationOn || _options.fixedLayout)
@@ -153,6 +162,7 @@ self.redraw=function(){
                 var point = params.pointer.DOM;
                 self.context.currentNode = node;
                 var options = {
+                    dbleClick:dbleClick,
                     ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
                     altKey: (params.event.srcEvent.altKey ? 1 : 0),
                     shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
@@ -170,6 +180,12 @@ self.redraw=function(){
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
                 var point = params.pointer.DOM;
+                var options = {
+                    dbleClick:dbleClick,
+                    ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
+                    altKey: (params.event.srcEvent.altKey ? 1 : 0),
+                    shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
+                }
                 if (_options.onclickFn)
                     _options.onclickFn(edge, point, options)
 

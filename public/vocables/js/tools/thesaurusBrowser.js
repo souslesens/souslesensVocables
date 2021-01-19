@@ -29,7 +29,7 @@ var ThesaurusBrowser = (function () {
 
     }
 
-    self.selectNodeFn = function (event, propertiesMap) {
+    self.selectTreeNodeFn = function (event, propertiesMap) {
 
 
         var source;
@@ -101,7 +101,7 @@ var ThesaurusBrowser = (function () {
 
             var jsTreeOptions = options;
             jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu()
-            jsTreeOptions.selectNodeFn = Config.tools[MainController.currentTool].controller.selectNodeFn;
+            jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
             jsTreeOptions.source = thesaurusLabel;
 
             TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions)
@@ -147,7 +147,7 @@ var ThesaurusBrowser = (function () {
         items.nodeInfos = {
             label: "Node infos",
             action: function (e) {// pb avec source
-                MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
+                MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
             }
 
         }
@@ -230,9 +230,9 @@ var ThesaurusBrowser = (function () {
             }
 
             common.loadJsTree(self.currentTargetDiv, jstreeData, {
-                openAll: true, selectNodeFn: function (event, propertiesMap) {
-                    if (Config.tools[MainController.currentTool].controller.selectNodeFn)
-                        return Config.tools[MainController.currentTool].controller.selectNodeFn(event, propertiesMap);
+                openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
+                    if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
+                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);
                     self.editThesaurusConceptInfos(MainController.currentSource, propertiesMap.node)
                 }, contextMenu: self.getJstreeConceptsContextMenu()
             })
@@ -316,10 +316,10 @@ var ThesaurusBrowser = (function () {
 
 
             var jstreeOptions = {
-                openAll: true, selectNodeFn: function (event, propertiesMap) {
+                openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
                     ThesaurusBrowser.currentTreeNode = propertiesMap.node;
-                    if (Config.tools[MainController.currentTool].controller.selectNodeFn)
-                        return Config.tools[MainController.currentTool].controller.selectNodeFn(event, propertiesMap);
+                    if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
+                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);
 
                     self.editThesaurusConceptInfos(propertiesMap.node.data.source, propertiesMap.node)
                 }, contextMenu: self.getJstreeConceptsContextMenu()

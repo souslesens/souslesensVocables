@@ -53,13 +53,14 @@ var OntologyBrowser = (function () {
             var rightPanelDiv = 300
         /*    var w = $("#graphDiv").width()
             var h = $(window).height();*/
-
-            $("#OntologyBrowser_graphDiv").height(h - 100)
-            $("#OntologyBrowser_selectionDiv").height(h - 100)
-            $("#OntologyBrowser_graphDiv").width(w - rightPanelDiv)
+var h=$("#graphDiv").height();
+            var w=$("#graphDiv").height();
+            $("#OntologyBrowser_graphDiv").height(h )
+            $("#OntologyBrowser_selectionDiv").height(h)
+            $("#OntologyBrowser_graphDiv").width(w )
             $("#OntologyBrowser_selectionDiv").width(rightPanelDiv);
             $("#OntologyBrowser_tabs_result").width(w);
-            $("#OntologyBrowser_tabs_result").height(h - 100);
+            $("#OntologyBrowser_tabs_result").height(h );
 
             $("#OntologyBrowser_dataPropertyFilterDialog").dialog({
                 autoOpen: false,
@@ -421,7 +422,7 @@ var OntologyBrowser = (function () {
                 if (isNewTree) {
                     var jsTreeOptions = {};
                     jsTreeOptions.contextMenu = OntologyBrowser.getJstreeConceptsContextMenu()
-                    jsTreeOptions.selectNodeFn = OntologyBrowser.selectTreeNodeFn;
+                    jsTreeOptions.selectTreeNodeFn = OntologyBrowser.selectTreeNodeFn;
                     //  jsTreeOptions.onCheckNodeFn = OntologyBrowser.checkTreeNodeFn;
                     //  jsTreeOptions.withCheckboxes=true
 

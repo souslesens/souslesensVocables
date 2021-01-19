@@ -84,7 +84,7 @@ var Collection = (function () {
     }
 
 
-    self.selectNodeFn = function (event, propertiesMap) {
+    self.selectTreeNodeFn = function (event, propertiesMap) {
         if (propertiesMap)
             self.currentTreeNode = propertiesMap.node
 

@@ -76,22 +76,22 @@
     <script>
 
         var leftPanelWidth = 400
-        var rightPanelWidth =400
+        var rightPanelWidth = 400
         $(function () {
             config = {loginMode: "none", appName: "VOCABLES"};
             authentication.init()
 
-            var w = $(document).width() - leftPanelWidth-30;
-            var h = $(document).height()-20;
+            var w = $(document).width() - leftPanelWidth - 30;
+            var h = $(document).height() - 20;
             // $("#centralPanel").width(w)
             $("#graphDiv").width(w)
             $("#blendDiv").width(w)
             $("#graphDiv").height(h - 70)
             $("#blendDiv").height(h - 70)
-            $("#leftPanelDiv").height(h-50)
-            $("#rightPanelDiv").height(h-50)
-       //   $('.jstree').attr("height",800)
-         //   $(".jstree").css({ "max-height": 600 });
+            $("#leftPanelDiv").height(h - 50)
+            $("#rightPanelDiv").height(h - 50)
+            //   $('.jstree').attr("height",800)
+            //   $(".jstree").css({ "max-height": 600 });
 
 
             $("#accordion").accordion()
@@ -130,18 +130,19 @@
 
         .jstree {
             margin: 2px;
-          max-height: 550px;
+            max-height: 550px;
 
             overflow: auto;
             min-width: 300px;
 
 
         }
-        #actionDiv{
+
+        #actionDiv {
             width: 385px;
         }
 
-        .ui-accordion-content-active{
+        .ui-accordion-content-active {
             margin-left: -30px !important;
             overflow: auto;
             Xwidth: 400px;
@@ -151,8 +152,9 @@
             margin: 3px;
             border: 2px solid #ddd;
         }
-        .jstree-default{
-           min-height: 300px !important;
+
+        .jstree-default {
+            min-height: 300px !important;
         }
 
         .jstree-node {
@@ -237,7 +239,7 @@
         <table>
             <tr>
                 <td>
-                  <!-- <button onclick="MainController.test()">T</button>-->
+                    <!-- <button onclick="MainController.test()">T</button>-->
                 </td>
                 <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
                 <td><span id="messageDiv"></span></td>
@@ -265,8 +267,10 @@
 
             <h3><span class="title">Sources </span></h3>
             <div style="margin:5px" class='max-height'>
-                <div id="sourceDivControlPanelDiv"></div>
-                <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+                <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
+                <div>
+                    <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+                </div>
             </div>
 
 

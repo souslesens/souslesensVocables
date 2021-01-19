@@ -19,16 +19,16 @@ var parseXlsx = {
                 var sheet_name_list = workbook.SheetNames;
 
                 sheet_name_list.forEach(function (sheetName, sheetIndex) {
-                    if (!options.firstSheetNumber ||sheetIndex >=options.firstSheetNumber -1)
+                    if (!options.firstSheetNumber || sheetIndex >= options.firstSheetNumber - 1)
                         sheets[sheetName] = workbook.Sheets[sheetName];
                 })
                 callbackSeries()
 
             },
             function (callbackSeries) {
-                allData={}
+                allData = {}
                 for (var sheetKey in sheets) {
-                    console.log("processing "+sheetKey)
+                    console.log("processing " + sheetKey)
                     var worksheet = sheets[sheetKey];
                     var dataArray = [];
 
@@ -93,23 +93,23 @@ var parseXlsx = {
                     }
 
 
-
-                        allData[sheetKey] = dataArray
+                    allData[sheetKey] = dataArray
                     allModel[sheetKey] = header
 
-                    console.log("saving "+filePath.replace("xlsx", "json"))
+                    console.log("saving " + filePath.replace("xlsx", "json"))
                     var str = JSON.stringify(allData[sheetKey], null, 2)
-                    fs.writeFileSync(filePath.replace("xlsx", "_"+sheetKey+".json"), str)
+                    fs.writeFileSync(filePath.replace("xlsx", "_" + sheetKey + ".json"), str)
                     console.log("done")
 
                 }
                 callbackSeries();
 
             }
-        ], function (err) {    console.log("done")
+        ], function (err) {
+            console.log("done")
             var x = allData;
 
-            console.log("saving "+filePath.replace("xlsx", "model.json"))
+            console.log("saving " + filePath.replace("xlsx", "model.json"))
             var str = JSON.stringify(allModel, null, 2)
             fs.writeFileSync(filePath.replace("xlsx", "model.json"), str)
             console.log("done")
@@ -232,20 +232,20 @@ if (false) {
 }
 
 if (false) {
-   var  options = {firstSheetNumber: 4, firstLineNumber: 7}
+    var options = {firstSheetNumber: 4, firstLineNumber: 7}
     parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options)
 }
 
 if (false) {
     var options = {firstSheetNumber: 1, firstLineNumber: 1}
- parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx",options);
- //   parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\test.xlsx",options);
+    parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx", options);
+    //   parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\test.xlsx",options);
 }
 
-if(true){
+if (false) {
 
-    var groups={
-        mainObjects:['tblAttribute',
+    var groups = {
+        mainObjects: ['tblAttribute',
             'tblCompany',
             'tblDiscipline',
             'tblDocument',
@@ -259,7 +259,7 @@ if(true){
             'tblTagAttribute',
             'tblUnitOfMeasure',
         ],
-        objects:['tblAttributePickListValue',
+        objects: ['tblAttributePickListValue',
             'tblDocumentAttribute',
             'tblModelAttribute',
             'tblModelItem',
@@ -269,7 +269,7 @@ if(true){
             'tblTagFormatPermittedValue',
             'tblUnitOfMeasureDimension',
         ],
-        relations:['tblDisciplineDocumentType',
+        relations: ['tblDisciplineDocumentType',
             'tblDocumentToDocument',
             'tblFunctionalClassToAttribute',
             'tblFunctionalClassToDiscDocType',
@@ -284,7 +284,7 @@ if(true){
             'tblTagToModelItem',
             'tblTagToTag',
         ]
-        ,util:[
+        , util: [
             //'tblADLChangeManagement',
             'tblBreakdownAttribute',
             'tblBreakdownToBreakdown',
@@ -292,8 +292,8 @@ if(true){
             'tblCodification',
             'tblComments',
             'tblEntities',
-          //  'tblMappingSource',
-          //  'tblMappingSourceDetails',
+            //  'tblMappingSource',
+            //  'tblMappingSourceDetails',
             'tblMappingSourceOrigin',
             'tblRDLChangeManagement',
             'tblRequirementOrigin',
@@ -309,37 +309,45 @@ if(true){
 
 
     }
-if( true){
-    var model="D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json"
-    var data=JSON.parse(fs.readFileSync(model))
-    var obj={}
-    for (var key in groups){
-        obj[key]={}
-        groups[key].forEach(function(fileName) {
-            obj[key][fileName]=data[fileName]
-        })
+    if (false) {
+        var model = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json"
+        var data = JSON.parse(fs.readFileSync(model))
+        var obj = {}
+        for (var key in groups) {
+            obj[key] = {}
+            groups[key].forEach(function (fileName) {
+                obj[key][fileName] = data[fileName]
+            })
         }
-    var file=model.replace(".json","2.json")
-    fs.writeFileSync(file,JSON.stringify(obj,null,2))
+        var file = model.replace(".json", "2.json")
+        fs.writeFileSync(file, JSON.stringify(obj, null, 2))
+    }
+
+
+    if (false) {
+        for (var key in groups) {
+
+            var obj = {}
+
+            groups[key].forEach(function (fileName) {
+                var file = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._" + fileName + ".json"
+                if (!fs.existsSync(file)) {
+                    return console.log(file)
+                }
+                var data = JSON.parse(fs.readFileSync(file))
+                obj[fileName] = (data);
+
+            })
+            var file = "D:\\NLP\\ontologies\\quantum\\__" + key + ".json"
+            fs.writeFileSync(file, JSON.stringify(obj, null, 2))
+        }
+    }
+
 }
 
-
-    if( false){
-    for (var key in groups){
-
-        var obj={}
-
-        groups[key].forEach(function(fileName){
-            var file="D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._"+fileName+".json"
-            if(!fs.existsSync(file)){
-               return  console.log(file)
-            }
-            var data=JSON.parse(fs.readFileSync(file))
-            obj[fileName]=(data);
-
-        })
-        var file="D:\\NLP\\ontologies\\quantum\\__"+key+".json"
-        fs.writeFileSync(file,JSON.stringify(obj,null,2))
-    }
-}}
+if( true){
+    var filePath="D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.xlsx"
+    var  options = {firstSheetNumber: 1, firstLineNumber: 1}
+    parseXlsx.parse(filePath,options);
+}
 

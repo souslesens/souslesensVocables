@@ -73,7 +73,7 @@ var Lineage_classes = (function () {
 
 
             if(sourceLabel && !self.currentSource) {
-                ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
+                ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv"})
                 Lineage_classes.drawTopConcepts(sourceLabel)
             }
             self.currentSource = sourceLabel
@@ -89,6 +89,7 @@ var Lineage_classes = (function () {
                 action: function (e) {// pb avec source
                     $("#Lineage_topClassesRadio").prop("checked", true)
                     Lineage_classes.drawTopConcepts()
+                 //   self.showThesaurusTopConcepts()
                     ThesaurusBrowser.showThesaurusTopConcepts(self.currentSource, {targetDiv: "LineagejsTreeDiv"})
 
                 }
@@ -114,8 +115,10 @@ var Lineage_classes = (function () {
 
         }
 
-        self.selectNodeFn = function (event, propertiesMap) {
+        self.selectTreeNodeFn = function (event, propertiesMap) {
+           ThesaurusBrowser.currentTreeNode= propertiesMap.node;
             var data = propertiesMap.node.data;
+
             if (propertiesMap.event.ctrlKey)
                 self.addArbitraryNodeToGraph(data)
             ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
@@ -442,9 +445,9 @@ var Lineage_classes = (function () {
             })
 
             var jstreeOptions = {
-                openAll: true, selectNodeFn: function (event, propertiesMap) {
+                openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
 
-                    return Lineage_classes.selectNodeFn(event, propertiesMap);
+                    return Lineage_classes.selectTreeNodeFn(event, propertiesMap);
 
 
                 },
@@ -1270,7 +1273,18 @@ var Lineage_classes = (function () {
             },
 
             onNodeClick: function (node, point, options) {
-                return MainController.UI.hidePopup("graphPopupDiv")
+                if(!node)
+                    return MainController.UI.hidePopup("graphPopupDiv")
+
+                self.currentGraphNode=node;
+                if(options.ctrlKey){
+                    MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+                }
+                if(options.dbleClick){
+                    Lineage_classes.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)
+                }
+
+
 
             },
             drawChildren: function () {
@@ -1422,7 +1436,7 @@ Lineage_properties = (function () {
 
                 }
 
-                var options = {selectNodeFn: Lineage_properties.onTreeNodeClick}
+                var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick}
                 common.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
 
 

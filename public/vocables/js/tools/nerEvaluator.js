@@ -148,7 +148,7 @@ var NerEvaluator = (function () {
                     }*/
             }
 
-            common.loadJsTree(self.categoriesTreeId, nodes, {selectNodeFn: NerEvaluator.onTreeClickNode, types: types});
+            common.loadJsTree(self.categoriesTreeId, nodes, {selectTreeNodeFn: NerEvaluator.onTreeClickNode, types: types});
 
         })
 

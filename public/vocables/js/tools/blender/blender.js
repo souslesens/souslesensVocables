@@ -115,7 +115,7 @@ var Blender = (function () {
                         Collection.Sparql.getCollections(source, null, function (err, result) {
                             var jsTreeOptions = {};
                             jsTreeOptions.contextMenu = Collection.getJstreeContextMenu()
-                            jsTreeOptions.selectNodeFn = Collection.selectNodeFn;
+                            jsTreeOptions.selectTreeNodeFn = Collection.selectTreeNodeFn;
 
                             jsTreeOptions.dnd = Blender.dnd
                             TreeController.drawOrUpdateTree("Blender_collectionTreeDiv", result, "#", "collection", jsTreeOptions, function () {
@@ -168,7 +168,7 @@ var Blender = (function () {
         self.getConceptJstreeOptions = function (withDnd) {
             var jsTreeOptions = {};
             jsTreeOptions.contextMenu = Blender.getJstreeConceptsContextMenu()
-            jsTreeOptions.selectNodeFn = Blender.selectNodeFn
+            jsTreeOptions.selectTreeNodeFn = Blender.selectTreeNodeFn
             if (withDnd) {
 
                 jsTreeOptions.dropAllowedFn = Blender.dnd.dropAllowed
@@ -207,7 +207,7 @@ var Blender = (function () {
         },
 
 
-            self.selectNodeFn = function (event, propertiesMap) {
+            self.selectTreeNodeFn = function (event, propertiesMap) {
                 if (propertiesMap) {
                     self.currentTreeNode = propertiesMap.node
                     $("#Blender_conceptTreeDiv").jstree(true).settings.contextmenu.items = self.getJstreeConceptsContextMenu()

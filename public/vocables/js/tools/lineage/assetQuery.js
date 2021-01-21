@@ -424,13 +424,12 @@ var AssetQuery = (function () {
                     whereStr += Sparql_common.setFilter("readi", null, labels, {exactMatch: true})
                     var selectStr = "?quantumId  "
                     var fromStr = ""
-                    if (self.graphUri && self.graphUri != "") {
-                        if (!Array.isArray(self.graphUri))
-                            self.graphUri = [self.graphUri]
-                        self.graphUri.forEach(function (graphUri) {
+
+                   var graphUri= Config.sources["QUANTUM"].graphUri
+                   if(graphUri)
                             fromStr = " FROM <" + graphUri + "> "
-                        })
-                    }
+
+
 
 
                     query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
@@ -443,12 +442,52 @@ var AssetQuery = (function () {
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: Lineage_classes.currentSource}, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
-                    if (result.length >= self.queryLimit)
+                    if (result.length >= Sparql_generic.queryLimit)
                         return MainController.UI.message("result too long >" + self.queryLimit + " lines ")
-                    self.query.showQueryResultInDataTable(result)
+                    //  self.query.showQueryResultInDataTable(result)
+
+
+                    var quantumObjs = [];
+                    result.results.bindings.forEach(function (item) {
+                        quantumObjs.push({id: item.quantumId.value, filter: []})
+                    })
+
+                    self.query.AssetQuery(quantumObjs, function (err, result) {
+                        if(err)
+                            return MainController.UI.message(err)
+
+
+                    })
                 })
 
 
+            },
+
+
+            AssetQuery: function (quantumObjs, callback) {
+                var payload = {}
+                payload.AssetQuery = true;
+                payload.assetType = "tag";
+                payload.quantumObjs = JSON.stringify(quantumObjs, null, 2);
+
+
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: payload,
+                    dataType: "json",
+                    /* beforeSend: function(request) {
+                         request.setRequestHeader('Age', '10000');
+                     },*/
+
+                    success: function (data, textStatus, jqXHR) {
+
+                    }
+                    , error: function (err) {
+
+                        MainController.UI.message(err.responseText);
+                    }
+                })
             },
 
 

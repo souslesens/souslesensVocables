@@ -15,7 +15,7 @@ var logger = require("../bin/logger..js");
 //var annotator_skos = require("../bin/backoffice/annotator_skos.");
 //var skosReader = require("../bin/backoffice/skosReader..js");
 var httpProxy = require("../bin/httpProxy.")
-var mediawikiTaggger=require("../bin/mediawiki/mediawikiTagger.")
+var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.")
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
@@ -233,8 +233,8 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
         if (req.body.httpProxy) {
             if (req.body.POST) {
-                var body=JSON.parse(req.body.body)
-                httpProxy.post(req.body.url,body.headers, body.params, function (err, result) {
+                var body = JSON.parse(req.body.body)
+                httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(response, err, result)
                 })
             } else {
@@ -260,16 +260,16 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
         if (req.body.getWikimediaPageNonThesaurusWords) {
 
-            mediawikiTaggger.getWikimediaPageNonThesaurusWords(req.body.elasticUrl,req.body.indexName,req.body.pageName,req.body.graphIri,req.body.pageCategoryThesaurusWords,function (err, result) {
+            mediawikiTaggger.getWikimediaPageNonThesaurusWords(req.body.elasticUrl, req.body.indexName, req.body.pageName, req.body.graphIri, req.body.pageCategoryThesaurusWords, function (err, result) {
                 processResponse(response, err, result)
 
             })
         }
 
         if (req.body.annotateLive) {
-            var annotatorLive=require("../bin/annotatorLive.")
-            var sources=JSON.parse(req.body.sources)
-            annotatorLive.annotate(req.body.text,sources,function (err, result) {
+            var annotatorLive = require("../bin/annotatorLive.")
+            var sources = JSON.parse(req.body.sources)
+            annotatorLive.annotate(req.body.text, sources, function (err, result) {
                 processResponse(response, err, result)
 
             })
@@ -277,56 +277,56 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
         if (req.body.writeUserLog) {
             var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
-            req.body.infos+=","+ip
+            req.body.infos += "," + ip
 
             logger.info(req.body.infos)
-                processResponse(response,null,{done:1})
-
-
+            processResponse(response, null, {done: 1})
 
 
         }
-
-
-
-
-    if (req.query.SPARQLquery) {
-
-        var query=req.body.query;
-        if(req.query.graphUri)
-            query=query.replace(/where/gi, 'from <'+req.query.graphUri+'> WHERE ')
-
-        if(req.query.method=="POST") {
-            var headers = {}
-            headers["Accept"] = "application/sparql-results+json";
-            headers["Content-Type"] = "application/x-www-form-urlencoded";
-
-
-            httpProxy.post(req.query.url, headers, {query: query}, function (err, result) {
-                processResponse(response, err, result)
+        if (req.body.AssetQuery) {
+            var AssetQuerySqlConnector=require("../bin/sqlConnectors/AssetQuerySqlConnector.")
+            AssetQuerySqlConnector.get(req.body.assetType,JSON.parse(req.body.quantumObjs),function(err,result) {
+                processResponse(response, null, result)
 
             })
+
+
         }
-        else if(req.query.method=="GET"){
-            var headers = {}
-            headers["Accept"] = "application/sparql-results+json";
-        headers["Content-Type"] = "application/x-www-form-urlencoded"
 
-            var query2 = encodeURIComponent( query);
-            query2 = query2.replace(/%2B/g, "+").trim()
-            var url = req.query.url +"?format=json&query="+ query2;
-        httpProxy.get(url, headers,  function (err, result) {
-            if( result && typeof result==='string')
-                result=JSON.parse(result.trim());
-            processResponse(response, err, result)
 
-        })
+        if (req.query.SPARQLquery) {
+
+            var query = req.body.query;
+            if (req.query.graphUri)
+                query = query.replace(/where/gi, 'from <' + req.query.graphUri + '> WHERE ')
+
+            if (req.query.method == "POST") {
+                var headers = {}
+                headers["Accept"] = "application/sparql-results+json";
+                headers["Content-Type"] = "application/x-www-form-urlencoded";
+
+
+                httpProxy.post(req.query.url, headers, {query: query}, function (err, result) {
+                    processResponse(response, err, result)
+
+                })
+            } else if (req.query.method == "GET") {
+                var headers = {}
+                headers["Accept"] = "application/sparql-results+json";
+                headers["Content-Type"] = "application/x-www-form-urlencoded"
+
+                var query2 = encodeURIComponent(query);
+                query2 = query2.replace(/%2B/g, "+").trim()
+                var url = req.query.url + "?format=json&query=" + query2;
+                httpProxy.get(url, headers, function (err, result) {
+                    if (result && typeof result === 'string')
+                        result = JSON.parse(result.trim());
+                    processResponse(response, err, result)
+
+                })
+            }
         }
-    }
-
-
-
-
 
 
     },

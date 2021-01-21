@@ -209,8 +209,8 @@
   },
   "_comment": "**************************************************************ontologies***************************************",
   "_comment": "**************************************************************ontologies***************************************",
-  "_comment": "**************************************************************ontologies***************************************",
-  "_comment": "**************************************************************ontologies***************************************",
+  "_comment": "**************************************************************ontologies ONE MODEL ***************************************",
+  "_comment": "**************************************************************ontologies ONE MODEL  ***************************************",
 
 
 
@@ -226,18 +226,6 @@
     "color": "#bcbd22"
   },
 
-  "ISO_15926-PCA": {
-    "graphUri": "",
-    "sparql_server": {
-      "url": "http://staging.data.posccaesar.org/rdl/",
-      "method": "GET"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
 
   "CFIHOS_READI": {
     "graphUri": "http://w3id.org/readi/rdl/",
@@ -250,14 +238,26 @@
     "schema": null,
     "color": "#bcbd22"
   },
+  "QUANTUM": {
+    "graphUri": ["http://data.total.com/resource/quantum/"],
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
 
 
 
 
 
 
-  "_comment": "**************************************************************ontologies***************************************",
-  "_comment": "**************************************************************ontologies***************************************",
+  "_comment": "**************************************************************ontologies autres***************************************",
+  "_comment": "**************************************************************ontologies autres***************************************",
+
 
 
 
@@ -294,17 +294,29 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "QUANTUM": {
-    "graphUri": ["http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"],
+
+
+
+  "_comment": "**************************************************************ontologies  ISO CFIHOS***************************************",
+  "_comment": "**************************************************************ontologies  ISO CFIHOS***************************************",
+
+
+
+
+
+  "ISO_15926-PCA": {
+    "graphUri": "",
     "sparql_server": {
-      "url": "http://51.178.139.80:8890/sparql"
+      "url": "http://staging.data.posccaesar.org/rdl/",
+      "method": "GET"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
   },
+
   "CFIHOS-ISO": {
     "graphUri": "",
     "sparql_server": {

@@ -975,7 +975,7 @@ var uniques={}
         var sourceConfig = {
             type: "jsonMap",
             filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__relations.json",
-            table: "tblFunctionalClassToAttribute",
+            table: "tblPhysicalClassToAttribute",
         }
 
 
@@ -1016,7 +1016,7 @@ var uniques={}
             var objIdP = item.PhysicalClassID;
             var attrId = item.AttributeID;
 
-            var predicate='http://data.total.com/resource/quantum#hasAttribute'
+      var predicate=null;//   var predicate='http://data.total.com/resource/quantum#hasAttribute'
             var propLabel='unMappedAttributeProperty'
            var quantumMappedId=mappingMap[attrId]
             if(quantumMappedId) {
@@ -1024,7 +1024,7 @@ var uniques={}
                 if(!readiId)
                     readiId = quantumMappedId.CFIHOS_READI2
                 if(readiId && rangeMap[readiId]){
-                    predicate=rangeMap[readiId].prop
+                  predicate=rangeMap[readiId].prop
                     if(!propIds[predicate]){
                         propIds[predicate]=1
                         propLabel=rangeMap[readiId].propLabel
@@ -1034,13 +1034,13 @@ var uniques={}
                 }
             }
 
-            if (objIdF && attrId) {
+            if (predicate && objIdF && attrId) {
                 triples += "<http://data.total.com/resource/quantum/" + objIdF +
                     "> <"+predicate+"> " +
                     "<http://data.total.com/resource/quantum/" + attrId + ">.\n"
 
             }
-            if (objIdP && attrId) {
+            if (predicate && objIdP && attrId) {
                 triples += "<http://data.total.com/resource/quantum/" + objIdP +
                     "> <"+predicate+"> " +
                     "<http://data.total.com/resource/quantum/" + attrId + ">.\n"

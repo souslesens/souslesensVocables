@@ -21,6 +21,8 @@ var Config = (function () {
     self.appName = "VOCABLES";
     self.hideBlender = false;
     self.enableCollections=false;
+    self.showAssetQueyMenu=true;
+    self.preferredSchemaType="OWL"
 
     if (self.hideBlender) {
         setTimeout(function(){
@@ -55,7 +57,7 @@ var Config = (function () {
 
 
 
-    // self.tools["ontologyBrowser"] = {label: "Ontology", multiSources: 0, controller: OntologyBrowser,toolDescriptionImg:null}
+    // self.tools["AssetQuery"] = {label: "Ontology", multiSources: 0, controller: AssetQuery,toolDescriptionImg:null}
 
   //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
     // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}

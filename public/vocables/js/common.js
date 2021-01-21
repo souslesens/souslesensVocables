@@ -52,9 +52,11 @@ var common = (function () {
 
         }
 
-        self.getjsTreeNodes = function (jstreeDiv, IdsOnly) {
+        self.getjsTreeNodes = function (jstreeDiv, IdsOnly,parentNodeId) {
+            if(!parentNodeId)
+                parentNodeId="#"
             var idList = [];
-            var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json('#', {flat: true});
+            var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json(parentNodeId, {flat: true});
             if (IdsOnly) {
                 jsonNodes.forEach(function (item) {
                     idList.push(item.id)
@@ -122,9 +124,12 @@ var common = (function () {
 
 
             }).on('loaded.jstree', function () {
+
                 if (options.openAll)
                     $('#' + jstreeDiv).jstree(true).open_all();
                 self.setTreeAppearance()
+                if(callback)
+                    callback();
 
 
             }).on("select_node.jstree",

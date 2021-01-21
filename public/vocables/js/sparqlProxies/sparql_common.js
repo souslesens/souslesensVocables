@@ -121,6 +121,22 @@ var Sparql_common = (function () {
         return str;
     }
 
+    self.getLabelFromId=function (id) {
+
+        if (OwlSchema.currentSourceSchema.labelsMap[id])
+            return OwlSchema.currentSourceSchema.labelsMap[id];
+
+        var p = id.lastIndexOf("#")
+        if (p > -1)
+            return id.substring(p + 1)
+        else {
+            var p = id.lastIndexOf("/")
+            return id.substring(p + 1)
+        }
+
+
+    }
+
 
     return self;
 

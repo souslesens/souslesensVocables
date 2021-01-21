@@ -46,7 +46,7 @@ var NerEvaluator = (function () {
 
             var activeTab = $('ul.tabs li a.active');
 
-            if (true || (activeTab && activeTab.data('id') == "OntologyBrowser_tabs_wikiPageContent")) {
+            if (true || (activeTab && activeTab.data('id') == "AssetQuery_tabs_wikiPageContent")) {
                 self.loadWikiPage()
             }
             return self.getWikipageMissingWords(obj.node)
@@ -64,7 +64,7 @@ var NerEvaluator = (function () {
 
     self.onTabActivate = function (e, ui) {
         var divId = ui.newPanel.attr('id');
-        if (divId == "OntologyBrowser_tabs_wikiPageContent") {
+        if (divId == "AssetQuery_tabs_wikiPageContent") {
             self.loadWikiPage()
         }
     }
@@ -77,7 +77,7 @@ var NerEvaluator = (function () {
         if (type != "wikiPage")
             return MainController.UI.message("select a page ")
         var page = selectedNode[0].id
-        $("#OntologyBrowser_wikiPageContent_iframe").attr('src', page)
+        $("#AssetQuery_wikiPageContent_iframe").attr('src', page)
     }
 
 

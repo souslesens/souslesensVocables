@@ -88,6 +88,9 @@ var MainController = (function () {
                         }
                     }
                 }
+            },function(){
+                $("#" + treeDiv).jstree(true).open_node(Config.preferredSchemaType);
+
             })
         },
 
@@ -263,7 +266,7 @@ var MainController = (function () {
         /*    self.loadSources(function () {
                 MainController.currentSource = "NPD"
                 ThesaurusBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
-                OntologyBrowser.showProperties()
+                AssetQuery.showProperties()
             })*/
 
     }

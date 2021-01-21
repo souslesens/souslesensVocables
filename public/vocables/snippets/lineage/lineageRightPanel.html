@@ -19,6 +19,8 @@
             <li><a href="#Lineage_ClassesTab">Classes</a></li>
             <li><a href="#LineageTypesTab">Types</a></li>
             <li><a href="#LineagePropertiesTab">Properties</a></li>
+            <li><a href="#AssetQueryTab">Asset Query</a></li>
+
         </ul>
 
 
@@ -51,6 +53,9 @@
                 <div id="LineageProperties_propertyInfosDiv"></div>-->
 
         </div>
+        <div id="AssetQueryTab">
+
+        </div>
     </div>
 
 
@@ -58,5 +63,9 @@
 
 <script>
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+    setTimeout(function(){
+        $("#GenericTools_searchInAllSources").prop("checked",false)
+    },300)
+    $("#AssetQueryTab").load("./snippets/lineage/assetQuery.html");
     $("#Lineage_RighPanelTabs").tabs()
 </script>

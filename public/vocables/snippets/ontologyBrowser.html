@@ -1,6 +1,6 @@
 <style>
 
-    .OntologyBrowser_majorDiv {
+    .AssetQuery_majorDiv {
         min-height: 100px;
         border-radius: 5px;
         border: #372806 2px solid;
@@ -10,7 +10,7 @@
 
     }
 
-    .OntologyBrowser_minorDiv {
+    .AssetQuery_minorDiv {
 
         border-radius: 5px;
         border: #372806 1px solid;
@@ -20,19 +20,19 @@
 
     }
 
-    #OntologyBrowser_tabs_result {
+    #AssetQuery_tabs_result {
 
         overflow: auto;
     }
 
-    .OntologyBrowser_propertyDiv {
+    .AssetQuery_propertyDiv {
         margin: 5px;
         padding: 2px;
         border-radius: 3px;
         border: blue solid 1px;
         background-color: #bdbdbd;
     }
-#OntologyBrowser_queryTreeDiv {
+#AssetQuery_queryTreeDiv {
     background-color: #cdd;
     height: 45%;
     overflow: auto;
@@ -44,7 +44,7 @@
 
 <script>
 
-    $("#OntologyBrowser_tabs").tabs()
+    $("#AssetQuery_tabs").tabs()
 </script>
 
 
@@ -52,44 +52,44 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
 
 
-<div id="OntologyBrowser_tabs">
+<div id="AssetQuery_tabs">
 
     <ul>
-        <li><a href="#OntologyBrowser_tabs_selection">Selection</a></li>
-        <li><a href="#OntologyBrowser_tabs_result">Result</a></li>
+        <li><a href="#AssetQuery_tabs_selection">Selection</a></li>
+        <li><a href="#AssetQuery_tabs_result">Result</a></li>
 
 
     </ul>
-    <div id="OntologyBrowser_tabs_selection" style="display: flex;flex-direction: row">
+    <div id="AssetQuery_tabs_selection" style="display: flex;flex-direction: row">
 
 
-        <div id="OntologyBrowser_graphDiv"></div>
-        <div id="OntologyBrowser_selectionDiv" style="border: blue;margin-left: 5px">
-            <div id="OntologyBrowser_propertiesDiv" style="width: 100%;height: 45%;overflow: auto"></div>
+        <div id="AssetQuery_graphDiv"></div>
+        <div id="AssetQuery_selectionDiv" style="border: blue;margin-left: 5px">
+            <div id="AssetQuery_propertiesDiv" style="width: 100%;height: 45%;overflow: auto"></div>
             <div><B>Query Fields</B></div>
-            <div id="OntologyBrowser_queryTreeDiv" style="width: 100%;height: 45%;overflow: auto"></div>
-            <div id="OntologyBrowser_actionDiv" style="width: 100%;height: 5%;overflow: auto">
-                <input type="checkbox" checked="checked" id="OntologyBrowser_queryShowItemsIdsCBX">show Ids
-                <button onclick="OntologyBrowser.query.executeQuery()">Execute Query</button>
-                <button onclick="OntologyBrowser.graphActions.resetFilters()">Reset</button>
+            <div id="AssetQuery_queryTreeDiv" style="width: 100%;height: 45%;overflow: auto"></div>
+            <div id="AssetQuery_actionDiv" style="width: 100%;height: 5%;overflow: auto">
+                <input type="checkbox" checked="checked" id="AssetQuery_queryShowItemsIdsCBX">show Ids
+                <button onclick="AssetQuery.query.executeQuery()">Execute Query</button>
+                <button onclick="AssetQuery.graphActions.resetFilters()">Reset</button>
             </div>
         </div>
     </div>
 
 
-    <div id="OntologyBrowser_tabs_result">
+    <div id="AssetQuery_tabs_result">
 
     </div>
 
-    <div id="OntologyBrowser_dataPropertyFilterDialog">
-        <span id="OntologyBrowser_dataPropertyFilterDialog_name"></span>
-        <select id="OntologyBrowser_dataPropertyFilterDialog_operator">
+    <div id="AssetQuery_dataPropertyFilterDialog">
+        <span id="AssetQuery_dataPropertyFilterDialog_name"></span>
+        <select id="AssetQuery_dataPropertyFilterDialog_operator">
 
         </select>
-        <input id="OntologyBrowser_dataPropertyFilterDialog_value"></input>
+        <input id="AssetQuery_dataPropertyFilterDialog_value"></input>
         <br>
-        <button onclick="OntologyBrowser.query.validateFilterDialog()">Add filter</button>
-        <button onclick="OntologyBrowser.query.cancelFilterDialog()">Cancel</button>
+        <button onclick="AssetQuery.query.validateFilterDialog()">Add filter</button>
+        <button onclick="AssetQuery.query.cancelFilterDialog()">Cancel</button>
     </div>
 
 

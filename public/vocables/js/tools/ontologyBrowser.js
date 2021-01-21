@@ -7,7 +7,7 @@ var OntologyBrowser = (function () {
     self.currentFilters = {}
     self.currentSelectedProps = {}
     self.classColors = {}
-    self.currentJstreeNode;
+    self.currentNode;
     self.queryClassPath = {};
     self.queryLimit = 500;
 
@@ -22,24 +22,10 @@ var OntologyBrowser = (function () {
         string: ["=", "!=", "startWith", "contains"]
     }
 
-    function getLabelFromId(id) {
 
-        if (OwlSchema.currentSourceSchema.labelsMap[id])
-            return OwlSchema.currentSourceSchema.labelsMap[id];
-
-        var p = id.lastIndexOf("#")
-        if (p > -1)
-            return id.substring(p + 1)
-        else {
-            var p = id.lastIndexOf("/")
-            return id.substring(p + 1)
-        }
-
-
-    }
 
     self.onLoaded = function () {
-        // $("#graphDiv").load("snippets/ontologyBrowser.html")
+        // $("#graphDiv").load("snippets/OntologyBrowser.html")
     }
 
     self.onSourceSelect = function (sourceLabel) {
@@ -48,7 +34,7 @@ var OntologyBrowser = (function () {
     /********************************************************************************************************************************/
 
     self.init = function (callback) {
-        $("#graphDiv").load("snippets/ontologyBrowser.html")
+        $("#graphDiv").load("snippets/OntologyBrowser.html")
         setTimeout(function () {
             var rightPanelDiv = 300
         /*    var w = $("#graphDiv").width()
@@ -106,7 +92,7 @@ var h=$("#graphDiv").height();
         self.currentTreeNode = obj.node;
     }
     self.checkTreeNodeFn = function (item, xx) {
-        var range = OntologyBrowser.currentJstreeNode.dataProperties[item]
+        var range = OntologyBrowser.currentNode.dataProperties[item]
 
 
     }
@@ -170,7 +156,7 @@ var h=$("#graphDiv").height();
                         existingVisjsIds[classId] = 1
                         visjsData.nodes.push({
                             id: ThesaurusBrowser.currentTreeNode.data.id,
-                            label: getLabelFromId(classId),
+                            label: Sparql_common.getLabelFromId(classId),
                             shape: "box"
 
                         })
@@ -183,7 +169,7 @@ var h=$("#graphDiv").height();
                                 self.classColors[property.domain] = common.palette[Object.keys(self.classColors).length]
                             visjsData.nodes.push({
                                 id: property.domain,
-                                label: getLabelFromId(property.domain),
+                                label: Sparql_common.getLabelFromId(property.domain),
                                 shape: "box",
                                 color: self.classColors[property.domain],
                                 data: {}
@@ -193,7 +179,7 @@ var h=$("#graphDiv").height();
                                 id: edgeId,
                                 from: classId,
                                 to: property.domain,
-                                label: getLabelFromId(key),
+                                label: Sparql_common.getLabelFromId(key),
                                 data: {propertyId: key}
 
 
@@ -206,7 +192,7 @@ var h=$("#graphDiv").height();
                                 self.classColors[property.range] = common.palette[Object.keys(self.classColors).length]
                             visjsData.nodes.push({
                                 id: property.range,
-                                label: getLabelFromId(property.range),
+                                label: Sparql_common.getLabelFromId(property.range),
                                 shape: "box",
                                 color: self.classColors[property.range],
                                 data: {}
@@ -216,7 +202,7 @@ var h=$("#graphDiv").height();
                                 id: edgeId,
                                 from: classId,
                                 to: property.range,
-                                label: getLabelFromId(key),
+                                label: Sparql_common.getLabelFromId(key),
                                 data: {propertyId: key}
 
 
@@ -287,18 +273,18 @@ var h=$("#graphDiv").height();
 
         OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, result) {
             if (err) {
-                self.currentJstreeNode = null;
+                self.currentNode = null;
                 return MainController.UI.message(err)
             }
-            self.currentJstreeNode = node;
-            self.currentJstreeNode.dataProperties = {}
+            self.currentNode = node;
+            self.currentNode.dataProperties = {}
             self.graphActions.showDataTypeProperties()
 
         })
     }
     self.showGraphPopupMenu = function (node, point, event) {
             self.setGraphPopupMenus(node)
-            self.currentJstreeNode = node;
+            self.currentNode = node;
             MainController.UI.showPopup(point, "graphPopupDiv")
 
     }
@@ -307,13 +293,13 @@ var h=$("#graphDiv").height();
     self.graphActions = {
         expandObjectProperties: function () {
 
-            self.showProperties(OntologyBrowser.currentJstreeNode.id, OntologyBrowser.currentJstreeNode.text)
+            self.showProperties(OntologyBrowser.currentNode.id, OntologyBrowser.currentNode.text)
         },
         showDataTypeProperties: function () {
             var schema = Config.sources[MainController.currentSource].schema;
-            Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentJstreeNode.id, function (err, result) {
+            Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentNode.id, function (err, result) {
                 OwlSchema.setLabelsFromQueryResult(result)
-                var html = "<B>" + OntologyBrowser.currentJstreeNode.label + "</B>" +
+                var html = "<B>" + OntologyBrowser.currentNode.label + "</B>" +
                     "<div style='display:flex;flex-direction:column'>"
                 var existingItems = []
                 result.forEach(function (item) {
@@ -325,14 +311,14 @@ var h=$("#graphDiv").height();
                         range = item.range
                     } else
                         return;
-                    var id = OntologyBrowser.currentJstreeNode.id + "|" + item.property.value;
-                    if (!OntologyBrowser.currentJstreeNode.dataProperties[id]) {
-                        OntologyBrowser.currentJstreeNode.dataProperties[id] = range
+                    var id = OntologyBrowser.currentNode.id + "|" + item.property.value;
+                    if (!OntologyBrowser.currentNode.dataProperties[id]) {
+                        OntologyBrowser.currentNode.dataProperties[id] = range
                     }
 
                     if (existingItems.indexOf(id) < 0) {
                         existingItems.push(id)
-                        html += "<div class='OntologyBrowser_propertyDiv' onclick='OntologyBrowser.graphActions.addPropertyToTree($(this))' id='" + id + "'>" + getLabelFromId(item.property.value) + "</div>"
+                        html += "<div class='OntologyBrowser_propertyDiv' onclick='OntologyBrowser.graphActions.addPropertyToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
                     }
 
                 })
@@ -345,7 +331,7 @@ var h=$("#graphDiv").height();
 
         },
         expandSubclasses: function () {
-            Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, OntologyBrowser.currentJstreeNode.id, 1, {}, function (err, children) {
+            Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, OntologyBrowser.currentNode.id, 1, {}, function (err, children) {
                 OwlSchema.setLabelsFromQueryResult(children)
                 if (err)
                     return MainController.UI.message(err);
@@ -357,14 +343,14 @@ var h=$("#graphDiv").height();
 
                         visjsData.nodes.push({
                             id: item.child1.value,
-                            label: getLabelFromId(item.child1.value),
+                            label: Sparql_common.getLabelFromId(item.child1.value),
                             shape: "dot",
-                            color: OntologyBrowser.currentJstreeNode.color
+                            color: OntologyBrowser.currentNode.color
                         })
-                        var edgeId = OntologyBrowser.currentJstreeNode.id + "_" + item.child1.value
+                        var edgeId = OntologyBrowser.currentNode.id + "_" + item.child1.value
                         visjsData.edges.push({
                             id: edgeId,
-                            from: OntologyBrowser.currentJstreeNode.id,
+                            from: OntologyBrowser.currentNode.id,
                             to: item.child1.value,
 
                         })
@@ -386,14 +372,14 @@ var h=$("#graphDiv").height();
                 existingNodes = common.getjsTreeNodes("OntologyBrowser_queryTreeDiv", true)
             var jstreeData = [];
 
-            if (existingNodes.indexOf(OntologyBrowser.currentJstreeNode.id) < 0) {
+            if (existingNodes.indexOf(OntologyBrowser.currentNode.id) < 0) {
                 jstreeData.push({
-                    id: OntologyBrowser.currentJstreeNode.id,
-                    text: getLabelFromId(OntologyBrowser.currentJstreeNode.id),
+                    id: OntologyBrowser.currentNode.id,
+                    text: Sparql_common.getLabelFromId(OntologyBrowser.currentNode.id),
                     parent: '#',
                     data: {
                         type: "Class",
-                        id: OntologyBrowser.currentJstreeNode.id,
+                        id: OntologyBrowser.currentNode.id,
                     }
                 })
                 if (!isNewTree) {
@@ -408,14 +394,14 @@ var h=$("#graphDiv").height();
                 var propId = id.split("|")[1]
                 jstreeData.push({
                     id: id,
-                    text: getLabelFromId(propId),
-                    parent: OntologyBrowser.currentJstreeNode.id,
+                    text: Sparql_common.getLabelFromId(propId),
+                    parent: OntologyBrowser.currentNode.id,
                     data: {
 
                         propId: propId,
                         type: "DataTypeProperty",
-                        parent: OntologyBrowser.currentJstreeNode.id,
-                        range: OntologyBrowser.currentJstreeNode.dataProperties[id]
+                        parent: OntologyBrowser.currentNode.id,
+                        range: OntologyBrowser.currentNode.dataProperties[id]
                     }
                 })
 
@@ -428,7 +414,7 @@ var h=$("#graphDiv").height();
 
                     common.loadJsTree("OntologyBrowser_queryTreeDiv", jstreeData, jsTreeOptions)
                 } else {
-                    common.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentJstreeNode.id, jstreeData)
+                    common.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentNode.id, jstreeData)
                 }
 
             }
@@ -440,7 +426,7 @@ var h=$("#graphDiv").height();
 
         showNodeInfo: function(){
 
-            MainController.UI.showNodeInfos(MainController.currentSource, OntologyBrowser.currentJstreeNode.id, "mainDialogDiv")
+            MainController.UI.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode.id, "mainDialogDiv")
         }
 
 

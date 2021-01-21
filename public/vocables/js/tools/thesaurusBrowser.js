@@ -122,12 +122,12 @@ var ThesaurusBrowser = (function () {
         // return {}
         var items = {}
         ;
-        if (MainController.currentSource && Config.sources[MainController.currentSource].schemaType == "OWL") {
+        if (false && MainController.currentSource && Config.sources[MainController.currentSource].schemaType == "OWL") {
             items.showProperties = {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
 
-                    OntologyBrowser.showProperties()
+                    AssetQuery.showProperties()
 
 
                 }
@@ -135,16 +135,37 @@ var ThesaurusBrowser = (function () {
             }
 
         }
+        if(MainController.currentTool=="lineage") {
+            items.graphNode = {
+                label: "graph Node",
+                action: function (e) {// pb avec source
+
+                    Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
+
+                }
+
+            }
+            if(Config.showAssetQueyMenu){
+                items.addToAssetQuery = {
+                    label: "add to Asset Query",
+                    action: function (e) {// pb avec source
+                        AssetQuery.showNodeProperties(self.currentTreeNode.data)
+
+
+                    }
+
+                }
+
+            }
+        }
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
-
-                ThesaurusBrowser.copyNode(e)
-
+                ThesaurusBrowser.copyNode (e)
             }
 
         }
-        items.nodeInfos = {
+        , items.nodeInfos = {
             label: "Node infos",
             action: function (e) {// pb avec source
                 MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
@@ -267,6 +288,8 @@ var ThesaurusBrowser = (function () {
            }
        }
         else{
+            if(!MainController.currentSource)
+                return alert( "select a source or search in all source")
            searchedSources.push(MainController.currentSource)
        }
         var jstreeData = []
@@ -318,6 +341,7 @@ var ThesaurusBrowser = (function () {
             var jstreeOptions = {
                 openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
                     ThesaurusBrowser.currentTreeNode = propertiesMap.node;
+
                     if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);
 

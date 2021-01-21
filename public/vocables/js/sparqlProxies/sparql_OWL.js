@@ -36,7 +36,10 @@ var Sparql_OWL = (function () {
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
                 query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
-            query += "}order by ?topConceptLabel limit 1000"
+            query += "}order by ?topConceptLabel "
+            " }"
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
             var url = self.sparql_url + "?format=json&query=";
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
@@ -77,18 +80,24 @@ var Sparql_OWL = (function () {
                 "select   distinct * " + fromStr + " where {" +
                 "?child1   rdfs:" + owlPredicate + " ?concept. " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
-
+            if(false  && options.skipRestrictions){
+                query +=  " filter ( NOT EXISTS {?child1 rdfs:subClassOf ?superClass.?superClass rdf:type owl:Restriction}) "
+            }
 
             for (var i = 1; i < descendantsDepth; i++) {
 
                 query += "OPTIONAL { ?child" + (i + 1) + " rdfs:" + owlPredicate + " ?child" + i + "." +
                     "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
+
             }
             for (var i = 1; i < descendantsDepth; i++) {
                 query += "} "
             }
-            query += "} order by ?child1 limit 10000";
+            query += "} order by ?child1 ";
+            " }"
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
 
 
             if (options.filterCollections) {
@@ -116,6 +125,7 @@ var Sparql_OWL = (function () {
                     "   optional{?concept rdfs:label ?conceptLabel.}" +
                     "   ?child1 rdfs:label ?child1Label." +
                     "   ?child1 rdf:type ?child1Type." +
+
                     "}order by ?concept"
             }
 
@@ -151,7 +161,10 @@ var Sparql_OWL = (function () {
 
 
             var query = "select * " + fromStr +
-                " where {<" + conceptId + "> ?prop ?value. } limit 500";
+                " where {<" + conceptId + "> ?prop ?value. } ";
+            " }"
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
 
             var url = self.sparql_url + "?format=json&query=";
 
@@ -199,19 +212,22 @@ var Sparql_OWL = (function () {
 
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  ?concept rdfs:" + owlPredicate + "  ?broader" + i + "." +
-                        // "?broader" + i +" rdf:type owl:Class." +
-                        "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+                    query += "  ?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
+                    if(options.skipRestrictions){
+                        query +=  " filter ( NOT EXISTS {?broader" + (i)+" rdf:type owl:Restriction}) "
+                    }
 
 
                 } else {
 
                     query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + "."
-                    "?broader" + i + " rdf:type owl:Class."
+                 //   "?broader" + i + " rdf:type owl:Class."
 
-                    query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+
 
                 }
+                query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+
 
 
             }
@@ -222,12 +238,14 @@ var Sparql_OWL = (function () {
 
             }
 
-            query += "  }";
+            query += "  }}";
 
             if (options.filterCollections) {
                 query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
             }
-            query += "}limit 1000 ";
+
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
 
 
             var url = self.sparql_url + "?format=json&query=";
@@ -276,8 +294,9 @@ var Sparql_OWL = (function () {
                 query += "filter(lang(?conceptLabel )='" + lang + "')"
 
             query += "  } ";
-            if (options.limit)
-                query += "limit " + options.limit;
+            " }"
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
 
             var url = self.sparql_url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
@@ -292,8 +311,102 @@ var Sparql_OWL = (function () {
             })
         }
 
+        self.getObjectProperties = function (sourceLabel, ids, options, callback) {
+
+            if (!options) {
+                options = {}
+            }
+
+            var filterStr = Sparql_common.setFilter("domain", ids);
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "") {
+                if (!Array.isArray(self.graphUri))
+                    self.graphUri = [self.graphUri]
+                self.graphUri.forEach(function (graphUri) {
+                    fromStr = " FROM <" + graphUri + "> "
+                })
+            }
 
 
+            var query = "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel" + fromStr +
+                " WHERE { ?domain ?prop ?range ." + filterStr +
+                "?prop rdfs:subProperty* ?superProp.    ?superProp rdf:type owl:ObjectProperty"+
+            " OPTIONAL {?domain rdfs:label ?domainLabel}"+
+                " OPTIONAL {?prop rdfs:label ?propLabel}"+
+                " OPTIONAL {?range rdfs:label ?rangeLabel}"+
+                " }"
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
+
+
+
+            var url = self.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+
+                return callback(null, result.results.bindings)
+
+            })
+        }
+        self.getObjectRestrictions = function (sourceLabel, ids, options, callback) {
+
+            if (!options) {
+                options = {}
+            }
+
+            var filterStr = Sparql_common.setFilter("id", ids);
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+            var fromStr = ""
+            if (self.graphUri && self.graphUri != "") {
+                if (!Array.isArray(self.graphUri))
+                    self.graphUri = [self.graphUri]
+                self.graphUri.forEach(function (graphUri) {
+                    fromStr = " FROM <" + graphUri + "> "
+                })
+            }
+
+
+            var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "SELECT * "+fromStr+" WHERE {" +
+                "  ?id rdfs:subClassOf ?node. " +filterStr+
+                " ?node owl:onProperty ?prop ." +
+                " OPTIONAL {?prop rdfs:label ?propLabel}"+
+                "  OPTIONAL {?node owl:allValuesFrom ?value}. " +
+                "   OPTIONAL {?node owl:someValueFrom ?value}. " +
+                "   OPTIONAL {?node owl:aValueFrom ?value}. " +
+                "} "
+            var limit = options.limit || Sparql_generic.queryLimit;
+            query+=" limit "+limit
+
+
+
+            var url = self.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+
+                return callback(null, result.results.bindings)
+
+            })
+        }
 
 
 

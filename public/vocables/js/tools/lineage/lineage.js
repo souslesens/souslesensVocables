@@ -1003,7 +1003,7 @@ var Lineage_classes = (function () {
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"
             }
 
-            if(Config.showAssetQueyMenu){
+            if(Config.showAssetQueyMenu  && Config.sources[Lineage_classes.currentSource].assetQueryController){
                 html += "    <span class=\"popupMenuItem\" onclick=\"AssetQuery.showNodeProperties();\"> add to Asset Query</span>"
             }
             $("#graphPopupDiv").html(html);

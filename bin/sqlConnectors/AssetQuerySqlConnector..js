@@ -10,7 +10,8 @@ var AssetQuerySqlConnector = {
     },
 
     queries: {
-        tag: "select * from tag,tag_attribute where tag.ID=tag_attribute.TagId "
+        tag: "select * from tag,tag_attribute where tag.ID=tag_attribute.TagId ",
+        model: "select * from model,model_attribute where model.ID=model_attribute.ModelId "
     },
 
     get: function (objectName,quantumArray,callback){
@@ -23,8 +24,8 @@ var AssetQuerySqlConnector = {
 
         quantumArray.forEach(function(item) {
             var quantumId = item.id
-            var p = quantumId.indexOf("TOTAL-") + 6
-            var quantumTypeLetter = quantumId.substring(p, p + 1)
+            var p = quantumId.indexOf("TOTAL-")
+            var quantumTypeLetter = quantumId.substring(p+ 6, p + 7)
             var quantumTotalId=quantumId.substring(p)
             var quantumType = QuantumTypesMap[quantumTypeLetter]
             if (quantumType) {
@@ -59,10 +60,13 @@ var AssetQuerySqlConnector = {
             else{
                 query+=""+key+"='"+paramsMap[key].id+"'"
             }
-            query+=" limit 1000"
+
 
         }
+        query+=" limit 1000"
+        console.log(query)
         mysql.exec(AssetQuerySqlConnector.connection,query,function(err, result){
+          return callback(err,result);
 
         })
 

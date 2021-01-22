@@ -354,7 +354,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop","domain","range"])
                 return callback(null, result.results.bindings)
 
             })
@@ -402,7 +402,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop","value"])
                 return callback(null, result.results.bindings)
 
             })

@@ -235,6 +235,7 @@
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
     "schemaType": "OWL",
+    "assetQueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -246,6 +247,7 @@
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
     "schemaType": "OWL",
+    "assetQueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -277,7 +279,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
-
+    "assetQueryController": "RDF",
     "schemaType": "OWL",
     "schema": null,
     "color": "#e377c2"

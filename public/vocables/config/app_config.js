@@ -16,22 +16,22 @@ var Config = (function () {
         self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
-  self.loginMode = "json";
-  self.loginMode = "none";
+    self.loginMode = "json";
+    self.loginMode = "none";
     self.appName = "VOCABLES";
     self.hideBlender = false;
-    self.enableCollections=false;
-    self.showAssetQueyMenu=true;
-    self.preferredSchemaType="OWL"
+    self.enableCollections = false;
+    self.showAssetQueyMenu = true;
+    self.preferredSchemaType = "OWL"
 
     if (self.hideBlender) {
-        setTimeout(function(){
-           // $('#accordion').accordion().children('b:eq(3), div:eq(1)').hide();
-      //  $("#blenderPanelLabel").css("display", "none")
-     //   $("#blenderPanelDiv").css("display", "none")
+        setTimeout(function () {
+            // $('#accordion').accordion().children('b:eq(3), div:eq(1)').hide();
+            //  $("#blenderPanelLabel").css("display", "none")
+            //   $("#blenderPanelDiv").css("display", "none")
             $("#ui-id-7").remove()
-          //  $("#blenderPanelDiv").remove()
-        },2000)
+            //  $("#blenderPanelDiv").remove()
+        }, 2000)
     }
 
     self.currentProfile = {
@@ -55,11 +55,9 @@ var Config = (function () {
     self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
-
-
     // self.tools["AssetQuery"] = {label: "Ontology", multiSources: 0, controller: AssetQuery,toolDescriptionImg:null}
 
-  //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
+    //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
     // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
     //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
 

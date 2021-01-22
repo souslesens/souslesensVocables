@@ -74,6 +74,31 @@ var common = (function () {
         }
 
 
+       self.getAllDescendants=function(jstreeDiv,nodeId) {
+            var nodes = [];
+            var nodeIdsMap = {};
+            var recurse=function(nodeId){
+
+                var node =  $('#' + jstreeDiv).jstree(true).get_node(nodeId);
+                if(!nodeIdsMap[nodeId]){
+                    nodeIdsMap[nodeId]=1
+                nodes.push(node);
+
+                // Attempt to traverse if the node has children
+               node.children.forEach(function(child) {
+                        recurse(child);
+
+                })
+                    }
+            }
+
+
+
+            return nodes
+        };
+
+
+
         self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
 
             if (!options)

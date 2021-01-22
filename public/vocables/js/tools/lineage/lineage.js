@@ -247,6 +247,8 @@ var Lineage_classes = (function () {
             }
             if (nodeIds) {
                 parentIds = nodeIds
+            //   parentIds=common.getAllDescendants("",nodeIds)
+
             } else {
                 var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
                 parentIds = sourcesIdsMap[source]

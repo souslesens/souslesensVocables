@@ -3,10 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graphController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -132,7 +131,7 @@
       <workItem from="1610290742772" duration="65843000" />
       <workItem from="1610612770480" duration="63332000" />
       <workItem from="1610872673300" duration="101074000" />
-      <workItem from="1611251600415" duration="38701000" />
+      <workItem from="1611251600415" duration="45774000" />
     </task>
     <servers />
   </component>
@@ -151,5 +150,17 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js</url>
+          <line>18</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="617" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -36,9 +36,10 @@
         background-color: #bdbdbd;
 
     }
+
     #AssetQuery_propertiesDiv {
-    height: 300px;
-    whidth:100%;
+        height: 300px;
+        whidth: 100%;
         overflow: auto;
 
     }
@@ -46,15 +47,14 @@
     #AssetQuery_queryTreeDiv {
         background-color: #cdd;
         height: 300px;
-        whidth:100%;
+        whidth: 100%;
         overflow: auto;
         border: blue solid 1px;
     }
-    .AssetQuery_existsInRemoteSource{
+
+    .AssetQuery_existsInRemoteSource {
         background-color: #a3b7a8;
     }
-
-
 
 
 </style>
@@ -67,23 +67,20 @@
 </select>
     object <select id="AssetQuery_assetObjectSelect">
     <option>
-       tag
+        tag
     </option>
     <option>
         model
     </option>
 </select>
-
-
-
-
+    <button onclick="AssetQuery.actions.selectAllProps()"> select all</button>
 
 
     <div id="AssetQuery_graphDiv"></div>
     <div id="AssetQuery_selectionDiv" style="border: blue;margin-left: 5px">
         <div id="AssetQuery_propertiesDiv"></div>
         <div><B>Query Fields</B></div>
-        <div id="AssetQuery_queryTreeDiv" style="width: 100%;height: 45%;overflow: auto"></div>
+        <div id="AssetQuery_queryTreeDiv" style="width: 100%;height: 400px;overflow: auto"></div>
         <div id="AssetQuery_actionDiv" style="width: 100%;height: 5%;overflow: auto">
             <input type="checkbox" checked="checked" id="AssetQuery_queryShowItemsIdsCBX">show Ids
             <button onclick="AssetQuery.query.executeQuery()">Execute Query</button>
@@ -92,5 +89,15 @@
     </div>
 
 
+</div>
+<div id="AssetQuery_dataPropertyFilterDialog">
+    <span id="AssetQuery_dataPropertyFilterDialog_name"></span>
+    <select id="AssetQuery_dataPropertyFilterDialog_operator">
+
+    </select>
+    <input id="AssetQuery_dataPropertyFilterDialog_value"></input>
+    <br>
+    <button onclick="AssetQuery.query.validateFilterDialog()">Add filter</button>
+    <button onclick="AssetQuery.query.cancelFilterDialog()">Cancel</button>
 </div>
 

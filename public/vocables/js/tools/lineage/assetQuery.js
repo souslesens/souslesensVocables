@@ -7,6 +7,13 @@ var AssetQuery = (function () {
 
 
         self.showNodeProperties = function (node) {
+            $("#AssetQuery_dataPropertyFilterDialog").dialog({
+                autoOpen: false,
+                height: 300,
+                width: 300,
+                modal: false,
+            })
+
             if (!node)
                 node = Lineage_classes.currentGraphNode
             self.currentNode = node
@@ -32,8 +39,23 @@ var AssetQuery = (function () {
                         callbackSeries()
                     })
                 },
+                //matching object label to filter Quantum item mapping source label
+                function (callbackSeries) {
+                    if (Config.sources[MainController.currentSource].assetQueryController != "remoteSQL")
+                        return callbackSeries()
+                    var sourceObjs = [];
 
-                //matching labels to filter Quantum items mapping source labels
+                    self.getMatchingLabels([node], "QUANTUM", function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        result.forEach(function (itemRemote) {
+                            node.existsInRemoteSource = itemRemote.targetId;
+                        })
+                        callbackSeries()
+                    })
+                },
+
+                //matching properties labels to filter Quantum items mapping source labels
                 function (callbackSeries) {
                     if (Config.sources[MainController.currentSource].assetQueryController != "remoteSQL")
                         return callbackSeries()
@@ -85,14 +107,14 @@ var AssetQuery = (function () {
 
                         var id = node.id + "|" + item.prop.value;
                         if (!node.properties[id]) {
-                            node.properties[item.prop.value] = {id: item.prop.value, label: propLabel, range: range,existsInRemoteSource:item.existsInRemoteSource}
+                            node.properties[item.prop.value] = {id: item.prop.value, label: propLabel, range: range, existsInRemoteSource: item.existsInRemoteSource}
                         }
                         var existsInRemoteSourceClass = ""
                         if (item.existsInRemoteSource)
                             existsInRemoteSourceClass = " AssetQuery_existsInRemoteSource"
                         if (existingItems.indexOf(id) < 0) {
                             existingItems.push(id)
-                            html += "<div class='AssetQuery_propertyDiv " + existsInRemoteSourceClass + " ' onclick='AssetQuery.actions.addPropertyToTree($(this))' id='" + encodeURIComponent(id) + "'>" + propLabel + "</div>"
+                            html += "<div class='AssetQuery_propertyDiv " + existsInRemoteSourceClass + " ' onclick='AssetQuery.actions.addPropertiesToTree($(this))' id='" + encodeURIComponent(id) + "'>" + propLabel + "</div>"
                         }
 
                     })
@@ -144,6 +166,9 @@ var AssetQuery = (function () {
             self.currentTreeNode = obj.node;
         };
         self.actions = {
+            selectAllProps: function () {
+                self.actions.addPropertiesToTree("AssetQuery_propertyDiv", true)
+            },
             expandObjectProperties: function () {
 
                 self.showProperties(AssetQuery.currentProperty.id, AssetQuery.currentProperty.text)
@@ -171,7 +196,7 @@ var AssetQuery = (function () {
 
                         if (existingItems.indexOf(id) < 0) {
                             existingItems.push(id)
-                            html += "<div class='AssetQuery_propertyDiv' onclick='AssetQuery.graphActions.addPropertyToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
+                            html += "<div class='AssetQuery_propertyDiv' onclick='AssetQuery.graphActions.addPropertiesToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
                         }
 
                     })
@@ -220,11 +245,19 @@ var AssetQuery = (function () {
                 $("#AssetQuery_queryTreeDiv").html("")
                 self.queryClassPath = {};
             },
-            addPropertyToTree: function (div) {
-                var str = decodeURIComponent($(div).attr("id"));
-                var array = str.split("|")
-
-                var prop = self.currentNode.properties[array[1]];
+            addPropertiesToTree: function (div, all) {
+                var props = [];
+                if (all) {
+                    $(".AssetQuery_existsInRemoteSource").each(function (item) {
+                        var str = decodeURIComponent($(this).attr("id"));
+                        var array = str.split("|")
+                        props.push(self.currentNode.properties[array[1]]);
+                    })
+                } else {
+                    var str = decodeURIComponent($(div).attr("id"));
+                    var array = str.split("|")
+                    props.push(self.currentNode.properties[array[1]]);
+                }
 
 
                 var isNewTree = $("#AssetQuery_queryTreeDiv").is(':empty');
@@ -254,36 +287,35 @@ var AssetQuery = (function () {
 
 
                 }
-                if (existingNodes.indexOf(prop.id) < 0) {
+                props.forEach(function (prop) {
+                    if (existingNodes.indexOf(prop.id) < 0) {
 
-                    jstreeData.push({
-                        id: prop.id,
-                        text: prop.label,
-                        parent: AssetQuery.currentNode.id,
-                        data: {
-                            label: prop.label,
-                            propId: prop.id,
-                            type: "DataTypeProperty",
+                        jstreeData.push({
+                            id: prop.id,
+                            text: prop.label,
                             parent: AssetQuery.currentNode.id,
-                            range: AssetQuery.currentNode.properties[prop.id].range,
-                            existsInRemoteSource:prop.existsInRemoteSource
-                        }
-                    })
-
-                    if (isNewTree) {
-                        var jsTreeOptions = {};
-                        jsTreeOptions.contextMenu = AssetQuery.getJstreeConceptsContextMenu()
-                        jsTreeOptions.selectTreeNodeFn = AssetQuery.selectTreeNodeFn;
-                        //  jsTreeOptions.onCheckNodeFn = AssetQuery.checkTreeNodeFn;
-                        //  jsTreeOptions.withCheckboxes=true
-
-                        common.loadJsTree("AssetQuery_queryTreeDiv", jstreeData, jsTreeOptions)
-                    } else {
-                        common.addNodesToJstree("AssetQuery_queryTreeDiv", AssetQuery.currentNode.id, jstreeData)
+                            data: {
+                                label: prop.label,
+                                propId: prop.id,
+                                type: "DataTypeProperty",
+                                parent: AssetQuery.currentNode.id,
+                                range: AssetQuery.currentNode.properties[prop.id].range,
+                                existsInRemoteSource: prop.existsInRemoteSource
+                            }
+                        })
                     }
+                })
+                if (isNewTree) {
+                    var jsTreeOptions = {};
+                    jsTreeOptions.contextMenu = AssetQuery.getJstreeConceptsContextMenu()
+                    jsTreeOptions.selectTreeNodeFn = AssetQuery.selectTreeNodeFn;
+                    //  jsTreeOptions.onCheckNodeFn = AssetQuery.checkTreeNodeFn;
+                    //  jsTreeOptions.withCheckboxes=true
 
+                    common.loadJsTree("AssetQuery_queryTreeDiv", jstreeData, jsTreeOptions)
+                } else {
+                    common.addNodesToJstree("AssetQuery_queryTreeDiv", AssetQuery.currentNode.id, jstreeData)
                 }
-
             }
             ,
             resetFilters: function () {
@@ -301,16 +333,16 @@ var AssetQuery = (function () {
         self.getMatchingLabels = function (sourceData, targetSource, callback) {
 
             var labels = []
-            var labelsMap={}
+            var labelsMap = {}
             sourceData.forEach(function (item) {
-                if (item.id  && item.label)
+                if (item.id && item.label)
                     labels.push(item.label)
-                labelsMap[item.label.toLowerCase()]=item.id
+                labelsMap[item.label.toLowerCase()] = item.id
 
             })
 
-            if(labels.length==0)
-                return callback(null,[])
+            if (labels.length == 0)
+                return callback(null, [])
             var whereStr = " ?targetId rdfs:label  ?sourceLabel. "
 
             whereStr += Sparql_common.setFilter("source", null, labels, {exactMatch: true})
@@ -335,7 +367,7 @@ var AssetQuery = (function () {
 
                 var targetObjs = [];
                 result.results.bindings.forEach(function (item) {
-                    var sourceId= labelsMap[item.sourceLabel.value.toLowerCase()]
+                    var sourceId = labelsMap[item.sourceLabel.value.toLowerCase()]
                     targetObjs.push({sourceId: sourceId, targetId: item.targetId.value, sourceLabel: item.sourceLabel.value})
                 })
 
@@ -353,14 +385,14 @@ var AssetQuery = (function () {
 
                     var operators = []
                     $("#AssetQuery_dataPropertyFilterDialog").dialog("open");
-
-
-                    if (range.value.indexOf("XMLSchema#string") > -1 || range.value.indexOf("Literal") > -1) {
+                    if (range == "?") {
+                        operators = ["contains", "=", ">", "<", ">=", "<=", "#", "beginsWith", "endsWith"]
+                    } else if (range.indexOf("XMLSchema#string") > -1 || range.value.indexOf("Literal") > -1) {
                         operators = ["=", "#", "contains", "beginsWith", "endsWith"]
-                    } else if (range.value.indexOf("XMLSchema#decimal") > -1 || range.value.indexOf("XMLSchema#integer") > -1) {
+                    } else if (range.indexOf("XMLSchema#decimal") > -1 || range.value.indexOf("XMLSchema#integer") > -1) {
                         operators = ["=", "#", ">", "<", ">=", "<="]
                     } else {
-                        alert("else ?  " + range.value)
+                        alert("else ?  " + range)
                     }
 
                     common.fillSelectOptions("AssetQuery_dataPropertyFilterDialog_operator", operators, true)
@@ -553,56 +585,71 @@ var AssetQuery = (function () {
                 },
 
                 executeRemoteSqlQuery: function () {
-                    var nodes = common.getjsTreeNodes("AssetQuery_queryTreeDiv")
-                    var nodesMap = {}
-                    nodes.forEach(function (item) {
-                        nodesMap[item.id] = item;
-                    })
-
-
-                    var classNodeIds = $('#AssetQuery_queryTreeDiv').jstree(true).get_node("#").children;
-
-
-                    var filters = [];
-                    var selectFields = []
-                    var previousClassId = null;
-                    var previousClassLabel = null;
-                    var selectStr = " * "
-                    var showIds = $('AssetQuery_queryShowItemsIdsCBX').prop("checked")
-                    var query = "";
-                    if (!showIds)
-                        selectStr = " ";
-
-                    formatVariableName = function (str) {
-                        return str.replace(/ /g, "_")
-                    }
-
                     var remoteObjs = [];
-                    classNodeIds.forEach(function (classNodeId, index) {
-
-                        var props = common.getjsTreeNodes("AssetQuery_queryTreeDiv", false, [classNodeId])
-
-
-                        var labels = []
-                        var sourceObjs = []
-
-                        props.forEach(function (prop) {
-                            if (prop.data.existsInRemoteSource)
-                                    remoteObjs.push({id: prop.data.existsInRemoteSource, filter: []})
-                                })
-
+                    var isNewTree = $("#AssetQuery_queryTreeDiv").is(':empty');
+                    if(isNewTree) {//query only class (not properties)
+                    }
+                    else{
+                        var nodes = common.getjsTreeNodes("AssetQuery_queryTreeDiv")
+                        var nodesMap = {}
+                        nodes.forEach(function (item) {
+                            nodesMap[item.id] = item;
                         })
 
 
+                        var classNodeIds = $('#AssetQuery_queryTreeDiv').jstree(true).get_node("#").children;
 
-                            self.query.queryRemoteAssetSource(remoteObjs, function (err, result) {
-                                if (err)
-                                    return MainController.UI.message(err)
 
+                        var filters = [];
+                        var selectFields = []
+                        var previousClassId = null;
+                        var previousClassLabel = null;
+                        var selectStr = " * "
+                        var showIds = $('AssetQuery_queryShowItemsIdsCBX').prop("checked")
+                        var query = "";
+                        if (!showIds)
+                            selectStr = " ";
+
+                        formatVariableName = function (str) {
+                            return str.replace(/ /g, "_")
+                        }
+
+
+                        classNodeIds.forEach(function (classNodeId, index) {
+
+                            var props = common.getjsTreeNodes("AssetQuery_queryTreeDiv", false, [classNodeId])
+
+
+                            var labels = []
+                            var sourceObjs = []
+
+                            props.forEach(function (prop) {
+                                if (prop.data.existsInRemoteSource) {
+                                    remoteObjs.push({id: prop.data.existsInRemoteSource, filter: []})
+
+
+                                    var propChildrenIds = $("#AssetQuery_queryTreeDiv").jstree(true).get_node("prop.id").children
+                                    propChildrenIds.forEach(function (filterId) {
+                                        var filter = $("#AssetQuery_queryTreeDiv").jstree(true).get_node(filterId)
+                                        var value = filter.data.value;
+                                        var operator = filter.data.operator;
+                                        value = common.convertNumStringToNumber(value)
+                                        remoteObjs.push({id: prop.data.existsInRemoteSource, filter: [{operator: operator, value: value}]})
+                                    })
+                                }
 
                             })
 
+                        })
+                    }
 
+
+                    self.query.queryRemoteAssetSource(remoteObjs, function (err, result) {
+                        if (err)
+                            return MainController.UI.message(err)
+
+
+                    })
 
 
                 },
@@ -611,7 +658,9 @@ var AssetQuery = (function () {
                 queryRemoteAssetSource: function (quantumObjs, callback) {
                     var payload = {}
                     payload.AssetQuery = true;
-                    payload.assetType =$("#AssetQuery_assetObjectSelect").val()
+                    payload.assetType = $("#AssetQuery_assetObjectSelect").val();
+                    if (self.currentNode.existsInRemoteSource)
+                        quantumObjs.push({id: self.currentNode.existsInRemoteSource})
                     payload.quantumObjs = JSON.stringify(quantumObjs, null, 2);
 
 
@@ -633,28 +682,27 @@ var AssetQuery = (function () {
                             var cols = [];
                             var colNames = [];
 
-                            if(   data.length==0)
+                            if (data.length == 0)
                                 return alert("no remote data found")
 
-                                for(var key in data[0]){
+                            for (var key in data[0]) {
 
-                                    cols.push(({title: key}))
-                                    colNames.push(key)
-                                }
+                                cols.push(({title: key}))
+                                colNames.push(key)
+                            }
 
 
+                            data.forEach(function (item, index) {
+                                var line = []
 
-                            data.forEach(function(item,index){
-                                var line=[]
-
-                                colNames.forEach(function(col,index) {
-                                        line.push(item[col] || "" )
-                                    })
+                                colNames.forEach(function (col, index) {
+                                    line.push(item[col] || "")
+                                })
                                 dataSet.push(line)
 
                             })
 
-                            self.query.showQueryResultInDataTable(dataSet,cols)
+                            self.query.showQueryResultInDataTable(dataSet, cols)
                         }
                         , error: function (err) {
 
@@ -666,7 +714,7 @@ var AssetQuery = (function () {
                 ,
 
 
-                showQueryResultInDataTable: function (dataSet,cols) {
+                showQueryResultInDataTable: function (dataSet, cols) {
 
 
                     //  $("#AssetQuery_tabs").tabs("option", "active", 1);

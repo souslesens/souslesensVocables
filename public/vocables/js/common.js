@@ -411,8 +411,32 @@ var common = (function () {
 
 
         }
+        self.convertNumStringToNumber= function (value) {
+            if (value.match && value.match(/.*[a-zA-Z\/\\$].*/))
+                return value;
+            if (self.isInt(value))
+                return parseInt(value)
+            if (self.isFloat(value))
+                return parseFloat(value)
+            if (value == "true")
+                return true;
+            if (value == "false")
+                return false;
+            return value;
 
+        },
 
+          self.isNumber=  function (n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+        self.isInt= function (value) {
+            return /-?[0-9]+/.test("" + value);
+
+        },
+            self.isFloat=  function (value) {
+            return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
+
+        },
         self.palette = [
             '#9edae5',
             '#17becf',

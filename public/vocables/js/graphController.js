@@ -108,6 +108,9 @@ var GraphController = (function () {
                     }
                     if (visjOptions.arrows)
                         edge.arrows = visjOptions.arrows
+                    if (visjOptions.edgeColor)
+                        edge.color = visjOptions.edgeColor
+
                     visjsData.edges.push(edge);
 
                 }

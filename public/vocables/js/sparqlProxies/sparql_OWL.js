@@ -336,15 +336,21 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel" + fromStr +
-                " WHERE { ?domain ?prop ?range ." + filterStr +
-                "?prop rdfs:subProperty* ?superProp.    ?superProp rdf:type owl:ObjectProperty"+
-            " OPTIONAL {?domain rdfs:label ?domainLabel}"+
-                " OPTIONAL {?prop rdfs:label ?propLabel}"+
-                " OPTIONAL {?range rdfs:label ?rangeLabel}"+
-                " }"
+                " WHERE {"+
+                "   ?prop rdf:type owl:ObjectProperty " +
+                "OPTIONAL{?prop rdfs:label ?propLabel.}  " +
+                "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
+                " ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " + "OPTIONAL{?domain rdfs:label ?domainLabel.} " +
+                " OPTIONAL {?subProp rdfs:subPropertyOf ?prop. {?subProp rdfs:label ?subPropLabel.}} "+filterStr
+
+            /* " WHERE { ?domain ?prop ?range ." + filterStr +
+             "?prop rdfs:subProperty* ?superProp.    ?superProp rdf:type owl:ObjectProperty"+
+         " OPTIONAL {?domain rdfs:label ?domainLabel}"+
+             " OPTIONAL {?prop rdfs:label ?propLabel}"+
+             " OPTIONAL {?range rdfs:label ?rangeLabel}"+*/
+               + " }"
             var limit = options.limit || Sparql_generic.queryLimit;
             query+=" limit "+limit
-
 
 
             var url = self.sparql_url + "?format=json&query=";

@@ -23,24 +23,23 @@ var visjsGraph = (function () {
     self.globalOptions = {nodes: {}, edges: {}};
 
 
-
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
     self.showNodesLabelMinScale = 0.5
     var currentDrawParams;
-    var lastClickTime=new Date();
-    var dbleClickIntervalDuration=500
+    var lastClickTime = new Date();
+    var dbleClickIntervalDuration = 500
 
     self.simulationOn = false;
-self.redraw=function(){
-    if(!currentDrawParams)
-        return;
-   var  visjsData={nodes:self.data.nodes.get(),edges:self.data.edges.get()}
-    self.draw(currentDrawParams.divId,visjsData, currentDrawParams.options, currentDrawParams.callback)
+    self.redraw = function () {
+        if (!currentDrawParams)
+            return;
+        var visjsData = {nodes: self.data.nodes.get(), edges: self.data.edges.get()}
+        self.draw(currentDrawParams.divId, visjsData, currentDrawParams.options, currentDrawParams.callback)
 
-}
+    }
     self.draw = function (divId, visjsData, _options, callback) {
-        currentDrawParams={divId:divId,options:_options,callback:callback}
+        currentDrawParams = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
@@ -118,11 +117,10 @@ self.redraw=function(){
                             _options.onRightClickFn(obj, point, params.event)
                     } else {
                         objId = self.network.getEdgeAt(params.pointer.DOM)
-                            var obj = self.data.edges.get(objId);
-                            if (obj)
-                                _options.onRightClickFn(obj, point, params.event)
-                        }
-
+                        var obj = self.data.edges.get(objId);
+                        if (obj)
+                            _options.onRightClickFn(obj, point, params.event)
+                    }
 
 
                 }
@@ -130,66 +128,12 @@ self.redraw=function(){
 
         });
 
+        self.network.on("doubleClick", function (params) {
+            self.processClicks(params,_options, true)
+        });
+
         self.network.on("click", function (params) {
-            var dbleClick=false;
-            var now=new Date()
-            if(lastClickTime-now<dbleClickIntervalDuration)
-                dbleClick=1
-            lastClickTime=now;
-
-            if (params.edges.length == 0 && params.nodes.length == 0) {//simple click stop animation
-
-                if (self.simulationOn || _options.fixedLayout)
-                    self.network.stopSimulation();
-                else {
-
-                    self.network.startSimulation();
-
-                }
-                self.simulationOn = !self.simulationOn;
-                // graphController.hideNodePopover();
-
-                if (_options.onclickFn)
-                    _options.onclickFn(null, point, options)
-            }
-
-            // select node
-            else if (params.nodes.length == 1) {
-
-                var nodeId = params.nodes[0];
-                var node = self.data.nodes.get(nodeId);
-                node._graphPosition = params.pointer.DOM;
-                var point = params.pointer.DOM;
-                self.context.currentNode = node;
-                var options = {
-                    dbleClick:dbleClick,
-                    ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
-                    altKey: (params.event.srcEvent.altKey ? 1 : 0),
-                    shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
-                }
-                if (_options.onclickFn)
-                    _options.onclickFn(node, point, options)
-
-
-            }
-
-            //select edge{
-            else if (params.edges.length == 1) {
-                var edgeId = params.edges[0];
-                var edge = self.data.edges.get(edgeId);
-                edge.fromNode = self.data.nodes.get(edge.from);
-                edge.toNode = self.data.nodes.get(edge.to);
-                var point = params.pointer.DOM;
-                var options = {
-                    dbleClick:dbleClick,
-                    ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
-                    altKey: (params.event.srcEvent.altKey ? 1 : 0),
-                    shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
-                }
-                if (_options.onclickFn)
-                    _options.onclickFn(edge, point, options)
-
-            }
+            self.processClicks(params,_options)
 
         }).on("hoverNode", function (params) {
             var nodeId = params.node;
@@ -432,6 +376,100 @@ self.redraw=function(){
         })
 
         return csvStr;
+    }
+    self.getNodeDescendantIds = function (nodeIds, includeParents) {
+        if(!Array.isArray(nodeIds))
+            nodeIds=[nodeIds]
+        var nodes = [];
+        if (includeParents)
+            nodes = nodeIds
+        var allEdges = self.data.edges.get();
+
+        function recurse(nodeId) {
+            allEdges.forEach(function (edge) {
+                if (edge.from == nodeId) {
+                    nodes.push(edge.to)
+                    recurse(edge.to)
+                }
+            })
+        }
+
+
+        nodeIds.forEach(function (parentId) {
+            recurse(parentId)
+        })
+        return nodes;
+    }
+
+    self.getNodeDescendants = function (nodeIds, includeParents) {
+      var nodeIds=  self.getNodeDescendantIds(nodeIds, includeParents) ;
+      return self.data.nodes.get(nodeIds)
+
+    }
+
+
+    self.processClicks = function (params, _options, isDbleClick) {
+
+        var now = new Date()
+        if ( (now -lastClickTime) < dbleClickIntervalDuration) {
+            lastClickTime = now;
+          return
+        }
+      if(isDbleClick)
+          var x=3
+
+        if (params.edges.length == 0 && params.nodes.length == 0) {//simple click stop animation
+
+            if (self.simulationOn || _options.fixedLayout)
+                self.network.stopSimulation();
+            else {
+
+                self.network.startSimulation();
+
+            }
+            self.simulationOn = !self.simulationOn;
+            // graphController.hideNodePopover();
+            if (_options.onclickFn)
+                _options.onclickFn(null, point, {})
+        }
+
+        // select node
+        else if (params.nodes.length == 1) {
+
+            var nodeId = params.nodes[0];
+            var node = self.data.nodes.get(nodeId);
+            node._graphPosition = params.pointer.DOM;
+            var point = params.pointer.DOM;
+            self.context.currentNode = node;
+            var options = {
+                dbleClick: isDbleClick,
+                ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
+                altKey: (params.event.srcEvent.altKey ? 1 : 0),
+                shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
+            }
+            if (_options.onclickFn)
+                _options.onclickFn(node, point, options)
+
+
+        }
+
+        //select edge{
+        else if (params.edges.length == 1) {
+            var edgeId = params.edges[0];
+            var edge = self.data.edges.get(edgeId);
+            edge.fromNode = self.data.nodes.get(edge.from);
+            edge.toNode = self.data.nodes.get(edge.to);
+            var point = params.pointer.DOM;
+            var options = {
+                dbleClick: isDbleClick,
+                ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
+                altKey: (params.event.srcEvent.altKey ? 1 : 0),
+                shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
+            }
+            if (_options.onclickFn)
+                _options.onclickFn(edge, point, options)
+
+        }
     }
 
 

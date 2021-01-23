@@ -6,6 +6,8 @@ var Lineage_classes = (function () {
         var defaultShape = "dot";
         var defaultShapeSize = 5;
         var objectPropertyColor = "red"
+        var defaultEdgeArrowType="triangle"
+        var defaultEdgeColor="#aaa"
         var restrictionColor="orange"
         var maxChildrenDrawn = 15
 
@@ -14,6 +16,7 @@ var Lineage_classes = (function () {
         var self = {}
         self.maxClusterOpeningLength = 50
         self.currentSource;
+        var graphContext={}
 
         self.onLoaded = function () {
             MainController.UI.message("");
@@ -180,10 +183,11 @@ var Lineage_classes = (function () {
                         },
                         data: {source: MainController.currentSource},
                         rootLabel: source,
+                        edgeColor:defaultEdgeColor,
                         arrows: {
                             to: {
                                 enabled: true,
-                                type: "arrow",
+                                type: defaultEdgeArrowType,
                                 scaleFactor: 0.5
                             },
                         },
@@ -197,6 +201,7 @@ var Lineage_classes = (function () {
 
         }
         self.drawNewGraph = function (visjsData) {
+            graphContext={}
             var options = {
 
                 onclickFn: Lineage_classes.graphActions.onNodeClick,
@@ -243,11 +248,16 @@ var Lineage_classes = (function () {
         self.addChildrenToGraph = function (nodeIds, source) {
             var parentIds
             if (!source) {
+                if(self.currentSource)
                 source = self.currentSource;
+                else
+                    return alert("select a source")
             }
             if (nodeIds) {
-                parentIds = nodeIds
-            //   parentIds=common.getAllDescendants("",nodeIds)
+               /// parentIds = nodeIds
+         //    parentIds=common.getAllDescendants("",nodeIds)
+             var parentIds=visjsGraph.getNodeDescendantIds(nodeIds,true)
+
 
             } else {
                 var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
@@ -255,6 +265,8 @@ var Lineage_classes = (function () {
                 if (!parentIds || parentIds.length == 0)
                     parentIds = expandedLevels[source][expandedLevels[source].length - 1];
             }
+            if(parentIds.length==0)
+                return MainController.UI.message("no parent node selected")
             MainController.UI.message("")
             var options = {}
             if (self.currentOwlType == "ObjectProperty")
@@ -320,11 +332,13 @@ var Lineage_classes = (function () {
                                 id: edgeId,
                                 from: key,
                                 to: key + "_cluster",
+                                color:defaultEdgeColor,
                                 arrows: {
                                     to: {
                                         enabled: true,
-                                        type: "arrow",
-                                        scaleFactor: 0.5
+                                        type: defaultEdgeArrowType,
+                                        scaleFactor: 0.5,
+
                                     },
                                 },
                                 data: {source: source}
@@ -348,7 +362,7 @@ var Lineage_classes = (function () {
                                 if (nodeSource2) {
                                     nodeSource = nodeSource2
                                     color = self.getSourceColor(nodeSource2)
-                                    shape = "triangle"
+                                    shape = defaultEdgeArrowType
                                     shapeSize = 6
                                     self.registerSource(nodeSource)
                                 } else {
@@ -382,10 +396,11 @@ var Lineage_classes = (function () {
                                     id: edgeId,
                                     from: item.concept.value,
                                     to: item.child1.value,
+                                    color:defaultEdgeColor,
                                     arrows: {
                                         from: {
                                             enabled: true,
-                                            type: "arrow",
+                                            type: defaultEdgeArrowType,
                                             scaleFactor: 0.5
                                         },
                                     },
@@ -495,7 +510,7 @@ var Lineage_classes = (function () {
         }
 
 
-        self.drawSimilarsNodes = function (node, sources) {
+        self.drawSimilarsNodes = function (node, sources,descendantsAlso) {
             MainController.UI.message("")
             //    $("#Lineage_toSource").val("")
 
@@ -531,8 +546,18 @@ var Lineage_classes = (function () {
                             }
                         })
                     } else {
-                        words = [node.label]
-                        sourceItemsMap[node.label.toLowerCase()] = node.id
+                        var nodes=[]
+                        if(descendantsAlso) {
+                           var nodes = visjsGraph.getNodeDescendants(node.id, true)
+                        }
+                       else{
+                            nodes.push(node)
+                        }
+                       nodes.forEach(function(node){
+                           words.push(node.label)
+                           sourceItemsMap[node.label.toLowerCase()] = node.id
+                       })
+
 
                     }
                     slices = common.sliceArray(words, Sparql_generic.slicesSize);
@@ -729,14 +754,18 @@ var Lineage_classes = (function () {
         }
 
 
-        self.drawObjectProperties = function (classIds) {
+        self.drawObjectProperties = function (classIds,descendantsAlso) {
             var source = self.currentSource
             if (!source)
                 return alert("select a source");
             if (!classIds) {
                 classIds = self.getGraphIdsFromSource(source)
-
+            }else {
+                if (descendantsAlso)
+                    classIds = visjsGraph.getNodeDescendantIds(classIds, true)
             }
+
+
             MainController.UI.message("")
 
                     Sparql_OWL.getObjectProperties(source,classIds,null,function (err, result) {
@@ -755,7 +784,7 @@ var Lineage_classes = (function () {
                     result.forEach(function (item) {
 
                         if (!item.range) {
-                            item.range = {value: "?_" + item.property.value}
+                            item.range = {value: "?_" + item.prop.value}
                         }
                         if (!item.rangeLabel) {
                             item.rangeLabel = {value: "?"}
@@ -941,10 +970,12 @@ var Lineage_classes = (function () {
                         arrows: {
                             from: {
                                 enabled: true,
-                                type: "arrow",
+                                type: defaultEdgeArrowType,
                                 scaleFactor: 0.5
                             },
+
                         },
+                        edgeColor:defaultEdgeColor,
 
                     })
 
@@ -985,10 +1016,10 @@ var Lineage_classes = (function () {
 
         }
 
-        self.setGraphPopupMenus = function (node) {
+        self.setGraphPopupMenus = function (node,event) {
             if (!node)
                 return;
-
+            graphContext.clickOptions=event
             var html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawChildren();\"> draw children</span>" +
                 "<span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawParents();\"> draw parents</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawSimilars();\"> draw similars</span>" +
@@ -1117,13 +1148,14 @@ var Lineage_classes = (function () {
 
                                     visjsData.edges.push({
                                         id: edgeId,
-                                        from: fromId,
-                                        to: item["broader" + i].value,
+                                        from: item["broader" + i].value,
+                                        to:fromId,
                                         data: {source: nodeData.source},
+                                        color:defaultEdgeColor,
                                         arrows: {
-                                            to: {
+                                            from: {
                                                 enabled: true,
-                                                type: "arrow",
+                                                type: defaultEdgeArrowType,
                                                 scaleFactor: 0.5
                                             },
                                         },
@@ -1143,10 +1175,11 @@ var Lineage_classes = (function () {
                                         from: fromId,
                                         to: item["broader" + i].value,
                                         data: {source: nodeData.source},
+                                       color:defaultEdgeColor,
                                         arrows: {
                                             to: {
                                                 enabled: true,
-                                                type: "arrow",
+                                                type: defaultEdgeArrowType,
                                                 scaleFactor: 0.5
                                             },
                                         },
@@ -1310,6 +1343,8 @@ var Lineage_classes = (function () {
         }
 
         self.getGraphSourcesIdsMap = function (nodeIds) {
+            if(!visjsGraph.data || !visjsGraph.data.nodes)
+                return
             var nodes = visjsGraph.data.nodes.get();
             var sourcesIdsMap = {}
             nodes.forEach(function (node) {
@@ -1355,7 +1390,7 @@ var Lineage_classes = (function () {
                         return;
                     MainController.UI.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv")
                 } else {
-                    self.setGraphPopupMenus(node)
+                    self.setGraphPopupMenus(node,event)
                     self.currentGraphNode = node;
                     MainController.UI.showPopup(point, "graphPopupDiv")
                 }
@@ -1386,7 +1421,8 @@ var Lineage_classes = (function () {
             },
 
             drawSimilars: function () {
-                Lineage_classes.drawSimilarsNodes(self.currentGraphNode)
+               var descendantsAlso=graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
+                Lineage_classes.drawSimilarsNodes(self.currentGraphNode,null,descendantsAlso)
             },
             hideChildren: function () {
                 Lineage_classes.removeLastChildrenFromGraph(self.currentGraphNode.id)
@@ -1409,7 +1445,8 @@ var Lineage_classes = (function () {
                 MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
             },
             showProperties: function () {
-               Lineage_classes.drawObjectProperties([self.currentGraphNode.id])
+                var descendantsAlso=graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
+               Lineage_classes.drawObjectProperties([self.currentGraphNode.id],descendantsAlso)
             }
         }
 
@@ -1465,6 +1502,7 @@ Lineage_properties = (function () {
     var self = {}
     sourceColors = {}
     self.propertyDefaultShape = "triangle";
+    var defaultEdgeArrowType="triangle"
     self.classDefaultShape = "dot";
     self.subPropertyDefaultShape = "square";
     self.defaultShapeSize = 8
@@ -1551,7 +1589,7 @@ Lineage_properties = (function () {
 
     self.drawGraph = function (propertyId) {
 
-        OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
+        OwlSchema.initSourceSchema(Lineage_classes.currentSource, function (err, schema) {
             if (err)
                 return MainController.UI.message(err);
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
@@ -1624,7 +1662,7 @@ Lineage_properties = (function () {
                                 arrows: {
                                     to: {
                                         enabled: true,
-                                        type: "arrow",
+                                        type: defaultEdgeArrowType,
                                         scaleFactor: 0.5
                                     },
                                 },
@@ -1670,7 +1708,7 @@ Lineage_properties = (function () {
                                 arrows: {
                                     from: {
                                         enabled: true,
-                                        type: "arrow",
+                                        type: defaultEdgeArrowType,
                                         scaleFactor: 0.5
                                     },
                                 },
@@ -1715,7 +1753,7 @@ Lineage_properties = (function () {
                                 arrows: {
                                     to: {
                                         enabled: true,
-                                        type: "arrow",
+                                        type: defaultEdgeArrowType,
                                         scaleFactor: 0.5
                                     },
                                 },
@@ -1758,7 +1796,7 @@ Lineage_properties = (function () {
                                     arrows: {
                                         to: {
                                             enabled: true,
-                                            type: "arrow",
+                                            type: defaultEdgeArrowType,
                                             scaleFactor: 0.5
                                         },
                                     },

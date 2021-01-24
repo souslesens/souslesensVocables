@@ -24,21 +24,22 @@ var OwlSchema = (function () {
 
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
-            if (Config.sources[sourceLabel].schema) {
-                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schema];
-                self.currentSourceSchema.source=sourceLabel
+            if (Config.sources[sourceLabel].schemaType) {
+                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
+
 
             } else {
                 self.currentSourceSchema = {
                     sparql_url: Config.sources[sourceLabel].sparql_server.url,
                     graphUri: Config.sources[sourceLabel].graphUri,
                 }
+            }
                 self.currentSourceSchema.source=sourceLabel
                 self.currentSourceSchema.classes = {}
                 self.currentSourceSchema.labelsMap = {}
                 self.schemasConfig[sourceLabel] = self.currentSourceSchema;
                 return callback(null, self.currentSourceSchema);
-            }
+
         })
     }
 
@@ -112,7 +113,7 @@ var OwlSchema = (function () {
                 },
                 function (callbackSeries) {
                     var properties = Object.keys(self.currentSourceSchema.classes[classId].objectProperties)
-                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, null,function (err, result) {
+                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, {mandatoryDomain:1},function (err, result) {
                         if (err)
                             return callbackSeries(err)
                         self.setLabelsFromQueryResult(result)

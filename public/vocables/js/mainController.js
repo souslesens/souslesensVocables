@@ -258,6 +258,15 @@ var MainController = (function () {
                 $("#blendDiv").css("display", "block")
             }
 
+        },
+
+        openRightPanel:function(){
+            var w = $(document).width() - leftPanelWidth
+            var h = $(document).height() - 30;
+            // $("#centralPanel").width(w)
+            $("#centralPanelDiv").width(w - rightPanelWidth)
+            $("#rightPanelToogleButton").css("display", "block")
+            $("#rightPanelDiv").width(rightPanelWidth)
         }
     }
 

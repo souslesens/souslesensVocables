@@ -138,6 +138,7 @@ var SourceEditor = (function () {
 
 
         self.editNode = function (divId, source, nodeId, type, initData, isNew) {
+
             $("#" + divId).css("display", "block")
             $("#Blender_nodeEditionButtonsDiv").css("display","block")
             var editingObject;
@@ -222,7 +223,8 @@ var SourceEditor = (function () {
                             $("#SourceEditor_ObjectType").html(OwlSchema.currentSourceSchema.classes[editingObject.type].label);
                             $(".SourceEditor_minorDiv").remove();
                             var objectPropertiesList = Object.keys(OwlSchema.currentSourceSchema.classes[type].objectProperties).sort();
-                            common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true, "label", "id")
+                           // common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true, "label", "id")
+                            common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true)
                             for (var key in editingObject.objectProperties) {
                                 if (editingObject.objectProperties[key].value) {
 
@@ -230,7 +232,8 @@ var SourceEditor = (function () {
                                 }
                             }
                             var annotationsList = Object.keys(OwlSchema.currentSourceSchema.classes[type].annotations).sort();
-                            common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, "label", "id")
+                           // common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, "label", "id")
+                            common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, )
                             for (var key in editingObject.annotations) {
                                 if (editingObject.annotations[key].value)
                                     self.drawObjectValue("annotations", key, editingObject, "SourceEditor_ObjectAnnotationsTableDiv")

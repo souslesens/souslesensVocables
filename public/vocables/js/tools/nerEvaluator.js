@@ -287,7 +287,7 @@ var NerEvaluator = (function () {
                     if (self.currentConceptsLabels.indexOf(conceptLabel) < 0)
                         self.currentConceptsLabels.push(conceptLabel);
                 })
-                $("#NerEvaluator_graphDiv").html("too many concepts to show :" + result.results.bindings.length);
+                $("#graphDiv").html("too many concepts to show :" + result.results.bindings.length);
                 return callback(null)
 
 
@@ -413,9 +413,9 @@ var NerEvaluator = (function () {
                     }
                 }
             }
-            $("#NerEvaluator_graphDiv").width($(window).width() - 20)
-            $("#NerEvaluator_graphDiv").height($(window).height() - 20)
-            visjsGraph.draw("NerEvaluator_graphDiv", visjsData, {onclickFn: NerEvaluator.onGraphNodeClick})
+          //  $("#graphDiv").width($(window).width() - 20)
+         //   $("#graphDiv").height($(window).height() - 20)
+            visjsGraph.draw("graphDiv", visjsData, {onclickFn: NerEvaluator.onGraphNodeClick})
             $("#waitImg").css("display", "none");
             return callback(null)
             /* $("#sliderCountPagesMax").slider("option", "max", maxPages);
@@ -428,6 +428,8 @@ var NerEvaluator = (function () {
 
 
     self.onGraphNodeClick = function (node, point, event) {
+        if(!node)
+            return  Cli
         if (event && event.ctrlKey) {
             Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
         } else {

@@ -241,7 +241,7 @@ var Collection = (function () {
             if (source.predicates && source.predicates.lang)
                 lang = source.predicates.lang
             var vars = {
-                serverUrl: source.sparql_server.url + "?format=json&query=",
+                sparql_server: source.sparql_server, //+ "?format=json&query=",
                 graphUri: source.graphUri,
                 lang: lang,
                 limit: 1000
@@ -274,7 +274,7 @@ var Collection = (function () {
                source:sourceLabel
             }
 
-            Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, null, options, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, null, options, function (err, result) {
                 if (err)
                     return callback(err);
 
@@ -324,7 +324,10 @@ var Collection = (function () {
             query += "}" +
                 "limit " + variables.limit;
 
-            Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, {}, null, function (err, result) {
+            var options={
+                source:sourceLabel
+            }
+            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, {}, options, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -356,7 +359,7 @@ var Collection = (function () {
             query += "limit " + variables.limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(variables.serverUrl, query, {}, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, {}, null, function (err, result) {
                 if (err) {
                     return callback(err)
                 }

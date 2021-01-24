@@ -4,7 +4,7 @@ var Sparql_schema = (function () {
     var self = {}
     self.skosUri = "http://www.w3.org/2004/02/skos/core/"
     self.npdOntologyUri = "http://sws.ifi.uio.no/vocab/npd-v2/"
-    self.queryLimit=10000
+    self.queryLimit = 10000
 
     var slicesSize = 25
 
@@ -21,11 +21,11 @@ var Sparql_schema = (function () {
         if (schema.allSubclasses)
             query += " OPTIONAL{?childClass rdfs:subClassOf* ?class. OPTIONAL{?childClass rdfs:label ?childClassLabel} } "
 
-        query += " }order by ?classLabel ?childClassLabel limit "+self.queryLimit
+        query += " }order by ?classLabel ?childClassLabel limit " + self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
         ;
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -48,10 +48,10 @@ var Sparql_schema = (function () {
             " OPTIONAL{ ?subProperty rdfs:subPropertyOf* ?property. OPTIONAL{?subProperty rdfs:label ?subPropertyLabel}}" +
             "}" +
 
-            "} limit "+self.queryLimit
+            "} limit " + self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -70,10 +70,10 @@ var Sparql_schema = (function () {
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct * " + fromStr + "   WHERE  " +
             "{ ?annotation rdf:type <http://www.w3.org/2002/07/owl#AnnotationProperty>. OPTIONAL{?annotation rdfs:label ?annotationLabel} } " +
-            "limit "+self.queryLimit
+            "limit " + self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -84,34 +84,45 @@ var Sparql_schema = (function () {
 
     }
 
-    self.getPropertiesRangeAndDomain = function (schema, propertyIds,options, callback) {
+    self.getPropertiesRangeAndDomain = function (schema, propertyIds, options, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
 
-        if(!options)
-            options={}
+        if (!options)
+            options = {}
         var filterStr = Sparql_common.setFilter("property", propertyIds)
-        if(options.filter)
-            filterStr+=options.filter
+        if (options.filter)
+            filterStr += options.filter
+        var query
+        if (options.mandatoryDomain) {
+            query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#>" +
+                "  select distinct * " + fromStr +
+                " WHERE  {    ?property   rdfs:subPropertyOf* ?superProperty.?superProperty rdf:type owl:ObjectProperty " + filterStr +
+                "  OPTIONAL{?property rdfs:label ?propertyLabel.} " +
+                "  ?superProperty rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}" +
+                "     OPTIONAL{ ?superProperty rdfs:range ?range.  ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.}}" +
+                "} order by ?propertyLabel limit " + self.queryLimit
+        } else {
 
-        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            " PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-            " select distinct *  " + fromStr + " WHERE  {" +
-            "    ?property rdf:type owl:ObjectProperty OPTIONAL" +
-            "{?property rdfs:label ?propertyLabel.}" +
-            filterStr +
-            "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
-            "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
-            "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } order by ?propertyLabel limit "+self.queryLimit
+            query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                " PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+                " select distinct *  " + fromStr + " WHERE  {" +
+                "    ?property rdf:type owl:ObjectProperty OPTIONAL" +
+                "{?property rdfs:label ?propertyLabel.}" +
+                filterStr +
+                "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
+                "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
+                "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } order by ?propertyLabel limit " + self.queryLimit
+        }
 
         var url = schema.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
                 return callback(err)
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "range", "domain", "subProperty"],{noType:1})
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "range", "domain", "subProperty"], {noType: 1})
             return callback(null, result.results.bindings)
 
         })
@@ -139,10 +150,10 @@ var Sparql_schema = (function () {
                " ?union owl:unionOf ?id . ?id ?z  ?range." +
                " OPTIONAL{?range rdfs:label ?rangeLabel.}"+
                "   }" +*/
-            " order by ?propertyLabel limit "+self.queryLimit
+            " order by ?propertyLabel limit " + self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -172,10 +183,10 @@ var Sparql_schema = (function () {
             "  ?prop rdfs:range  ?overClass." +
             " ?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel } " +
             "  }" +
-            "}limit "+self.queryLimit
+            "}limit " + self.queryLimit
 
         var url = schema.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source:schema.source}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -222,7 +233,7 @@ var Sparql_schema = (function () {
 
                 "  }" +
 
-                "}limit "+self.queryLimit
+                "}limit " + self.queryLimit
 
 
             /*    var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
@@ -250,9 +261,9 @@ var Sparql_schema = (function () {
 
                     "}limit "+self.queryLimit */
             var url = schema.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "",{source:schema.source},function(err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
                 if (err)
-                  return  callbackEach(err);
+                    return callbackEach(err);
                 var bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "range"], {type: "Property"})
 
 
@@ -294,18 +305,18 @@ var Sparql_schema = (function () {
     }
 
 
-  /*  self.executeQuery = function (schema, query, callback) {
+    /*  self.executeQuery = function (schema, query, callback) {
 
 
-        var url = schema.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
-            if (err) {
-                return callback(err)
-            }
-            return callback(null, result.results.bindings)
+          var url = schema.sparql_url + "?format=json&query=";
+          Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
+              if (err) {
+                  return callback(err)
+              }
+              return callback(null, result.results.bindings)
 
-        })
-    }*/
+          })
+      }*/
 
 
     return self;

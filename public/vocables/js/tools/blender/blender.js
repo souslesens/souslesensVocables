@@ -10,16 +10,15 @@ var Blender = (function () {
         self.backupSource = false// using  a clone of source graph
         self.displayMode = "leftPanel"
         self.onLoaded = function () {
-            // $("#sourceDivControlPanelDiv").html("")
-        }
 
+            MainController.UI.message("");
 
-        self.initPanel = function () {
-            if (isLoaded)
-                return;
+            MainController.UI.openRightPanel()
+            $("#accordion").accordion("option", {active: 2});
+            // $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
+            //  MainController.UI.toogleRightPanel("open");
+            $("#rightPanelDiv").load("snippets/blender/blender.html")
 
-
-            $("#blenderPanelDiv").load("snippets/blender/blender.html")
             if (!MainController.currentTool)
                 $("#graphDiv").html("")
             setTimeout(function () {
@@ -47,9 +46,6 @@ var Blender = (function () {
                         }
 
                     })
-                    if (!MainController.currentTool)
-                        self.moveTaxonomyPanel("leftPanel")
-                    isLoaded = true;
 
 
                 }, 200
@@ -167,6 +163,7 @@ var Blender = (function () {
         }
         self.getConceptJstreeOptions = function (withDnd) {
             var jsTreeOptions = {};
+            jsTreeOptions.source=self.currentSource
             jsTreeOptions.contextMenu = Blender.getJstreeConceptsContextMenu()
             jsTreeOptions.selectTreeNodeFn = Blender.selectTreeNodeFn
             if (withDnd) {
@@ -268,6 +265,13 @@ var Blender = (function () {
 
                 return menuItems;
             }
+            menuItems.copyNode = {
+                label: "Copy Node",
+                action: function (e) {// pb avec source
+                    Blender.menuActions.copyNode(e)
+                }
+
+            }
 
             var clipboard = Clipboard.getContent()
             if (clipboard.length > 0 && clipboard[0].type == "node") {
@@ -365,6 +369,17 @@ var Blender = (function () {
 
 
         self.menuActions = {
+            copyNode: function (event) {
+                Clipboard.copy({
+                        type: "node",
+                        id: self.currentTreeNode.data.id,
+                        label: self.currentTreeNode.text,
+                        source: self.currentTreeNode.data.source,
+                        data: self.currentTreeNode.data
+                    },
+                    self.currentTreeNode.id + "_anchor",
+                    event)
+            },
 
 
             dropNode: function (callback) {
@@ -577,7 +592,7 @@ var Blender = (function () {
                             if (Config.sources[self.currentSource].schemaType == "SKOS") {
                                 additionalTriplesNt.push("<" + id + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
                                 //   if(Config.sources[MainController.currentSource].schemaType=="OWL")
-                                additionalTriplesNt.push("<" + id + "> <http://www.w3.org/2004/02/skos/core#prefLabel> '" + data.data.label + "'@en.")
+                                additionalTriplesNt.push("<" + id + "> <http://www.w3.org/2004/02/skos/core#prefLabel> '" + data.label + "'@en.")
                             } else if (Config.sources[self.currentSource].schemaType == "OWL") {
                                 additionalTriplesNt.push("<" + id + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + parentNodeId + ">.")
                             } else
@@ -968,7 +983,7 @@ var Blender = (function () {
                 if (editingObject.type.indexOf("Concept") > 0) {
                     treeDiv = 'Blender_conceptTreeDiv'
                     if (Blender.currentTreeNode)
-                        currentNodeId = Blender.data.currentTreeNode.data.id
+                        currentNodeId = Blender.currentTreeNode.data.id
                 }
                 if (editingObject.type.indexOf("Collection") > 0) {
                     treeDiv = 'Blender_collectionTreeDiv'
@@ -1009,39 +1024,6 @@ var Blender = (function () {
 
         }
 
-
-        self.moveTaxonomyPanel = function (fromMode) {
-            if (fromMode)
-                self.displayMode = fromMode
-            if (self.displayMode == "leftPanel") {
-                self.displayMode = "centralPanelDiv"
-                $("#Blender_tabs").tabs("disable", 0);
-
-                MainController.UI.showInCentralPanelDiv("blendDiv")
-
-                setTimeout(function () {
-                    var treeElement = $('#Blender_conceptTreeDiv').detach();
-                    $('#Blender_conceptTreeContainerDiv').append(treeElement);
-                    $('#Blender_conceptTreeDiv').height($(window).height() - 100)
-                    if (Collection.currentTreeNode) {
-                        var html = ("<div  class='blender_collectionFilter' onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>")
-                        $('#Blender_collectionFilterContainerDiv').html("Collection" + Collection.currentTreeNode.text);
-                    }
-
-                    500
-                })
-
-            } else {
-                self.displayMode = "leftPanel"
-                $("#Blender_tabs").tabs("enable", 0);
-                var treeElement = $('#Blender_conceptTreeDiv').detach();
-                $('#Blender_tabs_concepts').html(treeElement);
-                MainController.UI.showInCentralPanelDiv("graphDiv")
-
-
-                $('#graphDiv').html("")
-            }
-        }
 
         self.searchTerm = function () {
 

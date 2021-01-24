@@ -61,7 +61,7 @@ var Config = (function () {
     // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
     //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
 
-    // moved self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender,toolDescriptionImg:null}
+  self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender,toolDescriptionImg:null}
 
 
     return self;

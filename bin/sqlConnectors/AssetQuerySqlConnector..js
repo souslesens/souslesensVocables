@@ -1,5 +1,8 @@
 var mysql = require('./mySQLproxy..js')
 
+
+
+//"C:\Program Files\MariaDB 10.2\bin\mysqld"
 var AssetQuerySqlConnector = {
 
     connection: {

@@ -23,18 +23,14 @@ var Lineage_classes = (function () {
 
 
             $("#accordion").accordion("option", {active: 2});
+            MainController.UI.openRightPanel()
             $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
             //   MainController.UI.toogleRightPanel("open");
             $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")
             ThesaurusBrowser.currentTargetDiv = "LineagejsTreeDiv"
 
 
-            var w = $(document).width() - leftPanelWidth
-            var h = $(document).height() - 30;
-            // $("#centralPanel").width(w)
-            $("#centralPanelDiv").width(w - rightPanelWidth)
-            $("#rightPanelToogleButton").css("display", "block")
-            $("#rightPanelDiv").width(rightPanelWidth)
+
 
 
             setTimeout(function () {

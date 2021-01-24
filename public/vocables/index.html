@@ -98,8 +98,8 @@
             $("#accordion").accordion("option", {active: 0});
             $("#accordion").on("accordionactivate", function (event, ui) {
 
-                if (ui.newPanel[0].id == "blenderPanelDiv") {
-                    Blender.initPanel();
+                if (false && ui.newPanel[0].id == "blenderPanelDiv") {
+                    //Blender.initPanel();
                     MainController.UI.showInCentralPanelDiv("blendDiv")
                 } else {
                     MainController.UI.showInCentralPanelDiv("graphDiv")
@@ -281,10 +281,10 @@
 
             </div>
 
-            <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
+       <!--     <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
             <div id="blenderPanelDiv" class='max-height'>
 
-            </div>
+            </div>-->
 
         </div>
     </div>
@@ -293,7 +293,7 @@
         <div id="graphDiv">
         </div>
 
-        <div id="blendDiv">
+     <!--   <div id="blendDiv">
 
             <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
             <div style='display: flex;flex-direction: row;background-color: #ccc;'>
@@ -307,7 +307,7 @@
                 </div>
 
             </div>
-        </div>
+        </div>-->
 
 
     </div>

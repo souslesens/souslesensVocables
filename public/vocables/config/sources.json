@@ -1,4 +1,24 @@
 {
+  "SKOS": {
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "graphUri": "http://www.w3.org/2004/02/skos/core/",
+    "label": "skos",
+    "isOntology": false,
+    "allSubclasses": true,
+    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    "newObject": {
+      "treeChildrenClasses": {
+        "http://www.w3.org/2004/02/skos/core#Concept": "http://www.w3.org/2004/02/skos/core#Concept",
+        "http://www.w3.org/2004/02/skos/core#ConceptScheme": "http://www.w3.org/2004/02/skos/core#Concept"
+      },
+      "treeParentProperty": "http://www.w3.org/2004/02/skos/core#broader",
+      "mandatoryProperties": [
+        "http://www.w3.org/2004/02/skos/core#prefLabel"
+      ]
+    }
+  },
   "TEST": {
     "editable": true,
     "controller": "Sparql_SKOS",
@@ -196,7 +216,6 @@
     },
     "color": "#ffbb78"
   },
-
   "WORDNET": {
     "graphUri": "",
     "sparql_server": {
@@ -211,9 +230,6 @@
   "_comment": "**************************************************************ontologies***************************************",
   "_comment": "**************************************************************ontologies ONE MODEL ***************************************",
   "_comment": "**************************************************************ontologies ONE MODEL  ***************************************",
-
-
-
   "ISO_15926-part-14": {
     "graphUri": "http://standards.iso.org/iso/15926/part14/",
     "sparql_server": {
@@ -225,8 +241,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
-
   "CFIHOS_READI": {
     "graphUri": "http://w3id.org/readi/rdl/",
     "sparql_server": {
@@ -240,7 +254,9 @@
     "color": "#bcbd22"
   },
   "QUANTUM": {
-    "graphUri": ["http://data.total.com/resource/quantum/"],
+    "graphUri": [
+      "http://data.total.com/resource/quantum/"
+    ],
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },
@@ -251,27 +267,8 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
-
-
-
-
-
   "_comment": "**************************************************************ontologies autres***************************************",
   "_comment": "**************************************************************ontologies autres***************************************",
-
-
-
-
-
-
-
-
-
-
-
-
-
   "NPD": {
     "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/> from <http://sws.ifi.uio.no/data/npd-v2/",
     "sparql_server": {
@@ -284,7 +281,6 @@
     "schema": null,
     "color": "#e377c2"
   },
-
   "CIDOC": {
     "graphUri": "http://erlangen-crm.org/current/",
     "sparql_server": {
@@ -296,16 +292,8 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
-
-
   "_comment": "**************************************************************ontologies  ISO CFIHOS***************************************",
   "_comment": "**************************************************************ontologies  ISO CFIHOS***************************************",
-
-
-
-
-
   "ISO_15926-PCA": {
     "graphUri": "",
     "sparql_server": {
@@ -318,7 +306,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
   "CFIHOS-ISO": {
     "graphUri": "",
     "sparql_server": {
@@ -331,8 +318,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
-
   "CFIHOS_equipment": {
     "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
     "sparql_server": {
@@ -344,7 +329,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
   "ISO_15926-org": {
     "graphUri": "",
     "sparql_server": {
@@ -381,11 +365,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
-
-
-
-
   "_comment": "**************************************************************Obsolete***************************************",
   "_comment": "**************************************************************Obsolete***************************************",
   "CFIHOS": {
@@ -415,7 +394,5 @@
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
-
   }
-
 }

@@ -267,6 +267,14 @@ var MainController = (function () {
             $("#centralPanelDiv").width(w - rightPanelWidth)
             $("#rightPanelToogleButton").css("display", "block")
             $("#rightPanelDiv").width(rightPanelWidth)
+        },
+        showCurrentQuery:function(){
+           $("#mainDialogDiv") .html("<textarea style='width: 100%;height: 400px'>"+Sparql_proxy.currentQuery+"</textarea>")
+            $("#mainDialogDiv") .dialog("open")
+        },
+        copyCurrentQuery:function(){
+            common.copyTextToClipboard(Sparql_proxy.currentQuery)
+
         }
     }
 

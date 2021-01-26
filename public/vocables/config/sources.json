@@ -241,13 +241,25 @@
     "schema": null,
     "color": "#bcbd22"
   },
+
+  "ISO_15926-part-13": {
+    "graphUri": "http://standards.iso.org/iso/15926/part13/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?x rdfs:subClassOf ?topConcept . filter (NOT exists {?obj rdfs:subClassOf ?x})",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
   "CFIHOS_READI": {
     "graphUri": "http://w3id.org/readi/rdl/",
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/Object>",
     "schemaType": "OWL",
     "assetQueryController": "remoteSQL",
     "schema": null,
@@ -255,7 +267,7 @@
   },
   "QUANTUM": {
     "graphUri": [
-      "http://data.total.com/resource/quantum/"
+      "http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"
     ],
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
@@ -264,6 +276,17 @@
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
     "schemaType": "OWL",
     "assetQueryController": "remoteSQL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_14224": {
+    "graphUri": "http://standards.iso.org/iso/14224/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter":"?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -382,17 +405,6 @@
     "schemaType": "OWLXXXX",
     "schema": null,
     "color": "#bcbd22"
-  },
-  "QUANTUM_MODEL": {
-    "editable": true,
-    "graphUri": "http://data.total.com/resource/quantum/model/",
-    "sparql_server": {
-      "url": "http://51.178.139.80:8890/sparql"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.total.com/resource/quantum/model/>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
   }
+
 }

@@ -23,7 +23,7 @@ var ThesaurusMatcher = (function () {
         }
         self.selectTreeNodeFn = function (event, propertiesMap) {
             $("#ThesaurusMatcher_actionDiv").css('display', 'block')
-            ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", propertiesMap.node.data.source, propertiesMap.node)
+            ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv, propertiesMap.node.data.source, propertiesMap.node)
             ThesaurusBrowser.currentTreeNode = propertiesMap.node
         }
 

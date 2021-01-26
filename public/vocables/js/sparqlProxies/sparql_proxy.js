@@ -82,6 +82,8 @@ var Sparql_proxy = (function () {
 
 
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
+self.currentQuery=query;
+
         if (!options)
             options = {}
 

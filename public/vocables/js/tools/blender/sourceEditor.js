@@ -59,7 +59,7 @@ var SourceEditor = (function () {
 
         self.selectTreeNodeFn = function (event, propertiesMap) {
             self.editjstreeNode(event, propertiesMap)
-            ThesaurusBrowser.openTreeNode("currentSourceTreeDiv", MainController.currentSource, propertiesMap.node)
+            ThesaurusBrowser.openTreeNode( ThesaurusBrowser.currentTargetDiv, MainController.currentSource, propertiesMap.node)
 
         }
 
@@ -407,15 +407,15 @@ var SourceEditor = (function () {
 
         self.deleteEditingObject = function () {
 
-            var children = $('#currentSourceTreeDiv').jstree(true).get_node(self.editingObject.about).children
+            var children = $('#'+ThesaurusBrowser.currentTargetDiv).jstree(true).get_node(self.editingObject.about).children
             if (children.length > 0)
                 return alert("cannot delete node with children")
 
             Sparql_generic.deleteTriples(MainController.currentSource, self.editingObject.about, null, null, function (err, result) {
                 if (err)
                     MainController.UI.message(err);
-                $('#currentSourceTreeDiv').jstree(true).delete_node(self.editingObject.about)
-                $('#currentSourceTreeDiv').jstree(true).deselect_all();
+                $('#'+ThesaurusBrowser.currentTargetDiv).jstree(true).delete_node(self.editingObject.about)
+                $('#'+ThesaurusBrowser.currentTargetDiv).jstree(true).deselect_all();
                 self.editingObject = null;
                 $("#SourceEditor_mainDiv").css("display", "none")
 

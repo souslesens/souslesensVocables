@@ -148,7 +148,7 @@ var ThesaurusBrowser = (function () {
                 }
 
             }
-            if(Config.showAssetQueyMenu && Config.sources[MainController.currentSource].assetQueryController){
+            if(MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].assetQueryController){
                 items.addToAssetQuery = {
                     label: "add to Asset Query",
                     action: function (e) {// pb avec source

@@ -949,18 +949,18 @@ var ontologiesMapper = {
 
         })
 
-var uniques={}
+        var uniques = {}
         for (var key in pickListMap) {
-            if(!uniques[pickListMap[key]]){
-                uniques[pickListMap[key]]=1
+            if (!uniques[pickListMap[key]]) {
+                uniques[pickListMap[key]] = 1
 
-            if (pickListMap[key] == "LOV")
-                triples += "<http://data.total.com/resource/quantum/pickList#LOV>"
-            else
-                triples += "<http://w3id.org/readi/rdl/" + pickListMap[key]+ ">"
-            triples += " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
-            " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n"
-        }
+                if (pickListMap[key] == "LOV")
+                    triples += "<http://data.total.com/resource/quantum/pickList#LOV>"
+                else
+                    triples += "<http://w3id.org/readi/rdl/" + pickListMap[key] + ">"
+                triples += " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
+                    " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n"
+            }
         }
 
         //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
@@ -979,7 +979,6 @@ var uniques={}
         }
 
 
-
         var data = JSON.parse(fs.readFileSync(sourceConfig.filePath))
         var tableData = data[sourceConfig.table]
         if (!tableData)
@@ -987,28 +986,28 @@ var uniques={}
         var triples = ""
 
 
-        var objectPropertiesArray=JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\readi\\PropertiesAndRestrictions._objectProperties.json"))
-        var rangeMap={}
-        objectPropertiesArray.forEach(function(item){
-            if( !item.range)
-              return
-            rangeMap[item.range]=item
+        var objectPropertiesArray = JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\readi\\PropertiesAndRestrictions._objectProperties.json"))
+        var rangeMap = {}
+        objectPropertiesArray.forEach(function (item) {
+            if (!item.range)
+                return
+            rangeMap[item.range] = item
         })
 
 
-        var attrsSourceMappingsArray=JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.json"))
-        var mappingMap={}
-        attrsSourceMappingsArray.forEach(function(item){
-            if(  !item.QuantumId)
+        var attrsSourceMappingsArray = JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.json"))
+        var mappingMap = {}
+        attrsSourceMappingsArray.forEach(function (item) {
+            if (!item.QuantumId)
                 return
-            if(  !item.CFIHOS_READI)
+            if (!item.CFIHOS_READI)
                 return
-            mappingMap[item.QuantumId]=item
+            mappingMap[item.QuantumId] = item
         })
 
 
-        var propLabelTriples=""
-        var propIds={}
+        var propLabelTriples = ""
+        var propIds = {}
         tableData.forEach(function (item) {
 
 
@@ -1016,19 +1015,19 @@ var uniques={}
             var objIdP = item.PhysicalClassID;
             var attrId = item.AttributeID;
 
-      var predicate=null;//   var predicate='http://data.total.com/resource/quantum#hasAttribute'
-            var propLabel='unMappedAttributeProperty'
-           var quantumMappedId=mappingMap[attrId]
-            if(quantumMappedId) {
-               var  readiId = quantumMappedId.CFIHOS_READI
-                if(!readiId)
+            var predicate = null;//   var predicate='http://data.total.com/resource/quantum#hasAttribute'
+            var propLabel = 'unMappedAttributeProperty'
+            var quantumMappedId = mappingMap[attrId]
+            if (quantumMappedId) {
+                var readiId = quantumMappedId.CFIHOS_READI
+                if (!readiId)
                     readiId = quantumMappedId.CFIHOS_READI2
-                if(readiId && rangeMap[readiId]){
-                  predicate=rangeMap[readiId].prop
-                    if(!propIds[predicate]){
-                        propIds[predicate]=1
-                        propLabel=rangeMap[readiId].propLabel
-                        propLabelTriples+="<"+predicate+"> <http://www.w3.org/2000/01/rdf-schema#label> '"+propLabel+"'.\n"
+                if (readiId && rangeMap[readiId]) {
+                    predicate = rangeMap[readiId].prop
+                    if (!propIds[predicate]) {
+                        propIds[predicate] = 1
+                        propLabel = rangeMap[readiId].propLabel
+                        propLabelTriples += "<" + predicate + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + propLabel + "'.\n"
                     }
 
                 }
@@ -1036,20 +1035,20 @@ var uniques={}
 
             if (predicate && objIdF && attrId) {
                 triples += "<http://data.total.com/resource/quantum/" + objIdF +
-                    "> <"+predicate+"> " +
+                    "> <" + predicate + "> " +
                     "<http://data.total.com/resource/quantum/" + attrId + ">.\n"
 
             }
             if (predicate && objIdP && attrId) {
                 triples += "<http://data.total.com/resource/quantum/" + objIdP +
-                    "> <"+predicate+"> " +
+                    "> <" + predicate + "> " +
                     "<http://data.total.com/resource/quantum/" + attrId + ">.\n"
 
             }
 
 
         })
-        triples+=propLabelTriples
+        triples += propLabelTriples
 
 
         fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\" + sourceConfig.table + "2Attribute.nt", triples)
@@ -1502,16 +1501,43 @@ if (false) {
 if (false) {
     ontologiesMapper.getQuantumAttributesSuperclassesTriples()
 }
-if (true) {
+if (false) {
     ontologiesMapper.getQuantumClassToAttributeTriples()
 }
 if (false) {
     ontologiesMapper.getQuantumPickListSuperclassesTriples()
 }
 
-if(true){
-    ontologiesMapper.p
+if (true) {
+    var data = JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\14224\\docx14224data.json"));
+    var str = "";
+    var nodeIds = {}
+    data.forEach(function (item) {
+        var objectUri = "<http://standards.iso.org/iso/14224/" + item.Object.replace(/ /g, "_") + ">"
+        if (!nodeIds[item.Object]) {
+
+            nodeIds[item.Object] = 1
+
+            str += objectUri + " <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>.\n"
+            str += objectUri + " <http://www.w3.org/2000/01/rdf-schema#label> '" + item.Object.replace(/_/g, " ") + "'.\n"
+        }
+        if (item["Attribute Name"]) {
+            var attrUri = "<http://standards.iso.org/iso/14224/" + item["Attribute Name"].replace(/ /g, "_") + ">"
+            var attrPropUri = "<http://standards.iso.org/iso/14224/Has" + item["Attribute Name"].replace(/ /g, "_") + ">"
+            if (!nodeIds[item["Attribute Name"]]) {
+                nodeIds[item["Attribute Name"]] = 1
+                str += attrPropUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty>.\n"
+                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#label> 'has" + item.Definition.replace()  + "'.\n"
+                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity>.\n"
+
+                str += attrUri + " <http://www.w3.org/2000/01/rdf-schema#label> '" + item.Definition.replace(/_/g, " ") + "'.\n"
+            }
+            str += objectUri + " " + attrPropUri + " " + attrUri + ".\n"
+        }
+    })
 }
+
+console.log(str)
 
 
 //mapQuatumCfihos.writeMappings()

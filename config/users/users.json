@@ -1,6 +1,7 @@
 {
 
   "Fauconnet":{"login":"Fauconnet","password":"ClaFauc17","groups":["VOCABLES","admin"]},
-  "BETA":{"login":"BETA","password":"thes_X32!","groups":["VOCABLES","admin"]}
+  "BETA":{"login":"BETA","password":"thes_X32!","groups":["VOCABLES","admin"]},
+  "P.Jallais":{"P.Jallais":"BETA","password":"thes_X32!","groups":["VOCABLES","admin"]}
 
 }

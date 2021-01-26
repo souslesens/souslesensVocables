@@ -96,9 +96,9 @@ var parseXlsx = {
                     allData[sheetKey] = dataArray
                     allModel[sheetKey] = header
 
-                    console.log("saving " + filePath.replace("xlsx", "json"))
+                    console.log("saving " + filePath.replace(/xlsx/i, "json"))
                     var str = JSON.stringify(allData[sheetKey], null, 2)
-                    fs.writeFileSync(filePath.replace("xlsx", "_" + sheetKey + ".json"), str)
+                    fs.writeFileSync(filePath.replace(/xlsx/i, "_" + sheetKey + ".json"), str)
                     console.log("done")
 
                 }
@@ -345,9 +345,14 @@ if (false) {
 
 }
 
-if( true){
+if( false){
     var filePath="D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.xlsx"
     var  options = {firstSheetNumber: 1, firstLineNumber: 1}
     parseXlsx.parse(filePath,options);
 }
 
+if( true){
+    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A_FJ-BC.XLSX"
+    var  options = {firstSheetNumber: 1, firstLineNumber: 1}
+    parseXlsx.parse(filePath,options);
+}

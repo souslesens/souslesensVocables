@@ -247,6 +247,7 @@
         </table>
 
     </div>
+
     <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
 
 
@@ -287,10 +288,15 @@
             </div>-->
 
         </div>
+        <div id="sparqlQueryDiv" style="height: 30px;">
+            <button onclick="MainController.UI.showCurrentQuery()">Q show</button>
+            <button onclick="MainController.UI.copyCurrentQuery()">Q cpy</button>
+        </div>
     </div>
 
     <div id="centralPanelDiv" style="display: flex;flex-direction: row">
         <div id="graphDiv">
+
         </div>
 
      <!--   <div id="blendDiv">

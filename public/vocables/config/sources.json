@@ -129,7 +129,7 @@
     },
     "graphUri": "http://dbpedia.org",
     "ancestorsDepth": 4,
-    "schemaType": "SKOS",
+    "schemaType": "SKOSXXX",
     "predicates": {
       "topConceptFilter": "?topConcept  <http://www.w3.org/2000/01/rdf-schema#subClassOf>\t<http://www.w3.org/2002/07/owl#Thing> .",
       "broaderPredicate": "rdfs:subClassOf",
@@ -241,7 +241,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
   "ISO_15926-part-13": {
     "graphUri": "http://standards.iso.org/iso/15926/part13/",
     "sparql_server": {
@@ -285,7 +284,7 @@
       "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter":"?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
@@ -405,6 +404,20 @@
     "schemaType": "OWLXXXX",
     "schema": null,
     "color": "#bcbd22"
+  },
+  "_comment": "**************************************************************assets***************************************",
+  "ASSETS-turbogenerator": {
+    "graphUri": [
+      "http://data.total.com/resource/one-model/assets/turbognerator/"
+    ],
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+    "assetQueryController": "remoteSQL",
+    "schema": null,
+    "color": "#bcbd22"
   }
-
 }

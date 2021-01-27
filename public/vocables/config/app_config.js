@@ -36,7 +36,7 @@ var Config = (function () {
     }
 
     self.currentProfile = {
-        allowedSourceSchemas: ["SKOS", "OWL"]
+        allowedSourceSchemas: ["SKOS", "OWL","INDIVIDUAL"]
     }
 
 

@@ -24,7 +24,7 @@ var OwlSchema = (function () {
 
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
-            if (Config.sources[sourceLabel].schemaType) {
+            if (false && Config.sources[sourceLabel].schemaType) {
                 self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
 
 

@@ -8,7 +8,21 @@ var sliceSize = 50
 
 var ontologiesMapper = {
 
+    formatLabel:function(str,forUri) {
+        if(!str)
+            var x=3
 
+        str = str.trim().toLowerCase().replace(/['$]/g, "")
+        str = str.replace(/\\/g, "")
+        str = str.replace(/\(/gm, "")
+        str = str.replace(/\)/gm, "")
+        str = str.replace(/\[/gm, "")
+        str = str.replace(/\]/gm, "")
+
+        if(forUri)
+            str = str.replace(/ /gm, "_")
+        return str
+    },
     mapClasses: function (sourceConfig, targetConfigs, callback) {
         function decapitalize(str) {
             var str2 = "";
@@ -24,16 +38,6 @@ var ontologiesMapper = {
             return str2.trim();
         }
 
-        function formatLabel(str) {
-            str = str.trim().toLowerCase().replace(/['$]/g, "")
-            str = str.replace(/\\/g, "")
-            str = str.replace(/\(/gm, "")
-            str = str.replace(/\)/gm, "")
-            str = str.replace(/\[/gm, "")
-            str = str.replace(/\]/gm, "")
-
-            return str
-        }
 
         // var x=  decapitalize("FibreOpticPatchPanelsCabinet")
 
@@ -81,7 +85,7 @@ var ontologiesMapper = {
                 var labels =
                     tableData.forEach(function (item) {
 
-                        var label = formatLabel(item[sourceConfig.labelKey])
+                        var label = ontologiesMapper.formatLabel(item[sourceConfig.labelKey])
                         var id = item[sourceConfig.idKey]
                         if (id == "TOTAL-P0000002823")
                             var x = 3
@@ -138,7 +142,7 @@ var ontologiesMapper = {
                                 bindings.forEach(function (item) {
                                     var x = item;
                                     var id = item.concept.value;
-                                    var label = formatLabel(item.conceptLabel.value)
+                                    var label = ontologiesMapper.formatLabel(item.conceptLabel.value)
                                     for (var id2 in sourceClassesIds)
                                         if (sourceClassesIds[id2].label == label)
 
@@ -1224,6 +1228,92 @@ var ontologiesMapper = {
     }
 
 
+
+
+    , getTurboGenTriples:function(filePath){
+        var data=JSON.parse(fs.readFileSync(filePath))
+        var existingNodes={}
+        var triples="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+        var tripleTags=""
+        data.forEach(function(item){
+            for(var i=1;i<4;i++){
+                var id=item["FunctionalClass"+i];
+                if(!id)
+                    return
+                if(!existingNodes[id]) {
+                    console.log(id)
+                    existingNodes[id] = 1
+
+
+                    var idUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(id, true) + ">";
+                    triples += idUri + " rdfs:label '" + ontologiesMapper.formatLabel(id) + "'.\n"
+                    triples += idUri + " rdf:type <http://standards.iso.org/iso/15926/part14/FunctionalObject>.\n"
+                    if (i == 1) {
+                        triples += idUri + " rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>.\n"
+                    } else {
+                        var parentUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(item["FunctionalClass" + (i - 1)], true) + ">";
+                        triples += parentUri + " <http://standards.iso.org/iso/15926/part14/hasArrangedPart> " + idUri + ".\n"
+                        triples += idUri + " rdfs:subClassOf " + parentUri + ".\n"
+                    }
+
+                    var tag = item["TAG" + i];
+                    if (tag) {
+                        var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
+                        tripleTags+=tagUri +" rdf:type <http://data.15926.org/rdl/RDS2222036>.\n"
+                        tripleTags+=idUri +" <http://standards.iso.org/iso/15926/part14/installedAs> "+tagUri +".\n"
+
+
+                    }
+
+                }
+
+
+
+
+
+            }
+       /*     var tag = item["TAG"];
+            if (tag) {
+                var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
+                tripleTags+=tagUri +" rdf:type <http://data.15926.org/cfihos/33330003>\n"
+                tripleTags+=tagUri +" <http://standards.iso.org/iso/15926/part14/concretizes> "+ "<http://data.total.com/resource/one-model/assets/turbognerator/PIPoint"+".\n"
+
+
+            }*/
+
+
+
+        })
+console.log(triples+tripleTags)
+
+    }
+    , getTurboGenAttrsTriples:function(filePath){
+        var data=JSON.parse(fs.readFileSync(filePath))
+        var existingNodes={}
+        var triples="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+        var tripleTags=""
+        var str=""
+        data.forEach(function(item){
+           // var id=item["AttributeID"]
+            var id=item["AttributeValue"]
+            if(!existingNodes[id]) {
+                existingNodes[id]=1
+            //    console.log(id+","+item["AttributeValue"])
+                str+="<http://data.total.com/resource/quantum/"+id+">,"
+            }
+
+
+        })
+        console.log(str);
+    //    console.log(triples+tripleTags)
+
+    }
+
+
+
+
     , sources: {
         "QUANTUM": {
             "graphUri": ["http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"],
@@ -1508,7 +1598,7 @@ if (false) {
     ontologiesMapper.getQuantumPickListSuperclassesTriples()
 }
 
-if (true) {
+if (false) {
     var data = JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\14224\\docx14224data.json"));
     var str = "";
     var nodeIds = {}
@@ -1535,6 +1625,20 @@ if (true) {
             str += objectUri + " " + attrPropUri + " " + attrUri + ".\n"
         }
     })
+}
+
+
+//getTurboGenTriples
+if(true){
+    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_data.json"
+    ontologiesMapper.getTurboGenTriples(filePath)
+}
+
+
+//getTurboGenTriplesAttrs
+if(false){
+    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json"
+    ontologiesMapper.getTurboGenAttrsTriples(filePath,)
 }
 
 console.log(str)

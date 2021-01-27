@@ -96,9 +96,10 @@ var parseXlsx = {
                     allData[sheetKey] = dataArray
                     allModel[sheetKey] = header
 
-                    console.log("saving " + filePath.replace(/xlsx/i, "json"))
+                    console.log("saving " + filePath.replace(/\.xlsx/i, "json"))
                     var str = JSON.stringify(allData[sheetKey], null, 2)
-                    fs.writeFileSync(filePath.replace(/xlsx/i, "_" + sheetKey + ".json"), str)
+                    var xx=filePath.replace(/\.xlsx/i, "_" )+ sheetKey + ".json"
+                    fs.writeFileSync(filePath.replace(/\.xlsx/i, "_" )+ sheetKey + ".json", str)
                     console.log("done")
 
                 }
@@ -109,9 +110,10 @@ var parseXlsx = {
             console.log("done")
             var x = allData;
 
-            console.log("saving " + filePath.replace("xlsx", "model.json"))
+            console.log("saving " + filePath.replace(/\.xlsx/i, "model.json"))
             var str = JSON.stringify(allModel, null, 2)
-            fs.writeFileSync(filePath.replace("xlsx", "model.json"), str)
+
+            fs.writeFileSync(filePath.replace(/\.xlsx/i, "model.json"), str)
             console.log("done")
 
         })
@@ -212,6 +214,7 @@ var parseXlsx = {
             fs.writeFileSync(triplesPath, triples)
         })
     }
+
 }
 
 
@@ -352,7 +355,7 @@ if( false){
 }
 
 if( true){
-    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A_FJ-BC.XLSX"
+    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA.xlsx"
     var  options = {firstSheetNumber: 1, firstLineNumber: 1}
     parseXlsx.parse(filePath,options);
 }

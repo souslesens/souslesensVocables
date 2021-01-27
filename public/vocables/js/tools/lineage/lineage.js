@@ -74,12 +74,17 @@ var Lineage_classes = (function () {
 
                 ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
                 Lineage_classes.drawTopConcepts(sourceLabel)
+                self.initIndividualsPropertiesSelect(sourceLabel)
             }
             self.currentSource = sourceLabel
             MainController.currentSource = sourceLabel
             $("#GenericTools_onSearchCurrentSourceInput").css("display", "block")
 
+
+
         }
+
+
         self.jstreeContextMenu = function () {
             var items = {}
 
@@ -754,6 +759,20 @@ var Lineage_classes = (function () {
         }
 
 
+        self.initIndividualsPropertiesSelect = function (sourceLabel) {
+            var schemaType = Config.sources[sourceLabel].schemaType
+            if (schemaType == "INDIVIDUAL") {
+                Sparql_OWL.getIndividualProperties(sourceLabel, null, null, null, {distinct: "property"}, function (err, result) {
+                    if (err)
+                        return MainController.UI.message(err);
+                    common.fillSelectOptions("lineage_individualsPropertiesSelect", result, true, "propertyLabel", "property")
+                })
+
+            }
+        }
+        self.drawIndividualsProperties = function (propertyId) {
+
+        }
         self.drawObjectProperties = function (classIds, descendantsAlso) {
             var source = self.currentSource
             if (!source)
@@ -1515,7 +1534,7 @@ Lineage_properties = (function () {
         OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
             if (err)
                 return MainController.UI.message(err);
-            Sparql_schema.getPropertiesRangeAndDomain(schema, null, null, function (err, result) {
+            Sparql_schema.getPropertiesRangeAndDomain(schema, null, {mandatoryDomain: 0}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var propertiesTypes = {
@@ -1598,7 +1617,7 @@ Lineage_properties = (function () {
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
             var options = {mandatoryDomain: 1}
 
-            Sparql_schema.getPropertiesRangeAndDomain(schema, propertyId, options, function (err, result) {
+            Sparql_schema.getPropertiesRangeAndDomain(schema, propertyId, {mandatoryDomain: 0}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var visjsData = {nodes: [], edges: []}
@@ -1626,6 +1645,48 @@ Lineage_properties = (function () {
                             color: color,
                             shape: self.propertyDefaultShape
                         })
+                    }
+
+                    if (item.subProperty) {
+                        var subProperty = item.subProperty.value
+                        if (!existingNodes[subProperty]) {
+                            existingNodes[subProperty] = 1
+                            visjsData.nodes.push({
+                                id: subProperty,
+                                label: item.subPropertyLabel.value,
+                                data: {
+                                    id: subProperty,
+                                    label: item.subPropertyLabel.value,
+                                    subProperties: [],
+                                    source: self.currentSource
+
+                                },
+                                size: self.defaultShapeSize,
+                                color: color,
+                                shape: self.propertyDefaultShape
+                            })
+                            var edgeId = item.property.value + "_" + subProperty
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.property.value,
+                                    to: subProperty,
+                                    // label: "range"
+                                    color: "brown",
+                                    dashes: true,
+                                    arrows: {
+                                        from: {
+                                            enabled: true,
+                                            type: defaultEdgeArrowType,
+                                            scaleFactor: 0.5
+                                        },
+                                    },
+                                })
+                            }
+                        }
+
+
                     }
                     if (item.range) {
                         if (!existingNodes[item.range.value]) {

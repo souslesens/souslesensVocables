@@ -47,6 +47,10 @@ var Blender = (function () {
 
                     })
 
+                $("#Blender_searchDiv").load("snippets/searchAll.html")
+
+
+
 
                 }, 200
             )
@@ -69,7 +73,7 @@ var Blender = (function () {
 
 
             self.currentSource = source
-
+            MainController.searchedSource=self.currentSource
 
             async.series([
                     function (callbackSeries) {
@@ -212,7 +216,7 @@ var Blender = (function () {
                     var source = self.currentTreeNode.data.source || self.currentSource;
                     var type = self.currentTreeNode.data.type
 
-                    var options = {type: type, labelClass: "treeType_" + type}
+                    var options = { source:source,labelClass: "treeType_" + type}
                     if (Collection.currentCollectionFilter)
                         options.filterCollections = Collection.currentCollectionFilter;
                     ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", source, propertiesMap.node, options);
@@ -911,11 +915,13 @@ var Blender = (function () {
                     parentNode = self.currentTreeNode;
                     parentProperty = OwlSchema.currentSourceSchema.newObject.treeParentProperty;
                     mandatoryProps = OwlSchema.currentSourceSchema.newObject.mandatoryProperties;
-                    childClass = OwlSchema.currentSourceSchema.newObject.treeChildrenClasses[parentNode.data.type];
+                    //childClass = OwlSchema.currentSourceSchema.newObject.treeChildrenClasses[parentNode.data.type];
                     treeDivId = 'Blender_conceptTreeDiv';
                     type = "http://www.w3.org/2004/02/skos/core#Concept"
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#ConceptScheme")
                         initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
+                    if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#Concept")
+                        initData["http://www.w3.org/2004/02/skos/core#broader"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
 
                 } else if (type == "collection") {
                     parentNode = Collection.currentTreeNode;
@@ -935,10 +941,12 @@ var Blender = (function () {
 
                 if (self.displayMode == "centralPanelDiv") {
 
-                    SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, type, childClass, initData);
+                    SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource,  type, initData);
                 } else {
                     self.nodeEdition.openDialog()
-                    SourceEditor.editNewObject("Blender_nodeEditionDiv", self.currentSource, type, childClass, initData);
+                    SourceEditor.editNewObject("Blender_nodeEditionDiv", self.currentSource,  type, initData);
+
+
                 }
 
             },

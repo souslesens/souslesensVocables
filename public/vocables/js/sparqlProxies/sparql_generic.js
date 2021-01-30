@@ -2,8 +2,8 @@
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
 var Sparql_generic = (function () {
         var self = {};
-       self.slicesSize = 25;
-        self.queryLimit=10000
+        self.slicesSize = 25;
+        self.queryLimit = 10000
 
         /**********************************************************************************************************************************/
         /**********************************************************************************************************************************/
@@ -35,15 +35,11 @@ var Sparql_generic = (function () {
             if (!options) {
                 options = {}
             }
-                Config.sources[sourceLabel].controller.getItems(sourceLabel, options, function (err, result) {
-                    callback(err, result);
-                })
+            Config.sources[sourceLabel].controller.getItems(sourceLabel, options, function (err, result) {
+                callback(err, result);
+            })
 
-            }
-
-
-
-
+        }
 
 
         /**
@@ -117,7 +113,6 @@ var Sparql_generic = (function () {
         }
 
 
-
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
             $("#waitImg").css("display", "block");
             if (!options) {
@@ -133,8 +128,9 @@ var Sparql_generic = (function () {
                 fitlerType = "ids"
                 slices = common.sliceArray(ids, self.slicesSize)
             }
-            if (words && !Array.isArray(words)) {
-                words = [words]
+            if (words) {
+                if (!Array.isArray(words))
+                    words = [words]
                 fitlerType = "words"
                 slices = common.sliceArray(words, self.slicesSize)
             }
@@ -157,9 +153,6 @@ var Sparql_generic = (function () {
                 return callback(err, bulkResult)
             })
         }
-
-
-
 
 
         /*******************************************end basic requests (mode read) **************************************************************/
@@ -519,16 +512,16 @@ var Sparql_generic = (function () {
         self.setBindingsOptionalProperties = function (bindings, _fields, options) {
             if (!options)
                 options = {}
-            if(!Array.isArray(_fields))
-                _fields=[_fields];
-            _fields.forEach(function(_field) {
+            if (!Array.isArray(_fields))
+                _fields = [_fields];
+            _fields.forEach(function (_field) {
                 bindings.forEach(function (item) {
-                    if(!item["range"])
-                        var x=3
+                    if (!item["range"])
+                        var x = 3
 
                     for (var i = 0; i < 20; i++) {
-                        if(i==5)
-                            var x=9
+                        if (i == 5)
+                            var x = 9
                         var iStr = "" + i;
                         if (i == 0)
                             iStr = ""

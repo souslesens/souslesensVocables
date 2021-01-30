@@ -291,9 +291,9 @@ var ThesaurusBrowser = (function () {
            }
        }
         else{
-            if(!MainController.currentSource)
+            if(! MainController.searchedSource  && !MainController.currentSource)
                 return alert( "select a source or search in all source")
-           searchedSources.push(MainController.currentSource)
+           searchedSources.push(MainController.searchedSource || MainController.currentSource)
        }
         var jstreeData = []
         var uniqueIds = {}

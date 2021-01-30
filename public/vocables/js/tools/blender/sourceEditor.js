@@ -98,20 +98,23 @@ var SourceEditor = (function () {
 
         },
 
-            self.editNewObject = function (divId, sourceLabel, classId, initData) {
+            self.editNewObject = function (divId, sourceLabel, classId, _initData) {
                 if (!classId)
                     classId = $("#SourceEditor_NewClassSelect").val();
 
-                var classLabel = OwlSchema.currentSourceSchema.classes[classId].label
+               var initData=_initData
                 OwlSchema.getClassDescription(sourceLabel, classId, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
+
                     $("#SourceEditor_NewClassSelect").val("");
                     $("#SourceEditor_NewObjectDiv").css("display", "none");
+                    var classLabel = OwlSchema.currentSourceSchema.classes[classId].label
                     $("#SourceEditor_ObjectType").html(classLabel);
 
                     var newNodeId = common.getNewUri(sourceLabel)
                     $("#SourceEditor_ObjectUri").val(newNodeId);
+                  //  self.editNode = function (divId, source, nodeId, type, initData, isNew) {
 
                     self.editNode(divId, sourceLabel, newNodeId, classId, initData, true)
                 })
@@ -223,6 +226,7 @@ var SourceEditor = (function () {
                             $("#SourceEditor_ObjectType").html(OwlSchema.currentSourceSchema.classes[editingObject.type].label);
                             $(".SourceEditor_minorDiv").remove();
                             var objectPropertiesList = Object.keys(OwlSchema.currentSourceSchema.classes[type].objectProperties).sort();
+
                            // common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true, "label", "id")
                             common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true)
                             for (var key in editingObject.objectProperties) {
@@ -393,6 +397,8 @@ var SourceEditor = (function () {
 
 
         self.onSelectNewProperty = function (property) {
+            if(!property || property=="")
+                return;
             $("#SourceEditor_NewPropertySelect").val("");
             self.drawObjectValue("objectProperties", property, self.editingObject, "SourceEditor_ObjectPropertiesTableDiv", "", true)
 

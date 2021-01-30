@@ -2,6 +2,7 @@ var Lineage_classes = (function () {
 
         var expandedLevels = {};
         var sourceColors = {}
+        var propertyColors = {}
         var orphanShape = "square";
         var defaultShape = "dot";
         var defaultShapeSize = 5;
@@ -16,6 +17,7 @@ var Lineage_classes = (function () {
         self.maxClusterOpeningLength = 50
         self.currentSource;
         var graphContext = {}
+        self.propertyColors = {}
 
         self.onLoaded = function () {
             MainController.UI.message("");
@@ -69,17 +71,27 @@ var Lineage_classes = (function () {
         self.onSourceSelect = function (sourceLabel) {
 
 
-            if (sourceLabel && !self.currentSource) {
-                $("#Lineage_sourceLabelDiv").html(sourceLabel)
+            if (sourceLabel) {
+                if (!self.currentSource) {
 
+                    Lineage_classes.drawTopConcepts(sourceLabel)
+                }
+                $("#Lineage_sourceLabelDiv").html(sourceLabel)
                 ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
-                Lineage_classes.drawTopConcepts(sourceLabel)
-                self.initIndividualsPropertiesSelect(sourceLabel)
+                if (Config.sources[sourceLabel].schemaType == "INDIVIDUAL") {
+                    $("#lineage_controlPanel0Div").css("display", "none")
+                    $("#lineage_controlPanel1Div").css("display", "block")
+                    self.initIndividualsPropertiesSelect(sourceLabel)
+                } else {
+                    $("#lineage_controlPanel0Div").css("display", "block")
+                    $("#lineage_controlPanel1Div").css("display", "none")
+                }
+
+                propertyColors = {}
             }
             self.currentSource = sourceLabel
             MainController.currentSource = sourceLabel
             $("#GenericTools_onSearchCurrentSourceInput").css("display", "block")
-
 
 
         }
@@ -225,7 +237,8 @@ var Lineage_classes = (function () {
 
 
         self.getGraphIdsFromSource = function (source) {
-
+            if (!visjsGraph.data || !visjsGraph.data.nodes)
+                return null;
             var existingNodes = visjsGraph.data.nodes.get();
             var sourceNodes = []
             existingNodes.forEach(function (item) {
@@ -464,7 +477,7 @@ var Lineage_classes = (function () {
             clusterNode.data.cluster.forEach(function (item, index) {
                 jstreeData.push({
                     id: item.child1.value, text: item.child1Label.value, parent: "#",
-                    data: {source: self.currentSource, id: item.child1.value, label: item.child1Label.value}
+                    data: {source: clusterNode.data.source, id: item.child1.value, label: item.child1Label.value}
                 })
             })
 
@@ -761,16 +774,214 @@ var Lineage_classes = (function () {
 
         self.initIndividualsPropertiesSelect = function (sourceLabel) {
             var schemaType = Config.sources[sourceLabel].schemaType
-            if (schemaType == "INDIVIDUAL") {
-                Sparql_OWL.getIndividualProperties(sourceLabel, null, null, null, {distinct: "property"}, function (err, result) {
-                    if (err)
-                        return MainController.UI.message(err);
-                    common.fillSelectOptions("lineage_individualsPropertiesSelect", result, true, "propertyLabel", "property")
+            if ( schemaType == "INDIVIDUAL") {
+
+                var preferredProperties=Config.sources[sourceLabel].preferredProperties
+                if(!preferredProperties)
+                    return alert ("no preferredProperties in source configuration")
+
+                var jstreeData = [];
+                var uriPrefixes = {}
+                preferredProperties.forEach(function (item) {
+                    var p
+                    p = item.lastIndexOf("#")
+                    if (p < 0)
+                        p = item.lastIndexOf("/")
+                    var graphPrefix = item.substring(0, p)
+                    var propLabel= item.substring(p+1)
+                    if (!uriPrefixes[graphPrefix]) {
+                        uriPrefixes[graphPrefix] = 1;
+                        jstreeData.push(
+                            {
+                                id: graphPrefix,
+                                text: graphPrefix,
+                                parent: "#"
+                            })
+                    }
+                    jstreeData.push(
+                        {
+                            id: item,
+                            text:propLabel,
+                            parent: graphPrefix
+                        }
+                    )
+
                 })
+                common.loadJsTree("lineage_individualsPropertiesTree", jstreeData,{openAll:true});
+
+                if(false) {
+                    Sparql_OWL.getIndividualProperties(sourceLabel, null, null, null, {distinct: "property"}, function (err, result) {
+                        if (err)
+                            return MainController.UI.message(err);
+                        var uriPrefixes = {}
+                        var jstreeData = [];
+                        result.forEach(function (item) {
+                            var p
+                            p = item.property.value.lastIndexOf("/")
+                            if (p < 0)
+                                p = item.property.value.lastIndexOf("#")
+                            var graphPrefix = item.property.value.substring(0, p)
+                            if (!uriPrefixes[graphPrefix]) {
+                                uriPrefixes[graphPrefix] = 1;
+                                jstreeData.push(
+                                    {
+                                        id: graphPrefix,
+                                        text: graphPrefix,
+                                        parent: "#"
+                                    })
+
+                            }
+
+                            jstreeData.push(
+                                {
+                                    id: item.property.value,
+                                    text: item.property.value.substring(p + 1),
+                                    parent: graphPrefix
+                                }
+                            )
+
+                        })
+
+                        common.loadJsTree("lineage_individualsPropertiesTree", jstreeData);
+                    })
+                }
+
 
             }
+
         }
-        self.drawIndividualsProperties = function (propertyId) {
+        self.drawIndividualsProperties = function (propertyId, classIds, options) {
+            if (!options) {
+                options = {}
+            }
+
+            if (!propertyId) {
+              //  propertyId = $("#lineage_individualsPropertiesSelect").val()
+                propertyId = $("#lineage_individualsPropertiesTree").jstree(true).get_selected()
+            }
+            var source = self.currentSource
+            if (!source)
+                return alert("select a source");
+            var subjects = null
+            var objects = null
+            if (!classIds) {
+                var filterType = $("#lineage_clearIndividualsPropertiesFilterSelect").val();
+                if(filterType=="graph nodes")
+                    classIds = self.getGraphIdsFromSource(source)
+                else if(filterType=="graph nodes")
+                    classIds=null;
+                else if(filterType=="filter value"){
+                    return alert ("to be developped")
+                }
+
+
+            }
+            if (options.inverse) {
+                objects = classIds
+            } else {
+                subjects = classIds
+
+            }
+            MainController.UI.message("")
+            Sparql_OWL.getIndividualProperties(source, subjects, [propertyId], objects, null, function (err, result) {
+                if ($("#lineage_clearIndividualsPropertiesCBX").prop("checked")) {
+                    var oldIds = Object.keys(self.currentIndividualsProperties);
+                    visjsGraph.data.nodes.remove(oldIds)
+                    visjsGraph.data.edges.remove(oldIds)
+                }
+
+                if (err)
+                    return MainController.UI.message(err)
+                if (result.length == 0) {
+                    $("#waitImg").css("display", "none");
+                    Lineage_classes.drawRestrictions(classIds)
+                    return MainController.UI.message("No data found")
+
+                }
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                var color = self.getPropertyColor(propertyId)
+
+                result.forEach(function (item) {
+                    if (!item.subject) {
+                        item.subject = {value: "?_" + item.property.value}
+                    }
+                    if (!item.subjectLabel) {
+                        item.subjectLabel = {value: "?"}
+                    }
+                    if (!existingNodes[item.subject.value]) {
+                        existingNodes[item.subject.value] = 1;
+                        visjsData.nodes.push({
+                            id: item.subject.value,
+                            label: item.subjectLabel.value,
+                            font: {color: color},
+                            shape: "dot",
+                            size: defaultShapeSize,
+                            color: "#ddd",
+                            data: {source: source}
+                        })
+
+                    }
+                    if (!item.object) {
+                        item.object = {value: "?_" + item.property.value}
+                    }
+                    if (!item.objectLabel) {
+                        item.objectLabel = {value: "?"}
+                    }
+                    if (!existingNodes[item.object.value]) {
+                        existingNodes[item.object.value] = 1;
+                        visjsData.nodes.push({
+                            id: item.object.value,
+                            label: item.objectLabel.value,
+                            font: {color: color},
+                            shape: "dot",
+                            size: defaultShapeSize,
+                            color: "#ddd",
+                            data: {source: source}
+                        })
+
+                    }
+                    var edgeId = item.subject.value + "_" + item.object.value + "_" + item.property.value
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1
+
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.subject.value,
+                            to: item.object.value,
+                            label: "<i>" + item.propertyLabel.value + "</i>",
+                            data: {propertyId: item.property.value, source: source},
+                            font: {multi: true, size: 10},
+
+                            // font: {align: "middle", ital: {color:objectPropertyColor, mod: "italic", size: 10}},
+                            //   physics:false,
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: "bar",
+                                    scaleFactor: 0.5
+                                },
+                            },
+                            //  dashes: true,
+                            color: color
+
+                        })
+                    }
+
+                })
+                self.currentIndividualsProperties = existingNodes;
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    self.drawNewGraph(visjsData)
+                } else {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                }
+                visjsGraph.network.fit()
+                $("#waitImg").css("display", "none");
+
+                //   $("#lineage_clearIndividualsPropertiesCBX").prop("checked",true)
+
+            })
 
         }
         self.drawObjectProperties = function (classIds, descendantsAlso) {
@@ -1055,7 +1266,7 @@ var Lineage_classes = (function () {
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"
             }
 
-            if (Config.showAssetQueyMenu && Config.sources[Lineage_classes.currentSource].assetQueryController) {
+            if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].assetQueryController) {
                 html += "    <span class=\"popupMenuItem\" onclick=\"AssetQuery.showNodeProperties();\"> add to Asset Query</span>"
             }
             $("#graphPopupDiv").html(html);
@@ -1476,6 +1687,13 @@ var Lineage_classes = (function () {
             if (!sourceColors[source])
                 sourceColors[source] = common[palette][Object.keys(sourceColors).length]
             return sourceColors[source];
+        }
+        self.getPropertyColor = function (propertyName, palette) {
+            if (!palette)
+                palette = "paletteIntense"
+            if (!propertyColors[propertyName])
+                propertyColors[propertyName] = common[palette][Object.keys(propertyColors).length]
+            return propertyColors[propertyName];
         }
 
 

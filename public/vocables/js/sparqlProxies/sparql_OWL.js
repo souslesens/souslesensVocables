@@ -308,61 +308,106 @@ var Sparql_OWL = (function () {
 
             })
         }
-        self.getIndividualProperties = function (sourceLabel, subjectIds, objectIds, propertyIds, options, callback) {
+        self.getIndividualProperties = function (sourceLabel, subjectIds,propertyIds,  objectIds, options, callback) {
             if (!options)
                 options = {}
 
-            var filterStr = ""
-            if (subjectIds)
-                filterStr = Sparql_common.setFilter("subject", subjectIds);
-            if (objectIds)
-                filterStr = Sparql_common.setFilter("object", objectIds);
-            if (propertyIds)
-                filterStr = Sparql_common.setFilter("property", propertyIds);
-            self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+            function query(subjectIds,propertyIds,objectIds,callbackQuery) {
+                var filterStr = ""
+                if (subjectIds)
+                    filterStr+= Sparql_common.setFilter("subject", subjectIds);
+                if (objectIds)
+                    filterStr+= Sparql_common.setFilter("object", objectIds);
+                if (propertyIds)
+                    filterStr+= Sparql_common.setFilter("property", propertyIds);
+                self.graphUri = Config.sources[sourceLabel].graphUri;
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = ""
-            if (self.graphUri && self.graphUri != "") {
-                if (!Array.isArray(self.graphUri))
-                    self.graphUri = [self.graphUri]
-                self.graphUri.forEach(function (graphUri) {
-                    fromStr = " FROM <" + graphUri + "> "
+                var fromStr = Sparql_common.getFromStr(sourceLabel)
+
+
+                var query =
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
+                if (options.distinct)
+                    query += "select distinct ?" + options.distinct + " "
+                else
+                    query += "select distinct ?subject ?property ?object "
+                query += fromStr +
+                    " WHERE {?subject ?property ?object. " + filterStr + " " +
+
+                    "OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
+                    " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
+                    " OPTIONAL{?object rdfs:label ?objectLabel.}  " +
+
+                    " } order by ?propertyLabel "
+                var limit = options.limit || Sparql_generic.queryLimit;
+                query += " limit " + limit
+
+
+                var url = self.sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+
+
+                    if (err) {
+                        return callbackQuery(err)
+                    }
+                    result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "property", "subject"])
+                    return callbackQuery(null, result.results.bindings)
+
                 })
             }
 
 
-            var query =
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
-            if (options.distinct)
-                query += "select distinct ?" + options.distinct + " "
-            else
-                query += "select distinct ?subject ?property ?object "
-            query += fromStr +
-                " WHERE {?subject ?property ?object. " + filterStr + " " +
-
-                "OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
-                " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
-                " OPTIONAL{?object rdfs:label ?objectLabel.}  " +
-
-                " }"
-            var limit = options.limit || Sparql_generic.queryLimit;
-            query += " limit " + limit
 
 
-            var url = self.sparql_url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
 
 
-                if (err) {
-                    return callback(err)
+            var slicedSubjectIds=null;
+            var  slicedObjectIds=null;
+
+            var allResults=[]
+            if(subjectIds){
+                slicedSubjectIds=common.sliceArray(subjectIds,Sparql_generic.slicesSize)
+                async.eachSeries(slicedSubjectIds,function(subjectIds,callbackEach){
+                    query(subjectIds,propertyIds,objectIds,function(err,result){
+                        if(err)
+                            return callback(err)
+                        allResults=allResults.concat(result);
+                        callbackEach()
+                    })
+                },function(err){
+                    return callback(err,allResults)
+                })
+
+
+            }
+            else if(objectIds){
+                slicedObjectIds=common.sliceArray(slicedObjectIds,Sparql_generic.slicesSize)
+
+                    async.eachSeries(slicedObjectIds,function(objectIds,callbackEach){
+                        query(subjectIds,propertyIds,objectIds,function(err,result){
+                            if(err)
+                                return callback(err)
+                            allResults=allResults.concat(result);
+                            callbackEach()
+                        })
+                    },function(err){
+                        return callback(err,allResults)
+                    })
+
+
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "property", "subject"])
-                return callback(null, result.results.bindings)
 
-            })
+           else {
+                query(subjectIds,propertyIds,objectIds,function(err,result){
+                        return callback(err,result)
+
+                })
+            }
+
+
         }
 
 

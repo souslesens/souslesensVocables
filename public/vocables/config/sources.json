@@ -49,11 +49,13 @@
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },
-    "graphUri": "http://data.total.com/resource/thesaurus/ctg/",
+    "graphUri": "http://data.total.com/resource/thesaurus/ctg2/",
     "schemaType": "SKOS",
     "predicates": {
+      "broaderPredicate": "skos:broader|^skos:hasTopConcept",
       "lang": "en"
     },
+
     "color": "#9edae5"
   },
   "IEC": {
@@ -407,15 +409,25 @@
   },
   "_comment": "**************************************************************assets***************************************",
   "ASSETS-turbogenerator": {
-    "graphUri": [
-      "http://data.total.com/resource/one-model/assets/turbognerator/"
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/turbognerator/",
+      "http://data.total.com/resource/quantum/"
     ],
+
+
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
     "schemaType": "INDIVIDUAL",
+    "preferredProperties": [
+      "http://standards.iso.org/iso/15926/part14/installedAs",
+      "http://standards.iso.org/iso/15926/part14/hasArrangedPart",
+      "http://data.total.com/resource/one-model/assets#hasTOTAL-ID",
+      "http://data.total.com/resource/one-model/assets#hasTagID"
+    ],
+
     "assetQueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"

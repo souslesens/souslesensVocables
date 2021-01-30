@@ -20,12 +20,12 @@ var Sparql_common = (function () {
         var filter = ";"
         if (words) {
             if (Array.isArray(words)) {
-                if(words[0]==null)
+                if (words[0] == null)
                     return ""
                 var conceptWordStr = ""
                 words.forEach(function (word, index) {
 
-                    if(word.length>2) {
+                    if (word.length > 2) {
                         if (conceptWordStr != "")
                             conceptWordStr += "|"
                         if (options.exactMatch)
@@ -36,7 +36,7 @@ var Sparql_common = (function () {
                 })
                 filter = " filter( regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ";
             } else {
-                if(words==null)
+                if (words == null)
                     return "";
                 var filter = "  filter( regex(?" + varName + "Label, \"^" + words + "$\", \"i\"))";
                 if (!options.exactMatch) {
@@ -47,12 +47,12 @@ var Sparql_common = (function () {
         } else if (ids) {
 
             if (Array.isArray(ids)) {
-                if(ids[0]==null)
+                if (ids[0] == null)
                     return ""
                 var conceptIdsStr = ""
                 ids.forEach(function (id, index) {
-                    if(id!="") {
-                        if (conceptIdsStr!="")
+                    if (id != "") {
+                        if (conceptIdsStr != "")
                             conceptIdsStr += ","
                         conceptIdsStr += "<" + id + ">"
                     }
@@ -60,7 +60,7 @@ var Sparql_common = (function () {
 
                 filter = "filter(  ?" + varName + " in( " + conceptIdsStr + "))";
             } else {
-                if(ids==null)
+                if (ids == null)
                     return "";
                 filter = " filter( ?" + varName + " =<" + ids + ">)";
             }
@@ -72,7 +72,7 @@ var Sparql_common = (function () {
     }
 
 
-    self.getUriFilter = function(varName, uri) {
+    self.getUriFilter = function (varName, uri) {
         var filterStr = ""
         if (Array.isArray(uri)) {
             var str = ""
@@ -89,6 +89,21 @@ var Sparql_common = (function () {
         return filterStr;
     }
 
+
+    self.getFromStr = function (source) {
+        var fromStr = ""
+        var graphUris = Config.sources[source].graphUri
+        if (!graphUris || graphUris == "")
+            return ""
+        if (!Array.isArray(graphUris))
+            graphUris = [graphUris]
+
+
+        graphUris.forEach(function (graphUri, index) {
+            fromStr += " from <" + graphUri + "> "
+        })
+        return fromStr;
+    }
 
     self.formatString = function (str, forUri) {
         if (!str || !str.replace)
@@ -121,7 +136,7 @@ var Sparql_common = (function () {
         return str;
     }
 
-    self.getLabelFromId=function (id) {
+    self.getLabelFromId = function (id) {
 
         if (OwlSchema.currentSourceSchema.labelsMap[id])
             return OwlSchema.currentSourceSchema.labelsMap[id];

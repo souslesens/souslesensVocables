@@ -101,7 +101,7 @@ var Collection = (function () {
 
     self.openTreeNode = function (divId, thesaurusLabel, node, callback) {
         var existingNodes = common.getjsTreeNodes(divId, true)
-        if (node.children.length > 0)
+        if (!node.children || node.children.length > 0)
             return;
 
         self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, {onlyCollectionType: true}, function (err, result) {

@@ -70,7 +70,11 @@ var MainController = (function () {
                 selectTreeNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
+                            if(obj.node.id=="INDIVIDUAL")
+                                MainController.currentSchemaType = "OWL"
+                            else
                             MainController.currentSchemaType = obj.node.id;
+
                             if ($("#sourcesTreeDiv").children().length > 0)
                                 $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
                             return;
@@ -84,6 +88,9 @@ var MainController = (function () {
                 onOpenNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
+                            if(obj.node.id=="INDIVIDUAL")
+                                MainController.currentSchemaType = "OWL"
+                            else
                             MainController.currentSchemaType = obj.node.id;
                         }
                     }

@@ -24,8 +24,9 @@ var OwlSchema = (function () {
 
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
-            if (false && Config.sources[sourceLabel].schemaType) {
+            if ( Config.sources[sourceLabel].schemaType) {
                 self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
+                self.currentSourceSchema.type=Config.sources[sourceLabel].schemaType
 
 
             } else {
@@ -93,6 +94,10 @@ var OwlSchema = (function () {
                                 self.currentSourceSchema.classes[classId].objectProperties[item.property.value] = {id: item.property.value, label: common.getItemLabel(item, "property")}
 
                         })
+                        if(self.currentSourceSchema.type=="SKOS")
+                            self.currentSourceSchema.classes[classId].objectProperties["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]= {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label:"rdf type"}
+
+
 
                         callbackSeries();
                     })

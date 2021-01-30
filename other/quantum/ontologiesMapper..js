@@ -8,9 +8,9 @@ var sliceSize = 50
 
 var ontologiesMapper = {
 
-    formatLabel:function(str,forUri) {
-        if(!str)
-            var x=3
+    formatLabel: function (str, forUri) {
+        if (!str)
+            var x = 3
 
         str = str.trim().toLowerCase().replace(/['$]/g, "")
         str = str.replace(/\\/g, "")
@@ -19,7 +19,7 @@ var ontologiesMapper = {
         str = str.replace(/\[/gm, "")
         str = str.replace(/\]/gm, "")
 
-        if(forUri)
+        if (forUri)
             str = str.replace(/ /gm, "_")
         return str
     },
@@ -1228,20 +1228,18 @@ var ontologiesMapper = {
     }
 
 
-
-
-    , getTurboGenTriples:function(filePath){
-        var data=JSON.parse(fs.readFileSync(filePath))
-        var existingNodes={}
-        var triples="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+    , getTurboGenTriples: function (filePath) {
+        var data = JSON.parse(fs.readFileSync(filePath))
+        var existingNodes = {}
+        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-        var tripleTags=""
-        data.forEach(function(item){
-            for(var i=1;i<4;i++){
-                var id=item["FunctionalClass"+i];
-                if(!id)
+        var tripleTags = ""
+        data.forEach(function (item) {
+            for (var i = 1; i < 4; i++) {
+                var id = item["FunctionalClass" + i];
+                if (!id)
                     return
-                if(!existingNodes[id]) {
+                if (!existingNodes[id]) {
                     console.log(id)
                     existingNodes[id] = 1
 
@@ -1260,8 +1258,8 @@ var ontologiesMapper = {
                     var tag = item["TAG" + i];
                     if (tag) {
                         var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
-                        tripleTags+=tagUri +" rdf:type <http://data.15926.org/rdl/RDS2222036>.\n"
-                        tripleTags+=idUri +" <http://standards.iso.org/iso/15926/part14/installedAs> "+tagUri +".\n"
+                        tripleTags += tagUri + " rdf:type <http://data.15926.org/rdl/RDS2222036>.\n"
+                        tripleTags += idUri + " <http://standards.iso.org/iso/15926/part14/installedAs> " + tagUri + ".\n"
 
 
                     }
@@ -1269,49 +1267,76 @@ var ontologiesMapper = {
                 }
 
 
-
-
-
             }
-       /*     var tag = item["TAG"];
-            if (tag) {
-                var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
-                tripleTags+=tagUri +" rdf:type <http://data.15926.org/cfihos/33330003>\n"
-                tripleTags+=tagUri +" <http://standards.iso.org/iso/15926/part14/concretizes> "+ "<http://data.total.com/resource/one-model/assets/turbognerator/PIPoint"+".\n"
+            /*     var tag = item["TAG"];
+                 if (tag) {
+                     var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
+                     tripleTags+=tagUri +" rdf:type <http://data.15926.org/cfihos/33330003>\n"
+                     tripleTags+=tagUri +" <http://standards.iso.org/iso/15926/part14/concretizes> "+ "<http://data.total.com/resource/one-model/assets/turbognerator/PIPoint"+".\n"
 
 
-            }*/
-
+                 }*/
 
 
         })
-console.log(triples+tripleTags)
+        console.log(triples + tripleTags)
 
     }
-    , getTurboGenAttrsTriples:function(filePath){
-        var data=JSON.parse(fs.readFileSync(filePath))
-        var existingNodes={}
-        var triples="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+    , getTurboGenAttrsTriples: function (filePath) {
+        var data = JSON.parse(fs.readFileSync(filePath))
+        var existingNodes = {}
+        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
-        var tripleTags=""
-        var str=""
-        data.forEach(function(item){
-           // var id=item["AttributeID"]
-            var id=item["AttributeValue"]
-            if(!existingNodes[id]) {
-                existingNodes[id]=1
-            //    console.log(id+","+item["AttributeValue"])
-                str+="<http://data.total.com/resource/quantum/"+id+">,"
+        var tripleTags = ""
+        var str = ""
+        data.forEach(function (item) {
+            // var id=item["AttributeID"]
+            var tagRef = ontologiesMapper.formatLabel(item["TAG_Ref"], true)
+            var tagId = item["TagID"]
+            var totalId = item["AttributeValue"]
+            if (!existingNodes[tagRef]) {
+                existingNodes[tagRef] = 1
+                //    console.log(id+","+item["AttributeValue"])
+
+                str += "<http://data.total.com/resource/one-model/assets/turbognerator/" + tagRef + "> <http://data.total.com/resource/one-model/assets#hasTagID>   '" + tagId + "'.\n"
+
+                str += "<http://data.total.com/resource/one-model/assets/turbognerator/" + tagRef + "> <http://data.total.com/resource/one-model/assets#hasTOTAL-ID>   <http://data.total.com/resource/quantum/" + totalId + ">.\n"
             }
 
 
         })
         console.log(str);
-    //    console.log(triples+tripleTags)
+        //    console.log(triples+tripleTags)
 
     }
 
+    , getTurboGenTagToTagTriples: function (filePath) {
+        var data = JSON.parse(fs.readFileSync(filePath))
+        var existingNodes = {}
+        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> "
+        var tripleTags = ""
+        var str = ""
+        data.forEach(function (item) {
+            // var id=item["AttributeID"]
+            var tagRef = ontologiesMapper.formatLabel(item["TAG_Ref"], true)
+            var tagId = item["TagID"]
+            var totalId = item["AttributeValue"]
+            if (!existingNodes[tagRef]) {
+                existingNodes[tagRef] = 1
+                //    console.log(id+","+item["AttributeValue"])
 
+                str += "<http://data.total.com/resource/one-model/assets/turbognerator/" + tagRef + "> <http://data.total.com/resource/one-model/assets#hasTagID>   '" + tagId + "'.\n"
+
+                str += "<http://data.total.com/resource/one-model/assets/turbognerator/" + tagRef + "> <http://data.total.com/resource/one-model/assets#hasTOTAL-ID>   <http://data.total.com/resource/quantum/" + totalId + ">.\n"
+            }
+
+
+        })
+        console.log(str);
+        //    console.log(triples+tripleTags)
+
+    }
 
 
     , sources: {
@@ -1617,7 +1642,7 @@ if (false) {
             if (!nodeIds[item["Attribute Name"]]) {
                 nodeIds[item["Attribute Name"]] = 1
                 str += attrPropUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty>.\n"
-                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#label> 'has" + item.Definition.replace()  + "'.\n"
+                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#label> 'has" + item.Definition.replace() + "'.\n"
                 str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity>.\n"
 
                 str += attrUri + " <http://www.w3.org/2000/01/rdf-schema#label> '" + item.Definition.replace(/_/g, " ") + "'.\n"
@@ -1629,17 +1654,54 @@ if (false) {
 
 
 //getTurboGenTriples
-if(true){
-    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_data.json"
+if (false) {
+    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_data.json"
     ontologiesMapper.getTurboGenTriples(filePath)
 }
 
 
 //getTurboGenTriplesAttrs
-if(false){
-    var filePath="D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json"
+if (false) {
+    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json"
     ontologiesMapper.getTurboGenAttrsTriples(filePath,)
 }
+
+if (true) {
+    var mapping = [
+        {
+            subject: "oneModel:PrimaryTagID_Lookup",
+            predicate: "part14:contains",
+            object: "oneModel:LinkTagID_Lookup"
+        },
+        {
+            subject: "oneModel:PrimaryTagID_Lookup",
+            predicate: "part14:contains",
+            object: "oneModel:LinkTagID_Lookup"
+        },
+    ]
+
+  /*  xx = {
+        "ID": "2cbd25fd-7774-4913-b226-0af1ee4ba776",
+        "PrimaryTagID": "7519ecc8-8b5d-4be7-a602-994dbd487297",
+        "PrimaryTagID_Lookup": "TO-DT-6010A",
+        "Ref_PrimaryTagID_Lookup": "TO-DT-6010A",
+        "FunctionalClassID": "TOTAL-F0000000417",
+        "LinkTagID": "987f7188-c0d5-411b-af26-4020d7b3f6a3",
+        "LinkTagID_Lookup": "TO-G_-6010A",
+        "Ref_LinkTagID_Lookup": "TO-G-6010A",
+        "FunctinalClassID": "TOTAL-F0000000287",
+        "FunctinalClassName": "Electrical Generation Package",
+        "Remark": "0-1",
+        "LinkType": "Parent",
+        "RequirementID": "7519ecc8-8b5d-4be7-a602-994dbd487297987f7188-c0d5-411b-af26-4020d7b3f6a3",
+        "undefined": "TOTAL-RB0000000028"
+    }*/
+
+
+    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json"
+    ontologiesMapper.getTurboGenAttrsTriples(filePath,)
+}
+
 
 console.log(str)
 

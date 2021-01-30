@@ -47,9 +47,8 @@ var Blender = (function () {
 
                     })
 
-                $("#Blender_searchDiv").load("snippets/searchAll.html")
-
-
+                    $("#Blender_searchDiv").load("snippets/searchAll.html")
+                    ThesaurusBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
 
 
                 }, 200
@@ -73,7 +72,7 @@ var Blender = (function () {
 
 
             self.currentSource = source
-            MainController.searchedSource=self.currentSource
+            MainController.searchedSource = self.currentSource
 
             async.series([
                     function (callbackSeries) {
@@ -123,6 +122,7 @@ var Blender = (function () {
                                 var firstNode = $("#Blender_collectionTreeDiv").jstree(true).get_node(firstNodeId);
 
                                 Collection.openTreeNode("Blender_collectionTreeDiv", Blender.currentSource, firstNode)
+
                                 callbackSeries(err);
                             })
 
@@ -159,7 +159,7 @@ var Blender = (function () {
                     MainController.UI.message(err);
                     return callback(err)
                 }
-                var jsTreeOptions = self.getConceptJstreeOptions(true)
+                var jsTreeOptions = self.getConceptJstreeOptions(false  )
                 TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
                 return callback()
             })
@@ -167,14 +167,15 @@ var Blender = (function () {
         }
         self.getConceptJstreeOptions = function (withDnd) {
             var jsTreeOptions = {};
-            jsTreeOptions.source=self.currentSource
+            jsTreeOptions.source = self.currentSource
             jsTreeOptions.contextMenu = Blender.getJstreeConceptsContextMenu()
             jsTreeOptions.selectTreeNodeFn = Blender.selectTreeNodeFn
             if (withDnd) {
 
                 jsTreeOptions.dropAllowedFn = Blender.dnd.dropAllowed
+                jsTreeOptions.dnd = self.dnd
             }
-            jsTreeOptions.dnd = self.dnd
+
             return jsTreeOptions;
 
         }
@@ -216,7 +217,7 @@ var Blender = (function () {
                     var source = self.currentTreeNode.data.source || self.currentSource;
                     var type = self.currentTreeNode.data.type
 
-                    var options = { source:source,labelClass: "treeType_" + type}
+                    var options = {source: source, labelClass: "treeType_" + type}
                     if (Collection.currentCollectionFilter)
                         options.filterCollections = Collection.currentCollectionFilter;
                     ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", source, propertiesMap.node, options);
@@ -936,15 +937,15 @@ var Blender = (function () {
                     if (!initData[item])
                         initData[item] = [{"xml:lang": SourceEditor.prefLang, value: "", type: "literal"}]
                 })
-                initData[parentProperty] = [{value: parentNode.id, type: "uri"}];
+                initData[parentProperty] = [{value: parentNode.data.id, type: "uri"}];
 
 
                 if (self.displayMode == "centralPanelDiv") {
 
-                    SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource,  type, initData);
+                    SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, type, initData);
                 } else {
                     self.nodeEdition.openDialog()
-                    SourceEditor.editNewObject("Blender_nodeEditionDiv", self.currentSource,  type, initData);
+                    SourceEditor.editNewObject("Blender_nodeEditionDiv", self.currentSource, type, initData);
 
 
                 }
@@ -967,14 +968,41 @@ var Blender = (function () {
                     }
                     $("#Blender_nodeEditionButtonsDiv").css("display", "none")
                     $("#Blender_nodeEditionContainerDiv").html("")
-                    if (self.nodeEdition.afterSaveEditingObject(editingObject))
+
+                    if (self.nodeEdition.processEditingErrors(editingObject)) {
+                     /*   if (editingObject.isNew) {
+                            var jstreeData = {
+                                id: editingObject.about,
+                                text: editingObject.nodeLabel,
+                                parent: ThesaurusBrowser.currentTreeNode.id,
+                                data: {
+                                    id: editingObject.about,
+                                    label: editingObject.nodeLabel,
+                                    source: ThesaurusBrowser.currentTreeNode.data.source
+                                }
+
+                            }
+                            common.addNodesToJstree(ThesaurusBrowser.currentTargetDiv, ThesaurusBrowser.currentTreeNode.id, jstreeData)
+
+                        } else {
+
+                            var node = $("#" + ThesaurusBrowser.currentTargetDiv).jstree(true).get_node(editingObject.about)
+                            var newLabel = editingObject.nodeLabel
+                            if (newLabel != node.text)
+                                $("#" + ThesaurusBrowser.currentTargetDiv).jstree(true).rename_node(editingObject.about, newLabel)
+                            $("#" + ThesaurusBrowser.currentTargetDiv).jstree(true).open_node(editingObject.about)
+                        }*/
                         $("#Blender_PopupEditDiv").dialog("close")
+
+                    } else {
+
+                    }
                 })
             }
             ,
 
 
-            afterSaveEditingObject: function (editingObject) {
+            processEditingErrors: function (editingObject) {
 
                 if (editingObject.errors && editingObject.errors.length > 0) {
                     var errorsStr = ""
@@ -988,15 +1016,18 @@ var Blender = (function () {
 
                 var treeDiv, currentNodeId;
                 currentNodeId = "#"
+
                 if (editingObject.type.indexOf("Concept") > 0) {
                     treeDiv = 'Blender_conceptTreeDiv'
                     if (Blender.currentTreeNode)
                         currentNodeId = Blender.currentTreeNode.data.id
+
                 }
                 if (editingObject.type.indexOf("Collection") > 0) {
                     treeDiv = 'Blender_collectionTreeDiv'
                     if (Collection.currentTreeNode)
                         currentNodeId = Collection.currentTreeNode.data.id
+
                 }
 
                 var parent = editingObject.parent || "#"
@@ -1010,16 +1041,25 @@ var Blender = (function () {
                     }]
 
 
-                    var parentNode = $("#" + treeDiv).jstree(true).get_selected("#")
-                    if (parentNode)
-                        common.addNodesToJstree(treeDiv, currentNodeId, jsTreeData, {})
-                    else
+                    var parentNode = $("#" + treeDiv).jstree(true).get_selected(true)[0]
+                    if (parentNode) {
+                        common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
+                      //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
+                    } else {
                         common.loadJsTree("#" + treeDiv, jsTreeData, null)
+                     //  $("#" + treeDiv).jstree(true).open_node("#");
+                    }
 
 
                 } else {
                     if (editingObject.nodeLabel) {
-                        $("#" + treeDiv).jstree(true).rename_node(currentNodeId, editingObject.nodeLabel)
+                        var nodeJstreeId = $("#" + treeDiv).jstree(true).get_selected()[0]
+
+                        $("#" + treeDiv).jstree(true).rename_node(nodeJstreeId, editingObject.nodeLabel)
+                     /*   var parentNodeId = $("#" + treeDiv).jstree(true).get_selected(true)[0]
+                        parentNodeId=parentNodeId.parent
+                        $("#" + treeDiv).jstree(true).refresh_node(parentNodeId)*/
+
                         common.setTreeAppearance();
                     }
                 }

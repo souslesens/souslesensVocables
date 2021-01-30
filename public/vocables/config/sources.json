@@ -127,13 +127,14 @@
   "Dbpedia": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://dbpedia.org/sparql"
+      "url": "http://dbpedia.org/sparql",
+      "method": "GET"
     },
     "graphUri": "http://dbpedia.org",
     "ancestorsDepth": 4,
-    "schemaType": "SKOSXXX",
+    "schemaType": "SKOS",
     "predicates": {
-      "topConceptFilter": "?topConcept  <http://www.w3.org/2000/01/rdf-schema#subClassOf>\t<http://www.w3.org/2002/07/owl#Thing> .",
+      "topConceptFilter": "?topConcept  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .",
       "broaderPredicate": "rdfs:subClassOf",
       "prefLabel": "rdfs:label",
       "lang": "en"
@@ -224,7 +225,7 @@
       "url": "http://wordnet.rkbexplorer.com/sparql/"
     },
     "controller": "Sparql_WORDNET",
-    "schemaType": "SKOS",
+    "schemaType": "SKOSXX",
     "schema": null,
     "color": "#e377c2"
   },

@@ -282,7 +282,7 @@ var Sparql_generic = (function () {
 
             var query = "with <" + Config.sources[sourceLabel].graphUri + "> " +
                 " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}"
-
+            var queryOptions=""
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
                 if (err) {

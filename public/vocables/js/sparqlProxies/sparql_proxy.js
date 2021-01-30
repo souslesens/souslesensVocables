@@ -82,7 +82,7 @@ var Sparql_proxy = (function () {
 
 
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
-self.currentQuery=query;
+        self.currentQuery = query;
 
         if (!options)
             options = {}
@@ -93,40 +93,41 @@ self.currentQuery=query;
 
         var payload = {
             httpProxy: 1,
-            options: queryOptions
+            options: {}
         }
+        if(!queryOptions)
+            queryOptions=""
 
         var sourceParams
-        if( options.source)
-            sourceParams=Config.sources[options.source];
-            else
-            sourceParams=Config.sources[MainController.currentSource];
-
+        if (options.source)
+            sourceParams = Config.sources[options.source];
+        else
+            sourceParams = Config.sources[MainController.currentSource];
 
 
         if (sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
             payload.GET = true;
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim()
-            payload.url = url + query2
-            if(sourceParams.sparql_server.headers){
-                payload.options=JSON.stringify({headers:sourceParams.sparql_server.headers})
+            payload.url = url + query2 + queryOptions
+            if (sourceParams.sparql_server.headers) {
+                payload.options = JSON.stringify({headers: sourceParams.sparql_server.headers})
             }
         } else {
             payload.POST = true;
-            var headers={}
-            if(sourceParams.sparql_server.headers){
-                body=JSON.stringify({headers:sourceParams.server.headers})
+            var headers = {}
+            if (sourceParams.sparql_server.headers) {
+                body = JSON.stringify({headers: sourceParams.server.headers})
             }
-            headers["Accept"]= "application/sparql-results+json";
-            headers["Content-Type"]="application/x-www-form-urlencoded"
+            headers["Accept"] = "application/sparql-results+json";
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
             var body = {
                 params: {query: query},
                 headers: headers,
             }
 
             payload.body = JSON.stringify(body);
-            payload.url = url
+            payload.url = url+ queryOptions
         }
 
         $.ajax({
@@ -141,15 +142,11 @@ self.currentQuery=query;
             success: function (data, textStatus, jqXHR) {
 
 
-
                 if (data.result && typeof data.result != "object")
                     data = JSON.parse(data.result.trim())
 
                 if (!data.results)
-                    return callback(null, {results:{bindings:[]}});
-
-
-
+                    return callback(null, {results: {bindings: []}});
 
 
                 callback(null, data)
@@ -159,7 +156,7 @@ self.currentQuery=query;
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) { //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data")
                 } else
-                   MainController.UI.message(err.responseText);
+                    MainController.UI.message(err.responseText);
 
                 $("#waitImg").css("display", "none");
                 console.log(JSON.stringify(err))

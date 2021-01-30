@@ -7,7 +7,7 @@ var Sparql_SKOS = (function () {
             setVariables(sourceLabel);
             var query = "";
             query += prefixesStr
-            query += " select distinct ?topConcept ?topConceptLabel ?topConceptType " + fromStr + "  WHERE {"
+            query += " select distinct ?topConcept ?topConceptLabel " + fromStr + "  WHERE {"
             query += topConceptFilter;
             query += "?topConcept " + prefLabelPredicate + " ?topConceptLabel.";
             if (lang && !options.noLang)

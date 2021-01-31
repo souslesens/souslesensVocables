@@ -53,7 +53,7 @@ var GraphController = (function () {
                     ;
                 } else {
                     if (!item[fromVar])
-                        return console.log(JSON.stringify(item));
+                        return ;//console.log(JSON.stringify(item));
                     fromId = item[fromVar].value
                     fromLabel = item[fromVar + "Label"].value;
                 }

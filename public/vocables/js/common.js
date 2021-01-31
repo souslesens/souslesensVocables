@@ -225,7 +225,7 @@ var common = (function () {
 
         self.addNodesToJstree = function (jstreeDiv, parentNodeId, jstreeData, options) {
             jstreeData.forEach(function (node) {
-                $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, "last", function () {
+                $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, "first", function () {
 
 
                 })

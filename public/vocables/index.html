@@ -115,7 +115,7 @@
 
             MainController.UI.showToolsList("toolsTreeDiv")
             MainController.loadSources()
-            MainController.UI.setCredits()
+            MainController.UI.setCredits();MainController.UI.configureUI();
         });
 
 
@@ -247,7 +247,7 @@
         </table>
 
     </div>
-
+    <button style="justify-content: right" id="showBlenderButton" style="display: none" onclick="Blender.onLoaded()">Blender</button>
     <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
 
 

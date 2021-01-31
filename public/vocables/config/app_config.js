@@ -20,20 +20,11 @@ var Config = (function () {
  self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
-    self.hideBlender = false;
+    self.enableBlenderTool = true;
     self.enableCollections = false;
     self.showAssetQueyMenu = true;
     self.preferredSchemaType = "OWL"
 
-    if (self.hideBlender) {
-        setTimeout(function () {
-            // $('#accordion').accordion().children('b:eq(3), div:eq(1)').hide();
-            //  $("#blenderPanelLabel").css("display", "none")
-            //   $("#blenderPanelDiv").css("display", "none")
-            $("#ui-id-7").remove()
-            //  $("#blenderPanelDiv").remove()
-        }, 2000)
-    }
 
     self.currentProfile = {
         allowedSourceSchemas: ["SKOS", "OWL","INDIVIDUAL"]
@@ -62,7 +53,7 @@ var Config = (function () {
     // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
     //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
 
-    self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
+   // self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
 
 
     return self;

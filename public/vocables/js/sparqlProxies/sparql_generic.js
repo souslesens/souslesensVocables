@@ -282,7 +282,7 @@ var Sparql_generic = (function () {
 
             var query = "with <" + Config.sources[sourceLabel].graphUri + "> " +
                 " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}"
-            var queryOptions=""
+            var queryOptions = ""
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
                 if (err) {
@@ -295,7 +295,11 @@ var Sparql_generic = (function () {
         }
 
         self.triplesObjectToString = function (item) {
-            var valueStr = ""
+            if (typeof item === "string")
+               return item
+
+
+                var valueStr = ""
             if (item.valueType == "uri")
                 valueStr = "<" + item.object + ">"
             else {
@@ -318,7 +322,7 @@ var Sparql_generic = (function () {
             var insertTriplesStr = "";
             triples.forEach(function (item, index) {
 
-                insertTriplesStr += self.triplesObjectToString(item);
+                    insertTriplesStr += self.triplesObjectToString(item);
 
             })
 
@@ -332,7 +336,7 @@ var Sparql_generic = (function () {
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
-                return callback(err);
+                return callback(err,triples.length);
             })
         }
 
@@ -440,6 +444,9 @@ var Sparql_generic = (function () {
                                 options.setObjectFn(item)
 
                             subject = item.id.value
+                            if(options.subjectNewUri)
+                                subject=options.subjectNewUri
+
                             prop = item.prop.value
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
@@ -493,7 +500,7 @@ var Sparql_generic = (function () {
                             insertTriplesStr +
                             "  }"
 
-                        url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
+                        var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
                             return callbackEach(err);
                         })

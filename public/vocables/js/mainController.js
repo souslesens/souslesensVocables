@@ -39,6 +39,12 @@ var MainController = (function () {
 
     self.UI = {
 
+        configureUI:function(){
+            if(Config.enableBlenderTool)
+                $("#showBlenderButton").css("display","block")
+            else
+                $("#showBlenderButton").css("display","node")
+        },
         showSources: function (treeDiv, withCBX) {
             var treeData = [];
             var distinctNodes = {}
@@ -70,10 +76,10 @@ var MainController = (function () {
                 selectTreeNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if(obj.node.id=="INDIVIDUAL")
+                            if (obj.node.id == "INDIVIDUAL")
                                 MainController.currentSchemaType = "OWL"
                             else
-                            MainController.currentSchemaType = obj.node.id;
+                                MainController.currentSchemaType = obj.node.id;
 
                             if ($("#sourcesTreeDiv").children().length > 0)
                                 $("#sourcesTreeDiv").jstree(true).open_node(obj.node.id)
@@ -88,14 +94,14 @@ var MainController = (function () {
                 onOpenNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if(obj.node.id=="INDIVIDUAL")
+                            if (obj.node.id == "INDIVIDUAL")
                                 MainController.currentSchemaType = "OWL"
                             else
-                            MainController.currentSchemaType = obj.node.id;
+                                MainController.currentSchemaType = obj.node.id;
                         }
                     }
                 }
-            },function(){
+            }, function () {
                 $("#" + treeDiv).jstree(true).open_node(Config.preferredSchemaType);
 
             })
@@ -107,8 +113,7 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300)
             var treeData = []
             for (var key in Config.tools) {
-                // Object.keys(Config.tools).forEach(function (toolLabel) {
-                treeData.push({id: key, text: Config.tools[key].label, parent: "#", data: Config.tools[key]})
+                    treeData.push({id: key, text: Config.tools[key].label, parent: "#", data: Config.tools[key]})
 
             }
             //})
@@ -154,7 +159,7 @@ var MainController = (function () {
         , getJstreeConceptsContextMenu: function () {
             var controller = Config.tools[self.currentTool].controller
             if (controller.jstreeContextMenu)
-               return controller.jstreeContextMenu()
+                return controller.jstreeContextMenu()
 
         },
 
@@ -267,7 +272,7 @@ var MainController = (function () {
 
         },
 
-        openRightPanel:function(){
+        openRightPanel: function () {
             var w = $(document).width() - leftPanelWidth
             var h = $(document).height() - 30;
             // $("#centralPanel").width(w)
@@ -275,11 +280,11 @@ var MainController = (function () {
             $("#rightPanelToogleButton").css("display", "block")
             $("#rightPanelDiv").width(rightPanelWidth)
         },
-        showCurrentQuery:function(){
-           $("#mainDialogDiv") .html("<textarea style='width: 100%;height: 400px'>"+Sparql_proxy.currentQuery+"</textarea>")
-            $("#mainDialogDiv") .dialog("open")
+        showCurrentQuery: function () {
+            $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>")
+            $("#mainDialogDiv").dialog("open")
         },
-        copyCurrentQuery:function(){
+        copyCurrentQuery: function () {
             common.copyTextToClipboard(Sparql_proxy.currentQuery)
 
         }

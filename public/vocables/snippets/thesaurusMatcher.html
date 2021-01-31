@@ -36,7 +36,7 @@
             </option>
         </select>
 
-        <input type="checkbox" id="ThesaurusMatcher_compareAllCBX">compare all
+        <input type="checkbox" id="ThesaurusMatcher_compareAllCBX" >compare all
 
     </div>
 
@@ -61,19 +61,19 @@
         </select>
 
 
-        <input type="checkbox" id="showAllSourceNodesCBX">
+        <input type="checkbox" id="showAllSourceNodesCBX" checked="checked">
         showAllSourceNodes
     </div>
 
     <div class="ThesaurusMatcher_paramsDiv">
 
-        <button onclick='ThesaurusMatcher.compareConcepts()'>Compare with...</button>
 
 
         <select id="ThesaurusMatcher_targetGraphUriSelect">
 
-        </select><br>
 
+        </select><br>
+        <button onclick='ThesaurusMatcher.compareConcepts()'>Compare </button>
         <!--
         <button onclick='OntologiesStats.generateAllOwlStats()'>X</button>
         <button onclick='OntologiesStats.generateMatchingMatrix()'>Y</button>

@@ -19,8 +19,9 @@ var OwlSchema = (function () {
     }
 
     self.initSourceSchema = function (sourceLabel, callback) {
-        if (self.schemasConfig && self.schemasConfig[sourceLabel])
+        if (self.schemasConfig && self.schemasConfig[sourceLabel]) {
             return callback(null, self.schemasConfig[sourceLabel]);
+        }
 
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
@@ -53,6 +54,7 @@ var OwlSchema = (function () {
                     if (self.currentSourceSchema)
                         return callbackSeries();
                     self.initSourceSchema(sourceLabel, function (err, result) {
+                        self.currentSourceSchema=result
                         if (err)
                             return MainController.UI.message(err)
 

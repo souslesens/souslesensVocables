@@ -1674,27 +1674,35 @@ if (true) {
             object: "oneModel:LinkTagID_Lookup"
         },
         {
-            subject: "oneModel:PrimaryTagID_Lookup",
-            predicate: "part14:contains",
-            object: "oneModel:LinkTagID_Lookup"
+            subject: "_:",
+            predicate: "rdf:type",
+            object: " owl:Restriction"
         },
+        {
+
+        }
     ]
+    rdf:type owl:Restriction ;
+    owl:onProperty npdv:operatorForField ;
+    owl:someValuesFrom npdv:Field
 
   /*  xx = {
-        "ID": "2cbd25fd-7774-4913-b226-0af1ee4ba776",
-        "PrimaryTagID": "7519ecc8-8b5d-4be7-a602-994dbd487297",
-        "PrimaryTagID_Lookup": "TO-DT-6010A",
-        "Ref_PrimaryTagID_Lookup": "TO-DT-6010A",
-        "FunctionalClassID": "TOTAL-F0000000417",
-        "LinkTagID": "987f7188-c0d5-411b-af26-4020d7b3f6a3",
-        "LinkTagID_Lookup": "TO-G_-6010A",
-        "Ref_LinkTagID_Lookup": "TO-G-6010A",
-        "FunctinalClassID": "TOTAL-F0000000287",
-        "FunctinalClassName": "Electrical Generation Package",
-        "Remark": "0-1",
-        "LinkType": "Parent",
-        "RequirementID": "7519ecc8-8b5d-4be7-a602-994dbd487297987f7188-c0d5-411b-af26-4020d7b3f6a3",
-        "undefined": "TOTAL-RB0000000028"
+       "ID": "2cbd25fd-7774-4913-b226-0af1ee4ba776",
+    "PrimaryTagID": "7519ecc8-8b5d-4be7-a602-994dbd487297",
+    "PrimaryTagID_Lookup": "TO-DT-6010A",
+    "Ref_PrimaryTagID_Lookup": "TO-DT-6010A",
+    "FunctionalClassID": "TOTAL-F0000000417",
+    "LinkTagID": "987f7188-c0d5-411b-af26-4020d7b3f6a3",
+    "LinkTagID_Lookup": "TO-G_-6010A",
+    "Ref_LinkTagID_Lookup": "TO-G-6010A",
+    "FunctinalClassID": "TOTAL-F0000000287",
+    "FunctinalClassName": "Electrical Generation Package",
+    "Remark": "0-1",
+    "LinkType": "Parent",
+    "XXXrequirementCompositeTagKey": "7519ecc8-8b5d-4be7-a602-994dbd487297987f7188-c0d5-411b-af26-4020d7b3f6a3",
+    "XXX": 1,
+    "XXXrequirementCompositeFunctionalKey": "TOTAL-F0000000417TOTAL-F0000000287",
+    "RequirementID": "TOTAL-RB0000000028"
     }*/
 
 

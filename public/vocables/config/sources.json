@@ -19,13 +19,13 @@
       ]
     }
   },
-  "TEST": {
+  "ONE-TAXONOMY": {
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
       "url": "http://51.178.139.80:8890/sparql"
     },
-    "graphUri": "http://souslesens/thesaurus/TEST/",
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY/",
     "schemaType": "SKOS",
     "predicates": {
     },

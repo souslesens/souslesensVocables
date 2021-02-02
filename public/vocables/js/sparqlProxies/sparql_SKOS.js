@@ -724,7 +724,7 @@ var Sparql_SKOS = (function () {
         var optionalDepth = 0
         var lang = "";
         var url = "";
-        var queryOptions = "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
+        var queryOptions = "";//"&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
 
 
         setVariables = function (sourceLabel) {

@@ -85,7 +85,7 @@ var annotatorLive = {
 
 
                         var url = source.sparql_server.url;
-                        var queryOptions = "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
+                        var queryOptions ="";// "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
 
                         var params = {query: query}
                         var headers = {

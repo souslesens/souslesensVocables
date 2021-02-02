@@ -3,13 +3,14 @@ var Collection = (function () {
     var self = {}
     self.currentTreeNode;
     self.currentCollectionFilter = null;
+    self.currentCandidateNode = null;
 
     self.broaderProperty = "http://www.w3.org/2004/02/skos/core#member"
 
     self.getJstreeContextMenu = function () {
         var menuItems = {}
-        var clipboard = Clipboard.getContent()
-        if (clipboard.length > 0 && clipboard[0].type == "node") {
+
+        if (self.currentCandidateNode) {
 
 
             menuItems.assignConcepts = {
@@ -71,15 +72,15 @@ var Collection = (function () {
                 Blender.nodeEdition.createChildNode(null, "collection",);
                 ;
             },
-        },
+        }
 
-            menuItems.importChildren = {
+         /*   menuItems.importChildren = {
                 label: "Import child nodes",
                 action: function (obj, sss, cc) {
                     Import.showImportNodesDialog("collection");
                     ;
                 },
-            }
+            }*/
         return menuItems;
     }
 
@@ -116,7 +117,8 @@ var Collection = (function () {
 
 
     self.assignConcepts = function () {
-        var nodes = Clipboard.getContent();
+
+        var nodes = [self.currentCandidateNode];
         var conceptIds = [];
         var newTreeNodes = []
         nodes.forEach(function (item) {
@@ -131,8 +133,10 @@ var Collection = (function () {
         Collection.Sparql.setConceptsCollectionMembership(Blender.currentSource, conceptIds, Collection.currentTreeNode.data.id, function (err, result) {
             if (err)
                 return MainController.UI.message(err)
-            return MainController.UI.message(result)
-            common.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
+
+          //  common.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
+            MainController.UI.message("node " + self.currentCandidateNode.data.label + " assigned to collection " + Collection.currentTreeNode.data.label)
+            return self.currentCandidateNode = null;
         })
 
     }
@@ -259,7 +263,7 @@ var Collection = (function () {
                 fromStr = " FROM <" + variables.graphUri + ">"
 
             var query = "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
-                " select    distinct * "+fromStr+" WHERE {" +
+                " select    distinct * " + fromStr + " WHERE {" +
                 "?collection rdf:type  ?collectionType. filter( ?collectionType =skos:Collection). " +
                 "?collection skos:prefLabel ?collectionLabel."
             if (variables.lang)
@@ -270,8 +274,8 @@ var Collection = (function () {
 
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
 
-            var options={
-               source:sourceLabel
+            var options = {
+                source: sourceLabel
             }
 
             Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, null, options, function (err, result) {
@@ -324,10 +328,10 @@ var Collection = (function () {
             query += "}" +
                 "limit " + variables.limit;
 
-            var options={
-                source:sourceLabel
+            var options = {
+                source: sourceLabel
             }
-            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, {}, options, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, "", options, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -359,7 +363,7 @@ var Collection = (function () {
             query += "limit " + variables.limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, {}, null, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, "", null, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -381,7 +385,7 @@ var Collection = (function () {
                 Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
                 $("#ThesaurusBrowser_collectionDiv").css("display", "none")
-                return ;//MainController.UI.message("no collections for this source")
+                return;//MainController.UI.message("no collections for this source")
 
             }
 

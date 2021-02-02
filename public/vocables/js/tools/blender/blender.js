@@ -14,7 +14,7 @@ var Blender = (function () {
             MainController.UI.message("");
 
             MainController.UI.openRightPanel()
-        //    $("#accordion").accordion("option", {active: 2});
+            //    $("#accordion").accordion("option", {active: 2});
             // $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
             //  MainController.UI.toogleRightPanel("open");
             $("#rightPanelDiv").load("snippets/blender/blender.html")
@@ -159,7 +159,7 @@ var Blender = (function () {
                     MainController.UI.message(err);
                     return callback(err)
                 }
-                var jsTreeOptions = self.getConceptJstreeOptions(true  )
+                var jsTreeOptions = self.getConceptJstreeOptions(true)
                 TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
                 return callback()
             })
@@ -183,9 +183,9 @@ var Blender = (function () {
         self.dnd = {
 
             "drag_start": function (data, element, helper, event) {
-               // Blender.currentDNDstartNodeParentId=Blender.currentTreeNode.parent
+                // Blender.currentDNDstartNodeParentId=Blender.currentTreeNode.parent
                 Blender.currentDNDstartNodeId = element.data.nodes[0];
-                Blender.currentDNDstartNodeParentId=common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId).parent
+                Blender.currentDNDstartNodeParentId = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId).parent
 
                 return true;
             },
@@ -273,10 +273,10 @@ var Blender = (function () {
 
                 return menuItems;
             }
-            menuItems.copyNode = {
-                label: "Copy Node",
+            menuItems.toCollection = {
+                label: "to Collection",
                 action: function (e) {// pb avec source
-                    Blender.menuActions.copyNode(e)
+                    Blender.menuActions.toCollection(e)
                 }
 
             }
@@ -296,14 +296,14 @@ var Blender = (function () {
                                 self.menuActions.pasteClipboardNodeOnly();
                             }
                         },
-                        pasteProperties: {
-                            label: "some properties...",
-                            action: function () {
-                                self.menuActions.pasteClipboardNodeProperties()
-                                ;
-                            },
-                        }
-                        ,
+                        /*   pasteProperties: {
+                               label: "some properties...",
+                               action: function () {
+                                   self.menuActions.pasteClipboardNodeProperties()
+                                   ;
+                               },
+                           }
+                           ,*/
                         pasteDescendants: {
                             label: " descendants",
                             action: function (obj, sss, cc) {
@@ -311,13 +311,13 @@ var Blender = (function () {
                                 ;
                             },
                         },
-                        pasteAsReference: {
-                            label: " reference",
-                            action: function (obj, sss, cc) {
-                                ExternalReferences.pasteAsReference()
-                                ;
-                            },
-                        },
+                        /*  pasteAsReference: {
+                              label: " reference",
+                              action: function (obj, sss, cc) {
+                                  ExternalReferences.pasteAsReference()
+                                  ;
+                              },
+                          },*/
 
                         /*   pasteAscendants: {
                                label: "ascendants",
@@ -362,14 +362,14 @@ var Blender = (function () {
                     self.nodeEdition.createChildNode(null, "concept");
                     ;
                 },
-            },
-                menuItems.importChildren = {
+            }
+            /*    menuItems.importChildren = {
                     label: "Import child nodes",
                     action: function (obj, sss, cc) {
                         Import.showImportNodesDialog("concept");
                         ;
                     },
-                }
+                }*/
 
             return menuItems;
 
@@ -377,16 +377,9 @@ var Blender = (function () {
 
 
         self.menuActions = {
-            copyNode: function (event) {
-                Clipboard.copy({
-                        type: "node",
-                        id: self.currentTreeNode.data.id,
-                        label: self.currentTreeNode.text,
-                        source: self.currentTreeNode.data.source,
-                        data: self.currentTreeNode.data
-                    },
-                    self.currentTreeNode.id + "_anchor",
-                    event)
+            toCollection: function (event) {
+                Collection.currentCandidateNode = self.currentTreeNode
+                $("#Blender_tabs").tabs("option", "active", 1);
             },
 
 
@@ -395,8 +388,8 @@ var Blender = (function () {
                 if (Blender.startDNDtime && date - Blender.startDNDtime < 2000)
                     return true;
                 Blender.startDNDtime = date;
-if(! Blender.currentDNDoperation)
-    return;
+                if (!Blender.currentDNDoperation)
+                    return;
                 var newParentData = Blender.currentDNDoperation.parent.data;
                 var nodeData = Blender.currentDNDoperation.node.data
                 var oldParentData = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeParentId).data;
@@ -574,108 +567,116 @@ if(! Blender.currentDNDoperation)
             },
 
 
-            pasteClipboardNodeOnly:  function (callback) {
-                    var dataArray = Clipboard.getContent();
-                    if (!dataArray)
-                        return;
+            pasteClipboardNodeOnly: function (dataArray, options, callback) {
+                if (!dataArray)
+                    dataArray = Clipboard.getContent();
+                if (!dataArray)
+                    return;
+                if (!options) {
+                    options = {}
+                }
                 var oldId
                 var newId
                 var label
-                    async.eachSeries(dataArray, function (data, callbackEach) {
+                async.eachSeries(dataArray, function (data, callbackEach) {
 
 
-                        if (data.type == "node") {// cf clipboard and annotator
-                            var fromSource = data.source;
-                            var toGraphUri = Config.sources[self.currentSource].graphUri
-                             oldId = data.id;
-                             newId=common.getNewUri(self.currentSource)
-                           label = data.label;
-                            var existingNodes= common.getjsTreeNodes("Blender_conceptTreeDiv")
-                            var ok=true
-                            existingNodes.forEach(function(item){
-                                if(item.data.label.toLowerCase()==data.label.toLowerCase())
-                                    ok=false;
-                            })
-                            if (!ok) {
-                               alert ("node " + data.label+ " already exists")
-                                if (callback)
-                                    return callback(null)
-                            }
+                    if (data.type == "node") {// cf clipboard and annotator
+                        var fromSource = data.source;
+                        var toGraphUri = Config.sources[self.currentSource].graphUri
+                        oldId = data.id;
+                        newId = common.getNewUri(self.currentSource)
+                        label = data.label;
+                        var existingNodes = common.getjsTreeNodes("Blender_conceptTreeDiv")
+                        var ok = true
+                        existingNodes.forEach(function (item) {
+                            if (item.data.label.toLowerCase() == data.label.toLowerCase())
+                                ok = false;
+                        })
+                        if (!ok) {
+                            alert("node " + data.label + " already exists")
+                            if (callback)
+                                return callback(null)
+                        }
 
-                            var additionalTriplesNt = []
-                            var parentNodeId = self.currentTreeNode.data.id
+                        var additionalTriplesNt = []
 
+                        var parentNodeId
+                        if (options.newParentId)
+                            parentNodeId = options.newParentId;
+                        else
+                            parentNodeId = self.currentTreeNode.data.id
+
+                        if (Config.sources[self.currentSource].schemaType == "SKOS") {
+                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
+                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#exactMatch> <" + oldId + ">.")
+                        } else if (Config.sources[self.currentSource].schemaType == "OWL") {
+                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + parentNodeId + ">.")
+                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2002/07/owl#sameAs> <" + oldId + ">.")
+                        } else
+                            return alert("no schema")
+
+                        //if source and target have different schma type we only copy minimum info else we copy all node triplets
+
+                        if (Config.sources[self.currentSource].schemaType != Config.sources[fromSource].schemaType) {
                             if (Config.sources[self.currentSource].schemaType == "SKOS") {
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
                                 additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#prefLabel> '" + data.label + "'@en.")
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#exactMatch> <" + oldId + ">.")
+                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.")
                             } else if (Config.sources[self.currentSource].schemaType == "OWL") {
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + parentNodeId + ">.")
+                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class>.")
                                 additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + data.label + "'@en.")
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2002/07/owl#sameAs> <" + oldId + ">.")
-                            } else
-                                return alert("no schema")
+                            }
+                            Sparql_generic.insertTriples(self.currentSource, additionalTriplesNt, function (err, result) {
+                                if (!err)
+                                    MainController.UI.message(result + "new triples inserted")
+                                callbackEach(err, result)
 
-                            //if source and target have different schma type we only copy minimum info else we copy all node triplets
+                            })
+                        } else {
 
-                            if(Config.sources[self.currentSource].schemaType!=Config.sources[fromSource].schemaType){
-                                if (Config.sources[self.currentSource].schemaType == "SKOS") {
-                                    additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.")
-                                } else if (Config.sources[self.currentSource].schemaType == "OWL") {
-                                    additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class>.")
-
-                                }
-                                Sparql_generic.insertTriples(self.currentSource,additionalTriplesNt,function (err, result) {
-                                  if(!err)
-                                      MainController.UI.message(result+"new triples inserted")
-                                    callbackEach(err,result)
+                            Sparql_generic.copyNodes(fromSource, toGraphUri, oldId, {
+                                    additionalTriplesNt: additionalTriplesNt,
+                                    subjectNewUri: newId
+                                },
+                                function (err, result) {
+                                    if (!err)
+                                        MainController.UI.message(result + "new triples inserted")
+                                    callbackEach(err, result)
 
                                 })
-                            }else {
+                        }
+                    }
+                }, function (err) {
 
-                                Sparql_generic.copyNodes(fromSource, toGraphUri, oldId,{
-                                    additionalTriplesNt: additionalTriplesNt,
-                                    subjectNewUri:newId
-                                },
-                                    function (err, result) {
-                                    if(!err)
-                                        MainController.UI.message(result+"new triples inserted")
-                                    callbackEach(err,result)
+                    if (err)
+                        return MainController.UI.message(err);
 
-                                    })
+
+                    var jstreeData = [
+                        {
+                            id: newId,
+                            text: label,
+                            parent: self.currentTreeNode.data.id,
+                            data: {
+                                type: "http://www.w3.org/2004/02/skos/core#Concept",
+                                source: self.currentSource,
+                                id: newId,
+                                label: label
                             }
                         }
-                    }, function (err) {
-
-                        if (err)
-                            return MainController.UI.message(err);
+                    ]
+                    common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.id, jstreeData)
 
 
-                        var jstreeData = [
-                            {
-                                id: newId,
-                                text: label,
-                                parent: self.currentTreeNode.data.id,
-                                data: {
-                                    type: "http://www.w3.org/2004/02/skos/core#Concept",
-                                    source: self.currentSource,
-                                    id: newId,
-                                    label: label
-                                }
-                            }
-                        ]
-                        common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.id, jstreeData)
+                    if (!callback)
+                        Clipboard.clear();
+                    else
+                        return callback(null, newId)
+
+                })
 
 
-                        if (!callback)
-                            Clipboard.clear();
-                        else
-                            return callback(null)
-
-                    })
-
-
-                }
+            }
 
             ,
             setCopiedNodeObjectFn: function (item) {
@@ -704,88 +705,80 @@ if(! Blender.currentDNDoperation)
                 if (!dataArray)
                     return;
                 var totalNodesCount = 0
+
                 async.eachSeries(dataArray, function (data, callbackEach) {
 
-                    self.menuActions.pasteClipboardNodeOnly(function (err, result) {
+                        self.menuActions.pasteClipboardNodeOnly(null, null, function (err, newId) {
 
-                        Clipboard.clear();
+                            Clipboard.clear();
 
-                        var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
-                        var fromSource = data.source;
-                        var toGraphUri = Config.sources[self.currentSource].graphUri
-                        var id = data.id;
-                        var label = data.label;
-                        var depth = 3
-                        var childrenIds = [id]
-                        var currentDepth = 1
-
-                        async.whilst(
-                            function test(cb) {
-                                return childrenIds.length > 0
-                            },
-
-                            function (callbackWhilst) {//iterate
-
-                                Sparql_generic.getNodeChildren(fromSource, null, childrenIds, 1, null, function (err, result) {
-                                    if (err)
-                                        return MainController.UI.message(err);
-                                    childrenIds = []
-                                    if (result.length == 0)
-                                        return callbackWhilst();
-                                    totalNodesCount += result.length
-                                    var items = {}
-                                    result.forEach(function (item) {
-
-                                        var parentId;
-                                        if (item["child" + currentDepth]) {
-
-                                            parentId = item.concept.value;
-
-                                            var childId = item["child" + currentDepth].value
-                                            if (existingNodeIds.indexOf(childId) > -1) {
-
-                                                return MainController.UI.message("node " + id + " already exists")
-                                            }
-
-                                            childrenIds.push(childId)
-                                            if (!items[parentId])
-                                                items[parentId] = [];
-                                            items[parentId].push(item)
-                                        }
-
-                                    })
+                            var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
+                            var fromSource = data.source;
+                            var toGraphUri = Config.sources[self.currentSource].graphUri
+                            var id = data.id;
+                            var label = data.label;
+                            var childrenIds = [id]
+                            var currentDepth = 1;
+                            var newParentId = newId
 
 
-                                    Sparql_generic.copyNodes(fromSource, toGraphUri, childrenIds, {}, function (err, result) {
+                            async.whilst(
+                                function test(cb) {
+                                    return childrenIds.length > 0
+                                },
+
+                                function (callbackWhilst) {//iterate
+
+                                    Sparql_generic.getNodeChildren(fromSource, null, childrenIds, 1, null, function (err, result) {
                                         if (err)
-                                            return callbackWhilst(err)
-                                        for (var parentId in items) {
-                                            TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", items[parentId], parentId, "child" + currentDepth, null)
-                                        }
-
+                                            return MainController.UI.message(err);
+                                        childrenIds = []
+                                        if (result.length == 0)
+                                            return callbackWhilst();
+                                        totalNodesCount += result.length
+                                        var items = {}
+                                        var dataArray = []
+                                        result.forEach(function (item) {
+                                            var childId = item["child" + currentDepth].value
+                                            var childLabel = item["child" + currentDepth + "Label"].value
+                                            dataArray.push({
+                                                type: "node",
+                                                id: childId,
+                                                label: childLabel,
+                                                newParentId: newParentId,
+                                                source: fromSource,
+                                                data: null
+                                            })
+                                            setTimeout(function () {
+                                                self.menuActions.pasteClipboardNodeOnly(dataArray, null, function (err, result) {
+                                                    newParentId = result;
+                                                }, 500)
+                                            })
+                                        })
                                         callbackWhilst();
 
                                     })
 
 
+                                }
+                                , function (err) {
+                                    if (err)
+                                        callbackEach(err);
+                                    callbackEach();
                                 })
-                            }
-                            , function (err) {
-                                if (err)
-                                    callbackEach(err);
-                                callbackEach();
-                            })
-                    })
-                }, function (err) {
-                    if (err)
-                        return MainController.UI.message(err)
-                    return MainController.UI.message("copied " + totalNodesCount + " nodes")
-                })
+                        })
+                    }, function (err) {
+                        if (err)
+                            return MainController.UI.message(err)
+                        return MainController.UI.message("copied " + totalNodesCount + " nodes")
+                    }
+                )
 
 
             }
 
 
+            ,
             /**
              *
              *  A FINIR
@@ -793,75 +786,74 @@ if(! Blender.currentDNDoperation)
              *
              * @param callback
              */
-            ,
-            pasteClipboardNodeAscendants: function () {
-                var data = Clipboard.getContent();
-                if (!data)
-                    return;
+            /*    pasteClipboardNodeAscendants: function () {
+                    var data = Clipboard.getContent();
+                    if (!data)
+                        return;
 
-                self.menuActions.pasteClipboardNodeOnly(function (err, result) {
+                    self.menuActions.pasteClipboardNodeOnly(function (err, result) {
 
-                    var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
-                    var fromSource = data.source;
-                    var toGraphUri = Config.sources[self.currentSource].graphUri
-                    var id = data.id;
-                    var label = data.label;
-                    var depth = 8
-                    Sparql_generic.getNodeParents(fromSource, null, id, depth, null, function (err, result) {
-                        if (err)
-                            return MainController.UI.message(err);
-                        var childrenIds = []
+                        var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
+                        var fromSource = data.source;
+                        var toGraphUri = Config.sources[self.currentSource].graphUri
+                        var id = data.id;
+                        var label = data.label;
+                        var depth = 8
+                        Sparql_generic.getNodeParents(fromSource, null, id, depth, null, function (err, result) {
+                            if (err)
+                                return MainController.UI.message(err);
+                            var childrenIds = []
 
-                        if (result.length > 0) {
-                            for (var i = 1; i <= depth; i++) {
-                                var items = {}
-                                result.forEach(function (item) {
+                            if (result.length > 0) {
+                                for (var i = 1; i <= depth; i++) {
+                                    var items = {}
+                                    result.forEach(function (item) {
 
-                                    var parentId;
-                                    if (item["broader" + i]) {
-                                        if (i == 1) {
-                                            parentId = id
-                                        } else {
-                                            parentId = item["broader" + (i - 1)].value;
+                                        var parentId;
+                                        if (item["broader" + i]) {
+                                            if (i == 1) {
+                                                parentId = id
+                                            } else {
+                                                parentId = item["broader" + (i - 1)].value;
+
+                                            }
+                                            var childId = item["broader" + i].value
+                                            if (existingNodeIds.indexOf(childId) > -1)
+                                                return
+                                            childrenIds.push(childId)
+                                            if (!items[parentId])
+                                                items[parentId] = [];
+                                            items[parentId].push(item)
+
 
                                         }
-                                        var childId = item["broader" + i].value
-                                        if (existingNodeIds.indexOf(childId) > -1)
-                                            return
-                                        childrenIds.push(childId)
-                                        if (!items[parentId])
-                                            items[parentId] = [];
-                                        items[parentId].push(item)
 
 
+                                    })
+                                    for (var parentId in items) {
+                                        TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", items[parentId], parentId, "broader" + i, null)
                                     }
 
 
-                                })
-                                for (var parentId in items) {
-                                    TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", items[parentId], parentId, "broader" + i, null)
                                 }
+                                Sparql_generic.copyNodes(fromSource, toGraphUri, childrenIds, {}, function (err, result) {
+                                    if (err)
+                                        return MainController.UI.message(err);
+
+
+                                })
 
 
                             }
-                            Sparql_generic.copyNodes(fromSource, toGraphUri, childrenIds, {}, function (err, result) {
-                                if (err)
-                                    return MainController.UI.message(err);
+                            self.modified = true;
 
+                        })
 
-                            })
-
-
-                        }
-                        self.modified = true;
 
                     })
 
-
-                })
-
-            }
-            ,
+                }
+                ,*/
             pasteClipboardNodeProperties: function () {
                 var data = Clipboard.getContent();
                 Clipboard.clear();
@@ -959,6 +951,7 @@ if(! Blender.currentDNDoperation)
                         initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#Concept")
                         initData["http://www.w3.org/2004/02/skos/core#broader"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
+                    initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [{value: "http://www.w3.org/2004/02/skos/core#Concept", type: "uri"}]
 
                 } else if (type == "collection") {
                     parentNode = Collection.currentTreeNode;
@@ -967,6 +960,7 @@ if(! Blender.currentDNDoperation)
                     mandatoryProps = ["http://www.w3.org/2004/02/skos/core#prefLabel"]
                     childClass = "http://www.w3.org/2004/02/skos/core#Collection";
                     treeDivId = 'Blender_collectionTreeDiv';
+                    initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [{value: "http://www.w3.org/2004/02/skos/core#Collection", type: "uri"}]
                 }
 
                 mandatoryProps.forEach(function (item) {
@@ -1005,103 +999,72 @@ if(! Blender.currentDNDoperation)
                     $("#Blender_nodeEditionButtonsDiv").css("display", "none")
                     $("#Blender_nodeEditionContainerDiv").html("")
 
-                    if (self.nodeEdition.processEditingErrors(editingObject)) {
-                     /*   if (editingObject.isNew) {
-                            var jstreeData = {
-                                id: editingObject.about,
-                                text: editingObject.nodeLabel,
-                                parent: ThesaurusBrowser.currentTreeNode.id,
-                                data: {
-                                    id: editingObject.about,
-                                    label: editingObject.nodeLabel,
-                                    source: ThesaurusBrowser.currentTreeNode.data.source
-                                }
+                    if (editingObject.errors && editingObject.errors.length > 0) {
+                        var errorsStr = ""
+                        editingObject.errors.forEach(function (item) {
+                            errorsStr += item + "."
+                        })
+                        alert(errorsStr)
+                        return false;
+                    }
 
-                            }
-                            common.addNodesToJstree(ThesaurusBrowser.currentTargetDiv, ThesaurusBrowser.currentTreeNode.id, jstreeData)
 
-                        } else {
+                    var treeDiv, currentNodeId;
+                    currentNodeId = "#"
 
-                            var node = $("#" + ThesaurusBrowser.currentTargetDiv).jstree(true).get_node(editingObject.about)
-                            var newLabel = editingObject.nodeLabel
-                            if (newLabel != node.text)
-                                $("#" + ThesaurusBrowser.currentTargetDiv).jstree(true).rename_node(editingObject.about, newLabel)
-                            $("#" + ThesaurusBrowser.currentTargetDiv).jstree(true).open_node(editingObject.about)
-                        }*/
-                        $("#Blender_PopupEditDiv").dialog("close")
-
-                    } else {
+                    if (editingObject.type.indexOf("Concept") > 0) {
+                        treeDiv = 'Blender_conceptTreeDiv'
+                        if (Blender.currentTreeNode)
+                            currentNodeId = Blender.currentTreeNode.data.id
 
                     }
+                    if (editingObject.type.indexOf("Collection") > 0) {
+                        treeDiv = 'Blender_collectionTreeDiv'
+                        if (Collection.currentTreeNode)
+                            currentNodeId = Collection.currentTreeNode.data.id
+
+                    }
+
+                    var parent = editingObject.parent || "#"
+                    if (editingObject.isNew) {
+                        editingObject.isNew = false;
+                        var jsTreeData = [{
+                            id: editingObject.about,
+                            text: editingObject.nodeLabel,
+                            parent: currentNodeId,
+                            data: {type: editingObject.type, source: self.currentSource, id: editingObject.about, label: editingObject.nodeLabel}
+                        }]
+
+
+                        var parentNode = $("#" + treeDiv).jstree(true).get_selected(true)[0]
+                        if (parentNode) {
+                            common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
+                            //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
+                        } else {
+                            common.loadJsTree("#" + treeDiv, jsTreeData, null)
+                            //  $("#" + treeDiv).jstree(true).open_node("#");
+                        }
+
+
+                    } else {
+                        if (editingObject.nodeLabel) {
+                            var nodeJstreeId = $("#" + treeDiv).jstree(true).get_selected()[0]
+
+                            $("#" + treeDiv).jstree(true).rename_node(nodeJstreeId, editingObject.nodeLabel)
+                            /*   var parentNodeId = $("#" + treeDiv).jstree(true).get_selected(true)[0]
+                               parentNodeId=parentNodeId.parent
+                               $("#" + treeDiv).jstree(true).refresh_node(parentNodeId)*/
+
+                            common.setTreeAppearance();
+                        }
+                    }
+                    $("#Blender_PopupEditDiv").dialog("close")
+
+
                 })
             }
-            ,
 
 
-            processEditingErrors: function (editingObject) {
-
-                if (editingObject.errors && editingObject.errors.length > 0) {
-                    var errorsStr = ""
-                    editingObject.errors.forEach(function (item) {
-                        errorsStr += item + "."
-                    })
-                    alert(errorsStr)
-                    return false;
-                }
-
-
-                var treeDiv, currentNodeId;
-                currentNodeId = "#"
-
-                if (editingObject.type.indexOf("Concept") > 0) {
-                    treeDiv = 'Blender_conceptTreeDiv'
-                    if (Blender.currentTreeNode)
-                        currentNodeId = Blender.currentTreeNode.data.id
-
-                }
-                if (editingObject.type.indexOf("Collection") > 0) {
-                    treeDiv = 'Blender_collectionTreeDiv'
-                    if (Collection.currentTreeNode)
-                        currentNodeId = Collection.currentTreeNode.data.id
-
-                }
-
-                var parent = editingObject.parent || "#"
-                if (editingObject.isNew) {
-                    editingObject.isNew = false;
-                    var jsTreeData = [{
-                        id: editingObject.about,
-                        text: editingObject.nodeLabel,
-                        parent: currentNodeId,
-                        data: {type: editingObject.type}
-                    }]
-
-
-                    var parentNode = $("#" + treeDiv).jstree(true).get_selected(true)[0]
-                    if (parentNode) {
-                        common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
-                      //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
-                    } else {
-                        common.loadJsTree("#" + treeDiv, jsTreeData, null)
-                     //  $("#" + treeDiv).jstree(true).open_node("#");
-                    }
-
-
-                } else {
-                    if (editingObject.nodeLabel) {
-                        var nodeJstreeId = $("#" + treeDiv).jstree(true).get_selected()[0]
-
-                        $("#" + treeDiv).jstree(true).rename_node(nodeJstreeId, editingObject.nodeLabel)
-                     /*   var parentNodeId = $("#" + treeDiv).jstree(true).get_selected(true)[0]
-                        parentNodeId=parentNodeId.parent
-                        $("#" + treeDiv).jstree(true).refresh_node(parentNodeId)*/
-
-                        common.setTreeAppearance();
-                    }
-                }
-                return true;
-
-            }
             , cancelEditingNode: function () {
                 $("#Blender_PopupEditDiv").dialog("close")
             }

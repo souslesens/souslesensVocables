@@ -217,7 +217,7 @@ var SourceEditor = (function () {
                     //draw node data
                     function (callbackSeries) {
 
-
+                        $("#" + divId).html("")
                         $("#" + divId).load("snippets/sourceEditor.html");
 
                         setTimeout(function () {

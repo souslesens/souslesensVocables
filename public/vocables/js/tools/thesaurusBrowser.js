@@ -55,7 +55,7 @@ var ThesaurusBrowser = (function () {
         Clipboard.copy({
                 type: "node",
                 id: self.currentTreeNode.data.id,
-                label: self.currentTreeNode.text,
+                label: self.currentTreeNode.data.label,
                 source: self.currentTreeNode.data.source,
                 data: self.currentTreeNode.data
             },

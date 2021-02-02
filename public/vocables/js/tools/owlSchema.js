@@ -25,22 +25,26 @@ var OwlSchema = (function () {
 
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
-            if ( Config.sources[sourceLabel].schemaType) {
-                self.currentSourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
-                self.currentSourceSchema.type=Config.sources[sourceLabel].schemaType
+            var sourceSchema = null;
 
+            if (Config.sources[sourceLabel].schemaType) {
+                sourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
+                if (sourceSchema)
+                    sourceSchema.type = Config.sources[sourceLabel].schemaType
+            }
 
-            } else {
-                self.currentSourceSchema = {
+            if (!sourceSchema) {
+                sourceSchema = {
                     sparql_url: Config.sources[sourceLabel].sparql_server.url,
                     graphUri: Config.sources[sourceLabel].graphUri,
                 }
             }
-                self.currentSourceSchema.source=sourceLabel
-                self.currentSourceSchema.classes = {}
-                self.currentSourceSchema.labelsMap = {}
-                self.schemasConfig[sourceLabel] = self.currentSourceSchema;
-                return callback(null, self.currentSourceSchema);
+            sourceSchema.source = sourceLabel
+            sourceSchema.classes = {}
+            sourceSchema.labelsMap = {}
+            self.schemasConfig[sourceLabel] = sourceSchema;
+            self.currentSourceSchema = sourceSchema;
+            return callback(null, self.currentSourceSchema);
 
         })
     }
@@ -54,7 +58,7 @@ var OwlSchema = (function () {
                     if (self.currentSourceSchema)
                         return callbackSeries();
                     self.initSourceSchema(sourceLabel, function (err, result) {
-                        self.currentSourceSchema=result
+                        self.currentSourceSchema = result
                         if (err)
                             return MainController.UI.message(err)
 
@@ -65,7 +69,7 @@ var OwlSchema = (function () {
                 //check if classType already loaded
                 function (callbackSeries) {
                     if (self.currentSourceSchema.classes[classId])
-                        return callback(null,self.currentSourceSchema.classes[classId]);
+                        return callback(null, self.currentSourceSchema.classes[classId]);
                     return callbackSeries()
                 },
                 // load classes
@@ -96,9 +100,11 @@ var OwlSchema = (function () {
                                 self.currentSourceSchema.classes[classId].objectProperties[item.property.value] = {id: item.property.value, label: common.getItemLabel(item, "property")}
 
                         })
-                        if(self.currentSourceSchema.type=="SKOS")
-                            self.currentSourceSchema.classes[classId].objectProperties["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]= {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label:"rdf type"}
-
+                        if (self.currentSourceSchema.type == "SKOS")
+                            self.currentSourceSchema.classes[classId].objectProperties["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = {
+                                id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                label: "rdf type"
+                            }
 
 
                         callbackSeries();
@@ -120,7 +126,7 @@ var OwlSchema = (function () {
                 },
                 function (callbackSeries) {
                     var properties = Object.keys(self.currentSourceSchema.classes[classId].objectProperties)
-                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, {mandatoryDomain:1},function (err, result) {
+                    Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, {mandatoryDomain: 1}, function (err, result) {
                         if (err)
                             return callbackSeries(err)
                         self.setLabelsFromQueryResult(result)

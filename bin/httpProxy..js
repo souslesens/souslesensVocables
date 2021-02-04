@@ -24,6 +24,7 @@ var httpProxy = {
             var x = 3
         }
         var request = superagent.get(url)
+
         for (var key in options.headers) {
             request.set(key, options.headers[key])
 

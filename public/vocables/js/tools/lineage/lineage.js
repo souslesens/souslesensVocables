@@ -1794,20 +1794,21 @@ Lineage_properties = (function () {
                         parent: "#",
                         id: key,
                         text: self.properties[key].label,
-                        data: self.properties[key]
+                        data: {id: key, label: self.properties[key].label,source:self.currentSource}
                     })
                     self.properties[key].subProperties.forEach(function (item) {
                         jsTreeData.push({
                             parent: key,
                             id: item.id,
                             text: item.label,
-                            data: self.properties[key]
+                            data:{id: item.id, label: item.label,source:self.currentSource,parent: self.properties[key]}
                         })
                     })
 
                 }
 
                 var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick}
+                options.contextMenu=self.jstreeContextMenu()
                 common.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
 
 
@@ -1822,9 +1823,33 @@ Lineage_properties = (function () {
             $("#graphDiv").html(html)
         }
     }
+    self.jstreeContextMenu = function () {
+        var items = {
+            nodeInfos: {
+                label: "Property infos",
+                action: function (e) {// pb avec source
+                    MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                }
 
+            },
+            drawProperty: {
+                label: "Draw property",
+                action: function (e) {// pb avec source
+                    self.drawGraph(self.currentTreeNode.id)
+                }
+
+            }
+        }
+
+
+
+
+        return items;
+
+    }
     self.onTreeNodeClick = function (event, obj) {
-        self.drawGraph(obj.node.id)
+        self.currentTreeNode=obj.node
+
     }
 
     self.drawGraph = function (propertyId) {

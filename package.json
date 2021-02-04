@@ -45,6 +45,7 @@
     "stemmer": "^1.0.5",
     "streams": "^0.1.0",
     "superagent": "^5.3.1",
+    "superagent-proxy": "^2.1.0",
     "tika-server-client": "0.0.3",
     "util": "^0.12.1",
     "winston": "^3.3.3",

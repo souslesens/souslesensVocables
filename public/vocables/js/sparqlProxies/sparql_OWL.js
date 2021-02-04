@@ -285,6 +285,7 @@ var Sparql_OWL = (function () {
 
             query += " select distinct * " + fromStr + "  WHERE { "
             query += "?concept rdfs:label ?conceptLabel.";
+            query += "OPTIONAL {?concept rdf:type ?conceptType.}";
 
             if (options.filter)
                 query += options.filter;

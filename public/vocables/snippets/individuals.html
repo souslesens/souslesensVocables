@@ -1,0 +1,90 @@
+<style>
+    .Individuals_panel {
+        border: #372806 solid 1px;
+        margin: 2px;
+        min-height: 400px;
+        min-width: 300px;
+    }
+    .mappingTriple{
+        background-color: #dda;
+
+
+        border: #372806 solid 1px;
+        border-radius: 3px;
+        display: flex;
+        justify-content:center;
+    }
+    .mappingTripleCell{
+        height: 20px;
+        width: 200px;
+        margin: 3px;
+        padding: 3px;
+        border-radius: 3px;
+        border: #372806 solid 1px;
+        background-color: #eee;
+
+    }
+    .mappingTripleSelected{
+        border: blue solid 3px;
+    }
+    .mappingTripleButton{
+        width: 20px;
+        display: flex;
+        justify-content:center;
+        font:14px verdana bold ;
+
+    }
+    #Individuals_mappingsTriplesTA{
+        height: 200px;
+        width:100%;
+    }
+    #Individuals_mappingsTriplesDiv{
+        height: 200px;
+        width:100%;
+    }
+
+</style>
+<div class="Individuals_panel" style="display:flex;flex-direction: column;">
+    <div class="Individuals_panel" style="display:flex;flex-direction: row;">
+        <div class="Individuals_panel" id="Individuals_DataModelPanel" style="width:50%;height: 40%">
+
+            Data
+            <button onclick="Individuals.loadXlsModel()">open Xls Model</button>
+            <div id="Individuals_dataModelTree"></div>
+
+
+        </div>
+
+        <div class="Individuals_panel" id="Individuals_OntologyClassPanel" style="height: 40%;">
+            <div>
+                Ontology  Properties
+                <div id="Individuals_ontologyPropertiesTree"></div>
+            </div>
+        </div>
+        <div class="Individuals_panel" id="Individuals_OntologPanel" style="height: 40%;">
+
+
+            <div>
+                Ontology Classes
+                <div id="Individuals_ontologyClassesTree"></div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+    <div class="Individuals_panel" id="Individuals_MappingsPanel" style="width:100%;height: 80%;">
+
+        Mappings
+
+
+            <button onclick="Individuals.newTripleMapping()">New Mapping</button>
+            <button onclick="Individuals.saveMappings()">Save</button>
+        <div id="Individuals_mappingsTriplesDiv"></div>
+        <textarea id="Individuals_mappingsTriplesTA"></textarea>
+        <div>
+        </div>
+
+    </div>
+</div>

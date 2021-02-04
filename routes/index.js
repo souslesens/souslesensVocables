@@ -329,6 +329,16 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
 
 
+        if(req.body.xlsxProxy){
+            var xlsxProxy=require('../bin/xlsxProxy.')
+            if(req.body.getJsonModel)
+            xlsxProxy.getJsonModel(req.body.getJsonModel, function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+
+
     },
     router.get('/heatMap', function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);

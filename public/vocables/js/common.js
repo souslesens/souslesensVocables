@@ -366,6 +366,11 @@ var common = (function () {
             var nodeId = sourceUri + common.getRandomHexaId(length)
             return nodeId;
         }
+        self.getNewId = function (prefix, length) {
+            if (!length)
+                length = 10
+           return prefix + common.getRandomHexaId(length)
+        }
 
         self.copyTextToClipboard = function (text) {
             var textArea = document.createElement("textarea");

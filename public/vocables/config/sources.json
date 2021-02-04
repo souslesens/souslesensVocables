@@ -390,6 +390,32 @@
     "schema": null,
     "color": "#bcbd22"
   },
+
+
+
+
+
+
+
+
+
+  "ONE-MODEL": {
+    "editable": true,
+    "graphUri": "http://data.total.com/resource/one-model/ontology/",
+    "sparql_server": {
+      "url": "http://51.178.139.80:8890/sparql"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+
+
+
+
   "_comment": "**************************************************************Obsolete***************************************",
   "_comment": "**************************************************************Obsolete***************************************",
   "CFIHOS": {
@@ -408,6 +434,14 @@
     "schema": null,
     "color": "#bcbd22"
   },
+
+
+
+
+
+
+
+
   "_comment": "**************************************************************assets***************************************",
   "ASSETS-turbogenerator": {
     "graphUri":  [

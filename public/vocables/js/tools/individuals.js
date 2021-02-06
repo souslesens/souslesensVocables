@@ -2,6 +2,15 @@ var Individuals = (function () {
 
         var self = {}
         self.currentSource = null;
+        self.prefixes = {
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdfs",
+            "http://www.w3.org/2002/07/owl#": "owl",
+            "http://data.total.com/resource/one-model/ontology/": "total"
+
+
+        }
+        self.subjectPropertiesMap = {}
 
         var constraintsMap = {}
         self.onLoaded = function () {
@@ -94,7 +103,15 @@ var Individuals = (function () {
                 $(div).html(nodeData.id)
                 if (type == "Subject") {
                     self.currentSubject = {id: nodeData.id, type: ""}
-                    self.setConstaintsFilter("Subject", "dataId")
+
+                    self.setConstaintsFilter("Subject", nodeData.id)
+                }
+                if (type == "Object") {
+                    self.newTripleMapping()
+                    if (self.currentPropertyJstreeNode.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                        if (!self.subjectPropertiesMap[nodeData.id])
+                            self.subjectPropertiesMap[nodeData.id] = []
+                    self.subjectPropertiesMap [nodeData.id] = self.currentSubject.id
                 }
 
             }, 200)
@@ -111,7 +128,7 @@ var Individuals = (function () {
                 "<div class='mappingTripleCell mappingSubject'>" + subjectValue + "</div>" +
                 "<div class='mappingTripleCell mappingPredicate'></div>" +
                 "<div class='mappingTripleCell mappingObject'></div>" +
-                "<div class='mappingTripleButton mappingTripleCell'  onclick='Individuals.deleteTripleDiv($(this))'>X</div> " +
+                "<div class='mappingTripleButton mappingTripleCell ' style='min-width:20px' onclick='Individuals.deleteTripleDiv($(this))'>X</div> " +
 
                 "</div>"
             $("#Individuals_mappingsTriplesDiv").append(html)
@@ -155,36 +172,54 @@ var Individuals = (function () {
 
 
             var treeDivId;
-            var filteredItems
-            if (nodeId == "dataId") {
+            var filteredItems = []
+            var jstreeDiv;
+            if (type == "Subject") {
                 jstreeDiv = "Individuals_ontologyPropertiesTree"
-                filteredItems = constraintsMap.domains[nodeId]
-                if (self.currentSubject.type) {
-                    filteredItems = filteredItems.concat(constraintsMap.domains[self.currentSubject.type])
+             //   filteredItems = constraintsMap.domains[nodeId]
+                if (self.subjectPropertiesMap[nodeId]) {
+                    filteredItems =constraintsMap.properties[self.currentSubject.type]
+                }
+               else {
+                    filteredItems = constraintsMap.domains['default']
                 }
             } else if (type == "Class") {
                 if (self.currentPropertyJstreeNode == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
                     self.currentSubject.type = node.id
                 jstreeDiv = "Individuals_ontologyPropertiesTree"
-                filteredItems = constraintsMap.domains[nodeId]
+                filteredItems = constraintsMap.domains[nodeId] || []
+                filteredItems.splice(0, 0, "http://www.w3.org/2000/01/rdf-schema#label");
+                filteredItems.splice(0, 0, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+
 
             } else if (type == "Property") {
                 jstreeDiv = "Individuals_ontologyClassesTree"
-                filteredItems = constraintsMap.properties[nodeId]
+                if (nodeId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                    filteredItems = constraintsMap.properties[nodeId] || []
+                else {
+                    if (self.subjectPropertiesMap[nodeId])
+                        filteredItems = filteredItems.concat(self.subjectPropertiesMap[nodeId])
+
+                }
+
             }
 
+            $('#Individuals_ontologyClassesTree').jstree(true).hide_all()
+            $('#Individuals_ontologyPropertiesTree').jstree(true).hide_all()
 
+            $('#' + jstreeDiv).jstree(true).hide_all()
+            if (!filteredItems)
+                return
             var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json("#", {flat: true});
             jsonNodes.forEach(function (item) {
-                if (filteredItems.length == 0)
-                    $('#' + jstreeDiv).jstree(true).show_node(item.id);
-                if (filteredItems.indexOf("none") > -1)
-                    $('#' + jstreeDiv).jstree(true).hide_node(item.id);
-                else if (filteredItems.indexOf("any") > -1)
-                    $('#' + jstreeDiv).jstree(true).show_node(item.id);
-                else if (filteredItems.indexOf(item.id) < 0)
-                    $('#' + jstreeDiv).jstree(true).hide_node(item.id);
-                else
+                var ok = false
+
+                if (filteredItems.indexOf("any") > -1)
+                    ok = true
+                else if (filteredItems.indexOf(item.id) > -1)
+                    ok = true
+
+                if (ok)
                     $('#' + jstreeDiv).jstree(true).show_node(item.id);
 
             });
@@ -263,9 +298,9 @@ var Individuals = (function () {
                                 self.currentClassJstreeNode = obj.node
                                 self.currentJstreeNode = obj.node
                                 self.setConstaintsFilter("Class", obj.node.data.id)
-
+                                self.setTripleObject("Object", obj.node.data)
                             },
-                            contextMenu: self.jstreeContextMenu("Class"),
+                            // contextMenu: self.jstreeContextMenu("Class"),
                             openAll: true
                         }
                         common.loadJsTree("Individuals_ontologyClassesTree", classJstreeData, optionsClass)
@@ -318,9 +353,10 @@ var Individuals = (function () {
                                     self.currentPropertyJstreeNode = obj.node
                                     self.currentJstreeNode = obj.node
                                     self.setConstaintsFilter("Property", obj.node.data.id)
+                                    self.setTripleObject("Predicate", obj.node.data)
 
                                 },
-                                contextMenu: self.jstreeContextMenu("Property")
+                                // contextMenu: self.jstreeContextMenu("Property")
                             }
 
 
@@ -334,16 +370,16 @@ var Individuals = (function () {
 
 
                         constraintsMap = {
-                            domains: {"dataId": ["http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2000/01/rdf-schema#label"]},
+                            domains: {"default": ["http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2000/01/rdf-schema#label"]},
                             properties: {
-                                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": "any",
-                                "http://www.w3.org/2000/01/rdf-schema#label": "none"
+                                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": ["any"],
+                                "http://www.w3.org/2000/01/rdf-schema#label": ["none"]
                             }
                         }
 
                         OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
                             if (err)
-                                return     callbackSeries(err)
+                                return callbackSeries(err)
                             var objs = []
                             Sparql_schema.getPropertiesRangeAndDomain(schema, null, {mandatoryDomain: 1}, function (err, result) {
                                 //  Sparql_OWL.getObjectProperties(source, null, null, function (err, result) {
@@ -365,7 +401,7 @@ var Individuals = (function () {
 
                                     Sparql_OWL.getObjectRestrictions(self.currentSource, null, null, function (err, result) {
                                         if (err)
-                                           return callbackSeries(err)
+                                            return callbackSeries(err)
 
                                         result.forEach(function (item) {
 
@@ -407,6 +443,8 @@ var Individuals = (function () {
                 function (err) {
                     if (err)
                         return MainController.UI.message(message)
+                    $('#Individuals_ontologyClassesTree').jstree(true).hide_all()
+                    $('#Individuals_ontologyPropertiesTree').jstree(true).hide_all()
                 }
             )
         }

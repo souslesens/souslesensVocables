@@ -38,7 +38,7 @@ var Sparql_OWL = (function () {
                 query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
             query += "}order by ?topConceptLabel "
             " }"
-            var limit = options.limit || Sparql_generic.queryLimit;
+            var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
             var url = self.sparql_url + "?format=json&query=";
 
@@ -61,7 +61,7 @@ var Sparql_OWL = (function () {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-            var strFilter;
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
@@ -96,8 +96,7 @@ var Sparql_OWL = (function () {
             }
             query += "} order by ?child1 ";
             " }"
-            var limit = options.limit || Sparql_generic.queryLimit;
-            query += " limit " + limit
+
 
 
             if (options.filterCollections) {
@@ -128,6 +127,8 @@ var Sparql_OWL = (function () {
 
                     "}order by ?concept"
             }
+            var limit = options.limit || Config.queryLimit;
+            query += " limit " + limit
 
 
             var url = self.sparql_url + "?format=json&query=";
@@ -136,7 +137,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "child")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","child"])
                 return callback(null, result.results.bindings)
 
             })
@@ -163,7 +164,7 @@ var Sparql_OWL = (function () {
             var query = "select * " + fromStr +
                 " where {<" + conceptId + "> ?prop ?value. } ";
             " }"
-            var limit = options.limit || Sparql_generic.queryLimit;
+            var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
             var url = self.sparql_url + "?format=json&query=";
@@ -182,7 +183,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             if (!options)
                 options = {}
-            var strFilter;
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
@@ -242,7 +243,7 @@ var Sparql_OWL = (function () {
                 query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
             }
 
-            var limit = options.limit || Sparql_generic.queryLimit;
+            var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
 
@@ -252,7 +253,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "broader")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","broader"])
                 return callback(null, result.results.bindings)
 
             })
@@ -283,8 +284,8 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
 
-            query += " select distinct * " + fromStr + "  WHERE { "
-            query += "?concept rdfs:label ?conceptLabel.";
+            query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. "
+            query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
 
             if (options.filter)
@@ -294,7 +295,7 @@ var Sparql_OWL = (function () {
 
             query += "  } ";
             " }"
-            var limit = options.limit || Sparql_generic.queryLimit;
+            var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
             var url = self.sparql_url + "?format=json&query=";
@@ -305,6 +306,7 @@ var Sparql_OWL = (function () {
                     return callback(err)
                 }
 
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"concept")
                 return callback(null, result.results.bindings)
 
             })
@@ -343,7 +345,7 @@ var Sparql_OWL = (function () {
                     " OPTIONAL{?object rdfs:label ?objectLabel.}  " +
 
                     " } order by ?propertyLabel "
-                var limit = options.limit || Sparql_generic.queryLimit;
+                var limit = options.limit || Config.queryLimit;
                 query += " limit " + limit
 
 
@@ -450,7 +452,7 @@ var Sparql_OWL = (function () {
                  " OPTIONAL {?prop rdfs:label ?propLabel}"+
                  " OPTIONAL {?range rdfs:label ?rangeLabel}"+*/
                 + " }"
-            var limit = options.limit || Sparql_generic.queryLimit;
+            var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
 
@@ -494,10 +496,10 @@ var Sparql_OWL = (function () {
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
                 "  OPTIONAL {?node owl:allValuesFrom ?value}. " +
-                "   OPTIONAL {?node owl:someValueFrom ?value}. " +
+                "   OPTIONAL {?node owl:someValuesFrom ?value}. " +
                 "   OPTIONAL {?node owl:aValueFrom ?value}. " +
                 "} "
-            var limit = options.limit || Sparql_generic.queryLimit;
+            var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
 

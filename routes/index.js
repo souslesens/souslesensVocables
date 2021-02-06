@@ -329,10 +329,10 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
 
 
-        if(req.body.xlsxProxy){
-            var xlsxProxy=require('../bin/xlsxProxy.')
+        if(req.body.triplesGenerator){
+            var triplesGenerator=require('../bin/triplesGenerator')
             if(req.body.getJsonModel)
-            xlsxProxy.getJsonModel(req.body.getJsonModel, function (err, result) {
+                triplesGenerator.getJsonModel(req.body.getJsonModel, function (err, result) {
                 processResponse(response, err, result)
 
             })

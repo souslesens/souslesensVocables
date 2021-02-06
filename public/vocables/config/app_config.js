@@ -24,6 +24,9 @@ var Config = (function () {
     self.enableCollections = false;
     self.showAssetQueyMenu = true;
     self.preferredSchemaType = "OWL"
+    self.queryLimit = 10000;
+    self.searchLimit=500;
+    self.searchDepth=8
 
 
     self.currentProfile = {

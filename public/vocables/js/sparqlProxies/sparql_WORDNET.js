@@ -31,7 +31,7 @@ var Sparql_WORDNET = (function () {
         self.graphUri =  Config.sources[sourceLabel].graphUri ;
         self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
 
-        var strFilter;
+        var strFilter="";
         if (words) {
             strFilter = Sparql_common.setFilter("concept", null, words, null)
         } else if (ids) {
@@ -90,7 +90,7 @@ var Sparql_WORDNET = (function () {
         self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
         if (!options)
             options = {}
-        var strFilter;
+        var strFilter="";
         if (words) {
             strFilter = Sparql_common.setFilter("concept", null, words, {exactMatch:true})
         } else if (ids) {

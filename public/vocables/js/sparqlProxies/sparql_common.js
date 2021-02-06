@@ -4,6 +4,8 @@ var Sparql_common = (function () {
     var self = {};
 
     self.setFilter = function (varName, ids, words, options) {
+        if(!ids &&  !words)
+            return "";
         function formatWord(str) {
             var str = str.replace(/\\/g, "")
             str = str.replace(/\(/gm, "")

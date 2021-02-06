@@ -3,7 +3,7 @@ var Sparql_proxy = (function () {
 
     self.querySPARQL_GET_proxy_cursor = function (url, query, queryOptions, options, callback) {
         var offset = 0;
-        var limit = Sparql_generic.queryLimit;
+        var limit = Config.queryLimit;
         var resultSize = 1;
         var allData = {
             results: {bindings: []}

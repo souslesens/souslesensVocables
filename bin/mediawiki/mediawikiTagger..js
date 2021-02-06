@@ -1164,7 +1164,7 @@ if (false) {
 }
 
 
-if (true) {
+if (false) {
 
     var wikiUrl = "https://wiki.seg.org/wiki/"
     var indexName = "mediawiki-pages-seg"

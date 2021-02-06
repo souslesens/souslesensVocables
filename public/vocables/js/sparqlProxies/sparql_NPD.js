@@ -46,7 +46,7 @@ var Sparql_NPD = (function () {
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
             self.graphUri =  Config.sources[sourceLabel].graphUri ;
             self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
-            var strFilter;
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, null)
             } else if (ids) {
@@ -96,7 +96,7 @@ var Sparql_NPD = (function () {
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
             if (!options)
                 options = {}
-            var strFilter;
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, {exactMatch: true})
             } else if (ids) {

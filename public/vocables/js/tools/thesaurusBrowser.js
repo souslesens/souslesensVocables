@@ -242,7 +242,8 @@ var ThesaurusBrowser = (function () {
         var options = {
             term: term,
             rootId: rootId,
-            exactMatch: exactMatch
+            exactMatch: exactMatch,
+            limit :Config.searchLimit
         }
         ThesaurusBrowser.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
             if (callback)
@@ -310,7 +311,8 @@ var ThesaurusBrowser = (function () {
             var options2 = {
                 term: term,
                 rootId: sourceLabel,
-                exactMatch: exactMatch
+                exactMatch: exactMatch,
+                limit :Config.searchLimit,
             }
             ThesaurusBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
                 if (err)
@@ -374,7 +376,7 @@ var ThesaurusBrowser = (function () {
             options.rootId = "#"
         if (!sourceLabel)
             sourceLabel = MainController.currentSource
-        var depth = 6
+        var depth = Config.searchDepth
         Sparql_generic.getNodeParents(sourceLabel, options.term, options.ids, depth, options, function (err, result) {
             if (err)
                 return MainController.UI.message(err)
@@ -409,8 +411,6 @@ var ThesaurusBrowser = (function () {
                         var jstreeId = item["broader" + i].value
                         if (!existingNodes[id]) {
                             existingNodes[id] = 1
-                            if (!item["broader" + i + "Label"])
-                                var x = 3
                             var label = item["broader" + i + "Label"].value
                             var parentId = options.rootId;
                             if (item["broader" + (i + 1)])

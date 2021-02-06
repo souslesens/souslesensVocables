@@ -129,7 +129,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "child")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","child"])
                 return callback(null, result.results.bindings);
             })
         }
@@ -185,6 +185,7 @@ var Sparql_SKOS = (function () {
             if (options.filterCollections) {
                 query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
             }
+            var limit = options.limit || Config.queryLimit;
             query += "}limit " + limit + " ";
 
 
@@ -193,7 +194,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "broader")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","broader"])
                 return callback(null, result.results.bindings);
             })
         }
@@ -258,9 +259,8 @@ var Sparql_SKOS = (function () {
 
             var query = "";
             query += prefixesStr
-            query += " select distinct * " + fromStr + "  WHERE { "
-
-            query += "?concept " + prefLabelPredicate + " ?conceptLabel.";
+            query += " select distinct * " + fromStr + "  WHERE {  ?concept ?x ?y. "
+                query += "OPTIONAL {?concept " + prefLabelPredicate + " ?conceptLabel.}";
 
             if (options.filter)
                 query += options.filter;
@@ -282,7 +282,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"concept")
                 return callback(null, result.results.bindings)
 
             })

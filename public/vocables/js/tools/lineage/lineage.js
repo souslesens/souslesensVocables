@@ -638,7 +638,7 @@ var Lineage_classes = (function () {
                                 return callbackSeries()
 
                             }
-                            var filter
+                            var filter=""
                             if (similarType == "labels") {
                                 filter = Sparql_common.setFilter("concept", null, items, {exactMatch: true})
                             } else if (similarType == "sameAs") {

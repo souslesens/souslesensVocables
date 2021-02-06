@@ -45,7 +45,7 @@ var Sparql_ISO_15926 = (function () {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-            var strFilter;
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
@@ -111,7 +111,7 @@ var Sparql_ISO_15926 = (function () {
 
             if (!options)
                 options = {}
-            var strFilter;
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {

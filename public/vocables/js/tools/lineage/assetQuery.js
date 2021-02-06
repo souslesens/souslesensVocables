@@ -356,13 +356,13 @@ var AssetQuery = (function () {
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                 "Select " + selectStr + " " + fromStr + " where {" + whereStr;
 
-            query += "} limit " + Sparql_generic.queryLimit
+            query += "} limit " + Config.queryLimit
             //  return;
             var url = Config.sources[Lineage_classes.currentSource].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: Lineage_classes.currentSource}, function (err, result) {
                 if (err)
                     callback(err)
-                if (result.length >= Sparql_generic.queryLimit)
+                if (result.length >= Config.queryLimit)
                     MainController.UI.message("result too long >" + self.queryLimit + " lines ")
 
                 var targetObjs = [];

@@ -183,26 +183,40 @@ var Blender = (function () {
         self.dnd = {
 
             "drag_start": function (data, element, helper, event) {
+
+
                 // Blender.currentDNDstartNodeParentId=Blender.currentTreeNode.parent
                 Blender.currentDNDstartNodeId = element.data.nodes[0];
-                Blender.currentDNDstartNodeParentId = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId).parent
+
+                Blender.currentDNDstartNode = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId)
+                Blender.currentDNDstartNodeParentId=  Blender.currentDNDstartNode.parent
+
 
                 return true;
             },
             "drag_move": function (data, element, helper, event) {
-                return true;
+                return false;
             },
             "drag_stop": function (data, element, helper, event) {
-
+                if(!Blender.currentDNDoperation)
+                    return false;
+                var currentNodeLevel =Blender.currentDNDoperation.parent.parents.length;
+                var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
+                if(currentNodeLevel <allowedLevels)
+                    return false;
 
                 Blender.menuActions.dropNode(function (err, result) {
-                    return;
+                    return true;
                 })
                 return true;
 
 
             },
             dropAllowed: function (operation, node, parent, position, more) {
+                var currentNodeLevel = Blender.currentDNDstartNode.parents.length
+                var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
+                if(currentNodeLevel <allowedLevels)
+                    return false;
                 console.log(operation)
                 Blender.currentDNDoperation = {operation: operation, node: node, parent: parent, position: position, more, more}
 
@@ -251,127 +265,154 @@ var Blender = (function () {
 
         self.getJstreeConceptsContextMenu = function () {
             var menuItems = {}
+
+
+
+
             if (!self.currentTreeNode || !self.currentTreeNode.data)
                 return menuItems
 
+            var currentNodeLevel = self.currentTreeNode.parents.length
+            var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
 
-            if (self.currentTreeNode.data.type == "externalReferenceTopConcept") {
-                return ExternalReferences.getJstreeConceptsContextMenu(self.currentTreeNode)
+            /*   if (self.currentTreeNode.data.type == "externalReferenceTopConcept") {
+                   return ExternalReferences.getJstreeConceptsContextMenu(self.currentTreeNode)
 
-            }
+               }
 
 
-            if (self.currentTreeNode.data.type == "externalReference") {
+               if (self.currentTreeNode.data.type == "externalReference") {
 
-                menuItems.showExternalReferenceNodeInfos = {
+                   menuItems.showExternalReferenceNodeInfos = {
 
-                    label: "view node properties",
+                       label: "view node properties",
+                       action: function (obj, sss, cc) {
+                           ExternalReferences.showExternalReferenceNodeInfos()
+                       }
+                   }
+
+                   return menuItems;
+               }*/
+
+            if(currentNodeLevel<allowedLevels) {
+                menuItems.forbidden = {
+                    label: "!...",
                     action: function (obj, sss, cc) {
-                        ExternalReferences.showExternalReferenceNodeInfos()
-                    }
+                        alert("Modifications not allowed at this level")
+                    },
                 }
+                menuItems.nodeInfos = {
+                    label: "Show Node infos",
+                    action: function (obj, sss, cc) {
+                        MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
+                    },
 
+
+                }
                 return menuItems;
             }
-            menuItems.toCollection = {
-                label: "to Collection",
-                action: function (e) {// pb avec source
-                    Blender.menuActions.toCollection(e)
+            else{
+                menuItems.toCollection = {
+                    label: "to Collection",
+                    action: function (e) {// pb avec source
+                        Blender.menuActions.toCollection(e)
+                    }
+
                 }
 
-            }
+                var clipboard = Clipboard.getContent()
+                if (clipboard.length > 0 && clipboard[0].type == "node") {
+                    menuItems.pasteNode = {
+                        "label": "Paste...",
+                        "separator_before": false,
+                        "separator_after": true,
 
-            var clipboard = Clipboard.getContent()
-            if (clipboard.length > 0 && clipboard[0].type == "node") {
-                menuItems.pasteNode = {
-                    "label": "Paste...",
-                    "separator_before": false,
-                    "separator_after": true,
-
-                    "action": false,
-                    "submenu": {
-                        pasteNode: {
-                            label: "node",
-                            action: function () {
-                                self.menuActions.pasteClipboardNodeOnly();
-                            }
-                        },
-                        /*   pasteProperties: {
-                               label: "some properties...",
-                               action: function () {
-                                   self.menuActions.pasteClipboardNodeProperties()
-                                   ;
-                               },
-                           }
-                           ,*/
-                        pasteDescendants: {
-                            label: " descendants",
-                            action: function (obj, sss, cc) {
-                                self.menuActions.pasteClipboardNodeDescendants()
-                                ;
+                        "action": false,
+                        "submenu": {
+                            pasteNode: {
+                                label: "node",
+                                action: function () {
+                                    self.menuActions.pasteClipboardNodeOnly();
+                                }
                             },
-                        },
-                        /*  pasteAsReference: {
-                              label: " reference",
-                              action: function (obj, sss, cc) {
-                                  ExternalReferences.pasteAsReference()
-                                  ;
-                              },
-                          },*/
+                            /*   pasteProperties: {
+                                   label: "some properties...",
+                                   action: function () {
+                                       self.menuActions.pasteClipboardNodeProperties()
+                                       ;
+                                   },
+                               }
+                               ,*/
+                            pasteDescendants: {
+                                label: " descendants",
+                                action: function (obj, sss, cc) {
+                                    self.menuActions.pasteClipboardNodeDescendants()
+                                    ;
+                                },
+                            },
+                            /*  pasteAsReference: {
+                                  label: " reference",
+                                  action: function (obj, sss, cc) {
+                                      ExternalReferences.pasteAsReference()
+                                      ;
+                                  },
+                              },*/
 
-                        /*   pasteAscendants: {
-                               label: "ascendants",
-                               action: function (obj, sss, cc) {
-                                   self.menuActions.pasteClipboardNodeAscendants()
-                                   ;
-                               },
-                           }*/
+                            /*   pasteAscendants: {
+                                   label: "ascendants",
+                                   action: function (obj, sss, cc) {
+                                       self.menuActions.pasteClipboardNodeAscendants()
+                                       ;
+                                   },
+                               }*/
+                        }
+
                     }
 
-                }
+                } else if (clipboard && clipboard.type == "word") {
+                    menuItems.pasteDescendants = {
+                        label: " create concept " + Clipboard.getContent().label,
+                        action: function (obj, sss, cc) {
+                            self.menuActions.createConceptFromWord()
+                            ;
+                        }
 
-            } else if (clipboard && clipboard.type == "word") {
-                menuItems.pasteDescendants = {
-                    label: " create concept " + Clipboard.getContent().label,
-                    action: function (obj, sss, cc) {
-                        self.menuActions.createConceptFromWord()
-                        ;
                     }
-
                 }
-            }
 
-            menuItems.editNode = {
-                label: "Edit node",
-                action: function (obj, sss, cc) {
-                    self.nodeEdition.editNode("concept")
-                }
-            }
-
-            menuItems.deleteNode = {
-                label: "Delete node",
-                action: function (obj, sss, cc) {
-                    self.menuActions.deleteNode("concept");
-                },
-
-
-            }
-            menuItems.addChildNodeNode = {
-                label: "Create child",
-                action: function (obj, sss, cc) {
-                    self.nodeEdition.createChildNode(null, "concept");
-                    ;
-                },
-            }
-            /*    menuItems.importChildren = {
-                    label: "Import child nodes",
+                menuItems.editNode = {
+                    label: "Edit node",
                     action: function (obj, sss, cc) {
-                        Import.showImportNodesDialog("concept");
+                        self.nodeEdition.editNode("concept")
+                    }
+                }
+
+                menuItems.deleteNode = {
+                    label: "Delete node",
+                    action: function (obj, sss, cc) {
+                        self.menuActions.deleteNode("concept");
+                    },
+
+
+                }
+                menuItems.addChildNodeNode = {
+                    label: "Create child",
+                    action: function (obj, sss, cc) {
+                        self.nodeEdition.createChildNode(null, "concept");
                         ;
                     },
-                }*/
+                }
+                /*    menuItems.importChildren = {
+                        label: "Import child nodes",
+                        action: function (obj, sss, cc) {
+                            Import.showImportNodesDialog("concept");
+                            ;
+                        },
+                    }*/
+                return menuItems;
 
-            return menuItems;
+            }
+
 
         }
 
@@ -390,6 +431,8 @@ var Blender = (function () {
                 Blender.startDNDtime = date;
                 if (!Blender.currentDNDoperation)
                     return;
+
+
                 var newParentData = Blender.currentDNDoperation.parent.data;
                 var nodeData = Blender.currentDNDoperation.node.data
                 var oldParentData = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeParentId).data;

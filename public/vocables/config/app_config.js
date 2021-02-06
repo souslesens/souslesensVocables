@@ -17,7 +17,7 @@ var Config = (function () {
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
- self.loginMode = "none";
+    self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableBlenderTool = true;
@@ -25,12 +25,17 @@ var Config = (function () {
     self.showAssetQueyMenu = true;
     self.preferredSchemaType = "OWL"
     self.queryLimit = 10000;
-    self.searchLimit=500;
-    self.searchDepth=8
+    self.searchLimit = 500;
+    self.searchDepth = 8
 
 
     self.currentProfile = {
-        allowedSourceSchemas: ["SKOS", "OWL","INDIVIDUAL"]
+        allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
+        allowedSources: "ALL",
+        forbiddenSources: ["CFIHOS_READI"],
+        allowedTools: "ALL",
+       forbiddenTools: ["INDIVIDUALS"],
+        blender:{contextMenuActionStartLevel:4}
     }
 
 
@@ -57,7 +62,7 @@ var Config = (function () {
     // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
     //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
 
-   // self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
+    // self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
 
 
     return self;

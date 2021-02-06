@@ -8,70 +8,93 @@ var Collection = (function () {
     self.broaderProperty = "http://www.w3.org/2004/02/skos/core#member"
 
     self.getJstreeContextMenu = function () {
+        if (!self.currentTreeNode || !self.currentTreeNode.data)
+            return;
+        var allowedLevels=Config.currentProfile.blender.contextMenuActionStartLevel
+        var currentNodeLevel=self.currentTreeNode.parents.length
         var menuItems = {}
 
-        if (self.currentCandidateNode) {
 
-
-            menuItems.assignConcepts = {
-                label: "Assign selected Concepts",
+        if(currentNodeLevel<allowedLevels) {
+            menuItems.forbidden = {
+                label: "!!",
                 action: function (obj, sss, cc) {
-                    Collection.assignConcepts()
+                   alert("Modifications not allowed at this level")
+                },
+            }
+            menuItems.nodeInfos = {
+                label: "Show Node infos",
+                action: function (obj, sss, cc) {
+                    MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
                 },
 
 
             }
         }
-        if (Collection.currentTreeNode && Collection.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#Concept") {
+        else{
+            if (self.currentCandidateNode) {
+
+
+                menuItems.assignConcepts = {
+                    label: "Assign selected Concepts",
+                    action: function (obj, sss, cc) {
+                        Collection.assignConcepts()
+                    },
+
+
+                }
+            }
+            if (Collection.currentTreeNode && Collection.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#Concept") {
+                menuItems.editNode = {
+                    label: "Edit node",
+                    action: function (obj, sss, cc) {
+                        Blender.nodeEdition.editNode("collection")
+                    }
+                }
+
+                return menuItems;
+
+            }
             menuItems.editNode = {
                 label: "Edit node",
                 action: function (obj, sss, cc) {
                     Blender.nodeEdition.editNode("collection")
                 }
             }
-
-            return menuItems;
-
-        }
-        menuItems.editNode = {
-            label: "Edit node",
-            action: function (obj, sss, cc) {
-                Blender.nodeEdition.editNode("collection")
-            }
-        }
-        if (Blender.displayMode == "leftPanel") {
-            menuItems.filterConcepts = {
-                label: "Filter Concepts",
-                action: function (obj, sss, cc) {
-                    Collection.filterConcepts()
+            if (Blender.displayMode == "leftPanel") {
+                menuItems.filterConcepts = {
+                    label: "Filter Concepts",
+                    action: function (obj, sss, cc) {
+                        Collection.filterConcepts()
+                    }
                 }
             }
-        }
 
 
-        menuItems.unAssignConcepts = {
-            label: "Unassign Concepts",
-            action: function (obj, sss, cc) {
-                Collection.unAssignConcepts()
-                ;
-            },
-        }
+            menuItems.unAssignConcepts = {
+                label: "Unassign Concepts",
+                action: function (obj, sss, cc) {
+                    Collection.unAssignConcepts()
+                    ;
+                },
+            }
 
 
-        menuItems.deleteNode = {
-            label: "Delete node",
-            action: function (obj, sss, cc) {
-                Blender.menuActions.deleteNode("collection");
-            },
+            menuItems.deleteNode = {
+                label: "Delete node",
+                action: function (obj, sss, cc) {
+                    Blender.menuActions.deleteNode("collection");
+                },
 
 
-        }
-        menuItems.addChildNodeNode = {
-            label: "Create child",
-            action: function (obj, sss, cc) {
-                Blender.nodeEdition.createChildNode(null, "collection",);
-                ;
-            },
+            }
+            menuItems.addChildNodeNode = {
+                label: "Create child",
+                action: function (obj, sss, cc) {
+                    Blender.nodeEdition.createChildNode(null, "collection",);
+                    ;
+                },
+            }
         }
 
          /*   menuItems.importChildren = {

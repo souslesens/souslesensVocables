@@ -56,6 +56,8 @@ var MainController = (function () {
 
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
+                if ( (Config.currentProfile.allowedSources!="ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0)  ||  Config.currentProfile.forbiddenSources.indexOf(sourceLabel) >-1)
+                    return;
                 Config.sources[sourceLabel].name = sourceLabel;
 
                 if (!distinctNodes[sourceLabel]) {
@@ -113,6 +115,9 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300)
             var treeData = []
             for (var key in Config.tools) {
+                if (( Config.currentProfile.allowedTools!="ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) ||  Config.currentProfile.forbiddenTools.indexOf(key) >-1)
+                    ;
+                else
                     treeData.push({id: key, text: Config.tools[key].label, parent: "#", data: Config.tools[key]})
 
             }

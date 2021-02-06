@@ -3,8 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/individuals.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/individuals.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/individuals.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/individuals.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -136,7 +138,7 @@
       <workItem from="1611728394067" duration="568000" />
       <workItem from="1611728994576" duration="10579000" />
       <workItem from="1611758637943" duration="117488000" />
-      <workItem from="1612449705391" duration="50300000" />
+      <workItem from="1612449705391" duration="53430000" />
     </task>
     <servers />
   </component>
@@ -166,7 +168,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>220</line>
+          <line>231</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint type="javascript">

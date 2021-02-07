@@ -38,6 +38,15 @@ var Config = (function () {
         blender:{contextMenuActionStartLevel:4}
     }
 
+    self.currentProfile = {
+        allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
+        allowedSources: "ALL",
+        forbiddenSources: [],
+        allowedTools: "ALL",
+        forbiddenTools: [],
+        blender:{contextMenuActionStartLevel:0}
+    }
+
 
     self.sources = {}
     self.tools = {};

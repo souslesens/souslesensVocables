@@ -12,7 +12,10 @@ var Individuals = (function () {
         }
         self.subjectPropertiesMap = {}
 
+        self.typedObjectsMap = {}
+
         var constraintsMap = {}
+        var allObjectsMap = {}
         self.onLoaded = function () {
             $("#graphDiv").load("./snippets/individuals.html");
 
@@ -21,11 +24,7 @@ var Individuals = (function () {
             self.currentSource = source;
             OwlSchema.currentSourceSchema = null;
 
-
-            setTimeout(function () {
-                self.loadOntology();
-                self.newTripleMapping()
-            }, 200)
+            self.loadOntology();
 
 
         }
@@ -45,6 +44,7 @@ var Individuals = (function () {
                     label: "tripleSubject",
                     action: function (e) {// pb avec source
                         var ss = getSelectedNode(e)
+
                         self.setTripleObject("Subject", getSelectedNode(e).data)
                     }
 
@@ -67,84 +67,33 @@ var Individuals = (function () {
                 }
 
 
-            } else if (type == "Class") {
-                items.tripleObject = {
-                    label: "tripleObject",
-                    action: function (e) {
-                        var x = e.reference.prevObject[0]
-                        var text = x.innerText
-                        self.setTripleObject("Object", getSelectedNode(e).data)
-                    }
-                }
-
-
-            } else if (type == "Property") {
-                items.triplePredicate = {
-                    label: "triplePredicate",
-                    action: function (e) {
-                        var x = e.reference.prevObject[0]
-                        var text = x.innerText
-                        self.setTripleObject("Predicate", getSelectedNode(e).data)
-                    }
-                }
-
             }
             return items
         }
 
 
-        self.setTripleObject = function (type, nodeData, newTripleDiv) {
+        self.setTripleObject = function (type, nodeData) {
 
 
-            if (newTripleDiv)
-                self.newTripleMapping()
-            setTimeout(function () {
-                var div = $("#" + self.currentMappingTripleDiv + " .mapping" + type);
-                $(div).html(nodeData.id)
-                if (type == "Subject") {
-                    self.currentSubject = {id: nodeData.id, type: ""}
+            if (type == "Subject") {
+                self.currentColumn = nodeData.id;
+                if (!self.typedObjectsMap[nodeData.id]) {
 
-                    self.setConstaintsFilter("Subject", nodeData.id)
-                }
-                if (type == "Object") {
-                    self.newTripleMapping()
-                    if (self.currentPropertyJstreeNode.id == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                        if (!self.subjectPropertiesMap[nodeData.id])
-                            self.subjectPropertiesMap[nodeData.id] = []
-                    self.subjectPropertiesMap [nodeData.id] = self.currentSubject.id
+                    self.typedObjectsMap[nodeData.id] = {};
+                    self.drawPropertiesTree("rdf:type")
+
+
+                } else {
+                    var propertiesFilter = constraintsMap.domains[self.typedObjectsMap[nodeData.id].type]
+                    self.drawPropertiesTree(propertiesFilter)
                 }
 
-            }, 200)
-        }
 
+            }
 
-        self.newTripleMapping = function () {
-            var index = common.getNewId("mappingTripleCell")
-            var id = "mappingTriple_" + index
-            self.currentMappingTripleDiv = id;
-
-            var subjectValue = self.currentModelJstreeNode ? self.currentModelJstreeNode.data.id : ""
-            var html = "<div class=mappingTriple id='" + id + "' onclick='Individuals.selectMappingTriple($(this))'>" +
-                "<div class='mappingTripleCell mappingSubject'>" + subjectValue + "</div>" +
-                "<div class='mappingTripleCell mappingPredicate'></div>" +
-                "<div class='mappingTripleCell mappingObject'></div>" +
-                "<div class='mappingTripleButton mappingTripleCell ' style='min-width:20px' onclick='Individuals.deleteTripleDiv($(this))'>X</div> " +
-
-                "</div>"
-            $("#Individuals_mappingsTriplesDiv").append(html)
-            self.selectMappingTriple($("#" + id))
 
         }
 
-        self.deleteTripleDiv = function (div) {
-            $(div).parent().remove()
-        }
-
-        self.selectMappingTriple = function (div) {
-            $(".mappingTriple").removeClass("mappingTripleSelected")
-            $(div).addClass("mappingTripleSelected")
-            self.currentMappingTripleDiv = $(div).attr("id")
-        }
 
         self.displayMappings = function () {
             var data = [];
@@ -168,61 +117,104 @@ var Individuals = (function () {
         }
 
 
-        self.setConstaintsFilter = function (type, nodeId) {
-
-
-            var treeDivId;
-            var filteredItems = []
-            var jstreeDiv;
-            if (type == "Subject") {
-                jstreeDiv = "Individuals_ontologyPropertiesTree"
-             //   filteredItems = constraintsMap.domains[nodeId]
-                if (self.subjectPropertiesMap[nodeId]) {
-                    filteredItems =constraintsMap.properties[self.currentSubject.type]
+        self.drawPropertiesTree = function (properties) {
+            var propJstreeData = []
+            if (properties == "rdf:type") {
+                var idType = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+                propJstreeData.push({
+                    id: idType,
+                    text: "rdf:type",
+                    parent: "#",
+                    data: {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", source: self.currentSource}
+                })
+                for (var key in allObjectsMap) {
+                    if (allObjectsMap[key].type == "Class") {
+                        var label = allObjectsMap[key].label
+                        propJstreeData.push({
+                            id: key,
+                            text: label,
+                            parent: idType,
+                            data: {id: key, label: label, source: self.currentSource}
+                        })
+                    }
                 }
-               else {
-                    filteredItems = constraintsMap.domains['default']
-                }
-            } else if (type == "Class") {
-                if (self.currentPropertyJstreeNode == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                    self.currentSubject.type = node.id
-                jstreeDiv = "Individuals_ontologyPropertiesTree"
-                filteredItems = constraintsMap.domains[nodeId] || []
-                filteredItems.splice(0, 0, "http://www.w3.org/2000/01/rdf-schema#label");
-                filteredItems.splice(0, 0, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+            } else {
+                properties.forEach(function (prop) {
 
 
-            } else if (type == "Property") {
-                jstreeDiv = "Individuals_ontologyClassesTree"
-                if (nodeId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                    filteredItems = constraintsMap.properties[nodeId] || []
-                else {
-                    if (self.subjectPropertiesMap[nodeId])
-                        filteredItems = filteredItems.concat(self.subjectPropertiesMap[nodeId])
+                    var label = allObjectsMap[prop].label || prop
+                    propJstreeData.push({
+                        id: prop,
+                        text: label,
+                        parent: "#",
+                        data: {id: key, label: key, source: self.currentSource}
+                    })
 
-                }
+                    for (var range in constraintsMap.properties[prop]) {
+                        var label = allObjectsMap[range].label || range
+
+                        propJstreeData.push({
+                            id: range,
+                            text: label,
+                            parent: prop,
+                            data: {id: range, label: label, source: self.currentSource}
+
+                        })
+                        if (constraintsMap.properties[prop][range]) {
+                            constraintsMap.properties[prop][range].forEach(function (item) {
+                                propJstreeData.push({
+                                    id: item,
+                                    text: "<span class='rangeValue' >" + item + "</span>",
+                                    parent: range,
+                                    data: {id: item, label: item, source: self.currentSource}
+
+                                })
+
+
+                            })
+                        }
+                    }
+                })
 
             }
+            var optionsClass = {
+                selectTreeNodeFn: self.onselectPropertiesNode,
+                openAll: true
+            }
+            common.loadJsTree("Individuals_ontologyPropertiesTree", propJstreeData, optionsClass)
 
-            $('#Individuals_ontologyClassesTree').jstree(true).hide_all()
-            $('#Individuals_ontologyPropertiesTree').jstree(true).hide_all()
 
-            $('#' + jstreeDiv).jstree(true).hide_all()
-            if (!filteredItems)
-                return
-            var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json("#", {flat: true});
-            jsonNodes.forEach(function (item) {
-                var ok = false
+        }
+        self.onselectPropertiesNode = function (event, obj) {
+            var parentNode = obj.node.parent
+            if (parentNode == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                self.typedObjectsMap[self.currentColumn].type = obj.node.data.id
 
-                if (filteredItems.indexOf("any") > -1)
-                    ok = true
-                else if (filteredItems.indexOf(item.id) > -1)
-                    ok = true
+                var modelNode = $("#Individuals_dataModelTree").jstree(true).get_node(self.currentColumn)
+                var propLabel = allObjectsMap[obj.node.data.id].label
+                $("#Individuals_dataModelTree").jstree(true).rename_node(self.currentColumn, "<span  class='typedColumn'>" + propLabel + ":" + modelNode.data.label + "</span>")
 
-                if (ok)
-                    $('#' + jstreeDiv).jstree(true).show_node(item.id);
 
-            });
+                for (var prop in constraintsMap.properties) {
+                    if (constraintsMap.properties[prop][obj.node.data.id])
+                        constraintsMap.properties[prop][obj.node.data.id].push(self.currentColumn)
+                }
+
+
+            } else {
+                var propertyNode = obj.node.parents[1]
+                var newChildren = [];
+                var label = allObjectsMap[propertyNode].label + "->" + allObjectsMap[parentNode].label + ":" + obj.node.data.label
+                newChildren.push({
+                    id: +"_" + propertyNode + "_" + self.currentColumn,
+                    text: "<span class='typedColumn'>" + label + "</span>",
+                    parent: self.currentColumn,
+                    data: {type: "triple", object: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
+
+                })
+                common.addNodesToJstree("Individuals_dataModelTree", self.currentColumn, newChildren)
+            }
+
         }
 
 
@@ -242,209 +234,74 @@ var Individuals = (function () {
                     parent: "#",
                     data: {type: "http://www.w3.org/2000/01/rdf-schema#label", id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", source: self.currentSource}
                 }]
+            constraintsMap = {domains: [], properties: []}
+
 
             async.series([
-
-                    //loadClasses
+                    // loadClasses
                     function (callbackSeries) {
 
-                        Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
-                            var existingNodes = {}
-
-                            result.forEach(function (item) {
-                                if (item.concept.value.indexOf("http") != 0)
-                                    return
-                                if (!existingNodes[item.concept.value]) {
-                                    existingNodes[item.concept.value] = 1
-
-                                    var obj = {
-                                        id: item.concept.value,
-                                        text: item.conceptLabel.value,
-                                        parent: "#",
-                                        data: {type: "Class", id: item.concept.value, label: item.conceptLabel.value, source: self.currentSource}
-
-                                    }
-                                    classJstreeData.push(obj);
-                                    for (var i = 1; i < depth; i++) {
-                                        if (item["child" + i]) {
-                                            var id = item["child" + i].value;
-                                            if (!existingNodes[id]) {
-                                                existingNodes[id] = 1
-                                                var label = item["child" + i + "Label"].value;
-
-                                                var obj = {
-                                                    id: id,
-                                                    text: label,
-                                                    parent: (i == 1 ? item.concept.value : item["child" + (i - 1)].value),
-                                                    data: {type: "Class", id: id, label: label, source: self.currentSource}
-
-                                                }
-                                                classJstreeData.push(obj);
-
-                                            }
-                                        }
-                                    }
-
-
-                                }
-                            })
-                            callbackSeries(err)
-                        })
-                    },
-                    //draw classesTree
-                    function (callbackSeries) {
-                        var optionsClass = {
-                            selectTreeNodeFn: function (event, obj) {
-                                self.currentClassJstreeNode = obj.node
-                                self.currentJstreeNode = obj.node
-                                self.setConstaintsFilter("Class", obj.node.data.id)
-                                self.setTripleObject("Object", obj.node.data)
-                            },
-                            // contextMenu: self.jstreeContextMenu("Class"),
-                            openAll: true
-                        }
-                        common.loadJsTree("Individuals_ontologyClassesTree", classJstreeData, optionsClass)
-                        callbackSeries()
-                    }
-                    ,
-                    //loadProperties
-                    function (callbackSeries) {
-                        var filter = " ?concept rdf:type owl:ObjectProperty"
+                        var filter = "?concept rdf:type owl:Class"
                         Sparql_OWL.getItems(self.currentSource, {filter: filter}, function (err, result) {
                             if (err)
-                                return MainController.UI.message(message)
-
-                            var classJstreeData = []
-                            var propertyJstreeData = [{
-                                id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                text: "type",
-                                parent: "#",
-                                data: {type: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "type", source: self.currentSource}
-                            },
-                                {
-                                    id: "http://www.w3.org/2000/01/rdf-schema#label",
-                                    text: "label",
-                                    parent: "#",
-                                    data: {type: "http://www.w3.org/2000/01/rdf-schema#label", id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", source: self.currentSource}
-                                }]
-                            var existingNodes = {}
+                                return callbackSeries(err)
                             result.forEach(function (item) {
-                                if (!existingNodes[item.concept.value]) {
-                                    existingNodes[item.concept.value] = 1
-
-                                    var obj = {
-                                        id: item.concept.value,
-                                        text: item.conceptLabel.value,
-                                        parent: "#",
-                                        data: {type: item.conceptType.value, id: item.concept.value, label: item.conceptLabel.value, source: self.currentSource}
-
-                                    }
-
-                                    if (item.conceptType.value == "http://www.w3.org/2002/07/owl#ObjectProperty") {
-                                        propertyJstreeData.push(obj)
-                                    }
-                                }
-
+                                allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}}
 
                             })
-
-                            var optionsProperty = {
-                                selectTreeNodeFn: function (event, obj) {
-                                    self.currentPropertyJstreeNode = obj.node
-                                    self.currentJstreeNode = obj.node
-                                    self.setConstaintsFilter("Property", obj.node.data.id)
-                                    self.setTripleObject("Predicate", obj.node.data)
-
-                                },
-                                // contextMenu: self.jstreeContextMenu("Property")
-                            }
-
-
-                            common.loadJsTree("Individuals_ontologyPropertiesTree", propertyJstreeData, optionsProperty)
                             callbackSeries()
                         })
-                    }
-                    ,
-                    // load constraints
+                    },
+
+                    //load restrictions
                     function (callbackSeries) {
-
-
-                        constraintsMap = {
-                            domains: {"default": ["http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://www.w3.org/2000/01/rdf-schema#label"]},
-                            properties: {
-                                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": ["any"],
-                                "http://www.w3.org/2000/01/rdf-schema#label": ["none"]
-                            }
-                        }
-
-                        OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
+                        var objs = []
+                        Sparql_OWL.getObjectRestrictions(self.currentSource, null, null, function (err, result) {
                             if (err)
                                 return callbackSeries(err)
-                            var objs = []
-                            Sparql_schema.getPropertiesRangeAndDomain(schema, null, {mandatoryDomain: 1}, function (err, result) {
-                                //  Sparql_OWL.getObjectProperties(source, null, null, function (err, result) {
-                                if (err)
-                                    return MainController.UI.message(err)
-                                result.forEach(function (item) {
-                                    if (!item.range) {
-                                        item.range = {value: "any"}
-                                    }
-                                    var hasId = true
-                                    if (!item.domain) {
-                                        item.range = {value: "any"}
-                                        hasId = false;
-                                    }
 
-                                    var obj = {property: item.property.value, domain: item.domain.value, range: item.range.value}
+                            result.forEach(function (item) {
 
-                                    objs.push(obj);
+                                if (!item.value) {
+                                    item.value = {value: "any"}
+                                }
+                                var hasId = true
+                                if (!item.id) {
+                                    item.id = {value: "any"}
+                                    hasId = false
+                                }
 
-                                    Sparql_OWL.getObjectRestrictions(self.currentSource, null, null, function (err, result) {
-                                        if (err)
-                                            return callbackSeries(err)
+                                var obj = {property: item.prop.value, domain: item.id.value, range: item.value.value}
+                                allObjectsMap[item.prop.value] = {type: "Property", label: item.propLabel.value, data: obj}
 
-                                        result.forEach(function (item) {
-
-                                            if (!item.value) {
-                                                item.value = {value: "any"}
-                                            }
-                                            var hasId = true
-                                            if (!item.id) {
-                                                item.id = {value: "any"}
-                                                hasId = false
-                                            }
-
-                                            var obj = {property: item.prop.value, domain: item.id.value, range: item.value.value}
-                                            objs.push(obj)
-                                        })
-                                        objs.forEach(function (obj) {
-                                            if (!constraintsMap.domains[obj.domain])
-                                                constraintsMap.domains[obj.domain] = []
-                                            if (constraintsMap.domains[obj.domain].indexOf(obj.property) < 0)
-                                                constraintsMap.domains[obj.domain].push(obj.property)
-
-                                            if (!constraintsMap.properties[obj.property])
-                                                constraintsMap.properties[obj.property] = []
-                                            if (constraintsMap.properties[obj.property].indexOf(obj.range) < 0)
-                                                constraintsMap.properties[obj.property].push(obj.range)
-                                        })
-
-
-                                    })
-
-                                })
-                                callbackSeries()
+                                objs.push(obj)
                             })
+                            objs.forEach(function (obj) {
+                                if (!constraintsMap.domains[obj.domain])
+                                    constraintsMap.domains[obj.domain] = []
+                                if (constraintsMap.domains[obj.domain].indexOf(obj.property) < 0)
+                                    constraintsMap.domains[obj.domain].push(obj.property)
+
+                                if (!constraintsMap.properties[obj.property])
+                                    constraintsMap.properties[obj.property] = {}
+
+                                constraintsMap.properties[obj.property][obj.range] = []
+
+                            })
+
+                            callbackSeries();
                         })
-                    }
+
+
+                    },
+
 
                 ],
 
                 function (err) {
                     if (err)
                         return MainController.UI.message(message)
-                    $('#Individuals_ontologyClassesTree').jstree(true).hide_all()
-                    $('#Individuals_ontologyPropertiesTree').jstree(true).hide_all()
+
                 }
             )
         }
@@ -491,6 +348,7 @@ var Individuals = (function () {
                         selectTreeNodeFn: function (event, obj) {
                             self.currentModelJstreeNode = obj.node
                             self.currentJstreeNode = obj.node;
+                            self.setTripleObject("Subject", obj.node.data)
 
                         },
                         contextMenu: self.jstreeContextMenu("Column")
@@ -514,4 +372,5 @@ var Individuals = (function () {
 
         return self;
     }
-)()
+)
+()

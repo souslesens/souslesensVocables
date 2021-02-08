@@ -1,7 +1,10 @@
 {
 
-  "Fauconnet":{"login":"Fauconnet","password":"ClaFauc17","groups":["VOCABLES","admin"]},
-  "BETA":{"login":"BETA","password":"thes_X32!","groups":["VOCABLES","admin"]},
-  "P.Jallais":{"P.Jallais":"BETA","password":"thes_X32!","groups":["VOCABLES","admin"]}
 
+  "Fauconnet":{"login":"Fauconnet","password":"&","groups":["admin"]},
+  "BETA":{"login":"BETA","password":"thes_X32!","groups":["admin"]},
+  "P.Jallais":{"login":"P.Jallais","password":"thes_X32!","groups":["admin"]},
+  "S.Dorleans": {"login":"S.Dorleans","password":"thes_X32!","groups":["admin_skos"]},
+  "skosReader": {"login":"skosReader","password":"&","groups":["reader_skos"]},
+  "skosBlender": {"login":"skosBlender","password":"thes_X32!","groups":["blender_skos"]}
 }

@@ -118,7 +118,7 @@
 
             MainController.UI.showToolsList("toolsTreeDiv")
             MainController.loadSources()
-            MainController.UI.setCredits();MainController.UI.configureUI();
+            MainController.UI.setCredits();
         });
 
 
@@ -332,7 +332,7 @@
     <div> login<input id="loginInput">
         password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
                               document.getElementById('loginButton').click()">
-        <button id="loginButton" onclick="authentication.doLogin()">OK</button>
+        <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
         <!--   <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>-->
 
         <div id="loginMessage" style="margin: 20px; font-size: 14px; color:saddlebrown"></div>

@@ -129,6 +129,7 @@ var Individuals = (function () {
                 })
                 for (var key in allObjectsMap) {
                     if (allObjectsMap[key].type == "Class") {
+
                         var label = allObjectsMap[key].label
                         propJstreeData.push({
                             id: key,
@@ -202,6 +203,8 @@ var Individuals = (function () {
 
 
             } else {
+                if(obj.node.parents.length<3)
+                    return;
                 var propertyNode = obj.node.parents[1]
                 var newChildren = [];
                 var label = allObjectsMap[propertyNode].label + "->" + allObjectsMap[parentNode].label + ":" + obj.node.data.label
@@ -252,6 +255,8 @@ var Individuals = (function () {
                             callbackSeries()
                         })
                     },
+
+                // load classes hierarchy
 
                     //load restrictions
                     function (callbackSeries) {

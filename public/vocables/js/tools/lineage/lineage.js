@@ -1762,7 +1762,7 @@ Lineage_properties = (function () {
                     rangeAndDomain: [],
                 }
                 self.properties = {};
-
+var allSubProperties=[]
                 result.forEach(function (item) {
                     if (!self.properties[item.property.value]) {
                         var obj = {
@@ -1783,6 +1783,7 @@ Lineage_properties = (function () {
                     }
                     if (item.subProperty) {
                         self.properties[item.property.value].subProperties.push({id: item.subProperty.value, label: item.subPropertyLabel.value})
+                        allSubProperties.push(item.subProperty.value)
                     }
 
 
@@ -1790,24 +1791,30 @@ Lineage_properties = (function () {
 
                 var jsTreeData = []
                 for (var key in self.properties) {
-                    jsTreeData.push({
-                        parent: "#",
-                        id: key,
-                        text: self.properties[key].label,
-                        data: {id: key, label: self.properties[key].label,source:self.currentSource}
-                    })
-                    self.properties[key].subProperties.forEach(function (item) {
+                    if(allSubProperties.indexOf(key)<0) {
                         jsTreeData.push({
-                            parent: key,
-                            id: item.id,
-                            text: item.label,
-                            data:{id: item.id, label: item.label,source:self.currentSource,parent: self.properties[key]}
+                            parent: "#",
+                            id: key,
+                            text: self.properties[key].label,
+                            data: {id: key, label: self.properties[key].label, source: self.currentSource}
                         })
-                    })
+                    }
+                        if (true) {
+                            self.properties[key].subProperties.forEach(function (item) {
+                                jsTreeData.push({
+                                    parent: key,
+                                    id: item.id,
+                                    text: item.label,
+                                    data: {id: item.id, label: item.label, source: self.currentSource, parent: self.properties[key]}
+                                })
+
+                            })
+                        }
+
 
                 }
 
-                var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick}
+                var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick,openAll:true}
                 options.contextMenu=self.jstreeContextMenu()
                 common.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
 

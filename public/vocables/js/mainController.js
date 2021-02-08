@@ -37,13 +37,30 @@ var MainController = (function () {
         })
     }
 
+
+    self.onAfterLogin=function(){
+
+        if(!authentication.currentUser)
+            return alert(" no user identified")
+        var groups=authentication.currentUser.groupes
+
+        Config.currentProfile=Config.profiles["reader_all"]
+        groups.forEach(function(group){
+            if(Config.profiles[group])
+                return  Config.currentProfile=Config.profiles[group]
+        })
+        MainController.UI.configureUI();
+
+
+    }
+
     self.UI = {
 
         configureUI:function(){
-            if(Config.enableBlenderTool)
-                $("#showBlenderButton").css("display","block")
+            if(Config.currentProfile.forbiddenTools.indexOf("BLENDER")>-1)
+                $("#showBlenderButton").css("display","none")
             else
-                $("#showBlenderButton").css("display","node")
+                $("#showBlenderButton").css("display","block")
         },
         showSources: function (treeDiv, withCBX) {
             var treeData = [];

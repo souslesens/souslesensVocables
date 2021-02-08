@@ -103,7 +103,8 @@ var authentication = (function () {
             $("#loginDiv").css("visibility", "hidden");
             $("#main").css("visibility", "visible");
             self.currentUser = user;
-
+if(callback)
+    callback();
 
 
             // mainController.init0();
@@ -155,7 +156,7 @@ var authentication = (function () {
 
     }
 
-    self.doLoginJson = function (login, password, callback) {
+    self.doLoginJson = function (login, password, callback2) {
 
 
         var payload = {
@@ -172,10 +173,10 @@ var authentication = (function () {
             success: function (data, textStatus, jqXHR) {
 
                 if (!$.isArray(data))
-                    return callback(err);
+                    return callback2(err);
 
                 else if (data.length == 0) {
-                    return callback();
+                    return callback2();
 
                 }
                 var user = {
@@ -184,14 +185,14 @@ var authentication = (function () {
                     groupes: data,
                 };
                 self.currentUser = user;
-                return callback(null, user);
+                return callback2(null, user);
 
                 // $("#panels").css("display", "block")
 
 
             }, error: function (err) {
 
-                return callback(err);
+                return callback2(err);
 
 
             }

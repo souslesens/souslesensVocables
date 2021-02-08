@@ -17,10 +17,9 @@ var Config = (function () {
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-    self.loginMode = "none";
+  //  self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
-    self.enableBlenderTool = true;
     self.enableCollections = false;
     self.showAssetQueyMenu = true;
     self.preferredSchemaType = "OWL"
@@ -29,24 +28,53 @@ var Config = (function () {
     self.searchDepth = 8
 
 
-    self.currentProfile = {
-        allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
-        allowedSources: "ALL",
-        forbiddenSources: ["CFIHOS_READI"],
-        allowedTools: "ALL",
-       forbiddenTools: ["INDIVIDUALS"],
-        blender:{contextMenuActionStartLevel:4}
+
+
+    self.profiles= {
+        admin: {
+            allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
+            allowedSources: "ALL",
+            forbiddenSources: [],
+            allowedTools: "ALL",
+            forbiddenTools:  [],
+            blender: {contextMenuActionStartLevel: 0}
+        },
+        admin_skos: {
+            allowedSourceSchemas: ["SKOS"],
+            allowedSources: "ALL",
+            forbiddenSources: [],
+            allowedTools: "ALL",
+            forbiddenTools: ["INDIVIDUALS"],
+            blender: {contextMenuActionStartLevel: 0}
+        },
+        blender_skos: {
+            allowedSourceSchemas: ["SKOS"],
+            allowedSources: "ALL",
+            forbiddenSources: [],
+            allowedTools: "ALL",
+            forbiddenTools: ["INDIVIDUALS"],
+            blender: {contextMenuActionStartLevel: 3}
+        },
+        reader_skos: {
+            allowedSourceSchemas: ["SKOS"],
+            allowedSources: "ALL",
+            forbiddenSources: [],
+            allowedTools: "ALL",
+            forbiddenTools: ["INDIVIDUALS","BLENDER"],
+            blender: {contextMenuActionStartLevel: 3}
+        },
+        reader_all: {
+            allowedSourceSchemas: ["SKOS","OWL"],
+            allowedSources: "ALL",
+            forbiddenSources: [],
+            allowedTools: "ALL",
+            forbiddenTools: ["INDIVIDUALS","BLENDER"],
+            blender: {contextMenuActionStartLevel: 3}
+        }
     }
 
-    self.currentProfile = {
-        allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
-        allowedSources: "ALL",
-        forbiddenSources: [],
-        allowedTools: "ALL",
-        forbiddenTools: [],
-        blender:{contextMenuActionStartLevel:0}
-    }
 
+    self.currentProfile = self.profiles["admin"]
 
     self.sources = {}
     self.tools = {};

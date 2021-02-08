@@ -17,7 +17,7 @@ var Config = (function () {
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-  //  self.loginMode = "none";
+   self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -27,6 +27,35 @@ var Config = (function () {
     self.searchLimit = 500;
     self.searchDepth = 8
 
+
+
+
+
+
+    self.sources = {}
+    self.tools = {};
+
+
+    self.tools["thesaurusBrowser"] = {label: "Browse", multiSources: 0, controller: ThesaurusBrowser, toolDescriptionImg: null}//"images/browse.png"}
+    //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
+    self.tools["thesauriMatcher"] = {label: "Match", multiSources: 0, controller: ThesaurusMatcher, toolDescriptionImg: null}//"images/match.png"}
+    self.tools["nerEvaluator"] = {label: "Evaluate", multiSources: 1, controller: NerEvaluator, toolDescriptionImg: null}//"images/evaluate.png"}
+    self.tools["termTaxonomy"] = {label: "Taxonomy", multiSources: 1, controller: TermTaxonomy, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+
+    self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+    self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+    self.tools["INDIVIDUALS"] = {label: "Individuals", multiSources: 0, controller: Individuals, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+    // self.tools["AssetQuery"] = {label: "Ontology", multiSources: 0, controller: AssetQuery,toolDescriptionImg:null}
+
+    //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
+    // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
+    //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
+
+    // self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
 
 
 
@@ -76,30 +105,8 @@ var Config = (function () {
 
     self.currentProfile = self.profiles["admin"]
 
-    self.sources = {}
-    self.tools = {};
 
 
-    self.tools["thesaurusBrowser"] = {label: "Browse", multiSources: 0, controller: ThesaurusBrowser, toolDescriptionImg: null}//"images/browse.png"}
-    //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
-    self.tools["thesauriMatcher"] = {label: "Match", multiSources: 0, controller: ThesaurusMatcher, toolDescriptionImg: null}//"images/match.png"}
-    self.tools["nerEvaluator"] = {label: "Evaluate", multiSources: 1, controller: NerEvaluator, toolDescriptionImg: null}//"images/evaluate.png"}
-    self.tools["termTaxonomy"] = {label: "Taxonomy", multiSources: 1, controller: TermTaxonomy, toolDescriptionImg: null}//"images/taxonomy.png"}
-
-
-    self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
-
-    self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
-
-    self.tools["INDIVIDUALS"] = {label: "Individuals", multiSources: 0, controller: Individuals, toolDescriptionImg: null}//"images/taxonomy.png"}
-
-    // self.tools["AssetQuery"] = {label: "Ontology", multiSources: 0, controller: AssetQuery,toolDescriptionImg:null}
-
-    //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
-    // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
-    //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
-
-    // self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
 
 
     return self;

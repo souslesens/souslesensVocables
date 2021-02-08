@@ -128,7 +128,7 @@ var Individuals = (function () {
                     data: {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", source: self.currentSource}
                 })
                 for (var key in allObjectsMap) {
-                    if (allObjectsMap[key].type == "Class") {
+                    if (allObjectsMap[key].type == "Class"  && allObjectsMap[key].isLeaf) {
 
                         var label = allObjectsMap[key].label
                         propJstreeData.push({
@@ -224,7 +224,7 @@ var Individuals = (function () {
         self.loadOntology = function () {
 
             var classJstreeData = []
-            var depth = 5;
+            var depth = 10;
             var propertyJstreeData = [{
                 id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                 text: "type",
@@ -256,7 +256,7 @@ var Individuals = (function () {
                         })
                     },
 
-                // load classes hierarchy
+
 
                     //load restrictions
                     function (callbackSeries) {
@@ -299,6 +299,39 @@ var Individuals = (function () {
 
 
                     },
+                // load classes hierarchy and set leaf and parents Classes
+                function (callbackSeries) {
+                    Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
+                        var existingNodes = {}
+
+
+                        result.forEach(function (item) {
+
+                            var stop = false
+                            for (var i = 1; i < depth; i++) {
+                                if (!stop) {
+                                    if (allObjectsMap[item["child" + i].value]) {
+                                        if (i == 1) {
+                                            allObjectsMap[item["child" + i].value].parent = item.concept.value
+                                        } else {
+                                            allObjectsMap[item["child" + i].value].parent = item["child" + (i - 1)].value
+
+                                        }
+                                    } else {
+                                        stop = true;
+
+                                        if (i == 1)
+                                            allObjectsMap[item.concept.value].isLeaf = true;
+                                        else
+                                            allObjectsMap[item["child" + i].value].isLeaf = true;
+                                    }
+
+                                }
+                            }
+                        })
+                        callbackSeries();
+                    })
+                }
 
 
                 ],

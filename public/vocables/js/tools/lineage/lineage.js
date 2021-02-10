@@ -88,6 +88,7 @@ var Lineage_classes = (function () {
                     $("#lineage_controlPanel1Div").css("display", "none")
                 }
 
+                
                 propertyColors = {}
             }
             self.currentSource = sourceLabel

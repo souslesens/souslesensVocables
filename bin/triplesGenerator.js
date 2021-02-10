@@ -16,6 +16,7 @@ var triplesGenerator = {
             options = {}
         mappings.forEach(function (item) {
 
+
             var p;
             if ((p = item.subject.indexOf("http")) != 0) {
                 item.subject = item.subject.split(".")[1]
@@ -166,29 +167,17 @@ if (false) {
 }
 if (true) {
     var xlsxPath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX"
-    var mappings = [
-        {
-            "subject": "Tag.ID",
-            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://data.total.com/resource/one-model/ontology#Tag"
-        },
-        {
-            "subject": "Tag.ID",
-            "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-            "object": "Tag.TagNumber"
-        },
-        {
-            "subject": "Tag.ID",
-            "predicate": "http://data.total.com/resource/one-model/ontology#concretize",
-            "object": "http://data.total.com/resource/one-model/ontology#Equipment"
-        }
-    ]
+    var mappings = [{"subject": "Tag.ID", "predicate": "http://data.total.com/resource/one-model/ontology#TOTAL-hasAttribute", "object": "TagtoAttributes.AttributeID"}, {
+        "subject": "Tag.ID",
+        "predicate": "http://standards.iso.org/iso/15926/part14/represents",
+        "object": "Tag.FunctionalClassID"
+    }]
     var options = {generateIds: 15, output: "ntTriples"}
     var uriPrefix = "http://data.total.com/resource/one-model/ontology#"
     triplesGenerator.generateXlsxBookTriples(mappings, xlsxPath, uriPrefix, options, function (err, result) {
-        if(err)
+        if (err)
             return console.log(err);
-        return fs.writeFileSync(xlsxPath+"_triples.nt",result)
+        return fs.writeFileSync(xlsxPath + "_triples.nt", result)
 
     })
 }

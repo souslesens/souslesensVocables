@@ -96,17 +96,36 @@ var Individuals = (function () {
 
 
         self.displayMappings = function () {
-            var data = [];
-            $(".mappingTriple").each(function () {
-                var subject = $(this).find(".mappingSubject").html()
-                var predicate = $(this).find(".mappingPredicate").html()
-                var object = $(this).find(".mappingObject").html()
-                data.push({
-                    subject: subject,
-                    predicate: predicate,
-                    object: object
 
-                })
+
+
+        //    data: {type: "triple", object: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
+            var data = [];
+
+
+           var nodes =common.getjsTreeNodes("Individuals_dataModelTree")
+
+           for(var key in self.typedObjectsMap){
+               data.push({
+                   subject: key,
+                   predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                   object: self.typedObjectsMap[key]
+
+               })
+           }
+          nodes.forEach(function (node) {
+
+              if( node.data.type=="triple") {
+                  var subject = node.data.subject
+                  var predicate = node.data.predicate
+                  var object = node.data.object
+                  data.push({
+                      subject: subject,
+                      predicate: predicate,
+                      object: object
+
+                  })
+              }
 
             })
 
@@ -128,7 +147,7 @@ var Individuals = (function () {
                     data: {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", source: self.currentSource}
                 })
                 for (var key in allObjectsMap) {
-                    if (allObjectsMap[key].type == "Class"  && allObjectsMap[key].isLeaf) {
+                    if (allObjectsMap[key].type == "Class") {// && allObjectsMap[key].isLeaf) {
 
                         var label = allObjectsMap[key].label
                         propJstreeData.push({
@@ -203,7 +222,7 @@ var Individuals = (function () {
 
 
             } else {
-                if(obj.node.parents.length<3)
+                if (obj.node.parents.length < 3)
                     return;
                 var propertyNode = obj.node.parents[1]
                 var newChildren = [];
@@ -212,7 +231,7 @@ var Individuals = (function () {
                     id: +"_" + propertyNode + "_" + self.currentColumn,
                     text: "<span class='typedColumn'>" + label + "</span>",
                     parent: self.currentColumn,
-                    data: {type: "triple", object: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
+                    data: {type: "triple", subject: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
 
                 })
                 common.addNodesToJstree("Individuals_dataModelTree", self.currentColumn, newChildren)
@@ -224,7 +243,7 @@ var Individuals = (function () {
         self.loadOntology = function () {
 
             var classJstreeData = []
-            var depth = 10;
+            var depth = 5;
             var propertyJstreeData = [{
                 id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                 text: "type",
@@ -237,25 +256,10 @@ var Individuals = (function () {
                     parent: "#",
                     data: {type: "http://www.w3.org/2000/01/rdf-schema#label", id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", source: self.currentSource}
                 }]
-            constraintsMap = {domains: [], properties: []}
+            constraintsMap = {domains: [], properties: [],ranges:[]}
 
 
             async.series([
-                    // loadClasses
-                    function (callbackSeries) {
-
-                        var filter = "?concept rdf:type owl:Class"
-                        Sparql_OWL.getItems(self.currentSource, {filter: filter}, function (err, result) {
-                            if (err)
-                                return callbackSeries(err)
-                            result.forEach(function (item) {
-                                allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}}
-
-                            })
-                            callbackSeries()
-                        })
-                    },
-
 
 
                     //load restrictions
@@ -287,6 +291,11 @@ var Individuals = (function () {
                                 if (constraintsMap.domains[obj.domain].indexOf(obj.property) < 0)
                                     constraintsMap.domains[obj.domain].push(obj.property)
 
+                                if (!constraintsMap.ranges[obj.range])
+                                    constraintsMap.ranges[obj.range] = []
+                                if (constraintsMap.ranges[obj.range].indexOf(obj.property) < 0)
+                                    constraintsMap.ranges[obj.range].push(obj.property)
+
                                 if (!constraintsMap.properties[obj.property])
                                     constraintsMap.properties[obj.property] = {}
 
@@ -299,39 +308,76 @@ var Individuals = (function () {
 
 
                     },
-                // load classes hierarchy and set leaf and parents Classes
-                function (callbackSeries) {
-                    Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
-                        var existingNodes = {}
+                    // loadClasses
+                    function (callbackSeries) {
+
+                        /*   Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
+                               var existingNodes = {}
 
 
-                        result.forEach(function (item) {
+                               result.forEach(function (item) {
+                                   allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}, idRoot: true}
 
-                            var stop = false
-                            for (var i = 1; i < depth; i++) {
-                                if (!stop) {
-                                    if (allObjectsMap[item["child" + i].value]) {
-                                        if (i == 1) {
-                                            allObjectsMap[item["child" + i].value].parent = item.concept.value
-                                        } else {
-                                            allObjectsMap[item["child" + i].value].parent = item["child" + (i - 1)].value
+                                   for (var i = 1; i < depth; i++) {
+                                       var childObj = item["child" + i]
+                                       var obj
+                                       if (childObj) {
+                                           obj = {type: "Class", label: childObj.value, data: {}};
 
-                                        }
-                                    } else {
-                                        stop = true;
+                                           if (i == 1) {
+                                               obj.parent = item.concept.value
+                                           } else {
+                                               obj.parent = item["child" + (i - 1)].value
 
-                                        if (i == 1)
-                                            allObjectsMap[item.concept.value].isLeaf = true;
-                                        else
-                                            allObjectsMap[item["child" + i].value].isLeaf = true;
-                                    }
+                                           }
+                                           allObjectsMap[childObj.value] = obj;
+                                       }
+                                   }
+                               })
 
-                                }
-                            }
+
+                               result.forEach(function (item) {
+                                   for (var i = 1; i < depth; i++) {
+                                       var done = false
+                                       var childObj = item["child" + i]
+
+                                       if(item.concept)
+                                       if (!childObj || childObj=== undefined) {
+
+                                           if (i == 1) {
+                                               allObjectsMap[item.concept.value].isLeaf = true;
+                                               console.log(item.concept.value)
+                                           } else {
+                                               if (item["child" + (i - 1)]) {
+
+                                                   allObjectsMap[item["child" + (i - 1)].value].isLeaf = true;
+                                                   console.log(item["child" + (i - 1)].value)
+                                               }
+
+
+                                           }
+
+                                       }
+                                   }
+                               })
+
+
+                               callbackSeries()
+                           })*/
+                        var filter = "?concept rdf:type owl:Class"
+                        Sparql_OWL.getItems(self.currentSource, {filter: filter}, function (err, result) {
+                            if (err)
+                                return callbackSeries(err)
+                            result.forEach(function (item) {
+                                if( constraintsMap.domains[item.concept.value] ||    constraintsMap.ranges[item.concept.value])
+                                allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}}
+
+
+                            })
+                            callbackSeries()
                         })
-                        callbackSeries();
-                    })
-                }
+                    },
+
 
 
                 ],

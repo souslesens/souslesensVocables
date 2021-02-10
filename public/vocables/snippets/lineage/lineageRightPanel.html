@@ -47,6 +47,15 @@
         </div>
 
         <div id="LineagePropertiesTab">
+            <div>
+                <input id='LineageProperties_searchAllSourcesTermInput' style="width: 200px" value="">
+                <button id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>Search</button>
+            </div>
+            <div>
+                <input type='checkbox' checked='checked' id='LineageProperties_allExactMatchSearchCBX'>Exact Match
+
+                <input type='checkbox' id='LineageProperties_searchInAllSources'>All sources
+            </div>
             <button onclick='Lineage_properties.drawGraph()'>draw</button>
             <div class="jstree" id="Lineage_propertiesTree"></div>
             <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W

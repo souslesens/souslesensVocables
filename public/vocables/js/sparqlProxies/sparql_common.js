@@ -20,6 +20,7 @@ var Sparql_common = (function () {
         if (!options)
             options = {}
         var filter = ";"
+
         if (words) {
             if (Array.isArray(words)) {
                 if (words[0] == null)

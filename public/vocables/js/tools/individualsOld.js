@@ -381,7 +381,7 @@ var Individuals = (function () {
                             if (err)
                                 return callbackSeries(err)
                             var objs = []
-                            Sparql_schema.getPropertiesRangeAndDomain(schema, null, {mandatoryDomain: 1}, function (err, result) {
+                            Sparql_schema.getPropertiesRangeAndDomain(schema, null,null, {mandatoryDomain: 1}, function (err, result) {
                                 //  Sparql_OWL.getObjectProperties(source, null, null, function (err, result) {
                                 if (err)
                                     return MainController.UI.message(err)

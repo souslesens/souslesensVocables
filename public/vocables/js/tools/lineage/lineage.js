@@ -638,7 +638,7 @@ var Lineage_classes = (function () {
                                 return callbackSeries()
 
                             }
-                            var filter=""
+                            var filter = ""
                             if (similarType == "labels") {
                                 filter = Sparql_common.setFilter("concept", null, items, {exactMatch: true})
                             } else if (similarType == "sameAs") {
@@ -774,11 +774,11 @@ var Lineage_classes = (function () {
 
         self.initIndividualsPropertiesSelect = function (sourceLabel) {
             var schemaType = Config.sources[sourceLabel].schemaType
-            if ( schemaType == "INDIVIDUAL") {
+            if (schemaType == "INDIVIDUAL") {
 
-                var preferredProperties=Config.sources[sourceLabel].preferredProperties
-                if(!preferredProperties)
-                    return alert ("no preferredProperties in source configuration")
+                var preferredProperties = Config.sources[sourceLabel].preferredProperties
+                if (!preferredProperties)
+                    return alert("no preferredProperties in source configuration")
 
                 var jstreeData = [];
                 var uriPrefixes = {}
@@ -788,7 +788,7 @@ var Lineage_classes = (function () {
                     if (p < 0)
                         p = item.lastIndexOf("/")
                     var graphPrefix = item.substring(0, p)
-                    var propLabel= item.substring(p+1)
+                    var propLabel = item.substring(p + 1)
                     if (!uriPrefixes[graphPrefix]) {
                         uriPrefixes[graphPrefix] = 1;
                         jstreeData.push(
@@ -801,15 +801,15 @@ var Lineage_classes = (function () {
                     jstreeData.push(
                         {
                             id: item,
-                            text:propLabel,
+                            text: propLabel,
                             parent: graphPrefix
                         }
                     )
 
                 })
-                common.loadJsTree("lineage_individualsPropertiesTree", jstreeData,{openAll:true});
+                common.loadJsTree("lineage_individualsPropertiesTree", jstreeData, {openAll: true});
 
-                if(false) {
+                if (false) {
                     Sparql_OWL.getIndividualProperties(sourceLabel, null, null, null, {distinct: "property"}, function (err, result) {
                         if (err)
                             return MainController.UI.message(err);
@@ -856,7 +856,7 @@ var Lineage_classes = (function () {
             }
 
             if (!propertyId) {
-              //  propertyId = $("#lineage_individualsPropertiesSelect").val()
+                //  propertyId = $("#lineage_individualsPropertiesSelect").val()
                 propertyId = $("#lineage_individualsPropertiesTree").jstree(true).get_selected()
             }
             var source = self.currentSource
@@ -866,12 +866,12 @@ var Lineage_classes = (function () {
             var objects = null
             if (!classIds) {
                 var filterType = $("#lineage_clearIndividualsPropertiesFilterSelect").val();
-                if(filterType=="graph nodes")
+                if (filterType == "graph nodes")
                     classIds = self.getGraphIdsFromSource(source)
-                else if(filterType=="graph nodes")
-                    classIds=null;
-                else if(filterType=="filter value"){
-                    return alert ("to be developped")
+                else if (filterType == "graph nodes")
+                    classIds = null;
+                else if (filterType == "filter value") {
+                    return alert("to be developped")
                 }
 
 
@@ -1749,87 +1749,21 @@ Lineage_properties = (function () {
     self.init = function () {
         self.graphInited = false
         self.currentSource = MainController.currentSource
-        OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
+        self.getPropertiesjsTreeData(function (err, result) {
             if (err)
-                return MainController.UI.message(err);
-            Sparql_schema.getPropertiesRangeAndDomain(schema, null, {mandatoryDomain: 0}, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err);
-                var propertiesTypes = {
-                    orphans: [],
-                    rangeOnly: [],
-                    domainOnly: [],
-                    rangeAndDomain: [],
-                }
-                self.properties = {};
-var allSubProperties=[]
-                result.forEach(function (item) {
-                    if (!self.properties[item.property.value]) {
-                        var obj = {
-                            id: item.property.value,
-                            label: item.propertyLabel.value,
-                            subProperties: []
-
-                        }
-                        if (item.range) {
-                            obj.range = item.range.value
-                            obj.rangeLabel = item.rangeLabel.value
-                        }
-                        if (item.label) {
-                            obj.label = item.label.value
-                            obj.labelLabel = item.labelLabel.value
-                        }
-                        self.properties[item.property.value] = obj
-                    }
-                    if (item.subProperty) {
-                        self.properties[item.property.value].subProperties.push({id: item.subProperty.value, label: item.subPropertyLabel.value})
-                        allSubProperties.push(item.subProperty.value)
-                    }
-
-
-                })
-
-                var jsTreeData = []
-                for (var key in self.properties) {
-                    if(allSubProperties.indexOf(key)<0) {
-                        jsTreeData.push({
-                            parent: "#",
-                            id: key,
-                            text: self.properties[key].label,
-                            data: {id: key, label: self.properties[key].label, source: self.currentSource}
-                        })
-                    }
-                        if (true) {
-                            self.properties[key].subProperties.forEach(function (item) {
-                                jsTreeData.push({
-                                    parent: key,
-                                    id: item.id,
-                                    text: item.label,
-                                    data: {id: item.id, label: item.label, source: self.currentSource, parent: self.properties[key]}
-                                })
-
-                            })
-                        }
-
-
-                }
-
-                var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick,openAll:true}
-                options.contextMenu=self.jstreeContextMenu()
-                common.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
-
-
-                // common.fillSelectOptions("LineageProperties_properties_Select", propertiesTypes.rangeAndDomain, true, "propertyLabel", "property")
-
-
-            })
+                return MainController.UI.message(err)
+            var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true}
+            options.contextMenu = self.jstreeContextMenu()
+            common.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
         })
-        self.showPropInfos = function (event, obj) {
-            var id = obj.node.id
-            var html = JSON.stringify(self.properties[id])
-            $("#graphDiv").html(html)
-        }
+
     }
+    self.showPropInfos = function (event, obj) {
+        var id = obj.node.id
+        var html = JSON.stringify(self.properties[id])
+        $("#graphDiv").html(html)
+    }
+
     self.jstreeContextMenu = function () {
         var items = {
             nodeInfos: {
@@ -1849,14 +1783,89 @@ var allSubProperties=[]
         }
 
 
-
-
         return items;
 
     }
     self.onTreeNodeClick = function (event, obj) {
-        self.currentTreeNode=obj.node
+        self.currentTreeNode = obj.node
 
+    }
+
+    self.getPropertiesjsTreeData = function (id, words, callback) {
+
+
+        OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
+            if (err)
+                return MainController.UI.message(err);
+            Sparql_schema.getPropertiesRangeAndDomain(schema, id, words, {mandatoryDomain: 0}, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+
+                var propertiesTypes = {
+                    orphans: [],
+                    rangeOnly: [],
+                    domainOnly: [],
+                    rangeAndDomain: [],
+                }
+                self.properties = {};
+                self.subProperties = {};
+                var allSubProperties = []
+                result.forEach(function (item) {
+                    if (!self.properties[item.property.value]) {
+                        var obj = {
+                            id: item.property.value,
+                            label: item.propertyLabel.value,
+                            subProperties: []
+
+                        }
+                        if (item.range) {
+                            obj.range = item.range.value
+                            obj.rangeLabel = item.rangeLabel.value
+                        }
+                        if (item.label) {
+                            obj.label = item.label.value
+                            obj.labelLabel = item.labelLabel.value
+                        }
+                        self.properties[item.property.value] = obj
+                    }
+                    if (item.subProperty) {
+                        if (allSubProperties.indexOf(item.subProperty.value) < 0) {
+
+                            self.properties[item.property.value].subProperties.push({id: item.subProperty.value, label: item.subPropertyLabel.value})
+                            allSubProperties.push(item.subProperty.value)
+                        }
+                    }
+
+
+                })
+
+                var jsTreeData = []
+                for (var key in self.properties) {
+                    if (allSubProperties.indexOf(key) < 0) {
+                        jsTreeData.push({
+                            parent: "#",
+                            id: key,
+                            text: self.properties[key].label,
+                            data: {id: key, label: self.properties[key].label, source: self.currentSource}
+                        })
+                    }
+                    if (true) {
+                        self.properties[key].subProperties.forEach(function (item) {
+                            jsTreeData.push({
+                                parent: key,
+                                id: item.id,
+                                text: item.label,
+                                data: {id: item.id, label: item.label, source: self.currentSource, parent: self.properties[key]}
+                            })
+
+                        })
+                    }
+                }
+                callback(null, jsTreeData)
+
+
+            })
+        })
     }
 
     self.drawGraph = function (propertyId) {
@@ -1867,7 +1876,7 @@ var allSubProperties=[]
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
             var options = {mandatoryDomain: 1}
 
-            Sparql_schema.getPropertiesRangeAndDomain(schema, propertyId, {mandatoryDomain: 0}, function (err, result) {
+            Sparql_schema.getPropertiesRangeAndDomain(schema, propertyId, null, {mandatoryDomain: 0}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var visjsData = {nodes: [], edges: []}
@@ -2150,21 +2159,65 @@ var allSubProperties=[]
         }
 
     }
-    /* self.setGraphPopupMenus = function (node) {
-         if (!node)
-             return;
+    self.searchAllSourcesTerm = function () {
 
-         var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.showNodeInfos();\">show node infos</span>" +
-             "    <span  class=\"popupMenuItem\"onclick=\"Lineage_properties.graphActions.expandNode();\">expand node</span>"
+        var term = $("#LineageProperties_searchAllSourcesTermInput").val()
+        if (!term || term == "")
+            return
+        var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked")
+        var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked")
+        var searchedSources = [];
+        if (searchAllSources) {
+            for (var sourceLabel in Config.sources) {
+                if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == "OWL")
+                    searchedSources.push(sourceLabel)
+            }
+        } else {
+            if (!MainController.searchedSource && !MainController.currentSource)
+                return alert("select a source or search in all source")
+            searchedSources.push(MainController.searchedSource || MainController.currentSource)
+        }
+        var jstreeData = []
+        var uniqueIds = {}
 
-         $("#graphPopupDiv").html(html);
+        async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
+            setTimeout(function () {
+                MainController.UI.message("searching in " + sourceLabel)
+            }, 100)
 
-     }*/
+
+            if(sourceLabel=="ONE-MODEL")
+                var x=3
+            self.getPropertiesjsTreeData(null, term, function (err, result) {
+                if (err)
+                    callbackEach(err);
+
+                var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
+                jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
+                result.forEach(function (item) {
+                    if (!uniqueIds[item.id]) {
+                        uniqueIds[item.id] = 1
+                        item.parent=sourceLabel
+                        jstreeData.push(item)
+
+                    }
+                })
+
+                callbackEach()
+            })
+        }, function (err) {
+            var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true}
+            options.contextMenu = self.jstreeContextMenu()
+            common.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+        })
+
+    }
 
 
     return self;
 
-})()
+})
+()
 
 
 Lineage_types = (function () {

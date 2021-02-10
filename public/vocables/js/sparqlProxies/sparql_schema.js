@@ -84,23 +84,37 @@ var Sparql_schema = (function () {
 
     }
 
-    self.getPropertiesRangeAndDomain = function (schema, propertyIds, options, callback) {
+    self.getPropertiesRangeAndDomain = function (schema, propertyIds, words, options, callback) {
         var fromStr = "";
         if (schema.graphUri)
             fromStr = "FROM <" + schema.graphUri + "> ";
 
+
         if (!options)
             options = {}
-        var filterStr = Sparql_common.setFilter("property", propertyIds)
+        var filterStr
+        if (words) {
+
+
+            filterStr = Sparql_common.setFilter("property",null, words, options.exactMatch)
+            filterStr = filterStr.replace("?propertyLabel","str(?property)")
+
+
+        }else
+            filterStr = Sparql_common.setFilter("property", propertyIds)
         if (options.filter)
             filterStr += options.filter
         var query
         if (options.mandatoryDomain) {
             query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#>" +
                 "  select distinct * " + fromStr +
-                " WHERE  {    ?property   rdfs:subPropertyOf* ?superProperty.?superProperty rdf:type owl:ObjectProperty " + filterStr +
-                "  OPTIONAL{?property rdfs:label ?propertyLabel.} " +
-                "  ?superProperty rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}" +
+                " WHERE  {    ?property   rdfs:subPropertyOf* ?superProperty.?superProperty rdf:type owl:ObjectProperty " + filterStr
+            if(words)
+                query+=  " ?property rdfs:label ?propertyLabel. "
+            else
+                query+="  OPTIONAL{?property rdfs:label ?propertyLabel.} "
+
+            query+=    "  ?superProperty rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}" +
                 "     OPTIONAL{ ?superProperty rdfs:range ?range.  ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.}}" +
                 "} order by ?propertyLabel limit " + self.queryLimit
         } else {

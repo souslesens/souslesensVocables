@@ -78,7 +78,7 @@ var Sparql_OWL = (function () {
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * " + fromStr + " where {" +
-                "?child1   rdfs:" + owlPredicate + " ?concept. " + strFilter +
+                "?child1   rdfs:" + owlPredicate + " ?concept.  FILTER (!isBlank(?concept)) " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
             if (false && options.skipRestrictions) {
                 query += " filter ( NOT EXISTS {?child1 rdfs:subClassOf ?superClass.?superClass rdf:type owl:Restriction}) "
@@ -207,7 +207,7 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 " select distinct *  " + fromStr + "  WHERE {{"
 
-            query += "?concept rdfs:label ?conceptLabel. " + strFilter;
+            query += "?concept rdfs:label ?conceptLabel. FILTER (!isBlank(?concept))" + strFilter;
 
             ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 
@@ -284,7 +284,7 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
 
-            query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. "
+            query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
 

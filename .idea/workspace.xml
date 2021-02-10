@@ -2,18 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/bin/exportGraph..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/util..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/sourcesDatalab.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sourcesDatalab.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/individuals.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/individuals.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/individualsOld.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/individualsOld.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -84,11 +82,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.bin\www">
-    <configuration name="AssetQuerySqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
-      <method v="2" />
-    </configuration>
-    <configuration name="ontologiesMapper..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="ontologiesMapper..js" working-dir="$PROJECT_DIR$/other/quantum">
+  <component name="RunManager" selected="Node.js.exportGraph..js">
+    <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportGraph..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <configuration name="parseXlsx..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="parseXlsx..js" working-dir="$PROJECT_DIR$/other/quantum">
@@ -97,16 +92,19 @@
     <configuration name="triplesGenerator.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="triplesGenerator.js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
+    <configuration name="util..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="util..js" working-dir="$PROJECT_DIR$/bin/skosConverters">
+      <method v="2" />
+    </configuration>
     <configuration name="xlsx2json..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="xlsx2json..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.exportGraph..js" />
+        <item itemvalue="Node.js.util..js" />
         <item itemvalue="Node.js.triplesGenerator.js" />
         <item itemvalue="Node.js.xlsx2json..js" />
         <item itemvalue="Node.js.parseXlsx..js" />
-        <item itemvalue="Node.js.ontologiesMapper..js" />
-        <item itemvalue="Node.js.AssetQuerySqlConnector..js" />
       </list>
     </recent_temporary>
   </component>
@@ -146,7 +144,7 @@
       <workItem from="1611728994576" duration="10579000" />
       <workItem from="1611758637943" duration="117488000" />
       <workItem from="1612449705391" duration="53430000" />
-      <workItem from="1612679557225" duration="53701000" />
+      <workItem from="1612679557225" duration="72721000" />
     </task>
     <servers />
   </component>

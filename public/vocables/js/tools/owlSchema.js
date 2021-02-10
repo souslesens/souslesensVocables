@@ -19,6 +19,7 @@ var OwlSchema = (function () {
     }
 
     self.initSourceSchema = function (sourceLabel, callback) {
+
         if (self.schemasConfig && self.schemasConfig[sourceLabel]) {
             return callback(null, self.schemasConfig[sourceLabel]);
         }
@@ -27,7 +28,8 @@ var OwlSchema = (function () {
             self.schemasConfig = json;
             var sourceSchema = null;
 
-            if (Config.sources[sourceLabel].schemaType) {
+
+            if ( sourceLabel && Config.sources[sourceLabel].schemaType) {
                 sourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
                 if (sourceSchema)
                     sourceSchema.type = Config.sources[sourceLabel].schemaType

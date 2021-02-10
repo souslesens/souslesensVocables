@@ -74,7 +74,8 @@ var Sparql_proxy = (function () {
 
                 });
 
-            }, function (err) {
+            },
+            function (err) {
                 callback(err, allData)
 
             })

@@ -64,7 +64,7 @@
     "sparql_server": {
       "url": "http://10.28.171.139:8890/sparql"
     },
-    "graphUri": "http://souslesens.org/vocabulary/iec/",
+    "graphUri": "http://sousoillesens.org/vocabulary/iec/",
     "schemaType": "SKOS",
     "predicates": {
       "lang": "en"
@@ -144,7 +144,7 @@
   "USGS": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+      "url": "http://10.28.171.139:8890/sparql/"
     },
     "graphUri": "https://www2.usgs.gov/science/USGSThesaurus/",
     "schemaType": "SKOS",
@@ -157,7 +157,7 @@
   "GEOSCMIL": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+      "url": "http://10.28.171.139:8890/sparql/"
     },
     "graphUri": "http://resource.geosciml.org/",
     "schemaType": "SKOS",
@@ -170,7 +170,7 @@
   "TermSciences": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+      "url": "http://10.28.171.139:8890/sparql/"
     },
     "graphUri": "http://api.termsciences.fr/termsciences/",
     "schemaType": "SKOS",
@@ -183,7 +183,7 @@
   "ThesaurusIngenieur": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+      "url": "http://10.28.171.139:8890/sparql/"
     },
     "graphUri": "http://www.souslesens.org/thesaurusIngenieur/",
     "schemaType": "SKOS",
@@ -196,7 +196,7 @@
   "Unesco": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+      "url": "http://10.28.171.139:8890/sparql/"
     },
     "graphUri": "http://skos.um.es/unesco6/",
     "schemaType": "SKOS",
@@ -209,7 +209,7 @@
   "LibraryOfCongress": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+      "url": "http://10.28.171.139:8890/sparql/"
     },
     "graphUri": "http://www.loc.gov/",
     "schemaType": "SKOS!!!",

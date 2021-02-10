@@ -271,7 +271,7 @@ var ThesaurusBrowser = (function () {
             options = {}
         }
 
-
+var x= $("#GenericTools_searchAllSourcesTermInput")
         var term = $("#GenericTools_searchAllSourcesTermInput").val()
 
         if (!term || term == "")

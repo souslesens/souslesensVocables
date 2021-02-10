@@ -94,11 +94,7 @@ var Sparql_schema = (function () {
             options = {}
         var filterStr
         if (words) {
-
-
-            filterStr = Sparql_common.setFilter("property",null, words, options.exactMatch)
-            filterStr = filterStr.replace("?propertyLabel","str(?property)")
-
+            filterStr ="FILTER ( regex(str(?property),'"+words+"','i') ||regex(str(?subProperty),'"+words+"','i') || regex(?propertyLabel,'"+words+"','i')  || regex(?subPropertyLabel,'"+words+"','i') )"
 
         }else
             filterStr = Sparql_common.setFilter("property", propertyIds)

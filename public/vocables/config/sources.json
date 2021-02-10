@@ -146,7 +146,7 @@
     "sparql_server": {
       "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
-    "graphUri": "https://www2.usgs.gov/science/USGSThesaurus/",
+    "graphUri": "https://www2.usgs.gov/science/USGSThesaurusX/",
     "schemaType": "SKOS",
     "predicates": {
       "topConceptFilter": "?topConcept skos:broader <https://www2.usgs.gov/science/USGSThesaurus/Categories>.",

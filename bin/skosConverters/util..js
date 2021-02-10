@@ -23,12 +23,10 @@ var util = {
 
 
         str = str.replace(/"/gm, "\\\"")
-        str = str.replace(/;/gm, " ")
+        str = str.replace(/;/gm, "\\\;")
         str = str.replace(/\n/gm, "\\\\n")
-        str = str.replace(/\r/gm, "")
-        str = str.replace(/\t/gm, " ")
-        str = str.replace(/\(/gm, "\\\\(")
-        str = str.replace(/\)/gm, "\\\\)")
+        str = str.replace(/\r/gm, "\\\\r")
+        str = str.replace(/\t/gm, "\\\\t")
         str = str.replace(/\\xa0/gm, " ")
         str = str.replace(/'/gm, "\\\'")
         if (forUri)

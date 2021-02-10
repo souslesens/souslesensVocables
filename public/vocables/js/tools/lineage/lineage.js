@@ -20,6 +20,7 @@ var Lineage_classes = (function () {
         self.propertyColors = {}
 
         self.onLoaded = function () {
+            $("#sourceDivControlPanelDiv").html("")
             MainController.UI.message("");
 
 
@@ -1749,7 +1750,7 @@ Lineage_properties = (function () {
     self.init = function () {
         self.graphInited = false
         self.currentSource = MainController.currentSource
-        self.getPropertiesjsTreeData(function (err, result) {
+        self.getPropertiesjsTreeData(self.currentSource,null,null,function (err, jsTreeData) {
             if (err)
                 return MainController.UI.message(err)
             var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true}
@@ -1764,6 +1765,7 @@ Lineage_properties = (function () {
         $("#graphDiv").html(html)
     }
 
+
     self.jstreeContextMenu = function () {
         var items = {
             nodeInfos: {
@@ -1776,7 +1778,7 @@ Lineage_properties = (function () {
             drawProperty: {
                 label: "Draw property",
                 action: function (e) {// pb avec source
-                    self.drawGraph(self.currentTreeNode.id)
+                    self.drawGraph(self.currentTreeNode)
                 }
 
             }
@@ -1791,10 +1793,10 @@ Lineage_properties = (function () {
 
     }
 
-    self.getPropertiesjsTreeData = function (id, words, callback) {
+    self.getPropertiesjsTreeData = function (source,id, words, callback) {
 
 
-        OwlSchema.initSourceSchema(self.currentSource, function (err, schema) {
+        OwlSchema.initSourceSchema(source, function (err, schema) {
             if (err)
                 return MainController.UI.message(err);
             Sparql_schema.getPropertiesRangeAndDomain(schema, id, words, {mandatoryDomain: 0}, function (err, result) {
@@ -1846,7 +1848,7 @@ Lineage_properties = (function () {
                             parent: "#",
                             id: key,
                             text: self.properties[key].label,
-                            data: {id: key, label: self.properties[key].label, source: self.currentSource}
+                            data: {id: key, label: self.properties[key].label, source: source}
                         })
                     }
                     if (true) {
@@ -1855,7 +1857,7 @@ Lineage_properties = (function () {
                                 parent: key,
                                 id: item.id,
                                 text: item.label,
-                                data: {id: item.id, label: item.label, source: self.currentSource, parent: self.properties[key]}
+                                data: {id: item.id, label: item.label, source: source, parent: self.properties[key]}
                             })
 
                         })
@@ -1868,15 +1870,15 @@ Lineage_properties = (function () {
         })
     }
 
-    self.drawGraph = function (propertyId) {
+    self.drawGraph = function (property) {
 
-        OwlSchema.initSourceSchema(Lineage_classes.currentSource, function (err, schema) {
+        OwlSchema.initSourceSchema(property.data.source, function (err, schema) {
             if (err)
                 return MainController.UI.message(err);
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
             var options = {mandatoryDomain: 1}
 
-            Sparql_schema.getPropertiesRangeAndDomain(schema, propertyId, null, {mandatoryDomain: 0}, function (err, result) {
+            Sparql_schema.getPropertiesRangeAndDomain(schema, property.id, null, {mandatoryDomain: 0}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var visjsData = {nodes: [], edges: []}
@@ -2152,7 +2154,7 @@ Lineage_properties = (function () {
 
 
         expandNode: function (node, point, event) {
-            self.drawGraph(node.id)
+            self.drawGraph(node)
         },
         showNodeInfos: function () {
             MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
@@ -2169,7 +2171,7 @@ Lineage_properties = (function () {
         var searchedSources = [];
         if (searchAllSources) {
             for (var sourceLabel in Config.sources) {
-                if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == "OWL")
+                if ( Config.sources[sourceLabel].schemaType == "OWL")
                     searchedSources.push(sourceLabel)
             }
         } else {
@@ -2188,7 +2190,7 @@ Lineage_properties = (function () {
 
             if(sourceLabel=="ONE-MODEL")
                 var x=3
-            self.getPropertiesjsTreeData(null, term, function (err, result) {
+            self.getPropertiesjsTreeData(sourceLabel,null, term, function (err, result) {
                 if (err)
                     callbackEach(err);
 

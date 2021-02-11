@@ -82,5 +82,9 @@ var graphUri = "http://souslesens/thesaurus/ONE-TAXONOMY/";
 var filePath = "D:\\NLP\\rdfs\\ONE-TAXONOMY.nt"
 
 
+var graphUri = "http://resource.geosciml.org/";
+var filePath = "D:\\NLP\\rdfs\\geosciml.nt"
+
+
 
 exportGraph.execute(serverUrl, graphUri, filePath)

@@ -1,4 +1,4 @@
-var Individuals = (function () {
+var Xlsx2mappings = (function () {
 
         var self = {}
         self.currentSource = null;

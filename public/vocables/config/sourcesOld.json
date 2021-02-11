@@ -1,7 +1,7 @@
 {
   "SKOS": {
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://www.w3.org/2004/02/skos/core/",
     "label": "skos",
@@ -23,7 +23,7 @@
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY/",
     "schemaType": "SKOS",
@@ -35,7 +35,7 @@
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://data.total.com/resource/thesaurus/POC-EP/",
     "schemaType": "SKOS",
@@ -47,7 +47,7 @@
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://data.total.com/resource/thesaurus/ctg2/",
     "schemaType": "SKOS",
@@ -62,7 +62,7 @@
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://souslesens.org/vocabulary/iec/",
     "schemaType": "SKOS",
@@ -74,7 +74,7 @@
   "Oil-Gas-Upstream": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://souslesens.org/oil-gas/upstream/",
     "schemaType": "SKOS",
@@ -86,7 +86,7 @@
   "Gaia": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://data.total.com/resource/dictionary/gaia/",
     "schemaType": "SKOS",
@@ -98,7 +98,7 @@
   "GEMET": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "graphUri": "http://www.eionet.europa.eu/gemet/",
     "schemaType": "SKOS",
@@ -144,7 +144,7 @@
   "USGS": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
     "graphUri": "https://www2.usgs.gov/science/USGSThesaurusX/",
     "schemaType": "SKOS",
@@ -157,7 +157,7 @@
   "GEOSCMIL": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
     "graphUri": "http://resource.geosciml.org/",
     "schemaType": "SKOS",
@@ -170,7 +170,7 @@
   "TermSciences": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
     "graphUri": "http://api.termsciences.fr/termsciences/",
     "schemaType": "SKOS",
@@ -183,7 +183,7 @@
   "ThesaurusIngenieur": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
     "graphUri": "http://www.souslesens.org/thesaurusIngenieur/",
     "schemaType": "SKOS",
@@ -196,7 +196,7 @@
   "Unesco": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
     "graphUri": "http://skos.um.es/unesco6/",
     "schemaType": "SKOS",
@@ -209,7 +209,7 @@
   "LibraryOfCongress": {
     "controller": "Sparql_SKOS",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
     },
     "graphUri": "http://www.loc.gov/",
     "schemaType": "SKOS!!!",
@@ -236,7 +236,7 @@
   "ISO_15926-part-14": {
     "graphUri": "http://standards.iso.org/iso/15926/part14/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
@@ -247,7 +247,7 @@
   "ISO_15926-part-13": {
     "graphUri": "http://standards.iso.org/iso/15926/part13/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?x rdfs:subClassOf ?topConcept . filter (NOT exists {?obj rdfs:subClassOf ?x})",
@@ -258,7 +258,7 @@
   "CFIHOS_READI": {
     "graphUri": "http://w3id.org/readi/rdl/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/Object>",
@@ -272,7 +272,7 @@
       "http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"
     ],
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
@@ -284,7 +284,7 @@
   "ISO_14224": {
     "graphUri": "http://standards.iso.org/iso/14224/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
@@ -297,7 +297,7 @@
   "NPD": {
     "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/> from <http://sws.ifi.uio.no/data/npd-v2/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
@@ -309,7 +309,7 @@
   "CIDOC": {
     "graphUri": "http://erlangen-crm.org/current/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
@@ -346,7 +346,7 @@
   "CFIHOS_equipment": {
     "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
@@ -370,7 +370,7 @@
     "editable": true,
     "graphUri": "http://standards.iso.org/iso/15926/part4/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
     "controller": "Sparql_OWL",
@@ -382,7 +382,7 @@
     "editable": true,
     "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
@@ -403,7 +403,7 @@
     "editable": true,
     "graphUri": "http://data.total.com/resource/one-model/ontology/",
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
@@ -451,7 +451,7 @@
 
 
     "sparql_server": {
-      "url": "_default"
+      "url": "http://51.178.139.80:8890/sparql"
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",

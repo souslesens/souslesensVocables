@@ -47,7 +47,7 @@ var Config = (function () {
 
     self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-    self.tools["INDIVIDUALS"] = {label: "Individuals", multiSources: 0, controller: Individuals, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["xlsx2mappings"] = {label: "Xlsx2mappings", multiSources: 0, controller: Xlsx2mappings, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     // self.tools["AssetQuery"] = {label: "Ontology", multiSources: 0, controller: AssetQuery,toolDescriptionImg:null}
 

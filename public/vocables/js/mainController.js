@@ -9,6 +9,10 @@ var MainController = (function () {
 
         $.getJSON("config/sources.json", function (json) {
             Config.sources = json;
+           for(var sourceLabel in Config.sources){
+                if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
+                    Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
+            }
             if (callback)
                 return callback()
 
@@ -71,10 +75,13 @@ var MainController = (function () {
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
 
+
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
                 if ( (Config.currentProfile.allowedSources!="ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0)  ||  Config.currentProfile.forbiddenSources.indexOf(sourceLabel) >-1)
                     return;
+
+
                 Config.sources[sourceLabel].name = sourceLabel;
 
                 if (!distinctNodes[sourceLabel]) {

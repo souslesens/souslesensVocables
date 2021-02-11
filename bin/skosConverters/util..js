@@ -21,7 +21,7 @@ var util = {
         if (!str || !str.replace)
             return null;
 
-
+        str = str.replace(/\\/gm, "")
         str = str.replace(/"/gm, "\\\"")
         str = str.replace(/;/gm, "\\\;")
         str = str.replace(/\n/gm, "\\\\n")

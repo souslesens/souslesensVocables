@@ -3,7 +3,7 @@
 
 {
   "SKOS": {
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_url": "_default",
     "graphUri": "http://www.w3.org/2004/02/skos/core/",
     "label": "skos",
     "isOntology":false,
@@ -23,7 +23,7 @@
     }
   },
   "OWLXXXX": {
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_url": "_default",
     "graphUri":"http://data.15926.org/dm/",
     "label": "NPD",
     "isOntology":true,
@@ -38,7 +38,7 @@
     }
   },
  "NPD": {
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_url": "_default",
     "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
     "label": "NPD",
     "isOntology":true,
@@ -53,7 +53,7 @@
     }
   },
   "QUANTUM": {
-    "sparql_url": "http://51.178.139.80:8890/sparql",
+    "sparql_url": "_default",
     "graphUri": "http://data.total.com/resource/GS_EP_DEV/vocab/",
     "label": "QUANTUM",
     "isOntology":true,

@@ -83,13 +83,17 @@ var triplesGenerator = {
                 mappingSheets.push(sheet)
             }
         })
-        xlsx2json.parse(xlsxFilePath, {sheets: mappingSheets}, function (err, result) {
+        xlsx2json.parse(xlsxFilePath, {sheets: mappingSheets}, optfunction (err, result) {
 
             if (err)
                 return callback(err)
-            var allTriples = []
+            var allTriples = [];
+            var mappingData=[]
             mappingSheets.forEach(function (sheet) {
-                triplesGenerator.generateSheetDataTriples(mappings, result.data[sheet], uriPrefix, options, function (err, triples) {
+                sheet.forEach(function (line) {
+                mappingData = mappingData.concat(result.data[sheet])
+            })
+                triplesGenerator.generateSheetDataTriples(mappings, mappingData, uriPrefix, options, function (err, triples) {
                     if (err)
                         return callback(err)
 
@@ -117,7 +121,7 @@ var triplesGenerator = {
                     return callback(null, allTriples)
 
 
-                })
+
             })
         })
 
@@ -167,11 +171,15 @@ if (false) {
 }
 if (true) {
     var xlsxPath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX"
-    var mappings = [{"subject": "Tag.ID", "predicate": "http://data.total.com/resource/one-model/ontology#TOTAL-hasAttribute", "object": "TagtoAttributes.AttributeID"}, {
+    var mappings = [{
         "subject": "Tag.ID",
-        "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-        "object": "Tag.FunctionalClassID"
-    }]
+        "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "object": {"type": "http://data.total.com/resource/one-model/ontology#Tag"}
+    }, {
+        "subject": "TagtoAttributes.Attributes",
+        "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "object": {"type": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"}
+    }, {"subject": "Tag.ID", "predicate": "http://data.total.com/resource/one-model/ontology#TOTAL-hasAttribute", "object": "TagtoAttributes.Attributes"}]
     var options = {generateIds: 15, output: "ntTriples"}
     var uriPrefix = "http://data.total.com/resource/one-model/ontology#"
     triplesGenerator.generateXlsxBookTriples(mappings, xlsxPath, uriPrefix, options, function (err, result) {

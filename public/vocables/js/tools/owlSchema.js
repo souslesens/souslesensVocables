@@ -31,6 +31,8 @@ var OwlSchema = (function () {
 
             if ( sourceLabel && Config.sources[sourceLabel].schemaType) {
                 sourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
+                if(sourceSchema.sparql_url=="_default")
+                    sourceSchema.sparql_url=Config.default_sparql_url
                 if (sourceSchema)
                     sourceSchema.type = Config.sources[sourceLabel].schemaType
             }

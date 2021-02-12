@@ -445,8 +445,7 @@
   "_comment": "**************************************************************assets***************************************",
   "ASSETS-turbogenerator": {
     "graphUri":  [
-      "http://data.total.com/resource/one-model/assets/turbognerator/",
-      "http://data.total.com/resource/quantum/"
+      "http://data.total.com/resource/one-model/assets/turbognerator/"
     ],
 
 
@@ -455,7 +454,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "OWL",
     "preferredProperties": [
       "http://standards.iso.org/iso/15926/part14/installedAs",
       "http://standards.iso.org/iso/15926/part14/hasArrangedPart",

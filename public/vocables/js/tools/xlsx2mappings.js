@@ -147,12 +147,15 @@ var Xlsx2mappings = (function () {
             var nodes = common.getjsTreeNodes("Individuals_dataModelTree")
 
             for (var key in self.typedObjectsMap) {
+                if(self.typedObjectsMap[key].type){
                 data.mappings.push({
                     subject: key,
                     predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                     object: self.typedObjectsMap[key].type
 
+
                 })
+                }
             }
             nodes.forEach(function (node) {
 
@@ -160,12 +163,14 @@ var Xlsx2mappings = (function () {
                     var subject = node.data.subject
                     var predicate = node.data.predicate
                     var object = node.data.object
-                    data.mappings.push({
-                        subject: subject,
-                        predicate: predicate,
-                        object: object
+                    if(subject && predicate && object) {
+                        data.mappings.push({
+                            subject: subject,
+                            predicate: predicate,
+                            object: object
 
-                    })
+                        })
+                    }
                 }
 
             })
@@ -432,7 +437,7 @@ var Xlsx2mappings = (function () {
 
 
         self.loadXlsModel = function (path) {
-            self.init()
+
             var path = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BCmodel.json"
             var payload = {
                 triplesGenerator: 1,

@@ -1872,14 +1872,22 @@ Lineage_properties = (function () {
     }
 
     self.drawGraph = function (property) {
+        var source=self.currentSource
+        var propId=null
+        if(property) {
+            source = property.data.source
+            propId=property.id
+        }
 
-        OwlSchema.initSourceSchema(property.data.source, function (err, schema) {
+
+
+        OwlSchema.initSourceSchema(source, function (err, schema) {
             if (err)
                 return MainController.UI.message(err);
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
             var options = {mandatoryDomain: 1}
 
-            Sparql_schema.getPropertiesRangeAndDomain(schema, property.id, null, {mandatoryDomain: 0}, function (err, result) {
+            Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, {mandatoryDomain: 0}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var visjsData = {nodes: [], edges: []}

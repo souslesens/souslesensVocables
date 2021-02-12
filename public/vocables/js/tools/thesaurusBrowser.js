@@ -289,7 +289,7 @@ var x= $("#GenericTools_searchAllSourcesTermInput")
        if(searchAllSources) {
            for (var sourceLabel in Config.sources) {
                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                   if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                   if (!Config.sources[sourceLabel].schemaType || (Config.sources[sourceLabel].schemaType == schemaType || schemaType==""))
                        searchedSources.push(sourceLabel)
                }
            }

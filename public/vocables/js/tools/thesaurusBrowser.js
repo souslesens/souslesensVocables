@@ -345,6 +345,8 @@ var x= $("#GenericTools_searchAllSourcesTermInput")
             }
             $("#" + self.currentTargetDiv).html(html)
 
+MainController.UI.message("Search Done")
+
 
             var jstreeOptions = {
                 openAll: true, selectTreeNodeFn: function (event, propertiesMap) {

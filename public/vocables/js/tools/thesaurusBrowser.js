@@ -5,6 +5,9 @@ var ThesaurusBrowser = (function () {
 
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
+        setTimeout(function(){
+                $("#GenericTools_searchSchemaType").val(MainController.currentSchemaType)
+        },200)
         /*    $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
                 "<input type='checkbox' checked='checked' id= 'GenericTools_allExactMatchSearchCBX'>Exact Match" +
                 "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")*/
@@ -280,8 +283,7 @@ var x= $("#GenericTools_searchAllSourcesTermInput")
         var searchAllSources = $("#GenericTools_searchInAllSources").prop("checked")
 
         var searchedSources = [];
-        if (MainController.currentSchemaType)
-            $("#GenericTools_searchSchemaType").val(MainController.currentSchemaType)
+
         var schemaType = $("#GenericTools_searchSchemaType").val()
 
        if(searchAllSources) {

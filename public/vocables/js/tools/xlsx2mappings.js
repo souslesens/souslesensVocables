@@ -10,14 +10,20 @@ var Xlsx2mappings = (function () {
 
 
         }
-        self.subjectPropertiesMap = {}
-
-        self.typedObjectsMap = {}
-
         var constraintsMap = {}
         var allObjectsMap = {}
+        self.init = function () {
+            self.subjectPropertiesMap = {}
+            self.typedObjectsMap = {}
+            self.sheetJoinColumns = {}
+            constraintsMap = {}
+            allObjectsMap = {}
+        }
+        self.init()
+
+
         self.onLoaded = function () {
-            $("#graphDiv").load("./snippets/individuals.html");
+            $("#graphDiv").load("./snippets/xlsx2mapping.html");
 
         }
         self.onSourceSelect = function (source) {
@@ -66,11 +72,44 @@ var Xlsx2mappings = (function () {
                     }
                 }
 
+                items.joinColumnStart = {
+                    label: "joinColumnStart",
+                    action: function (e) {
+                        var x = e.reference.prevObject[0]
+                        var text = x.innerText
+                        self.startJoiningColumn = getSelectedNode(e).data.id
+                    }
+                }
+                if (true || self.startJoiningColumn) {
+                    items.joinColumnEnd = {
+                        label: "joinColumnEnd",
+                        action: function (e) {
+                            var x = e.reference.prevObject[0]
+                            var text = x.innerText
+                            self.endJoiningColumn = getSelectedNode(e).data.id
+                            self.joinSheetColumns()
+                        }
+                    }
+                }
+
 
             }
             return items
         }
 
+
+        self.joinSheetColumns = function () {
+            var start = self.startJoiningColumn;
+            var end = self.endJoiningColumn;
+            $("#Individuals_dataModelTree").jstree(true).rename_node(self.endJoiningColumn, "<span  class='joinColumn'>" +self.endJoiningColumn + "=" +self.startJoiningColumn + "</span>")
+            if(! self.sheetJoinColumns[start])
+                self.sheetJoinColumns[start]=[]
+            self.sheetJoinColumns[start].push(end)
+            if(! self.sheetJoinColumns[end])
+                self.sheetJoinColumns[end]=[]
+            self.sheetJoinColumns[end].push(start)
+
+        }
 
         self.setTripleObject = function (type, nodeData) {
 
@@ -98,34 +137,36 @@ var Xlsx2mappings = (function () {
         self.displayMappings = function () {
 
 
+            //    data: {type: "triple", object: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
+            var data = {
+                mappings: [],
+                sheetJoinColumns: self.sheetJoinColumns,
+            };
 
-        //    data: {type: "triple", object: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
-            var data = [];
 
+            var nodes = common.getjsTreeNodes("Individuals_dataModelTree")
 
-           var nodes =common.getjsTreeNodes("Individuals_dataModelTree")
+            for (var key in self.typedObjectsMap) {
+                data.mappings.push({
+                    subject: key,
+                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                    object: self.typedObjectsMap[key].type
 
-           for(var key in self.typedObjectsMap){
-               data.push({
-                   subject: key,
-                   predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                   object: self.typedObjectsMap[key]
+                })
+            }
+            nodes.forEach(function (node) {
 
-               })
-           }
-          nodes.forEach(function (node) {
+                if (node.data.type == "triple") {
+                    var subject = node.data.subject
+                    var predicate = node.data.predicate
+                    var object = node.data.object
+                    data.mappings.push({
+                        subject: subject,
+                        predicate: predicate,
+                        object: object
 
-              if( node.data.type=="triple") {
-                  var subject = node.data.subject
-                  var predicate = node.data.predicate
-                  var object = node.data.object
-                  data.push({
-                      subject: subject,
-                      predicate: predicate,
-                      object: object
-
-                  })
-              }
+                    })
+                }
 
             })
 
@@ -256,7 +297,7 @@ var Xlsx2mappings = (function () {
                     parent: "#",
                     data: {type: "http://www.w3.org/2000/01/rdf-schema#label", id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", source: self.currentSource}
                 }]
-            constraintsMap = {domains: [], properties: [],ranges:[]}
+            constraintsMap = {domains: [], properties: [], ranges: []}
 
 
             async.series([
@@ -369,15 +410,14 @@ var Xlsx2mappings = (function () {
                             if (err)
                                 return callbackSeries(err)
                             result.forEach(function (item) {
-                                if( constraintsMap.domains[item.concept.value] ||    constraintsMap.ranges[item.concept.value])
-                                allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}}
+                                if (constraintsMap.domains[item.concept.value] || constraintsMap.ranges[item.concept.value])
+                                    allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}}
 
 
                             })
                             callbackSeries()
                         })
                     },
-
 
 
                 ],
@@ -392,6 +432,7 @@ var Xlsx2mappings = (function () {
 
 
         self.loadXlsModel = function (path) {
+            self.init()
             var path = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BCmodel.json"
             var payload = {
                 triplesGenerator: 1,

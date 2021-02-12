@@ -23,7 +23,7 @@ var util = {
 
         str = str.replace(/\\/gm, "")
         str = str.replace(/"/gm, "\\\"")
-        str = str.replace(/;/gm, "\\\;")
+       // str = str.replace(/;/gm, "\\\;")
         str = str.replace(/\n/gm, "\\\\n")
         str = str.replace(/\r/gm, "\\\\r")
         str = str.replace(/\t/gm, "\\\\t")

@@ -47,8 +47,8 @@ var Blender = (function () {
 
                     })
 
-                    $("#Blender_searchDiv").load("snippets/searchAll.html")
-                    ThesaurusBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
+                 //   $("#Blender_searchDiv").load("snippets/searchAll.html")
+                 //   ThesaurusBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
 
 
                 }, 200

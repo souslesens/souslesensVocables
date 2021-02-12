@@ -38,7 +38,7 @@
       "url": "_default"
     },
     "graphUri": "http://data.total.com/resource/thesaurus/POC-EP/",
-    "schemaType": "SKOS",
+    "schemaType": "SKOSXXX",
     "predicates": {
     },
     "color": "#9edae5"
@@ -146,7 +146,7 @@
     "sparql_server": {
       "url": "_default"
     },
-    "graphUri": "https://www2.usgs.gov/science/USGSThesaurusX/",
+    "graphUri": "https://www2.usgs.gov/science/USGSThesaurus/",
     "schemaType": "SKOS",
     "predicates": {
       "topConceptFilter": "?topConcept skos:broader <https://www2.usgs.gov/science/USGSThesaurus/Categories>.",

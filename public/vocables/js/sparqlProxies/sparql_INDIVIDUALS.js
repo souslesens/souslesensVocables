@@ -1,4 +1,4 @@
-var Sparql_OWL = (function () {
+var Sparql_INDIVIDUALS = (function () {
 
         var self = {};
 
@@ -61,7 +61,7 @@ var Sparql_OWL = (function () {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-            var strFilter = "";
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
@@ -96,6 +96,7 @@ var Sparql_OWL = (function () {
             }
             query += "} order by ?child1 ";
             " }"
+
 
 
             if (options.filterCollections) {
@@ -136,7 +137,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","child"])
                 return callback(null, result.results.bindings)
 
             })
@@ -182,7 +183,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             if (!options)
                 options = {}
-            var strFilter = "";
+            var strFilter="";
             if (words) {
                 strFilter = Sparql_common.setFilter("concept", null, words, options)
             } else if (ids) {
@@ -204,44 +205,16 @@ var Sparql_OWL = (function () {
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                " select distinct *  " + fromStr + "  WHERE {{"
+                " select distinct *  " + fromStr + "  WHERE {"
 
-            if(words) {
-                query += "?concept rdfs:label ?conceptLabel."
-            }else{
-                query += "OPTIONAL { ?concept rdfs:label ?conceptLabel.}"
-            }
+            query += "?concept rdfs:label ?conceptLabel. " +
+                "?concept rdf:type ?broader1." +
+                "FILTER (!isBlank(?concept))" + strFilter;
 
 
-            ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
-
-            for (var i = 1; i <= ancestorsDepth; i++) {
-                if (i == 1) {
-                    query += "  ?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
-                    if (options.skipRestrictions) {
-                        query += " filter ( NOT EXISTS {?broader" + (i) + " rdf:type owl:Restriction}) "
-                    }
 
 
-                } else {
-
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + "."
-                    //   "?broader" + i + " rdf:type owl:Class."
-
-
-                }
-                query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
-
-
-            }
-
-
-            for (var i = 1; i < ancestorsDepth; i++) {
-                query += "} "
-
-            }
-            query += " FILTER (!isBlank(?concept))" + strFilter;
-            query += "  }}";
+            query += "  }";
 
             if (options.filterCollections) {
                 query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
@@ -257,7 +230,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "broader"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","broader"])
                 return callback(null, result.results.bindings)
 
             })
@@ -310,23 +283,23 @@ var Sparql_OWL = (function () {
                     return callback(err)
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "concept")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"concept")
                 return callback(null, result.results.bindings)
 
             })
         }
-        self.getIndividualProperties = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
+        self.getIndividualProperties = function (sourceLabel, subjectIds,propertyIds,  objectIds, options, callback) {
             if (!options)
                 options = {}
 
-            function query(subjectIds, propertyIds, objectIds, callbackQuery) {
+            function query(subjectIds,propertyIds,objectIds,callbackQuery) {
                 var filterStr = ""
                 if (subjectIds)
-                    filterStr += Sparql_common.setFilter("subject", subjectIds);
+                    filterStr+= Sparql_common.setFilter("subject", subjectIds);
                 if (objectIds)
-                    filterStr += Sparql_common.setFilter("object", objectIds);
+                    filterStr+= Sparql_common.setFilter("object", objectIds);
                 if (propertyIds)
-                    filterStr += Sparql_common.setFilter("property", propertyIds);
+                    filterStr+= Sparql_common.setFilter("property", propertyIds);
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -367,42 +340,49 @@ var Sparql_OWL = (function () {
             }
 
 
-            var slicedSubjectIds = null;
-            var slicedObjectIds = null;
 
-            var allResults = []
-            if (subjectIds) {
-                slicedSubjectIds = common.sliceArray(subjectIds, Sparql_generic.slicesSize)
-                async.eachSeries(slicedSubjectIds, function (subjectIds, callbackEach) {
-                    query(subjectIds, propertyIds, objectIds, function (err, result) {
-                        if (err)
+
+
+
+            var slicedSubjectIds=null;
+            var  slicedObjectIds=null;
+
+            var allResults=[]
+            if(subjectIds){
+                slicedSubjectIds=common.sliceArray(subjectIds,Sparql_generic.slicesSize)
+                async.eachSeries(slicedSubjectIds,function(subjectIds,callbackEach){
+                    query(subjectIds,propertyIds,objectIds,function(err,result){
+                        if(err)
                             return callback(err)
-                        allResults = allResults.concat(result);
+                        allResults=allResults.concat(result);
                         callbackEach()
                     })
-                }, function (err) {
-                    return callback(err, allResults)
+                },function(err){
+                    return callback(err,allResults)
                 })
 
 
-            } else if (objectIds) {
-                slicedObjectIds = common.sliceArray(slicedObjectIds, Sparql_generic.slicesSize)
+            }
+            else if(objectIds){
+                slicedObjectIds=common.sliceArray(slicedObjectIds,Sparql_generic.slicesSize)
 
-                async.eachSeries(slicedObjectIds, function (objectIds, callbackEach) {
-                    query(subjectIds, propertyIds, objectIds, function (err, result) {
-                        if (err)
-                            return callback(err)
-                        allResults = allResults.concat(result);
-                        callbackEach()
+                    async.eachSeries(slicedObjectIds,function(objectIds,callbackEach){
+                        query(subjectIds,propertyIds,objectIds,function(err,result){
+                            if(err)
+                                return callback(err)
+                            allResults=allResults.concat(result);
+                            callbackEach()
+                        })
+                    },function(err){
+                        return callback(err,allResults)
                     })
-                }, function (err) {
-                    return callback(err, allResults)
-                })
 
 
-            } else {
-                query(subjectIds, propertyIds, objectIds, function (err, result) {
-                    return callback(err, result)
+                }
+
+           else {
+                query(subjectIds,propertyIds,objectIds,function(err,result){
+                        return callback(err,result)
 
                 })
             }

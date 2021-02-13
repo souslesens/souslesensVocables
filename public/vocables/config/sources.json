@@ -452,9 +452,9 @@
     "sparql_server": {
       "url": "_default"
     },
-    "controller": "Sparql_OWL",
+    "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "OWL",
+    "schemaType": "INDIVIDUAL",
     "preferredProperties": [
       "http://standards.iso.org/iso/15926/part14/installedAs",
       "http://standards.iso.org/iso/15926/part14/hasArrangedPart",

@@ -417,6 +417,11 @@ var Sparql_OWL = (function () {
                 options = {}
             }
 
+
+
+
+
+
             var filterStr = Sparql_common.setFilter("domain", ids);
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;

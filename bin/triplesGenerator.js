@@ -30,12 +30,17 @@ var triplesGenerator = {
             mappings.forEach(function (mapping, index) {
                 var subjectValue = item[mapping.subject];
 
-
                 if (!subjectValue)
                     return;
 
+
+
+
                 var subjectUri
-                if (options.generateIds) {
+                if(options.labelUrisMap && options.labelUrisMap[subjectValue]){
+                    subjectValue=options.labelUrisMap[subjectValue];
+                }
+                else if (options.generateIds) {
                     var newUri = false
                     if (!idsMap[subjectValue]) {
                         idsMap[subjectValue] = util.getRandomHexaId(options.generateIds)
@@ -395,7 +400,7 @@ if (false) {
     }
 
 
-    var mappings = {
+    var mappingsXX = {
         "mappings": [{
             "subject": "data.TAG1",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",

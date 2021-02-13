@@ -137,6 +137,9 @@ var Lineage_classes = (function () {
             ThesaurusBrowser.currentTreeNode = propertiesMap.node;
             var data = propertiesMap.node.data;
 
+            if(Config.sources[data.source].schemaType=="INDIVIDUAL"){
+                return AssetQuery.showJstreeNodeChildren(ThesaurusBrowser.currentTargetDiv,propertiesMap.node)
+            }
             if (propertiesMap.event.ctrlKey)
                 self.addArbitraryNodeToGraph(data)
             ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
@@ -998,15 +1001,16 @@ var Lineage_classes = (function () {
             }
 
 
-            MainController.UI.message("")
 
             Sparql_OWL.getObjectProperties(source, classIds, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 if (result.length == 0) {
                     $("#waitImg").css("display", "none");
-                    Lineage_classes.drawRestrictions(classIds)
-                    return MainController.UI.message("No data found")
+                    if(Config.sources[source].schemaType!="INDIVIDUAL") {
+                        Lineage_classes.drawRestrictions(classIds)
+                    }
+                   return  MainController.UI.message("No data found")
 
                 }
                 var visjsData = {nodes: [], edges: []}
@@ -1034,29 +1038,32 @@ var Lineage_classes = (function () {
 
                     }
                     var edgeId = item.domain.value + "_" + item.range.value + "_" + item.prop.value
+                    var edgeIdInv = item.range.value + "_" + item.range.value + "_" + item.prop.value
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
-
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.domain.value,
-                            to: item.range.value,
-                            label: "<i>" + item.propLabel.value + "</i>",
-                            data: {propertyId: item.prop.value, source: source},
-                            font: {multi: true, size: 10},
-                            // font: {align: "middle", ital: {color:objectPropertyColor, mod: "italic", size: 10}},
-                            //   physics:false,
-                            arrows: {
-                                to: {
-                                    enabled: true,
-                                    type: "bar",
-                                    scaleFactor: 0.5
+                        if (!existingNodes[edgeIdInv]) {
+                            existingNodes[edgeIdInv] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: item.domain.value,
+                                to: item.range.value,
+                                label: "<i>" + item.propLabel.value + "</i>",
+                                data: {propertyId: item.prop.value, source: source},
+                                font: {multi: true, size: 10},
+                                // font: {align: "middle", ital: {color:objectPropertyColor, mod: "italic", size: 10}},
+                                //   physics:false,
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "bar",
+                                        scaleFactor: 0.5
+                                    },
                                 },
-                            },
-                            dashes: true,
-                            color: objectPropertyColor
+                                dashes: true,
+                                color: objectPropertyColor
 
-                        })
+                            })
+                        }
                     }
 
                 })
@@ -1066,7 +1073,9 @@ var Lineage_classes = (function () {
                 visjsGraph.network.fit()
                 $("#waitImg").css("display", "none");
 
-                Lineage_classes.drawRestrictions(classIds)
+                if(Config.sources[source].schemaType!="INDIVIDUAL") {
+                    Lineage_classes.drawRestrictions(classIds)
+                }
 
             })
 

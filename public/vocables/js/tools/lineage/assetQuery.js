@@ -1,9 +1,68 @@
 var AssetQuery = (function () {
-        var self = {};
-        self.currentProperty;
-        self.currentNode;
+    var self = {};
+    self.currentProperty;
+    self.currentNode;
 
-        self.queryClassPath = {};
+    self.queryClassPath = {};
+
+
+    self.showJstreeNodeChildren = function (jstreeTargetDiv, node) {
+
+
+        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, {}, function (err, result) {
+            var existingsNodes = {[node.data.id]: 1}
+
+            var propsMap = {}
+            result.forEach(function (item) {
+                if (!propsMap[item.prop.value])
+                    propsMap[item.prop.value] = {id: item.prop.value, label: item.propLabel.value, domains: [], ranges: []}
+
+                propsMap[item.prop.value].domains.push({id: item.domain.value, label: item.domainLabel.value})
+                propsMap[item.prop.value].ranges.push({id: item.range.value, label: item.rangeLabel.value})
+
+            })
+
+            var jstreeData = []
+            for (var key in propsMap) {
+                var item = propsMap[key]
+var propId= item.id + "_" + common.getRandomHexaId(3);
+                jstreeData.push({
+                    id:propId,
+                    text: item.label,
+                    parent: node.data.id,
+                    data: item
+                })
+
+                common.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
+
+                jstreeData = []
+                item.domains.forEach(function (item) {
+                    jstreeData.push({
+                        id: item.id + "_" + common.getRandomHexaId(3),
+                        text: item.label,
+                        parent: propId,
+                        data: item
+                    })
+                })
+
+                item.ranges.forEach(function (item) {
+                    jstreeData.push({
+                        id: item.id + "_" + common.getRandomHexaId(3),
+                        text: item.label,
+                        parent: propId,
+                        data: item
+                    })
+                })
+
+                common.addNodesToJstree(jstreeTargetDiv, propId, jstreeData)
+            }
+
+        })
+
+
+
+
+        }
 
 
         self.showNodeProperties = function (node) {
@@ -587,9 +646,8 @@ var AssetQuery = (function () {
                 executeRemoteSqlQuery: function () {
                     var remoteObjs = [];
                     var isNewTree = $("#AssetQuery_queryTreeDiv").is(':empty');
-                    if(isNewTree) {//query only class (not properties)
-                    }
-                    else{
+                    if (isNewTree) {//query only class (not properties)
+                    } else {
                         var nodes = common.getjsTreeNodes("AssetQuery_queryTreeDiv")
                         var nodesMap = {}
                         nodes.forEach(function (item) {

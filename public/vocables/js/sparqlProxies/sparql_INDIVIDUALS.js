@@ -217,8 +217,8 @@ var Sparql_INDIVIDUALS = (function () {
 
 
             //  var filterStr = "FILTER (?domain in (<"+ids[0]+">) || ?range in (<"+ids[0]+">))"
-            var filterStr = Sparql_common.setFilter("domain", ids);
-            var filterStr2 = Sparql_common.setFilter("range", ids);
+            var filterStr = Sparql_common.setFilter(["domain","range"] , ids);
+
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -240,7 +240,7 @@ var Sparql_INDIVIDUALS = (function () {
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
                 "select "+selectStr+"  FROM <"+ self.graphUri+">   WHERE {{" +
                 "   ?domain ?prop ?range. ?domain rdfs:label ?domainLabel.  ?range rdfs:label ?rangeLabel. " +
-                " ?range rdf:type ?rangeType. ?domain rdf:type ?domainType. filter(regex(str(?prop),\"part14\")) "+filterStr2+"}"
+                " ?range rdf:type ?rangeType. ?domain rdf:type ?domainType. filter(regex(str(?prop),\"part14\")) "+filterStr+"}"
              /*   +
                 "UNION "+
                 "  {?range  ?prop ?domain. ?domain rdfs:label ?domainLabel.  ?range rdfs:label ?rangeLabel. " +

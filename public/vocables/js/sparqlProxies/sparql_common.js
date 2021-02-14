@@ -4,8 +4,9 @@ var Sparql_common = (function () {
     var self = {};
 
     self.setFilter = function (varName, ids, words, options) {
-        if(!ids &&  !words)
+        if (!ids && !words)
             return "";
+
         function formatWord(str) {
             var str = str.replace(/\\/g, "")
             str = str.replace(/\(/gm, "")
@@ -21,56 +22,79 @@ var Sparql_common = (function () {
             options = {}
         var filter = ";"
 
-        if (words) {
-            if (Array.isArray(words)) {
-                if (words[0] == null)
-                    return ""
-                var conceptWordStr = ""
-                words.forEach(function (word, index) {
 
-                    if (word.length > 1) {
-                        if (conceptWordStr != "")
-                            conceptWordStr += "|"
-                        if (options.exactMatch)
-                            conceptWordStr += "^" + formatWord(word) + "$";
-                        else
-                            conceptWordStr += "" + formatWord(word) + "";
-                    }
-                })
-                filter = " filter( regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\")) ";
-            } else {
-                if (words == null)
-                    return "";
-                var filter = "  filter( regex(?" + varName + "Label, \"^" + words + "$\", \"i\"))";
-                if (!options.exactMatch) {
-                    filter = " filter( regex(?" + varName + "Label, \"" + words + "\", \"i\"))";
-
-                }
-            }
-        } else if (ids) {
-
-            if (Array.isArray(ids)) {
-                if (ids[0] == null)
-                    return ""
-                var conceptIdsStr = ""
-                ids.forEach(function (id, index) {
-                    if (id != "") {
-                        if (conceptIdsStr != "")
-                            conceptIdsStr += ","
-                        conceptIdsStr += "<" + id + ">"
-                    }
-                })
-
-                filter = "filter(  ?" + varName + " in( " + conceptIdsStr + "))";
-            } else {
-                if (ids == null)
-                    return "";
-                filter = " filter( ?" + varName + " =<" + ids + ">)";
-            }
-
+        var varNames
+        if (!Array.isArray(varName)) {
+            varNames = [varName]
         } else {
-            return "";
+            varNames = varName
         }
+
+        var filters=[]
+        varNames.forEach(function (varName) {
+            if (words) {
+                if (Array.isArray(words)) {
+                    if (words[0] == null)
+                        return ""
+                    var conceptWordStr = ""
+                    words.forEach(function (word, index) {
+
+                        if (word.length > 1) {
+                            if (conceptWordStr != "")
+                                conceptWordStr += "|"
+                            if (options.exactMatch)
+                                conceptWordStr += "^" + formatWord(word) + "$";
+                            else
+                                conceptWordStr += "" + formatWord(word) + "";
+                        }
+                    })
+                    filters.push("regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\") ");
+                } else {
+                    if (words == null)
+                        return "";
+                    filters.push(" regex(?" + varName + "Label, \"^" + words + "$\", \"i\")");
+                    if (!options.exactMatch) {
+                        filters.push("regex(?" + varName + "Label, \"" + words + "\", \"i\")");
+
+                    }
+                }
+            } else if (ids) {
+
+
+
+                if (Array.isArray(ids)) {
+                    if (ids[0] == null)
+                        return ""
+                    var conceptIdsStr = ""
+                    ids.forEach(function (id, index) {
+                        if (id != "") {
+                            if (conceptIdsStr != "")
+                                conceptIdsStr += ","
+                            conceptIdsStr += "<" + id + ">"
+                        }
+                    })
+
+                    filters.push(" ?" + varName + " in( " + conceptIdsStr + ")");
+                } else {
+                    if (ids == null)
+                        return "";
+                    filters.push(" ?" + varName + " =<" + ids + ">");
+                }
+
+            } else {
+                return "";
+            }
+        })
+
+        filter=" FILTER ("
+        filters.forEach(function(filterStr,index){
+            if(index>0)
+                filter+=" || "
+            filter+=filterStr
+
+        })
+        filter+=" ) "
+
         return filter;
     }
 

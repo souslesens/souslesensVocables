@@ -9,7 +9,7 @@ var AssetQuery = (function () {
     self.showJstreeNodeChildren = function (jstreeTargetDiv, node) {
 
 
-        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, {propertiesStats:1}, function (err, result) {
+        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, {propertiesStats:false}, function (err, result) {
             var existingsNodes = {[node.data.id]: 1}
 
             var jstreeData = []
@@ -29,25 +29,25 @@ var AssetQuery = (function () {
              }
 
 
-                if( !existingNodes[item.rangeType.value]){
-                    var rangeTypeId= item.rangeType.value + "_" + common.getRandomHexaId(3);
-                    existingNodes[item.rangeType.value]=rangeTypeId
+                if( item.range.value!= node.data.id && !existingNodes[item.range.value]){
+                    var range= item.range.value + "_" + common.getRandomHexaId(3);
+                    existingNodes[item.range.value]=range
                     jstreeData.push({
-                        id:rangeTypeId,
-                        text:"->"+item.rangeTypeLabel.value +" : "+item.nRanges.value,
+                        id:range,
+                        text:"->"+item.rangeLabel.value,
                         parent:existingNodes[item.prop.value],
-                        data:{source:node.data.source, id:rangeTypeId,label:item.rangeTypeLabel.value}
+                        data:{source:node.data.source, id:item.range.value,label:item.rangeLabel.value}
                     })
 
                 }
-                if( !existingNodes[item.domainType.value]){
-                    var domainTypeId= item.domainType.value + "_" + common.getRandomHexaId(3);
-                    existingNodes[item.domainType.value]=domainTypeId
+                if( item.domain.value!= node.data.id && !existingNodes[item.domain.value]){
+                    var domain= item.domain.value + "_" + common.getRandomHexaId(3);
+                    existingNodes[item.domain.value]=domain
                     jstreeData.push({
-                        id:domainTypeId,
-                        text:"<-"+item.domainTypeLabel.value+" : "+item.nDomains.value,
+                        id:domain,
+                        text:"<-"+item.domainLabel.value,
                         parent:existingNodes[item.prop.value],
-                        data:{source:node.data.source, id:domainTypeId,label:item.domainTypeLabel.value}
+                        data:{source:node.data.source, id:item.domain.value,label:item.domainLabel.value}
                     })
 
                 }
@@ -275,7 +275,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 self.showProperties(AssetQuery.currentProperty.id, AssetQuery.currentProperty.text)
             },
-            showDataTypeProperties: function () {
+            showDataProperties: function () {
                 var schema = Config.sources[MainController.currentSource].schema;
                 Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, AssetQuery.currentProperty.id, function (err, result) {
                     OwlSchema.setLabelsFromQueryResult(result)
@@ -399,7 +399,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                             data: {
                                 label: prop.label,
                                 propId: prop.id,
-                                type: "DataTypeProperty",
+                                type: "DataProperty",
                                 parent: AssetQuery.currentNode.id,
                                 range: AssetQuery.currentNode.properties[prop.id].range,
                                 existsInRemoteSource: prop.existsInRemoteSource
@@ -759,7 +759,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 queryRemoteAssetSource: function (quantumObjs, callback) {
                     var payload = {}
                     payload.AssetQuery = true;
-                    payload.assetType = $("#AssetQuery_assetObjectSelect").val();
+                    payload.asset = $("#AssetQuery_assetObjectSelect").val();
                     if (self.currentNode.existsInRemoteSource)
                         quantumObjs.push({id: self.currentNode.existsInRemoteSource})
                     payload.quantumObjs = JSON.stringify(quantumObjs, null, 2);
@@ -769,7 +769,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                         type: "POST",
                         url: Config.serverUrl,
                         data: payload,
-                        dataType: "json",
+                        data: "json",
                         /* beforeSend: function(request) {
                              request.setRequestHeader('Age', '10000');
                          },*/

@@ -1068,25 +1068,25 @@ var Blender = (function () {
 
                     }
 
-                    var parent = editingObject.parent || "#"
+                   // var parent = editingObject.parent || "#"
+                    var parentNode = $("#" + treeDiv).jstree(true).get_selected(true)[0]
+                    if(!parentNode)
+                        parentNode="#"
                     if (editingObject.isNew) {
                         editingObject.isNew = false;
                         var jsTreeData = [{
                             id: editingObject.about,
                             text: editingObject.nodeLabel,
-                            parent: currentNodeId,
+                            parent: parentNode,
                             data: {type: editingObject.type, source: self.currentSource, id: editingObject.about, label: editingObject.nodeLabel}
                         }]
 
 
-                        var parentNode = $("#" + treeDiv).jstree(true).get_selected(true)[0]
-                        if (parentNode) {
+
+
                             common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
                             //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
-                        } else {
-                            common.loadJsTree("#" + treeDiv, jsTreeData, null)
-                            //  $("#" + treeDiv).jstree(true).open_node("#");
-                        }
+
 
 
                     } else {

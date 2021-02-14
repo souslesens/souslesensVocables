@@ -229,14 +229,17 @@ var common = (function () {
                 if(node.parent)
                     parentNode=node.parent
                 $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, "first", function () {
-
+                    $("#" + jstreeDiv).jstree(true).open_node(parentNode, null,500);
 
                 })
 
             })
-            self.setTreeAppearance()
-            $("#" + jstreeDiv).jstree(true).open_node(parentNodeId);
-            var offset = $(document.getElementById(parentNodeId)).offset();
+            setTimeout(function() {
+                self.setTreeAppearance()
+             //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
+
+                var offset = $(document.getElementById(parentNodeId)).offset();
+            },500)
         }
 
         self.deleteNode = function (jstreeDiv, nodeId) {

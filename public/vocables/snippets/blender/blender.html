@@ -47,7 +47,7 @@
 
 <div style="width:100%;align-self:end">
     <span style="font:bold 14px Arial;">Blender</span>
-    <div id="Blender_currentFilterDiv" style="background-color: beige;padding: 2px"></div>
+
 
     <!--   <input id='GenericTools_searchTermInput'> <button onclick='Blender.searchTerm()'>Search</button>-->
 
@@ -61,6 +61,12 @@
     <div style="margin:5px;">
         Taxonomy <select onchange="Blender.onSourceSelect($(this).val())" id="Blender_SourcesSelect"></select>
     </div>
+    <div id="Blender_currentFilterContainerDiv" style="background-color: beige;padding: 2px">
+        <div id="Blender_currentFilterDiv" style="background-color: beige;padding: 2px">
+            <button onclick="Blender.copyTriples()">copy Triples</button>
+            <button onclick="Blender.copyCsv()">copy CSV</button>
+    </div>
+
     <div id="Blender_searchDiv"></div>
 
     <div id="Blender_tabs" style="width:400px;height:80%">

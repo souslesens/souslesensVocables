@@ -24,6 +24,10 @@ var NerEvaluator = (function () {
         $("#graphDiv").load("snippets/nerEvaluator_right.html")
         $("#accordion").accordion("option", {active: 2});
         setTimeout(function () {
+            var w = $(document).width() - leftPanelWidth - 30;
+            var h = $(document).height() - 20;
+            $("#NerEvaluator_graphDiv").height(h-200)
+            $("#NerEvaluator_graphDiv").width(w-200)
             $("#NerEvaluator_tabs").tabs({
                 activate: self.onTabActivate
 
@@ -94,7 +98,7 @@ var NerEvaluator = (function () {
 
             "} LIMIT 1000"
 
-        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, {}, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, "", {}, function (err, result) {
             if (err) {
                 return console.log(err);
             }
@@ -172,7 +176,7 @@ var NerEvaluator = (function () {
             " " +
             "} LIMIT 1000"
 
-        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, {}, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, "", {}, function (err, result) {
 
             if (err) {
                 return console.log(err);
@@ -260,7 +264,7 @@ var NerEvaluator = (function () {
             "  optional{ ?concept skos:broader ?broader1. ?broader1 skos:prefLabel ?broader1Label  filter(lang(?broader1Label)='en')      optional{ ?broader1 skos:broader ?broader2. ?broader2 skos:prefLabel ?broader2Label  filter(lang(?broader2Label)='en')      optional{ ?broader2 skos:broader ?broader3. ?broader3 skos:prefLabel ?broader3Label  filter(lang(?broader3Label)='en')         optional{ ?broader3 skos:broader ?broader4. ?broader4 skos:prefLabel ?broader4Label  filter(lang(?broader4Label)='en') }    }    }  }     " +
             " GRAPH ?g{?concept skos:prefLabel ?x}" +
             "} order by ?concept limit 10000"
-        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, {}, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, "", {}, function (err, result) {
 
             if (err) {
                 return console.log(err);
@@ -287,7 +291,7 @@ var NerEvaluator = (function () {
                     if (self.currentConceptsLabels.indexOf(conceptLabel) < 0)
                         self.currentConceptsLabels.push(conceptLabel);
                 })
-                $("#graphDiv").html("too many concepts to show :" + result.results.bindings.length);
+                $("#NerEvaluator_graphDiv").html("too many concepts to show :" + result.results.bindings.length);
                 return callback(null)
 
 
@@ -415,7 +419,7 @@ var NerEvaluator = (function () {
             }
           //  $("#graphDiv").width($(window).width() - 20)
          //   $("#graphDiv").height($(window).height() - 20)
-            visjsGraph.draw("graphDiv", visjsData, {onclickFn: NerEvaluator.onGraphNodeClick})
+            visjsGraph.draw("NerEvaluator_graphDiv", visjsData, {onclickFn: NerEvaluator.onGraphNodeClick})
             $("#waitImg").css("display", "none");
             return callback(null)
             /* $("#sliderCountPagesMax").slider("option", "max", maxPages);
@@ -429,7 +433,7 @@ var NerEvaluator = (function () {
 
     self.onGraphNodeClick = function (node, point, event) {
         if(!node)
-            return  Cli
+            return  ;
         if (event && event.ctrlKey) {
             Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
         } else {
@@ -509,7 +513,7 @@ var NerEvaluator = (function () {
             "  ?category foaf:page ?page. ?category foaf:topic ?subject  " +
             "  filter(?subject=<" + subject.id + ">)" +
             "} limit 1000"
-        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, {}, {}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(Config.default_sparql_url, query, "", {}, function (err, result) {
 
             if (err) {
                 return console.log(err);

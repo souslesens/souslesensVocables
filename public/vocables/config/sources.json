@@ -31,20 +31,20 @@
     },
     "color": "#9edae5"
   },
-  "POC-EP": {
+  "ONE-TAXONOMY_TEST": {
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
       "url": "_default"
     },
-    "graphUri": "http://data.total.com/resource/thesaurus/POC-EP/",
-    "schemaType": "SKOSXXX",
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST/",
+    "schemaType": "SKOS",
     "predicates": {
     },
     "color": "#9edae5"
   },
   "Total-CTG": {
-    "editable": true,
+    "editable": false,
     "controller": "Sparql_SKOS",
     "sparql_server": {
       "url": "_default"

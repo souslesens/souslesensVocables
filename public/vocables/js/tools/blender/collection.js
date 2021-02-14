@@ -9,8 +9,8 @@ var Collection = (function () {
 
     self.getJstreeContextMenu = function () {
         if (!self.currentTreeNode || !self.currentTreeNode.data)
-            return;
-        var allowedLevels=Config.currentProfile.blender.contextMenuActionStartLevel
+            return {};
+        var allowedLevels=0;//Config.currentProfile.contextMenuActionStartLevel
         var currentNodeLevel=self.currentTreeNode.parents.length
         var menuItems = {}
 
@@ -132,7 +132,8 @@ var Collection = (function () {
             if (err) {
                 return MainController.UI.message(err);
             }
-            TreeController.drawOrUpdateTree(divId, result, node.id, "child1")
+           var options={source:node.data.source}
+            TreeController.drawOrUpdateTree(divId, result, node.id, "child1",options)
 
         })
 
@@ -145,10 +146,10 @@ var Collection = (function () {
         var conceptIds = [];
         var newTreeNodes = []
         nodes.forEach(function (item) {
-            conceptIds.push(item.id)
+            conceptIds.push(item.data.id)
             newTreeNodes.push({
                 text: "<span class='searched_concept'>" + item.label + "</span>",
-                id: item.id,
+                id: item.data.id,
                 parent: Collection.currentTreeNode.data.id,
                 data: {type: "treeType_concept"}
             })

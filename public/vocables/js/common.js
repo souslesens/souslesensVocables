@@ -225,7 +225,10 @@ var common = (function () {
 
         self.addNodesToJstree = function (jstreeDiv, parentNodeId, jstreeData, options) {
             jstreeData.forEach(function (node) {
-                $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, "first", function () {
+                var parentNode=parentNodeId;
+                if(node.parent)
+                    parentNode=node.parent
+                $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, "first", function () {
 
 
                 })

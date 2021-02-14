@@ -115,7 +115,7 @@ var Blender = (function () {
                             var jsTreeOptions = {};
                             jsTreeOptions.contextMenu = Collection.getJstreeContextMenu()
                             jsTreeOptions.selectTreeNodeFn = Collection.selectTreeNodeFn;
-
+                            jsTreeOptions.source=source
                             jsTreeOptions.dnd = Blender.dnd
                             TreeController.drawOrUpdateTree("Blender_collectionTreeDiv", result, "#", "collection", jsTreeOptions, function () {
                                 var firstNodeId = $("#Blender_collectionTreeDiv").jstree(true).get_node("#").children[0];
@@ -253,7 +253,7 @@ var Blender = (function () {
                         }, self.currentTreeNode.data.id + "_anchor", propertiesMap.event)
                     }
 
-                    if (self.currentTreeNode.children.length == 0)
+                    if (false && self.currentTreeNode.children.length == 0)
                         ExternalReferences.openNarrowMatchNodes(self.currentSource, self.currentTreeNode)
 
                 }
@@ -1118,6 +1118,14 @@ var Blender = (function () {
         self.searchTerm = function () {
 
             "Blender_conceptTreeDiv"
+        }
+
+        self.copyTriples=function(){
+
+        }
+
+        self.copyCsv=function(){
+
         }
 
 

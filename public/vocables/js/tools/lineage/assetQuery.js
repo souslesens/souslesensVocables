@@ -9,10 +9,53 @@ var AssetQuery = (function () {
     self.showJstreeNodeChildren = function (jstreeTargetDiv, node) {
 
 
-        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, {}, function (err, result) {
+        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, {propertiesStats:1}, function (err, result) {
             var existingsNodes = {[node.data.id]: 1}
 
-            var propsMap = {}
+            var jstreeData = []
+            var existingNodes={}
+            var propIdsMap={}
+            result.forEach(function (item) {
+             if( !existingNodes[item.prop.value]){
+                 var propId= item.prop.value + "_" + common.getRandomHexaId(3);
+                 existingNodes[item.prop.value]=propId
+                 jstreeData.push({
+                     id:propId,
+                     text:item.propLabel.value,
+                     parent:node.data.id,
+                     data:{source:node.data.source, id:item.prop.value,label:item.propLabel.value}
+                 })
+
+             }
+
+
+                if( !existingNodes[item.rangeType.value]){
+                    var rangeTypeId= item.rangeType.value + "_" + common.getRandomHexaId(3);
+                    existingNodes[item.rangeType.value]=rangeTypeId
+                    jstreeData.push({
+                        id:rangeTypeId,
+                        text:"->"+item.rangeTypeLabel.value +" : "+item.nRanges.value,
+                        parent:existingNodes[item.prop.value],
+                        data:{source:node.data.source, id:rangeTypeId,label:item.rangeTypeLabel.value}
+                    })
+
+                }
+                if( !existingNodes[item.domainType.value]){
+                    var domainTypeId= item.domainType.value + "_" + common.getRandomHexaId(3);
+                    existingNodes[item.domainType.value]=domainTypeId
+                    jstreeData.push({
+                        id:domainTypeId,
+                        text:"<-"+item.domainTypeLabel.value+" : "+item.nDomains.value,
+                        parent:existingNodes[item.prop.value],
+                        data:{source:node.data.source, id:domainTypeId,label:item.domainTypeLabel.value}
+                    })
+
+                }
+
+            })
+            common.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
+
+   /*         var propsMap = {}
             result.forEach(function (item) {
                 if (!propsMap[item.prop.value])
                     propsMap[item.prop.value] = {id: item.prop.value, label: item.propLabel.value, domains: [], ranges: []}
@@ -35,7 +78,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 common.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
 
-                jstreeData = []
+           jstreeData = []
                 item.domains.forEach(function (item) {
                     jstreeData.push({
                         id: item.id + "_" + common.getRandomHexaId(3),
@@ -55,7 +98,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 })
 
                 common.addNodesToJstree(jstreeTargetDiv, propId, jstreeData)
-            }
+            }*/
 
         })
 

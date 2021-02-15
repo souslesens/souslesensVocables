@@ -2,26 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/exportGraph..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportGraph..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/exportRDF..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/util..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/mySQLproxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/mySQLproxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/xlsx2json..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/xlsx2json..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926_part4.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_WORDNET.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_WORDNET.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/licence.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -158,7 +139,7 @@
       <workItem from="1613022128638" duration="19976000" />
       <workItem from="1613111503853" duration="10397000" />
       <workItem from="1613128702585" duration="37645000" />
-      <workItem from="1613282689958" duration="32477000" />
+      <workItem from="1613282689958" duration="32979000" />
     </task>
     <servers />
   </component>
@@ -183,12 +164,12 @@
       <breakpoints>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js</url>
-          <line>1348</line>
+          <line>1358</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>231</line>
+          <line>241</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -198,18 +179,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/xlsx2mappings.js</url>
-          <line>164</line>
+          <line>174</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/nerEvaluator.js</url>
-          <line>101</line>
+          <line>111</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="53" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>255</line>
+          <line>265</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="54" />
         </line-breakpoint>

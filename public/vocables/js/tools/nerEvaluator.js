@@ -1,7 +1,7 @@
 var NerEvaluator = (function () {
     var self = {}
 
-    self.maxGraphConceptLength = 1000
+    self.maxGraphConceptLength = 200
     var sourceGraphsUriMap = {}
 
     self.selectedSources = []
@@ -33,7 +33,7 @@ var NerEvaluator = (function () {
 
             });
 
-            common.fillSelectOptions("nerEvaluator_graphUrisSelect", self.selectedSources, true)
+            common.fillSelectOptions("nerEvaluator_sourceSelect", self.selectedSources, true)
             self.showWikiCategoriesTree();
 
 
@@ -291,8 +291,10 @@ var NerEvaluator = (function () {
                     if (self.currentConceptsLabels.indexOf(conceptLabel) < 0)
                         self.currentConceptsLabels.push(conceptLabel);
                 })
-                $("#NerEvaluator_graphDiv").html("too many concepts to show :" + result.results.bindings.length);
-                return callback(null)
+               // $("#NerEvaluator_graphDiv").html("too many concepts to show :" + result.results.bindings.length);
+              alert("too many concepts to show :" + result.results.bindings.length+" only "+self.maxGraphConceptLength+" will be shown");
+                result.results.bindings=result.results.bindings.slice(0,self.maxGraphConceptLength)
+             //   return callback(null)
 
 
             }
@@ -560,10 +562,10 @@ var NerEvaluator = (function () {
         }
 
 
-        var graphUri = $("#nerEvaluator_graphUrisSelect").val();
-        if (!graphUri || graphUri == "")
+        var source = $("#nerEvaluator_sourceSelect").val();
+        if (!source || source == "")
             return $("#messageDiv").html("select a source");
-        graphUri = Config.sources[graphUri].graphUri
+       var  graphUri = Config.sources[source].graphUri
         $("#waitImg").css("display", "block")
         $("#commentDiv").html("searching new concepts in selected wiki page")
         // getWimimediaPageSpecificWords:function(elasticUrl,indexName,pageName,pageCategories, callback){
@@ -624,29 +626,24 @@ var NerEvaluator = (function () {
 
     self.onMissingWordClick = function (event) {
 
-
+        var source = $("#nerEvaluator_sourceSelect").val();
         var word = event.currentTarget.id.substring(8)
         if (event && event.ctrlKey) {
-            return Clipboard.copy({type: "word", text: word}, event.currentTarget.id, event)
+           Clipboard.copy({type: "word", text: word,source:source}, event.currentTarget.id, event)
+
+
+            var id = event.currentTarget.id;
+            self.currentSelectedPageNewWord = word;
+
+            $(".newWord").each(function () {
+                $(this).removeClass('selectedNewWord')
+                if ($(this).attr("id") == event.currentTarget.id)
+                    $(this).addClass('selectedNewWord')
+
+            })
+
 
         }
-
-        var id = event.currentTarget.id;
-        self.currentSelectedPageNewWord = word;
-        var classes = $('#' + id).attr('class').split(/\s+/);
-        var text = $("#nerEvaluator_copiedWords").val()
-        if (classes.indexOf('selectedNewWord') > -1) {
-            $('#' + id).removeClass('selectedNewWord')
-
-            text = text.replace(word, "")
-            text = text.replace(",,", "")
-
-        } else {
-            $('#' + id).addClass('selectedNewWord')
-            text = text + "," + word;
-        }
-        $("#nerEvaluator_copiedWords").val(text)
-
     }
 
 

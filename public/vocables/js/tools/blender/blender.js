@@ -47,8 +47,8 @@ var Blender = (function () {
 
                     })
 
-                 //   $("#Blender_searchDiv").load("snippets/searchAll.html")
-                 //   ThesaurusBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
+                    //   $("#Blender_searchDiv").load("snippets/searchAll.html")
+                    //   ThesaurusBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
 
 
                 }, 200
@@ -115,7 +115,7 @@ var Blender = (function () {
                             var jsTreeOptions = {};
                             jsTreeOptions.contextMenu = Collection.getJstreeContextMenu()
                             jsTreeOptions.selectTreeNodeFn = Collection.selectTreeNodeFn;
-                            jsTreeOptions.source=source
+                            jsTreeOptions.source = source
                             jsTreeOptions.dnd = Blender.dnd
                             TreeController.drawOrUpdateTree("Blender_collectionTreeDiv", result, "#", "collection", jsTreeOptions, function () {
                                 var firstNodeId = $("#Blender_collectionTreeDiv").jstree(true).get_node("#").children[0];
@@ -189,7 +189,7 @@ var Blender = (function () {
                 Blender.currentDNDstartNodeId = element.data.nodes[0];
 
                 Blender.currentDNDstartNode = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId)
-                Blender.currentDNDstartNodeParentId=  Blender.currentDNDstartNode.parent
+                Blender.currentDNDstartNodeParentId = Blender.currentDNDstartNode.parent
 
 
                 return true;
@@ -198,11 +198,11 @@ var Blender = (function () {
                 return false;
             },
             "drag_stop": function (data, element, helper, event) {
-                if(!Blender.currentDNDoperation)
+                if (!Blender.currentDNDoperation)
                     return false;
-                var currentNodeLevel =Blender.currentDNDoperation.parent.parents.length;
+                var currentNodeLevel = Blender.currentDNDoperation.parent.parents.length;
                 var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
-                if(currentNodeLevel <allowedLevels)
+                if (currentNodeLevel < allowedLevels)
                     return false;
 
                 Blender.menuActions.dropNode(function (err, result) {
@@ -215,7 +215,7 @@ var Blender = (function () {
             dropAllowed: function (operation, node, parent, position, more) {
                 var currentNodeLevel = Blender.currentDNDstartNode.parents.length
                 var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
-                if(currentNodeLevel <allowedLevels)
+                if (currentNodeLevel < allowedLevels)
                     return false;
                 console.log(operation)
                 Blender.currentDNDoperation = {operation: operation, node: node, parent: parent, position: position, more, more}
@@ -267,8 +267,6 @@ var Blender = (function () {
             var menuItems = {}
 
 
-
-
             if (!self.currentTreeNode || !self.currentTreeNode.data)
                 return menuItems
 
@@ -294,7 +292,7 @@ var Blender = (function () {
                    return menuItems;
                }*/
 
-            if(currentNodeLevel<allowedLevels) {
+            if (currentNodeLevel < allowedLevels) {
                 menuItems.forbidden = {
                     label: "!...",
                     action: function (obj, sss, cc) {
@@ -310,8 +308,7 @@ var Blender = (function () {
 
                 }
                 return menuItems;
-            }
-            else{
+            } else {
                 menuItems.toCollection = {
                     label: "to Collection",
                     action: function (e) {// pb avec source
@@ -369,9 +366,9 @@ var Blender = (function () {
 
                     }
 
-                } else if (clipboard && clipboard.type == "word") {
+                } else if (clipboard.length > 0 && clipboard[0].type == "word") {
                     menuItems.pasteDescendants = {
-                        label: " create concept " + Clipboard.getContent().label,
+                        label: " create concept " + Clipboard.getContent()[0].text,
                         action: function (obj, sss, cc) {
                             self.menuActions.createConceptFromWord()
                             ;
@@ -525,7 +522,7 @@ var Blender = (function () {
                 var str = ""
                 if (node.children.length > 0)
                     str = " and all its descendants"
-                if (confirm("delete node " + node.data.label + str)) {
+                if (true || confirm("delete node " + node.data.label + str)) {
 
                     var nodeIdsToDelete = [node.data.id]
                     async.series([
@@ -632,14 +629,17 @@ var Blender = (function () {
                         label = data.label;
                         var existingNodes = common.getjsTreeNodes("Blender_conceptTreeDiv")
                         var ok = true
+                        var previousId;
                         existingNodes.forEach(function (item) {
-                            if (item.data.label.toLowerCase() == data.label.toLowerCase())
+                            if (item.data.label.toLowerCase() == data.label.toLowerCase()) {
+                                previousId = item.data.id
                                 ok = false;
+                            }
                         })
                         if (!ok) {
                             alert("node " + data.label + " already exists")
                             if (callback)
-                                return callback(null)
+                                return callback(null, previousId)
                         }
 
                         var additionalTriplesNt = []
@@ -671,26 +671,24 @@ var Blender = (function () {
                             }
                             Sparql_generic.insertTriples(self.currentSource, additionalTriplesNt, function (err, result) {
                                 if (!err)
-                                    MainController.UI.message(result + "new triples inserted")
-                                callbackEach(err, result)
+                                    $("#waitImg").css("display", "none");
+                                MainController.UI.message(result + "new triples inserted")
+                                callbackEach(err, newId)
 
                             })
                         } else {
 
-                            Sparql_generic.copyNodes(fromSource, toGraphUri, oldId, {
-                                    additionalTriplesNt: additionalTriplesNt,
-                                    subjectNewUri: newId
-                                },
-                                function (err, result) {
-                                    if (!err)
-                                        MainController.UI.message(result + "new triples inserted")
-                                    callbackEach(err, result)
+                            Sparql_generic.copyNodes(fromSource, toGraphUri, oldId, {additionalTriplesNt: additionalTriplesNt, subjectNewUri: newId}, function (err, result) {
+                                if (!err)
+                                    $("#waitImg").css("display", "none");
+                                MainController.UI.message(result + "new triples inserted")
+                                callbackEach(err, newId)
 
-                                })
+                            })
                         }
                     }
                 }, function (err) {
-
+                    $("#waitImg").css("display", "none");
                     if (err)
                         return MainController.UI.message(err);
 
@@ -722,25 +720,6 @@ var Blender = (function () {
             }
 
             ,
-            setCopiedNodeObjectFn: function (item) {
-                var newParent = self.currentTreeNode;
-                if (item.prop.value == "http://www.w3.org/2004/02/skos/core#broader")
-                    item.value.value = newParent.data.id;
-                else if (item.prop.value == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                    item.prop.value = "http://www.w3.org/2004/02/skos/core#broader"
-                    item.value.value = newParent.data.id;
-                }
-
-                return item
-
-
-            }
-            ,
-            setCopiedNodePredicateFn: function (item) {
-
-
-                return item
-            },
 
 
             pasteClipboardNodeDescendants: function (callback) {
@@ -764,7 +743,7 @@ var Blender = (function () {
                             var currentDepth = 1;
                             var newParentId = newId
 
-
+                            var copiedNodes = {}
                             async.whilst(
                                 function test(cb) {
                                     return childrenIds.length > 0
@@ -783,21 +762,25 @@ var Blender = (function () {
                                         var dataArray = []
                                         result.forEach(function (item) {
                                             var childId = item["child" + currentDepth].value
-                                            var childLabel = item["child" + currentDepth + "Label"].value
-                                            dataArray.push({
-                                                type: "node",
-                                                id: childId,
-                                                label: childLabel,
-                                                newParentId: newParentId,
-                                                source: fromSource,
-                                                data: null
-                                            })
-                                            setTimeout(function () {
-                                                self.menuActions.pasteClipboardNodeOnly(dataArray, null, function (err, result) {
-                                                    newParentId = result;
-                                                }, 500)
-                                            })
+                                            if (!copiedNodes[childId]) {
+                                                copiedNodes[childId] = 1
+                                                var childLabel = item["child" + currentDepth + "Label"].value
+                                                dataArray.push({
+                                                    type: "node",
+                                                    id: childId,
+                                                    label: childLabel,
+                                                    newParentId: newParentId,
+                                                    source: fromSource,
+                                                    data: null
+                                                })
+                                            }
                                         })
+                                        setTimeout(function () {
+                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId}, function (err, result) {
+                                                newParentId = result;
+                                            }, 500)
+                                        })
+
                                         callbackWhilst();
 
                                     })
@@ -822,6 +805,26 @@ var Blender = (function () {
 
 
             ,
+            setCopiedNodeObjectFn: function (item) {
+                var newParent = self.currentTreeNode;
+                if (item.prop.value == "http://www.w3.org/2004/02/skos/core#broader")
+                    item.value.value = newParent.data.id;
+                else if (item.prop.value == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                    item.prop.value = "http://www.w3.org/2004/02/skos/core#broader"
+                    item.value.value = newParent.data.id;
+                }
+
+                return item
+
+
+            }
+            ,
+            setCopiedNodePredicateFn: function (item) {
+
+
+                return item
+            },
+
             /**
              *
              *  A FINIR
@@ -905,9 +908,11 @@ var Blender = (function () {
 
 
             createConceptFromWord: function () {
-                var data = Clipboard.getContent();
-                var initData = {"http://www.w3.org/2004/02/skos/core#prefLabel": [{"xml:lang": SourceEditor.prefLang, value: data.label, type: "literal"}]}
+                var data = Clipboard.getContent()[0];
+
+                var initData = {"http://www.w3.org/2004/02/skos/core#prefLabel": [{"xml:lang": SourceEditor.prefLang, value: data.text, type: "literal"}]}
                 self.nodeEdition.createChildNode(initData, "concept")
+                Clipboard.clear()
             }
             ,
 
@@ -1068,10 +1073,10 @@ var Blender = (function () {
 
                     }
 
-                   // var parent = editingObject.parent || "#"
+                    // var parent = editingObject.parent || "#"
                     var parentNode = $("#" + treeDiv).jstree(true).get_selected(true)[0]
-                    if(!parentNode)
-                        parentNode="#"
+                    if (!parentNode)
+                        parentNode = "#"
                     if (editingObject.isNew) {
                         editingObject.isNew = false;
                         var jsTreeData = [{
@@ -1082,11 +1087,8 @@ var Blender = (function () {
                         }]
 
 
-
-
-                            common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
-                            //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
-
+                        common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
+                        //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
 
 
                     } else {
@@ -1120,14 +1122,16 @@ var Blender = (function () {
             "Blender_conceptTreeDiv"
         }
 
-        self.copyTriples=function(){
+        self.copyTriples = function () {
 
         }
 
-        self.copyCsv=function(){
+        self.copyCsv = function () {
 
         }
+        self.openAll = function () {
 
+        }
 
         return self;
 

@@ -15,6 +15,7 @@ var Config = (function () {
     if (window.location.href.indexOf("localhost") < 0)
         self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
+    self.default_sparql_url = "http://10.28.171.139:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
    self.loginMode = "none";
@@ -73,7 +74,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: [],
             allowedTools: "ALL",
-            forbiddenTools: ["INDIVIDUALS"],
+            forbiddenTools: ["xlsx2mappings","nerEvaluator"],
             blender: {contextMenuActionStartLevel: 0}
         },
         blender_skos: {
@@ -81,7 +82,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: [],
             allowedTools: "ALL",
-            forbiddenTools: ["INDIVIDUALS"],
+            forbiddenTools: ["xlsx2mappings","nerEvaluator"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_skos: {
@@ -89,7 +90,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: [],
             allowedTools: "ALL",
-            forbiddenTools: ["INDIVIDUALS","BLENDER"],
+            forbiddenTools: ["xlsx2mappings","nerEvaluator","BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_all: {
@@ -97,7 +98,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: [],
             allowedTools: "ALL",
-            forbiddenTools: ["INDIVIDUALS","BLENDER"],
+            forbiddenTools: ["xlsx2mappings","nerEvaluator","INDIVIDUALS","BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         }
     }

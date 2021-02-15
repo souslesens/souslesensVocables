@@ -618,6 +618,12 @@ var Blender = (function () {
                 var oldId
                 var newId
                 var label
+
+                var parentNodeId
+                if (options.newParentId)
+                    parentNodeId = options.newParentId;
+                else
+                    parentNodeId = self.currentTreeNode.data.id
                 async.eachSeries(dataArray, function (data, callbackEach) {
 
 
@@ -644,11 +650,7 @@ var Blender = (function () {
 
                         var additionalTriplesNt = []
 
-                        var parentNodeId
-                        if (options.newParentId)
-                            parentNodeId = options.newParentId;
-                        else
-                            parentNodeId = self.currentTreeNode.data.id
+
 
                         if (Config.sources[self.currentSource].schemaType == "SKOS") {
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
@@ -692,22 +694,26 @@ var Blender = (function () {
                     if (err)
                         return MainController.UI.message(err);
 
+                    if (options.newParentId)
+                       ;
+                    else {
+                        var parentJstreeId = self.currentTreeNode.id
 
-                    var jstreeData = [
-                        {
-                            id: newId,
-                            text: label,
-                            parent: self.currentTreeNode.data.id,
-                            data: {
-                                type: "http://www.w3.org/2004/02/skos/core#Concept",
-                                source: self.currentSource,
+                        var jstreeData = [
+                            {
                                 id: newId,
-                                label: label
+                                text: label,
+                                parent: parentJstreeId,
+                                data: {
+                                    type: "http://www.w3.org/2004/02/skos/core#Concept",
+                                    source: self.currentSource,
+                                    id: newId,
+                                    label: label
+                                }
                             }
-                        }
-                    ]
-                    common.addNodesToJstree("Blender_conceptTreeDiv", self.currentTreeNode.id, jstreeData)
-
+                        ]
+                        common.addNodesToJstree("Blender_conceptTreeDiv", parentJstreeId, jstreeData)
+                    }
 
                     if (!callback)
                         Clipboard.clear();
@@ -776,7 +782,7 @@ var Blender = (function () {
                                             }
                                         })
                                         setTimeout(function () {
-                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId}, function (err, result) {
+                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId,parentJstreeId:parentJstreeId}, function (err, result) {
                                                 newParentId = result;
                                             }, 500)
                                         })

@@ -15,7 +15,7 @@ var Config = (function () {
     if (window.location.href.indexOf("localhost") < 0)
         self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
-    self.default_sparql_url = "http://10.28.171.139:8890/sparql"
+//    self.default_sparql_url = "http://10.28.171.139:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
    self.loginMode = "none";

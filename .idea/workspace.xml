@@ -2,7 +2,58 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/licence.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/elastic/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotatorLive..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotatorLive..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/authentication..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/authentication..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/configLoader..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configLoader..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/elasticRestProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/elasticRestProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportGraph..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportGraph..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportRDF..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/globalParams..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/globalParams..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/jsonFileStorage.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/jsonFileStorage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/logger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/logger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/mySQLproxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/mySQLproxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/authentification.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/authentification.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/clipboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/clipboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/external/jsTree/License" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/external/jsTree/License" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/drawCanvas.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/drawCanvas.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/graphController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/graphController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graphController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_ISO_15926.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_NPD.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_WORDNET.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_WORDNET.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_proxy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/importCSV.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/importCSV.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologiesStats.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologiesStats.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/xlsx2mappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/xlsx2mappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/treeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/treeController.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,8 +68,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JavaScript File" />
-        <option value="HTML File" />
         <option value="JS module" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -139,7 +190,7 @@
       <workItem from="1613022128638" duration="19976000" />
       <workItem from="1613111503853" duration="10397000" />
       <workItem from="1613128702585" duration="37645000" />
-      <workItem from="1613282689958" duration="32979000" />
+      <workItem from="1613282689958" duration="41847000" />
     </task>
     <servers />
   </component>
@@ -193,6 +244,30 @@
           <line>265</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>43</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>66</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>18</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="60" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/routes/index.js</url>
+          <line>241</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="61" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

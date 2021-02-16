@@ -18,7 +18,7 @@ var Config = (function () {
 //    self.default_sparql_url = "http://10.28.171.139:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-   self.loginMode = "none";
+  self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -64,7 +64,7 @@ var Config = (function () {
         admin: {
             allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
             allowedSources: "ALL",
-            forbiddenSources: [],
+            forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
             forbiddenTools:  [],
             blender: {contextMenuActionStartLevel: 0}
@@ -72,7 +72,7 @@ var Config = (function () {
         admin_skos: {
             allowedSourceSchemas: ["SKOS"],
             allowedSources: "ALL",
-            forbiddenSources: [],
+            forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
             forbiddenTools: ["xlsx2mappings","nerEvaluator"],
             blender: {contextMenuActionStartLevel: 0}
@@ -80,7 +80,7 @@ var Config = (function () {
         blender_skos: {
             allowedSourceSchemas: ["SKOS"],
             allowedSources: "ALL",
-            forbiddenSources: [],
+            forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
             forbiddenTools: ["xlsx2mappings","nerEvaluator"],
             blender: {contextMenuActionStartLevel: 3}
@@ -88,7 +88,7 @@ var Config = (function () {
         reader_skos: {
             allowedSourceSchemas: ["SKOS"],
             allowedSources: "ALL",
-            forbiddenSources: [],
+            forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
             forbiddenTools: ["xlsx2mappings","nerEvaluator","BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
@@ -96,7 +96,7 @@ var Config = (function () {
         reader_all: {
             allowedSourceSchemas: ["SKOS","OWL"],
             allowedSources: "ALL",
-            forbiddenSources: [],
+            forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
             forbiddenTools: ["xlsx2mappings","nerEvaluator","INDIVIDUALS","BLENDER"],
             blender: {contextMenuActionStartLevel: 3}

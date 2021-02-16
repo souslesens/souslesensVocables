@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<script>
+
+    var elasticUrl = "http://vps254642.ovh.net:2009/"
+
+    function executeQuery() {
+
+        var method = $("#elasticMethod").val();
+        var urlParams = $("#urlParams").val();
+        var elasticPayload = $("#elasticPayload").val();
+
+
+        var headers = {}
+        headers["Accept"] = "application/sparql-results+json";
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+
+
+        var payload = {
+            httpProxy: 1,
+            url: elasticUrl + urlParams,
+        }
+
+        if (method == "POST") {
+            var body = {
+                headers: headers,
+                params: elasticPayload,
+            }
+            payload.body = JSON.stringify(body)
+        } else if (method == "GET") {
+            payload.options=JSON.stringify({headers:headers})
+
+        }
+
+        payload[method] = true;
+
+
+        $.ajax({
+            type: "POST",
+            url: "/elastic",
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+
+
+                var x = data
+                var str=JSON.stringify(data, null,2)
+                $("#elasticResponse").val(str)
+
+            }
+            , error: function (err) {
+                console.log(err);
+                $("#elasticResponse").val(err)
+            }
+        })
+    }
+
+
+</script>
+<script src="../vocables/js/external/jquery/jquery.min.js"></script>
+<script src="../vocables/js/external/jquery/jquery-ui.min.js"></script>
+<link href="../vocables/js/external/jquery/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+<script src="../vocables/js/external/async.js" charset="utf-8"></script>
+
+
+<select id="elasticMethod">
+    <option>GET</option>
+    <option>POST</option>
+    <option>PUT</option>
+
+    <option>DELETE</option>
+</select>
+<div>
+    <textarea style="width:800px;height:50px" id="urlParams"></textarea>
+
+    <textarea style="width:800px;height:200px" id="elasticPayload"></textarea>
+    <button onclick="executeQuery()">Execute</button>
+
+</div>
+
+<textarea style="width:800px;height:400px" id="elasticResponse"></textarea>
+
+</body>
+</html>

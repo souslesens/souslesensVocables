@@ -39,7 +39,7 @@ var Sparql_common = (function () {
             varNames = varName
         }
 
-        var filters=[]
+        var filters = []
         varNames.forEach(function (varName) {
             if (words) {
                 if (Array.isArray(words)) {
@@ -70,7 +70,6 @@ var Sparql_common = (function () {
             } else if (ids) {
 
 
-
                 if (Array.isArray(ids)) {
                     if (ids[0] == null)
                         return ""
@@ -79,7 +78,10 @@ var Sparql_common = (function () {
                         if (id != "") {
                             if (conceptIdsStr != "")
                                 conceptIdsStr += ","
-                            conceptIdsStr += "<" + id + ">"
+                            if (id.indexOf("http") <0)
+                                conceptIdsStr += id
+                            else
+                                conceptIdsStr += "<" + id + ">"
                         }
                     })
 
@@ -87,6 +89,9 @@ var Sparql_common = (function () {
                 } else {
                     if (ids == null)
                         return "";
+                    if (ids.indexOf("http") <0)
+                    filters.push(" ?" + varName + " =" + ids );
+                    else
                     filters.push(" ?" + varName + " =<" + ids + ">");
                 }
 
@@ -95,14 +100,14 @@ var Sparql_common = (function () {
             }
         })
 
-        filter=" FILTER ("
-        filters.forEach(function(filterStr,index){
-            if(index>0)
-                filter+=" || "
-            filter+=filterStr
+        filter = " FILTER ("
+        filters.forEach(function (filterStr, index) {
+            if (index > 0)
+                filter += " || "
+            filter += filterStr
 
         })
-        filter+=" ) "
+        filter += " ) "
 
         return filter;
     }

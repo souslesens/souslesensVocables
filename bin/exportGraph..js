@@ -104,4 +104,8 @@ var graphUri = "https://www2.usgs.gov/science/USGSThesaurus/";
 var filePath = "D:\\NLP\\rdfs\\USGSThesaurus.nt"
 
 
+var graphUri = "http://souslesens.org/data/total/ep/";
+var filePath = "D:\\NLP\\rdfs\\mediawiki.nt"
+
+
 exportGraph.execute(serverUrl, graphUri, filePath)

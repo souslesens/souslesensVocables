@@ -46,7 +46,7 @@ var Collection = (function () {
 
 
                 menuItems.assignConcepts = {
-                    label: "Assign selected Concepts",
+                    label: "<span class='blender_assignCollection'>Assign selected Concepts</span>",
                     action: function (obj, sss, cc) {
                         Collection.assignConcepts()
                     },
@@ -72,8 +72,8 @@ var Collection = (function () {
                 }
             }
             if (Blender.displayMode == "leftPanel") {
-                menuItems.filterConcepts = {
-                    label: "Filter Concepts",
+                menuItems.filterTaxonomy = {
+                    label: "<span class='blender_assignCollection'>Filter Taxonomy</span>",
                     action: function (obj, sss, cc) {
                         Collection.filterConcepts()
                     }
@@ -193,42 +193,51 @@ var Collection = (function () {
         var html = ("<div  class='blender_collectionFilter' onclick='Collection.removeTaxonomyFilter()'>" + collection.text + "</div>")
         $("#Blender_currentFilterDiv").append(html)
 
-        Sparql_generic.getTopConcepts(Blender.currentSource, options, function (err, result) {
-            //   ThesaurusBrowser.getFilteredNodesJstreeData(Blender.currentSource, options, function (err, jstreeData) {
-            if (err) {
-                return MainController.UI.message(err)
-            }
-            if (Blender.displayMode == "leftPanel")
-                $("#Blender_tabs").tabs("option", "active", 0);
-            $('#Blender_conceptTreeDiv').empty();
-            $("#Blender_conceptTreeDiv").html("");
-            if (result.length == 0)
-                return $("#Blender_conceptTreeDiv").html("No concept for collection :" + collection.text)
+        if(true){
+            Blender.showFilteredTaxonomyTree()
 
-            var jsTreeOptions = Blender.getConceptJstreeOptions()
+        }
 
 
-            TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
 
-            /*   setTimeout(function () {
-                   if ($("#Blender_conceptTreeDiv").jstree(true)) {
-                       var firstNodeId = $("#Blender_conceptTreeDiv").jstree(true).get_node("#").children[0];
-                       var firstNode = $("#Blender_conceptTreeDiv").jstree(true).get_node(firstNodeId);
-                       var options = {filterCollections: Collection.currentCollectionFilter};
-                       ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", Blender.currentSource, firstNode, options);
-                   }
+        if( false) {
+            Sparql_generic.getTopConcepts(Blender.currentSource, options, function (err, result) {
+                //   ThesaurusBrowser.getFilteredNodesJstreeData(Blender.currentSource, options, function (err, jstreeData) {
+                if (err) {
+                    return MainController.UI.message(err)
+                }
+                if (Blender.displayMode == "leftPanel")
+                    $("#Blender_tabs").tabs("option", "active", 0);
+                $('#Blender_conceptTreeDiv').empty();
+                $("#Blender_conceptTreeDiv").html("");
+                if (result.length == 0)
+                    return $("#Blender_conceptTreeDiv").html("No concept for collection :" + collection.text)
 
-                   if (Blender.currentTreeNode && Blender.currentTreeNode.children.length == 0)
-                       ExternalReferences.openNarrowMatchNodes(Blender.currentSource, Blender.currentTreeNode)
-                   if (Collection.currentTreeNode) {
-                       var html = "<div  class='blender_collectionFilter'  onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>"
-                       $('#Blender_collectionFilterContainerDiv').html(html);
-                   }
-               }, 200)
-               */
+                var jsTreeOptions = Blender.getConceptJstreeOptions()
 
 
-        })
+                TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
+
+                /*   setTimeout(function () {
+                       if ($("#Blender_conceptTreeDiv").jstree(true)) {
+                           var firstNodeId = $("#Blender_conceptTreeDiv").jstree(true).get_node("#").children[0];
+                           var firstNode = $("#Blender_conceptTreeDiv").jstree(true).get_node(firstNodeId);
+                           var options = {filterCollections: Collection.currentCollectionFilter};
+                           ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", Blender.currentSource, firstNode, options);
+                       }
+
+                       if (Blender.currentTreeNode && Blender.currentTreeNode.children.length == 0)
+                           ExternalReferences.openNarrowMatchNodes(Blender.currentSource, Blender.currentTreeNode)
+                       if (Collection.currentTreeNode) {
+                           var html = "<div  class='blender_collectionFilter'  onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>"
+                           $('#Blender_collectionFilterContainerDiv').html(html);
+                       }
+                   }, 200)
+                   */
+
+
+            })
+        }
     }
 
 

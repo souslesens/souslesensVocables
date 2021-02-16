@@ -113,7 +113,8 @@ var Blender = (function () {
                     },
 
                     function (callbackSeries) {
-                        self.showTopConcepts(null, function (err, result) {
+                self.showFilteredTaxonomyTree(function(err, result){
+                      //  self.showTopConcepts(null, function (err, result) {
                             callbackSeries(err);
                         })
 
@@ -320,7 +321,7 @@ var Blender = (function () {
                 return menuItems;
             } else {
                 menuItems.toCollection = {
-                    label: "to Collection",
+                    label: "<span class='blender_assignCollection'>to Collection</span>",
                     action: function (e) {// pb avec source
                         Blender.menuActions.toCollection(e)
                     }
@@ -330,14 +331,14 @@ var Blender = (function () {
                 var clipboard = Clipboard.getContent()
                 if (clipboard.length > 0 && clipboard[0].type == "node") {
                     menuItems.pasteNode = {
-                        "label": "Paste...",
+                        "label": "<span class='blender_pasteNode'>Paste...</span>",
                         "separator_before": false,
                         "separator_after": true,
 
                         "action": false,
                         "submenu": {
                             pasteNode: {
-                                label: "node",
+                                label: "<span class='blender_pasteNode'>node</span>",
                                 action: function () {
                                     self.menuActions.pasteClipboardNodeOnly();
                                 }
@@ -351,7 +352,7 @@ var Blender = (function () {
                                }
                                ,*/
                             pasteDescendants: {
-                                label: " descendants",
+                                label: "<span class='blender_pasteNode'>descendants</span>",
                                 action: function (obj, sss, cc) {
                                     self.menuActions.pasteClipboardNodeDescendants()
                                     ;
@@ -661,7 +662,6 @@ var Blender = (function () {
                         var additionalTriplesNt = []
 
 
-
                         if (Config.sources[self.currentSource].schemaType == "SKOS") {
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#exactMatch> <" + oldId + ">.")
@@ -689,8 +689,13 @@ var Blender = (function () {
 
                             })
                         } else {
+                            var options = {
+                                skipPredicates: ["http://www.w3.org/2004/02/skos/core#broader", "http://www.w3.org/2004/02/skos/core#narrower"],
+                                additionalTriplesNt: additionalTriplesNt,
+                                subjectNewUri: newId
+                            }
 
-                            Sparql_generic.copyNodes(fromSource, toGraphUri, oldId, {additionalTriplesNt: additionalTriplesNt, subjectNewUri: newId}, function (err, result) {
+                            Sparql_generic.copyNodes(fromSource, toGraphUri, oldId, options, function (err, result) {
                                 if (!err)
                                     $("#waitImg").css("display", "none");
                                 MainController.UI.message(result + "new triples inserted")
@@ -705,7 +710,7 @@ var Blender = (function () {
                         return MainController.UI.message(err);
 
                     if (options.newParentId)
-                       ;
+                        ;
                     else {
                         var parentJstreeId = self.currentTreeNode.id
 
@@ -792,7 +797,7 @@ var Blender = (function () {
                                             }
                                         })
                                         setTimeout(function () {
-                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId,parentJstreeId:parentJstreeId}, function (err, result) {
+                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId, parentJstreeId: parentJstreeId}, function (err, result) {
                                                 newParentId = result;
                                             }, 500)
                                         })
@@ -1143,9 +1148,142 @@ var Blender = (function () {
         }
 
         self.copyCsv = function () {
+            var collection = Collection.currentCollectionFilter
+            Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
+                if (err) {
+                    if (callback)
+                        return callback(err)
+                    return (MainController.UI.message(err))
+                }
 
+                    var predicates=[]
+                    var subjects={}
+                    result.forEach(function(item){
+                        if(!subjects[item.subject.value])
+                            subjects[item.subject.value]={}
+                        var value=item.object.value;
+                        if(item.object["xml:lang"])
+                            value=value+"@"+item.object["xml:lang"]
+                        if( !subjects[item.subject.value][item.predicate.value])
+                            subjects[item.subject.value][item.predicate.value]=[]
+                        subjects[item.subject.value][item.predicate.value].push(value)
+
+                        if(predicates.indexOf(item.predicate.value)<0)
+                            predicates.push(item.predicate.value)
+
+
+                    })
+                    var line=0;
+                    var str=""
+                    var sep="\t"
+
+                    predicates.splice(0,0,"uri")
+                    predicates.forEach(function(predicate, predicateIndex) {
+
+                        if (predicateIndex > 0)
+                            str += sep
+                        str += predicate;
+                    })
+                    str+="\n"
+
+                    for( var key in subjects){
+                        str+=key
+                        predicates.forEach(function(predicate, predicateIndex) {
+
+                        if (predicateIndex >0)
+                            str += sep
+
+                    var object=subjects[key][predicate]
+                            if(object) {
+                                var valueStr=""
+                                object.forEach(function(value,valueIndex) {
+                                    if(valueIndex>0)
+                                        valueStr+="|"
+                                if(subjects[value])
+                                    valueStr+= value+"@"+subjects[value]["http://www.w3.org/2004/02/skos/core#prefLabel"]
+                                    else
+                                    valueStr+=value
+
+
+                            })
+                                str += valueStr
+                            }
+                            else
+                                str+=""
+
+                        })
+                        str+="\n"
+
+                    }
+
+                var result = common.copyTextToClipboard(str)
+                alert( "filtered taxonomy CSV copied in clipboard")
+
+
+            })
         }
-        self.openAll = function () {
+        self.showFilteredTaxonomyTree = function (callback) {
+
+
+            var collection = Collection.currentCollectionFilter
+
+            Sparql_generic.getCollectionNodes(self.currentSource, collection, {filter: {predicates: ["skos:prefLabel", "skos:broader"]}}, function (err, result) {
+                if (err) {
+                    if(callback)
+                        return callback(err)
+                    return (MainController.UI.message(err))
+                }
+                var jstreeData = []
+
+                var dataMap = {}
+                result.forEach(function (item) {
+                    if (!dataMap[item.subject.value])
+                        dataMap[item.subject.value] = {}
+                    if (item.predicate.value.indexOf("#broader") > -1) {
+                        dataMap[item.subject.value].broader = item.object.value
+                    }
+                    if (item.predicate.value.indexOf("#prefLabel") > -1) {
+                        dataMap[item.subject.value].prefLabel = item.object.value
+                    }
+                })
+                var orphanBroaders = []
+                for (var key in dataMap) {
+                    var id;
+                    var jsTreeId
+                    var parent;
+                    var item = dataMap[key]
+                    if (item.broader) {
+                        jsTreeId = key + common.getRandomHexaId(3)
+                        id = key
+                        parent = item.broader
+                        if (!dataMap[parent])
+                            orphanBroaders.push(parent)
+                    } else {
+                        parent = "#"
+                        jsTreeId = item.broader + common.getRandomHexaId(3)
+                        id = key
+
+                    }
+                    jstreeData.push({
+                        id: id,
+                        text: item.prefLabel || "X",
+                        parent: parent,
+                        data: {source: self.currentSource, id: id, label: item.prefLabel}
+                    })
+                }
+
+                    console.log(JSON.stringify(jstreeData, null, 2))
+                    var jsTreeOptions = self.getConceptJstreeOptions(false)
+                    jsTreeOptions.openAll = true;
+                    common.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)
+                $("#Blender_tabs").tabs("option", "active", 0);
+                if(callback)
+                    callback();
+                })
+
+
+
+
 
         }
 

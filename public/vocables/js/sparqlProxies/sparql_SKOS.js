@@ -1,5 +1,3 @@
-
-
 //biblio
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
 /** The MIT License
@@ -132,6 +130,7 @@ var Sparql_SKOS = (function () {
                     "   ?child1 skos:prefLabel ?child1Label." +
                     "   ?child1 rdf:type ?child1Type." +
                     "}order by ?concept"
+                query += "} limit " + limit + " ";
             }
 
 
@@ -141,7 +140,57 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","child"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"])
+                return callback(null, result.results.bindings);
+            })
+        }
+
+
+        self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
+            $("#waitImg").css("display", "block");
+
+            setVariables(sourceLabel);
+            var filterStr = ""
+            if (options && options.filter) {
+
+                if (options.filter.predicates) {
+                    filterStr = Sparql_common.setFilter("predicate", options.filter.predicates)
+                }
+
+
+            }
+
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                " select  distinct * " + fromStr + "   WHERE { " +
+                " ?subject ?predicate ?object. " + filterStr+
+                "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})"
+
+            if (!collection || collection == "") {
+
+                query += "}";
+
+            } else {
+
+                query += "   ?collection skos:member* ?acollection. " + Sparql_common.getUriFilter("collection", collection) +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
+                    "   ?collection skos:prefLabel ?collectionLabel." +
+                    "   ?acollection skos:prefLabel ?acollectionLabel." +
+                    "   ?subject skos:prefLabel ?subjectLabel." +
+
+                    "}"
+            }
+
+            query += " limit " + limit + " ";
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"])
                 return callback(null, result.results.bindings);
             })
         }
@@ -206,14 +255,10 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept","broader"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "broader"])
                 return callback(null, result.results.bindings);
             })
         }
-
-
-
-
 
 
         self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
@@ -272,7 +317,7 @@ var Sparql_SKOS = (function () {
             var query = "";
             query += prefixesStr
             query += " select distinct * " + fromStr + "  WHERE {  ?concept ?x ?y. "
-                query += "OPTIONAL {?concept " + prefLabelPredicate + " ?conceptLabel.}";
+            query += "OPTIONAL {?concept " + prefLabelPredicate + " ?conceptLabel.}";
 
             if (options.filter)
                 query += options.filter;
@@ -294,7 +339,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"concept")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "concept")
                 return callback(null, result.results.bindings)
 
             })
@@ -714,7 +759,7 @@ var Sparql_SKOS = (function () {
             , broader: "skos:broader"
             , prefLabel: "skos:prefLabel"
             , altLabel: "skos:altLabel",
-            limit: 1000,
+            limit: 10000,
             optionalDepth: 5
 
 

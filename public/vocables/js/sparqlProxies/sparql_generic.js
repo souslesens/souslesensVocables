@@ -52,7 +52,17 @@ var Sparql_generic = (function () {
             })
 
         }
+        self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
+            $("#waitImg").css("display", "block");
+            if (!options) {
+                options = {}
+            }
+            Config.sources[sourceLabel].controller.getCollectionNodes(sourceLabel, collection, options, function (err, result) {
+                callback(err, result);
+            })
 
+
+        }
 
         /**
          *
@@ -308,10 +318,10 @@ var Sparql_generic = (function () {
 
         self.triplesObjectToString = function (item) {
             if (typeof item === "string")
-               return item
+                return item
 
 
-                var valueStr = ""
+            var valueStr = ""
             if (item.valueType == "uri")
                 valueStr = "<" + item.object + ">"
             else {
@@ -334,7 +344,7 @@ var Sparql_generic = (function () {
             var insertTriplesStr = "";
             triples.forEach(function (item, index) {
 
-                    insertTriplesStr += self.triplesObjectToString(item);
+                insertTriplesStr += self.triplesObjectToString(item);
 
             })
 
@@ -348,7 +358,7 @@ var Sparql_generic = (function () {
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
-                return callback(err,triples.length);
+                return callback(err, triples.length);
             })
         }
 
@@ -456,10 +466,17 @@ var Sparql_generic = (function () {
                                 options.setObjectFn(item)
 
                             subject = item.id.value
-                            if(options.subjectNewUri)
-                                subject=options.subjectNewUri
+                            if (options.subjectNewUri)
+                                subject = options.subjectNewUri
+
 
                             prop = item.prop.value
+
+                            if (options.skipPredicates && options.skipPredicates.indexOf(prop)> - 1) {
+                                return
+
+                            }
+
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
 

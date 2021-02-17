@@ -113,11 +113,17 @@ var Blender = (function () {
                     },
 
                     function (callbackSeries) {
-                self.showFilteredTaxonomyTree(function(err, result){
-                      //  self.showTopConcepts(null, function (err, result) {
-                            callbackSeries(err);
-                        })
+                        if (Blender.currentSource)
+                            if(Config.Blender.openTaxonomyTreeOnLoad) {
+                                self.showFilteredTaxonomyTree(function (err, result) {
+                                    callbackSeries(err);
+                                })
+                            }else{
+                           self.showTopConcepts(null, function (err, result) {
+                                callbackSeries(err);
+                            })
 
+                            }
 
                     }
                     ,

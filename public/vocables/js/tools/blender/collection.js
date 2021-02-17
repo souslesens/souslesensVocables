@@ -193,14 +193,11 @@ var Collection = (function () {
         var html = ("<div  class='blender_collectionFilter' onclick='Collection.removeTaxonomyFilter()'>" + collection.text + "</div>")
         $("#Blender_currentFilterDiv").append(html)
 
-        if(true){
+        if(Config.Blender.openTaxonomyTreeOnLoad){
             Blender.showFilteredTaxonomyTree()
 
         }
-
-
-
-        if( false) {
+        else {
             Sparql_generic.getTopConcepts(Blender.currentSource, options, function (err, result) {
                 //   ThesaurusBrowser.getFilteredNodesJstreeData(Blender.currentSource, options, function (err, jstreeData) {
                 if (err) {
@@ -218,22 +215,6 @@ var Collection = (function () {
 
                 TreeController.drawOrUpdateTree("Blender_conceptTreeDiv", result, "#", "topConcept", jsTreeOptions)
 
-                /*   setTimeout(function () {
-                       if ($("#Blender_conceptTreeDiv").jstree(true)) {
-                           var firstNodeId = $("#Blender_conceptTreeDiv").jstree(true).get_node("#").children[0];
-                           var firstNode = $("#Blender_conceptTreeDiv").jstree(true).get_node(firstNodeId);
-                           var options = {filterCollections: Collection.currentCollectionFilter};
-                           ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", Blender.currentSource, firstNode, options);
-                       }
-
-                       if (Blender.currentTreeNode && Blender.currentTreeNode.children.length == 0)
-                           ExternalReferences.openNarrowMatchNodes(Blender.currentSource, Blender.currentTreeNode)
-                       if (Collection.currentTreeNode) {
-                           var html = "<div  class='blender_collectionFilter'  onclick='Collection.removeTaxonomyFilter()'>" + Collection.currentTreeNode.text + "</div>"
-                           $('#Blender_collectionFilterContainerDiv').html(html);
-                       }
-                   }, 200)
-                   */
 
 
             })
@@ -246,10 +227,11 @@ var Collection = (function () {
 
         $(".blender_collectionFilter").remove();
         if (Blender.currentSource)
-            Blender.showTopConcepts(null, function (err,) {
-
-
-            })
+            if(Config.Blender.openTaxonomyTreeOnLoad)
+            Blender.showFilteredTaxonomyTree()
+        else {
+                Blender.showTopConcepts()
+            }
 
 
     }

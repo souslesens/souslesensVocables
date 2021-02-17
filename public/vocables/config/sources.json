@@ -31,18 +31,79 @@
     },
     "color": "#9edae5"
   },
-  "ONE-TAXONOMY_TEST": {
+  "ONE-TAXONOMY_TEST_1": {
     "editable": true,
     "controller": "Sparql_SKOS",
     "sparql_server": {
       "url": "_default"
     },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST/",
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-1/",
     "schemaType": "SKOS",
     "predicates": {
     },
     "color": "#9edae5"
   },
+  "ONE-TAXONOMY_TEST_2": {
+    "editable": true,
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-2/",
+    "schemaType": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+  "ONE-TAXONOMY_TEST_3": {
+    "editable": true,
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-3/",
+    "schemaType": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+  "ONE-TAXONOMY_TEST_4": {
+    "editable": true,
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-4/",
+    "schemaType": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+  "ONE-TAXONOMY_TEST_5": {
+    "editable": true,
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-5/",
+    "schemaType": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+  "ONE-TAXONOMY_TEST_6": {
+    "editable": true,
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-6/",
+    "schemaType": "SKOS",
+    "predicates": {
+    },
+    "color": "#9edae5"
+  },
+
   "Total-CTG": {
     "editable": false,
     "controller": "Sparql_SKOS",
@@ -59,7 +120,7 @@
     "color": "#9edae5"
   },
   "IEC": {
-    "editable": true,
+    "editable": false,
     "controller": "Sparql_SKOS",
     "sparql_server": {
       "url": "_default"
@@ -367,7 +428,7 @@
     "color": "#bcbd22"
   },
   "ISO_15926-part-4": {
-    "editable": true,
+    "editable": false,
     "graphUri": "http://standards.iso.org/iso/15926/part4/",
     "sparql_server": {
       "url": "_default"
@@ -379,7 +440,7 @@
     "color": "#bcbd22"
   },
   "ISO_15926-part-12": {
-    "editable": true,
+    "editable": false,
     "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
     "sparql_server": {
       "url": "_default"

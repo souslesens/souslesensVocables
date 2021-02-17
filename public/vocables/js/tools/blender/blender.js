@@ -320,15 +320,18 @@ var Blender = (function () {
                 }
                 return menuItems;
             } else {
-                menuItems.toCollection = {
-                    label: "<span class='blender_assignCollection'>to Collection</span>",
-                    action: function (e) {// pb avec source
-                        Blender.menuActions.toCollection(e)
-                    }
+                var clipboard = Clipboard.getContent()
+                if(clipboard.length==0) {
+                    menuItems.toCollection = {
+                        label: "<span class='blender_assignCollection'>to Collection</span>",
+                        action: function (e) {// pb avec source
+                            Blender.menuActions.toCollection(e)
+                        }
 
+                    }
                 }
 
-                var clipboard = Clipboard.getContent()
+
                 if (clipboard.length > 0 && clipboard[0].type == "node") {
                     menuItems.pasteNode = {
                         "label": "<span class='blender_pasteNode'>Paste...</span>",

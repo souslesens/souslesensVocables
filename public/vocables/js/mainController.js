@@ -164,8 +164,7 @@ var MainController = (function () {
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
                     var controller = Config.tools[self.currentTool].controller
-                    $("#actionDivContolPanelDiv").html("")
-                    $("#currentSourceTreeDiv").html("")
+                   $("#currentSourceTreeDiv").html("")
 
                     self.UI.updateActionDivLabel();
 
@@ -239,10 +238,10 @@ var MainController = (function () {
             $("#messageDiv").html(message)
         },
 
-        toogleRightPanel: function (status) {
+        toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display")
 
-            if (display == "flex") {//open->close
+            if (!open && display == "flex") {//open->close
                 var w2 = $("#graphDiv").width() + rightPanelWidth
                 $("#rightPanelDiv").css("display", "none")
                 $("#centralPanelDiv").width(w2)
@@ -333,8 +332,8 @@ var MainController = (function () {
 
         /*    self.loadSources(function () {
                 MainController.currentSource = "NPD"
-                ThesaurusBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
-                AssetQuery.showProperties()
+                SourceBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
+                ADLquery.showProperties()
             })*/
 
     }

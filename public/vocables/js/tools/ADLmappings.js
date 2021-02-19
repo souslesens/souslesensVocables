@@ -8,10 +8,10 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var Xlsx2mappings = (function () {
+var ADLmappings = (function () {
 
         var self = {}
-        self.currentSource = null;
+        self.currentSource;
         self.prefixes = {
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdfs",
@@ -20,6 +20,7 @@ var Xlsx2mappings = (function () {
 
 
         }
+        self.sampleData = {}
         var constraintsMap = {}
         var allObjectsMap = {}
         self.init = function () {
@@ -33,7 +34,20 @@ var Xlsx2mappings = (function () {
 
 
         self.onLoaded = function () {
-            $("#graphDiv").load("./snippets/xlsx2mapping.html");
+
+
+            $("#actionDivContolPanelDiv").html(" <button onclick=\"ADLmappings.loadXlsModel()\">open Xls Model</button>" +
+                " <button onclick=\"ADLmappings.loadADL_SQLModel()\">load ADL Model</button>");
+            $("#actionDiv").html(" <div id=\"ADLmappings_dataModelTree\"  style=\"width:400px\"></div>");
+            $("#accordion").accordion("option", {active: 2});
+
+            MainController.UI.toogleRightPanel(true)
+            $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
+            setTimeout(function () {
+                $("#rightPanelDiv").html(" <div> Ontology  Properties <div id=\"ADLmappings_ontologyPropertiesTree\" style=\"width:400px\"></div></div>")
+                self.currentSource = Config.ADLMappings.currentOntology;
+                ADLmappings.loadOntology()
+            }, 200)
 
         }
         self.onSourceSelect = function (source) {
@@ -111,12 +125,12 @@ var Xlsx2mappings = (function () {
         self.joinSheetColumns = function () {
             var start = self.startJoiningColumn;
             var end = self.endJoiningColumn;
-            $("#Individuals_dataModelTree").jstree(true).rename_node(self.endJoiningColumn, "<span  class='joinColumn'>" +self.endJoiningColumn + "=" +self.startJoiningColumn + "</span>")
-            if(! self.sheetJoinColumns[start])
-                self.sheetJoinColumns[start]=[]
+            $("#ADLmappings_dataModelTree").jstree(true).rename_node(self.endJoiningColumn, "<span  class='joinColumn'>" + self.endJoiningColumn + "=" + self.startJoiningColumn + "</span>")
+            if (!self.sheetJoinColumns[start])
+                self.sheetJoinColumns[start] = []
             self.sheetJoinColumns[start].push(end)
-            if(! self.sheetJoinColumns[end])
-                self.sheetJoinColumns[end]=[]
+            if (!self.sheetJoinColumns[end])
+                self.sheetJoinColumns[end] = []
             self.sheetJoinColumns[end].push(start)
 
         }
@@ -154,17 +168,17 @@ var Xlsx2mappings = (function () {
             };
 
 
-            var nodes = common.getjsTreeNodes("Individuals_dataModelTree")
+            var nodes = common.getjsTreeNodes("ADLmappings_dataModelTree")
 
             for (var key in self.typedObjectsMap) {
-                if(self.typedObjectsMap[key].type){
-                data.mappings.push({
-                    subject: key,
-                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object: self.typedObjectsMap[key].type
+                if (self.typedObjectsMap[key].type) {
+                    data.mappings.push({
+                        subject: key,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: self.typedObjectsMap[key].type
 
 
-                })
+                    })
                 }
             }
             nodes.forEach(function (node) {
@@ -173,7 +187,7 @@ var Xlsx2mappings = (function () {
                     var subject = node.data.subject
                     var predicate = node.data.predicate
                     var object = node.data.object
-                    if(subject && predicate && object) {
+                    if (subject && predicate && object) {
                         data.mappings.push({
                             subject: subject,
                             predicate: predicate,
@@ -257,7 +271,7 @@ var Xlsx2mappings = (function () {
                 selectTreeNodeFn: self.onselectPropertiesNode,
                 openAll: true
             }
-            common.loadJsTree("Individuals_ontologyPropertiesTree", propJstreeData, optionsClass)
+            common.loadJsTree("ADLmappings_ontologyPropertiesTree", propJstreeData, optionsClass)
 
 
         }
@@ -266,9 +280,9 @@ var Xlsx2mappings = (function () {
             if (parentNode == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                 self.typedObjectsMap[self.currentColumn].type = obj.node.data.id
 
-                var modelNode = $("#Individuals_dataModelTree").jstree(true).get_node(self.currentColumn)
+                var modelNode = $("#ADLmappings_dataModelTree").jstree(true).get_node(self.currentColumn)
                 var propLabel = allObjectsMap[obj.node.data.id].label
-                $("#Individuals_dataModelTree").jstree(true).rename_node(self.currentColumn, "<span  class='typedColumn'>" + propLabel + ":" + modelNode.data.label + "</span>")
+                $("#ADLmappings_dataModelTree").jstree(true).rename_node(self.currentColumn, "<span  class='typedColumn'>" + propLabel + ":" + modelNode.data.label + "</span>")
 
 
                 for (var prop in constraintsMap.properties) {
@@ -290,7 +304,7 @@ var Xlsx2mappings = (function () {
                     data: {type: "triple", subject: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
 
                 })
-                common.addNodesToJstree("Individuals_dataModelTree", self.currentColumn, newChildren)
+                common.addNodesToJstree("ADLmappings_dataModelTree", self.currentColumn, newChildren)
             }
 
         }
@@ -446,6 +460,27 @@ var Xlsx2mappings = (function () {
         }
 
 
+        self.loadADL_SQLModel = function () {
+            var dbName = "clov"
+
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: {ADLquery: 1, getModel: dbName},
+                dataType: "json",
+
+                success: function (data, textStatus, jqXHR) {
+                    self.configureModel(data, dbName)
+
+                },
+                error: function (err) {
+                    alert(err);
+                }
+            })
+
+
+        }
+
         self.loadXlsModel = function (path) {
 
             var path = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BCmodel.json"
@@ -462,39 +497,7 @@ var Xlsx2mappings = (function () {
                 dataType: "json",
 
                 success: function (data, textStatus, jqXHR) {
-                    var modelJstreeData = []
-                    var existingNodes = {}
-                    for (var key in data) {
-                        modelJstreeData.push({
-                            id: key,
-                            text: key,
-                            parent: "#",
-                            data: {type: "table", id: key, label: key, source: path}
-                        })
-
-                        data[key].forEach(function (item) {
-
-                            modelJstreeData.push({
-                                id: key + "." + item,
-                                text: item,
-                                parent: key,
-                                data: {type: "column", id: key + "." + item, label: item, source: path}
-
-                            })
-                        })
-                    }
-
-                    var options = {
-                        selectTreeNodeFn: function (event, obj) {
-                            self.currentModelJstreeNode = obj.node
-                            self.currentJstreeNode = obj.node;
-                            self.setTripleObject("Subject", obj.node.data)
-
-                        },
-                        contextMenu: self.jstreeContextMenu("Column")
-                    }
-                    common.loadJsTree("Individuals_dataModelTree", modelJstreeData, options)
-                    $("#waitImg").css("display", "none");
+                    self.configureModel(data, path)
                 }
                 , error: function (err) {
 
@@ -507,6 +510,115 @@ var Xlsx2mappings = (function () {
             })
 
 
+        }
+
+        self.configureModel = function (data, source) {
+            var modelJstreeData = []
+            var existingNodes = {}
+            for (var key in data) {
+                modelJstreeData.push({
+                    id: key,
+                    text: key,
+                    parent: "#",
+                    data: {type: "table", id: key, label: key, source: source}
+                })
+
+                data[key].forEach(function (item) {
+
+                    modelJstreeData.push({
+                        id: key + "." + item,
+                        text: item,
+                        parent: key,
+                        data: {type: "column", id: key + "." + item, label: item, source: source}
+
+                    })
+                })
+            }
+
+            var options = {
+                selectTreeNodeFn: function (event, obj) {
+                    self.currentModelJstreeNode = obj.node
+                    self.currentJstreeNode = obj.node;
+                    self.setTripleObject("Subject", obj.node.data)
+                    self.showSampleData(obj.node)
+
+                },
+                contextMenu: self.jstreeContextMenu("Column")
+            }
+            common.loadJsTree("ADLmappings_dataModelTree", modelJstreeData, options)
+            $("#waitImg").css("display", "none");
+        }
+
+        self.showSampleData = function (node) {
+            var limit = 10
+            var dbName = node.data.source;
+            var table;
+            if (node.parents.length == 1)
+                table = node.id
+            if (node.parents.length == 2)
+                table = node.parent
+            if (node.parents.length == 3)
+                table = node.parents[node.parents[2]]
+
+            function displaySampleData(data) {
+                var cols = []
+                var str = "<table><tr>"
+                var strTypes = ""
+                var strMappings = ""
+                data.forEach(function (item) {
+                    for (var key in item) {
+                        if (cols.indexOf(key) < 0) {
+                            cols.push(key);
+                            str += "<td class='dataSample_cell'>" + key + "</td>"
+                            strTypes += "<td class='dataSample_cell dataSample_type'><span class= 'dataSample_type' id='dataSample_type_" + table + "." + "_" + key + "'></span></td>"
+                            strMappings += "<td  class='dataSample_cell dataSample_mapping'<span class= 'dataSample_mapping' id='dataSample_mapping_" + table + "." + "_" + key + "'></span> </td>"
+                        }
+                    }
+                })
+                str += "</tr>"
+                str += "<tr>" + strTypes + "</tr>"
+                str += "<tr>" + strMappings + "</tr>"
+
+                data.forEach(function (item) {
+                    str += "<tr>"
+                    cols.forEach(function (col) {
+                        var value = ""
+
+                        if (item[col]) {
+                            value = item[col]
+                        }
+                        str += "<td class='dataSample_cell dataSample_cellValue'>" + value + "</td>"
+                    })
+                    str += "</tr>"
+                })
+
+                $("#ADLmappings_dataSampleDiv").html(str)
+            }
+
+
+            if (self.sampleData[table]) {
+
+                displaySampleData(self.sampleData[table])
+            } else {
+
+                var sqlQuery = " select * from " + table + " limit " + limit;
+
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: {ADLquery: 1, getData: 1, dbName: dbName, sqlQuery: sqlQuery},
+                    dataType: "json",
+
+                    success: function (data, textStatus, jqXHR) {
+                        self.sampleData[table] = data,
+                            displaySampleData(self.sampleData[table])
+                    }
+                    , error: function (err) {
+
+
+                    }
+                })
+            }
         }
 
 

@@ -19,9 +19,8 @@ var Sparql_schema = (function () {
     var slicesSize = 25
 
     self.getClasses = function (schema, classIds, callback) {
-        var fromStr = "";
-        if (schema.graphUri)
-            fromStr = "FROM <" + schema.graphUri + "> ";
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
@@ -46,9 +45,7 @@ var Sparql_schema = (function () {
 
     }
     self.getClassProperties = function (schema, classIds, callback) {
-        var fromStr = "";
-        if (schema.graphUri)
-            fromStr = "FROM <" + schema.graphUri + "> ";
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -72,9 +69,7 @@ var Sparql_schema = (function () {
 
     }
     self.getObjectAnnotations = function (schema, classIds, callback) {
-        var fromStr = "";
-        if (schema.graphUri)
-            fromStr = "FROM <" + schema.graphUri + "> ";
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -95,9 +90,7 @@ var Sparql_schema = (function () {
     }
 
     self.getPropertiesRangeAndDomain = function (schema, propertyIds, words, options, callback) {
-        var fromStr = "";
-        if (schema.graphUri)
-            fromStr = "FROM <" + schema.graphUri + "> ";
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
 
 
         if (!options)
@@ -151,11 +144,8 @@ var Sparql_schema = (function () {
     }
 
     self.getObjectRangeProperties = function (schema, classId, callback) {
-        var fromStr = "";
-        if (schema.graphUri)
-            fromStr = "FROM <" + schema.graphUri + "> ";
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
 
-        fromStr = "FROM <" + schema.graphUri + "> ";
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -184,9 +174,7 @@ var Sparql_schema = (function () {
 
     }
     self.getObjectDomainProperties = function (schema, classIds, callback) {
-        var fromStr = "";
-        if (schema.graphUri)
-            fromStr = "FROM <" + schema.graphUri + "> ";
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
@@ -225,9 +213,7 @@ var Sparql_schema = (function () {
         async.eachSeries(slices, function (classIds, callbackEach) {
 
 
-            var fromStr = "";
-            if (schema.graphUri)
-                fromStr = "FROM <" + schema.graphUri + "> ";
+            var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
             var classIdsFilter = Sparql_common.setFilter("classId", classIds)
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
@@ -299,9 +285,7 @@ var Sparql_schema = (function () {
 
     self.getAllTypes = function (sourceLabel, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri
-        var fromStr = ""
-        if (graphUri && graphUri != "")
-            fromStr = " FROM <" + graphUri + ">"
+        var fromStr = Sparql_common.getFromGraphStr(graphUri)
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +

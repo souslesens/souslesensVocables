@@ -11,30 +11,30 @@
 //inclure altLabel
 
 
-var ThesaurusMatcher = (function () {
+var SourceMatcher = (function () {
         var self = {}
         self.maxSourceDescendants = 500;
-        self.onSourceSelect = function (thesaurusLabel) {
+        self.onSourceSelect = function (sourceLabel) {
 
-            //  $("#actionDivContolPanelDiv").html("<button onclick='ThesaurusMatcher.showcompareWithDialog()'>Compare with...</button>")
-            // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
+            //  $("#actionDivContolPanelDiv").html("<button onclick='SourceMatcher.showcompareWithDialog()'>Compare with...</button>")
+            // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='SourceBrowser.searchTerm()'>Search</button>")
 
-            ThesaurusBrowser.showThesaurusTopConcepts(thesaurusLabel)
+            SourceBrowser.showThesaurusTopConcepts(sourceLabel)
 
 
-            $("#actionDivContolPanelDiv").load("snippets/thesaurusMatcher.html")
+            $("#actionDivContolPanelDiv").load("snippets/sourceMatcher.html")
             setTimeout(function () {
                 var sourceLabels = Object.keys(Config.sources).sort();
-                common.fillSelectOptions("ThesaurusMatcher_targetGraphUriSelect", sourceLabels, true)
+                common.fillSelectOptions("SourceMatcher_targetGraphUriSelect", sourceLabels, true)
                 $("#accordion").accordion("option", {active: 2});
             }, 200)
 
 
         }
         self.selectTreeNodeFn = function (event, propertiesMap) {
-            $("#ThesaurusMatcher_actionDiv").css('display', 'block')
-            ThesaurusBrowser.openTreeNode(ThesaurusBrowser.currentTargetDiv, propertiesMap.node.data.source, propertiesMap.node)
-            ThesaurusBrowser.currentTreeNode = propertiesMap.node
+            $("#SourceMatcher_actionDiv").css('display', 'block')
+            SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, propertiesMap.node.data.source, propertiesMap.node)
+            SourceBrowser.currentTreeNode = propertiesMap.node
         }
 
 
@@ -47,26 +47,26 @@ var ThesaurusMatcher = (function () {
 
 
             if (!toSourceId)
-                toSourceId = $("#ThesaurusMatcher_targetGraphUriSelect").val();
+                toSourceId = $("#SourceMatcher_targetGraphUriSelect").val();
             if (!fromSourceId)
                 return MainController.UI.message("choose a target ressource");
 
             if (!output)
-                output = $("#ThesaurusMatcher_outputTypeSelect").val();
+                output = $("#SourceMatcher_outputTypeSelect").val();
 
 
             if (!rdfType)
-                rdfType = ($("#ThesaurusMatcher_rdfTypeSelect").val());
+                rdfType = ($("#SourceMatcher_rdfTypeSelect").val());
 
 
             if (!compareAll)
-                compareAll = $("#ThesaurusMatcher_compareAllCBX").prop("checked");
+                compareAll = $("#SourceMatcher_compareAllCBX").prop("checked");
 
 
-            if (!ThesaurusBrowser.currentTreeNode) {
+            if (!SourceBrowser.currentTreeNode) {
                 if (!compareAll) {
                     if (confirm("compare all  items")) {
-                        $("#showOlderAncestorsOnlyCBX").prop("checked", "checked");
+                        $("#showOlderGenealogyOnlyCBX").prop("checked", "checked");
                         compareAll = true;
                     } else {
                         $("#waitImg").css("display", "none");
@@ -74,7 +74,7 @@ var ThesaurusMatcher = (function () {
                     }
                 }
             } else {
-                sourceNodeId = ThesaurusBrowser.currentTreeNode.data.id
+                sourceNodeId = SourceBrowser.currentTreeNode.data.id
 
                 if (!sourceNodeId || sourceNodeId.length == 0) {
                     $("#waitImg").css("display", "none");
@@ -83,8 +83,8 @@ var ThesaurusMatcher = (function () {
             }
 
             var showAllSourceNodes = $("#showAllSourceNodesCBX").prop("checked");
-            // var showOlderAncestorsOnly = $("#showOlderAncestorsOnlyCBX").prop("checked");
-            var maxDescendantsDepth = parseInt($("#ThesaurusMatcher_maxDescendantsDepth").val());
+            // var showOlderGenealogyOnly = $("#showOlderGenealogyOnlyCBX").prop("checked");
+            var maxDescendantsDepth = parseInt($("#SourceMatcher_maxDescendantsDepth").val());
             // var lang = "en"
 
 
@@ -419,7 +419,7 @@ var ThesaurusMatcher = (function () {
                             }
                         }
 
-                        visjsGraph.draw("graphDiv", visjsData, {onclickFn: ThesaurusMatcher.onGraphClickNode,})
+                        visjsGraph.draw("graphDiv", visjsData, {onclickFn: SourceMatcher.onGraphClickNode,})
                         return callbackSeries();
                     },
 
@@ -462,7 +462,7 @@ var ThesaurusMatcher = (function () {
                                 if (item.target) {
 
                                     csv += item.target.label + "\t";
-                                    if (showOlderAncestorsOnly) {
+                                    if (showOlderGenealogyOnly) {
                                         if (item.target.broaders.length > 0) {
                                             if (item.target.broaders.length > 1)
                                                 csv += item.target.broaders[item.target.broaders.length - 2].label + "\t";
@@ -566,7 +566,7 @@ var ThesaurusMatcher = (function () {
                             " SELECT (count(distinct ?id)  as ?countItems) "
 
                             if (targetGraphURI && targetGraphURI != "")
-                                query += " FROM <" + targetGraphURI + "> "
+                                query += Sparql_common.getFromGraphStr(targetGraphURI)
 
                             query += " WHERE {" +
                                 "?id skos:prefLabel ?prefLabel ." +
@@ -580,7 +580,7 @@ var ThesaurusMatcher = (function () {
                                 " SELECT (count(distinct ?id)  as ?countItems) "
 
                             if (targetGraphURI && targetGraphURI != "")
-                                query += " FROM <" + targetGraphURI + "> "
+                                query +=Sparql_common.getFromGraphStr(targetGraphURI)
 
                             query += " WHERE {" + "?id rdfs:label ?prefLabel .";
                             if (rdfType && rdfType != "")

@@ -133,12 +133,12 @@ var Collection = (function () {
     }
 
 
-    self.openTreeNode = function (divId, thesaurusLabel, node, callback) {
+    self.openTreeNode = function (divId, sourceLabel, node, callback) {
         var existingNodes = common.getjsTreeNodes(divId, true)
         if (!node.children || node.children.length > 0)
             return;
 
-        self.Sparql.getNodeChildren(thesaurusLabel, node.data.id, {onlyCollectionType: true}, function (err, result) {
+        self.Sparql.getNodeChildren(sourceLabel, node.data.id, {onlyCollectionType: true}, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -199,7 +199,7 @@ var Collection = (function () {
         }
         else {
             Sparql_generic.getTopConcepts(Blender.currentSource, options, function (err, result) {
-                //   ThesaurusBrowser.getFilteredNodesJstreeData(Blender.currentSource, options, function (err, jstreeData) {
+                //   SourceBrowser.getFilteredNodesJstreeData(Blender.currentSource, options, function (err, jstreeData) {
                 if (err) {
                     return MainController.UI.message(err)
                 }
@@ -284,8 +284,8 @@ var Collection = (function () {
 
             var variables = self.Sparql.getVariables(sourceLabel);
             var fromStr = ""
-            if (variables.graphUri && variables.graphUri != "")
-                fromStr = " FROM <" + variables.graphUri + ">"
+
+                fromStr = Sparql_common.getFromGraphStr(variables.graphUri);
 
             var query = "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
                 " select    distinct * " + fromStr + " WHERE {" +
@@ -371,8 +371,9 @@ var Collection = (function () {
                 options = {}
             var variables = self.Sparql.getVariables(sourceLabel);
             var query = "";
+            var    fromStr = Sparql_common.getFromGraphStr(variables.graphUri);
             query += "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-            query += " select distinct * FROM <" + variables.graphUri + ">  WHERE {"
+            query += " select distinct * " + fromStr + "  WHERE {"
             query += "  ?collection   skos:member*  ?narrower." +
                 "filter (?collection=<" + id + ">) " +
                 "?narrower skos:prefLabel|rdfs:label ?narrowerLabel." +
@@ -409,7 +410,7 @@ var Collection = (function () {
             if (result.length == 0) {
                 Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");
-                $("#ThesaurusBrowser_collectionDiv").css("display", "none")
+                $("#SourceBrowser_collectionDiv").css("display", "none")
                 return;//MainController.UI.message("no collections for this source")
 
             }
@@ -420,20 +421,20 @@ var Collection = (function () {
                 array.push({id: item.collection.value, label: item.collectionLabel.value})
 
             })
-            $("#ThesaurusBrowser_collectionDiv").css("display", "block")
-            common.fillSelectOptions("ThesaurusBrowser_collectionSelect", array, true, "label", "id")
+            $("#SourceBrowser_collectionDiv").css("display", "block")
+            common.fillSelectOptions("SourceBrowser_collectionSelect", array, true, "label", "id")
 
         })
     }
 
     self.filterBrowserCollection = function () {
-        var collection = $("#ThesaurusBrowser_collectionSelect").val();
+        var collection = $("#SourceBrowser_collectionSelect").val();
         if (!collection || collection == "") {
             return Collection.currentCollectionFilter = null;
             ;
         }
         Collection.currentCollectionFilter = collection;
-        ThesaurusBrowser.showThesaurusTopConcepts(MainController.currentSource, {filterCollections: collection})
+        SourceBrowser.showThesaurusTopConcepts(MainController.currentSource, {filterCollections: collection})
 
 
     }

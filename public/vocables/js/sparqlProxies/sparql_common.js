@@ -69,7 +69,9 @@ var Sparql_common = (function () {
                 }
             } else if (ids) {
 
-
+                var p = ids.indexOf("#")
+                if (p > -1)
+                    ids.splice(p, 1)
                 if (Array.isArray(ids)) {
                     if (ids[0] == null)
                         return ""
@@ -78,7 +80,7 @@ var Sparql_common = (function () {
                         if (id != "") {
                             if (conceptIdsStr != "")
                                 conceptIdsStr += ","
-                            if (id.indexOf("http") <0)
+                            if (id.indexOf("http") < 0)
                                 conceptIdsStr += id
                             else
                                 conceptIdsStr += "<" + id + ">"
@@ -89,10 +91,10 @@ var Sparql_common = (function () {
                 } else {
                     if (ids == null)
                         return "";
-                    if (ids.indexOf("http") <0)
-                    filters.push(" ?" + varName + " =" + ids );
+                    if (ids.indexOf("http") < 0)
+                        filters.push(" ?" + varName + " =" + ids);
                     else
-                    filters.push(" ?" + varName + " =<" + ids + ">");
+                        filters.push(" ?" + varName + " =<" + ids + ">");
                 }
 
             } else {
@@ -190,6 +192,22 @@ var Sparql_common = (function () {
             return id.substring(p + 1)
         }
 
+
+    }
+
+    self.getFromGraphStr = function (graphUris) {
+        if (!graphUris || graphUris=="")
+            return "";
+        if (Array.isArray(graphUris)) {
+            var fromStr =""
+                graphUris.forEach(function (item) {
+                    fromStr += " FROM <" + item + "> "
+
+                })
+            return fromStr;
+        } else {
+            return " FROM <" + graphUris + ">"
+        }
 
     }
 

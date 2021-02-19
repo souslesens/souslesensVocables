@@ -195,7 +195,7 @@ var ChildHood = (function () {
             var visjsData = {nodes: [], edges: []}
             visjsData.nodes.push(self.rootNode);
             visjsGraph.draw("graphDiv", visjsData, {
-                onclickFn: TermTaxonomy.onGraphNodeClick,
+                onclickFn: Genealogy.onGraphNodeClick,
                 //  onHoverNodeFn: multiSkosGraph3.onNodeClick,
                 afterDrawing: function () {
                     $("#waitImg").css("display", "none")
@@ -216,13 +216,13 @@ var ChildHood = (function () {
                 item.color = Config.sources[item.sourceId].color
 
                 if (direction == "ancestors") {
-                    //  sparql_abstract.getAncestors(concept.source.id, concept.id, {exactMatch: true}, function (err, result) {
+                    //  sparql_abstract.getGenealogy(concept.source.id, concept.id, {exactMatch: true}, function (err, result) {
                     Sparql_generic.getNodeParents(item.sourceId, null, conceptId, maxDepth, {exactMatch: true}, function (err, result) {
                         if (err)
                             return console.log(err)
                         if (!result || !result.forEach)
                             return;
-                        self.addAncestorsGraph(item.sourceId,self.context.currentWord, result, maxDepth)
+                        self.addGenealogyGraph(item.sourceId,self.context.currentWord, result, maxDepth)
                     })
                 } else if (direction == "children") {
 
@@ -242,7 +242,7 @@ var ChildHood = (function () {
 
     }
 
-    self.addAncestorsGraph = function (sourceId,rootNodeId, bindings, depth) {
+    self.addGenealogyGraph = function (sourceId,rootNodeId, bindings, depth) {
         var visjsData = {nodes: [], edges: []}
 
        // edge beetwen word and concept
@@ -290,7 +290,7 @@ var ChildHood = (function () {
             }
 
 
-        $("#TermTaxonomy_nodeInfosDialogDiv").html("")
+        $("#Genealogy_nodeInfosDialogDiv").html("")
         if (node) {
             self.graphActions.currentNode = node;
 
@@ -320,7 +320,7 @@ var ChildHood = (function () {
                 })
 
               var visjsData= GraphController.toVisjsData  (null, result, self.graphActions.currentNode.id,"concept","child1",
-                  {from:{},to:{shape:TermTaxonomy.graphActions.getVisjsGraphColor,color:self.graphActions.currentNode.color},data:self.graphActions.currentNode.data } )
+                  {from:{},to:{shape:Genealogy.graphActions.getVisjsGraphColor,color:self.graphActions.currentNode.color},data:self.graphActions.currentNode.data } )
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
               //  self.addChildrenNodesToGraph(self.graphActions.currentNode, children)
@@ -341,7 +341,7 @@ var ChildHood = (function () {
                     return MainController.UI.message(err);
                 }
 
-                SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
+                SourceEditor.showNodeInfos("Genealogy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 
             })
         }

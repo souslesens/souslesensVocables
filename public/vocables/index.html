@@ -29,11 +29,11 @@
     <script src="js/clipboard.js"></script>
 
 
-    <script src="js/tools/thesaurusBrowser.js"></script>
+    <script src="js/tools/sourceBrowser.js"></script>
 
-    <script src="js/tools/thesaurusMatcher.js"></script>
-    <script src="js/tools/nerEvaluator.js"></script>
-    <script src="js/tools/termTaxonomy.js"></script>
+    <script src="js/tools/sourceMatcher.js"></script>
+    <script src="js/tools/evaluate.js"></script>
+    <script src="js/tools/genealogy.js"></script>
     <script src="js/tools/owlSchema.js"></script>
     <script src="js/tools/annotator.js"></script>
     <script src="js/tools/childHood.js"></script>
@@ -47,9 +47,10 @@
     <script src="js/tools/blender/transform.js"></script>
     <script src="js/tools/SPARQL_endpoint.js"></script>
     <script src="js/tools/lineage/lineage.js"></script>
-    <script src="js/tools/lineage/assetQuery.js"></script>
+   <!-- <script src="js/tools/lineage/ADLquery.js"></script>-->
 
-    <script src="js/tools/xlsx2mappings.js"></script>
+    <script src="js/tools/ADLmappings.js"></script>
+    <script src="js/tools/ADLbrowser.js"></script>
 
 
     <script src="js/tools/ontologiesStats.js"></script>
@@ -95,8 +96,10 @@
             $("#blendDiv").height(h - 70)
             $("#leftPanelDiv").height(h - 50)
             $("#rightPanelDiv").height(h - 50)
-            //   $('.jstree').attr("height",800)
-            //   $(".jstree").css({ "max-height": 600 });
+
+
+            //  $('.jstree-default').css("max-height",h-200)
+               $(".jstree").height( w-100 );
 
 
             $("#accordion").accordion()
@@ -160,6 +163,8 @@
 
         .jstree-default {
             min-height: 300px !important;
+            max-height: 600px ;
+          overflow: auto;
         }
 
         .jstree-node {

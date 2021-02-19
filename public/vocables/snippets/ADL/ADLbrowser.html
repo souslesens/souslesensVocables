@@ -1,0 +1,53 @@
+<style>
+    #ADLbrowser_Tabs {
+        height: 100%;
+    }
+
+    .ADLbrowser_Tab {
+        overflow: auto;
+        max-height: 500px;
+    }
+
+    .aspect_Product{
+        background-color: deepskyblue;
+    }
+    .aspect_Location{
+        background-color: hotpink;
+    }
+    .aspect_Function{
+        background-color: yellow;
+    }
+    .aspect_LifeCycle{
+        background-color: green;
+    }
+
+
+</style>
+<div>
+
+
+    <div id="ADLbrowser_Tabs" style="width:360px;">
+
+        <div class="" id="ADLbrowser_ItemTab">
+            <div id="ADLbrowser_searchAllDiv" style="height: 50px"></div>
+            <div id="ADLbrowser_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
+            <div style="width: 360px;height: 500px">
+                <div class="jstree" id="ADLbrowserItemsjsTreeDiv"></div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+</div>
+
+<script>
+    $("#ADLbrowser_searchAllDiv").load("./snippets/searchAll.html");
+    setTimeout(function () {
+        $("#GenericTools_searchInAllSources").prop("checked", false)
+    }, 300)
+
+    $("#ADLbrowser_Tabs").tabs()
+</script>

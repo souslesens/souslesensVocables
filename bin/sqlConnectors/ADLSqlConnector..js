@@ -12,7 +12,7 @@ var mysql = require('./mySQLproxy..js')
 
 
 //"C:\Program Files\MariaDB 10.2\bin\mysqld"
-var AssetQuerySqlConnector = {
+var ADLSqlConnector = {
 
     connection: {
         host: "localhost",
@@ -26,9 +26,9 @@ var AssetQuerySqlConnector = {
         model: "select * from model,model_attribute where model.ID=model_attribute.ModelId "
     },
 
-    get: function (objectName,quantumArray,callback){
+    getFromSparql: function (objectName,quantumArray,callback){
 
-        var  assetQueryMap={}
+        var  ADLqueryMap={}
         var QuantumTypesMap={
             F:"FunctionalClassID",
             A:"AttributeID"
@@ -41,9 +41,9 @@ var AssetQuerySqlConnector = {
             var quantumTotalId=quantumId.substring(p)
             var quantumType = QuantumTypesMap[quantumTypeLetter]
             if (quantumType) {
-                if (!assetQueryMap[quantumType])
-                    assetQueryMap[quantumType] = []
-                assetQueryMap[quantumType].push(quantumTotalId)
+                if (!ADLqueryMap[quantumType])
+                    ADLqueryMap[quantumType] = []
+                ADLqueryMap[quantumType].push(quantumTotalId)
             }
         })
 
@@ -51,17 +51,17 @@ var AssetQuerySqlConnector = {
 
 
 
-        var query=AssetQuerySqlConnector.queries[objectName];
+        var query=ADLSqlConnector.queries[objectName];
 
-        for(var key in assetQueryMap){
+        for(var key in ADLqueryMap){
             query+=" and "
 
             if(true){
                 ""+key+" is not null"
             }
-            if(Array.isArray(assetQueryMap[key])){
+            if(Array.isArray(ADLqueryMap[key])){
                 query+=""+key+" in ("
-                assetQueryMap[key].forEach(function(quantumTotalId,indexId){
+                ADLqueryMap[key].forEach(function(quantumTotalId,indexId){
                     if(indexId>0){
                         query+=","
                     }
@@ -77,20 +77,53 @@ var AssetQuerySqlConnector = {
         }
         query+=" limit 1000"
         console.log(query)
-        mysql.exec(AssetQuerySqlConnector.connection,query,function(err, result){
+        mysql.exec(ADLSqlConnector.connection,query,function(err, result){
           return callback(err,result);
 
         })
 
-    }
+    },
+
+    getData:function(dbName,query,callback) {
+        mysql.exec(ADLSqlConnector.connection, query, function (err, result) {
+            return callback(err, result)
+
+        })
+    },
+
+    getADLmodel:function(dbName,callback){
+
+        var query="SELECT TABLE_NAME ,COLUMN_NAME\n" +
+            "  FROM INFORMATION_SCHEMA.COLUMNS\n" +
+            "  WHERE TABLE_SCHEMA = '"+dbName+"'"
+        mysql.exec(ADLSqlConnector.connection,query,function(err, result){
+            if(err)
+                return callback(err)
+
+            var model={}
+            result.forEach(function(item){
+                if(!model[item.TABLE_NAME]){
+                    model[item.TABLE_NAME]=[]
+                }
+                model[item.TABLE_NAME].push(item.COLUMN_NAME)
+
+            })
+            return callback(err,model);
+
+
+        })
+
+    },
+
+
 
 
 }
-module.exports=AssetQuerySqlConnector;
+module.exports=ADLSqlConnector;
 
 
 if(false){
-    AssetQuerySqlConnector.get("tag",
+    ADLSqlConnector.get("tag",
         {
             AttributeID:"XXXX",
             FunctionalClassID:"YYYYY"
@@ -101,3 +134,6 @@ if(false){
         )
 }
 
+if(false){
+    ADLSqlConnector.getADLmodel("clov")
+}

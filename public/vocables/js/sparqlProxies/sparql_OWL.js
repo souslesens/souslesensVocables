@@ -12,7 +12,7 @@ var Sparql_OWL = (function () {
 
         var self = {};
 
-        var filterCollectionsAncestorsDepth = 4
+        var filterCollectionsGenealogyDepth = 4
         self.ancestorsDepth = 6
 
         var elasticUrl = Config.serverUrl;
@@ -31,9 +31,8 @@ var Sparql_OWL = (function () {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-            if (self.graphUri && self.graphUri != "")
-                fromStr = " FROM <" + self.graphUri + ">"
 
+fromStr=Sparql_common.getFromGraphStr( self.graphUri)
 
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;
@@ -77,10 +76,8 @@ var Sparql_OWL = (function () {
             } else if (ids) {
                 strFilter = Sparql_common.setFilter("concept", ids, null)
             }
-            if (self.graphUri && self.graphUri != "")
-                fromStr = " FROM <" + self.graphUri + ">"
 
-
+            fromStr= Sparql_common.getFromGraphStr(self.graphUri)
             var owlPredicate = "subClassOf";
             if (options.owlType)
                 owlPredicate = options.owlType
@@ -109,14 +106,7 @@ var Sparql_OWL = (function () {
 
 
             if (options.filterCollections) {
-                var fromStr = ""
-                if (self.graphUri && self.graphUri != "") {
-                    if (!Array.isArray(self.graphUri))
-                        self.graphUri = [self.graphUri]
-                    self.graphUri.forEach(function (graphUri) {
-                        fromStr = " FROM <" + graphUri + "> "
-                    })
-                }
+                var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
 
                 query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
@@ -161,13 +151,8 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            if (self.graphUri && self.graphUri != "") {
-                if (!Array.isArray(self.graphUri))
-                    self.graphUri = [self.graphUri]
-                self.graphUri.forEach(function (graphUri) {
-                    fromStr = " FROM <" + graphUri + "> "
-                })
-            }
+            fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+
 
 
             var query = "select * " + fromStr +
@@ -199,14 +184,8 @@ var Sparql_OWL = (function () {
                 strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
-            var fromStr = ""
-            if (self.graphUri && self.graphUri != "") {
-                if (!Array.isArray(self.graphUri))
-                    self.graphUri = [self.graphUri]
-                self.graphUri.forEach(function (graphUri) {
-                    fromStr = " FROM <" + graphUri + "> "
-                })
-            }
+            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+
             var owlPredicate = "subClassOf";
             if (options.owlType)
                 owlPredicate = options.owlType
@@ -282,14 +261,8 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            var fromStr = ""
-            if (self.graphUri && self.graphUri != "") {
-                if (!Array.isArray(self.graphUri))
-                    self.graphUri = [self.graphUri]
-                self.graphUri.forEach(function (graphUri) {
-                    fromStr = " FROM <" + graphUri + "> "
-                })
-            }
+            var fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+
 
 
             var query = "";
@@ -436,14 +409,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = ""
-            if (self.graphUri && self.graphUri != "") {
-                if (!Array.isArray(self.graphUri))
-                    self.graphUri = [self.graphUri]
-                self.graphUri.forEach(function (graphUri) {
-                    fromStr = " FROM <" + graphUri + "> "
-                })
-            }
+            var   fromStr= Sparql_common.getFromGraphStr(self.graphUri)
 
 
             var query = "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
@@ -490,14 +456,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = ""
-            if (self.graphUri && self.graphUri != "") {
-                if (!Array.isArray(self.graphUri))
-                    self.graphUri = [self.graphUri]
-                self.graphUri.forEach(function (graphUri) {
-                    fromStr = " FROM <" + graphUri + "> "
-                })
-            }
+            var    fromStr= Sparql_common.getFromGraphStr(self.graphUri)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +

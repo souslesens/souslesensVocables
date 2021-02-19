@@ -165,7 +165,7 @@ var h=$("#graphDiv").height();
                     if (!existingVisjsIds[classId]) {
                         existingVisjsIds[classId] = 1
                         visjsData.nodes.push({
-                            id: ThesaurusBrowser.currentTreeNode.data.id,
+                            id: SourceBrowser.currentTreeNode.data.id,
                             label: Sparql_common.getLabelFromId(classId),
                             shape: "box"
 
@@ -250,8 +250,8 @@ var h=$("#graphDiv").height();
 
         if (!classId) {
             self.queryClassPath = {};
-            classId = ThesaurusBrowser.currentTreeNode.data.id
-            classLabel = ThesaurusBrowser.currentTreeNode.data.label
+            classId = SourceBrowser.currentTreeNode.data.id
+            classLabel = SourceBrowser.currentTreeNode.data.label
             self.init(function () {
                 execute(classId, classLabel)
             })

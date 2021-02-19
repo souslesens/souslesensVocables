@@ -58,7 +58,7 @@ var Blender = (function () {
                     })
 
                     //   $("#Blender_searchDiv").load("snippets/searchAll.html")
-                    //   ThesaurusBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
+                    //   SourceBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
 
 
                 }, 200
@@ -254,7 +254,7 @@ var Blender = (function () {
                     var options = {source: source, labelClass: "treeType_" + type}
                     if (Collection.currentCollectionFilter)
                         options.filterCollections = Collection.currentCollectionFilter;
-                    ThesaurusBrowser.openTreeNode("Blender_conceptTreeDiv", source, propertiesMap.node, options);
+                    SourceBrowser.openTreeNode("Blender_conceptTreeDiv", source, propertiesMap.node, options);
 
                     if (type == "externalReferenceTopConcept")
                         return;

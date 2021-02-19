@@ -284,13 +284,30 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
 
         }
-        if (req.body.AssetQuery) {
-            var AssetQuerySqlConnector=require("../bin/sqlConnectors/AssetQuerySqlConnector.")
-            AssetQuerySqlConnector.get(req.body.assetType,JSON.parse(req.body.quantumObjs),function(err,result) {
-                processResponse(response, null, result)
+        if (req.body.ADLquery) {
+            var ADLSqlConnector = require("../bin/sqlConnectors/ADLSqlConnector.")
+            if (req.body.getFromSparql) {
 
-            })
+                ADLSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), function (err, result) {
+                    processResponse(response, null, result)
 
+                })
+            }
+
+            if (req.body.getModel) {
+                ADLSqlConnector.getADLmodel(req.body.getModel, function (err, result) {
+                    processResponse(response, null, result)
+
+                })
+            }
+
+
+            if (req.body.getData) {
+                ADLSqlConnector.getData(req.body.dbName, req.body.sqlQuery, function (err, result) {
+                    processResponse(response, null, result)
+
+                })
+            }
 
         }
 
@@ -329,13 +346,13 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
 
 
-        if(req.body.triplesGenerator){
-            var triplesGenerator=require('../bin/triplesGenerator')
-            if(req.body.getJsonModel)
+        if (req.body.triplesGenerator) {
+            var triplesGenerator = require('../bin/triplesGenerator')
+            if (req.body.getJsonModel)
                 triplesGenerator.getJsonModel(req.body.getJsonModel, function (err, result) {
-                processResponse(response, err, result)
+                    processResponse(response, err, result)
 
-            })
+                })
         }
 
 

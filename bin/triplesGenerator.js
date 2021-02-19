@@ -13,6 +13,7 @@ const util = require('./skosConverters/util.')
 const xlsx2json = require('./xlsx2json.')
 const async = require('async')
 var httpProxy = require('./httpProxy.')
+var sqlConnector=require('../bin/sqlConnectors/ADLSqlConnector.')
 var idsCache = {}
 
 var triplesGenerator = {
@@ -43,13 +44,10 @@ var triplesGenerator = {
                     return;
 
 
-
-
                 var subjectUri
-                if(options.labelUrisMap && options.labelUrisMap[subjectValue]){
-                    subjectValue=options.labelUrisMap[subjectValue];
-                }
-                else if (options.generateIds) {
+                if (options.labelUrisMap && options.labelUrisMap[subjectValue]) {
+                    subjectValue = options.labelUrisMap[subjectValue];
+                } else if (options.generateIds) {
                     var newUri = false
                     if (!idsMap[subjectValue]) {
                         idsMap[subjectValue] = util.getRandomHexaId(options.generateIds)
@@ -83,10 +81,9 @@ var triplesGenerator = {
                         objectSuffix = "^^xsd:float"
                         objectValue = "'" + objectValue + "'" + objectSuffix;
                     } else {
-                        if(options.labelUrisMap && options.labelUrisMap[objectValue]){
-                            objectValue=options.labelUrisMap[objectValue];
-                        }
-                        else if (options.generateIds) {
+                        if (options.labelUrisMap && options.labelUrisMap[objectValue]) {
+                            objectValue = options.labelUrisMap[objectValue];
+                        } else if (options.generateIds) {
                             var newUri = false
                             if (!idsMap[objectValue]) {
                                 idsMap[objectValue] = util.getRandomHexaId(options.generateIds)
@@ -110,14 +107,14 @@ var triplesGenerator = {
 
     },
 
-    generateXlsxBookTriples: function (mappings, xlsxFilePath, uriPrefix, options, callback) {
+    generateXlsxBookTriples: function (mappings, source, uriPrefix, options, callback) {
         if (!options)
             options = {}
         var labelUrisMap = {}
         var mappingSheets = []
         var dataArray = [];
         var allTriples = [];
-
+        var allSheetsdata = {}
 
         async.series([
 
@@ -150,95 +147,115 @@ var triplesGenerator = {
                         }
                     })
                     callbackSeries()
-                }
+                },
 
-                // load Xsls and transform data structure
+
+            //xlsxSource
                 , function (callbackSeries) {
-                    xlsx2json.parse(xlsxFilePath, {sheets: mappingSheets}, function (err, result) {
+                    if (!source.xlsxFilePath)
+                        return callbackSeries()
+                    xlsx2json.parse(source.xlsxFilePath, {sheets: mappingSheets}, function (err, result) {
 
                         if (err)
                             return callback(err)
+                        allSheetsdata = result;
+                    })
+                },
+
+                , function (callbackSeries) {
+                    if (!source.sqlConnection)
+                        return callbackSeries()
+                    sqlConnector.parse(source.xlsxFilePath, {sheets: mappingSheets}, function (err, result) {
+
+                        if (err)
+                            return callback(err)
+                        allSheetsdata = result;
+                    })
+                },
+
+                // load Xsls and transform data structure
+                , function (callbackSeries) {
 
 
-                        var dataMap = {};
-                        var allCols = []
-                        var predicatesMap = {}
-                        mappings.mappings.forEach(function (mapping) {
+                    var dataMap = {};
+                    var allCols = []
+                    var predicatesMap = {}
+                    mappings.mappings.forEach(function (mapping) {
 
-                            var subject = mapping.subject
-                            var subjectSheet = subject.split('.')[0]
+                        var subject = mapping.subject
+                        var subjectSheet = subject.split('.')[0]
 
-                            var subjectCol = subject.split('.')[1]
-                            var object = mapping.object
-                            if (object && object.indexOf("http") < 0) {
-                                var objectSheet = object.split('.')[0]
-                                var objectCol = object.split('.')[1]
+                        var subjectCol = subject.split('.')[1]
+                        var object = mapping.object
+                        if (object && object.indexOf("http") < 0) {
+                            var objectSheet = object.split('.')[0]
+                            var objectCol = object.split('.')[1]
 
-                                predicatesMap[subjectCol + "_" + subjectCol] = mapping.predicate
+                            predicatesMap[subjectCol + "_" + subjectCol] = mapping.predicate
 
-                                result.data[objectSheet].forEach(function (item, index) {
+                            allSheetsdata.data[objectSheet].forEach(function (item, index) {
 
-                                    var subjectValue = item[subjectCol];
-                                    var subjectColLinked = subjectCol;
-                                    if (subjectSheet != objectSheet) {
-                                        if (subjectSheet == "TagtoTag")
-                                            var x = 3;
-                                        if (!subjectValue) {
-                                            mappings.sheetJoinColumns[subject].forEach(function (col) {
-                                                col = col.split(".")[1]
-                                                subjectValue = item[col];
-                                                if (subjectValue)
-                                                    return subjectColLinked = col;
-                                            })
+                                var subjectValue = item[subjectCol];
+                                var subjectColLinked = subjectCol;
+                                if (subjectSheet != objectSheet) {
+                                    if (subjectSheet == "TagtoTag")
+                                        var x = 3;
+                                    if (!subjectValue) {
+                                        mappings.sheetJoinColumns[subject].forEach(function (col) {
+                                            col = col.split(".")[1]
+                                            subjectValue = item[col];
+                                            if (subjectValue)
+                                                return subjectColLinked = col;
+                                        })
 
-                                        }
                                     }
-
-
-                                    var objectValue = item[objectCol]
-                                    if (!dataMap[subjectCol])
-                                        dataMap[subjectCol] = {}
-                                    if (!dataMap[subjectCol][subjectValue])
-                                        dataMap[subjectCol][subjectValue] = {}
-                                    if (!dataMap[subjectCol][subjectValue][objectCol])
-                                        dataMap[subjectCol][subjectValue][objectCol] = []
-                                    dataMap[subjectCol][subjectValue][objectCol].push(objectValue)
-                                    //  console.log( JSON.stringify(dataMap[subjectCol]))
-
-
-                                })
-
-                            }
-
-                        })
-
-
-                        var subjectDataArray = []
-                        var uniqueRows = {}
-                        for (var subjectCol in dataMap) {
-                            for (var subjectValue in dataMap[subjectCol]) {
-
-
-                                for (var objectCol in dataMap[subjectCol][subjectValue]) {
-                                    var valuesArray = dataMap[subjectCol][subjectValue][objectCol]
-
-                                    valuesArray.forEach(function (value) {
-                                        if (!uniqueRows[subjectCol + "_" + subjectValue]) {
-                                            uniqueRows[subjectCol + "_" + subjectValue] = 1
-                                            var obj = {[subjectCol]: subjectValue}
-                                            obj[objectCol] = value
-                                            dataArray.push(obj)
-                                        }
-                                    })
-
                                 }
-                            }
+
+
+                                var objectValue = item[objectCol]
+                                if (!dataMap[subjectCol])
+                                    dataMap[subjectCol] = {}
+                                if (!dataMap[subjectCol][subjectValue])
+                                    dataMap[subjectCol][subjectValue] = {}
+                                if (!dataMap[subjectCol][subjectValue][objectCol])
+                                    dataMap[subjectCol][subjectValue][objectCol] = []
+                                dataMap[subjectCol][subjectValue][objectCol].push(objectValue)
+                                //  console.log( JSON.stringify(dataMap[subjectCol]))
+
+
+                            })
 
                         }
 
-
-                        callbackSeries();
                     })
+
+
+                    var subjectDataArray = []
+                    var uniqueRows = {}
+                    for (var subjectCol in dataMap) {
+                        for (var subjectValue in dataMap[subjectCol]) {
+
+
+                            for (var objectCol in dataMap[subjectCol][subjectValue]) {
+                                var valuesArray = dataMap[subjectCol][subjectValue][objectCol]
+
+                                valuesArray.forEach(function (value) {
+                                    if (!uniqueRows[subjectCol + "_" + subjectValue]) {
+                                        uniqueRows[subjectCol + "_" + subjectValue] = 1
+                                        var obj = {[subjectCol]: subjectValue}
+                                        obj[objectCol] = value
+                                        dataArray.push(obj)
+                                    }
+                                })
+
+                            }
+                        }
+
+                    }
+
+
+                    callbackSeries();
+
                 }
 
                 //prepare mappings
@@ -279,8 +296,6 @@ var triplesGenerator = {
                             allTriples = allTriples.concat(triples)
 
 
-
-
                         })
                     })
 
@@ -307,7 +322,8 @@ var triplesGenerator = {
                         return str;
 
                     }
-                    var str= triplesToNt(allTriples);
+
+                    var str = triplesToNt(allTriples);
                     return callback(null, str)
                 }
                 return callback(null, allTriples)
@@ -376,7 +392,7 @@ var triplesGenerator = {
 module.exports = triplesGenerator;
 
 if (false) {
-    var xlsxPath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX"
+
     var mappings = {
 
         "mappings": [{
@@ -395,7 +411,12 @@ if (false) {
             "subject": "Tag.FunctionalClassName_Lookup",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
             "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-        }, {"subject": "Tag.TagNumber", "predicate": "http://standards.iso.org/iso/15926/part14/represents", "object": "Tag.FunctionalClassName_Lookup"}, {
+        },
+            {"subject": "Tag.TagNumber",
+            "predicate": "http://standards.iso.org/iso/15926/part14/represents",
+            "object": "Tag.FunctionalClassName_Lookup"},
+
+            {
             "subject": "Tag.TagNumber",
             "predicate": "http://data.total.com/resource/one-model/ontology#TOTAL-hasAttribute",
             "object": "TagtoAttributes.AttributeID"
@@ -409,7 +430,7 @@ if (false) {
     }
 
 
-    var mappingsXX = {
+    var mappings = {
         "mappings": [{
             "subject": "data.TAG1",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -454,11 +475,26 @@ if (false) {
     }
 
     var uriPrefix = "http://data.total.com/resource/one-model/assets/turbognerator/"
+
+    if (false) {
+        var xlsxPath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX"
+
     var options = {generateIds: 15, output: "ntTriples", getExistingUriMappings: "http://data.total.com/resource/one-model/assets/turbognerator/", sparqlServerUrl: "http://51.178.139.80:8890/sparql"}
-    triplesGenerator.generateXlsxBookTriples(mappings, xlsxPath, uriPrefix, options, function (err, result) {
+    triplesGenerator.generateXlsxBookTriples(mappings, {xlsxFilePath:xlsxPath}, uriPrefix, options, function (err, result) {
         if (err)
             return console.log(err);
         return fs.writeFileSync(xlsxPath + "_triples.nt", result)
 
     })
+}if( true){
+        sqlConnector.connection.database="clov";
+
+
+
+
+
+    }
+
+
+
 }

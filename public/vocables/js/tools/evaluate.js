@@ -8,16 +8,16 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var NerEvaluator = (function () {
+var Evaluate = (function () {
     var self = {}
 
     self.maxGraphConceptLength = 200
     var sourceGraphsUriMap = {}
 
     self.selectedSources = []
-    self.categoriesTreeId = "nerEvaluator_treeDiv"
+    self.categoriesTreeId = "evaluate_treeDiv"
     self.onSourceSelect = function () {
-        var html = "<button onclick='NerEvaluator.showActionPanel()'>OK</button>"
+        var html = "<button onclick='Evaluate.showActionPanel()'>OK</button>"
         $("#sourceDivControlPanelDiv").html(html)
 
     }
@@ -30,20 +30,20 @@ var NerEvaluator = (function () {
     self.showActionPanel = function () {
         self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
         $("#actionDiv").html("")
-        $("#actionDivContolPanelDiv").load("snippets/nerEvaluator_left.html")
-        $("#graphDiv").load("snippets/nerEvaluator_right.html")
+        $("#actionDivContolPanelDiv").load("snippets/evaluate_left.html")
+        $("#graphDiv").load("snippets/evaluate_right.html")
         $("#accordion").accordion("option", {active: 2});
         setTimeout(function () {
             var w = $(document).width() - leftPanelWidth - 30;
             var h = $(document).height() - 20;
-            $("#NerEvaluator_graphDiv").height(h-200)
-            $("#NerEvaluator_graphDiv").width(w-200)
-            $("#NerEvaluator_tabs").tabs({
+            $("#Evaluate_graphDiv").height(h-200)
+            $("#Evaluate_graphDiv").width(w-200)
+            $("#Evaluate_tabs").tabs({
                 activate: self.onTabActivate
 
             });
 
-            common.fillSelectOptions("nerEvaluator_sourceSelect", self.selectedSources, true)
+            common.fillSelectOptions("evaluate_sourceSelect", self.selectedSources, true)
             self.showWikiCategoriesTree();
 
 
@@ -60,7 +60,7 @@ var NerEvaluator = (function () {
 
             var activeTab = $('ul.tabs li a.active');
 
-            if (true || (activeTab && activeTab.data('id') == "AssetQuery_tabs_wikiPageContent")) {
+            if (true || (activeTab && activeTab.data('id') == "ADLquery_tabs_wikiPageContent")) {
                 self.loadWikiPage()
             }
             return self.getWikipageMissingWords(obj.node)
@@ -78,20 +78,20 @@ var NerEvaluator = (function () {
 
     self.onTabActivate = function (e, ui) {
         var divId = ui.newPanel.attr('id');
-        if (divId == "AssetQuery_tabs_wikiPageContent") {
+        if (divId == "ADLquery_tabs_wikiPageContent") {
             self.loadWikiPage()
         }
     }
 
     self.loadWikiPage = function () {
-        var selectedNode = $("#" + NerEvaluator.categoriesTreeId).jstree(true).get_selected(true);
+        var selectedNode = $("#" + Evaluate.categoriesTreeId).jstree(true).get_selected(true);
         if (!selectedNode || !selectedNode[0].data)
             return MainController.UI.message("select a page ")
         var type = selectedNode[0].data.type
         if (type != "wikiPage")
             return MainController.UI.message("select a page ")
         var page = selectedNode[0].id
-        $("#AssetQuery_wikiPageContent_iframe").attr('src', page)
+        $("#ADLquery_wikiPageContent_iframe").attr('src', page)
     }
 
 
@@ -162,7 +162,7 @@ var NerEvaluator = (function () {
                     }*/
             }
 
-            common.loadJsTree(self.categoriesTreeId, nodes, {selectTreeNodeFn: NerEvaluator.onTreeClickNode, types: types});
+            common.loadJsTree(self.categoriesTreeId, nodes, {selectTreeNodeFn: Evaluate.onTreeClickNode, types: types});
 
         })
 
@@ -218,7 +218,7 @@ var NerEvaluator = (function () {
 
             })
 
-            common.addNodesToJstree("nerEvaluator_treeDiv", broaderId, nodes);
+            common.addNodesToJstree("evaluate_treeDiv", broaderId, nodes);
 
         })
     }
@@ -301,7 +301,7 @@ var NerEvaluator = (function () {
                     if (self.currentConceptsLabels.indexOf(conceptLabel) < 0)
                         self.currentConceptsLabels.push(conceptLabel);
                 })
-               // $("#NerEvaluator_graphDiv").html("too many concepts to show :" + result.results.bindings.length);
+               // $("#Evaluate_graphDiv").html("too many concepts to show :" + result.results.bindings.length);
               alert("too many concepts to show :" + result.results.bindings.length+" only "+self.maxGraphConceptLength+" will be shown");
                 result.results.bindings=result.results.bindings.slice(0,self.maxGraphConceptLength)
              //   return callback(null)
@@ -431,7 +431,7 @@ var NerEvaluator = (function () {
             }
           //  $("#graphDiv").width($(window).width() - 20)
          //   $("#graphDiv").height($(window).height() - 20)
-            visjsGraph.draw("NerEvaluator_graphDiv", visjsData, {onclickFn: NerEvaluator.onGraphNodeClick})
+            visjsGraph.draw("Evaluate_graphDiv", visjsData, {onclickFn: Evaluate.onGraphNodeClick})
             $("#waitImg").css("display", "none");
             return callback(null)
             /* $("#sliderCountPagesMax").slider("option", "max", maxPages);
@@ -557,12 +557,12 @@ var NerEvaluator = (function () {
 
     self.getWikipageMissingWords = function (page) {
         MainController.UI.message("")
-        $("#nerEvaluator_missingWordsDiv").html("")
-        $("#nerEvaluator_copiedWords").html("")
+        $("#evaluate_missingWordsDiv").html("")
+        $("#evaluate_copiedWords").html("")
 
-        $("#NerEvaluator_tabs").tabs("option", 'active', 1)
+        $("#Evaluate_tabs").tabs("option", 'active', 1)
         if (!page) {
-            var selectedNode = $("#" + NerEvaluator.categoriesTreeId).jstree(true).get_selected(true);
+            var selectedNode = $("#" + Evaluate.categoriesTreeId).jstree(true).get_selected(true);
             if (!selectedNode || !selectedNode[0].data)
                 return MainController.UI.message("select a page ")
             var type = selectedNode[0].data.type
@@ -572,7 +572,7 @@ var NerEvaluator = (function () {
         }
 
 
-        var source = $("#nerEvaluator_sourceSelect").val();
+        var source = $("#evaluate_sourceSelect").val();
         if (!source || source == "")
             return $("#messageDiv").html("select a source");
        var  graphUri = Config.sources[source].graphUri
@@ -618,11 +618,11 @@ var NerEvaluator = (function () {
                 })
                 html += "</div>";
                 html += "<script>" +
-                    "$('.newWord').bind('click',NerEvaluator.onMissingWordClick);" +
+                    "$('.newWord').bind('click',Evaluate.onMissingWordClick);" +
 
                     "" +
                     "</script>"
-                $("#nerEvaluator_missingWordsDiv").html(html)
+                $("#evaluate_missingWordsDiv").html(html)
                 $("#waitImg").css("display", "none")
                 $("#messageDiv").html("")
 
@@ -636,7 +636,7 @@ var NerEvaluator = (function () {
 
     self.onMissingWordClick = function (event) {
 
-        var source = $("#nerEvaluator_sourceSelect").val();
+        var source = $("#evaluate_sourceSelect").val();
         var word = event.currentTarget.id.substring(8)
         if (event && event.ctrlKey) {
            Clipboard.copy({type: "word", text: word,source:source}, event.currentTarget.id, event)

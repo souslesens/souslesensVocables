@@ -193,7 +193,7 @@
     },
     "graphUri": "http://dbpedia.org",
     "ancestorsDepth": 4,
-    "schemaType": "SKOS",
+    "schemaType": "SKOSXXX",
     "predicates": {
       "topConceptFilter": "?topConcept  <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing> .",
       "broaderPredicate": "rdfs:subClassOf",
@@ -306,7 +306,7 @@
     "color": "#bcbd22"
   },
   "ISO_15926-part-13": {
-    "graphUri": "http://standards.iso.org/iso/15926/part13/",
+    "graphUri": ["http://standards.iso.org/iso/15926/part13/","http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/"],
     "sparql_server": {
       "url": "_default"
     },
@@ -324,7 +324,7 @@
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/Object>",
     "schemaType": "OWL",
-    "assetQueryController": "remoteSQL",
+    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -338,7 +338,7 @@
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
     "schemaType": "OWL",
-    "assetQueryController": "remoteSQL",
+    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -362,7 +362,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
-    "assetQueryController": "RDF",
+    "ADLqueryController": "RDF",
     "schemaType": "OWL",
     "schema": null,
     "color": "#e377c2"
@@ -516,14 +516,9 @@
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
     "schemaType": "INDIVIDUAL",
-    "preferredProperties": [
-      "http://standards.iso.org/iso/15926/part14/installedAs",
-      "http://standards.iso.org/iso/15926/part14/hasArrangedPart",
-      "http://data.total.com/resource/one-model/assets#hasTOTAL-ID",
-      "http://data.total.com/resource/one-model/assets#hasTagID"
-    ],
 
-    "assetQueryController": "remoteSQL",
+
+    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   }

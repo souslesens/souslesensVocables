@@ -8,7 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var AssetQuery = (function () {
+var ADLquery = (function () {
     var self = {};
     self.currentProperty;
     self.currentNode;
@@ -119,7 +119,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
 
         self.showNodeProperties = function (node) {
-            $("#AssetQuery_dataPropertyFilterDialog").dialog({
+            $("#ADLquery_dataPropertyFilterDialog").dialog({
                 autoOpen: false,
                 height: 300,
                 width: 300,
@@ -153,7 +153,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 },
                 //matching object label to filter Quantum item mapping source label
                 function (callbackSeries) {
-                    if (Config.sources[MainController.currentSource].assetQueryController != "remoteSQL")
+                    if (Config.sources[MainController.currentSource].ADLqueryController != "remoteSQL")
                         return callbackSeries()
                     var sourceObjs = [];
 
@@ -169,7 +169,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 //matching properties labels to filter Quantum items mapping source labels
                 function (callbackSeries) {
-                    if (Config.sources[MainController.currentSource].assetQueryController != "remoteSQL")
+                    if (Config.sources[MainController.currentSource].ADLqueryController != "remoteSQL")
                         return callbackSeries()
                     var sourceObjs = [];
                     data.forEach(function (item) {
@@ -223,15 +223,15 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                         }
                         var existsInRemoteSourceClass = ""
                         if (item.existsInRemoteSource)
-                            existsInRemoteSourceClass = " AssetQuery_existsInRemoteSource"
+                            existsInRemoteSourceClass = " ADLquery_existsInRemoteSource"
                         if (existingItems.indexOf(id) < 0) {
                             existingItems.push(id)
-                            html += "<div class='AssetQuery_propertyDiv " + existsInRemoteSourceClass + " ' onclick='AssetQuery.actions.addPropertiesToTree($(this))' id='" + encodeURIComponent(id) + "'>" + propLabel + "</div>"
+                            html += "<div class='ADLquery_propertyDiv " + existsInRemoteSourceClass + " ' onclick='ADLquery.actions.addPropertiesToTree($(this))' id='" + encodeURIComponent(id) + "'>" + propLabel + "</div>"
                         }
 
                     })
                     html += "</div>"
-                    $("#AssetQuery_propertiesDiv").html(html);
+                    $("#ADLquery_propertiesDiv").html(html);
                     $("#Lineage_Tabs").tabs("option", "active", 3);
                     callbackSeries()
                     /*   var point={x:300,y:600}
@@ -247,25 +247,25 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
         self.getJstreeConceptsContextMenu = function () {
             var items = {}
-            /*   if(!AssetQuery.currentTreeNode)
+            /*   if(!ADLquery.currentTreeNode)
                    return items;*/
 
             items.addQueryFilter = {
                 label: "Add Query Filter...",
                 action: function (e) {// pb avec source
-                    AssetQuery.query.addQueryFilterShowDialog()
+                    ADLquery.query.addQueryFilterShowDialog()
                 }
             }
             items.removeQueryFilter = {
                 label: "Remove Query Filter",
                 action: function (e) {// pb avec source
-                    AssetQuery.query.removeQueryFilter()
+                    ADLquery.query.removeQueryFilter()
                 }
             }
             items.setOptional = {
                 label: "Optional",
                 action: function (e) {// pb avec source
-                    AssetQuery.query.setOptional()
+                    ADLquery.query.setOptional()
                 }
             }
 
@@ -279,17 +279,17 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
         };
         self.actions = {
             selectAllProps: function () {
-                self.actions.addPropertiesToTree("AssetQuery_propertyDiv", true)
+                self.actions.addPropertiesToTree("ADLquery_propertyDiv", true)
             },
             expandObjectProperties: function () {
 
-                self.showProperties(AssetQuery.currentProperty.id, AssetQuery.currentProperty.text)
+                self.showProperties(ADLquery.currentProperty.id, ADLquery.currentProperty.text)
             },
             showDataProperties: function () {
                 var schema = Config.sources[MainController.currentSource].schema;
-                Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, AssetQuery.currentProperty.id, function (err, result) {
+                Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, ADLquery.currentProperty.id, function (err, result) {
                     OwlSchema.setLabelsFromQueryResult(result)
-                    var html = "<B>" + AssetQuery.currentProperty.label + "</B>" +
+                    var html = "<B>" + ADLquery.currentProperty.label + "</B>" +
                         "<div style='display:flex;flex-direction:column'>"
                     var existingItems = []
                     result.forEach(function (item) {
@@ -301,19 +301,19 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                             range = item.range
                         } else
                             return;
-                        var id = AssetQuery.currentProperty.id + "|" + item.property.value;
-                        if (!AssetQuery.currentProperty.dataProperties[id]) {
-                            AssetQuery.currentProperty.dataProperties[id] = range
+                        var id = ADLquery.currentProperty.id + "|" + item.property.value;
+                        if (!ADLquery.currentProperty.dataProperties[id]) {
+                            ADLquery.currentProperty.dataProperties[id] = range
                         }
 
                         if (existingItems.indexOf(id) < 0) {
                             existingItems.push(id)
-                            html += "<div class='AssetQuery_propertyDiv' onclick='AssetQuery.graphActions.addPropertiesToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
+                            html += "<div class='ADLquery_propertyDiv' onclick='ADLquery.graphActions.addPropertiesToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
                         }
 
                     })
                     html += "</div>"
-                    $("#AssetQuery_propertiesDiv").html(html);
+                    $("#ADLquery_propertiesDiv").html(html);
                     /*   var point={x:300,y:600}
                        MainController.UI.showPopup(point, "graphPopupDiv")*/
 
@@ -321,7 +321,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
             },
             expandSubclasses: function () {
-                Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, AssetQuery.currentProperty.id, 1, {}, function (err, children) {
+                Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, ADLquery.currentProperty.id, 1, {}, function (err, children) {
                     OwlSchema.setLabelsFromQueryResult(children)
                     if (err)
                         return MainController.UI.message(err);
@@ -335,12 +335,12 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                                 id: item.child1.value,
                                 label: Sparql_common.getLabelFromId(item.child1.value),
                                 shape: "dot",
-                                color: AssetQuery.currentProperty.color
+                                color: ADLquery.currentProperty.color
                             })
-                            var edgeId = AssetQuery.currentProperty.id + "_" + item.child1.value
+                            var edgeId = ADLquery.currentProperty.id + "_" + item.child1.value
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: AssetQuery.currentProperty.id,
+                                from: ADLquery.currentProperty.id,
                                 to: item.child1.value,
 
                             })
@@ -354,13 +354,13 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 })
             },
             resetFilters: function () {
-                $("#AssetQuery_queryTreeDiv").html("")
+                $("#ADLquery_queryTreeDiv").html("")
                 self.queryClassPath = {};
             },
             addPropertiesToTree: function (div, all) {
                 var props = [];
                 if (all) {
-                    $(".AssetQuery_existsInRemoteSource").each(function (item) {
+                    $(".ADLquery_existsInRemoteSource").each(function (item) {
                         var str = decodeURIComponent($(this).attr("id"));
                         var array = str.split("|")
                         props.push(self.currentNode.properties[array[1]]);
@@ -372,28 +372,28 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 }
 
 
-                var isNewTree = $("#AssetQuery_queryTreeDiv").is(':empty');
+                var isNewTree = $("#ADLquery_queryTreeDiv").is(':empty');
                 var existingNodes = []
                 if (!isNewTree)
-                    existingNodes = common.getjsTreeNodes("AssetQuery_queryTreeDiv", true)
+                    existingNodes = common.getjsTreeNodes("ADLquery_queryTreeDiv", true)
                 var jstreeData = [];
 
-                if (existingNodes.indexOf(AssetQuery.currentNode.id) < 0) {
+                if (existingNodes.indexOf(ADLquery.currentNode.id) < 0) {
                     jstreeData.push({
-                        id: AssetQuery.currentNode.id,
-                        text: AssetQuery.currentNode.label,
+                        id: ADLquery.currentNode.id,
+                        text: ADLquery.currentNode.label,
                         parent: '#',
                         data: {
                             type: "Class",
-                            id: AssetQuery.currentNode.id,
-                            label: AssetQuery.currentNode.text || AssetQuery.currentNode.label,
+                            id: ADLquery.currentNode.id,
+                            label: ADLquery.currentNode.text || ADLquery.currentNode.label,
 
 
                         }
                     })
                     if (!isNewTree) {
 
-                        common.addNodesToJstree("AssetQuery_queryTreeDiv", "#", jstreeData)
+                        common.addNodesToJstree("ADLquery_queryTreeDiv", "#", jstreeData)
                         jstreeData = []
                     }
 
@@ -405,13 +405,13 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                         jstreeData.push({
                             id: prop.id,
                             text: prop.label,
-                            parent: AssetQuery.currentNode.id,
+                            parent: ADLquery.currentNode.id,
                             data: {
                                 label: prop.label,
                                 propId: prop.id,
                                 type: "DataProperty",
-                                parent: AssetQuery.currentNode.id,
-                                range: AssetQuery.currentNode.properties[prop.id].range,
+                                parent: ADLquery.currentNode.id,
+                                range: ADLquery.currentNode.properties[prop.id].range,
                                 existsInRemoteSource: prop.existsInRemoteSource
                             }
                         })
@@ -419,25 +419,25 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 })
                 if (isNewTree) {
                     var jsTreeOptions = {};
-                    jsTreeOptions.contextMenu = AssetQuery.getJstreeConceptsContextMenu()
-                    jsTreeOptions.selectTreeNodeFn = AssetQuery.selectTreeNodeFn;
-                    //  jsTreeOptions.onCheckNodeFn = AssetQuery.checkTreeNodeFn;
+                    jsTreeOptions.contextMenu = ADLquery.getJstreeConceptsContextMenu()
+                    jsTreeOptions.selectTreeNodeFn = ADLquery.selectTreeNodeFn;
+                    //  jsTreeOptions.onCheckNodeFn = ADLquery.checkTreeNodeFn;
                     //  jsTreeOptions.withCheckboxes=true
 
-                    common.loadJsTree("AssetQuery_queryTreeDiv", jstreeData, jsTreeOptions)
+                    common.loadJsTree("ADLquery_queryTreeDiv", jstreeData, jsTreeOptions)
                 } else {
-                    common.addNodesToJstree("AssetQuery_queryTreeDiv", AssetQuery.currentNode.id, jstreeData)
+                    common.addNodesToJstree("ADLquery_queryTreeDiv", ADLquery.currentNode.id, jstreeData)
                 }
             }
             ,
             resetFilters: function () {
-                $("#AssetQuery_queryTreeDiv").html("")
+                $("#ADLquery_queryTreeDiv").html("")
             }
             ,
 
             showNodeInfo: function () {
 
-                MainController.UI.showNodeInfos(MainController.currentSource, AssetQuery.currentProperty.id, "mainDialogDiv")
+                MainController.UI.showNodeInfos(MainController.currentSource, ADLquery.currentProperty.id, "mainDialogDiv")
             }
 
 
@@ -462,8 +462,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
             var fromStr = ""
 
             var graphUri = Config.sources[targetSource].graphUri
-            if (graphUri)
-                fromStr = " FROM <" + graphUri + "> "
+            fromStr = Sparql_common.getFromGraphStr(graphUri);
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                 "Select " + selectStr + " " + fromStr + " where {" + whereStr;
@@ -492,11 +491,11 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
             self.query = {
 
                 addQueryFilterShowDialog: function () {
-                    var node = $("#AssetQuery_queryTreeDiv").jstree(true).get_selected(true)[0]
+                    var node = $("#ADLquery_queryTreeDiv").jstree(true).get_selected(true)[0]
                     var range = node.data.range
 
                     var operators = []
-                    $("#AssetQuery_dataPropertyFilterDialog").dialog("open");
+                    $("#ADLquery_dataPropertyFilterDialog").dialog("open");
                     if (range == "?") {
                         operators = ["contains", "=", ">", "<", ">=", "<=", "#", "beginsWith", "endsWith"]
                     } else if (range.indexOf("XMLSchema#string") > -1 || range.value.indexOf("Literal") > -1) {
@@ -507,17 +506,17 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                         alert("else ?  " + range)
                     }
 
-                    common.fillSelectOptions("AssetQuery_dataPropertyFilterDialog_operator", operators, true)
+                    common.fillSelectOptions("ADLquery_dataPropertyFilterDialog_operator", operators, true)
 
 
                 },
 
                 validateFilterDialog: function () {
-                    var operator = $("#AssetQuery_dataPropertyFilterDialog_operator").val()
-                    var value = $("#AssetQuery_dataPropertyFilterDialog_value").val()
-                    $("#AssetQuery_dataPropertyFilterDialog").dialog("close");
+                    var operator = $("#ADLquery_dataPropertyFilterDialog_operator").val()
+                    var value = $("#ADLquery_dataPropertyFilterDialog_value").val()
+                    $("#ADLquery_dataPropertyFilterDialog").dialog("close");
 
-                    var node = $("#AssetQuery_queryTreeDiv").jstree(true).get_selected(true)[0]
+                    var node = $("#ADLquery_queryTreeDiv").jstree(true).get_selected(true)[0]
                     var property = node.data
                     var jstreeData = []
                     jstreeData.push({
@@ -532,50 +531,50 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                     })
 
-                    common.addNodesToJstree("AssetQuery_queryTreeDiv", node.id, jstreeData)
+                    common.addNodesToJstree("ADLquery_queryTreeDiv", node.id, jstreeData)
 
 
                 },
                 cancelFilterDialog: function () {
-                    $("#AssetQuery_dataPropertyFilterDialog").dialog("close");
+                    $("#ADLquery_dataPropertyFilterDialog").dialog("close");
                 },
                 removeQueryFilter: function () {
-                    var nodeId = $("#AssetQuery_queryTreeDiv").jstree(true).get_selected()[0]
-                    $("#AssetQuery_queryTreeDiv").jstree(true).delete_node(nodeId)
+                    var nodeId = $("#ADLquery_queryTreeDiv").jstree(true).get_selected()[0]
+                    $("#ADLquery_queryTreeDiv").jstree(true).delete_node(nodeId)
                 },
                 setOptional: function () {
-                    // var node = $("#AssetQuery_queryTreeDiv").jstree(true).get_selected(true)[0];
+                    // var node = $("#ADLquery_queryTreeDiv").jstree(true).get_selected(true)[0];
                     var node = self.currentTreeNode
-                    $('#AssetQuery_queryTreeDiv').jstree('rename_node', node, node.text + " (OPTIONAL)")
+                    $('#ADLquery_queryTreeDiv').jstree('rename_node', node, node.text + " (OPTIONAL)")
                     node.data.optional = true
                     //  node.text=node.text+"optional"
 
                 },
                 executeQuery: function () {
-                    var assetQueryController = Config.sources[MainController.currentSource].assetQueryController
-                    if (assetQueryController == "remoteSQL")
+                    var ADLqueryController = Config.sources[MainController.currentSource].ADLqueryController
+                    if (ADLqueryController == "remoteSQL")
                         self.query.executeRemoteSqlQuery()
-                    if (assetQueryController == "RDF")
+                    if (ADLqueryController == "RDF")
                         self.query.executeOntologyIndividualsQuery()
                 },
 
                 executeOntologyIndividualsQuery: function () {
 
-                    var nodes = common.getjsTreeNodes("AssetQuery_queryTreeDiv")
+                    var nodes = common.getjsTreeNodes("ADLquery_queryTreeDiv")
                     var nodesMap = {}
                     nodes.forEach(function (item) {
                         nodesMap[item.id] = item;
                     })
 
 
-                    var classNodeIds = common.getjsTreeNodeObj("AssetQuery_queryTreeDiv", "#").children;
+                    var classNodeIds = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", "#").children;
 
                     var filters = [];
                     var selectFields = []
                     var previousClassId = null;
                     var previousClassLabel = null;
                     var selectStr = " * "
-                    var showIds = $('AssetQuery_queryShowItemsIdsCBX').prop("checked")
+                    var showIds = $('ADLquery_queryShowItemsIdsCBX').prop("checked")
                     var query = "";
                     if (!showIds)
                         selectStr = " ";
@@ -585,7 +584,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         var propertyNodes = []
                         var propertyNodes = []
-                        var classNode = common.getjsTreeNodeObj("AssetQuery_queryTreeDiv", [classNodeId])
+                        var classNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [classNodeId])
 
                         if (index > 0) {// join classes
 
@@ -621,7 +620,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . "
                         classNode.children.forEach(function (propertyNodeId) {
-                            var propertyNode = common.getjsTreeNodeObj("AssetQuery_queryTreeDiv", [propertyNodeId])
+                            var propertyNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [propertyNodeId])
                             if (propertyNode.data.optional) {
                                 query += "OPTIONAL {"
                                 propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "")
@@ -631,7 +630,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                             query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . "
                             propertyNode.children.forEach(function (filterNodeId) {
-                                var filterNode = common.getjsTreeNodeObj("AssetQuery_queryTreeDiv", [filterNodeId])
+                                var filterNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [filterNodeId])
                                 var operator = filterNode.data.operator;
                                 var value = filterNode.data.value;
                                 var range = propertyNode.data.range.value
@@ -698,17 +697,17 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 executeRemoteSqlQuery: function () {
                     var remoteObjs = [];
-                    var isNewTree = $("#AssetQuery_queryTreeDiv").is(':empty');
+                    var isNewTree = $("#ADLquery_queryTreeDiv").is(':empty');
                     if (isNewTree) {//query only class (not properties)
                     } else {
-                        var nodes = common.getjsTreeNodes("AssetQuery_queryTreeDiv")
+                        var nodes = common.getjsTreeNodes("ADLquery_queryTreeDiv")
                         var nodesMap = {}
                         nodes.forEach(function (item) {
                             nodesMap[item.id] = item;
                         })
 
 
-                        var classNodeIds = $('#AssetQuery_queryTreeDiv').jstree(true).get_node("#").children;
+                        var classNodeIds = $('#ADLquery_queryTreeDiv').jstree(true).get_node("#").children;
 
 
                         var filters = [];
@@ -716,7 +715,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                         var previousClassId = null;
                         var previousClassLabel = null;
                         var selectStr = " * "
-                        var showIds = $('AssetQuery_queryShowItemsIdsCBX').prop("checked")
+                        var showIds = $('ADLquery_queryShowItemsIdsCBX').prop("checked")
                         var query = "";
                         if (!showIds)
                             selectStr = " ";
@@ -728,7 +727,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         classNodeIds.forEach(function (classNodeId, index) {
 
-                            var props = common.getjsTreeNodes("AssetQuery_queryTreeDiv", false, [classNodeId])
+                            var props = common.getjsTreeNodes("ADLquery_queryTreeDiv", false, [classNodeId])
 
 
                             var labels = []
@@ -739,9 +738,9 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                                     remoteObjs.push({id: prop.data.existsInRemoteSource, filter: []})
 
 
-                                    var propChildrenIds = $("#AssetQuery_queryTreeDiv").jstree(true).get_node("prop.id").children
+                                    var propChildrenIds = $("#ADLquery_queryTreeDiv").jstree(true).get_node("prop.id").children
                                     propChildrenIds.forEach(function (filterId) {
-                                        var filter = $("#AssetQuery_queryTreeDiv").jstree(true).get_node(filterId)
+                                        var filter = $("#ADLquery_queryTreeDiv").jstree(true).get_node(filterId)
                                         var value = filter.data.value;
                                         var operator = filter.data.operator;
                                         value = common.convertNumStringToNumber(value)
@@ -768,8 +767,8 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 queryRemoteAssetSource: function (quantumObjs, callback) {
                     var payload = {}
-                    payload.AssetQuery = true;
-                    payload.asset = $("#AssetQuery_assetObjectSelect").val();
+                    payload.ADLquery = true;
+                    payload.asset = $("#ADLquery_assetObjectSelect").val();
                     if (self.currentNode.existsInRemoteSource)
                         quantumObjs.push({id: self.currentNode.existsInRemoteSource})
                     payload.quantumObjs = JSON.stringify(quantumObjs, null, 2);
@@ -828,7 +827,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 showQueryResultInDataTable: function (dataSet, cols) {
 
 
-                    //  $("#AssetQuery_tabs").tabs("option", "active", 1);
+                    //  $("#ADLquery_tabs").tabs("option", "active", 1);
                     $('#mainDialogDiv').dialog("open")
 
                     $('#mainDialogDiv').html("<table id='dataTableDiv'></table>");

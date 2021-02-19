@@ -158,18 +158,18 @@ var Annotator = (function () {
                     return MainController.UI.message(err)
                 SourceEditor.showNodeInfos("Annotator_EntityDetailsDiv", "en", id, result);
             })*/
-            Sparql_generic.getSingleNodeAllAncestors(source, id, function (err, result) {
+            Sparql_generic.getSingleNodeAllGenealogy(source, id, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
 
-                var html = "Ancestors : "
+                var html = "Genealogy : "
                 result.forEach(function (item) {
-                    html += "<span class='Annotator_entityAncestorsSpan'  data-source='" + source + "' data-id='" + item.broader.value + "'  data-label='" + item.broaderLabel.value + "' id='Annotator_entity|" + source + "|" + item.broader.value + "'>" + item.broaderLabel.value + "</span>"
+                    html += "<span class='Annotator_entityGenealogySpan'  data-source='" + source + "' data-id='" + item.broader.value + "'  data-label='" + item.broaderLabel.value + "' id='Annotator_entity|" + source + "|" + item.broader.value + "'>" + item.broaderLabel.value + "</span>"
 
                 })
 
-                $("#Annotator_EntityAncestorsDiv").html(html)
-                $(".Annotator_entityAncestorsSpan").bind("click", Annotator.onNodeClick)
+                $("#Annotator_EntityGenealogyDiv").html(html)
+                $(".Annotator_entityGenealogySpan").bind("click", Annotator.onNodeClick)
 
             })
 

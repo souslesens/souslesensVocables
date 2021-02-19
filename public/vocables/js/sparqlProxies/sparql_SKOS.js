@@ -348,7 +348,7 @@ var Sparql_SKOS = (function () {
 
         /*******************************************end basic requests (mode read) **************************************************************/
 
-        self.getSingleNodeAllAncestors = function (sourceLabel, id, callback) {
+        self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
             if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, {source: sourceLabel}, function (err, result) {
                     callback(err, result);
@@ -807,13 +807,7 @@ var Sparql_SKOS = (function () {
                 prefixesStr += "PREFIX " + item + " "
             })
 
-            if (graphUri && graphUri != "") {
-                if (!Array.isArray(graphUri))
-                    graphUri = [graphUri];
-                graphUri.forEach(function (item) {
-                    fromStr += " FROM <" + item + "> "
-                })
-            }
+            var fromStr = Sparql_common.getFromGraphStr(graphUri)
 
 
             topConceptFilter = predicates.topConceptFilter || defaultPredicates.topConceptFilter;

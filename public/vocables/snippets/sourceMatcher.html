@@ -2,20 +2,20 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
 <style>
 
-    .ThesaurusMatcher_paramsDiv {
+    .SourceMatcher_paramsDiv {
         margin-bottom: 15px;
     }
 
 
 </style>
 
-<div id="ThesaurusMatcher_actionDiv" style="display: flex;flex-direction: column">
+<div id="SourceMatcher_actionDiv" style="display: flex;flex-direction: column">
 
 
-    <div style="display: none" class="ThesaurusMatcher_paramsDiv">
+    <div style="display: none" class="SourceMatcher_paramsDiv">
 
         type
-        <select id="ThesaurusMatcher_rdfTypeSelect">
+        <select id="SourceMatcher_rdfTypeSelect">
             <option>
 
             </option>
@@ -36,15 +36,15 @@
             </option>
         </select>
 
-        <input type="checkbox" id="ThesaurusMatcher_compareAllCBX" >compare all
+        <input type="checkbox" id="SourceMatcher_compareAllCBX" >compare all
 
     </div>
 
 
-    <div class="ThesaurusMatcher_paramsDiv">
+    <div class="SourceMatcher_paramsDiv">
 
         output
-        <select id="ThesaurusMatcher_outputTypeSelect">
+        <select id="SourceMatcher_outputTypeSelect">
 
             <option>
                 graph
@@ -65,15 +65,15 @@
         showAllSourceNodes
     </div>
 
-    <div class="ThesaurusMatcher_paramsDiv">
+    <div class="SourceMatcher_paramsDiv">
 
 
 
-        <select id="ThesaurusMatcher_targetGraphUriSelect">
+        <select id="SourceMatcher_targetGraphUriSelect">
 
 
         </select><br>
-        <button onclick='ThesaurusMatcher.compareConcepts()'>Compare </button>
+        <button onclick='SourceMatcher.compareConcepts()'>Compare </button>
         <!--
         <button onclick='OntologiesStats.generateAllOwlStats()'>X</button>
         <button onclick='OntologiesStats.generateMatchingMatrix()'>Y</button>
@@ -82,12 +82,12 @@
 
 
         depth</td>
-        <input size="3" value="4" id="ThesaurusMatcher_maxDescendantsDepth"/>
+        <input size="3" value="4" id="SourceMatcher_maxDescendantsDepth"/>
 
 
         <hr>
         <input id='GenericTools_searchTermInput'>
-        <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>
+        <button onclick='SourceBrowser.searchTerm()'>Search</button>
         <input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match
     </div>
 </div>

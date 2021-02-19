@@ -8,7 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var TermTaxonomy = (function () {
+var Genealogy = (function () {
     var self = {context: {}}
 
     var colorsMap = {}
@@ -17,7 +17,7 @@ var TermTaxonomy = (function () {
 
 
     self.onSourceSelect = function () {
-        var html = "<button onclick='TermTaxonomy.showActionPanel()'>OK</button>"
+        var html = "<button onclick='Genealogy.showActionPanel()'>OK</button>"
         html += "&nbsp;<input type='checkbox' id='allConceptsCbx' onchange=\"common.onAllTreeCbxChange($(this),'sourcesTreeDiv')\"> All"
         $("#sourceDivControlPanelDiv").html(html)
 
@@ -27,7 +27,7 @@ var TermTaxonomy = (function () {
     self.showActionPanel = function () {
         self.initsourceLabels();
         $("#actionDivContolPanelDiv").html("")
-        $("#actionDiv").load("snippets/termTaxonomy.html")
+        $("#actionDiv").load("snippets/genealogy.html")
         $("#accordion").accordion("option", {active: 2});
 
     }
@@ -145,7 +145,7 @@ var TermTaxonomy = (function () {
     }
 
     self.displayGraph = function (direction) {
-        $("#TermTaxonomy_nodeInfosDialogDiv").html("")
+        $("#Genealogy_nodeInfosDialogDiv").html("")
         visjsGraph.clearGraph()
         var maxDepth = 5
 
@@ -163,7 +163,7 @@ var TermTaxonomy = (function () {
             var visjsData = {nodes: [], edges: []}
             visjsData.nodes.push(self.rootNode);
             visjsGraph.draw("graphDiv", visjsData, {
-                onclickFn: TermTaxonomy.onGraphNodeClick,
+                onclickFn: Genealogy.onGraphNodeClick,
                 edges: {arrows: "to"},
                 //  onHoverNodeFn: multiSkosGraph3.onNodeClick,
                 afterDrawing: function () {
@@ -190,13 +190,13 @@ var TermTaxonomy = (function () {
                 item.color = Config.sources[item.sourceId].color
 
                 if (direction == "ancestors") {
-                    //  sparql_abstract.getAncestors(concept.source.id, concept.id, {exactMatch: true}, function (err, result) {
+                    //  sparql_abstract.getGenealogy(concept.source.id, concept.id, {exactMatch: true}, function (err, result) {
                     Sparql_generic.getNodeParents(item.sourceId, null, conceptId, maxDepth, {exactMatch: true}, function (err, result) {
                         if (err)
                             return console.log(err)
                         if (!result || !result.forEach)
                             return;
-                        self.addAncestorsGraph(item.sourceId, self.context.currentWord, result, maxDepth)
+                        self.addGenealogyGraph(item.sourceId, self.context.currentWord, result, maxDepth)
                     })
                 } else if (direction == "children") {
 
@@ -216,7 +216,7 @@ var TermTaxonomy = (function () {
 
     }
 
-    self.addAncestorsGraph = function (sourceId, rootNodeId, bindings, depth) {
+    self.addGenealogyGraph = function (sourceId, rootNodeId, bindings, depth) {
         var visjsData = {nodes: [], edges: []}
 
         var existingIds = visjsGraph.getExistingIdsMap()
@@ -271,7 +271,7 @@ var TermTaxonomy = (function () {
         }
 
 
-        $("#TermTaxonomy_nodeInfosDialogDiv").html("")
+        $("#Genealogy_nodeInfosDialogDiv").html("")
         if (node) {
             self.graphActions.currentNode = node;
 
@@ -301,7 +301,7 @@ var TermTaxonomy = (function () {
                 })
 
                 var visjsData = GraphController.toVisjsData(null, result, self.graphActions.currentNode.id, "concept", "child1",
-                    {from: {}, to: {shape: TermTaxonomy.graphActions.getVisjsGraphColor, color: self.graphActions.currentNode.color}, data: self.graphActions.currentNode.data})
+                    {from: {}, to: {shape: Genealogy.graphActions.getVisjsGraphColor, color: self.graphActions.currentNode.color}, data: self.graphActions.currentNode.data})
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
                 //  self.addChildrenNodesToGraph(self.graphActions.currentNode, children)
@@ -317,13 +317,13 @@ var TermTaxonomy = (function () {
         }
         ,
         showDetails: function (defaultLang) {
-            MainController.UI.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, "TermTaxonomy_nodeInfosDialogDiv")
+            MainController.UI.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, "Genealogy_nodeInfosDialogDiv")
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
                        return MainController.UI.message(err);
                    }
-                   $("#TermTaxonomy_nodeInfosDialogDiv").dialog("open");
-                   SourceEditor.showNodeInfos("TermTaxonomy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
+                   $("#Genealogy_nodeInfosDialogDiv").dialog("open");
+                   SourceEditor.showNodeInfos("Genealogy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 
                })*/
         }

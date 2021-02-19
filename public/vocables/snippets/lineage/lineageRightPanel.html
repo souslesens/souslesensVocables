@@ -19,7 +19,7 @@
             <li><a href="#Lineage_ClassesTab">Classes</a></li>
             <li><a href="#LineageTypesTab">Types</a></li>
             <li><a href="#LineagePropertiesTab">Properties</a></li>
-            <li><a href="#AssetQueryTab">Asset Q</a></li>
+            <li><a href="#ADLqueryTab">Asset Q</a></li>
 
         </ul>
 
@@ -63,7 +63,7 @@
                 <div id="LineageProperties_propertyInfosDiv"></div>-->
 
         </div>
-        <div id="AssetQueryTab">
+        <div id="ADLqueryTab">
 
         </div>
     </div>
@@ -76,6 +76,6 @@
     setTimeout(function(){
         $("#GenericTools_searchInAllSources").prop("checked",false)
     },300)
-    $("#AssetQueryTab").load("./snippets/lineage/assetQuery.html");
+    $("#ADLqueryTab").load("./snippets/lineage/ADLquery.html");
     $("#Lineage_RighPanelTabs").tabs()
 </script>

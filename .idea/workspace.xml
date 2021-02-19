@@ -2,10 +2,53 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLMappingRightPanel.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/genealogy.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/transform.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/transform.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/nerEvaluator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/xlsx2mappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/annotator.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/annotator.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/import.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/import.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/childHood.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/childHood.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/nerEvaluator_left.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate_left.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/nerEvaluator_right.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate_right.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ontologyBrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ontologyBrowser.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/termTaxonomy.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/thesaurusMatcher.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/sourceMatcher.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/xlsx2mapping.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,9 +62,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="JS module" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -42,7 +85,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/sparqlProxies" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/snippets/ADL" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -50,18 +93,19 @@
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2019.2\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\sparqlProxies" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\config" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
-      <recent name="D:\GitHub\souslesensVocables\bin\sqlConnectors" />
-      <recent name="D:\GitHub\souslesensVocables\other\quantum" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADLbrowser" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\lineage" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\lineage" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
-      <recent name="D:\GitHub\souslesensVocables\public\souslesensVocables\js" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADL" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADLbrowser" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\sparqlProxies" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\config" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -76,11 +120,11 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.exportGraph..js">
-    <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportGraph..js" working-dir="$PROJECT_DIR$/bin">
+  <component name="RunManager" selected="Node.js.bin\www">
+    <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
-    <configuration name="parseXlsx..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="parseXlsx..js" working-dir="$PROJECT_DIR$/other/quantum">
+    <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportGraph..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <configuration name="triplesGenerator.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="triplesGenerator.js" working-dir="$PROJECT_DIR$/bin">
@@ -94,11 +138,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.ADLSqlConnector..js" />
         <item itemvalue="Node.js.exportGraph..js" />
         <item itemvalue="Node.js.triplesGenerator.js" />
         <item itemvalue="Node.js.util..js" />
         <item itemvalue="Node.js.xlsx2json..js" />
-        <item itemvalue="Node.js.parseXlsx..js" />
       </list>
     </recent_temporary>
   </component>
@@ -142,7 +186,8 @@
       <workItem from="1613022128638" duration="19976000" />
       <workItem from="1613111503853" duration="10397000" />
       <workItem from="1613128702585" duration="37645000" />
-      <workItem from="1613282689958" duration="65675000" />
+      <workItem from="1613282689958" duration="82688000" />
+      <workItem from="1613722030888" duration="23987000" />
     </task>
     <servers />
   </component>
@@ -167,7 +212,7 @@
       <breakpoints>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js</url>
-          <line>1358</line>
+          <line>1392</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -177,24 +222,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routes/index.js</url>
-          <line>353</line>
+          <line>370</line>
           <option name="timeStamp" value="30" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/xlsx2mappings.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js</url>
           <line>174</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/nerEvaluator.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate.js</url>
           <line>111</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="53" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
           <line>272</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="54" />
         </line-breakpoint>
       </breakpoints>

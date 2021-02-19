@@ -8,30 +8,32 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var ThesaurusBrowser = (function () {
+var SourceBrowser = (function () {
     var self = {}
     self.currentTargetDiv = "currentSourceTreeDiv"
 
 
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
+
         setTimeout(function(){
-                $("#GenericTools_searchSchemaType").val(MainController.currentSchemaType)
+           // console.log(Config.currentProfile.allowedSourceSchemas[0])
+            $("#GenericTools_searchInAllSources").prop("checked",true)
+            $("#GenericTools_searchSchemaType").val(Config.currentProfile.allowedSourceSchemas[0])
+
         },200)
-        /*    $("#sourceDivControlPanelDiv").html("<input id='GenericTools_searchAllSourcesTermInput'>" +
-                "<input type='checkbox' checked='checked' id= 'GenericTools_allExactMatchSearchCBX'>Exact Match" +
-                "<button onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>")*/
+
     }
-    self.onSourceSelect = function (thesaurusLabel) {
-        MainController.currentSource = thesaurusLabel;
+    self.onSourceSelect = function (sourceLabel) {
+        MainController.currentSource = sourceLabel;
         OwlSchema.currentSourceSchema = null;
-        self.showThesaurusTopConcepts(thesaurusLabel,)
+        self.showThesaurusTopConcepts(sourceLabel,)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match" +
-            "<button onclick='ThesaurusBrowser.searchTerm()'>Search</button>" +
-            "<button onclick='ThesaurusBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>" +
-            "<div id='ThesaurusBrowser_collectionDiv'>" +
-            "Collection<select id='ThesaurusBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
+            "<button onclick='SourceBrowser.searchTerm()'>Search</button>" +
+            "<button onclick='SourceBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>" +
+            "<div id='SourceBrowser_collectionDiv'>" +
+            "Collection<select id='SourceBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
             "</div>")
 
         if (Config.enableCollections) {
@@ -76,7 +78,7 @@ var ThesaurusBrowser = (function () {
             event)
     }
 
-    self.showThesaurusTopConcepts = function (thesaurusLabel, options) {
+    self.showThesaurusTopConcepts = function (sourceLabel, options) {
         if (!options)
             options = {}
 
@@ -90,7 +92,7 @@ var ThesaurusBrowser = (function () {
             $("#actionDiv").html(html);
         }
         options.filterCollections = Collection.currentCollectionFilter
-        Sparql_generic.getTopConcepts(thesaurusLabel, options, function (err, result) {
+        Sparql_generic.getTopConcepts(sourceLabel, options, function (err, result) {
             if (err)
                 return MainController.UI.message(err);
             $("#accordion").accordion("option", {active: 2});
@@ -118,12 +120,12 @@ var ThesaurusBrowser = (function () {
             var jsTreeOptions = options;
             jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu()
             jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
-            jsTreeOptions.source = thesaurusLabel;
+            jsTreeOptions.source = sourceLabel;
 
             TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions)
 
 
-            /* Collection.Sparql.getCollections(thesaurusLabel, options, function (err, result) {
+            /* Collection.Sparql.getCollections(sourceLabel, options, function (err, result) {
 
                })*/
 
@@ -143,7 +145,7 @@ var ThesaurusBrowser = (function () {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
 
-                    AssetQuery.showProperties()
+                    ADLquery.showProperties()
 
 
                 }
@@ -161,11 +163,11 @@ var ThesaurusBrowser = (function () {
                 }
 
             }
-            if(MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].assetQueryController){
-                items.addToAssetQuery = {
+            if(MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController){
+                items.addToADLquery = {
                     label: "add to Asset Query",
                     action: function (e) {// pb avec source
-                        AssetQuery.showNodeProperties(self.currentTreeNode.data)
+                        ADLquery.showNodeProperties(self.currentTreeNode.data)
 
 
                     }
@@ -177,7 +179,7 @@ var ThesaurusBrowser = (function () {
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
-                ThesaurusBrowser.copyNode (e)
+                SourceBrowser.copyNode (e)
             }
 
         }
@@ -199,7 +201,7 @@ var ThesaurusBrowser = (function () {
         return items;
     }
 
-    self.openTreeNode = function (divId, thesaurusLabel, node, options) {
+    self.openTreeNode = function (divId, sourceLabel, node, options) {
         if (!options)
             options = {}
         var existingNodes = common.getjsTreeNodes(divId, true)
@@ -208,11 +210,11 @@ var ThesaurusBrowser = (function () {
                 return;
 
         options.filterCollections = Collection.currentCollectionFilter
-        Sparql_generic.getNodeChildren(thesaurusLabel, null, node.data.id, 1, options, function (err, result) {
+        Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, 1, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
-            TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {source: thesaurusLabel, type: node.data.type})
+            TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {source: sourceLabel, type: node.data.type})
             $("#waitImg").css("display", "none");
 
         })
@@ -220,10 +222,10 @@ var ThesaurusBrowser = (function () {
     }
 
 
-    self.editThesaurusConceptInfos = function (thesaurusLabel, node, callback) {
-        MainController.UI.showNodeInfos(thesaurusLabel, node.data.id, "graphDiv")
+    self.editThesaurusConceptInfos = function (sourceLabel, node, callback) {
+        MainController.UI.showNodeInfos(sourceLabel, node.data.id, "graphDiv")
 
-        /*  Sparql_generic.getNodeInfos(thesaurusLabel, node.data.id, null, function (err, result) {
+        /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
               if (err) {
                   return MainController.UI.message(err);
               }
@@ -258,7 +260,7 @@ var ThesaurusBrowser = (function () {
             exactMatch: exactMatch,
             limit :Config.searchLimit
         }
-        ThesaurusBrowser.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
+        SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
             if (callback)
                 return (err, jstreeData)
             MainController.UI.message("")
@@ -284,7 +286,7 @@ var ThesaurusBrowser = (function () {
             options = {}
         }
 
-var x= $("#GenericTools_searchAllSourcesTermInput")
+
         var term = $("#GenericTools_searchAllSourcesTermInput").val()
 
         if (!term || term == "")
@@ -327,7 +329,7 @@ var x= $("#GenericTools_searchAllSourcesTermInput")
                 exactMatch: exactMatch,
                 limit :Config.searchLimit,
             }
-            ThesaurusBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
+            SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
 
@@ -360,7 +362,7 @@ MainController.UI.message("Search Done")
 
             var jstreeOptions = {
                 openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
-                    ThesaurusBrowser.currentTreeNode = propertiesMap.node;
+                    SourceBrowser.currentTreeNode = propertiesMap.node;
 
                     if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);

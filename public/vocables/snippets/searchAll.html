@@ -1,7 +1,7 @@
 <div style="display: flex;flex-direction: column;height: 50px">
     <div>
         <input id='GenericTools_searchAllSourcesTermInput' style="width: 200px" value="">
-        <button id="GenericTools_onSearchAllInput" onclick='ThesaurusBrowser.searchAllSourcesTerm()'>Search</button>
+        <button id="GenericTools_onSearchAllInput" onclick='SourceBrowser.searchAllSourcesTerm()'>Search</button>
     </div>
     <div>
         <input type='checkbox' checked='checked' id='GenericTools_allExactMatchSearchCBX'>Exact Match
@@ -11,6 +11,7 @@
             <option></option>
             <option>OWL</option>
             <option>SKOS</option>
+            <option>INDIVIDUAL</option>
         </select>
     </div>
 
@@ -21,8 +22,9 @@
     $('#GenericTools_searchAllSourcesTermInput').keypress(function (e) {
 
         if (e.which == 13) {
-            ThesaurusBrowser.searchAllSourcesTerm()
+            SourceBrowser.searchAllSourcesTerm()
         }
 
     })
+
 </script>

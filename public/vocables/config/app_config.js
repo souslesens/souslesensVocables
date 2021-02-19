@@ -18,7 +18,7 @@ var Config = (function () {
 //    self.default_sparql_url = "http://10.28.171.139:8890/sparql"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-  self.loginMode = "none";
+self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -29,7 +29,7 @@ var Config = (function () {
     self.searchDepth = 8
     self.Blender={openTaxonomyTreeOnLoad:1}
 
-
+    self.ADLMappings={currentOntology:"ONE-MODEL"}
 
 
 
@@ -38,20 +38,24 @@ var Config = (function () {
     self.tools = {};
 
 
-    self.tools["thesaurusBrowser"] = {label: "Browse", multiSources: 0, controller: ThesaurusBrowser, toolDescriptionImg: null}//"images/browse.png"}
+    self.tools["sourceBrowser"] = {label: "Browse", multiSources: 0, controller: SourceBrowser, toolDescriptionImg: null}//"images/browse.png"}
     //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
-    self.tools["thesauriMatcher"] = {label: "Match", multiSources: 0, controller: ThesaurusMatcher, toolDescriptionImg: null}//"images/match.png"}
-    self.tools["nerEvaluator"] = {label: "Evaluate", multiSources: 1, controller: NerEvaluator, toolDescriptionImg: null}//"images/evaluate.png"}
-    self.tools["termTaxonomy"] = {label: "Taxonomy", multiSources: 1, controller: TermTaxonomy, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["sourceMatcher"] = {label: "Match", multiSources: 0, controller: SourceMatcher, toolDescriptionImg: null}//"images/match.png"}
+    self.tools["evaluate"] = {label: "Evaluate", multiSources: 1, controller: Evaluate, toolDescriptionImg: null}//"images/evaluate.png"}
+    self.tools["ancestors"] = {label: "Genealogy", multiSources: 1, controller: Genealogy, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
     self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-    self.tools["xlsx2mappings"] = {label: "Xlsx2mappings", multiSources: 0, controller: Xlsx2mappings, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["xlsx2mappings"] = {label: "ADLmappings", multiSources: 0, controller: ADLmappings, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-    // self.tools["AssetQuery"] = {label: "Ontology", multiSources: 0, controller: AssetQuery,toolDescriptionImg:null}
+    self.tools["ADLbrowser"] = {label: "ADLbrowser", multiSources: 0, controller: ADLbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+
+
+    // self.tools["ADLquery"] = {label: "Ontology", multiSources: 0, controller: ADLquery,toolDescriptionImg:null}
 
     //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
     // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
@@ -63,7 +67,7 @@ var Config = (function () {
 
     self.profiles= {
         admin: {
-            allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUAL"],
+            allowedSourceSchemas: ["SKOS", "OWL"],
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
@@ -75,7 +79,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","nerEvaluator"],
+            forbiddenTools: ["xlsx2mappings","evaluate"],
             blender: {contextMenuActionStartLevel: 0}
         },
         blender_skos: {
@@ -83,7 +87,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","nerEvaluator"],
+            forbiddenTools: ["xlsx2mappings","evaluate"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_skos: {
@@ -91,7 +95,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","nerEvaluator","BLENDER"],
+            forbiddenTools: ["xlsx2mappings","evaluate","BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_all: {
@@ -99,7 +103,7 @@ var Config = (function () {
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","nerEvaluator","INDIVIDUALS","BLENDER"],
+            forbiddenTools: ["xlsx2mappings","evaluate","INDIVIDUALS","BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         }
     }

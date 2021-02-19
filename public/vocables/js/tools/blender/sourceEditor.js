@@ -59,17 +59,17 @@ var SourceEditor = (function () {
                 if (err)
                     return MainController.UI.message(err)
                 var contextMenu = self.getJstreeConceptsContextMenu()
-                ThesaurusBrowser.showThesaurusTopConcepts(sourceLabel, {treeselectTreeNodeFn: SourceEditor.editjstreeNode, contextMenu: contextMenu})
+                SourceBrowser.showThesaurusTopConcepts(sourceLabel, {treeselectTreeNodeFn: SourceEditor.editjstreeNode, contextMenu: contextMenu})
                 $("#graphDiv").load("snippets/sourceEditor.html")
                 $("#SourceEditor_NewObjectDiv").css("display", "none")
                 // $("#actionDivContolPanelDiv").html("<button onclick='SourceEditor.onAddNewObject()'>+</button>")
-                $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='ThesaurusBrowser.searchTerm()'>Search</button>")
+                $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='SourceBrowser.searchTerm()'>Search</button>")
             })
         }
 
         self.selectTreeNodeFn = function (event, propertiesMap) {
             self.editjstreeNode(event, propertiesMap)
-            ThesaurusBrowser.openTreeNode( ThesaurusBrowser.currentTargetDiv, MainController.currentSource, propertiesMap.node)
+            SourceBrowser.openTreeNode( SourceBrowser.currentTargetDiv, MainController.currentSource, propertiesMap.node)
 
         }
 
@@ -296,16 +296,16 @@ var SourceEditor = (function () {
 
             var keyLabel = editingObject[metaType][key].label
             var html = ""
-            values.forEach(function (value) {
+            values.forEach(function (value,indexValue) {
                 var langStr = "";
                 if (value["xml:lang"]) {
                     langStr = "<input class='SourceEditor_lang' value='" + value["xml:lang"] + "'>"
                 }
-
-                html += "<tr class='SourceEditor_input_TR' id='SourceEditor_" + key + "'>" +
+                var valueId=common.getRandomHexaId(3)+"_"+key
+                html += "<tr class='SourceEditor_input_TR' id='SourceEditor_" + valueId + "'>" +
                     "<td><span>" + keyLabel + "</span></td>" +
                     "<td>" + langStr + "<input class='SourceEditor_value '  value='" + value.value + "'></td>" +
-                    "<td><button onclick='SourceEditor.deleteEditingValue(\"SourceEditor_" + key + "\")'>X</button></td>" +
+                    "<td><button onclick='SourceEditor.deleteEditingValue(\"SourceEditor_" + valueId + "\")'>X</button></td>" +
                     "</tr>"
             })
             var divId = "SourceEditor_" + keyLabel.replace(/ /g, "_") + "Div"
@@ -350,7 +350,7 @@ var SourceEditor = (function () {
             $(".SourceEditor_input_TR").each(function (e, x) {
 
 
-                predicate = $(this).attr("id").substring(13);
+                predicate = $(this).attr("id").substring(17);
 
                 var value = $(this).find(".SourceEditor_value").val();
                 var lang = $(this).find(".SourceEditor_lang").val();
@@ -423,15 +423,15 @@ var SourceEditor = (function () {
 
         self.deleteEditingObject = function () {
 
-            var children = $('#'+ThesaurusBrowser.currentTargetDiv).jstree(true).get_node(self.editingObject.about).children
+            var children = $('#'+SourceBrowser.currentTargetDiv).jstree(true).get_node(self.editingObject.about).children
             if (children.length > 0)
                 return alert("cannot delete node with children")
 
             Sparql_generic.deleteTriples(MainController.currentSource, self.editingObject.about, null, null, function (err, result) {
                 if (err)
                     MainController.UI.message(err);
-                $('#'+ThesaurusBrowser.currentTargetDiv).jstree(true).delete_node(self.editingObject.about)
-                $('#'+ThesaurusBrowser.currentTargetDiv).jstree(true).deselect_all();
+                $('#'+SourceBrowser.currentTargetDiv).jstree(true).delete_node(self.editingObject.about)
+                $('#'+SourceBrowser.currentTargetDiv).jstree(true).deselect_all();
                 self.editingObject = null;
                 $("#SourceEditor_mainDiv").css("display", "none")
 
@@ -520,7 +520,7 @@ var SourceEditor = (function () {
                 } else {
                     var keyName = propertiesMap.properties[key].name
                     var selectId = "detailsLangSelect_" + keyName
-                    var propNameSelect = "<select id='" + selectId + "' onchange=ThesaurusBrowser.onNodeDetailsLangChange('" + keyName + "') >"
+                    var propNameSelect = "<select id='" + selectId + "' onchange=SourceBrowser.onNodeDetailsLangChange('" + keyName + "') >"
                     var langDivs = "";
 
 
@@ -551,7 +551,7 @@ var SourceEditor = (function () {
                     str += "<td class='detailsCellValue'>" + langDivs + "</td>";
 
                     if (propertiesMap.properties[key].langValues[defaultLang])
-                        str += "<script>ThesaurusBrowser.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+                        str += "<script>SourceBrowser.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
 
                     str += "</tr>"
 

@@ -129,6 +129,8 @@ var common = (function () {
                 plugins.push("contextmenu")
             if (options.dnd)
                 plugins.push("dnd")
+            if (options.types)
+                plugins.push("types")
 
 
             var check_callbackFn = function (op, node, parent, position, more) {

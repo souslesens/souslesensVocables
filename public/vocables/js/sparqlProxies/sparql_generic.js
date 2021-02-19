@@ -179,7 +179,7 @@ var Sparql_generic = (function () {
 
         /*******************************************end basic requests (mode read) **************************************************************/
 
-        self.getSingleNodeAllAncestors = function (sourceLabel, id, callback) {
+        self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
             if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
                 Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, {source: sourceLabel}, function (err, result) {
                     callback(err, result);

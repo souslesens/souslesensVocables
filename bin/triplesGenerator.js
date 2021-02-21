@@ -165,7 +165,7 @@ var triplesGenerator = {
                 , function (callbackSeries) {
                     if (!source.sqlConnection)
                         return callbackSeries()
-                    sqlConnector.parse(source.xlsxFilePath, {sheets: mappingSheets}, function (err, result) {
+                    sqlConnector.getData(source.database, {sheets: mappingSheets}, function (err, result) {
 
                         if (err)
                             return callback(err)

@@ -2,53 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLMappingRightPanel.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/genealogy.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/AssetQuerySqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/transform.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/transform.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/childHood.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/nerEvaluator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/termTaxonomy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/thesaurusMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/xlsx2mappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/annotator.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/annotator.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/import.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/import.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/childHood.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/childHood.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/nerEvaluator_left.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate_left.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/nerEvaluator_right.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate_right.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ontologyBrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ontologyBrowser.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/searchAll.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/termTaxonomy.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/thesaurusMatcher.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/sourceMatcher.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/xlsx2mapping.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -187,7 +146,7 @@
       <workItem from="1613111503853" duration="10397000" />
       <workItem from="1613128702585" duration="37645000" />
       <workItem from="1613282689958" duration="82688000" />
-      <workItem from="1613722030888" duration="23987000" />
+      <workItem from="1613722030888" duration="42521000" />
     </task>
     <servers />
   </component>

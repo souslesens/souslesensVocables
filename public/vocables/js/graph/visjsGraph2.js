@@ -170,12 +170,15 @@ var visjsGraph = (function () {
 
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
+                    if (!params.event.srcEvent.ctrlKey)
+                        return;
                     var nodeId = params.nodes[0]
                     //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
                     var fixed = true;
                     if (params.event.srcEvent.altKey)
                         fixed = false;
+
                     newNodes.push({id: nodeId, fixed: fixed})
                     /*   nodes.forEach(function (id) {
                            var fixed = true;

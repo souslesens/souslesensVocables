@@ -2,7 +2,7 @@
     .ADLmappings_panel {
         border: #372806 solid 1px;
         margin: 2px;
-        min-height: 400px;
+        min-height: 200px;
         min-width: 300px;
     }
 
@@ -63,6 +63,8 @@
 
     .dataSample_type {
         border-color: darkorange;
+        font-weight: bold;
+        color:blue;
     }
 
     .dataSample_mapping {
@@ -72,19 +74,22 @@
     .dataSample_cellValue {
         font: normal 8px Verdana;
     }
+    .dataSample_join{
+        border-color: blue;
+    }
 
 
 </style>
 
-<div class="ADLmappings_panel" id="ADLmappings_MappingsPanel" style="width:100%;height: 40%;overflow: auto">
+<div class="ADLmappings_panel" id="ADLmappings_MappingsPanel" style="width:100%;height: 300px;overflow: auto">
 
     Mappings
     <button onclick="ADLmappings.newTripleMapping()">New Mapping</button>
     <button onclick="ADLmappings.displayMappings()">display Mappings</button>
     <div id="ADLmappings_dataSampleDiv"></div>
+</div>
 
-    <div class="ADLmappings_panel" id="ADLmappings_graph" style="width:100%;height: 60%;">
+    <div class="ADLmappings_panel" id="ADLmappings_graph" style="width:100%;height:470px;">
 
 
-    </div>
 </div>

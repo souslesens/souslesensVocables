@@ -23,6 +23,8 @@ var ADLmappings = (function () {
         self.sampleData = {}
         var constraintsMap = {}
         var allObjectsMap = {}
+        //  self.currentMappingsMap={type:"",joins:[],relations:[] }
+        self.currentMappingsMap = null;
         self.init = function () {
             self.subjectPropertiesMap = {}
             self.typedObjectsMap = {}
@@ -284,31 +286,50 @@ var ADLmappings = (function () {
                 var propLabel = allObjectsMap[obj.node.data.id].label
                 $("#ADLmappings_dataModelTree").jstree(true).rename_node(self.currentColumn, "<span  class='typedColumn'>" + propLabel + ":" + modelNode.data.label + "</span>")
 
-
+                self.setSampleColumnType(obj.node)
+                self.graph.drawNode(self.currentColumn, {type: obj.node.data.label})
                 for (var prop in constraintsMap.properties) {
                     if (constraintsMap.properties[prop][obj.node.data.id])
-                        constraintsMap.properties[prop][obj.node.data.id].push(self.currentColumn)
+                        if (constraintsMap.properties[prop][obj.node.data.id].indexOf(self.currentColumn) < 0)
+                            constraintsMap.properties[prop][obj.node.data.id].push(self.currentColumn)
                 }
 
 
             } else {
+
                 if (obj.node.parents.length < 3)
                     return;
                 var propertyNode = obj.node.parents[1]
                 var newChildren = [];
                 var label = allObjectsMap[propertyNode].label + "->" + allObjectsMap[parentNode].label + ":" + obj.node.data.label
                 newChildren.push({
-                    id: +"_" + propertyNode + "_" + self.currentColumn,
+                    id: "_" + propertyNode + "_" + self.currentColumn,
                     text: "<span class='typedColumn'>" + label + "</span>",
                     parent: self.currentColumn,
                     data: {type: "triple", subject: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
 
                 })
                 common.addNodesToJstree("ADLmappings_dataModelTree", self.currentColumn, newChildren)
+                self.setSampleColumnRelation(obj.node, {subject: self.currentColumn, predicate: propertyNode, object: obj.node.data.id})
+                self.graph.drawNode(self.currentColumn, {predicate: allObjectsMap[propertyNode].label, object: obj.node.data.label})
             }
 
         }
 
+
+        self.setSampleColumnType = function (node) {
+            $("#dataSample_type_" + self.currentColumn.replace(".", "__")).html(node.data.label)
+            self.currentMappingsMap[self.currentColumn.replace(".", "__")].type = node.data.label
+
+
+        }
+
+
+        self.setSampleColumnRelation = function (node, mapping) {
+            $("#dataSample_mapping_" + self.currentColumn.replace(".", "__")).append(mapping.predicate + " " + mapping.object)
+            self.currentMappingsMap[self.currentColumn.replace(".", "__")].mappings.push(mapping)
+
+        }
 
         self.loadOntology = function () {
 
@@ -513,6 +534,12 @@ var ADLmappings = (function () {
         }
 
         self.configureModel = function (data, source) {
+
+            if (self.currentMappingsMap) {
+
+            } else {
+                self.currentMappingsMap = {}
+            }
             var modelJstreeData = []
             var existingNodes = {}
             for (var key in data) {
@@ -565,19 +592,37 @@ var ADLmappings = (function () {
                 var str = "<table><tr>"
                 var strTypes = ""
                 var strMappings = ""
+                var strJoins = ""
                 data.forEach(function (item) {
                     for (var key in item) {
                         if (cols.indexOf(key) < 0) {
                             cols.push(key);
+                            var colId = table + "__" + key;
+                            var colType = "";
+                            var colMappings = ""
+                            var colJoins = ""
+                            if (!self.currentMappingsMap[colId])
+                                self.currentMappingsMap[colId] = {type: "", joins: [], mappings: []}
+                            else {
+                                colType = self.currentMappingsMap[colId].type
+                                colMappings = JSON.stringify(self.currentMappingsMap[colId].mappings)
+                                colJoins = JSON.stringify(self.currentMappingsMap[colId].joins)
+
+                            }
+
                             str += "<td class='dataSample_cell'>" + key + "</td>"
-                            strTypes += "<td class='dataSample_cell dataSample_type'><span class= 'dataSample_type' id='dataSample_type_" + table + "." + "_" + key + "'></span></td>"
-                            strMappings += "<td  class='dataSample_cell dataSample_mapping'<span class= 'dataSample_mapping' id='dataSample_mapping_" + table + "." + "_" + key + "'></span> </td>"
+                            //   strJoins += "<td  class='dataSample_cell dataSample_join'<span id='dataSample_join_" + colId + "'>" + colJoins + "</span> </td>"
+                            strTypes += "<td  class='dataSample_cell dataSample_type'<span id='dataSample_type_" + colId + "'>" + colType + "</span> </td>"
+
+                            //   strMappings += "<td  class='dataSample_cell dataSample_mapping'<span id='dataSample_mapping_" + colId + "'>" + colMappings + "</span> </td>"
                         }
                     }
                 })
                 str += "</tr>"
+
                 str += "<tr>" + strTypes + "</tr>"
-                str += "<tr>" + strMappings + "</tr>"
+                //   str += "<tr>" + strMappings + "</tr>"
+                //   str += "<tr>" + strJoins + "</tr>"
 
                 data.forEach(function (item) {
                     str += "<tr>"
@@ -593,6 +638,25 @@ var ADLmappings = (function () {
                 })
 
                 $("#ADLmappings_dataSampleDiv").html(str)
+                setTimeout(function () {
+                    /*  $(".dataSample_join").bind("click", function () {
+
+                      })*/
+
+                    $(".dataSample_type").bind("click", function () {
+                        var nodeId = $(this).attr("id").substring(16).replace("__", ".")
+                        self.showNodePropertiesTree(nodeId)
+
+
+                      
+
+
+                    })
+                    /*   $(".dataSample_mapping").bind("click", function () {
+
+                       })*/
+
+                })
             }
 
 
@@ -610,6 +674,7 @@ var ADLmappings = (function () {
                     dataType: "json",
 
                     success: function (data, textStatus, jqXHR) {
+
                         self.sampleData[table] = data,
                             displaySampleData(self.sampleData[table])
                     }
@@ -621,6 +686,109 @@ var ADLmappings = (function () {
             }
         }
 
+
+        self.showNodePropertiesTree = function (nodeId) {
+            $("#ADLmappings_dataModelTree").jstree(true).select_node(nodeId)
+            var jstreeNode = $("#ADLmappings_dataModelTree").jstree(true).get_node(nodeId)
+            self.currentModelJstreeNode = jstreeNode
+            self.currentJstreeNode = jstreeNode;
+            self.setTripleObject("Subject", jstreeNode.data)
+        }
+
+
+
+
+        self.graph = {
+            attrs: {
+                table: {shape: "ellipse", color: "grey"},
+                column: {shape: "box", color: "#9edae5"},
+
+
+            },
+
+            drawNode: function (columnObj, targetObj) {
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                var visjsData = {nodes: [], edges: []}
+                var array = columnObj.split(".")
+                var table = array[0]
+                var column = array[1]
+
+                if (targetObj.object) {
+
+                    if (!existingNodes[targetObj.object]) {
+                        var array = targetObj.object.split(".")
+                        table = array[0]
+                        column = array[1]
+
+                    }
+                }
+                if (targetObj.predicate) {
+                    var edgeId = columnObj + "_" + targetObj.predicate + "_" + targetObj.object
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1
+                        visjsData.edges.push({
+                                id: edgeId,
+                                from: columnObj,
+                                to: targetObj.object,
+                                label: targetObj.predicate,
+                                arrows: "to"
+                            }
+                        )
+                    }
+
+
+                }
+
+
+                /*   if (!existingNodes[table]) {
+                       visjsData.nodes.push({
+                               id: table,
+                               label: table,
+                               data: {type: table, id: table, label: table},
+                               shape: ADLmappings.graph.attrs["table"].shape,
+                               color: ADLmappings.graph.attrs["table"].color,
+                           }
+                       )
+                   }*/
+                if (!existingNodes[columnObj]) {
+                    visjsData.nodes.push({
+                            id: columnObj,
+                            label: column + "\n" + targetObj.type,
+                            data: {type: column, id: columnObj, label: column},
+                            shape: ADLmappings.graph.attrs["column"].shape,
+                            color: ADLmappings.graph.attrs["column"].color,
+                        }
+                    )
+                }
+                /*  var edgeId = table + "_" + columnObj
+                  if (!existingNodes[edgeId]) {
+                      visjsData.edges.push({
+                          id: edgeId,
+                          from: table,
+                          to: columnObj,
+
+                      })
+                  }*/
+
+
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    var options={selectNodeFn:function(node) {
+
+                            ADLmappings.showNodePropertiesTree(node.id)
+                        }
+                    }
+                    visjsGraph.draw("ADLmappings_graph", visjsData,options)
+                } else {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                }
+                visjsGraph.network.fit()
+
+
+            }
+
+
+        }
 
         return self;
     }

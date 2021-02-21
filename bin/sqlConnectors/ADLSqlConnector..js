@@ -26,6 +26,22 @@ var ADLSqlConnector = {
         model: "select * from model,model_attribute where model.ID=model_attribute.ModelId "
     },
 
+
+
+    views:[
+        "create view view_adl_TagModelAttribute as select " +
+        " tag.ID tag_ID, tag.TagNumber tag_TagNumber, tag.FunctionalClassID tag_FunctionalClassID, tag.ServiceDescription tag_ServiceDescription, tag.ValidationStatus tag_ValidationStatus, tag.Status tag_Status, tag.CMMSRequired tag_CMMSRequired," +
+        " tag_attribute.ID tag_attribute_ID, tag_attribute.TagId tag_attribute_TagId, tag_attribute.AttributeID tag_attribute_AttributeID, tag_attribute.FromValue tag_attribute_FromValue, tag_attribute.ToValue tag_attribute_ToValue, " +
+        " tag_attribute.UnitOfMeasureID tag_attribute_UnitOfMeasureID, tag_attribute.Status tag_attribute_Status, tag_attribute.Source tag_attribute_Source," +
+        " model.ID model_ID, model.OEMID model_OEMID, model.ModelNumber model_ModelNumber, model.PhysicalClassID model_PhysicalClassID," +
+        " model_attribute.ID model_attribute_ID, model_attribute.ModelID model_attribute_ModelID, model_attribute.AttributeID model_attribute_AttributeID, model_attribute.FromValue model_attribute_FromValue, model_attribute.ToValue model_attribute_ToValue, model_attribute.UnitOfMeasureID model_attribute_UnitOfMeasureID, model_attribute.Status model_attribute_Status, model_attribute.Source model_attribute_Source\n" +
+
+        " from tag left join tag_attribute on tag.id=tag_attribute.TagId left join tag2model on tag.ID=tag2model.TagID" +
+        " left join model on tag2model.id=model.ID  left join model_attribute on  model_attribute.ModelID=tag2model.ModelID"
+
+
+    ],
+
     getFromSparql: function (objectName,quantumArray,callback){
 
         var  ADLqueryMap={}

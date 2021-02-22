@@ -101,7 +101,7 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
             for (var i = 1; i < descendantsDepth; i++) {
                 query += "} "
             }
-            query += "} order by ?child1 ";
+            query += "} ";
             " }"
 
 
@@ -124,8 +124,10 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
                     "   ?child1 rdfs:label ?child1Label." +
                     "   ?child1 rdf:type ?child1Type." +
 
-                    "}order by ?concept"
+                    "}"
             }
+            if(options.sort)
+                query += " order by ?"+options.sort+" "
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 

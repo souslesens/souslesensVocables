@@ -462,7 +462,7 @@
 
   "ONE-MODEL": {
     "editable": true,
-    "graphUri": "http://data.total.com/resource/one-model/ontology/",
+    "graphUri": ["http://data.total.com/resource/one-model/ontology/0.2/","http://standards.iso.org/iso/15926/part14/"],
     "sparql_server": {
       "url": "_default"
     },

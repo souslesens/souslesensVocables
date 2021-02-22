@@ -13,7 +13,7 @@ const util = require('./skosConverters/util.')
 const xlsx2json = require('./xlsx2json.')
 const async = require('async')
 var httpProxy = require('./httpProxy.')
-var sqlConnector=require('../bin/sqlConnectors/ADLSqlConnector.')
+var sqlConnector = require('../bin/sqlConnectors/ADLSqlConnector.')
 var idsCache = {}
 
 var triplesGenerator = {
@@ -38,6 +38,7 @@ var triplesGenerator = {
         var dataArray = []
         data.forEach(function (item, index) {
             mappings.forEach(function (mapping, index) {
+
                 var subjectValue = item[mapping.subject];
 
                 if (!subjectValue)
@@ -55,6 +56,7 @@ var triplesGenerator = {
                     }
                     subjectUri = uriPrefix + idsMap[subjectValue]
                     if (newUri)
+                        options.labelUrisMap[subjectValue]=subjectUri;
                         triples.push({subject: subjectUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + subjectValue + "'"})
 
                 } else {
@@ -67,7 +69,8 @@ var triplesGenerator = {
                 if (mapping.object.indexOf("http") == 0) {
                     objectValue = mapping.object;
                 } else {
-
+                    if(mapping.object=="tag_attribute_FromValue")
+                        var x=3
                     var objectValue = item[mapping.object]
                     if (!objectValue)
                         return;
@@ -80,7 +83,9 @@ var triplesGenerator = {
                     } else if (util.isFloat(objectValue)) {
                         objectSuffix = "^^xsd:float"
                         objectValue = "'" + objectValue + "'" + objectSuffix;
-                    } else {
+                    } else if (objectValue.indexOf("TOTAL-")==0) {
+                        objectValue = "http://data.total.com/resource/quantum-mdm/"+objectValue+"/"
+                    }  else {
                         if (options.labelUrisMap && options.labelUrisMap[objectValue]) {
                             objectValue = options.labelUrisMap[objectValue];
                         } else if (options.generateIds) {
@@ -102,10 +107,152 @@ var triplesGenerator = {
 
             })
         })
-        callback(null, triples)
+        callback(null, {triples:triples,urisMap:options.labelUrisMap})
 
 
     },
+
+    generateAdlSqlTriples: function (mappingsPath, uriPrefix, sqlParams, options, callback) {
+        if (!options)
+            options = {}
+        var labelUrisMap = {}
+        var mappingSheets = []
+        var dataArray = [];
+        var allTriples = [];
+        var allSheetsdata = {}
+        var mappings
+
+
+        async.series([
+
+
+//delete old Graph if options replaceGraph
+                function (callbackSeries) {
+                    if (!options.replaceGraph)
+                        return callbackSeries();
+                    var queryDeleteGraph = "with <" + uriPrefix + ">" +
+                        "delete {" +
+                        "  ?sub ?pred ?obj ." +
+                        "} " +
+                        "where { ?sub ?pred ?obj .}"
+
+                    var params = {query: queryDeleteGraph}
+
+                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+
+                        callbackSeries(err);
+
+                    })
+                },
+              
+                function (callbackSeries) {
+
+                    if (!options.getExistingUriMappings)
+                        return callbackSeries();
+                    triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, options.getExistingUriMappings, null, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        labelUrisMap = result;
+                        callbackSeries();
+                    })
+                }
+                //prepare mappings
+                , function (callbackSeries) {
+                    mappings = JSON.parse(fs.readFileSync(mappingsPath));
+                    mappings.mappings.forEach(function (mapping) {
+                        if (mapping.subject.indexOf("http") < 0)
+                            mapping.subject = mapping.subject.split(".")[1]
+                        if (mapping.object.indexOf("http") < 0)
+                            mapping.object = mapping.object.split(".")[1]
+                    })
+
+                    mappings.mappings.sort(function (a, b) {
+                        var p = a.predicate.indexOf("#type");
+                        var q = b.predicate.indexOf("#type");
+                        if (p < q)
+                            return 1;
+                        if (p > q)
+                            return -1;
+                        return 0;
+
+                    })
+                    callbackSeries();
+                }
+                ,
+
+                //generate triples and write in triple store
+                function (callbackSeries) {
+
+
+                    var processor = function (data, callback) {
+
+                        if (options.getExistingUriMappings)
+                            options.labelUrisMap = labelUrisMap;
+
+                        triplesGenerator.generateSheetDataTriples(mappings.mappings, data, uriPrefix, options, function (err, result) {
+                            if (err)
+                                return callback(err)
+
+                            for( var key in result.urisMap){
+                                labelUrisMap[key]=result.urisMap[key]
+                            }
+
+                            // create new  triples in graph
+                          var triplesStr=""
+                            result.triples.forEach(function(triple){
+                                var value=triple.object
+
+                                if(!triple.subject)
+                                    var x=3
+                                if(value.indexOf("http")==0)
+                                    value="<"+value+">"
+                                triplesStr+="<"+triple.subject+"> <"+triple.predicate+"> "+value+".\n"
+                            })
+
+                            var queryCreateGraph = "with <" + uriPrefix + ">" +
+                                "insert {"
+                            queryCreateGraph += triplesStr;
+
+                            queryCreateGraph += "}"
+
+                            var params = {query: queryCreateGraph}
+
+                            httpProxy.post(options.sparqlServerUrl, null, options.getExistingUriMappings, params, function (err, result) {
+                                if (err) {
+                                    console.log(err)
+                                    return callback(err);
+                                }
+                                console.log(result)
+                                return callback(null)
+                            })
+
+                        })
+
+                    }
+
+
+                    sqlConnector.processFetchedData(sqlParams.dbName, sqlParams.query, sqlParams.fetchSize, processor, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+
+                        callbackSeries()
+
+                    })
+
+
+                }
+
+
+            ]
+
+            , function (err) {
+
+                var x = 3
+            })
+
+
+    },
+
 
     generateXlsxBookTriples: function (mappings, source, uriPrefix, options, callback) {
         if (!options)
@@ -150,7 +297,7 @@ var triplesGenerator = {
                 },
 
 
-            //xlsxSource
+                //xlsxSource
                 , function (callbackSeries) {
                     if (!source.xlsxFilePath)
                         return callbackSeries()
@@ -288,12 +435,12 @@ var triplesGenerator = {
                         if (options.getExistingUriMappings)
                             options.labelUrisMap = labelUrisMap;
 
-                        triplesGenerator.generateSheetDataTriples(mappings.mappings, dataArray, uriPrefix, options, function (err, triples) {
+                        triplesGenerator.generateSheetDataTriples(mappings.mappings, dataArray, uriPrefix, options, function (err, result ){
                             if (err)
                                 return callbackSeries(err)
 
 
-                            allTriples = allTriples.concat(triples)
+                            allTriples = allTriples.concat(result.triples)
 
 
                         })
@@ -316,7 +463,7 @@ var triplesGenerator = {
                                 str += "<" + item.object + ">"
                             else
                                 str += item.object;
-                            str += " .\n"
+                            str += " ."
 
                         })
                         return str;
@@ -333,7 +480,7 @@ var triplesGenerator = {
     }
 
 
-    , getExistingLabelUriMap: function (serverUrl, graphUri, type, callback) {
+    , getExistingLabelUriMap: function (serverUrl, graphUri, type, callbackX) {
 
         var fetchLimit = 5000
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -367,6 +514,7 @@ var triplesGenerator = {
                 httpProxy.post(body.url, body.headers, body.params, function (err, result) {
                     if (err)
                         return callbackWhilst(err);
+
                     offset += result.results.bindings.length
                     resultSize = result.results.bindings.length
 
@@ -380,7 +528,7 @@ var triplesGenerator = {
 
 
             }, function (err) {
-                return callback(err, labelUrisMap)
+                return callbackX(err, labelUrisMap)
 
             })
 
@@ -412,15 +560,17 @@ if (false) {
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
             "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
         },
-            {"subject": "Tag.TagNumber",
-            "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-            "object": "Tag.FunctionalClassName_Lookup"},
+            {
+                "subject": "Tag.TagNumber",
+                "predicate": "http://standards.iso.org/iso/15926/part14/represents",
+                "object": "Tag.FunctionalClassName_Lookup"
+            },
 
             {
-            "subject": "Tag.TagNumber",
-            "predicate": "http://data.total.com/resource/one-model/ontology#TOTAL-hasAttribute",
-            "object": "TagtoAttributes.AttributeID"
-        }, {"subject": "Tag.TagNumber", "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf", "object": "TagtoTag.LinkTagID_Lookup"}],
+                "subject": "Tag.TagNumber",
+                "predicate": "http://data.total.com/resource/one-model/ontology#TOTAL-hasAttribute",
+                "object": "TagtoAttributes.AttributeID"
+            }, {"subject": "Tag.TagNumber", "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf", "object": "TagtoTag.LinkTagID_Lookup"}],
         "sheetJoinColumns": {
             "Tag.TagNumber": ["TagtoTag.PrimaryTagID_Lookup", "TagtoAttributes.TAG_Ref"],
             "TagtoTag.PrimaryTagID_Lookup": ["Tag.TagNumber"],
@@ -479,22 +629,45 @@ if (false) {
     if (false) {
         var xlsxPath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX"
 
-    var options = {generateIds: 15, output: "ntTriples", getExistingUriMappings: "http://data.total.com/resource/one-model/assets/turbognerator/", sparqlServerUrl: "http://51.178.139.80:8890/sparql"}
-    triplesGenerator.generateXlsxBookTriples(mappings, {xlsxFilePath:xlsxPath}, uriPrefix, options, function (err, result) {
-        if (err)
-            return console.log(err);
-        return fs.writeFileSync(xlsxPath + "_triples.nt", result)
+        var options = {
+            generateIds: 15,
+            output: "ntTriples",
+            getExistingUriMappings: "http://data.total.com/resource/one-model/assets/turbognerator/",
+            sparqlServerUrl: "http://51.178.139.80:8890/sparql"
+        }
+        triplesGenerator.generateXlsxBookTriples(mappings, {xlsxFilePath: xlsxPath}, uriPrefix, options, function (err, result) {
+            if (err)
+                return console.log(err);
+            return fs.writeFileSync(xlsxPath + "_triples.nt", result)
 
-    })
-}if( true){
-        sqlConnector.connection.database="clov";
+        })
+    }
+}
+
+if (true) {
 
 
-
-
-
+    var sqlParams = {
+        dbName: "clov",
+        query: " select * from view_adl_tagmodelattribute ",
+        fetchSize: 200
     }
 
+    var uriPrefix = "http://data.total.com/resource/one-model/assets/clov/"
+
+
+    var options = {
+        generateIds: 15,
+        output: "ntTriples",
+        getExistingUriMappings: uriPrefix,
+        sparqlServerUrl: "http://51.178.139.80:8890/sparql"
+    }
+
+
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\ClovMappings.json"
+    triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
+
+    })
 
 
 }

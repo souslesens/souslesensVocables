@@ -8,6 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 var mysql = require('./mySQLproxy..js')
+const async=require('async')
 
 
 
@@ -105,6 +106,60 @@ var ADLSqlConnector = {
             return callback(err, result)
 
         })
+    },
+
+
+
+    processFetchedData:function(dbName,query,fetchSize, processor,callback){
+
+        var offset = 0
+        var length = 1
+        var allResults = []
+        async.whilst(
+            function test(cb) {
+                return cb(null, length > 0);
+            },
+            function iter(callbackWhilst) {
+
+
+                //  query=query+" offset "+(""+offset);
+           var query2 =query +" limit "+fetchSize+ " offset " + offset
+                offset += fetchSize;
+                ADLSqlConnector.getData(dbName,query2,function (err, result) {
+                    if (err) {
+                        console.log(params.query)
+                        return callbackWhilst(err);
+                    }
+                    length = result.length
+                    if(processor) {
+                        processor(result, function (err, resultProcessor) {
+                            if (err) if (err) {
+                                console.log(params.query)
+                                return callbackWhilst(err);
+                            }
+                            return callbackWhilst();
+                        })
+                    }
+                    else{
+                        allResults=allResults.concat(result);
+                        return callbackWhilst();
+                    }
+
+
+                })
+            },
+            function (err, n) {
+                if (err)
+                    return callback(err);
+                callback(null, allResults);
+
+            }
+        )
+
+
+
+
+
     },
 
     getADLmodel:function(dbName,callback){

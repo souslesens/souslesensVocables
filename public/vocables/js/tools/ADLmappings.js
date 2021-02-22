@@ -203,10 +203,10 @@ var ADLmappings = (function () {
                                         if (item["child" + i]) {
                                             var childId = item["child" + i].value
 
-                                            if(childId=="http://data.total.com/resource/one-model/ontology#Tag")
+                                            if (childId == "http://data.total.com/resource/one-model/ontology#Tag")
 
 
-                                            var parentId;
+                                                var parentId;
                                             if (i == 1)
                                                 parentId = item.concept.value
                                             else
@@ -217,9 +217,6 @@ var ADLmappings = (function () {
                                             }
 
 
-
-
-
                                         }
 
                                     }
@@ -228,66 +225,73 @@ var ADLmappings = (function () {
                             })
                         },
 
-                    //inherit properties
-                    function (callbackSeries){
+                        //inherit properties
+                        function (callbackSeries) {
+//return callbackSeries()
+                            for (var classId in allObjectsMap) {
+                                var item = allObjectsMap[classId]
 
-                        for (var classId in allObjectsMap) {
-                            var item = allObjectsMap[classId]
-                            if (item.type == "Class") {
-                               if (constraintsMap.domains[item.parent]){
-                                   if(constraintsMap.domains[classId])
-                                       onstraintsMap.domains[classId]=constraintsMap.domains[item.parent]
+                                if ( item.type == "Class" && item.parent) {
+                                    if (constraintsMap.domains[item.parent]) {
+                                        if (!constraintsMap.domains[classId]) {
+                                            constraintsMap.domains[classId] = constraintsMap.domains[item.parent]
 
-                    }
+                                        } else
+                                            constraintsMap.domains[item.parent].forEach(function(item) {
+                                                constraintsMap.domains[classId].push(item)
+                                            })
 
+                                    }
 
+                                    if (constraintsMap.ranges[item.parent]) {
+                                        if (!constraintsMap.ranges[classId]) {
+                                            constraintsMap.ranges[classId] = constraintsMap.ranges[item.parent]
 
+                                        } else
+                                            constraintsMap.ranges[item.parent].forEach(function(item) {
+                                                constraintsMap.ranges[classId].push(item)
+                                            })
 
+                                    }
 
+                                    if (item.type == "Property") {
+                                        if (constraintsMap.properties[item.parent]) {
+                                            if (!constraintsMap.properties[item.parent][classId]) {
+                                                constraintsMap.properties[item.parent][classId] = []
+                                            }
+                                        }
+                                    }
+                                }
                             }
+                            callbackSeries()
+                        },
 
+
+                        //set   Ontology jstreeData_types
+                        function (callbackSeries) {
+                            self.Ontology.jstreeData_types=[]
+                            var typeUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+                            self.Ontology.jstreeData_types.push({
+                                id: typeUri,
+                                text: "rdf:type",
+                                parent: "#",
+                                data: {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", source: self.currentSource}
+                            })
+
+                            for (var key in allObjectsMap) {
+                                var item = allObjectsMap[key]
+                                if (item.type == "Class") {
+                                    self.Ontology.jstreeData_types.push({
+                                        id: key,
+                                        text: item.label,
+                                        parent: item.parent || typeUri,
+                                        data: {id: key, label: item.label}
+                                    })
+                                }
                             }
+                            callbackSeries()
 
-
-
-                        if (constraintsMap.domains[item.concept.value])
-                            if (!constraintsMap.domains[childId])
-                                constraintsMap.domains[childId] = constraintsMap.domains[item.concept.value]
-                        if (constraintsMap.ranges[item.concept.value])
-                            if (!constraintsMap.ranges[childId]) {
-                                constraintsMap.ranges[childId] = constraintsMap.ranges[item.concept.value]
-                            }
-
-
-
-                    }
-
-
-
-
-                    //set   Ontology jstreeData_types
-                    function(callbackSeries){
-                        var typeUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-                        self.Ontology.jstreeData_types.push({
-                            id: typeUri,
-                            text: "rdf:type",
-                            parent: "#",
-                            data: {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", source: self.currentSource}
-                        })
-                        for (var key in allObjectsMap) {
-                            var item = allObjectsMap[key]
-                            if (item.type == "Class") {
-                                self.Ontology.jstreeData_types.push({
-                                    id: key,
-                                    text: item.label,
-                                    parent: item.parent || typeUri,
-                                    data: {id: key, label: item.label}
-                                })
-                            }
                         }
-                        callbackSeries()
-
-                    }
 
 
                     ],
@@ -301,28 +305,28 @@ var ADLmappings = (function () {
                 )
             },
 
-            showNodePropertiesTree: function (nodeId,mode) {
-                    $("#ADLmappings_dataModelTree").jstree(true).select_node(nodeId)
-                    var jstreeNode = $("#ADLmappings_dataModelTree").jstree(true).get_node(nodeId)
-                    self.currentModelJstreeNode = jstreeNode
-                    self.currentJstreeNode = jstreeNode;
-                    self.Ontology.displayFilteredPropertiesTree(jstreeNode.data,mode)
-                }
+            showNodePropertiesTree: function (nodeId, mode) {
+                $("#ADLmappings_dataModelTree").jstree(true).select_node(nodeId)
+                var jstreeNode = $("#ADLmappings_dataModelTree").jstree(true).get_node(nodeId)
+                self.currentModelJstreeNode = jstreeNode
+                self.currentJstreeNode = jstreeNode;
+                self.Ontology.displayFilteredPropertiesTree(jstreeNode.data, mode)
+            }
 
             ,
 
 
-            displayFilteredPropertiesTree: function (columnNodeData,mode) {
+            displayFilteredPropertiesTree: function (columnNodeData, mode) {
                 var properties;
 
                 self.currentColumn = columnNodeData.id;
-                if (!self.typedObjectsMap[columnNodeData.id] || mode=="types") {
+                if (!self.typedObjectsMap[columnNodeData.id] || mode == "types") {
                     self.typedObjectsMap[columnNodeData.id] = {};
                     properties = "rdf:type"
                 } else {
-                    var type=self.typedObjectsMap[columnNodeData.id].type
-                 properties = constraintsMap.domains[type]
-                  //  properties = constraintsMap.domains[columnNodeData.id]
+                    var type = self.typedObjectsMap[columnNodeData.id].type
+                    properties = constraintsMap.domains[type]
+                    //  properties = constraintsMap.domains[columnNodeData.id]
 
                 }
 
@@ -330,14 +334,16 @@ var ADLmappings = (function () {
                 var propJstreeData = []
                 if (properties == "rdf:type") {
 
-                    propJstreeData=self.Ontology.jstreeData_types
+                    propJstreeData = self.Ontology.jstreeData_types
 
                 } else {
 
-                    var uniqueIds={}
+                    var uniqueIds = {}
                     properties.forEach(function (prop) {
-                        if(!uniqueIds[prop]) {
-                            uniqueIds[prop]=1
+                        if (!uniqueIds[prop]) {
+                            uniqueIds[prop] = 1
+                            if(!allObjectsMap[prop])
+                                x=3
                             var label = allObjectsMap[prop].label || prop
 
                             propJstreeData.push({
@@ -349,13 +355,13 @@ var ADLmappings = (function () {
                         }
 
                         for (var range in constraintsMap.properties[prop]) {
-                            console.log( prop+"  "+JSON.stringify(constraintsMap.properties[prop],null,2))
+                            console.log(prop + "  " + JSON.stringify(constraintsMap.properties[prop], null, 2))
                             label
-                            if(!allObjectsMap[range])
-                                label=range
+                            if (!allObjectsMap[range])
+                                label = range
                             else
-                             label = allObjectsMap[range].label || range
-                            if(!uniqueIds[range]) {
+                                label = allObjectsMap[range].label || range
+                            if (!uniqueIds[range]) {
                                 uniqueIds[range] = 1
                                 propJstreeData.push({
                                     id: range,
@@ -379,25 +385,25 @@ var ADLmappings = (function () {
                                 }
                             })
 
-                        /*   for (var rangeKey in constraintsMap.ranges) {
-                               if (rangeKey==range || (constraintsMap.properties[prop][rangeKey] && constraintsMap.properties[prop][rangeKey].indexOf(range)>-1)) {
-                                   constraintsMap.properties[prop][rangeKey].forEach(function (item) {
-                                       if (!uniqueIds[item]) {
-                                           uniqueIds[item] = 1
+                            /*   for (var rangeKey in constraintsMap.ranges) {
+                                   if (rangeKey==range || (constraintsMap.properties[prop][rangeKey] && constraintsMap.properties[prop][rangeKey].indexOf(range)>-1)) {
+                                       constraintsMap.properties[prop][rangeKey].forEach(function (item) {
+                                           if (!uniqueIds[item]) {
+                                               uniqueIds[item] = 1
 
-                                           propJstreeData.push({
-                                               id: item,
-                                               text: "<span class='rangeValue' >" + item + "</span>",
-                                               parent: rangeKey,
-                                               data: {id: item, label: item, source: self.currentSource}
+                                               propJstreeData.push({
+                                                   id: item,
+                                                   text: "<span class='rangeValue' >" + item + "</span>",
+                                                   parent: rangeKey,
+                                                   data: {id: item, label: item, source: self.currentSource}
 
-                                           })
-                                       }
+                                               })
+                                           }
 
 
-                                   })
-                               }
-                           }*/
+                                       })
+                                   }
+                               }*/
                         }
                     })
 
@@ -410,9 +416,9 @@ var ADLmappings = (function () {
             }
             ,
             onSelectPropertiesNode: function (event, obj) {
-              //  var parentNode = obj.node.parent
+                //  var parentNode = obj.node.parent
                 //mode=type
-                if (obj.node.parents.indexOf( "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")>-1) {
+                if (obj.node.parents.indexOf("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") > -1) {
                     self.typedObjectsMap[self.currentColumn].type = obj.node.data.id
 
                     var modelNode = $("#ADLmappings_dataModelTree").jstree(true).get_node(self.currentColumn)
@@ -426,16 +432,16 @@ var ADLmappings = (function () {
 
                     self.graph.drawNode(self.currentColumn, {type: obj.node.data.label})
 
-                    var ancestors=obj.node.parents;
+                    var ancestors = obj.node.parents;
                     ancestors.push(obj.node.data.id)
                     for (var prop in constraintsMap.properties) {
-                        ancestors.forEach(function(ancestorId){
-                        if (constraintsMap.properties[prop][ancestorId]) {
-                            if (constraintsMap.properties[prop][ancestorId].indexOf(self.currentColumn) < 0)
-                                constraintsMap.properties[prop][ancestorId].push(self.currentColumn)
-                        }else{
-                           // constraintsMap.properties[prop][ancestorId]=[self.currentColumn]
-                        }
+                        ancestors.forEach(function (ancestorId) {
+                            if (constraintsMap.properties[prop][ancestorId]) {
+                                if (constraintsMap.properties[prop][ancestorId].indexOf(self.currentColumn) < 0)
+                                    constraintsMap.properties[prop][ancestorId].push(self.currentColumn)
+                            } else {
+                                // constraintsMap.properties[prop][ancestorId]=[self.currentColumn]
+                            }
 
                         })
                     }
@@ -457,7 +463,7 @@ var ADLmappings = (function () {
 
                     })
                     common.addNodesToJstree("ADLmappings_dataModelTree", self.currentColumn, newChildren)
-                  //  $("#dataSample_mapping_" + self.currentColumn.replace(".", "__")).append(mapping.predicate + " " + mapping.object)
+                    //  $("#dataSample_mapping_" + self.currentColumn.replace(".", "__")).append(mapping.predicate + " " + mapping.object)
                     self.currentMappingsMap[self.currentColumn.replace(".", "__")].mappings.push({subject: self.currentColumn, predicate: propertyNode, object: obj.node.data.id})
                     self.graph.drawNode(self.currentColumn, {predicate: allObjectsMap[propertyNode].label, object: obj.node.data.label})
                 }
@@ -551,10 +557,10 @@ var ADLmappings = (function () {
                     selectTreeNodeFn: function (event, obj) {
                         self.currentModelJstreeNode = obj.node
                         self.currentJstreeNode = obj.node;
-                        var mode="properties"
-                        if(obj.event.ctrlKey)
-                            mode="types"
-                        self.Ontology.displayFilteredPropertiesTree(obj.node.data,mode)
+                        var mode = "properties"
+                        if (obj.event.ctrlKey)
+                            mode = "types"
+                        self.Ontology.displayFilteredPropertiesTree(obj.node.data, mode)
                         self.Data.showSampleData(obj.node)
 
                     },
@@ -635,10 +641,10 @@ var ADLmappings = (function () {
 
                         $(".dataSample_type").bind("click", function (event) {
                             var nodeId = $(this).attr("id").substring(16).replace("__", ".")
-                            var mode="properties"
-                            if(event.ctrlKey)
-                                mode="types"
-                            self.Ontology.showNodePropertiesTree(nodeId,mode)
+                            var mode = "properties"
+                            if (event.ctrlKey)
+                                mode = "types"
+                            self.Ontology.showNodePropertiesTree(nodeId, mode)
 
 
                         })
@@ -743,12 +749,12 @@ var ADLmappings = (function () {
 
                 if (!visjsGraph.data || !visjsGraph.data.nodes) {
                     var options = {
-                        selectNodeFn: function (node,event) {
-                            var mode="properties"
-                            if(event.ctrlKey)
-                                mode="types"
+                        selectNodeFn: function (node, event) {
+                            var mode = "properties"
+                            if (event.ctrlKey)
+                                mode = "types"
 
-                            ADLmappings.Ontology.showNodePropertiesTree(node.id,mode)
+                            ADLmappings.Ontology.showNodePropertiesTree(node.id, mode)
                         }
                     }
                     visjsGraph.draw("ADLmappings_graph", visjsData, options)
@@ -808,6 +814,14 @@ var ADLmappings = (function () {
 
             $("#mainDialogDiv").html(JSON.stringify(data, null, 2))
             $("#mainDialogDiv").dialog("open")
+
+        }
+
+        self.loadMappings=function(){
+
+
+
+
 
         }
 

@@ -521,5 +521,28 @@
     "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
+  },
+
+
+  "ASSETS-CLOV": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/clov/"
+    ],
+
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+
+
+    "ADLqueryController": "remoteSQL",
+    "schema": null,
+    "color": "#bcbd22"
   }
+
+
+
 }

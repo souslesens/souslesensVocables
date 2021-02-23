@@ -1,14 +1,130 @@
 {
   "mappings": [
     {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
+      "subject": "view_adl_tagmodelattribute.tag_ID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://data.total.com/resource/one-model/ontology#Tag"
     },
     {
-      "subject": "view_adl_tagmodelattribute.tag_ServiceDescription",
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_TagNumber"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_ServiceDescription"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_ValidationStatus"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_Status"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_CMMSRequired"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.tag_TagNumber"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.tag_TagNumber"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.tag_TagNumber"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/Description"
+      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_attribute_FromValue"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_attribute_ToValue"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_attribute_UnitOfMeasureID"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_attribute_Status"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.tag_attribute_Source"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.model_attribute_UnitOfMeasureID"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.tag_attribute_AttributeID"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_ID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.model_ModelNumber"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.model_attribute_FromValue"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.model_attribute_ToValue"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.model_attribute_Status"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_adl_tagmodelattribute.model_attribute_Source"
+    },
+
+    {
+      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.model_attribute_AttributeID"
     },
     {
       "subject": "view_adl_tagmodelattribute.tag_FunctionalClassID",
@@ -16,57 +132,12 @@
       "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
-      "subject": "view_adl_tagmodelattribute.tag_ValidationStatus",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#validationStatus"
+      "subject": "view_adl_tagmodelattribute.tag_FunctionalClassID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.tag_FunctionalClassID"
     },
     {
-      "subject": "view_adl_tagmodelattribute.tag_Status",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#stateStatus"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_CMMSRequired",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#CCMSRrequired"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_ID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.15926.org/rdl/RDS2222036"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.15926.org/rdl/RDS2222036"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_AttributeID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_FromValue",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/D101001516"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_ToValue",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/D101001516"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_UnitOfMeasureID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/UnitOfMeasure"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_Status",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#stateStatus"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.model_ID",
+      "subject": "view_adl_tagmodelattribute.model_PhysicalClassID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://standards.iso.org/iso/15926/part14/PhysicalObject"
     },
@@ -76,67 +147,39 @@
       "object": "http://standards.iso.org/iso/15926/part14/Organization"
     },
     {
-      "subject": "view_adl_tagmodelattribute.model_ModelNumber",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.15926.org/rdl/RDS2222036"
+      "subject": "view_adl_tagmodelattribute.model_OEMID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_adl_tagmodelattribute.model_OEMID"
     },
     {
-      "subject": "view_adl_tagmodelattribute.model_PhysicalClassID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.model_attribute_AttributeID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
+      "subject": "view_adl_tagmodelattribute.tag_ID",
       "predicate": "http://standards.iso.org/iso/15926/part14/concretizedBy",
       "object": "view_adl_tagmodelattribute.model_ID"
     },
     {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
-      "object": "view_adl_tagmodelattribute.tag_attribute_AttributeID"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
-      "predicate": "http://standards.iso.org/iso/15926/part14/isAbout",
-      "object": "view_adl_tagmodelattribute.tag_ID"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
-      "object": "view_adl_tagmodelattribute.tag_attribute_AttributeID"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
+      "subject": "view_adl_tagmodelattribute.tag_ID",
       "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
       "object": "view_adl_tagmodelattribute.tag_FunctionalClassID"
     },
     {
-      "subject": "view_adl_tagmodelattribute.tag_TagNumber",
-      "predicate": "http://standards.iso.org/iso/15926/part14/isAbout",
-      "object": "view_adl_tagmodelattribute.tag_ID"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_AttributeID",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity",
-      "object": "view_adl_tagmodelattribute.tag_attribute_FromValue"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_FromValue",
-      "predicate": "http://standards.iso.org/iso/15926/part14/datumUOM",
-      "object": "view_adl_tagmodelattribute.tag_attribute_UnitOfMeasureID"
+      "subject": "view_adl_tagmodelattribute.tag_ID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+      "object": "view_adl_tagmodelattribute.tag_attribute_ID"
     },
     {
       "subject": "view_adl_tagmodelattribute.model_ID",
-      "predicate": "http://data.total.com/resource/one-model/ontology#http://w3id.org/readi/rdl/D101001101",
+      "predicate": "http://w3id.org/readi/rdl/D101001101",
       "object": "view_adl_tagmodelattribute.model_OEMID"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_ID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+      "object": "view_adl_tagmodelattribute.model_attribute_ID"
+    },
+    {
+      "subject": "view_adl_tagmodelattribute.model_ID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
+      "object": "view_adl_tagmodelattribute.model_PhysicalClassID"
     }
-  ],
-  "sheetJoinColumns": {}
+  ]
 }
-
-

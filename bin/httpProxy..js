@@ -1,4 +1,3 @@
-
 /**
  The MIT License
  The MIT License
@@ -48,15 +47,14 @@ var httpProxy = {
             url: url,
         };
         if (headers) {
-           options.headers = headers;
+            options.headers = headers;
 
-            if(headers["content-type"] && headers["content-type"].indexOf("json")>-1)
-                options.json= params;
+            if (headers["content-type"] && headers["content-type"].indexOf("json") > -1)
+                options.json = params;
             else
-                options.form= params;
-        }
-        else {
-         options.headers = {
+                options.form = params;
+        } else {
+            options.headers = {
                 'content-type': 'application/x-www-form-urlencoded',
                 'accept': 'application/json'
             };
@@ -69,23 +67,22 @@ var httpProxy = {
                 return callback(error);
             }
 
-            try {
 
-                if (typeof body=="string") {
-                    body=body.trim()
-                    if(body.indexOf("{")<0)
+
+                if (typeof body == "string") {
+                    body = body.trim()
+                    if (body.indexOf("{") < 0)
                         return callback(body);//error
-                    var obj = JSON.parse(body);
-                    return callback(null, obj)
+                    try {
+                        var obj = JSON.parse(body);
+                        return callback(null, obj)
+                    } catch (e) {
+                        callback(body)
+                    }
                 } else {
                     return callback(null, body)
                 }
-            } catch (e) {
-                console.log(e)
-                console.log(body)
 
-                return callback(e)
-            }
 
             return;
         })

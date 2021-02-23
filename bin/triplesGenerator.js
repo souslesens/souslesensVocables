@@ -16,6 +16,9 @@ var httpProxy = require('./httpProxy.')
 var sqlConnector = require('../bin/sqlConnectors/ADLSqlConnector.')
 var idsCache = {}
 
+
+var originalADLproperty = "http://data.total.com/resource/one-model#originalIdOf"
+var totalMdmIdProperty = "http://data.total.com/resource/one-model#hasTotalMdmId"
 var triplesGenerator = {
 
     getJsonModel: function (filePath, callback) {
@@ -34,7 +37,7 @@ var triplesGenerator = {
 
 
         var triples = [];
-        var idsMap = {}
+        var idsMap = options.labelUrisMap
         var dataArray = []
         data.forEach(function (item, index) {
             mappings.forEach(function (mapping, index) {
@@ -46,68 +49,82 @@ var triplesGenerator = {
 
 
                 var subjectUri
-                if (options.labelUrisMap && options.labelUrisMap[subjectValue]) {
-                    subjectValue = options.labelUrisMap[subjectValue];
-                } else if (options.generateIds) {
+                if (idsMap && idsMap[subjectValue]) {
+                    subjectUri = idsMap[subjectValue];
+                }
+                if (!subjectUri && options.generateIds) {
                     var newUri = false
                     if (!idsMap[subjectValue]) {
-                        idsMap[subjectValue] = util.getRandomHexaId(options.generateIds)
+                        idsMap[subjectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
+                        triples.push({subject: idsMap[subjectValue], predicate: originalADLproperty, object: "'"+subjectValue+"'"})
                         newUri = true
                     }
-                    subjectUri = uriPrefix + idsMap[subjectValue]
-                    if (newUri)
-                        options.labelUrisMap[subjectValue]=subjectUri;
-                        triples.push({subject: subjectUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + subjectValue + "'"})
+                    subjectUri = idsMap[subjectValue]
+                    /*   if (newUri)
+                           options.labelUrisMap[subjectValue] = subjectUri;
+                       triples.push({subject: subjectUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + subjectValue + "'"})*/
 
-                } else {
-                    subjectUri = uriPrefix + util.formatStringForTriple(subjectUri, true)
                 }
+
+                if (!subjectUri)
+                    var x = 3
 
 
                 var objectValue;
 
                 if (mapping.object.indexOf("http") == 0) {
                     objectValue = mapping.object;
+                    triples.push({subject: subjectUri, predicate: mapping.predicate, object: objectValue})
                 } else {
-                    if(mapping.object=="tag_attribute_FromValue")
-                        var x=3
+                    if (mapping.object == "tag_attribute_FromValue")
+                        var x = 3
                     var objectValue = item[mapping.object]
                     if (!objectValue)
                         return;
 
+
                     var objectSuffix = ""
                     // if(util.isInt(objectValue))
-                    if (!isNaN(objectValue)) {
-                        objectSuffix = "^^xsd:integer"
-                        objectValue = "'" + objectValue + "'" + objectSuffix;
-                    } else if (util.isFloat(objectValue)) {
-                        objectSuffix = "^^xsd:float"
-                        objectValue = "'" + objectValue + "'" + objectSuffix;
-                    } else if (objectValue.indexOf("TOTAL-")==0) {
-                        objectValue = "http://data.total.com/resource/quantum-mdm/"+objectValue+"/"
-                    }  else {
-                        if (options.labelUrisMap && options.labelUrisMap[objectValue]) {
-                            objectValue = options.labelUrisMap[objectValue];
-                        } else if (options.generateIds) {
-                            var newUri = false
-                            if (!idsMap[objectValue]) {
-                                idsMap[objectValue] = util.getRandomHexaId(options.generateIds)
-                                newUri = true
+                    if (objectValue.indexOf("TOTAL-") == 0) {
+                        triples.push({subject: subjectUri, predicate: totalMdmIdProperty, object: "'" + objectValue + "'"})
+
+                    } else if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                        triples.push({subject: subjectUri, predicate: mapping.object, object: "'" + objectValue + "'"})
+
+                    } else {
+                        if (mapping.predicate == "http://www.w3.org/2000/01/rdf-schema#label")
+                            objectValue = "'" + objectValue + "'"
+                        else if (!isNaN(objectValue)) {
+                            objectSuffix = "^^xsd:integer"
+                            objectValue = "'" + objectValue + "'" + objectSuffix;
+                        } else if (util.isFloat(objectValue)) {
+                            objectSuffix = "^^xsd:float"
+                            objectValue = "'" + objectValue + "'" + objectSuffix;
+                        } else {
+                            if (idsMap && idsMap[objectValue]) {
+                                objectValue = idsMap[objectValue];
                             }
-                            var objectUri = uriPrefix + idsMap[objectValue]
-                            objectValue = objectUri
-                            if (newUri)
-                                triples.push({subject: objectUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + objectValue + "'"})
+                            if (!objectValue && options.generateIds) {
+                                var newUri = false
+                                if (!idsMap[objectValue]) {
+                                    idsMap[objectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
+                                    triples.push({subject: idsMap[objectValue], predicate: originalADLproperty, object: "'"+objectValue+"'"})
+
+                                    newUri = true
+                                }
+                                var objectValue = idsMap[objectValue]
+
+                            }
                         }
+                        triples.push({subject: subjectUri, predicate: mapping.predicate, object: objectValue})
                     }
 
                 }
-                var predicateUri = mapping.predicate
-                triples.push({subject: subjectUri, predicate: predicateUri, object: objectValue})
+
 
             })
         })
-        callback(null, {triples:triples,urisMap:options.labelUrisMap})
+        callback(null, {triples: triples, urisMap: options.labelUrisMap})
 
 
     },
@@ -144,7 +161,7 @@ var triplesGenerator = {
 
                     })
                 },
-              
+
                 function (callbackSeries) {
 
                     if (!options.getExistingUriMappings)
@@ -193,20 +210,26 @@ var triplesGenerator = {
                             if (err)
                                 return callback(err)
 
-                            for( var key in result.urisMap){
-                                labelUrisMap[key]=result.urisMap[key]
+                            for (var key in result.urisMap) {
+                                labelUrisMap[key] = result.urisMap[key]
                             }
 
                             // create new  triples in graph
-                          var triplesStr=""
-                            result.triples.forEach(function(triple){
-                                var value=triple.object
 
-                                if(!triple.subject)
-                                    var x=3
-                                if(value.indexOf("http")==0)
-                                    value="<"+value+">"
-                                triplesStr+="<"+triple.subject+"> <"+triple.predicate+"> "+value+".\n"
+                            var slicedTriples=util.sliceArray(result.triples,1000)
+
+                            async.eachSeries(slicedTriples,function(triples,callbackEach){
+                                var triplesStr = ""
+                          triples.forEach(function (triple) {
+                                var value = triple.object
+
+                                if (!triple.subject)
+                                    var x = 3
+                                if (!triple.object)
+                                    var x = 3
+                                if (value.indexOf("http") == 0)
+                                    value = "<" + value + ">"
+                                triplesStr += "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n"
                             })
 
                             var queryCreateGraph = "with <" + uriPrefix + ">" +
@@ -217,12 +240,16 @@ var triplesGenerator = {
 
                             var params = {query: queryCreateGraph}
 
-                            httpProxy.post(options.sparqlServerUrl, null, options.getExistingUriMappings, params, function (err, result) {
+                            httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
                                 if (err) {
                                     console.log(err)
-                                    return callback(err);
+                                    return callbackEach(err);
                                 }
-                                console.log(result)
+                                console.log(JSON.stringify(result))
+                                return callbackEach(null)
+                            })
+
+                            },function(err){
                                 return callback(null)
                             })
 
@@ -435,7 +462,7 @@ var triplesGenerator = {
                         if (options.getExistingUriMappings)
                             options.labelUrisMap = labelUrisMap;
 
-                        triplesGenerator.generateSheetDataTriples(mappings.mappings, dataArray, uriPrefix, options, function (err, result ){
+                        triplesGenerator.generateSheetDataTriples(mappings.mappings, dataArray, uriPrefix, options, function (err, result) {
                             if (err)
                                 return callbackSeries(err)
 
@@ -486,10 +513,9 @@ var triplesGenerator = {
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            " select distinct ?concept ?conceptLabel  FROM <" + graphUri + ">   WHERE " +
-            "{?concept rdfs:label ?conceptLabel. FILTER (!isBlank(?concept))"
-        if (type)
-            query += " FILTER (?concept rdf:type <" + type + "> "
+            " select distinct ?term ?oneModelId  FROM <" + graphUri + ">   WHERE " +
+            "{?term <" + originalADLproperty + "> ?oneModelId"
+
         query += "} limit " + fetchLimit + " "
 
         var offset = 0
@@ -520,7 +546,7 @@ var triplesGenerator = {
 
 
                     result.results.bindings.forEach(function (item) {
-                        labelUrisMap[item.conceptLabel.value] = item.concept.value
+                        labelUrisMap[item.oneModelId.value] = item.term.value
 
                     })
                     callbackWhilst();
@@ -660,7 +686,8 @@ if (true) {
         generateIds: 15,
         output: "ntTriples",
         getExistingUriMappings: uriPrefix,
-        sparqlServerUrl: "http://51.178.139.80:8890/sparql"
+        sparqlServerUrl: "http://51.178.139.80:8890/sparql",
+        replaceGraph: true
     }
 
 

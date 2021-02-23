@@ -100,7 +100,11 @@ var OneModelManager = {
                     objectValue = "'" + quad.object.value + "'"
                     predicate = "http://www.w3.org/2000/01/rdf-schema#label"
                 }
-                console.log("<" + subjectValue + "> <" + predicate + "> " + objectValue + ".\n")
+                if (quad.predicate.value == "http://www.w3.org/2000/01/rdf-schema#label") {
+                    objectValue = "'" + quad.object.value + "'"
+                    predicate = "http://www.w3.org/2000/01/rdf-schema#label"
+                }
+              //  console.log("<" + subjectValue + "> <" + predicate + "> " + objectValue + ".\n")
                 triples += "<" + subjectValue + "> <" + predicate + "> " + objectValue + ".\n"
             })
 

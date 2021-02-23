@@ -311,7 +311,7 @@ var ADLmappings = (function () {
 
                 self.currentColumn = columnNodeData.id;
                 if (!self.typedObjectsMap[columnNodeData.id] || mode == "types") {
-                    self.typedObjectsMap[columnNodeData.id] = {};
+
                     properties = "rdf:type"
                 } else {
                     var type = self.typedObjectsMap[columnNodeData.id].type
@@ -324,21 +324,43 @@ var ADLmappings = (function () {
                 var propJstreeData = []
                 if (properties == "rdf:type") {
 
-                    propJstreeData = self.Ontology.jstreeData_types
+
                     propJstreeData.push({
                         id: "http://www.w3.org/2002/07/owl#DatatypeProperty",
-                        text: "DatatypeProperty",
+                        text: "owl:DatatypePropertyOf",
                         parent: "#",
-                        data: {type: "http://www.w3.org/2002/07/owl#DatatypeProperty", id: "http://www.w3.org/2002/07/owl#DatatypeProperty", label: "owl:DatatypeProperty", source: self.currentSource}
+                        data: {type: "DatatypePropertyOf", id: "http://www.w3.org/2002/07/owl#DatatypeProperty", label: "owl:DatatypeProperty", source: self.currentSource}
                     })
 
-                    for (var id in self.typedObjectsMap){
+                    for (var id in self.typedObjectsMap) {
                         propJstreeData.push({
-                            id: id,
+                            id: id + common.getRandomHexaId(3),
                             text: id,
-                            parent:  "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                            parent: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                            data: {type: "http://www.w3.org/2002/07/owl#DatatypeProperty", id: id, label: id.substring(id.lastIndexOf(".") + 1), source: self.currentSource}
+
                         })
                     }
+                    propJstreeData.push({
+                        id: "http://www.w3.org/2000/01/rdf-schema#label",
+                        text: "rdfs:labelOf",
+                        parent: "#",
+                        data: {type: "labelOf", id: "http://www.w3.org/2000/01/rdf-schema#label", label: "http://www.w3.org/2000/01/rdf-schema#label", source: self.currentSource}
+                    })
+
+                    for (var id in self.typedObjectsMap) {
+                        propJstreeData.push({
+                            id: id + common.getRandomHexaId(3),
+                            text: id,
+                            parent: "http://www.w3.org/2000/01/rdf-schema#label",
+                            data: {type: "http://www.w3.org/2000/01/rdf-schema#label", id: id, label: id.substring(id.lastIndexOf(".") + 1), source: self.currentSource}
+                        })
+                    }
+                    //    propJstreeData = self.Ontology.jstreeData_types
+
+                    self.Ontology.jstreeData_types.forEach(function (item) {
+                        propJstreeData.push(item)
+                    })
 
                 } else {
 
@@ -359,7 +381,7 @@ var ADLmappings = (function () {
                         }
 
                         for (var range in constraintsMap.properties[prop]) {
-                            console.log(prop + "  " + JSON.stringify(constraintsMap.properties[prop], null, 2))
+                            //   console.log(prop + "  " + JSON.stringify(constraintsMap.properties[prop], null, 2))
                             label
                             if (!allObjectsMap[range])
                                 label = range
@@ -389,25 +411,7 @@ var ADLmappings = (function () {
                                 }
                             })
 
-                            /*   for (var rangeKey in constraintsMap.ranges) {
-                                   if (rangeKey==range || (constraintsMap.properties[prop][rangeKey] && constraintsMap.properties[prop][rangeKey].indexOf(range)>-1)) {
-                                       constraintsMap.properties[prop][rangeKey].forEach(function (item) {
-                                           if (!uniqueIds[item]) {
-                                               uniqueIds[item] = 1
 
-                                               propJstreeData.push({
-                                                   id: item,
-                                                   text: "<span class='rangeValue' >" + item + "</span>",
-                                                   parent: rangeKey,
-                                                   data: {id: item, label: item, source: self.currentSource}
-
-                                               })
-                                           }
-
-
-                                       })
-                                   }
-                               }*/
                         }
                     })
 
@@ -422,11 +426,22 @@ var ADLmappings = (function () {
             onSelectPropertiesNode: function (event, obj) {
                 //  var parentNode = obj.node.parent
                 //mode=type
-                if (obj.node.id == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
-
+                if (obj.node.data.type == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                    self.typedObjectsMap[obj.node.data.id].dataProperties.push(self.currentColumn)
+                    var text = "dataPropertyOf :\n " + obj.node.data.label
+                    $("#dataSample_type_" + self.currentColumn.replace(".", "__")).html(text)
+                    self.currentMappingsMap[self.currentColumn.replace(".", "__")].type = text
                 }
-                if (obj.node.parents.indexOf("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") > -1) {
-                    self.typedObjectsMap[self.currentColumn].type = obj.node.data.id
+
+                else if (obj.node.data.type == "http://www.w3.org/2000/01/rdf-schema#label") {
+                    self.typedObjectsMap[obj.node.data.id].rdfsLabels.push(self.currentColumn)
+                    var text = "owlLabelOf :\n " + obj.node.data.label
+                    $("#dataSample_type_" + self.currentColumn.replace(".", "__")).html(text)
+                    self.currentMappingsMap[self.currentColumn.replace(".", "__")].type = text
+                }
+                else if (obj.node.parents.indexOf("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") > -1) {
+                    self.typedObjectsMap[self.currentColumn] = {type:obj.node.data.id,rdfsLabels:[],dataProperties:[]};
+
 
                     var modelNode = $("#ADLmappings_dataModelTree").jstree(true).get_node(self.currentColumn)
                     var propLabel = allObjectsMap[obj.node.data.id].label
@@ -565,7 +580,7 @@ var ADLmappings = (function () {
                         self.currentModelJstreeNode = obj.node
                         self.currentJstreeNode = obj.node;
                         var mode = "properties"
-                        if (obj.event.ctrlKey)
+                        if (obj.event && obj.event.ctrlKey)
                             mode = "types"
                         self.Ontology.displayFilteredPropertiesTree(obj.node.data, mode)
                         self.Data.showSampleData(obj.node)
@@ -783,7 +798,7 @@ var ADLmappings = (function () {
             //    data: {type: "triple", object: self.currentColumn, predicate: propertyNode, object: obj.node.data.id}
             var data = {
                 mappings: [],
-                sheetJoinColumns: self.sheetJoinColumns,
+                //  sheetJoinColumns: self.sheetJoinColumns,
             };
 
 
@@ -795,10 +810,28 @@ var ADLmappings = (function () {
                         subject: key,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
                         object: self.typedObjectsMap[key].type
-
-
                     })
                 }
+                if (self.typedObjectsMap[key].dataProperties) {
+                    self.typedObjectsMap[key].dataProperties.forEach(function (item) {
+                        data.mappings.push({
+                            subject: key,
+                            predicate: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                            object: item
+                        })
+                    })
+                }
+
+                if (self.typedObjectsMap[key].rdfsLabels) {
+                    self.typedObjectsMap[key].rdfsLabels.forEach(function (item) {
+                        data.mappings.push({
+                            subject: key,
+                            predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                            object: item
+                        })
+                    })
+                }
+
             }
             nodes.forEach(function (node) {
 

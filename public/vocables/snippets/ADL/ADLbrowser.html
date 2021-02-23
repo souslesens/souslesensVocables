@@ -29,7 +29,27 @@
     <div id="ADLbrowser_Tabs" style="width:360px;">
 
         <div class="" id="ADLbrowser_ItemTab">
-            <div id="ADLbrowser_searchAllDiv" style="height: 50px"></div>
+            <div id="ADLbrowser_searchAllDiv"  style="display: flex;flex-direction: column;height: 50px">
+                    <div>
+                        <input id='ADLbrowser_searchAllSourcesTermInput' style="width: 200px" value="">
+                        <button id="ADLbrowser_onSearchAllInput" onclick='ADLbrowser.searchAllSourcesTerm()'>Search</button>
+                    </div>
+                    <div>
+                        <input type='checkbox' checked='checked' id='ADLbrowser_allExactMatchSearchCBX'>Exact Match
+
+                        <input type='checkbox'  id='ADLbrowser_searchInAllSources'>All sources
+
+                    </div>
+
+
+                </div>
+
+
+
+
+
+
+            </div>
             <div id="ADLbrowser_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
             <div style="width: 360px;height: 500px">
                 <div class="jstree" id="ADLbrowserItemsjsTreeDiv"></div>
@@ -44,10 +64,6 @@
 </div>
 
 <script>
-    $("#ADLbrowser_searchAllDiv").load("./snippets/searchAll.html");
-    setTimeout(function () {
-        $("#GenericTools_searchInAllSources").prop("checked", false)
-    }, 300)
 
     $("#ADLbrowser_Tabs").tabs()
 </script>

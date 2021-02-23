@@ -198,6 +198,39 @@ var Sparql_INDIVIDUALS = (function () {
             })
         }
 
+        
+        self.findByWords=function(source,words, options,callback){
+
+          
+            var fromStr=Sparql_common.getFromStr(source)
+            var filterStr=Sparql_common.setFilter("obj",null,words,options)
+            var query = " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "        SELECT * "+fromStr+" WHERE {" +
+                "        ?sub ?pred ?objLabel " +filterStr+
+                "        ?sub rdf:type  ?type"
+
+
+            var limit = options.limit || Config.queryLimit;
+            query += "}  limit " + limit
+
+            var url =Config.sources[source].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+                 return callback(null, result.results.bindings)
+
+            })
+
+
+        }
+            
+            
+            
+
 
 
         self.getObjectProperties = function (sourceLabel, ids, options, callback) {

@@ -115,7 +115,46 @@ var ADLbrowser = (function () {
     }
 
     self.onSelectJstreeItem = function (event, data) {
+        self.currentSource = data.node.id
 
+    }
+
+
+    self.searchAllSourcesTerm = function () {
+        var words = $("#ADLbrowser_searchAllSourcesTermInput").val();
+        var exactMatch = $("#ADLbrowser_allExactMatchSearchCBX").prop("checked")
+        Sparql_INDIVIDUALS.findByWords(self.currentSource, words, {exactMatch: exactMatch}, function (err, result) {
+            if (err)
+                return MainController.UI.message(err)
+            var existingNodes={}
+            var jstreeData=[]
+            result.forEach(function(item){
+                if(!existingNodes[item.type.value]){
+                    existingNodes[item.type.value]=1;
+                    jstreeData.push({
+                        id:item.type.value,
+                        text:item.type.value,
+                        parent:self.currentSource,
+                        data:{type:"type"}
+                    })
+
+                }
+                if(!existingNodes[item.sub.value]) {
+                    existingNodes[item.sub.value] = 1;
+                    jstreeData.push({
+                        id: item.sub.value,
+                        text: item.objLabel.value,
+                        parent: item.type.value,
+                        data: {type: "individual", id:item.sub.value, label:item.objLabel.value, source:self.currentSource}
+                    })
+                }
+
+
+            })
+
+            common.addNodesToJstree("ADLbrowserItemsjsTreeDiv",self.currentSource,jstreeData)
+
+        })
     }
 
 

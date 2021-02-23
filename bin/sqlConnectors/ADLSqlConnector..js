@@ -133,8 +133,8 @@ var ADLSqlConnector = {
                     length = result.length
                     if(processor) {
                         processor(result, function (err, resultProcessor) {
-                            if (err) if (err) {
-                                console.log(params.query)
+                            if (err)  {
+
                                 return callbackWhilst(err);
                             }
                             return callbackWhilst();

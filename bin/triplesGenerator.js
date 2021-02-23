@@ -19,6 +19,8 @@ var idsCache = {}
 
 var originalADLproperty = "http://data.total.com/resource/one-model#originalIdOf"
 var totalMdmIdProperty = "http://data.total.com/resource/one-model#hasTotalMdmId"
+var totalMdmIdProperty ="http://data.total.com/resource/one-model#hasTotalMdmUri"
+var totalMdmUriPrefix="http://data.total.com/resource/one-model/quantum-mdm/"
 var triplesGenerator = {
 
     getJsonModel: function (filePath, callback) {
@@ -56,7 +58,7 @@ var triplesGenerator = {
                     var newUri = false
                     if (!idsMap[subjectValue]) {
                         idsMap[subjectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
-                        triples.push({subject: idsMap[subjectValue], predicate: originalADLproperty, object: "'"+subjectValue+"'"})
+                        triples.push({subject: idsMap[subjectValue], predicate: originalADLproperty, object: "'" + subjectValue + "'"})
                         newUri = true
                     }
                     subjectUri = idsMap[subjectValue]
@@ -86,7 +88,7 @@ var triplesGenerator = {
                     var objectSuffix = ""
                     // if(util.isInt(objectValue))
                     if (objectValue.indexOf("TOTAL-") == 0) {
-                        triples.push({subject: subjectUri, predicate: totalMdmIdProperty, object: "'" + objectValue + "'"})
+                        triples.push({subject: subjectUri, predicate: totalMdmIdProperty, object: "<" + totalMdmUriPrefix+objectValue + ">"})
 
                     } else if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
                         triples.push({subject: subjectUri, predicate: mapping.object, object: "'" + objectValue + "'"})
@@ -108,7 +110,7 @@ var triplesGenerator = {
                                 var newUri = false
                                 if (!idsMap[objectValue]) {
                                     idsMap[objectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
-                                    triples.push({subject: idsMap[objectValue], predicate: originalADLproperty, object: "'"+objectValue+"'"})
+                                    triples.push({subject: idsMap[objectValue], predicate: originalADLproperty, object: "'" + objectValue + "'"})
 
                                     newUri = true
                                 }
@@ -216,40 +218,40 @@ var triplesGenerator = {
 
                             // create new  triples in graph
 
-                            var slicedTriples=util.sliceArray(result.triples,1000)
+                            var slicedTriples = util.sliceArray(result.triples, 1000)
 
-                            async.eachSeries(slicedTriples,function(triples,callbackEach){
+                            async.eachSeries(slicedTriples, function (triples, callbackEach) {
                                 var triplesStr = ""
-                          triples.forEach(function (triple) {
-                                var value = triple.object
+                                triples.forEach(function (triple) {
+                                    var value = triple.object
 
-                                if (!triple.subject)
-                                    var x = 3
-                                if (!triple.object)
-                                    var x = 3
-                                if (value.indexOf("http") == 0)
-                                    value = "<" + value + ">"
-                                triplesStr += "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n"
-                            })
+                                    if (!triple.subject)
+                                        var x = 3
+                                    if (!triple.object)
+                                        var x = 3
+                                    if (value.indexOf("http") == 0)
+                                        value = "<" + value + ">"
+                                    triplesStr += "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n"
+                                })
 
-                            var queryCreateGraph = "with <" + uriPrefix + ">" +
-                                "insert {"
-                            queryCreateGraph += triplesStr;
+                                var queryCreateGraph = "with <" + uriPrefix + ">" +
+                                    "insert {"
+                                queryCreateGraph += triplesStr;
 
-                            queryCreateGraph += "}"
+                                queryCreateGraph += "}"
 
-                            var params = {query: queryCreateGraph}
+                                var params = {query: queryCreateGraph}
 
-                            httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
-                                if (err) {
-                                    console.log(err)
-                                    return callbackEach(err);
-                                }
-                                console.log(JSON.stringify(result))
-                                return callbackEach(null)
-                            })
+                                httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                                    if (err) {
+                                        console.log(err)
+                                        return callbackEach(err);
+                                    }
+                                    console.log(JSON.stringify(result))
+                                    return callbackEach(null)
+                                })
 
-                            },function(err){
+                            }, function (err) {
                                 return callback(null)
                             })
 
@@ -560,6 +562,62 @@ var triplesGenerator = {
 
     }
 
+    , generateMdmTriples: function () {
+        var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\mainObjects.txt"
+        var json = util.csvToJson(filePath)
+        var str = ""
+        var graphUri = "http://data.total.com/resource/one-model/quantum-mdm/"
+        var str = ""
+        var typesMap = {
+            "pickList": "http://w3id.org/readi/rdl/D101001535",
+            "attribute": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
+            "physicalObject": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+            "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        }
+
+
+        var jsonSlices = util.sliceArray(json, 300);
+        async.eachSeries(jsonSlices, function (json, callbackEach) {
+            var triples = ""
+            json.forEach(function (item) {
+                if (!item.id)
+                    return;
+                var subjectUri = graphUri + item.id;
+
+
+                triples += "<" + subjectUri + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + typesMap[item.type] + ">.\n";
+                triples += "<" + subjectUri + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + util.formatStringForTriple(item.label) + "'.\n";
+                if (item.parent && item.parent != "")
+                    triples += "<" + subjectUri + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + graphUri + item.parent + ">.\n";
+
+
+            })
+
+            var queryCreateGraph = "with <" + graphUri + ">" +
+                "insert {"
+            queryCreateGraph += triples;
+
+            queryCreateGraph += "}"
+
+            var params = {query: queryCreateGraph}
+            var options = {sparqlServerUrl: "http://51.178.139.80:8890/sparql"}
+
+            httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                if (err) {
+                    console.log(err)
+                    return callbackEach(err);
+                }
+                console.log(JSON.stringify(result))
+                return callbackEach(null)
+            })
+        },function(err){
+            if(err)
+                return console.log(err)
+            console.log("done")
+        })
+
+    }
+
 
 }
 
@@ -670,7 +728,7 @@ if (false) {
     }
 }
 
-if (true) {
+if (false) {
 
 
     var sqlParams = {
@@ -697,4 +755,8 @@ if (true) {
     })
 
 
+}
+
+if (true) {
+    triplesGenerator.generateMdmTriples()
 }

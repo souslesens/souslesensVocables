@@ -269,6 +269,32 @@ var util = {
         return r;
     }
 
+    , csvToJson: function (filePath) {
+        var str = "" + fs.readFileSync(filePath);
+        str = str.replace(/[\u{0080}-\u{FFFF}]/gu, "");//charactrese vides
+        var lines = str.split("\n");
+        var pagesJson = [];
+        var cols = [];
+
+        lines[0].split("\t").forEach(function (cell) {
+            cols.push(cell.trim())
+        })
+
+        lines.forEach(function (line, lineIndex) {
+            var cells = line.trim().split("\t");
+            var obj = {}
+            cells.forEach(function (cell, index) {
+                if (lineIndex == 0)
+                   ;// cols.push(cell.trim())
+                else {
+                    obj[cols[index]] = cell.trim();
+                }
+            })
+            pagesJson.push(obj)
+        })
+        return pagesJson;
+    }
+
 
 
 

@@ -31,6 +31,8 @@ self.loginMode = "none";
 
     self.ADLMappings={currentOntology:"ONE-MODEL"}
 
+    self.ADLBrowser={mdmGraphUri:"http://data.total.com/resource/one-model/quantum-mdm/"}
+
 
 
 

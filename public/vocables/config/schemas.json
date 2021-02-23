@@ -51,22 +51,8 @@
         "http://www.w3.org/2000/01/rdf-schema#label"
       ]
     }
-  },
-  "QUANTUM": {
-    "sparql_url": "_default",
-    "graphUri": "http://data.total.com/resource/GS_EP_DEV/vocab/",
-    "label": "QUANTUM",
-    "isOntology":true,
-    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#Class",
-    "newObject": {
-      "treeChildrenClasses": {
-      },
-      "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-      "mandatoryProperties": [
-        "http://www.w3.org/2000/01/rdf-schema#label"
-      ]
-    }
   }
+
 
 }
 

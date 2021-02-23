@@ -51,6 +51,8 @@ var OwlSchema = (function () {
             }
 
             if (!sourceSchema) {
+                if(! Config.sources[sourceLabel])
+                    var x=3
                 sourceSchema = {
                     sparql_url: Config.sources[sourceLabel].sparql_server.url,
                     graphUri: Config.sources[sourceLabel].graphUri,

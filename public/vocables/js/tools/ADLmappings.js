@@ -65,18 +65,7 @@ var ADLmappings = (function () {
 
                 var classJstreeData = []
                 var depth = 5;
-                var propertyJstreeData = [{
-                    id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    text: "type",
-                    parent: "#",
-                    data: {type: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "type", source: self.currentSource}
-                },
-                    {
-                        id: "http://www.w3.org/2000/01/rdf-schema#label",
-                        text: "label",
-                        parent: "#",
-                        data: {type: "http://www.w3.org/2000/01/rdf-schema#label", id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label", source: self.currentSource}
-                    }]
+
                 constraintsMap = {domains: [], properties: [], ranges: []}
                 var allClassIds = []
 
@@ -231,13 +220,13 @@ var ADLmappings = (function () {
                             for (var classId in allObjectsMap) {
                                 var item = allObjectsMap[classId]
 
-                                if ( item.type == "Class" && item.parent) {
+                                if (item.type == "Class" && item.parent) {
                                     if (constraintsMap.domains[item.parent]) {
                                         if (!constraintsMap.domains[classId]) {
                                             constraintsMap.domains[classId] = constraintsMap.domains[item.parent]
 
                                         } else
-                                            constraintsMap.domains[item.parent].forEach(function(item) {
+                                            constraintsMap.domains[item.parent].forEach(function (item) {
                                                 constraintsMap.domains[classId].push(item)
                                             })
 
@@ -248,7 +237,7 @@ var ADLmappings = (function () {
                                             constraintsMap.ranges[classId] = constraintsMap.ranges[item.parent]
 
                                         } else
-                                            constraintsMap.ranges[item.parent].forEach(function(item) {
+                                            constraintsMap.ranges[item.parent].forEach(function (item) {
                                                 constraintsMap.ranges[classId].push(item)
                                             })
 
@@ -269,13 +258,14 @@ var ADLmappings = (function () {
 
                         //set   Ontology jstreeData_types
                         function (callbackSeries) {
-                            self.Ontology.jstreeData_types=[]
+                            self.Ontology.jstreeData_types = []
                             var typeUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+
                             self.Ontology.jstreeData_types.push({
                                 id: typeUri,
                                 text: "rdf:type",
                                 parent: "#",
-                                data: {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", source: self.currentSource}
+                                data: {id: "typeUri", label: "rdf:type", source: self.currentSource}
                             })
 
                             for (var key in allObjectsMap) {
@@ -335,6 +325,20 @@ var ADLmappings = (function () {
                 if (properties == "rdf:type") {
 
                     propJstreeData = self.Ontology.jstreeData_types
+                    propJstreeData.push({
+                        id: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                        text: "DatatypeProperty",
+                        parent: "#",
+                        data: {type: "http://www.w3.org/2002/07/owl#DatatypeProperty", id: "http://www.w3.org/2002/07/owl#DatatypeProperty", label: "owl:DatatypeProperty", source: self.currentSource}
+                    })
+
+                    for (var id in self.typedObjectsMap){
+                        propJstreeData.push({
+                            id: id,
+                            text: id,
+                            parent:  "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                        })
+                    }
 
                 } else {
 
@@ -342,8 +346,8 @@ var ADLmappings = (function () {
                     properties.forEach(function (prop) {
                         if (!uniqueIds[prop]) {
                             uniqueIds[prop] = 1
-                            if(!allObjectsMap[prop])
-                                x=3
+                            if (!allObjectsMap[prop])
+                                x = 3
                             var label = allObjectsMap[prop].label || prop
 
                             propJstreeData.push({
@@ -418,6 +422,9 @@ var ADLmappings = (function () {
             onSelectPropertiesNode: function (event, obj) {
                 //  var parentNode = obj.node.parent
                 //mode=type
+                if (obj.node.id == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+
+                }
                 if (obj.node.parents.indexOf("http://www.w3.org/1999/02/22-rdf-syntax-ns#type") > -1) {
                     self.typedObjectsMap[self.currentColumn].type = obj.node.data.id
 
@@ -817,10 +824,7 @@ var ADLmappings = (function () {
 
         }
 
-        self.loadMappings=function(){
-
-
-
+        self.loadMappings = function () {
 
 
         }

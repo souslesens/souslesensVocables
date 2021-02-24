@@ -1,9 +1,20 @@
 var ADLbrowser = (function () {
 
     var self = {}
-
+var typeColors=[]
     self.aspectsChildrenDepth = 8
+    self.MDMsource = "MDM-QUANTUM-MIN"
+self.OneModelSource="ONE-MODEL";
+    self.OneModelDictionary={}
 
+
+    self.getPropertyColor = function (type, palette) {
+        if (!palette)
+            palette = "paletteIntense"
+        if (!typeColors[type])
+            typeColors[type] = common[palette][Object.keys(typeColors).length]
+        return typeColors[type];
+    }
 
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").html("")
@@ -17,12 +28,38 @@ var ADLbrowser = (function () {
         setTimeout(function () {
             self.loadAdlsList();
             self.loadAspects();
+            self.initOneModelDictionary()
 
             SourceBrowser.currentTargetDiv = "ADLbrowserItemsjsTreeDiv"
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL")
 
 
         }, 200)
+    }
+
+    self.initOneModelDictionary= function(){
+
+
+        var schema = OwlSchema.initSourceSchema(self.OneModelSource, function (err, schema) {
+            var ontologyProps = {}
+            Sparql_schema.getPropertiesRangeAndDomain(schema, null, null, null, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err)
+                result.forEach(function (item) {
+                    if(item.propertyLabel)
+                    self.OneModelDictionary[item.property.value]= item.propertyLabel.value
+                    else
+                    self.OneModelDictionary[item.property.value]= item.property.value.substring( item.propertyLabel.value.lastIndexOf("/")+1)
+
+                    if(item.subProperty) {
+                        if(item.subPropertyLabel)
+                        self.OneModelDictionary[item.subProperty.value] = item.subPropertyLabel.value
+                        else
+                            self.OneModelDictionary[item.subProperty.value]= item.property.value.substring( item.subProperty.value.lastIndexOf("/")+1)
+                    }
+                })
+            })
+        })
     }
 
     self.loadAdlsList = function () {
@@ -78,13 +115,14 @@ var ADLbrowser = (function () {
 
 
         async.eachSeries(jstreeData, function (topAspect, callbackEach) {
-            Sparql_generic.getNodeChildren("ONE-MODEL", null, topAspect.id, self.aspectsChildrenDepth, null, function (err, result) {
+            Sparql_generic.getNodeChildren(self.OneModelSource, null, topAspect.id, self.aspectsChildrenDepth, null, function (err, result) {
                 if (err)
                     return callbackEach(err)
                 result.forEach(function (item) {
                     for (var i = 1; i < self.aspectsChildrenDepth; i++) {
                         if (item["child" + i]) {
                             var parent;
+                            self.OneModelDictionary[item.concept.value]= item.conceptLabel.value
                             if (true || i == 1)
                                 parent = topAspect.id
                             else
@@ -92,6 +130,7 @@ var ADLbrowser = (function () {
 
 
                             if (item["child" + i] && !item["child" + (i + 1)]) {
+                                self.OneModelDictionary[item["child" + i].value]= item["child" + i + "Label"].value
                                 jstreeData.push({
                                     id: item["child" + i].value,
                                     text: item["child" + i + "Label"].value,
@@ -111,11 +150,86 @@ var ADLbrowser = (function () {
             if (err)
                 MainController.UI.message(err)
             var options = {selectTreeNodeFn: ADLbrowser.onSelectJsTreeAspect, openAll: true}
-            common.loadJsTree("ADLbrowserjsAspectsTreeDiv", jstreeData, options, function (err, result) {
+            common.loadJsTree("ADLbrowser_aspectsJstreeDiv", jstreeData, options, function (err, result) {
 
             })
         })
     }
+
+
+    self.loadAdlProperties=function(){
+
+var fromStr=Sparql_common.getFromStr(self.currentSource)
+                var query="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?prop ?subType ?objType\n" +
+                   fromStr+
+                    "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) optional{?sub rdf:type  ?subType.}  optional{?obj rdf:type ?objType}\n" +
+                    "}"
+        var url = Config.sources[self.MDMsource ].sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.MDMsource}, function (err, result) {
+                    if (err) {
+                        return callback(err)
+                    }
+
+                    var jstreeData = []
+                    var existingNodes={}
+                    result.results.bindings.forEach(function (item) {
+                        if(item.subType) {
+                            var label = self.OneModelDictionary[item.subType.value]
+                            if (!label)
+                                label = item.subType.value
+                            var color=self.getPropertyColor(item.subType.value)
+                            if (!existingNodes["sub_" + item.subType.value]) {
+                                existingNodes["sub_" + item.subType.value] = 1
+                                jstreeData.push({
+                                    id: "sub_" + item.subType.value,
+                                    text: "<span style='color:"+color+"'>"+label+"</span>",
+                                    parent: "#",
+                                    data: {type: "subject", id: item.subType.value, label: label}
+                                })
+                            }
+                        }
+                        if(!existingNodes["prop_"+item.prop.value]){
+                            var label=self.OneModelDictionary[item.prop.value]
+                            if(!label)
+                            label=item.prop.value
+                            existingNodes["prop_"+item.prop.value]=1
+                            jstreeData.push({
+                                id:"prop_"+item.prop.value,
+                                text:label,
+                                parent:"sub_"+item.subType.value,
+                                data:{type:"property",id:item.prop.value, label:label}
+                            })
+                        }
+                        if(item.objType && !existingNodes["obj_"+item.objType.value]){
+                            existingNodes["obj_"+item.objType.value]=1
+                            var label=self.OneModelDictionary[item.objType.value]
+                            if(!label)
+                                label=item.objType.value
+                            var color=self.getPropertyColor(item.objType.value)
+                            jstreeData.push({
+                                id:"obj_"+item.objType.value,
+                                text: "<span style='color:"+color+"'>"+label+"</span>",
+                                parent:"prop_"+item.prop.value,
+                                data:{type:"object",id:item.objType.value, label:self.OneModelDictionary[item.objType.value]}
+                            })
+                        }
+
+                    })
+
+                    var options = {selectTreeNodeFn: ADLbrowser.onSelectJsTreeProperties, openAll: true}
+
+                    common.loadJsTree("ADLbrowser_propertiesJstreeDiv", jstreeData, options)
+
+
+
+        })
+
+
+    }
+
+
+
+
 
     self.onSelectJsTreeAspect = function (event, data) {
 
@@ -128,9 +242,19 @@ var ADLbrowser = (function () {
 
     }
 
+    self.onSelectJsTreeProperties=function(err, data){
+        var node=data.node
+      self.Graph.drawExpandGraph(node)
+
+
+
+
+    }
+
     self.onSelectLeftJstreeItem = function (event, data) {
         if (data.node.parents.length == 1)
             self.currentSource = data.node.id
+        self.loadAdlProperties()
 
     }
 
@@ -193,7 +317,7 @@ var ADLbrowser = (function () {
                     })
 
                 })
-                common.addNodesToJstree("ADLbrowserjsAspectsTreeDiv", jstreeParent, jstreeData)
+                common.addNodesToJstree("ADLbrowser_aspectsJstreeDiv", jstreeParent, jstreeData)
 
 
             })
@@ -235,10 +359,10 @@ var ADLbrowser = (function () {
 
             var limit = options.limit || Config.queryLimit;
             query += " } limit " + limit
-            var source = "MDM-QUANTUM-MIN"
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+            var url = Config.sources[self.MDMsource ].sparql_server.url + "?format=json&query=";
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.MDMsource}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -251,34 +375,166 @@ var ADLbrowser = (function () {
 
 
     self.Graph = {
-
+ clearGraph:function(){
+     visjsGraph.clearGraph()
+ },
         drawGraph: function (node) {
-            var totalId = node.id.substring(node.id.lastIndexOf("/") + 1)
-            var options = {filter :" FILTER (?conceptLabel='" + totalId + "') "}
 
+            if (!self.currentSource)
+                return alert("select a source")
 
-            var query="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
                 "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
-                "WHERE { ?concept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?concept rdfs:label ?conceptLabel.   }  limit 100"
+                "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
 
-            var source = "MDM-QUANTUM-MIN"
-            var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+            var source = self.currentSource
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                $("#waitImg").css("display", "none");
                 if (err) {
-                    return callback(err)
-                }
-                return callback(null, result.results.bindings);
-            })
-return;
-            Sparql_INDIVIDUALS.getItems(self.currentSource, options, function (err, result) {
-                if(err)
                     return MainController.UI.message(err)
+                }
+                var data = result.results.bindings
+                if (data.length == 0)
+                    return MainController.UI.message("no data found")
+                $("#waitImg").css("display", "flex");
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                if(!self.currentAdlTypesOnGraph)
+                    self.currentAdlTypesOnGraph={}
+
+
+                data.forEach(function (item) {
+                    if(!self.currentAdlTypesOnGraph[item.adlType.value])
+                        self.currentAdlTypesOnGraph[item.adlType.value]=0;
+                    self.currentAdlTypesOnGraph[item.adlType.value]+=1
+                    var color=self.getPropertyColor(item.adlType.value)
+                    if (!existingNodes[item.mdmConcept.value]) {
+                        existingNodes[item.mdmConcept.value] = 1
+                        visjsData.nodes.push({
+                            id: item.mdmConcept.value,
+                            label: item.mdmConceptLabel.value,
+                            shape: "dot",
+                            color: color,
+                            data: {source: self.currentSource, id: item.mdmConcept.value, label: item.mdmConceptLabel.value}
+
+                        })
+                    }
+
+                    if (!existingNodes[item.adlConcept.value]) {
+                        existingNodes[item.adlConcept.value] = 1
+                        visjsData.nodes.push({
+                            id: item.adlConcept.value,
+                            label: item.adlConceptLabel.value,
+                            shape: "dot",
+                            color: color,
+                            data: {source: self.currentSource, id: item.adlConcept.value, label: item.adlConceptLabel.value}
+
+                        })
+                    }
+                    var edgeId = item.adlConcept.value + "_" + item.mdmConcept.value
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.adlConcept.value,
+                            to: item.mdmConcept.value,
+                        })
+                    }
+
+
+                })
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    var options={
+                        onclickFn:function(node,point,event){
+                            if(event.ctrlKey)
+                            MainController.UI.showNodeInfos( node.data.source, node.data.id, "mainDialogDiv")
+
+
+
+                        }
+
+                    }
+                    visjsGraph.draw("graphDiv", visjsData,options)
+                } else {
+
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                    visjsGraph.network.fit()
+                }
+                $("#waitImg").css("display", "none");
             })
+        }
+        ,drawExpandGraph(node){
+            if(node.data.type=="property"){
+
+                var fromStr=Sparql_common.getFromStr(self.currentSource)
+                var graphNodes=visjsGraph.data.nodes.get();
+                var graphNodeIdsStr=""
+                graphNodes.forEach(function(item,index){
+                    if(index>0)
+                        graphNodeIdsStr+=","
+                    graphNodeIdsStr+="<"+item.data.id+">"
+                })
+
+
+                var filterStr="filter (?pred=<"+node.data.id+"> && ?sub in ("+graphNodeIdsStr+")) "
+
+                Sparql_INDIVIDUALS.getItems(self.currentSource,{filter:filterStr},function(err, result){
+                    if(err)
+                        return MainController.UI.message(err);
+
+                    var existingIds=visjsGraph.getExistingIdsMap()
+                    var visjsData={nodes:[],edges:[]}
+
+                    result.forEach(function(item){
+                        var color=self.getPropertyColor(item.objType.value)
+
+                        if(!existingIds[item.obj.value]){
+                            existingIds[item.obj.value]=1
+                            visjsData.nodes.push({
+                                id:item.obj.value,
+                                label:item.objLabel.value,
+                                shape:'dot',
+                                color:color,
+                                data:{source:self.currentSource, id:item.obj.value,
+                                    label:item.objLabel.value}
+
+                            })
+                        }
+                        var edgeId=item.obj.value+"_"+item.sub.value
+                        if(!existingIds[edgeId]){
+                            existingIds[edgeId]=1
+                            visjsData.edges.push({
+                                id:edgeId,
+                                from :item.obj.value,
+                                to:item.sub.value,
+
+                            })
+                        }
+
+                    })
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                    visjsGraph.network.fit()
+
+                })
+
+
+
+
+            }
         }
 
 
+
+
+
     }
+
+
 
 
     return self;

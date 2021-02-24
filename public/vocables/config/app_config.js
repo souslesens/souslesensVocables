@@ -69,7 +69,7 @@ self.loginMode = "none";
 
     self.profiles= {
         admin: {
-            allowedSourceSchemas: ["SKOS", "OWL"],
+            allowedSourceSchemas: ["SKOS", "OWL","INDIVIDUALS"],
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",

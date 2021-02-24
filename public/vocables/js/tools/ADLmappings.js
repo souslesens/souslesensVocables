@@ -178,7 +178,7 @@ var ADLmappings = (function () {
                         // loadClasses
                         function (callbackSeries) {
 
-                            var depth = 8;
+                            var depth = 6;
                             Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
                                 if (err)
                                     return callbackSeries(err)
@@ -288,7 +288,7 @@ var ADLmappings = (function () {
 
                     function (err) {
                         if (err)
-                            return MainController.UI.message(message)
+                            return MainController.UI.message(err)
 
 
                     }

@@ -19,8 +19,8 @@ var idsCache = {}
 
 var originalADLproperty = "http://data.total.com/resource/one-model#originalIdOf"
 var totalMdmIdProperty = "http://data.total.com/resource/one-model#hasTotalMdmId"
-var totalMdmIdProperty ="http://data.total.com/resource/one-model#hasTotalMdmUri"
-var totalMdmUriPrefix="http://data.total.com/resource/one-model/quantum-mdm/"
+var totalMdmIdProperty = "http://data.total.com/resource/one-model#hasTotalMdmUri"
+var totalMdmUriPrefix = "http://data.total.com/resource/one-model/quantum-mdm/"
 var triplesGenerator = {
 
     getJsonModel: function (filePath, callback) {
@@ -78,19 +78,23 @@ var triplesGenerator = {
                     objectValue = mapping.object;
                     triples.push({subject: subjectUri, predicate: mapping.predicate, object: objectValue})
                 } else {
-                    if (mapping.object == "tag_attribute_FromValue")
-                        var x = 3
+
                     var objectValue = item[mapping.object]
+
+                    if (mapping.predicate == "http://standards.iso.org/iso/15926/part14/hasFunctionalPart")
+                        var x = 3
                     if (!objectValue)
                         return;
-
 
                     var objectSuffix = ""
                     // if(util.isInt(objectValue))
                     if (objectValue.indexOf("TOTAL-") == 0) {
-                        triples.push({subject: subjectUri, predicate: totalMdmIdProperty, object: "<" + totalMdmUriPrefix+objectValue + ">"})
+                        objectValue = totalMdmUriPrefix + objectValue
+                        triples.push({subject: subjectUri, predicate: totalMdmIdProperty, object: "<" + objectValue + ">"})
 
-                    } else if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                    }
+
+                    if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
                         triples.push({subject: subjectUri, predicate: mapping.object, object: "'" + objectValue + "'"})
 
                     } else {
@@ -203,14 +207,14 @@ var triplesGenerator = {
                 function (callbackSeries) {
 
 
-                    var processor = function (data, callback) {
+                    var processor = function (data, callbackProcessor) {
 
                         if (options.getExistingUriMappings)
                             options.labelUrisMap = labelUrisMap;
 
                         triplesGenerator.generateSheetDataTriples(mappings.mappings, data, uriPrefix, options, function (err, result) {
                             if (err)
-                                return callback(err)
+                                return callbackProcessor(err)
 
                             for (var key in result.urisMap) {
                                 labelUrisMap[key] = result.urisMap[key]
@@ -275,8 +279,8 @@ var triplesGenerator = {
             ]
 
             , function (err) {
+                console.log("ALL DONE")
 
-                var x = 3
             })
 
 
@@ -610,8 +614,8 @@ var triplesGenerator = {
                 console.log(JSON.stringify(result))
                 return callbackEach(null)
             })
-        },function(err){
-            if(err)
+        }, function (err) {
+            if (err)
                 return console.log(err)
             console.log("done")
         })
@@ -734,7 +738,7 @@ if (false) {
     var sqlParams = {
         dbName: "clov",
         query: " select * from view_adl_tagmodelattribute ",
-        fetchSize: 200
+        fetchSize: 1000
     }
 
     var uriPrefix = "http://data.total.com/resource/one-model/assets/clov/"
@@ -758,5 +762,30 @@ if (false) {
 }
 
 if (true) {
+    var sqlParams = {
+        dbName: "clov",
+        query: " select * from breakdown ",
+        fetchSize: 1000
+    }
+
+    var uriPrefix = "http://data.total.com/resource/one-model/assets/clov/"
+
+
+    var options = {
+        generateIds: 15,
+        output: "ntTriples",
+        getExistingUriMappings: uriPrefix,
+        sparqlServerUrl: "http://51.178.139.80:8890/sparql",
+        replaceGraph: false
+    }
+
+
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdown.json"
+    triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
+
+    })
+}
+
+if (false) {
     triplesGenerator.generateMdmTriples()
 }

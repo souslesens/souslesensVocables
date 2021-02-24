@@ -170,14 +170,16 @@ var Sparql_INDIVIDUALS = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
 
-            query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. FILTER (!isBlank(?concept))"
-            query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
-            query += "OPTIONAL {?concept rdf:type ?conceptType.}";
+            query += " select distinct * " + fromStr + "  WHERE { ?sub ?pred ?obj. FILTER (!isBlank(?sub))"
+            query += "OPTIONAL {?sub rdfs:label ?subLabel.}";
+            query += "OPTIONAL {?obj rdfs:label ?objLabel.}";
+            query += "OPTIONAL {?sub rdf:type ?subType.}";
+            query += "OPTIONAL {?obj rdf:type ?objType.}";
 
             if (options.filter)
                 query += options.filter;
             if (options.lang)
-                query += "filter(lang(?conceptLabel )='" + lang + "')"
+                query += "filter(lang(?subLabel )='" + lang + "')"
 
             query += "  } ";
             " }"
@@ -192,7 +194,7 @@ var Sparql_INDIVIDUALS = (function () {
                     return callback(err)
                 }
 
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings,"concept")
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings,["sub","pred","obj"])
                 return callback(null, result.results.bindings)
 
             })

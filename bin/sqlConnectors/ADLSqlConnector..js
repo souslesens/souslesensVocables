@@ -125,6 +125,7 @@ var ADLSqlConnector = {
                 //  query=query+" offset "+(""+offset);
            var query2 =query +" limit "+fetchSize+ " offset " + offset
                 offset += fetchSize;
+                console.log("processed lines: "+offset)
                 ADLSqlConnector.getData(dbName,query2,function (err, result) {
                     if (err) {
                         console.log(params.query)

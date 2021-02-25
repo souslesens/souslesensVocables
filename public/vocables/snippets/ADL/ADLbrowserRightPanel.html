@@ -12,14 +12,15 @@
 </style>
 <div>
 
-
+    <button onclick='ADLbrowser.Graph.clearGraph()'>clear</button>
     <div id="ADLbrowser_Tabs" style="width:360px;">
 
         <ul>
+            <li><a href="#ADLbrowserAdlTab">ADL</a></li>
+            <li><a href="#ADLbrowserOneModelTab">One-Model</a></li>
 
-            <li><a href="#ADLbrowserAspectsTab">Aspects</a></li>
-            <li><a href="#ADLbrowserPropertiesTab">Properties</a></li>
-            <li><a href="#ADLbrowser_ItemTab">Query</a></li>
+            <li><a href="#ADLbrowserMDMTab">MDM</a></li>
+
 
 
         </ul>
@@ -30,23 +31,25 @@
 
 
 
-        <div id="ADLbrowserAspectsTab" style="width:100%;height:800px">
-            <button onclick='ADLbrowser.Graph.clearGraph()'>clear</button>
+        <div id="ADLbrowserAdlTab" style="width:100%;height:800px">
+
             <div style="width: 360px;height: 500px">
-                <div class="jstree" id="ADLbrowser_aspectsJstreeDiv"></div>
+                <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
             </div>
 
         </div>
-        <div class="" id="ADLbrowser_QueryTab">
-
+        <div class="" id="ADLbrowserMDMTab">
+            <div style="width: 360px;height: 500px">
+                <div class="jstree" id="ADLbrowser_mdmJstreeDiv"></div>
+            </div>
 
             <!--     <button onclick='ADLbrowser_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
 
         </div>
 
-        <div class="" id="ADLbrowserPropertiesTab">
+        <div class="" id="ADLbrowserOneModelTab">
             <div style="width: 360px;height: 500px">
-                <div class="jstree" id="ADLbrowser_propertiesJstreeDiv"></div>
+                <div class="jstree" id="ADLbrowser_oneModelJstreeDiv"></div>
             </div>
 
 

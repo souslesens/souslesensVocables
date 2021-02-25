@@ -208,7 +208,7 @@ var Sparql_INDIVIDUALS = (function () {
             var filterStr=Sparql_common.setFilter("obj",null,words,options)
             var query = " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "        SELECT * "+fromStr+" WHERE {" +
+                "        SELECT distinct * "+fromStr+" WHERE {" +
                 "        ?sub ?pred ?objLabel " +filterStr+
                 "        ?sub rdf:type  ?type"
 

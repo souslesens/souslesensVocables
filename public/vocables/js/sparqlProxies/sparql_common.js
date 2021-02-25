@@ -61,10 +61,11 @@ var Sparql_common = (function () {
                 } else {
                     if (words == null)
                         return "";
-                    filters.push(" regex(?" + varName + "Label, \"^" + words + "$\", \"i\")");
+
                     if (!options.exactMatch) {
                         filters.push("regex(?" + varName + "Label, \"" + words + "\", \"i\")");
-
+                    }else{
+                        filters.push(" regex(?" + varName + "Label, \"^" + words + "$\", \"i\")");
                     }
                 }
             } else if (ids) {

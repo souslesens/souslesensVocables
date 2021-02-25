@@ -2,15 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/other/oneModel/breakdown.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/oneModel/tag2tag.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/oneModel/breakdownLabels.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -25,9 +24,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="JavaScript File" />
         <option value="JS module" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -83,7 +82,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.triplesGenerator.js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
@@ -154,7 +153,9 @@
       <workItem from="1613928485001" duration="38515000" />
       <workItem from="1614011355100" duration="390000" />
       <workItem from="1614012116927" duration="58472000" />
-      <workItem from="1614166790836" duration="13777000" />
+      <workItem from="1614166790836" duration="14401000" />
+      <workItem from="1614235043143" duration="1769000" />
+      <workItem from="1614239044959" duration="25855000" />
     </task>
     <servers />
   </component>
@@ -225,25 +226,16 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/triplesGenerator.js</url>
           <line>613</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="190" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/triplesGenerator.js</url>
           <line>470</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="192" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js</url>
-          <line>161</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="195" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js</url>
           <line>69</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="197" />
         </line-breakpoint>
       </breakpoints>

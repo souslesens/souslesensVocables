@@ -780,7 +780,7 @@ if (true) {
     }
 
 
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdown.json"
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdownLabels.json"
     triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
 
     })

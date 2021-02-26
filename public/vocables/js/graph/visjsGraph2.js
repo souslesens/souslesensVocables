@@ -475,6 +475,21 @@ var visjsGraph = (function () {
         }
     }
 
+    self.collapseNode=function(nodeId) {
+        var nodeEdges = visjsGraph.data.edges.get();
+        var targetEdges=[]
+        var targetNodes=[]
+        nodeEdges.forEach(function(edge){
+            if(edge.from==nodeId){
+                targetEdges.push(edge.id)
+                if(targetNodes.indexOf(edge.to)<0)
+                    targetNodes.push(edge.to)
+            }
+
+        })
+        visjsGraph.data.edges.remove(targetEdges)
+        visjsGraph.data.nodes.remove(targetNodes)
+    }
 
     return self;
 

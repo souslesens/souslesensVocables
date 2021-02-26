@@ -473,6 +473,26 @@
     "color": "#bcbd22"
   },
 
+  "MDM-QUANTUM-MIN": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/quantum-mdm/"
+    ],
+
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+
+
+    "ADLqueryController": "remoteSQL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+
 
 
 
@@ -505,24 +525,7 @@
 
   "_comment": "**************************************************************assets***************************************",
 
-  "MDM-QUANTUM-MIN": {
-    "graphUri":  [
-      "http://data.total.com/resource/one-model/quantum-mdm/"
-    ],
 
-
-    "sparql_server": {
-      "url": "_default"
-    },
-    "controller": "Sparql_INDIVIDUALS",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
-
-
-    "ADLqueryController": "remoteSQL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
 
   "ASSETS-turbogenerator": {
     "graphUri":  [

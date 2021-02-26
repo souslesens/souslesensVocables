@@ -68,9 +68,13 @@ var ADLbrowser = (function () {
     self.searchAllSourcesTerm = function () {
         MainController.UI.message("searching...")
         $("#waitImg").css("display", "flex");
+
+        $('#ADLbrowserItemsjsTreeDiv').jstree(true).delete_node($('#ADLbrowserItemsjsTreeDiv').jstree(true).get_node(self.currentSource).children);
+
         var words = $("#ADLbrowser_searchAllSourcesTermInput").val();
         var exactMatch = $("#ADLbrowser_allExactMatchSearchCBX").prop("checked")
-        Sparql_INDIVIDUALS.findByWords(self.currentSource, words, {exactMatch: exactMatch}, function (err, result) {
+        var type = $("#ADLbrowser_searchAllSourcestypeSelect").val();
+        Sparql_INDIVIDUALS.findByWords(self.currentSource, words, {exactMatch: exactMatch, type: type}, function (err, result) {
 
 
             if (err)
@@ -78,14 +82,14 @@ var ADLbrowser = (function () {
 
             if (result.length == 0) {
                 MainController.UI.message("no  data found")
-                $("#waitImg").css("display", "none");
+                return $("#waitImg").css("display", "none");
             }
 
             MainController.UI.message("displaying nodes...")
             var existingNodes = {}
             var jstreeData = []
             result.forEach(function (item) {
-                if (!existingNodes[item.type.value]) {
+                if (false && !existingNodes[item.type.value]) { // type makes query execution longer
                     existingNodes[item.type.value] = 1;
                     jstreeData.push({
                         id: item.type.value,
@@ -100,8 +104,8 @@ var ADLbrowser = (function () {
                     jstreeData.push({
                         id: item.sub.value,
                         text: item.objLabel.value,
-                        parent: item.type.value,
-                        data: {sourceType: "adl", source: self.currentSource, id: item.sub.value, label: item.objLabel.value, source: self.currentSource}
+                        parent: self.currentSource, // item.type.value, // type makes query execution longer
+                        data: {sourceType: "adl", source: self.currentSource, type: "subject", id: item.sub.value, label: item.objLabel.value, source: self.currentSource}
                     })
                 }
 
@@ -207,9 +211,10 @@ var ADLbrowser = (function () {
                 var options = {
                     selectTreeNodeFn: function (event, data) {
                         $("#ADLbrowserItemsjsTreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
-                        if (data.node.parent != "#")// after search
-                            self.jstree.load.loadAdl(data.node)
-                        else {
+                        if (data.node.parent != "#") {// after search
+                            // self.jstree.load.loadAdl(data.node)
+                            self.currentJstreeNode = data.node
+                        } else {
                             self.currentSource = data.node.id
                             self.jstree.load.loadAdl()
                         }
@@ -367,7 +372,11 @@ var ADLbrowser = (function () {
 
                     var jstreeData = []
                     var existingNodes = {}
+                    var typesArray = []
+
                     result.forEach(function (item) {
+                        if (typesArray.indexOf(item.subType.value) < 0)
+                            typesArray.push(item.subType.value)
                         if (item.subType) {
                             var label = self.OneModelDictionary[item.subType.value]
                             if (!label)
@@ -396,6 +405,9 @@ var ADLbrowser = (function () {
                             })
                         }
                         if (item.objType && !existingNodes["obj_" + item.objType.value]) {
+                            if (typesArray.indexOf(item.objType.value) < 0)
+                                typesArray.push(item.objType.value)
+
                             existingNodes["obj_" + item.objType.value] = 1
                             var label = self.OneModelDictionary[item.objType.value]
                             if (!label)
@@ -421,7 +433,7 @@ var ADLbrowser = (function () {
                         contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
 
                     }
-
+                    common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
                     common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
                     $("#ADLbrowser_Tabs").tabs("option", "active", 0);
 
@@ -462,12 +474,12 @@ var ADLbrowser = (function () {
                 source = self.currentSource;
 
             var fromStr = Sparql_common.getFromStr(self.currentSource)
-            var filterStr="";
-            if( subjectType)
-                filterStr= "filter (?subType=<"+subjectType+"> ) "
+            var filterStr = "";
+            if (subjectType)
+                filterStr = "filter (?subType=<" + subjectType + "> ) "
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?prop ?subType ?objType\n" +
                 fromStr +
-                "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. "+filterStr+"}  optional{?obj rdf:type ?objType}\n" +
+                "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}\n" +
                 "}"
             var url = Config.sources[self.MDMsource].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.MDMsource}, function (err, result) {
@@ -492,8 +504,8 @@ var ADLbrowser = (function () {
                     properties.push({
                         property: item.prop.value,
                         objectType: objectType,
-                        propertyLabel: self.OneModelDictionary[item.prop.value] ||item.prop.value ,
-                        objectTypeLabel: self.OneModelDictionary[objectType]||objectType ,
+                        propertyLabel: self.OneModelDictionary[item.prop.value] || item.prop.value,
+                        objectTypeLabel: self.OneModelDictionary[objectType] || objectType,
                     })
 
                 })
@@ -548,10 +560,144 @@ var ADLbrowser = (function () {
         clearGraph: function () {
             visjsGraph.clearGraph()
         },
-        drawGraph: function (node,filterStr) {
+        drawGraph: function (node, filterStr) {
 
-            if(!filterStr)
-                filterStr="";
+            if (!filterStr)
+                filterStr = "";
+            if (!self.currentSource)
+                return alert("select a source")
+
+            var source;
+            var query
+            if (node.data.sourceType == "mdm") {
+                source = self.currentSource
+                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
+                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                    "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
+
+            }
+            if (node.data.sourceType == "adl") {
+                source = self.currentSource
+
+                var fromStr = Sparql_common.getFromStr(source)
+                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
+                    fromStr +
+                  "WHERE {" +
+                    "  { ?sub ?pred ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}" +
+                    "filter(   ?obj =<"+node.data.id+"> && regex(str(?pred),'part14'))}" +
+                    "  UNION  { ?sub ?pred ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}" +
+                    " filter(   ?sub =<"+node.data.id+"> && regex(str(?pred),'part14'))}"
+
+
+                query += " }  limit 1000"
+
+            }
+            if (node.data.sourceType == "oneModel") {
+                source = self.currentSource
+                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
+                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                    "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
+
+            }
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                // $("#waitImg").css("display", "none");
+                if (err) {
+                    return MainController.UI.message(err)
+                }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
+                var data = result.results.bindings
+                if (data.length == 0)
+                    return MainController.UI.message("no data found")
+                //   $("#waitImg").css("display", "flex");
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                if (!self.currentAdlTypesOnGraph)
+                    self.currentAdlTypesOnGraph = {}
+
+
+                data.forEach(function (item) {
+                    /*   if (!self.currentAdlTypesOnGraph[item.sub.value])
+                           self.currentAdlTypesOnGraph[item.sub.value] = 0;
+                       self.currentAdlTypesOnGraph[item.sub.value] += 1*/
+                    if (!existingNodes[item.sub.value]) {
+                        existingNodes[item.sub.value] = 1
+                        var color = "#ddd"
+                        if (item.subType)
+                            color = self.getPropertyColor(item.subType.value)
+                        visjsData.nodes.push({
+                            id: item.sub.value,
+                            label: item.subLabel.value,
+                            shape: "dot",
+                            color: color,
+                            data: {source: self.currentSource, id: item.sub.value, label: item.subLabel.value}
+
+                        })
+                    }
+
+                    if (!existingNodes[item.obj.value]) {
+                        existingNodes[item.obj.value] = 1
+                        var color = "#ddd"
+                        if (item.objType)
+                            color = self.getPropertyColor(item.objType.value)
+                        visjsData.nodes.push({
+                            id: item.obj.value,
+                            label: item.objLabel.value,
+                            shape: "dot",
+                            color: color,
+                            data: {source: self.currentSource, id: item.obj.value, label: item.objLabel.value}
+
+                        })
+                    }
+                    var edgeId = item.obj.value + "_" + item.sub.value
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.obj.value,
+                            to: item.sub.value,
+                        })
+                    }
+
+
+                })
+
+                MainController.UI.message("drawing...")
+
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    var options = {
+                        onclickFn: function (node, point, event) {
+                            if (event.ctrlKey)
+                                MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+
+
+                        },
+                        onRightClickFn: function (node, point, event) {
+                            self.currentJstreeNode=node
+                            point.x+=leftPanelWidth
+                            self.query.showQueryParamsDialog (point)
+                        }
+
+                    }
+                    visjsGraph.draw("graphDiv", visjsData, options)
+                } else {
+
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                    visjsGraph.network.fit()
+                }
+                MainController.UI.message("")
+                $("#waitImg").css("display", "none");
+            })
+        },
+        drawGraphOld: function (node, filterStr) {
+
+            if (!filterStr)
+                filterStr = "";
             if (!self.currentSource)
                 return alert("select a source")
 
@@ -575,7 +721,8 @@ var ADLbrowser = (function () {
                     "OPTIONAL{?sub rdf:type ?subType} " +
                     "OPTIONAL{?sub rdfs:label ?subLabel} " +
                     "OPTIONAL{?obj rdf:type ?objType} " +
-                    "OPTIONAL{?obj rdf:type ?objLabel} "
+                    "OPTIONAL{?obj rdf:type ?objLabel} " +
+                    "filter(   ?pred !=rdfs:label)"
 
                 if (node.data.type == "subject")
                     query += "filter(   ?sub =<" + node.data.id + ">)"

@@ -203,18 +203,24 @@ var Sparql_INDIVIDUALS = (function () {
         
         self.findByWords=function(source,words, options,callback){
 
-          
+          if(!options)
+            options={}
+            var filterTypeStr=""
+            if(options.type)
+                filterTypeStr= " ?sub rdf:type  <"+options.type+"> "
+
             var fromStr=Sparql_common.getFromStr(source)
             var filterStr=Sparql_common.setFilter("obj",null,words,options)
             var query = " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "        SELECT distinct * "+fromStr+" WHERE {" +
-                "        ?sub ?pred ?objLabel " +filterStr+
-                "        ?sub rdf:type  ?type"
+                "        ?sub ?pred ?objLabel " +filterStr
+            +filterTypeStr
+              //  +"        ?sub rdf:type  ?type"  // type makes query execution longer
 
 
             var limit = options.limit || Config.queryLimit;
-            query += "}  limit " + limit
+            query += "} order by ?sub limit " + limit
 
             var url =Config.sources[source].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {

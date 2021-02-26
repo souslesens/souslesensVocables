@@ -84,7 +84,10 @@ var MainController = (function () {
                 treeData.push({id: item, text: item, parent: "#"})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
-
+                if (!Config.sources[sourceLabel].controllerName) {
+                    Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
+                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
+                }
 
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
@@ -96,10 +99,7 @@ var MainController = (function () {
 
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1
-                    if (!Config.sources[sourceLabel].controllerName) {
-                        Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
-                        Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
-                    }
+
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     //  console.log(JSON.stringify(jstreeData,null,2))

@@ -24,6 +24,10 @@
         background-color: green;
     }
 
+    .ADLbrowser_tab{
+        height: 600px;
+    }
+
 
 </style>
 <div>
@@ -31,29 +35,33 @@
 
     <div id="ADLbrowser_Tabs" style="width:360px;">
 
-        <div class="" id="ADLbrowser_ItemTab">
-            <div id="ADLbrowser_searchAllDiv" style="display: flex;flex-direction: column;height: 50px">
+        <div class="ADLbrowser_tab" id="ADLbrowser_ItemTab">
+            <div style="margin: 5px">
+                type <select id="ADLbrowser_searchAllSourcestypeSelect" style="width: 300px"> </select>
+            </div>
+            <div id="ADLbrowser_searchAllDiv" style="display: flex;flex-direction: column;height: 100px">
                 <div>
                     <input id='ADLbrowser_searchAllSourcesTermInput' style="width: 200px" value="">
                     <button id="ADLbrowser_onSearchAllInput" onclick='ADLbrowser.searchAllSourcesTerm()'>Search</button>
                 </div>
+
                 <div>
-                    <input type='checkbox' checked='checked' id='ADLbrowser_allExactMatchSearchCBX'>Exact Match
+                    <input type='checkbox' id='ADLbrowser_allExactMatchSearchCBX'>Exact Match
 
                     <input type='checkbox' id='ADLbrowser_searchInAllSources'>All sources
 
                 </div>
 
 
-            </div>
+
 
 
         </div>
         <div id="ADLbrowser_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
-        <div style="width: 360px;height: 500px">
-            <div class="jstree" id="ADLbrowserItemsjsTreeDiv"></div>
-        </div>
 
+            <div class="jstree" id="ADLbrowserItemsjsTreeDiv"></div>
+
+        </div>
 
     </div>
 </div>
@@ -61,7 +69,7 @@
 
 </div>
 
-<div id="ADLbrowserQueryParamsDialog" style="position: absolute;display: none; z-index: 100 ;width: 300px;height: 50px;" class="vakata-context vakata-context">
+<div id="ADLbrowserQueryParamsDialog" style="position: absolute;display: none; z-index: 100 ;width: 300px;height:80px;" class="vakata-context vakata-context">
 
     <div>
         <button onclick="ADLbrowser.query.onQueryParamsDialogCancel()">X</button>

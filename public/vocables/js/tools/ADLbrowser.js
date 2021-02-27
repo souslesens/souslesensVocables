@@ -151,22 +151,22 @@ var ADLbrowser = (function () {
         MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
     }
 
-    self.getRdlJstreeData = function (parent, callback) {
+    self.getRdlJstreeData = function (parent, parentType, callback) {
 
-
+        var fromStr = Sparql_common.getFromStr(Config.ADLBrowser.RDLsource)
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT distinct * from <http://data.total.com/resource/one-model/quantum-rdl/> WHERE {" +
+            "SELECT distinct * " + fromStr + " WHERE {" +
             "  ?id rdf:type ?type ." +
             "   ?id rdfs:label ?label ." +
-            "  ?id rdfs:subClassOf  ?parent. filter (?parent=<" + parent + ">)"
+            "  ?id rdfs:subClassOf  <" + parent + ">"
 
 
         var limit = Config.queryLimit;
         query += " } limit " + limit
 
         var url = Config.sources[Config.ADLBrowser.RDLsource].sparql_server.url + "?format=json&query=";
-
+        MainController.UI.message("searching...")
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.RDLsource}, function (err, result) {
             if (err) {
                 return callback(err)
@@ -180,11 +180,12 @@ var ADLbrowser = (function () {
                     id: item.id.value,
                     text: item.label.value,
                     parent: parent,
-                    data: {sourceType: "rdl", role: "sub", id: item.id.value, label: item.label.value, source: Config.ADLBrowser.RDLsource}
+                    data: {sourceType: "rdl", role: "sub", id: item.id.value, label: item.label.value, source: Config.ADLBrowser.RDLsource, type: parentType}
 
                 })
 
             })
+            MainController.UI.message("")
             return callback(null, jstreeData)
 
         })
@@ -196,7 +197,7 @@ var ADLbrowser = (function () {
             onSelectNodeRdl: function (event, obj) {
                 ADLbrowser.currentJstreeNode = obj.node;
                 if (obj.node.children.length == 0)
-                    ADLbrowser.getRdlJstreeData(obj.node.data.id, function (err, result) {
+                    ADLbrowser.getRdlJstreeData(obj.node.data.id, obj.node.data.type, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
                         common.addNodesToJstree("ADLbrowser_rdlJstreeDiv", obj.node.data.id, result)
@@ -338,23 +339,25 @@ var ADLbrowser = (function () {
             loadRdl: function (aspectNode) {
 
                 var topObjects = {
-                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": "Functional Objects",
-                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": "Physical Objects",
-                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000":"Discipline",
-                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000":"Attribute",
-                    //  "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {label: "Functional Objects", type: "http://standards.iso.org/iso/15926/part14/FunctionalObject"},
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {label: "Physical Objects", type: "http://standards.iso.org/iso/15926/part14/PhysicalObject"},
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {label: "Disciplines", type: "http://w3id.org/readi/z018-rdl/Discipline"},
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {label: "Attributes", type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"}
+
                 }
                 var topIds = Object.keys(topObjects)
                 var jstreeData = []
                 async.eachSeries(topIds, function (parentId, callbackEach) {
-                    self.getRdlJstreeData(parentId, function (err, result) {
+                    var parentType = Config.ADLBrowser.topRdlObjects[parentId].type
+                    self.getRdlJstreeData(parentId, parentType, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
                         jstreeData.push({
                             id: parentId,
-                            text: topObjects[parentId],
+                            text: topObjects[parentId].label,
                             parent: "#",
-                            data: {sourceType: "rdl", role: "sub", id: parentId, label: topObjects[parentId], source: Config.ADLBrowser.RDLsource}
+
+                            data: {sourceType: "rdl", role: "sub", id: parentId, label: Config.ADLBrowser.topRdlObjects[parentId].label, type: parentType, source: Config.ADLBrowser.RDLsource}
                         })
                         result.forEach(function (item) {
                             jstreeData.push(item)
@@ -457,6 +460,8 @@ var ADLbrowser = (function () {
         }
         ,
         getJstreeConceptsContextMenu: function (jstreeDivId) {
+
+
             // return {}
             var items = {}
             /*  if (!self.currentJstreeNode)
@@ -469,6 +474,8 @@ var ADLbrowser = (function () {
                     items.addAllNodesToGraph = {
                         label: "graph  nodes",
                         action: function (e) {// pb avec source
+                            if (!self.currentSource)
+                                return alert("select a source")
                             self.jstree.menuActions.addAllNodesToGraph(self.currentJstreeNode)
                         }
                     }
@@ -476,6 +483,8 @@ var ADLbrowser = (function () {
                 items.addFilteredNodesToGraph = {
                     label: "graph filtered nodes",
                     action: function (e, xx) {// pb avec source
+                        if (!self.currentSource)
+                            return alert("select a source")
                         self.query.showQueryParamsDialog(e.position)
 
 
@@ -534,8 +543,8 @@ var ADLbrowser = (function () {
                 fromStr +
                 "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}\n" +
                 "}"
-            var url = Config.sources[Config.ADLBrowser.RDLsource].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.RDLsource}, function (err, result) {
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -545,6 +554,9 @@ var ADLbrowser = (function () {
         },
 
         getNodeProperties: function (node, callback) {
+            if (node.data.role == "pred")
+                return [node.data.id]
+
             self.query.getAdlModel(node.data.type || node.data.id, null, function (err, result) {
                 if (err) {
                     return callback(err)
@@ -569,9 +581,11 @@ var ADLbrowser = (function () {
         showQueryParamsDialog: function (position) {
             var field = self.currentJstreeNode.id
             self.query.getNodeProperties(self.currentJstreeNode, function (err, properties) {
+                var withBlankOption = false;
+                if (properties.length > 1)
+                    withBlankOption = true;
 
-
-                common.fillSelectOptions("ADLbrowserQueryParams_property", properties, true, "propertyLabel", "property")
+                common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property")
 
                 $("#ADLbrowserQueryParamsDialog").css("left", position.x)
                 $("#ADLbrowserQueryParamsDialog").css("top", position.y)
@@ -685,7 +699,6 @@ var ADLbrowser = (function () {
 
                 var url = Config.sources[source].sparql_server.url + "?format=json&query=";
                 MainController.UI.message("searching...")
-                var result = common.copyTextToClipboard(query)
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
                     // $("#waitImg").css("display", "none");
                     if (err) {
@@ -701,14 +714,19 @@ var ADLbrowser = (function () {
                     MainController.UI.message("drawing " + data.length + "nodes...")
                     var visjsData = {nodes: [], edges: []}
                     var existingNodes = visjsGraph.getExistingIdsMap()
-                    if (!self.currentAdlTypesOnGraph)
-                        self.currentAdlTypesOnGraph = {}
+                    var isNewGraph = true
+                    if (Object.keys(existingNodes).length > 0)
+                        isNewGraph = false;
+
+
+                    var subShape = "box"
+                    if (!isNewGraph) {
+                        subShape = "dot"
+                    }
 
 
                     data.forEach(function (item) {
-                        /*   if (!self.currentAdlTypesOnGraph[item.sub.value])
-                               self.currentAdlTypesOnGraph[item.sub.value] = 0;
-                           self.currentAdlTypesOnGraph[item.sub.value] += 1*/
+
                         if (!existingNodes[item.sub.value]) {
                             existingNodes[item.sub.value] = 1
                             var color = "#ddd"
@@ -717,38 +735,39 @@ var ADLbrowser = (function () {
                             visjsData.nodes.push({
                                 id: item.sub.value,
                                 label: item.subLabel.value,
-                                shape: "dot",
+                                shape: subShape,
                                 color: color,
                                 size: self.defaultNodeSize,
                                 data: {sourceType: node.data.sourceType, role: "sub", source: self.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
 
                             })
                         }
+                        if (true || !isNewGraph) {
+                            if (!existingNodes[item.obj.value]) {
+                                existingNodes[item.obj.value] = 1
+                                var color = "#ddd"
+                                if (item.objType)
+                                    color = self.getPropertyColor(item.objType.value)
+                                visjsData.nodes.push({
+                                    id: item.obj.value,
+                                    label: item.objLabel.value,
+                                    shape: "dot",
+                                    color: color,
+                                    size: self.defaultNodeSize,
+                                    data: {sourceType: "adl", role: "sub", source: self.currentSource, type: item.objType.value, id: item.obj.value, label: item.objLabel.value}
 
-                        if (!existingNodes[item.obj.value]) {
-                            existingNodes[item.obj.value] = 1
-                            var color = "#ddd"
-                            if (item.objType)
-                                color = self.getPropertyColor(item.objType.value)
-                            visjsData.nodes.push({
-                                id: item.obj.value,
-                                label: item.objLabel.value,
-                                shape: "dot",
-                                color: color,
-                                size: self.defaultNodeSize,
-                                data: {sourceType: "adl", role: "sub", source: self.currentSource, type: item.objType.value, id: item.obj.value, label: item.objLabel.value}
+                                })
+                            }
+                            var edgeId = item.obj.value + "_" + item.sub.value
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.obj.value,
+                                    to: item.sub.value,
 
-                            })
-                        }
-                        var edgeId = item.obj.value + "_" + item.sub.value
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.obj.value,
-                                to: item.sub.value,
-
-                            })
+                                })
+                            }
                         }
 
 
@@ -804,11 +823,11 @@ var ADLbrowser = (function () {
 
 
                 async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
-                    var graphNodesRole="sub"
-                    if(node.data.role=="sub" || node.data.role=="subType")
-                        graphNodesRole="obj"
-                    if(node.data.role=="obj" || node.data.role=="objType")
-                        graphNodesRole="sub"
+                    var graphNodesRole = "sub"
+                    if (node.data.role == "sub" || node.data.role == "subType")
+                        graphNodesRole = "obj"
+                    if (node.data.role == "obj" || node.data.role == "objType")
+                        graphNodesRole = "sub"
 
                     var graphNodeFilterStr = Sparql_common.setFilter(graphNodesRole, slice)
                     execute(graphNodeFilterStr, function (err, result) {
@@ -836,374 +855,7 @@ var ADLbrowser = (function () {
                     }, 1000)
                 })
             }
-        },
-
-        drawGraphXX: function (node, filterStr) {
-
-            if (!filterStr)
-                filterStr = "";
-            if (!self.currentSource)
-                return alert("select a source")
-
-
-            var graphNodeFilterStr = ""
-            if (visjsGraph.data && visjsGraph.data.nodes) {
-                var existingNodes = visjsGraph.data.nodes.getIds();
-                var slicedGraphNodes = common.sliceArray(existingNodes, 50)
-                graphNodeFilterStr = Sparql_common.setFilter("sub", existingNodes)
-            }
-
-
-            var source;
-            var query
-            if (node.data.sourceType == "rdl") {
-                source = self.currentSource
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-
-                    "WHERE { ?obj <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?obj rdfs:label ?objLabel. ?obj rdf:type ?objType. \n" +
-                    "?sub  rdfs:label ?subLabel  .?sub rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?sub && ?rdlConceptParent=<" + node.data.id + ">)" +
-                    graphNodeFilterStr +
-
-                    " }  limit 1000"
-
-
-            }
-            if (node.data.sourceType == "adl") {
-                source = self.currentSource
-
-                var fromStr = Sparql_common.getFromStr(source)
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    fromStr +
-                    "WHERE {" +
-                    "   ?sub ?pred ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}"
-                // "filter(   ?" + node.data.role + " =<" + node.data.id + "> && regex(str(?pred),'part14'))" + filterStr +
-                if (node.data.role == "sub|obj") {
-                    query += "filter(   ?sub =<" + node.data.id + "> || ?obj=<" + node.data.id + ">)"
-                } else
-                    query += "filter(   ?" + node.data.role + " =<" + node.data.id + "> )"
-
-                query += filterStr + graphNodeFilterStr
-
-
-                query += " }  limit 1000"
-
-            }
-            if (node.data.sourceType == "oneModel") {
-                source = self.currentSource
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                    "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
-
-            }
-
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-            MainController.UI.message("searching...")
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
-                // $("#waitImg").css("display", "none");
-                if (err) {
-                    return MainController.UI.message(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
-                var data = result.results.bindings
-                if (data.length == 0) {
-                    MainController.UI.message("no data found")
-                    return $("#waitImg").css("display", "none");
-                }
-
-                MainController.UI.message("drawing " + data.length + "nodes...")
-                var visjsData = {nodes: [], edges: []}
-                var existingNodes = visjsGraph.getExistingIdsMap()
-                if (!self.currentAdlTypesOnGraph)
-                    self.currentAdlTypesOnGraph = {}
-
-
-                data.forEach(function (item) {
-                    /*   if (!self.currentAdlTypesOnGraph[item.sub.value])
-                           self.currentAdlTypesOnGraph[item.sub.value] = 0;
-                       self.currentAdlTypesOnGraph[item.sub.value] += 1*/
-                    if (!existingNodes[item.sub.value]) {
-                        existingNodes[item.sub.value] = 1
-                        var color = "#ddd"
-                        if (item.subType)
-                            color = self.getPropertyColor(item.subType.value)
-                        visjsData.nodes.push({
-                            id: item.sub.value,
-                            label: item.subLabel.value,
-                            shape: "dot",
-                            color: color,
-                            size: self.defaultNodeSize,
-                            data: {sourceType: node.data.sourceType, role: "sub", source: self.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
-
-                        })
-                    }
-
-                    if (!existingNodes[item.obj.value]) {
-                        existingNodes[item.obj.value] = 1
-                        var color = "#ddd"
-                        if (item.objType)
-                            color = self.getPropertyColor(item.objType.value)
-                        visjsData.nodes.push({
-                            id: item.obj.value,
-                            label: item.objLabel.value,
-                            shape: "dot",
-                            color: color,
-                            size: self.defaultNodeSize,
-                            data: {sourceType: "adl", role: "sub", source: self.currentSource, type: item.objType.value, id: item.obj.value, label: item.objLabel.value}
-
-                        })
-                    }
-                    var edgeId = item.obj.value + "_" + item.sub.value
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.obj.value,
-                            to: item.sub.value,
-
-                        })
-                    }
-
-
-                })
-
-                MainController.UI.message("drawing...")
-
-                if (!visjsGraph.data || !visjsGraph.data.nodes) {
-                    var options = {
-                        onclickFn: function (node, point, event) {
-                            self.currentJstreeNode = node
-                            if (event.ctrlKey)
-                                ;
-
-
-                        },
-                        onRightClickFn: function (node, point, event) {
-
-                            self.currentJstreeNode = node
-
-                            MainController.UI.showPopup(point, "graphPopupDiv")
-                            self.Graph.setGraphPopupMenus(node, event)
-                            point.x += leftPanelWidth
-                            self.Graph.lastRightClickPosition = point
-
-
-                        }
-
-                    }
-                    visjsGraph.draw("graphDiv", visjsData, options)
-                } else {
-
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
-                    visjsGraph.network.fit()
-                }
-                setTimeout(function () {
-                    MainController.UI.message("")
-                    $("#waitImg").css("display", "none");
-
-                }, data.length * 20)
-            })
-        },
-        drawGraphOld: function (node, filterStr) {
-
-            if (!filterStr)
-                filterStr = "";
-            if (!self.currentSource)
-                return alert("select a source")
-
-            var source;
-            var query
-            if (node.data.sourceType == "rdl") {
-                source = self.currentSource
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                    "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
-
-            }
-            if (node.data.sourceType == "adl") {
-                source = self.currentSource
-
-
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-                    " WHERE { ?sub ?pred ?obj. " +
-                    "OPTIONAL{?sub rdf:type ?subType} " +
-                    "OPTIONAL{?sub rdfs:label ?subLabel} " +
-                    "OPTIONAL{?obj rdf:type ?objType} " +
-                    "OPTIONAL{?obj rdf:type ?objLabel} " +
-                    "filter(   ?pred !=rdfs:label)"
-
-                if (node.data.type == "subject")
-                    query += "filter(   ?sub =<" + node.data.id + ">)"
-                if (node.data.type == "property")
-                    query += "WHERE { ?sub ?pred ?obj. filter(   ?pred =<" + node.data.id + ">)"
-                if (node.data.type == "obj")
-                    query += "WHERE { ?sub ?pred ?obj. filter(   ?obj =<" + node.data.id + ">)"
-
-                query += " }  limit 1000"
-
-            }
-            if (node.data.sourceType == "oneModel") {
-                source = self.currentSource
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                    "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
-
-            }
-
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
-                // $("#waitImg").css("display", "none");
-                if (err) {
-                    return MainController.UI.message(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
-                var data = result.results.bindings
-                if (data.length == 0)
-                    return MainController.UI.message("no data found")
-                //   $("#waitImg").css("display", "flex");
-                var visjsData = {nodes: [], edges: []}
-                var existingNodes = visjsGraph.getExistingIdsMap()
-                if (!self.currentAdlTypesOnGraph)
-                    self.currentAdlTypesOnGraph = {}
-
-
-                data.forEach(function (item) {
-                    /*   if (!self.currentAdlTypesOnGraph[item.sub.value])
-                           self.currentAdlTypesOnGraph[item.sub.value] = 0;
-                       self.currentAdlTypesOnGraph[item.sub.value] += 1*/
-                    if (!existingNodes[item.sub.value]) {
-                        existingNodes[item.sub.value] = 1
-                        var color = "#ddd"
-                        if (item.subType)
-                            color = self.getPropertyColor(item.subType.value)
-                        visjsData.nodes.push({
-                            id: item.sub.value,
-                            label: item.subLabel.value,
-                            shape: "dot",
-                            color: color,
-                            data: {source: self.currentSource, id: item.sub.value, label: item.subLabel.value}
-
-                        })
-                    }
-
-                    if (!existingNodes[item.obj.value]) {
-                        existingNodes[item.obj.value] = 1
-                        var color = "#ddd"
-                        if (item.objType)
-                            color = self.getPropertyColor(item.objType.value)
-                        visjsData.nodes.push({
-                            id: item.obj.value,
-                            label: item.objLabel.value,
-                            shape: "dot",
-                            color: color,
-                            data: {source: self.currentSource, id: item.obj.value, label: item.objLabel.value}
-
-                        })
-                    }
-                    var edgeId = item.obj.value + "_" + item.sub.value
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.obj.value,
-                            to: item.sub.value,
-                        })
-                    }
-
-
-                })
-
-                MainController.UI.message("drawing...")
-
-                if (!visjsGraph.data || !visjsGraph.data.nodes) {
-                    var options = {
-                        onclickFn: function (node, point, event) {
-                            if (event.ctrlKey)
-                                MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
-
-
-                        }
-
-                    }
-                    visjsGraph.draw("graphDiv", visjsData, options)
-                } else {
-
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
-                    visjsGraph.network.fit()
-                }
-                MainController.UI.message("")
-                $("#waitImg").css("display", "none");
-            })
         }
-        , drawExpandGraph(node) {
-            if (node.data.type == "property") {
-
-                var fromStr = Sparql_common.getFromStr(self.currentSource)
-                var graphNodes = visjsGraph.data.nodes.get();
-                var graphNodeIdsStr = ""
-                graphNodes.forEach(function (item, index) {
-                    if (index > 0)
-                        graphNodeIdsStr += ","
-                    graphNodeIdsStr += "<" + item.data.id + ">"
-                })
-
-
-                var filterStr = "filter (?pred=<" + node.data.id + "> && ?sub in (" + graphNodeIdsStr + ")) "
-
-                Sparql_INDIVIDUALS.getItems(self.currentSource, {filter: filterStr}, function (err, result) {
-                    if (err)
-                        return MainController.UI.message(err);
-
-                    var existingIds = visjsGraph.getExistingIdsMap()
-                    var visjsData = {nodes: [], edges: []}
-
-                    result.forEach(function (item) {
-                        var color = self.getPropertyColor(item.objType.value)
-
-                        if (!existingIds[item.obj.value]) {
-                            existingIds[item.obj.value] = 1
-                            visjsData.nodes.push({
-                                id: item.obj.value,
-                                label: item.objLabel.value,
-                                shape: 'dot',
-                                color: color,
-                                data: {
-                                    source: self.currentSource, id: item.obj.value,
-                                    label: item.objLabel.value
-                                }
-
-                            })
-                        }
-                        var edgeId = item.obj.value + "_" + item.sub.value
-                        if (!existingIds[edgeId]) {
-                            existingIds[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.obj.value,
-                                to: item.sub.value,
-
-                            })
-                        }
-
-                    })
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
-                    visjsGraph.network.fit()
-
-                })
-
-
-            }
-        }
-
-
     }
 
 

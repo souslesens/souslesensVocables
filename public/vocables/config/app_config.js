@@ -33,7 +33,14 @@ self.loginMode = "none";
 
     self.ADLBrowser={
         RDLsource:"RDL-QUANTUM-MIN",
-        OneModelSource : "ONE-MODEL"
+        OneModelSource : "ONE-MODEL",
+         topRdlObjects : {
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801":{label:"Functional Objects" ,type:"http://standards.iso.org/iso/15926/part14/FunctionalObject"},
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723":{label:"Physical Objects",type:"http://standards.iso.org/iso/15926/part14/PhysicalObject"},
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000":{label:"Disciplines",type:"http://w3id.org/readi/z018-rdl/Discipline"},
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {label:"Attributes" ,type:"http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"}
+
+        }
     }
 
 

@@ -5,7 +5,7 @@ var ADLbrowser = (function () {
     self.aspectsChildrenDepth = 8
     self.OneModelDictionary = {}
 
-self.defaultNodeSize=10;
+    self.defaultNodeSize = 10;
     self.getPropertyColor = function (type, palette) {
         if (!palette)
             palette = "paletteIntense"
@@ -27,7 +27,7 @@ self.defaultNodeSize=10;
             self.jstree.load.loadAdlsList();
             self.jstree.load.loadOneModel();
             //  self.loadAdlJstree()
-            self.jstree.load.loadMdm();
+            self.jstree.load.loadRdl();
             self.initOneModelDictionary()
 
             SourceBrowser.currentTargetDiv = "ADLbrowserItemsjsTreeDiv"
@@ -36,9 +36,9 @@ self.defaultNodeSize=10;
 
         }, 200)
     }
-    var schema
-    self.initOneModelDictionary = function () {
 
+    self.initOneModelDictionary = function () {
+        var schema
         async.series([
 
             function (callbackSeries) {
@@ -151,12 +151,12 @@ self.defaultNodeSize=10;
         MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
     }
 
-    self.getMdmJstreeData = function (parent, callback) {
+    self.getRdlJstreeData = function (parent, callback) {
 
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT distinct * from <http://data.total.com/resource/one-model/quantum-mdm/> WHERE {" +
+            "SELECT distinct * from <http://data.total.com/resource/one-model/quantum-rdl/> WHERE {" +
             "  ?id rdf:type ?type ." +
             "   ?id rdfs:label ?label ." +
             "  ?id rdfs:subClassOf  ?parent. filter (?parent=<" + parent + ">)"
@@ -165,9 +165,9 @@ self.defaultNodeSize=10;
         var limit = Config.queryLimit;
         query += " } limit " + limit
 
-        var url = Config.sources[Config.ADLBrowser.MDMsource].sparql_server.url + "?format=json&query=";
+        var url = Config.sources[Config.ADLBrowser.RDLsource].sparql_server.url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.MDMsource}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.RDLsource}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -180,7 +180,7 @@ self.defaultNodeSize=10;
                     id: item.id.value,
                     text: item.label.value,
                     parent: parent,
-                    data: {sourceType: "mdm", role: "sub", id: item.id.value, label: item.label.value, source: Config.ADLBrowser.MDMsource}
+                    data: {sourceType: "rdl", role: "sub", id: item.id.value, label: item.label.value, source: Config.ADLBrowser.RDLsource}
 
                 })
 
@@ -192,52 +192,41 @@ self.defaultNodeSize=10;
 
 
     self.jstree = {
-        getJstreeConceptsContextMenu: function (jstreeDivId) {
-            // return {}
-            var items = {}
-            /*  if (!self.currentJstreeNode)
-                  return
-              var type = self.currentJstreeNode.data.type;*/
-            $("#waitImg").css("display", "none");
-            MainController.UI.message("")
-            if (true || type == "") {
-                if (jstreeDivId == "ADLbrowserItemsjsTreeDiv" || jstreeDivId == "ADLbrowser_mdmJstreeDiv" || (visjsGraph.data && visjsGraph.data.nodes)) {
-                    items.addAllNodesToGraph = {
-                        label: "graph  nodes",
-                        action: function (e) {// pb avec source
-                            self.jstree.actions.addAllNodesToGraph(self.currentJstreeNode)
-                        }
-                    }
-                }
-                items.addFilteredNodesToGraph = {
-                    label: "graph filtered nodes",
-                    action: function (e, xx) {// pb avec source
-                        self.query.showQueryParamsDialog(e.position)
-
-
-                    }
-                }
-                items.nodeInfos = {
-                    label: "node infos",
-                    action: function (e, xx) {// pb avec source
-                        self.showNodeInfos()
-
-
-                    }
+        events: {
+            onSelectNodeRdl: function (event, obj) {
+                ADLbrowser.currentJstreeNode = obj.node;
+                if (obj.node.children.length == 0)
+                    ADLbrowser.getRdlJstreeData(obj.node.data.id, function (err, result) {
+                        if (err)
+                            return MainController.UI.message(err)
+                        common.addNodesToJstree("ADLbrowser_rdlJstreeDiv", obj.node.data.id, result)
+                    })
+                $("#ADLbrowser_rdlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv")
+            },
+            onSelectNodeAdlList: function (event, data) {
+                $("#ADLbrowserItemsjsTreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
+                if (data.node.parent != "#") {// after search
+                    // self.jstree.load.loadAdl(data.node)
+                    self.currentJstreeNode = data.node
+                } else {
+                    self.currentSource = data.node.id
+                    self.jstree.load.loadAdl()
                 }
 
-                /*  items.removeNodesFromGraph = {
-                      label: "remove nodes from graph",
-                      action: function (e) {// pb avec source
-                          self.jstree.actions.removeNodesFromGraph(self.currentJstreeNode)
-                      }
-                  }*/
+            },
+            onSelectNodeOneModel: function (e, obj) {
+                ADLbrowser.currentJstreeNode = obj.node;
+                $("#ADLbrowser_oneModelJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_oneModelJstreeDiv")
             }
-            return items;
+            ,
+            onSelectNodeAdl: function (e, obj) {
+                ADLbrowser.currentJstreeNode = obj.node;
+                $("#ADLbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+            }
+
         },
 
         load: {
-
             loadAdlsList: function () {
                 var jstreeData = []
                 for (var source in Config.sources) {
@@ -249,23 +238,14 @@ self.defaultNodeSize=10;
                         })
                 }
                 var options = {
-                    selectTreeNodeFn: function (event, data) {
-                        $("#ADLbrowserItemsjsTreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
-                        if (data.node.parent != "#") {// after search
-                            // self.jstree.load.loadAdl(data.node)
-                            self.currentJstreeNode = data.node
-                        } else {
-                            self.currentSource = data.node.id
-                            self.jstree.load.loadAdl()
-                        }
-
-                    },
+                    selectTreeNodeFn: self.jstree.events.onSelectNodeAdlList,
                     contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
                 }
                 common.loadJsTree("ADLbrowserItemsjsTreeDiv", jstreeData, options, function (err, result) {
 
                 })
-            },
+            }
+            ,
             loadOneModel: function () {
 
 
@@ -341,10 +321,8 @@ self.defaultNodeSize=10;
                     if (err)
                         MainController.UI.message(err)
                     var options = {
-                        selectTreeNodeFn: function (event, obj) {
-                            ADLbrowser.currentJstreeNode = obj.node;
-                            $("#ADLbrowser_oneModelJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_oneModelJstreeDiv")
-                        },
+
+                        selectTreeNodeFn: self.jstree.events.onSelectNodeOneModel,
                         contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_oneModelJstreeDiv")
 
                         ,
@@ -355,25 +333,28 @@ self.defaultNodeSize=10;
 
                     })
                 })
-            },
-            loadMdm: function (aspectNode) {
+            }
+            ,
+            loadRdl: function (aspectNode) {
 
                 var topObjects = {
-                    "http://data.total.com/resource/one-model/quantum-mdm/TOTAL-F0000000801": "Functional Objects",
-                    "http://data.total.com/resource/one-model/quantum-mdm/TOTAL-P0000001723": "physical Objects",
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": "Functional Objects",
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": "Physical Objects",
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000":"Discipline",
+                    "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000":"Attribute",
                     //  "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
                 }
                 var topIds = Object.keys(topObjects)
                 var jstreeData = []
                 async.eachSeries(topIds, function (parentId, callbackEach) {
-                    self.getMdmJstreeData(parentId, function (err, result) {
+                    self.getRdlJstreeData(parentId, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
                         jstreeData.push({
                             id: parentId,
                             text: topObjects[parentId],
                             parent: "#",
-                            data: {sourceType: "mdm", role: "sub", id: parentId, label: topObjects[parentId], source: Config.ADLBrowser.MDMsource}
+                            data: {sourceType: "rdl", role: "sub", id: parentId, label: topObjects[parentId], source: Config.ADLBrowser.RDLsource}
                         })
                         result.forEach(function (item) {
                             jstreeData.push(item)
@@ -385,26 +366,16 @@ self.defaultNodeSize=10;
                 }, function (err) {
 
                     var options = {
-                        selectTreeNodeFn: function (event, obj) {
-                            ADLbrowser.currentJstreeNode = obj.node;
-
-                            if (obj.node.children.length == 0)
-                                ADLbrowser.getMdmJstreeData(obj.node.data.id, function (err, result) {
-                                    if (err)
-                                        return MainController.UI.message(err)
-                                    common.addNodesToJstree("ADLbrowser_mdmJstreeDiv", obj.node.data.id, result)
-
-                                })
-                            $("#ADLbrowser_mdmJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_mdmJstreeDiv")
-                        },
-                        contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_mdmJstreeDiv")
+                        selectTreeNodeFn: self.jstree.events.onSelectNodeRdl,
+                        contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv")
                     }
-                    common.loadJsTree("ADLbrowser_mdmJstreeDiv", jstreeData, options)
+                    common.loadJsTree("ADLbrowser_rdlJstreeDiv", jstreeData, options)
 
                 })
 
 
-            },
+            }
+            ,
             loadAdl: function (node) {
                 if (!self.currentSource) {
                     return alert("select a source")
@@ -467,11 +438,9 @@ self.defaultNodeSize=10;
 
 
                     var options = {
-                        selectTreeNodeFn: function (event, obj) {
 
-                            ADLbrowser.currentJstreeNode = obj.node;
-                            $("#ADLbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
-                        }, openAll: true,
+                        selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
+                        openAll: true,
                         contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
 
                     }
@@ -486,7 +455,52 @@ self.defaultNodeSize=10;
             }
 
         }
-        , actions: {
+        ,
+        getJstreeConceptsContextMenu: function (jstreeDivId) {
+            // return {}
+            var items = {}
+            /*  if (!self.currentJstreeNode)
+                  return
+              var type = self.currentJstreeNode.data.type;*/
+            $("#waitImg").css("display", "none");
+            MainController.UI.message("")
+            if (true || type == "") {
+                if (jstreeDivId == "ADLbrowserItemsjsTreeDiv" || jstreeDivId == "ADLbrowser_rdlJstreeDiv" || (visjsGraph.data && visjsGraph.data.nodes)) {
+                    items.addAllNodesToGraph = {
+                        label: "graph  nodes",
+                        action: function (e) {// pb avec source
+                            self.jstree.menuActions.addAllNodesToGraph(self.currentJstreeNode)
+                        }
+                    }
+                }
+                items.addFilteredNodesToGraph = {
+                    label: "graph filtered nodes",
+                    action: function (e, xx) {// pb avec source
+                        self.query.showQueryParamsDialog(e.position)
+
+
+                    }
+                }
+                items.nodeInfos = {
+                    label: "node infos",
+                    action: function (e, xx) {// pb avec source
+                        self.showNodeInfos()
+
+
+                    }
+                }
+
+                items.removeNodesFromGraph = {
+                    label: "remove nodes from graph",
+                    action: function (e) {// pb avec source
+                        self.jstree.menuActions.removeNodesFromGraph(self.currentJstreeNode)
+                    }
+                }
+            }
+            return items;
+        }
+        ,
+        menuActions: {
             addAllNodesToGraph: function (node) {
                 MainController.UI.message("searching...")
                 $("#waitImg").css("display", "flex");
@@ -494,17 +508,14 @@ self.defaultNodeSize=10;
 
                     self.Graph.drawGraph(node)
                 }
-            },
-            addFilteredNodesToGraph: function (node, position) {
-                self.query.showQueryParamsDialog(position)
             }
-            ,
-            removeNodesFromGraph: function (node) {
+            , removeNodesFromGraph: function (node) {
 
             }
 
 
         }
+
 
     }
 
@@ -523,8 +534,8 @@ self.defaultNodeSize=10;
                 fromStr +
                 "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}\n" +
                 "}"
-            var url = Config.sources[Config.ADLBrowser.MDMsource].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.MDMsource}, function (err, result) {
+            var url = Config.sources[Config.ADLBrowser.RDLsource].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.RDLsource}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -624,19 +635,19 @@ self.defaultNodeSize=10;
             ADLbrowser.query.showQueryParamsDialog(self.Graph.lastRightClickPosition);
 
         },
-        drawGraphNew: function (node, filterStr) {
+        drawGraph: function (node, filterStr) {
 
 
             function execute(graphNodeFilterStr, callback) {
                 var source;
                 var query
-                if (node.data.sourceType == "mdm") {
+                if (node.data.sourceType == "rdl") {
                     source = self.currentSource
                     query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
+                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
 
-                        "WHERE { ?obj <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?obj rdfs:label ?objLabel. ?obj rdf:type ?objType. \n" +
-                        "?sub  rdfs:label ?subLabel  .?subConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?sub && ?mdmConceptParent=<" + node.data.id + ">)" +
+                        "WHERE { ?obj <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?obj rdfs:label ?objLabel. ?obj rdf:type ?objType. \n" +
+                        "?sub  rdfs:label ?subLabel  .?sub rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?sub && ?rdlConceptParent=<" + node.data.id + ">)" +
                         graphNodeFilterStr +
 
                         " }  limit 1000"
@@ -666,14 +677,15 @@ self.defaultNodeSize=10;
                 if (node.data.sourceType == "oneModel") {
                     source = self.currentSource
                     query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
-                        "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                        "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
+                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
+                        "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                        "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
 
                 }
 
                 var url = Config.sources[source].sparql_server.url + "?format=json&query=";
                 MainController.UI.message("searching...")
+                var result = common.copyTextToClipboard(query)
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
                     // $("#waitImg").css("display", "none");
                     if (err) {
@@ -790,24 +802,43 @@ self.defaultNodeSize=10;
                 var existingNodes = visjsGraph.data.nodes.getIds();
                 slicedGraphNodes = common.sliceArray(existingNodes, 50)
 
-            }
-            async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
-                    var graphNodeFilterStr = Sparql_common.setFilter("sub", slice)
+
+                async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
+                    var graphNodesRole="sub"
+                    if(node.data.role=="sub" || node.data.role=="subType")
+                        graphNodesRole="obj"
+                    if(node.data.role=="obj" || node.data.role=="objType")
+                        graphNodesRole="sub"
+
+                    var graphNodeFilterStr = Sparql_common.setFilter(graphNodesRole, slice)
                     execute(graphNodeFilterStr, function (err, result) {
                         if (err)
                             return callbackEach(err)
                         return callbackEach()
                     })
 
-                },
-                setTimeout(function () {
-                    MainController.UI.message("")
+                }, function (err) {
                     $("#waitImg").css("display", "none");
+                    if (err)
+                        return MainController.UI.message(err)
+                    setTimeout(function () {
+                        MainController.UI.message("")
+                    }, 1000)
+                })
 
-                }, 1000))
+            } else {
+                execute(graphNodeFilterStr, function (err, result) {
+                    $("#waitImg").css("display", "none");
+                    if (err)
+                        return MainController.UI.message(err)
+                    setTimeout(function () {
+                        MainController.UI.message("")
+                    }, 1000)
+                })
+            }
         },
 
-        drawGraph: function (node, filterStr) {
+        drawGraphXX: function (node, filterStr) {
 
             if (!filterStr)
                 filterStr = "";
@@ -818,20 +849,20 @@ self.defaultNodeSize=10;
             var graphNodeFilterStr = ""
             if (visjsGraph.data && visjsGraph.data.nodes) {
                 var existingNodes = visjsGraph.data.nodes.getIds();
-                var slicedGraphNodes=common.sliceArray(existingNodes,50)
+                var slicedGraphNodes = common.sliceArray(existingNodes, 50)
                 graphNodeFilterStr = Sparql_common.setFilter("sub", existingNodes)
             }
 
 
             var source;
             var query
-            if (node.data.sourceType == "mdm") {
+            if (node.data.sourceType == "rdl") {
                 source = self.currentSource
                 query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
 
-                    "WHERE { ?obj <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?obj rdfs:label ?objLabel. ?obj rdf:type ?objType. \n" +
-                    "?sub  rdfs:label ?subLabel  .?subConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?sub && ?mdmConceptParent=<" + node.data.id + ">)" +
+                    "WHERE { ?obj <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?obj rdfs:label ?objLabel. ?obj rdf:type ?objType. \n" +
+                    "?sub  rdfs:label ?subLabel  .?sub rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?sub && ?rdlConceptParent=<" + node.data.id + ">)" +
                     graphNodeFilterStr +
 
                     " }  limit 1000"
@@ -846,13 +877,13 @@ self.defaultNodeSize=10;
                     fromStr +
                     "WHERE {" +
                     "   ?sub ?pred ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}"
-                   // "filter(   ?" + node.data.role + " =<" + node.data.id + "> && regex(str(?pred),'part14'))" + filterStr +
-                    if(node.data.role=="sub|obj"){
-                        query +="filter(   ?sub =<" + node.data.id + "> || ?obj=<" + node.data.id + ">)"
-                    }else
-                        query +="filter(   ?" + node.data.role + " =<" + node.data.id + "> )"
+                // "filter(   ?" + node.data.role + " =<" + node.data.id + "> && regex(str(?pred),'part14'))" + filterStr +
+                if (node.data.role == "sub|obj") {
+                    query += "filter(   ?sub =<" + node.data.id + "> || ?obj=<" + node.data.id + ">)"
+                } else
+                    query += "filter(   ?" + node.data.role + " =<" + node.data.id + "> )"
 
-                          query +=filterStr +  graphNodeFilterStr
+                query += filterStr + graphNodeFilterStr
 
 
                 query += " }  limit 1000"
@@ -861,9 +892,9 @@ self.defaultNodeSize=10;
             if (node.data.sourceType == "oneModel") {
                 source = self.currentSource
                 query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
-                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                    "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
+                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                    "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
 
             }
 
@@ -902,7 +933,7 @@ self.defaultNodeSize=10;
                             label: item.subLabel.value,
                             shape: "dot",
                             color: color,
-                            size:self.defaultNodeSize,
+                            size: self.defaultNodeSize,
                             data: {sourceType: node.data.sourceType, role: "sub", source: self.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
 
                         })
@@ -918,7 +949,7 @@ self.defaultNodeSize=10;
                             label: item.objLabel.value,
                             shape: "dot",
                             color: color,
-                            size:self.defaultNodeSize,
+                            size: self.defaultNodeSize,
                             data: {sourceType: "adl", role: "sub", source: self.currentSource, type: item.objType.value, id: item.obj.value, label: item.objLabel.value}
 
                         })
@@ -984,12 +1015,12 @@ self.defaultNodeSize=10;
 
             var source;
             var query
-            if (node.data.sourceType == "mdm") {
+            if (node.data.sourceType == "rdl") {
                 source = self.currentSource
                 query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
-                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                    "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
+                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                    "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
 
             }
             if (node.data.sourceType == "adl") {
@@ -997,7 +1028,7 @@ self.defaultNodeSize=10;
 
 
                 query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
                     " WHERE { ?sub ?pred ?obj. " +
                     "OPTIONAL{?sub rdf:type ?subType} " +
                     "OPTIONAL{?sub rdfs:label ?subLabel} " +
@@ -1018,9 +1049,9 @@ self.defaultNodeSize=10;
             if (node.data.sourceType == "oneModel") {
                 source = self.currentSource
                 query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-mdm/>\n" +
-                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalMdmUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
-                    "?mdmConcept  rdfs:label ?mdmConceptLabel  .?mdmConcept rdfs:subClassOf* ?mdmConceptParent.filter(   ?totalUri =?mdmConcept && ?mdmConceptParent=<" + node.data.id + ">) }  limit 1000"
+                    "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
+                    "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                    "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
 
             }
 
@@ -1179,4 +1210,5 @@ self.defaultNodeSize=10;
     return self;
 
 
-})()
+})
+()

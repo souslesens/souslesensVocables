@@ -473,9 +473,9 @@
     "color": "#bcbd22"
   },
 
-  "MDM-QUANTUM-MIN": {
+  "RDL-QUANTUM-MIN": {
     "graphUri":  [
-      "http://data.total.com/resource/one-model/quantum-mdm/"
+      "http://data.total.com/resource/one-model/quantum-rdl/"
     ],
 
 

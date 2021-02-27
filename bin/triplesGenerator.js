@@ -18,9 +18,9 @@ var idsCache = {}
 
 
 var originalADLproperty = "http://data.total.com/resource/one-model#originalIdOf"
-var totalMdmIdProperty = "http://data.total.com/resource/one-model#hasTotalMdmId"
-var totalMdmIdProperty = "http://data.total.com/resource/one-model#hasTotalMdmUri"
-var totalMdmUriPrefix = "http://data.total.com/resource/one-model/quantum-mdm/"
+var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId"
+var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri"
+var totalRdlUriPrefix = "http://data.total.com/resource/one-model/quantum-rdl/"
 var triplesGenerator = {
 
     getJsonModel: function (filePath, callback) {
@@ -89,8 +89,14 @@ var triplesGenerator = {
                     var objectSuffix = ""
                     // if(util.isInt(objectValue))
                     if (objectValue.indexOf("TOTAL-") == 0) {
-                        objectValue = totalMdmUriPrefix + objectValue
-                        triples.push({subject: subjectUri, predicate: totalMdmIdProperty, object: "<" + objectValue + ">"})
+                        var objectValueUri = totalRdlUriPrefix + objectValue
+                        triples.push({subject: subjectUri, predicate: totalRdlIdProperty, object: "<" + objectValueUri + ">"})
+                        var labelValue = options.rdlDictonary[objectValueUri];
+                        if (!labelValue)
+                          ;//  triples.push({subject: objectValueUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + objectValue + "'"})
+                        else
+                            triples.push({subject: objectValueUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + util.formatStringForTriple(labelValue )+ "'"})
+
 
                     }
 
@@ -99,7 +105,7 @@ var triplesGenerator = {
 
                     } else {
                         if (mapping.predicate == "http://www.w3.org/2000/01/rdf-schema#label")
-                            objectValue = "'" + objectValue + "'"
+                            objectValue = "'" + util.formatStringForTriple(objectValue) + "'"
                         else if (!isNaN(objectValue)) {
                             objectSuffix = "^^xsd:integer"
                             objectValue = "'" + objectValue + "'" + objectSuffix;
@@ -144,6 +150,7 @@ var triplesGenerator = {
         var allTriples = [];
         var allSheetsdata = {}
         var mappings
+        var rdlDictonary = {}
 
 
         async.series([
@@ -167,6 +174,28 @@ var triplesGenerator = {
 
                     })
                 },
+
+                // load RDL dictionary
+                function (callbackSeries) {
+
+                    var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "select ?sub ?subLabel  from <" + options.rdlGraphUri + "> where {" +
+                        "  ?sub rdfs:label ?subLabel ." +
+                        "} "
+                    var params = {query: query}
+                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+
+                        result.results.bindings.forEach(function (item) {
+                            rdlDictonary[item.sub.value] = item.subLabel.value
+                        })
+
+                        callbackSeries(err);
+
+                    })
+                },
+
 
                 function (callbackSeries) {
 
@@ -211,7 +240,7 @@ var triplesGenerator = {
 
                         if (options.getExistingUriMappings)
                             options.labelUrisMap = labelUrisMap;
-
+                        options.rdlDictonary = rdlDictonary
                         triplesGenerator.generateSheetDataTriples(mappings.mappings, data, uriPrefix, options, function (err, result) {
                             if (err)
                                 return callbackProcessor(err)
@@ -256,7 +285,10 @@ var triplesGenerator = {
                                 })
 
                             }, function (err) {
-                                return callback(null)
+                                if( err){
+                                    callbackProcessor(err)
+                                }
+                                return callbackProcessor(null)
                             })
 
                         })
@@ -566,17 +598,18 @@ var triplesGenerator = {
 
     }
 
-    , generateMdmTriples: function () {
+    , generateRdlTriples: function () {
         var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\mainObjects.txt"
         var json = util.csvToJson(filePath)
         var str = ""
-        var graphUri = "http://data.total.com/resource/one-model/quantum-mdm/"
+        var graphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
         var str = ""
         var typesMap = {
-            "pickList": "http://w3id.org/readi/rdl/D101001535",
+
             "attribute": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
             "physicalObject": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-            "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+            "discipline": "http://w3id.org/readi/z018-rdl/Discipline"
         }
 
 
@@ -764,7 +797,8 @@ if (false) {
 if (true) {
     var sqlParams = {
         dbName: "clov",
-        query: " select * from breakdown ",
+     //   query: " select * from breakdown ",
+        query: "select * from view_adl_tagmodelattribute",
         fetchSize: 1000
     }
 
@@ -776,16 +810,18 @@ if (true) {
         output: "ntTriples",
         getExistingUriMappings: uriPrefix,
         sparqlServerUrl: "http://51.178.139.80:8890/sparql",
+        rdlGraphUri: "http://data.total.com/resource/one-model/quantum-rdl/",
         replaceGraph: false
     }
 
 
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdownLabels.json"
+   // var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdownLabels.json"
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\ClovMappings.json"
     triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
 
     })
 }
 
 if (false) {
-    triplesGenerator.generateMdmTriples()
+    triplesGenerator.generateRdlTriples()
 }

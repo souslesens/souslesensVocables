@@ -32,7 +32,7 @@ self.loginMode = "none";
     self.ADLMappings={currentOntology:"ONE-MODEL"}
 
     self.ADLBrowser={
-        MDMsource:"MDM-QUANTUM-MIN",
+        RDLsource:"RDL-QUANTUM-MIN",
         OneModelSource : "ONE-MODEL"
     }
 

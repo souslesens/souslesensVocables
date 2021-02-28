@@ -23,6 +23,8 @@ var ADLmappings = (function () {
         self.sampleData = {}
         var constraintsMap = {}
         var allObjectsMap = {}
+
+        var dbName = "turbogenerator"
         //  self.currentMappingsMap={type:"",joins:[],relations:[] }
         self.currentMappingsMap = null;
         self.init = function () {
@@ -495,7 +497,7 @@ var ADLmappings = (function () {
         }
         self.Data = {
             loadADL_SQLModel: function () {
-                var dbName = "clov"
+
 
                 $.ajax({
                     type: "POST",

@@ -1,0 +1,69 @@
+{
+  "mappings": [
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#Tag"
+    },
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_ServiceDescription"
+    },
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_ValidationStatus"
+    },
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_Status"
+    },
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_CMMSRequired"
+    },
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "view_tag_attributes.tag_TagNumber"
+    },
+    {
+      "subject": "view_tag_attributes.tag_FunctionalClassID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+    },
+    {
+      "subject": "view_tag_attributes.tag_attribute_AttributeID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+    },
+    {
+      "subject": "view_tag_attributes.tag_attribute_AttributeID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_attribute_Attributes"
+    },
+    {
+      "subject": "view_tag_attributes.tag_attribute_AttributeID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_attribute_UnitOfMeasureID"
+    },
+    {
+      "subject": "view_tag_attributes.tag_attribute_AttributeID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_attribute_Status"
+    },
+    {
+      "subject": "view_tag_attributes.tag_attribute_AttributeID",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "view_tag_attributes.tag_attribute_Source"
+    },
+    {
+      "subject": "view_tag_attributes.tag_ID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+      "object": "view_tag_attributes.tag_FunctionalClassID"
+    }
+  ]
+}

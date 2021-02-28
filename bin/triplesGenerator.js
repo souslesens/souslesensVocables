@@ -101,7 +101,7 @@ var triplesGenerator = {
                     }
 
                     if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
-                        triples.push({subject: subjectUri, predicate: mapping.object, object: "'" + objectValue + "'"})
+                        triples.push({subject: subjectUri, predicate: mapping.object, object: "'" +  util.formatStringForTriple(objectValue) + "'"})
 
                     } else {
                         if (mapping.predicate == "http://www.w3.org/2000/01/rdf-schema#label")
@@ -655,6 +655,38 @@ var triplesGenerator = {
 
     }
 
+    ,formatTurboGenTags:function(){
+
+        var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\tagAttributeD.txt"
+        var json = util.csvToJson(filePath)
+     //   var cols=["ID","TagNumber","FunctionalClassID","ServiceDescription","ValidationStatus","Status","CMMSRequired"]
+        var cols=["ID","TagId","TAG_ref","Tag","AttributeID","Attributes","UnitOfMeasureID","Status","Source"]
+       // ID	TAG_Ref	Tag	TagID		Attributes	AttributeID	AttributeValue	UnitOfMeasureID	Status	Source
+      //  ID	Tag_ID	TAG_Ref	Tag	AttributesID	Attributes	UnitOfMeasureID	Status	Source
+        var str=""
+        cols.forEach(function(col,colIndex){
+            if(colIndex>0)
+                str+="\t"
+                str+=col
+            })
+        str+="\n"
+
+        json.forEach(function(item,index){
+            cols.forEach(function(col,colIndex){
+                if(colIndex>0)
+                    str+="\t"
+                str+=item[col] || ""
+            })
+            str+="\n"
+
+
+        })
+        console.log(str);
+
+
+
+    }
+
 
 }
 
@@ -795,7 +827,7 @@ if (false) {
 
 }
 
-if (true) {
+if (false) {
     var sqlParams = {
         dbName: "clov",
      //   query: " select * from breakdown ",
@@ -812,7 +844,7 @@ if (true) {
         getExistingUriMappings: uriPrefix,
         sparqlServerUrl: "http://51.178.139.80:8890/sparql",
         rdlGraphUri: "http://data.total.com/resource/one-model/quantum-rdl/",
-        replaceGraph: false
+        replaceGraph: true
     }
 
 
@@ -823,6 +855,40 @@ if (true) {
     })
 }
 
+if (true) {
+    var sqlParams = {
+        dbName: "turbogenerator",
+        //   query: " select * from breakdown ",
+      //  query: "select * from view_tag_attributes",
+        query: "select * from breakdown",
+        fetchSize: 1000
+    }
+
+    var uriPrefix = "http://data.total.com/resource/one-model/assets/turbogenerator/"
+
+
+    var options = {
+        generateIds: 15,
+        output: "ntTriples",
+        getExistingUriMappings: uriPrefix,
+        sparqlServerUrl: "http://51.178.139.80:8890/sparql",
+        rdlGraphUri: "http://data.total.com/resource/one-model/quantum-rdl/",
+        replaceGraph: false
+    }
+
+
+    // var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdownLabels.json"
+//    var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\TurboGenTagAttrMappings.json"
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\breakdowns.json"
+    triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
+
+    })
+}
+
 if (false) {
     triplesGenerator.generateRdlTriples()
+}
+
+if (false) {
+    triplesGenerator.formatTurboGenTags()
 }

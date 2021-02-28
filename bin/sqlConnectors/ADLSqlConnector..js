@@ -110,9 +110,9 @@ var ADLSqlConnector = {
 
 
 
-    processFetchedData:function(dbName,query,fetchSize, processor,callback){
+    processFetchedData:function(dbName,query,fetchSize,startOffset, processor,callback){
 
-        var offset = 0
+        var offset = startOffset
         var length = 1
         var allResults = []
         async.whilst(

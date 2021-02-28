@@ -296,7 +296,7 @@ var triplesGenerator = {
                     }
 
 
-                    sqlConnector.processFetchedData(sqlParams.dbName, sqlParams.query, sqlParams.fetchSize, processor, function (err, result) {
+                    sqlConnector.processFetchedData(sqlParams.dbName, sqlParams.query, sqlParams.fetchSize,(options.startOffset ||0), processor, function (err, result) {
                         if (err)
                             return callbackSeries(err);
 
@@ -780,6 +780,7 @@ if (false) {
     var options = {
         generateIds: 15,
         output: "ntTriples",
+        startOffset:138500,
         getExistingUriMappings: uriPrefix,
         sparqlServerUrl: "http://51.178.139.80:8890/sparql",
         replaceGraph: true

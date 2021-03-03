@@ -25,6 +25,7 @@ var ADLmappings = (function () {
         var allObjectsMap = {}
 
         var dbName = "turbogenerator"
+        var dbName = "clov"
         //  self.currentMappingsMap={type:"",joins:[],relations:[] }
         self.currentMappingsMap = null;
         self.init = function () {

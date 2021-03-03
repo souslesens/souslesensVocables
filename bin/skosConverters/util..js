@@ -29,7 +29,7 @@ var util = {
     formatStringForTriple: function (str, forUri) {
         if (!str || !str.replace)
             return null;
-
+        str=str.trim()
         str = str.replace(/\\/gm, "")
         str = str.replace(/"/gm, "\\\"")
        // str = str.replace(/;/gm, "\\\;")
@@ -148,12 +148,13 @@ var util = {
     }
     ,
 
+
     isInt: function (value) {
-        return /-?[0-9]+/.test("" + value);
+        return /^-?[0-9]+$/.test("" + value);
 
     },
     isFloat: function (value) {
-        return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
+        return /^-?[0-9]+[.,]+[0-9]?$/.test("" + value);
 
     },
 

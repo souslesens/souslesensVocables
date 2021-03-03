@@ -211,6 +211,11 @@ var common = (function () {
                         options.onMoveNodeFn(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance);
                         self.setTreeAppearance()
                     }
+
+                })
+                .on("show_contextmenu",function(node,x,y){
+                    if(options.onShowContextMenu)
+                        options.onShowContextMenu(node,x,y)
                 });
 
 

@@ -19,7 +19,7 @@ var ADLSqlConnector = {
         host: "localhost",
         user: "root",
         password: "vi0lon",
-        database: 'turbogenerator'
+        database: 'clov'
     },
 
     queries: {

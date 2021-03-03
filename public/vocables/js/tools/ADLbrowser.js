@@ -370,7 +370,8 @@ var ADLbrowser = (function () {
 
                     var options = {
                         selectTreeNodeFn: self.jstree.events.onSelectNodeRdl,
-                        contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv")
+                        contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv"),
+
                     }
                     common.loadJsTree("ADLbrowser_rdlJstreeDiv", jstreeData, options)
 
@@ -469,6 +470,8 @@ var ADLbrowser = (function () {
               var type = self.currentJstreeNode.data.type;*/
             $("#waitImg").css("display", "none");
             MainController.UI.message("")
+            if(jstreeDivId && $(jstreeDivId).jstree(true))
+            self.currentJstreeNode=$(jstreeDivId).jstree(true).get_selected(true)
             if (true || type == "") {
                 if (jstreeDivId == "ADLbrowserItemsjsTreeDiv" || jstreeDivId == "ADLbrowser_rdlJstreeDiv" || (visjsGraph.data && visjsGraph.data.nodes)) {
                     items.addAllNodesToGraph = {
@@ -539,9 +542,9 @@ var ADLbrowser = (function () {
             var filterStr = "";
             if (subjectType)
                 filterStr = "filter (?subType=<" + subjectType + "> ) "
-            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?prop ?subType ?objType\n" +
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?prop ?subType ?objType" +
                 fromStr +
-                "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}\n" +
+                "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}" +
                 "}"
             var url = Config.sources[source].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
@@ -584,7 +587,7 @@ var ADLbrowser = (function () {
                 var withBlankOption = false;
                 if (properties.length > 1)
                     withBlankOption = true;
-
+                $("#ADLbrowserQueryParams_type").html(self.currentJstreeNode.data.label)
                 common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property")
 
                 $("#ADLbrowserQueryParamsDialog").css("left", position.x)
@@ -602,13 +605,19 @@ var ADLbrowser = (function () {
                 var adlNodeObj = $("#ADLbrowser_adlJstreeDiv").jstree(true).get_node()
                 $("#ADLbrowserQueryParamsDialog").css("display", "none")
                 var filterStr = "";
+                var numberOperators=("<",">","<=",">=")
                 if (property) {
                     if (value) {
                         if (operator == "contains")
                             filterStr = " ?obj <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
+                            else if(numberOperators.indexOf(operator)>-1)
+                            filterStr = " ?obj <" + property + "> ?x. filter ( xsd:float(?x)"+ operator + value +") "
+
                         else
                             filterStr = " ?obj <" + property + "> ?x. filter (?x " + operator + value + ") "
                     } else {
+
+
                         filterStr = "  ?obj <" + property + "> ?x. "
                     }
 
@@ -657,13 +666,18 @@ var ADLbrowser = (function () {
                 var query
                 if (node.data.sourceType == "rdl") {
                     source = self.currentSource
-                    query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-
-                        "WHERE { ?obj <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?obj rdfs:label ?objLabel. ?obj rdf:type ?objType. \n" +
-                        "?sub  rdfs:label ?subLabel  .?sub rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?sub && ?rdlConceptParent=<" + node.data.id + ">)" +
-                        graphNodeFilterStr +
-
+                    var fromStrAdl = Sparql_common.getFromStr(source)
+                    var fromStrRdl = Sparql_common.getFromStr(Config.ADLBrowser.RDLsource)
+                    query = "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "SELECT distinct * "+fromStrAdl+fromStrRdl+" WHERE {" +
+                        filterStr +
+                        "  ?obj rdfs:subClassOf ?sub." +
+                        "  ?obj rdfs:label ?objLabel." +
+                        "  ?sub rdfs:label ?subLabel." +
+                        "  ?obj rdf:type ?objType." +
+                        "   ?sub rdf:type ?subType."+
                         " }  limit 1000"
 
 
@@ -672,7 +686,7 @@ var ADLbrowser = (function () {
                     source = self.currentSource
 
                     var fromStr = Sparql_common.getFromStr(source)
-                    query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
+                    query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * " +
                         fromStr +
                         "WHERE {" +
                         "   ?sub ?pred ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}"
@@ -690,9 +704,9 @@ var ADLbrowser = (function () {
                 }
                 if (node.data.sourceType == "oneModel") {
                     source = self.currentSource
-                    query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * \n" +
-                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>\n" +
-                        "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. \n" +
+                    query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * " +
+                        "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>" +
+                        "WHERE { ?adlConcept <http://data.total.com/resource/one-model#hasTotalRdlUri>  ?totalUri. ?adlConcept rdfs:label ?adlConceptLabel. ?adlConcept rdf:type ?adlType. " +
                         "?rdlConcept  rdfs:label ?rdlConceptLabel  .?rdlConcept rdfs:subClassOf* ?rdlConceptParent.filter(   ?totalUri =?rdlConcept && ?rdlConceptParent=<" + node.data.id + ">) }  limit 1000"
 
                 }
@@ -708,7 +722,8 @@ var ADLbrowser = (function () {
                     var data = result.results.bindings
                     if (data.length == 0) {
                         MainController.UI.message("no data found")
-                        return $("#waitImg").css("display", "none");
+                         $("#waitImg").css("display", "none");
+                        return callback()
                     }
 
                     MainController.UI.message("drawing " + data.length + "nodes...")
@@ -719,30 +734,31 @@ var ADLbrowser = (function () {
                         isNewGraph = false;
 
 
-                    var subShape = "box"
+                    var subShape = "square"
                     if (!isNewGraph) {
                         subShape = "dot"
                     }
 
 
                     data.forEach(function (item) {
+                        if ( !isNewGraph || node.data.role.indexOf("sub")==0) {
+                            if (!existingNodes[item.sub.value]) {
+                                existingNodes[item.sub.value] = 1
+                                var color = "#ddd"
+                                if (item.subType)
+                                    color = self.getPropertyColor(item.subType.value)
+                                visjsData.nodes.push({
+                                    id: item.sub.value,
+                                    label: item.subLabel.value,
+                                    shape: subShape,
+                                    color: color,
+                                    size: self.defaultNodeSize,
+                                    data: {sourceType: node.data.sourceType, role: "sub", source: self.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
 
-                        if (!existingNodes[item.sub.value]) {
-                            existingNodes[item.sub.value] = 1
-                            var color = "#ddd"
-                            if (item.subType)
-                                color = self.getPropertyColor(item.subType.value)
-                            visjsData.nodes.push({
-                                id: item.sub.value,
-                                label: item.subLabel.value,
-                                shape: subShape,
-                                color: color,
-                                size: self.defaultNodeSize,
-                                data: {sourceType: node.data.sourceType, role: "sub", source: self.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
-
-                            })
+                                })
+                            }
                         }
-                        if (true || !isNewGraph) {
+                        if ( node.data.sourceType=="rdl" || !isNewGraph  ||  node.data.role.indexOf("obj")==0) {
                             if (!existingNodes[item.obj.value]) {
                                 existingNodes[item.obj.value] = 1
                                 var color = "#ddd"
@@ -758,6 +774,8 @@ var ADLbrowser = (function () {
 
                                 })
                             }
+                        }
+                        if (  node.data.sourceType=="rdl" || !isNewGraph ) {
                             var edgeId = item.obj.value + "_" + item.sub.value
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1

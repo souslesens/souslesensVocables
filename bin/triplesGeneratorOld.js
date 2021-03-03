@@ -44,27 +44,6 @@ var triplesGenerator = {
         var missingTotalSubjects = []
         var missingTotalObjects = []
 
-        function getUriFromValue(value) {
-            var uri = idsMap[value]
-            if (!uri) {
-
-                if (value && value.indexOf("TOTAL-") == 0) {
-
-                    uri = totalRdlUriPrefix + value
-                    idsMap[value] = uri;
-                    var subjectLabel = options.rdlDictonary[uri];
-                    if (!subjectLabel)
-                        missingTotalSubjects.push(value)
-                    else
-                        triples.push({subject: uri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + util.formatStringForTriple(subjectLabel) + "'"})
-                } else {
-                    uri = uriPrefix + util.getRandomHexaId(options.generateIds)
-                    idsMap[value] = uri
-                    triples.push({subject: uri, predicate: originalADLproperty, object: "'" + util.formatStringForTriple(value) + "'"})
-                }
-            }
-            return uri;
-        }
 
         data.forEach(function (item, index) {
             mappings.forEach(function (mapping, index) {
@@ -76,29 +55,73 @@ var triplesGenerator = {
                     return;
                 subjectValue = subjectValue.trim()
 
-                var subjectUri = getUriFromValue(subjectValue)
+                var subjectUri
 
+                if (subjectValue && subjectValue.indexOf("TOTAL-") == 0) {
+                    var subjectUri = totalRdlUriPrefix + subjectValue
+                    var subjectLabel = options.rdlDictonary[subjectUri];
+                    if (!subjectLabel)
+                        missingTotalSubjects.push(subjectValue)
+                    else
+                        triples.push({subject: subjectUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + util.formatStringForTriple(subjectLabel) + "'"})
+
+                    ///    var subjectUri = options.rdlDictonary[subjectUri];
+
+                } else if (idsMap && idsMap[subjectValue]) {
+                    subjectUri = idsMap[subjectValue];
+                }
+
+
+                if (!subjectUri && options.generateIds) {
+                    var newUri = false
+                    if (!idsMap[subjectValue]) {
+                        idsMap[subjectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
+                        triples.push({subject: idsMap[subjectValue], predicate: originalADLproperty, object: "'" + util.formatStringForTriple(subjectValue) + "'"})
+                        newUri = true
+                    }
+                    subjectUri = idsMap[subjectValue]
+                    /*   if (newUri)
+                           options.labelUrisMap[subjectValue] = subjectUri;
+                       triples.push({subject: subjectUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + subjectValue + "'"})*/
+
+                }
 
                 if (!subjectUri)
-                    return;
+                    var x = 3
 
 
                 var objectValue;
                 var objectSuffix = ""
+
                 var objectValue = item[mapping.object]
 
                 if (objectValue)
                     objectValue = objectValue.trim()
 
 
+
+
                 if (objectValue && objectValue.indexOf("TOTAL-") == 0) {
-                    var totalUri = getUriFromValue(objectValue)
-                    triples.push({subject: subjectUri, predicate: mapping.predicate, object: totalUri})
+
+
+                    var objectValueUri = totalRdlUriPrefix + objectValue
+
+                    var labelValue = options.rdlDictonary[objectValueUri];
+                    if (!labelValue)
+                        missingTotalObjects.push(objectValue)
+                    else {
+                        triples.push({subject: subjectUri, predicate: totalRdlIdProperty, object: "<" + objectValueUri + ">"})
+                        /*    triples.push({subject: objectValueUri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + util.formatStringForTriple(labelValue) + "'"})
+                            if (mapping.predicate != "http://www.w3.org/2000/01/rdf-schema#label")
+                                triples.push({subject: subjectUri, predicate: mapping.predicate, object: objectValueUri})
+                            if (mapping.object.indexOf("http") == 0)
+                                triples.push({subject: subjectUri, predicate: mapping.predicate, object: mapping.object})*/
+                    }
+
+
                 } else if (mapping.object.indexOf("http") == 0) {
 
                     triples.push({subject: subjectUri, predicate: mapping.predicate, object: mapping.object})
-
-
                 } else {
 
                     if (!objectValue)
@@ -268,7 +291,7 @@ var triplesGenerator = {
                             var slicedTriples = util.sliceArray(result.triples, 1000)
 
                             async.eachSeries(slicedTriples, function (triples, callbackEach) {
-                                //    return callbackEach();
+                            //    return callbackEach();
                                 var triplesStr = ""
                                 triples.forEach(function (triple) {
                                     var value = triple.object
@@ -566,7 +589,7 @@ var triplesGenerator = {
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            " select ?term ?oneModelId  FROM <" + graphUri + ">   WHERE " +
+            " select distinct ?term ?oneModelId  FROM <" + graphUri + ">   WHERE " +
             "{?term <" + originalADLproperty + "> ?oneModelId"
 
         query += "} limit " + fetchLimit + " "
@@ -597,7 +620,6 @@ var triplesGenerator = {
                     offset += result.results.bindings.length
                     resultSize = result.results.bindings.length
 
-                    console.log( "existing ids retrieved "+offset)
 
                     result.results.bindings.forEach(function (item) {
                         labelUrisMap[item.oneModelId.value] = item.term.value
@@ -712,7 +734,7 @@ if (false) {
     var sqlParams = {
         dbName: "turbogenerator",
         //   query: " select * from breakdown ",
-        query: "select * from model",
+        query: "select * from view_tag_attributes",
         query: "select * from breakdown",
         fetchSize: 1000
     }
@@ -742,12 +764,12 @@ if (true) {
     var sqlParams = {
         dbName: "clov",
         //   query: " select * from breakdown ",
-        query: "select * from model_attribute",
+        query: "select * from view_adl_tagmodelattribute",
         //  query: "select * from breakdown",
         fetchSize: 1000
     }
 
-    var uriPrefix = "http://data.total.com/resource/one-model/assets/clov/"
+    var uriPrefix = "http://data.total.com/resource/one-model/assets/clov2/"
 
 
     var options = {
@@ -760,7 +782,7 @@ if (true) {
     }
 
 
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\clov\\modelAttributeMapping.json"
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\ClovMappings.json"
     //  var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\TurboGenTagAttrMappings.json"
     //  var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\breakdowns.json"
     triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {

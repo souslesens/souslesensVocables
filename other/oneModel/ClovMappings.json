@@ -35,16 +35,7 @@
       "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
       "object": "view_adl_tagmodelattribute.tag_TagNumber"
     },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "view_adl_tagmodelattribute.tag_TagNumber"
-    },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "view_adl_tagmodelattribute.tag_TagNumber"
-    },
+
     {
       "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -80,11 +71,7 @@
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
       "object": "view_adl_tagmodelattribute.model_attribute_UnitOfMeasureID"
     },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_attribute_ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "view_adl_tagmodelattribute.tag_attribute_AttributeID"
-    },
+
     {
       "subject": "view_adl_tagmodelattribute.model_ID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -122,20 +109,11 @@
     },
 
     {
-      "subject": "view_adl_tagmodelattribute.model_attribute_ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "view_adl_tagmodelattribute.model_attribute_AttributeID"
-    },
-    {
       "subject": "view_adl_tagmodelattribute.tag_FunctionalClassID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
-    {
-      "subject": "view_adl_tagmodelattribute.tag_FunctionalClassID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "view_adl_tagmodelattribute.tag_FunctionalClassID"
-    },
+
     {
       "subject": "view_adl_tagmodelattribute.model_PhysicalClassID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",

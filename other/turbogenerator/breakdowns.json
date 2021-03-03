@@ -25,6 +25,11 @@
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://data.total.com/resource/one-model/ontology#Tag"
     },
+
+
+
+
+
     {
       "subject": "breakdown.FunctionalClass1",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -115,6 +120,33 @@
       "subject": "breakdown.TAG5",
       "predicate": "http://standards.iso.org/iso/15926/part14/represents",
       "object": "http://data.total.com/resource/one-model/ontology#FunctionalClass5"
+    },
+
+
+    {
+      "subject": "breakdown.FunctionalClass1",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "breakdown.FunctionalClass1"
+    },
+    {
+      "subject": "breakdown.FunctionalClass2",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "breakdown.FunctionalClass2"
+    },
+    {
+      "subject": "breakdown.FunctionalClass3",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "breakdown.FunctionalClass3"
+    },
+    {
+      "subject": "breakdown.FunctionalClass4",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "breakdown.FunctionalClass4"
+    },
+    {
+      "subject": "breakdown.FunctionalClass5",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "breakdown.FunctionalClass5"
     }
   ]
 }

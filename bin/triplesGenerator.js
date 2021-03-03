@@ -39,19 +39,19 @@ var triplesGenerator = {
 
 
         var triples = [];
-        var idsMap = options.labelUrisMap
+        var existingUrisMap = options.existingUrisMap
         var dataArray = []
         var missingTotalSubjects = []
         var missingTotalObjects = []
 
         function getUriFromValue(value) {
-            var uri = idsMap[value]
+            var uri = existingUrisMap[value]
             if (!uri) {
 
                 if (value && value.indexOf("TOTAL-") == 0) {
 
                     uri = totalRdlUriPrefix + value
-                    idsMap[value] = uri;
+                    existingUrisMap[value] = uri;
                     var subjectLabel = options.rdlDictonary[uri];
                     if (!subjectLabel)
                         missingTotalSubjects.push(value)
@@ -59,7 +59,7 @@ var triplesGenerator = {
                         triples.push({subject: uri, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + util.formatStringForTriple(subjectLabel) + "'"})
                 } else {
                     uri = uriPrefix + util.getRandomHexaId(options.generateIds)
-                    idsMap[value] = uri
+                    existingUrisMap[value] = uri
                     triples.push({subject: uri, predicate: originalADLproperty, object: "'" + util.formatStringForTriple(value) + "'"})
                 }
             }
@@ -119,18 +119,18 @@ var triplesGenerator = {
                             objectValue = "'" + util.formatStringForTriple(objectValue) + "'"
 
                         } else {
-                            if (idsMap && idsMap[objectValue]) {
-                                objectValue = idsMap[objectValue];
+                            if (existingUrisMap && existingUrisMap[objectValue]) {
+                                objectValue = existingUrisMap[objectValue];
                             }
                             if (!objectValue && options.generateIds) {
                                 var newUri = false
-                                if (!idsMap[objectValue]) {
-                                    idsMap[objectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
-                                    triples.push({subject: idsMap[objectValue], predicate: originalADLproperty, object: "'" + objectValue + "'"})
+                                if (!existingUrisMap[objectValue]) {
+                                    existingUrisMap[objectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
+                                    triples.push({subject: existingUrisMap[objectValue], predicate: originalADLproperty, object: "'" + objectValue + "'"})
 
                                     newUri = true
                                 }
-                                var objectValue = idsMap[objectValue]
+                                var objectValue = existingUrisMap[objectValue]
 
                             }
                         }
@@ -146,7 +146,7 @@ var triplesGenerator = {
 
         console.log("missing TOTAL subject IDs " + JSON.stringify(missingTotalSubjects));
         console.log("missing TOTAL objects IDs " + JSON.stringify(missingTotalObjects));
-        callback(null, {triples: triples, urisMap: options.labelUrisMap})
+        callback(null, {triples: triples, urisMap: options.existingUrisMap})
 
 
     },
@@ -154,14 +154,15 @@ var triplesGenerator = {
     generateAdlSqlTriples: function (mappingsPath, uriPrefix, sqlParams, options, callback) {
         if (!options)
             options = {}
-        var labelUrisMap = {}
+        var existingUrisMap = {}
         var mappingSheets = []
         var dataArray = [];
         var allTriples = [];
         var allSheetsdata = {}
         var mappings
         var rdlDictonary = {}
-        var rdlInverseDictonary = {}
+        var rdlInverseDictonary = {};
+        var sqlTable = "";
 
 
         async.series([
@@ -212,12 +213,11 @@ var triplesGenerator = {
 
                 function (callbackSeries) {
 
-                    if (!options.getExistingUriMappings)
-                        return callbackSeries();
+                  
                     triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, options.getExistingUriMappings, null, function (err, result) {
                         if (err)
                             return callbackSeries(err)
-                        labelUrisMap = result;
+                        existingUrisMap = result;
                         callbackSeries();
                     })
                 }
@@ -225,10 +225,18 @@ var triplesGenerator = {
                 , function (callbackSeries) {
                     mappings = JSON.parse(fs.readFileSync(mappingsPath));
                     mappings.mappings.forEach(function (mapping) {
-                        if (mapping.subject.indexOf("http") < 0)
-                            mapping.subject = mapping.subject.split(".")[1]
-                        if (mapping.object.indexOf("http") < 0)
-                            mapping.object = mapping.object.split(".")[1]
+                        if (mapping.subject.indexOf("http") < 0) {
+                            var array = mapping.subject.split(".")
+                            mapping.subject = array[1]
+                            if (!sqlTable)
+                                sqlTable = array[0]
+                        }
+                        if (mapping.object.indexOf("http") < 0) {
+                            var array = mapping.object.split(".")
+                            mapping.object = array[1]
+                            if (!sqlTable)
+                                sqlTable = array[0]
+                        }
                     })
 
                     mappings.mappings.sort(function (a, b) {
@@ -251,8 +259,8 @@ var triplesGenerator = {
 
                     var processor = function (data, callbackProcessor) {
 
-                        if (options.getExistingUriMappings)
-                            options.labelUrisMap = labelUrisMap;
+
+                            options.existingUrisMap = existingUrisMap;
                         options.rdlDictonary = rdlDictonary
                         options.rdlInverseDictonary = rdlInverseDictonary
                         triplesGenerator.generateSheetDataTriples(mappings.mappings, data, uriPrefix, options, function (err, result) {
@@ -260,7 +268,7 @@ var triplesGenerator = {
                                 return callbackProcessor(err)
 
                             for (var key in result.urisMap) {
-                                labelUrisMap[key] = result.urisMap[key]
+                                existingUrisMap[key] = result.urisMap[key]
                             }
 
                             // create new  triples in graph
@@ -310,8 +318,8 @@ var triplesGenerator = {
 
                     }
 
-
-                    sqlConnector.processFetchedData(sqlParams.dbName, sqlParams.query, sqlParams.fetchSize, (options.startOffset || 0), processor, function (err, result) {
+                    var sqlQuery = "select * from  " + sqlTable + " ";
+                    sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), processor, function (err, result) {
                         if (err)
                             return callbackSeries(err);
 
@@ -326,7 +334,7 @@ var triplesGenerator = {
             ]
 
             , function (err) {
-                console.log("ALL DONE")
+                return callback(err)
 
             })
 
@@ -337,7 +345,7 @@ var triplesGenerator = {
     generateXlsxBookTriples: function (mappings, source, uriPrefix, options, callback) {
         if (!options)
             options = {}
-        var labelUrisMap = {}
+        var existingUrisMap = {}
         var mappingSheets = []
         var dataArray = [];
         var allTriples = [];
@@ -347,12 +355,11 @@ var triplesGenerator = {
 
                 // laod existing mappings
                 function (callbackSeries) {
-                    if (!options.getExistingUriMappings)
-                        return callbackSeries();
-                    triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, options.getExistingUriMappings, null, function (err, result) {
+
+                    triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, graphUri, null, function (err, result) {
                         if (err)
                             return callbackSeries(err)
-                        labelUrisMap = result;
+                        existingUrisMap = result;
                         callbackSeries();
                     })
                 },
@@ -512,8 +519,8 @@ var triplesGenerator = {
                 , function (callbackSeries) {
 
                     mappingSheets.forEach(function (sheet) {
-                        if (options.getExistingUriMappings)
-                            options.labelUrisMap = labelUrisMap;
+
+                        options.existingUrisMap = existingUrisMap;
 
                         triplesGenerator.generateSheetDataTriples(mappings.mappings, dataArray, uriPrefix, options, function (err, result) {
                             if (err)
@@ -573,7 +580,7 @@ var triplesGenerator = {
 
         var offset = 0
         var resultSize = 1
-        var labelUrisMap = {}
+        var existingUrisMap = {}
         async.whilst(
             function (callbackTest) {//test
                 var w = resultSize > 0;
@@ -597,10 +604,10 @@ var triplesGenerator = {
                     offset += result.results.bindings.length
                     resultSize = result.results.bindings.length
 
-                    console.log( "existing ids retrieved "+offset)
+                    console.log("existing ids retrieved " + offset)
 
                     result.results.bindings.forEach(function (item) {
-                        labelUrisMap[item.oneModelId.value] = item.term.value
+                        existingUrisMap[item.oneModelId.value] = item.term.value
 
                     })
                     callbackWhilst();
@@ -608,12 +615,40 @@ var triplesGenerator = {
 
 
             }, function (err) {
-                return callbackX(err, labelUrisMap)
+                return callbackX(err, existingUrisMap)
 
             })
 
-    }
+    },
 
+    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri,dbConnection, callback) {
+
+        sqlConnector.connection = dbConnection;
+        var count = 0;
+        async.eachSeries(mappingFileNames, function (mappingFile, callbackEach) {
+
+            var mappingPath = mappingsDirPath + mappingFile
+            var replaceGraph =false;// ((count++) == 0)
+
+            var options = {
+                generateIds: 15,
+                sparqlServerUrl: sparqlServerUrl,
+                rdlGraphUri: rdlGraphUri,
+                replaceGraph: replaceGraph
+            }
+
+            console.log("creating triples for mapping " + mappingPath)
+            triplesGenerator.generateAdlSqlTriples(mappingPath, graphUri, dbConnection, options, function (err, result) {
+                return callbackEach(err)
+            })
+
+
+        }, function (err) {
+            callback(err)
+        })
+
+
+    }
     , generateRdlTriples: function () {
         var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\mainObjectsMISSING.txt"
         var json = util.csvToJson(filePath)
@@ -738,33 +773,66 @@ if (false) {
     })
 }
 
-if (true) {
-    var sqlParams = {
-        dbName: "clov",
-        //   query: " select * from breakdown ",
-        query: "select * from tag2tag",
-        //  query: "select * from breakdown",
-        fetchSize: 1000
+if (false) {// buildClov
+
+
+    var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\clov\\"
+    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+    var rdlGraphUri= "http://data.total.com/resource/one-model/quantum-rdl/"
+    var adlGraphUri = "http://data.total.com/resource/one-model/assets/clov/"
+    var mappingFileNames = [
+      //  "tagMapping.json",
+      //  "tagAttributeMapping.json",
+        "tag2ModelMapping.json",
+        "modelMapping.json",
+        "modelAttributeMapping.json",
+        "tag2tagMapping.json",
+    ]
+
+
+    var dbConnection = {
+        host: "localhost",
+        user: "root",
+        password: "vi0lon",
+        database: 'clov',
+        fetchSize:5000,
     }
+    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri,dbConnection, function (err, result) {
+        if (err)
+            return console.log(err);
+        return console.log("ALL DONE");
+    })
+}
 
-    var uriPrefix = "http://data.total.com/resource/one-model/assets/clov/"
+if (true) {// turbogen
 
 
-    var options = {
-        generateIds: 15,
-        output: "ntTriples",
-        getExistingUriMappings: uriPrefix,
-        sparqlServerUrl: "http://51.178.139.80:8890/sparql",
-        rdlGraphUri: "http://data.total.com/resource/one-model/quantum-rdl/",
-        replaceGraph: false
+    var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
+    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+    var rdlGraphUri= "http://data.total.com/resource/one-model/quantum-rdl/"
+    var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
+    var mappingFileNames = [
+        "breakdowns.json"
+        /*  "tagMapping.json",
+          "tagAttributeMapping.json",
+        "tag2ModelMapping.json",
+        "modelMapping.json",
+        "modelAttributeMapping.json",
+        "tag2tagMapping.json",*/
+    ]
+
+
+    var dbConnection = {
+        host: "localhost",
+        user: "root",
+        password: "vi0lon",
+        database: 'turbogenerator',
+        fetchSize:5000,
     }
-
-
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\clov\\tag2tagMapping.json"
-    //  var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\TurboGenTagAttrMappings.json"
-    //  var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\breakdowns.json"
-    triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
-
+    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri,dbConnection, function (err, result) {
+        if (err)
+            return console.log(err);
+        return console.log("ALL DONE");
     })
 }
 

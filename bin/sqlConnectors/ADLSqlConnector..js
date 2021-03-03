@@ -19,7 +19,7 @@ var ADLSqlConnector = {
         host: "localhost",
         user: "root",
         password: "vi0lon",
-        database: 'clov'
+
     },
 
     queries: {
@@ -102,6 +102,7 @@ var ADLSqlConnector = {
     },
 
     getData:function(dbName,query,callback) {
+        ADLSqlConnector.connection.database=dbName
         mysql.exec(ADLSqlConnector.connection, query, function (err, result) {
             return callback(err, result)
 
@@ -126,9 +127,11 @@ var ADLSqlConnector = {
            var query2 =query +" limit "+fetchSize+ " offset " + offset
                 offset += fetchSize;
                 console.log("processed lines: "+offset)
+                ADLSqlConnector.connection.database=dbName
                 ADLSqlConnector.getData(dbName,query2,function (err, result) {
                     if (err) {
-                        console.log(params.query)
+                        console.log("error "+err)
+                        console.log(query2)
                         return callbackWhilst(err);
                     }
                     length = result.length
@@ -168,6 +171,7 @@ var ADLSqlConnector = {
         var query="SELECT TABLE_NAME ,COLUMN_NAME\n" +
             "  FROM INFORMATION_SCHEMA.COLUMNS\n" +
             "  WHERE TABLE_SCHEMA = '"+dbName+"'"
+        ADLSqlConnector.connection.database=dbName
         mysql.exec(ADLSqlConnector.connection,query,function(err, result){
             if(err)
                 return callback(err)

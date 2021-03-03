@@ -24,8 +24,8 @@ var ADLmappings = (function () {
         var constraintsMap = {}
         var allObjectsMap = {}
 
-        var dbName = "turbogenerator"
-        var dbName = "clov"
+        var dbName;
+
         //  self.currentMappingsMap={type:"",joins:[],relations:[] }
         self.currentMappingsMap = null;
         self.init = function () {
@@ -40,7 +40,13 @@ var ADLmappings = (function () {
 
         self.onLoaded = function () {
 
-            $("#actionDivContolPanelDiv").html(" <button onclick=\"ADLmappings.Data.loadXlsModel()\">open Xls Model</button>" +
+          /*  $("#actionDivContolPanelDiv").html(" <button onclick=\"ADLmappings.Data.loadXlsModel()\">open Xls Model</button>" +*/
+
+            $("#actionDivContolPanelDiv").html("ADL database<select id=\"ADLmappings_DatabaseSelect\">\n" +
+                "                <option></option>\n" +
+                "                <option>clov</option>\n" +
+                "                <option>turbogenerator</option>\n" +
+                "                </select>  "+
                 " <button onclick=\"ADLmappings.Data.loadADL_SQLModel()\">load ADL Model</button>");
             $("#actionDiv").html(" <div id=\"ADLmappings_dataModelTree\"  style=\"width:400px\"></div>");
             $("#accordion").accordion("option", {active: 2});
@@ -499,6 +505,9 @@ var ADLmappings = (function () {
         self.Data = {
             loadADL_SQLModel: function () {
 
+                dbName=$("#ADLmappings_DatabaseSelect").val()
+                if(dbName=="")
+                    return alert("select a ADL database")
 
                 $.ajax({
                     type: "POST",
@@ -803,7 +812,6 @@ var ADLmappings = (function () {
                 mappings: [],
                 //  sheetJoinColumns: self.sheetJoinColumns,
             };
-
 
             var nodes = common.getjsTreeNodes("ADLmappings_dataModelTree")
 

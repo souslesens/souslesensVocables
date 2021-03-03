@@ -1,0 +1,19 @@
+{
+  "mappings": [
+    {
+      "subject": "tag2tag.PrimaryTagID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#Tag"
+    },
+    {
+      "subject": "tag2tag.LinkTagID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#Tag"
+    },
+    {
+      "subject": "tag2tag.PrimaryTagID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+      "object": "tag2tag.LinkTagID"
+    }
+  ]
+}

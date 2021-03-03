@@ -392,14 +392,17 @@ var ADLbrowser = (function () {
                     var typesArray = []
 
                     result.forEach(function (item) {
+                        if(!item.objType)
+                            return;
                         if (typesArray.indexOf(item.subType.value) < 0)
                             typesArray.push(item.subType.value)
 
-                        var subId=item.subType.value
-                        var propId=item.subType.value+"_"+item.prop.value;
-                        var objId=null;
-                        if(item.objType)
-                        objId=item.subType.value+"_"+item.prop.value+"_"+item.objType.value;
+
+                        var subId = item.subType.value
+                        var propId = item.subType.value + "_" + item.prop.value;
+                        var objId = null;
+                        if (item.objType)
+                            objId = item.subType.value + "_" + item.prop.value + "_" + item.objType.value;
 
 
                         if (item.subType) {
@@ -440,7 +443,7 @@ var ADLbrowser = (function () {
                                 label = item.objType.value
                             var color = self.getPropertyColor(item.objType.value)
                             jstreeData.push({
-                                id:objId,
+                                id: objId,
                                 text: "<span style='color:" + color + "'>" + label + "</span>",
                                 parent: propId,
                                 data: {sourceType: "adl", role: "objType", source: self.currentSource, id: item.objType.value, label: self.OneModelDictionary[item.objType.value]}
@@ -479,25 +482,35 @@ var ADLbrowser = (function () {
               var type = self.currentJstreeNode.data.type;*/
             $("#waitImg").css("display", "none");
             MainController.UI.message("")
-            if(jstreeDivId && $(jstreeDivId).jstree(true))
-            self.currentJstreeNode=$(jstreeDivId).jstree(true).get_selected(true)
+            if (jstreeDivId && $(jstreeDivId).jstree(true))
+                self.currentJstreeNode = $(jstreeDivId).jstree(true).get_selected(true)
             if (true || type == "") {
-                if (jstreeDivId == "ADLbrowserItemsjsTreeDiv" || jstreeDivId == "ADLbrowser_rdlJstreeDiv" || (visjsGraph.data && visjsGraph.data.nodes)) {
-                    items.addAllNodesToGraph = {
-                        label: "graph  nodes",
-                        action: function (e) {// pb avec source
-                            if (!self.currentSource)
-                                return alert("select a source")
-                            self.jstree.menuActions.addAllNodesToGraph(self.currentJstreeNode)
-                        }
-                    }
-                }
+                /* if (jstreeDivId == "ADLbrowserItemsjsTreeDiv" || jstreeDivId == "ADLbrowser_rdlJstreeDiv" || (visjsGraph.data && visjsGraph.data.nodes)) {
+                      items.addAllNodesToGraph = {
+                          label: "graph  nodes",
+                          action: function (e) {// pb avec source
+                              if (!self.currentSource)
+                                  return alert("select a source")
+                              self.jstree.menuActions.addAllNodesToGraph(self.currentJstreeNode)
+                          }
+                      }
+                  }*/
                 items.addFilteredNodesToGraph = {
                     label: "graph filtered nodes",
                     action: function (e, xx) {// pb avec source
                         if (!self.currentSource)
                             return alert("select a source")
-                        self.query.showQueryParamsDialog(e.position)
+                        self.query.showQueryParamsDialog(e.position, "graph")
+
+
+                    }
+                }
+                items.addFilteredNodesToQuery = {
+                    label: "add to query",
+                    action: function (e, xx) {// pb avec source
+                        if (!self.currentSource)
+                            return alert("select a source")
+                        self.query.showQueryParamsDialog(e.position, "query")
 
 
                     }
@@ -590,8 +603,9 @@ var ADLbrowser = (function () {
 
             })
         },
-        showQueryParamsDialog: function (position) {
+        showQueryParamsDialog: function (position, mode) {
             var field = self.currentJstreeNode.id
+            self.currentMode = mode
             self.query.getNodeProperties(self.currentJstreeNode, function (err, properties) {
                 var withBlankOption = false;
                 if (properties.length > 1)
@@ -614,13 +628,13 @@ var ADLbrowser = (function () {
                 var adlNodeObj = $("#ADLbrowser_adlJstreeDiv").jstree(true).get_node()
                 $("#ADLbrowserQueryParamsDialog").css("display", "none")
                 var filterStr = "";
-                var numberOperators=("<",">","<=",">=")
+                var numberOperators = ("<", ">", "<=", ">=")
                 if (property) {
                     if (value) {
                         if (operator == "contains")
                             filterStr = " ?obj <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
-                            else if(numberOperators.indexOf(operator)>-1)
-                            filterStr = " ?obj <" + property + "> ?x. filter ( xsd:float(?x)"+ operator + value +") "
+                        else if (numberOperators.indexOf(operator) > -1)
+                            filterStr = " ?obj <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
 
                         else
                             filterStr = " ?obj <" + property + "> ?x. filter (?x " + operator + value + ") "
@@ -632,9 +646,12 @@ var ADLbrowser = (function () {
 
 
                 }
-
-                self.Graph.drawGraph(self.currentJstreeNode, filterStr)
+                if (self.currentMode == "graph")
+                    self.Graph.drawGraph(self.currentJstreeNode, filterStr)
+                else if (self.currentMode == "query")
+                    self.query.addToQuery(self.currentJstreeNode, filterStr)
             }
+
 
         ,
         onQueryParamsDialogCancel: function () {
@@ -642,7 +659,76 @@ var ADLbrowser = (function () {
             $("#ADLbrowserQueryParamsDialog").css("display", "none")
 
 
+        },
+
+
+        addToQuery: function (node, prop) {
+
+
+            var isNewTree = $("#ADLbrowser_queryTreeDiv").is(':empty');
+            var existingNodes = []
+            if (!isNewTree)
+                existingNodes = common.getjsTreeNodes("ADLbrowser_queryTreeDiv", true)
+            var jstreeData = [];
+
+            if (existingNodes.indexOf(node.data.id) < 0) {
+                jstreeData.push({
+                    id: node.data.id,
+                    text: node.data.label,
+                    parent: '#',
+                    data: {
+                        type: "Class",
+                        id: node.data.id,
+                        label: node.data.label,
+
+
+                    }
+                })
+                if (!isNewTree) {
+
+                    common.addNodesToJstree("ADLbrowser_queryTreeDiv", "#", jstreeData)
+                    jstreeData = []
+                }
+
+
+            }
+
+                if (false && existingNodes.indexOf(prop.id) < 0) {
+
+                    jstreeData.push({
+                        id: prop.id,
+                        text: prop.label,
+                        parent: ADLquery.currentNode.id,
+                        data: {
+                            label: prop.label,
+                            propId: prop.id,
+                            type: "DataProperty",
+                            parent: ADLquery.currentNode.id,
+                            range: ADLquery.currentNode.properties[prop.id].range,
+                            existsInRemoteSource: prop.existsInRemoteSource
+                        }
+                    })
+                }
+
+            if (isNewTree) {
+                var jsTreeOptions = {};
+            /*    jsTreeOptions.contextMenu = ADLquery.getJstreeConceptsContextMenu()
+                jsTreeOptions.selectTreeNodeFn = ADLquery.selectTreeNodeFn;*/
+                //  jsTreeOptions.onCheckNodeFn = ADLquery.checkTreeNodeFn;
+                //  jsTreeOptions.withCheckboxes=true
+
+                common.loadJsTree("ADLbrowser_queryTreeDiv", jstreeData, jsTreeOptions)
+            } else {
+                common.addNodesToJstree("ADLbrowser_queryTreeDiv",node.data.id, jstreeData)
+            }
         }
+        ,clear(){
+            self.currentQuery=[]
+
+        },
+        execute:function(){
+
+    },
     }
 
     self.Graph = {
@@ -680,13 +766,13 @@ var ADLbrowser = (function () {
                     query = "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                        "SELECT distinct * "+fromStrAdl+fromStrRdl+" WHERE {" +
+                        "SELECT distinct * " + fromStrAdl + fromStrRdl + " WHERE {" +
                         filterStr +
                         "  ?obj rdfs:subClassOf ?sub." +
                         "  ?obj rdfs:label ?objLabel." +
                         "  ?sub rdfs:label ?subLabel." +
                         "  ?obj rdf:type ?objType." +
-                        "   ?sub rdf:type ?subType."+
+                        "   ?sub rdf:type ?subType." +
                         " }  limit 1000"
 
 
@@ -731,7 +817,7 @@ var ADLbrowser = (function () {
                     var data = result.results.bindings
                     if (data.length == 0) {
                         MainController.UI.message("no data found")
-                         $("#waitImg").css("display", "none");
+                        $("#waitImg").css("display", "none");
                         return callback()
                     }
 
@@ -750,7 +836,7 @@ var ADLbrowser = (function () {
 
 
                     data.forEach(function (item) {
-                        if ( !isNewGraph || node.data.role.indexOf("sub")==0) {
+                        if (!isNewGraph || node.data.role.indexOf("sub") == 0) {
                             if (!existingNodes[item.sub.value]) {
                                 existingNodes[item.sub.value] = 1
                                 var color = "#ddd"
@@ -767,7 +853,7 @@ var ADLbrowser = (function () {
                                 })
                             }
                         }
-                        if ( node.data.sourceType=="rdl" || !isNewGraph  ||  node.data.role.indexOf("obj")==0) {
+                        if (node.data.sourceType == "rdl" || !isNewGraph || node.data.role.indexOf("obj") == 0) {
                             if (!existingNodes[item.obj.value]) {
                                 existingNodes[item.obj.value] = 1
                                 var color = "#ddd"
@@ -784,7 +870,7 @@ var ADLbrowser = (function () {
                                 })
                             }
                         }
-                        if (  node.data.sourceType=="rdl" || !isNewGraph ) {
+                        if (node.data.sourceType == "rdl" || !isNewGraph) {
                             var edgeId = item.obj.value + "_" + item.sub.value
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1

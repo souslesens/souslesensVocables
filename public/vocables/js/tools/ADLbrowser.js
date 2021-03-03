@@ -394,46 +394,55 @@ var ADLbrowser = (function () {
                     result.forEach(function (item) {
                         if (typesArray.indexOf(item.subType.value) < 0)
                             typesArray.push(item.subType.value)
+
+                        var subId=item.subType.value
+                        var propId=item.subType.value+"_"+item.prop.value;
+                        var objId=null;
+                        if(item.objType)
+                        objId=item.subType.value+"_"+item.prop.value+"_"+item.objType.value;
+
+
                         if (item.subType) {
                             var label = self.OneModelDictionary[item.subType.value]
                             if (!label)
                                 label = item.subType.value
                             var color = self.getPropertyColor(item.subType.value)
-                            if (!existingNodes["sub_" + item.subType.value]) {
-                                existingNodes["sub_" + item.subType.value] = 1
+                            if (!existingNodes[subId]) {
+
+                                existingNodes[subId] = 1
                                 jstreeData.push({
-                                    id: "sub_" + item.subType.value,
+                                    id: subId,
                                     text: "<span style='color:" + color + "'>" + label + "</span>",
                                     parent: "#",
                                     data: {sourceType: "adl", role: "subType", source: self.currentSource, id: item.subType.value, label: label}
                                 })
                             }
                         }
-                        if (!existingNodes["prop_" + item.prop.value]) {
-                            var label = self.OneModelDictionary[item.prop.value]
+                        if (!existingNodes[propId]) {
+                            var label = self.OneModelDictionary[propId]
                             if (!label)
                                 label = item.prop.value
-                            existingNodes["prop_" + item.prop.value] = 1
+                            existingNodes[propId] = 1
                             jstreeData.push({
-                                id: "prop_" + item.prop.value,
+                                id: propId,
                                 text: label,
-                                parent: "sub_" + item.subType.value,
+                                parent: subId,
                                 data: {sourceType: "adl", role: "pred", source: self.currentSource, id: item.prop.value, label: label}
                             })
                         }
-                        if (item.objType && !existingNodes["obj_" + item.objType.value]) {
+                        if (objId && !existingNodes[objId]) {
                             if (typesArray.indexOf(item.objType.value) < 0)
                                 typesArray.push(item.objType.value)
 
-                            existingNodes["obj_" + item.objType.value] = 1
+                            existingNodes[objId] = 1
                             var label = self.OneModelDictionary[item.objType.value]
                             if (!label)
                                 label = item.objType.value
                             var color = self.getPropertyColor(item.objType.value)
                             jstreeData.push({
-                                id: "obj_" + item.objType.value,
+                                id:objId,
                                 text: "<span style='color:" + color + "'>" + label + "</span>",
-                                parent: "prop_" + item.prop.value,
+                                parent: propId,
                                 data: {sourceType: "adl", role: "objType", source: self.currentSource, id: item.objType.value, label: self.OneModelDictionary[item.objType.value]}
                             })
                         }

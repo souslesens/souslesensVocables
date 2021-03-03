@@ -742,7 +742,7 @@ if (true) {
     var sqlParams = {
         dbName: "clov",
         //   query: " select * from breakdown ",
-        query: "select * from model_attribute",
+        query: "select * from tag2tag",
         //  query: "select * from breakdown",
         fetchSize: 1000
     }
@@ -760,7 +760,7 @@ if (true) {
     }
 
 
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\clov\\modelAttributeMapping.json"
+    var mappings = "D:\\GitHub\\souslesensVocables\\other\\clov\\tag2tagMapping.json"
     //  var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\TurboGenTagAttrMappings.json"
     //  var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\breakdowns.json"
     triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {

@@ -26,26 +26,7 @@ var util = {
 
 
     },
-    formatStringForTriple: function (str, forUri) {
-        if (!str || !str.replace)
-            return null;
-        str=str.trim()
-        str = str.replace(/\\/gm, "")
-        str = str.replace(/"/gm, "\\\"")
-       // str = str.replace(/;/gm, "\\\;")
-      //  str = str.replace(/\n/gm, "\\\\n")
-        str = str.replace(/\n/gm, "\\\\n")
-      //  str = str.replace(/\r/gm, "\\\\r")
-        str = str.replace(/\r/gm, "")
-        str = str.replace(/\t/gm, "\\\\t")
-        str = str.replace(/\\xa0/gm, " ")
-        str = str.replace(/'/gm, "\\\'")
-        if (forUri)
-            str = str.replace(/ /gm, "_")
 
-
-        return str;
-    },
 
 
 

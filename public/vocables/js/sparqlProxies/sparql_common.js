@@ -149,24 +149,20 @@ var Sparql_common = (function () {
         return fromStr;
     }
 
-    self.formatString = function (str, forUri) {
+    self.formatStringForTriple= function (str, forUri) {
         if (!str || !str.replace)
             return null;
-
-        str = str.replace(/&/gm, "and")
-        str = str.replace(/'/gm, " ")
+        str=str.trim()
         str = str.replace(/\\/gm, "")
-        //  str = str.replace(//gm, ".")
-        //  str = str.replace(/\r/gm, "")
-        //  str = str.replace(/\t/gm, " ")
-        // str = str.replace(/\(/gm, "-")
-        //  str = str.replace(/\)/gm, "-")
+        str = str.replace(/"/gm, "\\\"")
+        // str = str.replace(/;/gm, "\\\;")
+        //  str = str.replace(/\n/gm, "\\\\n")
+        str = str.replace(/\n/gm, "\\\\n")
+        //  str = str.replace(/\r/gm, "\\\\r")
+        str = str.replace(/\r/gm, "")
+        str = str.replace(/\t/gm, "\\\\t")
         str = str.replace(/\\xa0/gm, " ")
-
-
-        return unescape(encodeURIComponent(str));
-
-
+        str = str.replace(/'/gm, "\\\'")
         if (forUri)
             str = str.replace(/ /gm, "_")
 

@@ -6,11 +6,6 @@
       "object": "http://data.total.com/resource/one-model/ontology#Tag"
     },
     {
-      "subject": "breakdown.uri1",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/System"
-    },
-    {
       "subject": "breakdown.tagId2",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://data.total.com/resource/one-model/ontology#Tag"
@@ -30,25 +25,31 @@
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://data.total.com/resource/one-model/ontology#Tag"
     },
+
+    {
+      "subject": "breakdown.uri1",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+    },
     {
       "subject": "breakdown.uri2",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/System"
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
       "subject": "breakdown.uri3",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/System"
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
       "subject": "breakdown.uri4",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/System"
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
       "subject": "breakdown.uri5",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/System"
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
       "subject": "breakdown.uri1",

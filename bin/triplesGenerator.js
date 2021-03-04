@@ -812,13 +812,13 @@ if (true) {// turbogen
     var rdlGraphUri= "http://data.total.com/resource/one-model/quantum-rdl/"
     var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
     var mappingFileNames = [
-        "breakdowns.json"
-        /*  "tagMapping.json",
+      //  "breakdowns.json"
+          "tagMapping.json",
           "tagAttributeMapping.json",
         "tag2ModelMapping.json",
         "modelMapping.json",
         "modelAttributeMapping.json",
-        "tag2tagMapping.json",*/
+        "tag2tagMapping.json",
     ]
 
 

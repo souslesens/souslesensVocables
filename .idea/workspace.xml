@@ -2,20 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/modelAttributeMapping.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/modelMapping.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/tag2ModelMapping.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/tag2tagMapping.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/tagAttributeMapping.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/tagMapping.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -87,7 +78,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.triplesGenerator.js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
@@ -160,7 +151,9 @@
       <workItem from="1614012116927" duration="58472000" />
       <workItem from="1614166790836" duration="14401000" />
       <workItem from="1614235043143" duration="1769000" />
-      <workItem from="1614239044959" duration="159627000" />
+      <workItem from="1614239044959" duration="162412000" />
+      <workItem from="1614839107857" duration="161000" />
+      <workItem from="1614839275149" duration="904000" />
     </task>
     <servers />
   </component>
@@ -231,19 +224,16 @@
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/triplesGenerator.js</url>
           <line>35</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="300" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/triplesGenerator.js</url>
           <line>82</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="317" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/triplesGenerator.js</url>
           <line>800</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="340" />
         </line-breakpoint>
       </breakpoints>

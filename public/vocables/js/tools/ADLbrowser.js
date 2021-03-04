@@ -1,5 +1,6 @@
 var ADLbrowser = (function () {
 
+
     var self = {}
     var typeColors = []
     self.aspectsChildrenDepth = 8
@@ -633,6 +634,8 @@ var ADLbrowser = (function () {
                     if (value) {
                         if (operator == "contains")
                             filterStr = " ?obj <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
+                       else if (operator == "not contains")
+                            filterStr = " ?obj <" + property + "> ?x. filter regex(?x, '^((?!" + value + ").)*$','i') "
                         else if (numberOperators.indexOf(operator) > -1)
                             filterStr = " ?obj <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
 
@@ -878,6 +881,7 @@ var ADLbrowser = (function () {
                                     id: edgeId,
                                     from: item.obj.value,
                                     to: item.sub.value,
+                                    color:"#ccc"
 
                                 })
                             }
@@ -954,7 +958,7 @@ var ADLbrowser = (function () {
                     if (err)
                         return MainController.UI.message(err)
                     setTimeout(function () {
-                        MainController.UI.message("")
+                     ///   MainController.UI.message("")
                     }, 1000)
                 })
 

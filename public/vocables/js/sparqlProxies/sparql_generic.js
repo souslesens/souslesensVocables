@@ -552,8 +552,7 @@ var Sparql_generic = (function () {
                 _fields = [_fields];
             _fields.forEach(function (_field) {
                 bindings.forEach(function (item) {
-                    if (!item["range"])
-                        var x = 3
+
 
                     for (var i = 0; i < 20; i++) {
                         if (i == 5)

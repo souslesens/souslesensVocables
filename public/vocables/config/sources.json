@@ -363,7 +363,7 @@
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
     "ADLqueryController": "RDF",
-    "schemaType": "OWLXXX",
+    "schemaType": "OWL",
     "schema": null,
     "color": "#e377c2"
   },

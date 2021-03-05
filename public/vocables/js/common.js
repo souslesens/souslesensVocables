@@ -62,9 +62,9 @@ var common = (function () {
 
         }
 
-        self.getjsTreeNodes = function (jstreeDiv, IdsOnly,parentNodeId) {
-            if(!parentNodeId)
-                parentNodeId="#"
+        self.getjsTreeNodes = function (jstreeDiv, IdsOnly, parentNodeId) {
+            if (!parentNodeId)
+                parentNodeId = "#"
             var idList = [];
             var jsonNodes = $('#' + jstreeDiv).jstree(true).get_json(parentNodeId, {flat: true});
             if (IdsOnly) {
@@ -84,29 +84,27 @@ var common = (function () {
         }
 
 
-       self.getAllDescendants=function(jstreeDiv,nodeId) {
+        self.getAllDescendants = function (jstreeDiv, nodeId) {
             var nodes = [];
             var nodeIdsMap = {};
-            var recurse=function(nodeId){
+            var recurse = function (nodeId) {
 
-                var node =  $('#' + jstreeDiv).jstree(true).get_node(nodeId);
-                if(!nodeIdsMap[nodeId]){
-                    nodeIdsMap[nodeId]=1
-                nodes.push(node);
+                var node = $('#' + jstreeDiv).jstree(true).get_node(nodeId);
+                if (!nodeIdsMap[nodeId]) {
+                    nodeIdsMap[nodeId] = 1
+                    nodes.push(node);
 
-                // Attempt to traverse if the node has children
-               node.children.forEach(function(child) {
+                    // Attempt to traverse if the node has children
+                    node.children.forEach(function (child) {
                         recurse(child);
 
-                })
-                    }
+                    })
+                }
             }
-
 
 
             return nodes
         };
-
 
 
         self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
@@ -165,7 +163,7 @@ var common = (function () {
                 if (options.openAll)
                     $('#' + jstreeDiv).jstree(true).open_all();
                 self.setTreeAppearance()
-                if(callback)
+                if (callback)
                     callback();
 
 
@@ -174,7 +172,7 @@ var common = (function () {
 
                     if (options.selectTreeNodeFn)
                         options.selectTreeNodeFn(evt, obj);
-                }).on('open_node.jstree', function (evt,obj) {
+                }).on('open_node.jstree', function (evt, obj) {
                 self.setTreeAppearance()
                 if (options.onOpenNodeFn) {
                     options.onOpenNodeFn(evt, obj);
@@ -213,9 +211,9 @@ var common = (function () {
                     }
 
                 })
-                .on("show_contextmenu",function(node,x,y){
-                    if(options.onShowContextMenu)
-                        options.onShowContextMenu(node,x,y)
+                .on("show_contextmenu", function (node, x, y) {
+                    if (options.onShowContextMenu)
+                        options.onShowContextMenu(node, x, y)
                 });
 
 
@@ -241,22 +239,27 @@ var common = (function () {
         }
 
         self.addNodesToJstree = function (jstreeDiv, parentNodeId, jstreeData, options) {
+            if (!options)
+                options = {}
+            var position="first"
+            if(options.positionLast)
+                position="last"
             jstreeData.forEach(function (node) {
-                var parentNode=parentNodeId;
-                if(node.parent)
-                    parentNode=node.parent
-                $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, "first", function () {
-                    $("#" + jstreeDiv).jstree(true).open_node(parentNode, null,500);
+                var parentNode = parentNodeId;
+                if (node.parent)
+                    parentNode = node.parent
+                $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
+                    $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
 
                 })
 
             })
-            setTimeout(function() {
+            setTimeout(function () {
                 self.setTreeAppearance()
-             //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
+                //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
 
                 var offset = $(document.getElementById(parentNodeId)).offset();
-            },500)
+            }, 500)
         }
 
         self.deleteNode = function (jstreeDiv, nodeId) {
@@ -272,7 +275,6 @@ var common = (function () {
                 $("#" + jstreeDiv).jstree(true).uncheck_all()
             }
         }
-
 
 
         self.getAllsourcesWithType = function (type) {
@@ -392,7 +394,7 @@ var common = (function () {
         self.getNewId = function (prefix, length) {
             if (!length)
                 length = 10
-           return prefix + common.getRandomHexaId(length)
+            return prefix + common.getRandomHexaId(length)
         }
 
         self.copyTextToClipboard = function (text) {
@@ -439,7 +441,7 @@ var common = (function () {
 
 
         }
-        self.convertNumStringToNumber= function (value) {
+        self.convertNumStringToNumber = function (value) {
             if (value.match && value.match(/.*[a-zA-Z\/\\$].*/))
                 return value;
             if (self.isInt(value))
@@ -454,39 +456,39 @@ var common = (function () {
 
         },
 
-          self.isNumber=  function (n) {
-            return !isNaN(parseFloat(n)) && isFinite(n);
-        }
-        self.isInt= function (value) {
+            self.isNumber = function (n) {
+                return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+        self.isInt = function (value) {
             return /-?[0-9]+/.test("" + value);
 
         },
-            self.isFloat=  function (value) {
-            return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
+            self.isFloat = function (value) {
+                return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
 
-        },
-        self.palette = [
-            '#9edae5',
-            '#17becf',
-            '#dbdb8d',
-            '#bcbd22',
-            '#c7c7c7',
-            '#7f7f7f',
-            '#f7b6d2',
-            '#e377c2',
-            '#c49c94',
-            '#c5b0d5',
-            '#ff9896',
-            '#98df8a',
-            '#ffbb78',
-            '#ff7f0e',
-            '#aec7e8',
-            '#1f77b4',
-            '#9467bd',
-            '#8c564b',
-            '#d62728',
-            '#2ca02c',
-        ]
+            },
+            self.palette = [
+                '#9edae5',
+                '#17becf',
+                '#dbdb8d',
+                '#bcbd22',
+                '#c7c7c7',
+                '#7f7f7f',
+                '#f7b6d2',
+                '#e377c2',
+                '#c49c94',
+                '#c5b0d5',
+                '#ff9896',
+                '#98df8a',
+                '#ffbb78',
+                '#ff7f0e',
+                '#aec7e8',
+                '#1f77b4',
+                '#9467bd',
+                '#8c564b',
+                '#d62728',
+                '#2ca02c',
+            ]
 
         self.paletteIntense = [
 

@@ -807,7 +807,7 @@ var Sparql_SKOS = (function () {
                 prefixesStr += "PREFIX " + item + " "
             })
 
-            var fromStr = Sparql_common.getFromGraphStr(graphUri)
+            fromStr = Sparql_common.getFromGraphStr(graphUri)
 
 
             topConceptFilter = predicates.topConceptFilter || defaultPredicates.topConceptFilter;

@@ -7,6 +7,21 @@ const async = require("async")
 var sparql_server_url = "http://51.178.139.80:8890/sparql"
 
 var OneModelManager = {
+    getOntology:function (graphUri,callback){
+        var query="CONSTRUCT { ?s ?p ?o } WHERE {GRAPH <"+graphUri+"> { ?s ?p ?o } }";
+        var params = {query: query}
+
+        httpProxy.post(sparql_server_url, null, params, function (err, result) {
+            if (err) {
+                    return callback(err);
+            }
+         /*   const textStream = require('streamify-string')(JSON.stringify( result));
+            var triples = "";
+            rdfParser.parse(textStream, {contentType: 'application/rdf+xml', baseIRI: ''})*/
+            console.log(result)
+            callback(null,JSON.stringify( result,null,2));
+        })
+},
 
     refreshOntology: function (graphUri, filePath, callback) {
         var triples

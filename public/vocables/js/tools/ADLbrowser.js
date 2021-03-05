@@ -412,10 +412,10 @@ var ADLbrowser = (function () {
 
                         if (item.subType) {
                             var label
-                                if(item.subTypeLabel)
-                                    label=item.subTypeLabel.value;
-                                else
-                                    label=self.OneModelDictionary[item.subType.value]
+                            if (item.subTypeLabel)
+                                label = item.subTypeLabel.value;
+                            else
+                                label = self.OneModelDictionary[item.subType.value]
                             if (!label)
                                 label = item.subType.value
                             var color = self.getPropertyColor(item.subType.value)
@@ -431,10 +431,10 @@ var ADLbrowser = (function () {
                             }
                         }
                         if (!existingNodes[propId]) {
-                            if(item.propLabel)
-                                label=item.propLabel.value;
+                            if (item.propLabel)
+                                label = item.propLabel.value;
                             else
-                             label = self.OneModelDictionary[propId]
+                                label = self.OneModelDictionary[propId]
                             if (!label)
                                 label = item.prop.value
                             existingNodes[propId] = 1
@@ -450,10 +450,10 @@ var ADLbrowser = (function () {
                                 typesArray.push(item.objType.value)
 
                             existingNodes[objId] = 1
-                            if(item.objTypeLabel)
-                                label=item.objTypeLabel.value;
+                            if (item.objTypeLabel)
+                                label = item.objTypeLabel.value;
                             else
-                             label = self.OneModelDictionary[item.objType.value]
+                                label = self.OneModelDictionary[item.objType.value]
                             if (!label)
                                 label = item.objType.value
                             var color = self.getPropertyColor(item.objType.value)
@@ -510,17 +510,7 @@ var ADLbrowser = (function () {
                           }
                       }
                   }*/
-                items.addFilteredNodesToGraph = {
-                    label: "graph filtered nodes",
-                    action: function (e, xx) {// pb avec source
-                        if (!self.currentSource)
-                            return alert("select a source")
-                        self.queryMode = "graph"
-                        self.query.showQueryParamsDialog(e.position, "graph")
 
-
-                    }
-                }
                 items.addFilteredNodesToQuery = {
                     label: "add to query",
                     action: function (e, xx) {// pb avec source
@@ -529,6 +519,17 @@ var ADLbrowser = (function () {
                         self.queryMode = "query"
                         self.query.addNodeToQueryTree(self.currentJstreeNode)
                         ///  self.query.showQueryParamsDialog(e.position, "query")
+
+
+                    }
+                }
+                items.addFilteredNodesToGraph = {
+                    label: "graph filtered nodes",
+                    action: function (e, xx) {// pb avec source
+                        if (!self.currentSource)
+                            return alert("select a source")
+                        self.queryMode = "graph"
+                        self.query.showQueryParamsDialog(e.position, "graph")
 
 
                     }
@@ -640,7 +641,7 @@ var ADLbrowser = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "subType","objType"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "subType", "objType"])
                 self.adlModelCache[subjectType] = result.results.bindings
                 return callback(null, result.results.bindings)
             })
@@ -753,11 +754,14 @@ var ADLbrowser = (function () {
                             type: "type",
                             id: node.data.id,
                             label: node.data.label,
+                            role: node.data.role,
+                            sourceType: node.data.sourceType
 
 
                         }
                     })
                     if (!isNewTree) {
+                        var options = {}
 
                         common.addNodesToJstree("ADLbrowser_queryTreeDiv", "#", jstreeData)
                         jstreeData = []
@@ -777,13 +781,15 @@ var ADLbrowser = (function () {
                         jstreeData.push({
                             id: "prop" + common.getRandomHexaId(5),
                             text: item.propLabel.value,
-                            parent:typeId,
+                            parent: typeId,
                             data: {
                                 label: item.propLabel.value,
                                 id: item.prop.value,
                                 type: "property",
                                 parent: node.data.id,
                                 range: node.data.subType,
+                                role: node.data.role,
+                                sourceType: node.data.sourceType
 
                             }
                         })
@@ -831,15 +837,18 @@ var ADLbrowser = (function () {
         , clear() {
             $("#ADLbrowser_queryTreeDiv").jstree("destroy").empty();
 
+        }
+        , showQuery: function () {
+            self.query.execute(true)
         },
-        execute: function () {
+        execute: function (showQueryOnly) {
             if (Config.ADLBrowser.adlQueryMode == "SPARQL") {
-                self.query.executeSparqlQuery();
+                self.query.executeSparqlQuery(showQueryOnly);
             } else if (Config.ADLBrowser.adlQueryMode == "SQL") {
-                self.query.executeSqlQuery();
+                self.query.executeSqlQuery(showQueryOnly);
             }
         },
-        executeSparqlQuery: function () {
+        executeSparqlQuery: function (showQueryOnly) {
 
             //   var checkedNodes = $("#ADLbrowser_queryTreeDiv").jstree(true).get_checked(false)
             var allNodes = common.getjsTreeNodes("ADLbrowser_queryTreeDiv")
@@ -855,28 +864,41 @@ var ADLbrowser = (function () {
             var queryStr = ""
             var varNames = {}
             var previousType = 0
-            var previousTypeLabel=""
+            var previousTypeLabel = ""
             var currentProp = 0
+            var processedTypes = []
+            var sources = [self.currentSource]
 
-            function getVarName(str){
-               return "?"+str.replace(/[^\x00-\x7F]/g, "_").replace("-","_");
+            function getVarName(str) {
+                return "?" + str.replace(/[^\x00-\x7F]/g, "_").replace("-", "_");
             }
+
+
             allNodes.forEach(function (node, index) {
                 if (node.data.type == "type") {//type
-                    previousTypeLabel=node.data.label
-                    varNames[node.id] =getVarName(node.data.label)
+                    previousTypeLabel = node.data.label
+                    varNames[node.id] = getVarName(node.data.label)
                     queryStr += varNames[node.id] + " rdf:type <" + node.data.id + "> . \n"
-
+                    processedTypes.push(node.data.id)
                     if (index > 0) {//relation anonyme avec le precedent type
-                        queryStr += varNames[previousType] + " ?P" + index + " " + varNames[node.id] + " .\n "
+                        if (node.data.sourceType == "rdl") {
+                            if (sources.indexOf(Config.ADLBrowser.RDLsource) < 0)
+                                sources.push(Config.ADLBrowser.RDLsource)
+
+                        }
+                        if (node.data.role.indexOf("sub") > -1)
+                            queryStr += varNames[node.id] + " ?P" + index + " " + varNames[previousType] + " .\n "
+                        else
+                            queryStr += varNames[previousType] + " ?P" + index + " " + varNames[node.id] + " .\n "
+
                     }
 
                     previousType = node.id
-                        selectStr += " " + varNames[node.id]
+                    selectStr += " " + varNames[node.id]
                 }
                 if (node.data.type == "property") {//property
-                    currentProp=previousType+"_"+node.id
-                    varNames[currentProp] = getVarName(previousTypeLabel+"_"+node.data.label)
+                    currentProp = previousType + "_" + node.id
+                    varNames[currentProp] = getVarName(previousTypeLabel + "_" + node.data.label)
                     if (index < allNodes.length - 1 && allNodes[index + 1].data.type == "propertyFilter")
                         return;
                     var prop = nodesMap[node.data.id]
@@ -891,128 +913,79 @@ var ADLbrowser = (function () {
                 if (node.data.type == "propertyFilter") {//filter
                     var filter = nodesMap[node.data.id]
                     var clause = node.data.content
-                    selectStr += " " + varNames[currentProp]+"_value"
-                    var parentProp=previousType+"_"+node.parent
+                    selectStr += " " + varNames[currentProp] + "_value"
+                    var parentProp = previousType + "_" + node.parent
                     clause = clause.replace("?obj", varNames[previousType])
                     clause = clause.replace("?sub", varNames[previousType])
-                    clause = clause.replace(/\?x/g, varNames[parentProp]+"_value")
+                    clause = clause.replace(/\?x/g, varNames[parentProp] + "_value")
                     queryStr += clause
                 }
 
 
             })
 
-            var fromStr = Sparql_common.getFromStr(self.currentSource)
+            var fromStr = Sparql_common.getFromStr(sources)
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                 "Select " + selectStr + " " + fromStr + " where {"
                 + queryStr +
-                "} limit " + Config.queryLimit
+                "} limit " + Config.ADLBrowser.queryLimit
 
+            if (showQueryOnly) {
+                return common.copyTextToClipboard(query)
+            }
 
-            console.log(query)
+            var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: self.currentSource}, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err)
+                if (result.length >= self.queryLimit)
+                    return MainController.UI.message("result too long >" + self.queryLimit + " lines ")
 
-
-            /*      var classNodeIds = common.getjsTreeNodeObj("ADLbrowser_queryTreeDiv", "#").children;
-
-                  var filters = [];
-                  var selectFields = []
-                  var previousClassId = null;
-                  var previousClassLabel = null;
-                  var selectStr = " * "
-                  var showIds =true;// $('ADLquery_queryShowItemsIdsCBX').prop("checked")
-                  var query = "";
-                  if (!showIds)
-                      selectStr = " ";
-                  classNodeIds.forEach(function (classNodeId, index) {
-                      // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
-
-
-                      var propertyNodes = []
-                      var propertyNodes = []
-                      var classNode =  nodesMap[item.id]
-
-                      if (index > 0) {// join classes
-
-
-
-
-                      query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . "
-                      classNode.children.forEach(function (propertyNodeId) {
-                          var propertyNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [propertyNodeId])
-                          if (propertyNode.data.optional) {
-                              query += "OPTIONAL {"
-                              propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "")
-                          }
-                          if (!showIds)
-                              selectStr += " ?" + propertyNode.text;
-
-                          query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . "
-                          propertyNode.children.forEach(function (filterNodeId) {
-                              var filterNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [filterNodeId])
-                              var operator = filterNode.data.operator;
-                              var value = filterNode.data.value;
-                              var range = propertyNode.data.range.value
-                              if (range.indexOf("string") > -1) {
-                                  if (operator == "contains")
-                                      query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "','i')) "
-                                  else if (operator == "beginsWith")
-                                      query += "FILTER (REGEX(?" + propertyNode.text + ",'^" + value + "','i')) "
-
-                                  else if (operator == "beginsWith")
-                                      query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "$','i')) "
-                                  else
-                                      query += "FILTER (?" + propertyNode.text + operator + "'" + value + "'" + ")"
-
-                              } else if (value.indexOf("http") > 0) {
-
-                              } else {
-                                  query += "FILTER (?" + propertyNode.text + operator + value + ")"
-                              }
-
-
-                          })
-
-                          if (propertyNode.data.optional) {
-                              query += "} "
-                          }
-
-
-                      })
-                  })
-                  var fromStr = "FROM <http://sws.ifi.uio.no/vocab/npd-v2/> FROM <http://sws.ifi.uio.no/data/npd-v2/> "
-                  var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-                      "Select " + selectStr + " " + fromStr + " where {" + query;
-
-                  query += "} limit " + self.queryLimit
-                  //  return;
-                  var url = Config.sources[MainController.currentSource].sparql_server.url + "?format=json&query=";
-                  Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {}, function (err, result) {
-                      if (err)
-                          return MainController.UI.message(err)
-                      if (result.length >= self.queryLimit)
-                          return MainController.UI.message("result too long >" + self.queryLimit + " lines ")
-
-                      var dataSet = [];
-                      var cols = [];
-                      result.head.vars.forEach(function (item) {
-                          cols.push({title: item})
-                      })
-                      result.results.bindings.forEach(function (item, indexRow) {
-                          var line = []
-                          result.head.vars.forEach(function (col, indexCol) {
-                              if (item[col])
-                                  line.push(item[col].value);
-                              else
-                                  line.push("");
-                          })
-                          dataSet.push(line)
-                      })
-                      self.query.showQueryResultInDataTable(result)
-                  })
-      */
+                var dataSet = [];
+                var cols = [];
+                result.head.vars.forEach(function (item) {
+                    cols.push({title: item})
+                })
+                result.results.bindings.forEach(function (item, indexRow) {
+                    var line = []
+                    result.head.vars.forEach(function (col, indexCol) {
+                        if (item[col])
+                            line.push(item[col].value);
+                        else
+                            line.push("");
+                    })
+                    dataSet.push(line)
+                })
+                self.query.showQueryResultInDataTable(dataSet, cols)
+            })
 
         },
         executeSqlQuery: function () {
+        }
+        , showQueryResultInDataTable: function (dataSet, cols) {
+
+
+            $('#mainDialogDiv').dialog("open")
+
+            $('#mainDialogDiv').html("<table id='dataTableDiv'></table>");
+            setTimeout(function () {
+
+                $('#dataTableDiv').DataTable({
+                    data: dataSet,
+                    columns: cols,
+                    // async: false,
+                    "pageLength": 15,
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'copy', 'csv', 'excel', 'pdf', 'print'
+                    ]
+
+
+                })
+                    , 500
+            })
+
+
         }
     }
 

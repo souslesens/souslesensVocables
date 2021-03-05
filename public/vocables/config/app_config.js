@@ -35,6 +35,7 @@ self.loginMode = "none";
         RDLsource:"RDL-QUANTUM-MIN",
         OneModelSource : "ONE-MODEL",
         adlQueryMode:"SPARQL", //or SQL
+        queryLimit:1000,
          topRdlObjects : {
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801":{label:"Functional Objects" ,type:"http://standards.iso.org/iso/15926/part14/FunctionalObject"},
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723":{label:"Physical Objects",type:"http://standards.iso.org/iso/15926/part14/PhysicalObject"},

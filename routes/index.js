@@ -357,6 +357,9 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
 
     },
+
+
+
     router.get('/heatMap', function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);
 
@@ -370,6 +373,15 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
         httpProxy.get(req.query, function (err, result) {
             processResponse(res, err, result)
+        })
+    })
+    ,
+    router.get('/oneModel/ontology', function (req, res, next) {
+        var OneModelManager=require('../other/oneModel/OneModelManager.')
+        OneModelManager.getOntology("http://data.total.com/resource/one-model/ontology/0.2/",function(err,result){
+          //  res.setHeader('Content-type', "text:plain");
+            // response.send(JSON.stringify(resultObj));
+            res.send(result);
         })
     })
 )

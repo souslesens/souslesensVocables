@@ -29,8 +29,8 @@ self.loginMode = "none";
     self.searchDepth = 8
     self.Blender={openTaxonomyTreeOnLoad:1}
 
-    self.ADLMappings={currentOntology:"ONE-MODEL"}
-
+   // self.ADLMappings={currentOntology:"ONE-MODEL"}
+    self.ADLMappings={currentOntology:"SIL-ONTOLOGY"}
     self.ADLBrowser={
         RDLsource:"RDL-QUANTUM-MIN",
         OneModelSource : "ONE-MODEL",

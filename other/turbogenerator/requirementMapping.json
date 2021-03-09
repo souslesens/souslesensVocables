@@ -1,0 +1,29 @@
+{
+  "mappings": [
+    {
+      "subject": "tag2tag.RequirementID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "https://w3id.org/requirement-ontology/rdl/REQ_0011"
+    },
+    {
+      "subject": "tag2tag.PrimaryFunctionalClassID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+    },
+    {
+      "subject": "tag2tag.LinkedFunctionalClassID",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+    },
+    {
+      "subject": "tag2tag.RequirementID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasParticipant",
+      "object": "tag2tag.LinkedFunctionalClassID"
+    },
+    {
+      "subject": "tag2tag.RequirementID",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasParticipant",
+      "object": "tag2tag.LinkedFunctionalClassID"
+    }
+  ]
+}

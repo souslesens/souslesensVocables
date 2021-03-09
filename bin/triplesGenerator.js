@@ -7,6 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+ 
 var fs = require("fs")
 
 const util = require('./skosConverters/util.')
@@ -48,7 +49,7 @@ var triplesGenerator = {
             var uri = existingUrisMap[value]
             if (!uri) {
 
-                if (value && value.indexOf("TOTAL-") == 0) {
+                if (value  && value.indexOf && value.indexOf("TOTAL-") == 0) {
 
                     uri = totalRdlUriPrefix + value
                     existingUrisMap[value] = uri;
@@ -74,6 +75,7 @@ var triplesGenerator = {
 
                 if (!subjectValue)
                     return;
+                if(subjectValue.trim)
                 subjectValue = subjectValue.trim()
 
                 var subjectUri = getUriFromValue(subjectValue)
@@ -87,13 +89,16 @@ var triplesGenerator = {
                 var objectSuffix = ""
                 var objectValue = item[mapping.object]
 
-                if (objectValue)
+                if (objectValue && objectValue.trim )
                     objectValue = objectValue.trim()
 
 
-                if (objectValue && objectValue.indexOf("TOTAL-") == 0) {
+                if (objectValue  && objectValue.indexOf && objectValue.indexOf("TOTAL-") == 0) {
                     var totalUri = getUriFromValue(objectValue)
+                    if(totalUri)
                     triples.push({subject: subjectUri, predicate: mapping.predicate, object: totalUri})
+                    else
+                        triples.push({subject: subjectUri, predicate: mapping.predicate, object: "'"+objectValue+"'"})
                 } else if (mapping.object.indexOf("http") == 0) {
 
                     triples.push({subject: subjectUri, predicate: mapping.predicate, object: mapping.object})
@@ -650,17 +655,18 @@ var triplesGenerator = {
 
     }
     , generateRdlTriples: function () {
-        var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\mainObjectsMISSING.txt"
+        var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\mainObjectsRequirements.txt"
         var json = util.csvToJson(filePath)
         var str = ""
         var graphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
         var str = ""
         var typesMap = {
 
-            "attribute": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
+          /*  "attribute": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
             "physicalObject": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-            "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject",
-            "discipline": "http://w3id.org/readi/z018-rdl/Discipline"
+            "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject",*/
+            "discipline": "http://w3id.org/readi/z018-rdl/Discipline",
+           /* "requirement": "https://w3id.org/requirement-ontology/rdl/REQ_0011"*/
         }
 
 
@@ -804,21 +810,22 @@ if (false) {// buildClov
     })
 }
 
-if (true) {// turbogen
+if (false) {// turbogen
 
 
     var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
     var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-    var rdlGraphUri= "http://data.total.com/resource/one-model/quantum-rdl/"
+    var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
     var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
     var mappingFileNames = [
-      //  "breakdowns.json"
-          "tagMapping.json",
-          "tagAttributeMapping.json",
-        "tag2ModelMapping.json",
-        "modelMapping.json",
-        "modelAttributeMapping.json",
-        "tag2tagMapping.json",
+        /* "breakdowns.json"
+            "tagMapping.json",
+            "tagAttributeMapping.json",
+          "tag2ModelMapping.json",
+          "modelMapping.json",
+          "modelAttributeMapping.json",
+          "tag2tagMapping.json",*/
+        "requirementMapping.json"
     ]
 
 
@@ -827,8 +834,39 @@ if (true) {// turbogen
         user: "root",
         password: "vi0lon",
         database: 'turbogenerator',
-        fetchSize:5000,
+        fetchSize: 5000,
     }
+}
+
+    if (true) {// SIL
+
+
+        var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\SIL\\"
+        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var rdlGraphUri= "http://data.total.com/resource/sil/ontology/0.1/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
+        var mappingFileNames = [
+            /* "breakdowns.json"
+                "tagMapping.json",
+                "tagAttributeMapping.json",
+              "tag2ModelMapping.json",
+              "modelMapping.json",
+              "modelAttributeMapping.json",
+              "tag2tagMapping.json",*/
+            "failureMapping.json"
+        ]
+
+
+        var dbConnection = {
+            host: "localhost",
+            user: "root",
+            password: "vi0lon",
+            database: 'sil',
+            fetchSize:5000,
+        }
+
+
+
     triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri,dbConnection, function (err, result) {
         if (err)
             return console.log(err);

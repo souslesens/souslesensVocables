@@ -7,11 +7,11 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var fs=require('fs');
+var fs = require('fs');
 
 var util = {
 
-    sliceArray :function (array, sliceSize) {
+    sliceArray: function (array, sliceSize) {
         var slices = [];
         var slice = []
         array.forEach(function (item) {
@@ -22,12 +22,11 @@ var util = {
             slice.push(item)
         })
         slices.push(slice);
-        return slices;ormat
+        return slices;
+        ormat
 
 
     },
-
-
 
 
     /**
@@ -36,7 +35,7 @@ var util = {
      * @param length
      * @return {string}
      */
-   getRandomHexaId : function (length) {
+    getRandomHexaId: function (length) {
         const str = Math.floor(Math.random() * Math.pow(16, length)).toString(16);
         return "0".repeat(length - str.length) + str;
 
@@ -89,9 +88,7 @@ var util = {
                     obj[key] = new ObjectID.createFromHexString(id);
                     // obj[key] = new ObjectID(id);
 
-                }
-
-                else if (!isNaN(value) && value.indexOf) {
+                } else if (!isNaN(value) && value.indexOf) {
                     if (value.indexOf(".") > -1)
                         value = parseFloat(value)
                     else
@@ -177,8 +174,7 @@ var util = {
                             // value = value.replace(/\//g, "%2F");
                             value = value.replace(/\\/g, "")
                             //  value = value.replace(/:/g, "")
-                        }
-                        else if (value.indexOf(".") > -1)
+                        } else if (value.indexOf(".") > -1)
                             value = parseFloat(value)
                         else
                             value = parseInt(value)
@@ -196,7 +192,26 @@ var util = {
         return string.charAt(0).toUpperCase() + string.slice(1);
     },
 
+    formatStringForTriple: function (str, forUri) {
+        if (!str || !str.replace)
+            return null;
+        str = str.trim()
+        str = str.replace(/\\/gm, "")
+        str = str.replace(/"/gm, "\\\"")
+        // str = str.replace(/;/gm, "\\\;")
+        //  str = str.replace(/\n/gm, "\\\\n")
+        str = str.replace(/\n/gm, "\\\\n")
+        //  str = str.replace(/\r/gm, "\\\\r")
+        str = str.replace(/\r/gm, "")
+        str = str.replace(/\t/gm, "\\\\t")
+        str = str.replace(/\\xa0/gm, " ")
+        str = str.replace(/'/gm, "\\\'")
+        if (forUri)
+            str = str.replace(/ /gm, "_")
 
+
+        return str;
+    },
     getCsvFileSeparator: function (file, callback) {
         var readStream = fs.createReadStream(file, {start: 0, end: 5000, encoding: 'utf8'});
         var separator = ",";
@@ -269,7 +284,7 @@ var util = {
             var obj = {}
             cells.forEach(function (cell, index) {
                 if (lineIndex == 0)
-                   ;// cols.push(cell.trim())
+                    ;// cols.push(cell.trim())
                 else {
                     obj[cols[index]] = cell.trim();
                 }
@@ -278,9 +293,6 @@ var util = {
         })
         return pagesJson;
     }
-
-
-
 
 
 }

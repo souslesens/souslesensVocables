@@ -1,0 +1,84 @@
+{
+  "mappings": [
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/z018-rdl/prod_EQUI"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Equipment_Desc"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Equipment_Category"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Working_Hours"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Functionnal_Location"
+    },
+    {
+      "subject": "failure.Tag_Number",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#Tag"
+    },
+    {
+      "subject": "failure.Temperature",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/D101001516"
+    },
+    {
+      "subject": "failure.Manufacturer",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Organization"
+    },
+    {
+      "subject": "failure.Concept_Failure_Id",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS32354"
+    },
+    {
+      "subject": "failure.Concept_Failure_Id",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Notif_Number"
+    },
+    {
+      "subject": "failure.Concept_Failure_Id",
+      "predicate": "#http://data.total.com/resource/one-model/alters",
+      "object": "failure.Functionnal_Location"
+    },
+    {
+      "subject": "failure.Pressure",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/D101001516"
+    },
+    {
+      "subject": "failure.Unit",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#Site"
+    },
+    {
+      "subject": "failure.Valid_From",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Event"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://data.total.com/resource/one-model/ontology#http://w3id.org/readi/rdl/D101001101",
+      "object": "failure.Manufacturer"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf",
+      "object": "failure.Tag_Number"
+    }
+  ]
+}

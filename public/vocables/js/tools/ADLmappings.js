@@ -46,6 +46,7 @@ var ADLmappings = (function () {
                 "                <option></option>\n" +
                 "                <option>clov</option>\n" +
                 "                <option>turbogenerator</option>\n" +
+                "<option>sil</option>"+
                 "                </select>  "+
                 " <button onclick=\"ADLmappings.Data.loadADL_SQLModel()\">load ADL Model</button>");
             $("#actionDiv").html(" <div id=\"ADLmappings_dataModelTree\"  style=\"width:400px\"></div>");
@@ -187,7 +188,7 @@ var ADLmappings = (function () {
                         // loadClasses
                         function (callbackSeries) {
 
-                            var depth = 6;
+                            var depth = 5;
                             Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
                                 if (err)
                                     return callbackSeries(err)

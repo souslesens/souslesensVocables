@@ -143,6 +143,8 @@ var OneModelManager = {
 
 module.exports = OneModelManager;
 
-OneModelManager.refreshOntology("http://data.total.com/resource/one-model/ontology/0.2/","D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")
+//OneModelManager.refreshOntology("http://data.total.com/resource/one-model/ontology/0.2/","D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")
+OneModelManager.refreshOntology("http://data.total.com/resource/sil/ontology/0.1/","D:\\NLP\\ontologies\\OntoSIL\\SIL.owl-ttl.owl")
+
 
 //OneModelManager.rdfXmlToNt("D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")

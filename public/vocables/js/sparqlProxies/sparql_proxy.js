@@ -94,7 +94,7 @@ var Sparql_proxy = (function () {
 
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
         self.currentQuery = query;
-      common.copyTextToClipboard(query)
+    //  common.copyTextToClipboard(query)
         if (!options)
             options = {}
 
@@ -140,7 +140,7 @@ var Sparql_proxy = (function () {
             payload.body = JSON.stringify(body);
             payload.url = url+ queryOptions
         }
-console.log(options.source +"  "+payload.url)
+//console.log(options.source +"  "+payload.url)
         $.ajax({
             type: "POST",
             url: Config.serverUrl,

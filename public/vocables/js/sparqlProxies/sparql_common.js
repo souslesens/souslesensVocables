@@ -70,10 +70,11 @@ var Sparql_common = (function () {
                 }
             } else if (ids) {
 
-                var p = ids.indexOf("#")
-                if (p > -1)
-                    ids.splice(p, 1)
+
                 if (Array.isArray(ids)) {
+                    var p = ids.indexOf("#")
+                    if (p > -1 )
+                        ids.splice(p, 1)
                     if (ids[0] == null)
                         return ""
                     var conceptIdsStr = ""

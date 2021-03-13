@@ -289,14 +289,14 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
             if (req.body.getFromSparql) {
 
                 ADLSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), function (err, result) {
-                    processResponse(response, null, result)
+                    processResponse(response, err, result)
 
                 })
             }
 
             if (req.body.getModel) {
                 ADLSqlConnector.getADLmodel(req.body.getModel, function (err, result) {
-                    processResponse(response, null, result)
+                    processResponse(response, err, result)
 
                 })
             }
@@ -304,7 +304,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
             if (req.body.getData) {
                 ADLSqlConnector.getData(req.body.dbName, req.body.sqlQuery, function (err, result) {
-                    processResponse(response, null, result)
+                    processResponse(response, err, result)
 
                 })
             }

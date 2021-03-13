@@ -3,18 +3,22 @@
     {
       "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/z018-rdl/prod_EQUI"
+      "object": {
+        "switch": {
+          "Temperature Transmitter": "http://w3id.org/readi/rdl/CFIHOS-30000476",
+          "Pressure Transmitter": "http://w3id.org/readi/rdl/CFIHOS-30000654"
+
+
+        }
+
+      }
     },
     {
       "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
       "object": "failure.Equipment_Desc"
     },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "failure.Equipment_Category"
-    },
+
     {
       "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
@@ -33,7 +37,7 @@
     {
       "subject": "failure.Temperature",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/D101001516"
+      "object": "http://data.total.com/resource/quantum/TOTAL-A0000000216"
     },
     {
       "subject": "failure.Manufacturer",

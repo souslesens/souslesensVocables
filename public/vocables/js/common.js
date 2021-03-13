@@ -241,9 +241,9 @@ var common = (function () {
         self.addNodesToJstree = function (jstreeDiv, parentNodeId, jstreeData, options) {
             if (!options)
                 options = {}
-            var position="first"
-            if(options.positionLast)
-                position="last"
+            var position = "first"
+            if (options.positionLast)
+                position = "last"
             jstreeData.forEach(function (node) {
                 var parentNode = parentNodeId;
                 if (node.parent)
@@ -398,6 +398,17 @@ var common = (function () {
         }
 
         self.copyTextToClipboard = function (text) {
+          /*  async function copy() {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    console.log('Page URL copied to clipboard');
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            }
+copy()
+            return;*/
+
             var textArea = document.createElement("textarea");
             textArea.style.position = 'fixed';
             textArea.style.top = 0;
@@ -425,6 +436,7 @@ var common = (function () {
             textArea.focus();
             textArea.select();
 
+
             try {
                 var successful = document.execCommand('copy');
                 var msg = successful ? 'successful' : 'unsuccessful';
@@ -433,7 +445,7 @@ var common = (function () {
                     return "graph copied in clipboard"
                 else
 
-                    return "graph copy faild"
+                    return "graph copy failed"
             } catch (err) {
                 console.log(err);
                 return "graph copy faild"
@@ -441,6 +453,30 @@ var common = (function () {
 
 
         }
+
+
+        self.pasteTextFromClipboard = function (callback) {
+            async function paste() {
+                const text = await navigator.clipboard.readText();
+                callback(text)
+              //  alert('Pasted text: ', text);
+            }
+
+            paste()
+            /*  try {
+                  alert("a")
+                  navigator.clipboard.readText(function(err, result){
+                      alert(result)
+                      console.log('Pasted content: ', result);
+                  });
+
+              } catch (err) {
+                  alert("e")
+                  console.error('Failed to read clipboard contents: ', err);
+              }*/
+
+        }
+
         self.convertNumStringToNumber = function (value) {
             if (value.match && value.match(/.*[a-zA-Z\/\\$].*/))
                 return value;

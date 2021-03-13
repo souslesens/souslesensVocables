@@ -341,6 +341,8 @@ var Sparql_generic = (function () {
 
         self.insertTriples = function (sourceLabel, triples, callback) {
             var graphUri = Config.sources[sourceLabel].graphUri
+            if(Array.isArray(graphUri))
+                graphUri=graphUri[0]
             var insertTriplesStr = "";
             triples.forEach(function (item, index) {
 

@@ -16,6 +16,11 @@ var Sparql_common = (function () {
         if (!ids && !words)
             return "";
 
+        if (!words && ids.length==0)
+            return "";
+        if (!ids && words.length==0)
+            return "";
+
         function formatWord(str) {
             var str = str.replace(/\\/g, "")
             str = str.replace(/\(/gm, "")
@@ -43,6 +48,8 @@ var Sparql_common = (function () {
         varNames.forEach(function (varName) {
             if (words) {
                 if (Array.isArray(words)) {
+                    if(words.length==0)
+                        return "";
                     if (words[0] == null)
                         return ""
                     var conceptWordStr = ""
@@ -72,6 +79,8 @@ var Sparql_common = (function () {
 
 
                 if (Array.isArray(ids)) {
+                    if(ids.length==0)
+                        return "";
                     var p = ids.indexOf("#")
                     if (p > -1 )
                         ids.splice(p, 1)

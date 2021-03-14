@@ -16,12 +16,12 @@ var SourceBrowser = (function () {
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
 
-        setTimeout(function(){
-           // console.log(Config.currentProfile.allowedSourceSchemas[0])
-            $("#GenericTools_searchInAllSources").prop("checked",true)
+        setTimeout(function () {
+            // console.log(Config.currentProfile.allowedSourceSchemas[0])
+            $("#GenericTools_searchInAllSources").prop("checked", true)
             $("#GenericTools_searchSchemaType").val(Config.currentProfile.allowedSourceSchemas[0])
 
-        },200)
+        }, 200)
 
     }
     self.onSourceSelect = function (sourceLabel) {
@@ -84,8 +84,8 @@ var SourceBrowser = (function () {
 
         if (options.targetDiv)
             self.currentTargetDiv = options.targetDiv
-        else
-            self.currentTargetDiv ="actionDiv"
+        else if(!self.currentTargetDiv)
+            self.currentTargetDiv = "actionDiv"
 
         if ($("#" + self.currentTargetDiv).length == 0) {
             var html = "<div id='" + self.currentTargetDiv + "'></div>"
@@ -153,7 +153,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        if(MainController.currentTool=="lineage") {
+        if (MainController.currentTool == "lineage") {
             items.graphNode = {
                 label: "graph Node",
                 action: function (e) {// pb avec source
@@ -181,7 +181,16 @@ var SourceBrowser = (function () {
                 }
 
             }
-            if(MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController){
+            if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
+                items.uploadOntologyFromOwlFile = {
+                    label: "upload Ontology FromOwl File",
+                    action: function (e) {
+                        SourceBrowser.uploadOntologyFromOwlFile()
+
+                    }
+                }
+            }
+            if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
                 items.addToADLquery = {
                     label: "add to Asset Query",
                     action: function (e) {// pb avec source
@@ -197,11 +206,11 @@ var SourceBrowser = (function () {
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
-                SourceBrowser.copyNode (e)
+                SourceBrowser.copyNode(e)
             }
 
         }
-        , items.nodeInfos = {
+            , items.nodeInfos = {
             label: "Node infos",
             action: function (e) {// pb avec source
                 MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
@@ -276,7 +285,7 @@ var SourceBrowser = (function () {
             term: term,
             rootId: rootId,
             exactMatch: exactMatch,
-            limit :Config.searchLimit
+            limit: Config.searchLimit
         }
         SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
             if (callback)
@@ -316,19 +325,18 @@ var SourceBrowser = (function () {
 
         var schemaType = $("#GenericTools_searchSchemaType").val()
 
-       if(searchAllSources) {
-           for (var sourceLabel in Config.sources) {
-               if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                   if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                       searchedSources.push(sourceLabel)
-               }
-           }
-       }
-        else{
-            if(! MainController.searchedSource  && !MainController.currentSource)
-                return alert( "select a source or search in all source")
-           searchedSources.push(MainController.searchedSource || MainController.currentSource)
-       }
+        if (searchAllSources) {
+            for (var sourceLabel in Config.sources) {
+                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                    if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                        searchedSources.push(sourceLabel)
+                }
+            }
+        } else {
+            if (!MainController.searchedSource && !MainController.currentSource)
+                return alert("select a source or search in all source")
+            searchedSources.push(MainController.searchedSource || MainController.currentSource)
+        }
         var jstreeData = []
         var uniqueIds = {}
         async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
@@ -345,7 +353,7 @@ var SourceBrowser = (function () {
                 term: term,
                 rootId: sourceLabel,
                 exactMatch: exactMatch,
-                limit :Config.searchLimit,
+                limit: Config.searchLimit,
             }
             SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
                 if (err)
@@ -375,7 +383,7 @@ var SourceBrowser = (function () {
             }
             $("#" + self.currentTargetDiv).html(html)
 
-MainController.UI.message("Search Done")
+            MainController.UI.message("Search Done")
 
 
             var jstreeOptions = {
@@ -482,64 +490,88 @@ MainController.UI.message("Search Done")
     }
 
 
-
-    self.copyNodeToClipboard=function(nodeData){
+    self.copyNodeToClipboard = function (nodeData) {
         common.copyTextToClipboard(JSON.stringify(nodeData))
 
     }
 
-    self.pasteNodeFromClipboard=function(parentNode){
-      common.pasteTextFromClipboard(function(text){
-          try{
-              var nodeData=JSON.parse(text)
-              var triples=[];
-              triples.push({
-                  subject:nodeData.id,
-                  predicate:"http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                  object:"http://www.w3.org/2002/07/owl#Class",
-                  valueType:"uri"
+    self.pasteNodeFromClipboard = function (parentNode) {
+        common.pasteTextFromClipboard(function (text) {
+            try {
+                var nodeData = JSON.parse(text)
+                var triples = [];
+                triples.push({
+                    subject: nodeData.id,
+                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                    object: "http://www.w3.org/2002/07/owl#Class",
+                    valueType: "uri"
 
-              })
-              triples.push({
-                  subject:nodeData.id,
-                  predicate:"http://www.w3.org/2000/01/rdf-schema#label",
-                  object:nodeData.label
-              })
-              triples.push({
-                  subject:nodeData.id,
-                  predicate:"http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                  object:parentNode.data.id,
-                  valueType:"uri"
-              })
+                })
+                triples.push({
+                    subject: nodeData.id,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                    object: nodeData.label
+                })
+                triples.push({
+                    subject: nodeData.id,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                    object: parentNode.data.id,
+                    valueType: "uri"
+                })
 
-              if(confirm ("insert inside "+parentNode.data.label+"  triples "+JSON.stringify(triples,null,2))){
-                  Sparql_generic.insertTriples(parentNode.data.source,triples,function(err, result){
-                      if(err)
-                          return MainController.UI.message(err);
-                      nodeData.source=parentNode.data.source
-                      var jstreeData={
-                          id:nodeData.id,
-                          label:nodeData.label,
-                          parent:parentNode.data.id,
-                          data:nodeData,
-                      }
-                      common.addNodesToJstree("LineagejsTreeDiv",parentNode.id,jstreeData)
-                  })
-              }
+                if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
+                    Sparql_generic.insertTriples(parentNode.data.source, triples, function (err, result) {
+                        if (err)
+                            return MainController.UI.message(err);
+                        nodeData.source = parentNode.data.source
+                        var jstreeData = [{
+                            id: nodeData.id,
+                            text: nodeData.label,
+                            parent: parentNode.id,
+                            data: nodeData,
+                        }]
+                        common.addNodesToJstree("LineagejsTreeDiv", parentNode.id, jstreeData)
+                    })
+                }
 
 
-          }catch(e){
-              MainController.UI.message(e)
-          }
+            } catch (e) {
+                MainController.UI.message(e)
+            }
 
 
         });
 
 
-
     }
 
+    self.uploadOntologyFromOwlFile = function () {
+        var graphUri;
+        if (Array.isArray(Config.sources[Lineage_classes.currentSource].graphUri))
+            graphUri = Config.sources[Lineage_classes.currentSource].graphUri[0]
+        else
+            graphUri = Config.sources[Lineage_classes.currentSource].graphUri
+        var payload = {
+            uploadOntologyFromOwlFile: 1,
 
+            graphUri: graphUri,
+            filePath: Config.sources[Lineage_classes.currentSource].protegeFilePath
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+
+            success: function (data, textStatus, jqXHR) {
+                MainController.UI.message("Ontology updated")
+            }
+            , error: function (err) {
+                MainController.UI.message(err)
+            }
+        })
+
+    }
     return self;
 
 

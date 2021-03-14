@@ -97,7 +97,9 @@ var OwlSchema = (function () {
                         if (err)
                             return callbackSeries(err);
                         self.setLabelsFromQueryResult(result)
-
+if(result.length==0) {
+    self.currentSourceSchema.classes["http://www.w3.org/2000/01/rdf-schema#Class"]={id:"http://www.w3.org/2000/01/rdf-schema#Class", label: "owl:Class", objectProperties: {}, annotations: {}}
+}
                         result.forEach(function (item) {
                             self.currentSourceSchema.classes[item.class.value] = {id: item.class.value, label: common.getItemLabel(item, "class"), objectProperties: {}, annotations: {}}
                         })
@@ -135,10 +137,16 @@ var OwlSchema = (function () {
                     Sparql_schema.getObjectAnnotations(self.currentSourceSchema, classId, function (err, result) {
                         if (err)
                             return callbackSeries(err)
-                        self.setLabelsFromQueryResult(result)
-                        result.forEach(function (item) {
-                            self.currentSourceSchema.classes[classId].annotations[item.annotation.value] = {id: item.annotation.value, label: common.getItemLabel(item, "annotation")}
-                        })
+
+                        if(result.length==0){
+                            self.currentSourceSchema.classes["http://www.w3.org/2000/01/rdf-schema#Class"]. annotations["http://www.w3.org/2000/01/rdf-schema#label"]= {id:"http://www.w3.org/2000/01/rdf-schema#label",label:"rdfs:label"}
+                        }
+                            else {
+                            self.setLabelsFromQueryResult(result)
+                            result.forEach(function (item) {
+                                self.currentSourceSchema.classes[classId].annotations[item.annotation.value] = {id: item.annotation.value, label: common.getItemLabel(item, "annotation")}
+                            })
+                        }
 
                         callbackSeries();
                     })

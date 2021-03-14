@@ -1,7 +1,8 @@
 <div style="display: flex;flex-direction: column;height: 50px">
     <div>
-        <input id='GenericTools_searchAllSourcesTermInput' style="width: 200px" value="">
+        <input id='GenericTools_searchAllSourcesTermInput' style="width: 150px" value="">
         <button id="GenericTools_onSearchAllInput" onclick='SourceBrowser.searchAllSourcesTerm()'>Search</button>
+        <button onclick="SourceBrowser.showThesaurusTopConcepts(MainController.currentSource)">reset</button>
     </div>
     <div>
         <input type='checkbox' checked='checked' id='GenericTools_allExactMatchSearchCBX'>Exact Match

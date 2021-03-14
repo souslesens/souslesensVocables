@@ -114,7 +114,7 @@ var Blender = (function () {
 
                     function (callbackSeries) {
                         if (Blender.currentSource)
-                            if(Config.Blender.openTaxonomyTreeOnLoad) {
+                            if(Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType=="SKOS") {
                                 self.showFilteredTaxonomyTree(function (err, result) {
                                     callbackSeries(err);
                                 })
@@ -981,7 +981,18 @@ var Blender = (function () {
 
 
             ,
+           getSourceDefaultRdfType:function(){
+                if(Config.sources[ self.currentSource].schemaType=="SKOS")
+                    return "concept";
+               if(Config.sources[ self.currentSource].schemaType=="OWL") {
+                   return "class";
+               }
+               return null;
+
+           },
             editNode: function (type) {
+                var type=self.nodeEdition.getSourceDefaultRdfType();
+
                 if (!type)
                     alert(" no type")
 
@@ -1000,10 +1011,12 @@ var Blender = (function () {
                     self.nodeEdition.openDialog()
                     var type = "http://www.w3.org/2004/02/skos/core#Collection"
                     SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, Collection.currentTreeNode.data.id, type, false)
-                }
-                else{
 
-                    
+                } else if (type == "class") {
+                    var owlType = "http://www.w3.org/2000/01/rdf-schema#Class"
+                    self.nodeEdition.openDialog()
+                    SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, self.currentTreeNode.data.id, owlType, false)
+
                 }
 
                 return true;
@@ -1285,7 +1298,7 @@ var Blender = (function () {
                     })
                 }
 
-                    console.log(JSON.stringify(jstreeData, null, 2))
+                 //   console.log(JSON.stringify(jstreeData, null, 2))
                     var jsTreeOptions = self.getConceptJstreeOptions(false)
                     jsTreeOptions.openAll = true;
                     common.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)

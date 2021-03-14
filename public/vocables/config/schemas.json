@@ -22,9 +22,9 @@
       ]
     }
   },
-  "OWLXXXX": {
+  "OWL": {
     "sparql_url": "_default",
-    "graphUri":"http://data.15926.org/dm/",
+    "graphUri":"http://data.total.com/resource/one-model/rdfsOwlSimplified/",
     "label": "NPD",
     "isOntology":true,
     "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",

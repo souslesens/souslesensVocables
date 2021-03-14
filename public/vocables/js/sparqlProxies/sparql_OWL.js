@@ -32,7 +32,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-fromStr=Sparql_common.getFromGraphStr( self.graphUri)
+            fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;
@@ -77,7 +77,7 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
                 strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
-            fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            fromStr = Sparql_common.getFromGraphStr(self.graphUri)
             var owlPredicate = "subClassOf";
             if (options.owlType)
                 owlPredicate = options.owlType
@@ -126,8 +126,8 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
 
                     "}"
             }
-            if(options.sort)
-                query += " order by ?"+options.sort+" "
+            if (options.sort)
+                query += " order by ?" + options.sort + " "
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
@@ -153,8 +153,7 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            fromStr= Sparql_common.getFromGraphStr(self.graphUri)
-
+            fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
 
             var query = "select * " + fromStr +
@@ -197,9 +196,9 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 " select distinct *  " + fromStr + "  WHERE {{"
 
-            if(words) {
+            if (words) {
                 query += "?concept rdfs:label ?conceptLabel."
-            }else{
+            } else {
                 query += "OPTIONAL { ?concept rdfs:label ?conceptLabel.}"
             }
 
@@ -263,8 +262,7 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            var fromStr= Sparql_common.getFromGraphStr(self.graphUri)
-
+            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
 
             var query = "";
@@ -403,15 +401,11 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
             }
 
 
-
-
-
-
             var filterStr = Sparql_common.setFilter("domain", ids);
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var   fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
 
             var query = "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
@@ -458,7 +452,7 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var    fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -489,7 +483,9 @@ fromStr=Sparql_common.getFromGraphStr( self.graphUri)
             })
         }
 
-
+        self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
+            return callback(null, [])
+        }
         return self;
 
 

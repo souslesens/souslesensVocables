@@ -16,6 +16,8 @@ var logger = require("../bin/logger..js");
 //var skosReader = require("../bin/backoffice/skosReader..js");
 var httpProxy = require("../bin/httpProxy.")
 var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.")
+
+var OneModelManager=require('../other/oneModel/OneModelManager.')
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
@@ -354,6 +356,15 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
                 })
         }
+        if (req.body.uploadOntologyFromOwlFile) {
+
+                OneModelManager.uploadOntologyFromOwlFile(req.body.graphUri,req.body.filePath, function (err, result) {
+                    processResponse(response, err, result)
+
+                })
+        }
+
+
 
 
     },
@@ -377,7 +388,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
     })
     ,
     router.get('/oneModel/ontology', function (req, res, next) {
-        var OneModelManager=require('../other/oneModel/OneModelManager.')
+
         OneModelManager.getOntology("http://data.total.com/resource/one-model/ontology/0.2/",function(err,result){
           //  res.setHeader('Content-type', "text:plain");
             // response.send(JSON.stringify(resultObj));

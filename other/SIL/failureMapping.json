@@ -4,9 +4,10 @@
       "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": {
-        "switch": {
-          "Temperature Transmitter": "http://w3id.org/readi/rdl/CFIHOS-30000476",
-          "Pressure Transmitter": "http://w3id.org/readi/rdl/CFIHOS-30000654"
+        "column": "Equipment_Category",
+        "switchValue": {
+          "Transmetteur de température": "http://w3id.org/readi/rdl/CFIHOS-30000476",
+          "Transmetteur de pression": "http://w3id.org/readi/rdl/CFIHOS-30000654"
 
 
         }

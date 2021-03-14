@@ -1,33 +1,45 @@
 const httpProxy = require("../../bin/httpProxy.")
 const rdfParser = require("rdf-parse").default;
-const fs = require('fs')
+var fs=require('fs')
+var path=require('path')
 const async = require("async");
 var util = require('../../bin/skosConverters/util.')
 const N3 = require('n3');
 const {DataFactory} = N3;
 const {namedNode, literal, defaultGraph, quad} = DataFactory;
+var graphUrisMap={}
 
 
 var sparql_server_url = "http://51.178.139.80:8890/sparql"
 
+
 var OneModelManager = {
-    getOntology: function (graphUri, callback) {
 
-        /*  const writer = new N3.Writer({ prefixes: { c: 'http://example.org/cartoons#' } });
-          writer.addQuad(
-              namedNode('http://example.org/cartoons#Tom'),
-              namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-              namedNode('http://example.org/cartoons#Cat')
-          );
-          writer.addQuad(quad(
-              namedNode('http://example.org/cartoons#Tom'),
-              namedNode('http://example.org/cartoons#name'),
-              literal('Tom')
-          ));
-          writer.end((error, result) =>
-              console.log(result));
+    getGraphUri:function(sourceLabel){
+        if(graphUrisMap[sourceLabel])
+            return graphUrisMap[sourceLabel]
+//"D:\\GitHub\\souslesensVocables\\public\\vocables\\config"
+        var sourcesFilePath= path.join(__dirname, "../../public/vocables/config/sources.json")
+        sourcesFilePath=path.resolve(sourcesFilePath)
+        try {
+            var str = fs.readFileSync(sourcesFilePath)
+            var sources = JSON.parse(str)
+            if(!sources[sourceLabel])
+                return "no source matching"
+            if(Array.isArray(sources[sourceLabel].graphUri))
+                return sources[sourceLabel].graphUri[0]
+            return sources[sourceLabel].graphUri
+        }catch(e){
+            return e;
+        }
 
-          return;*/
+    },
+
+    getOntology: function (sourceLabel, callback) {
+
+      var graphUri=OneModelManager.getGraphUri(sourceLabel)
+        if(graphUri.indexOf("http")!=0)
+            return callback(null,"ERROR reading graphUri :"+ sourceLabel+"  "+graphUri)
 
 
         var query = "select  ?s ?p ?o  from <" + graphUri + ">  WHERE { ?s ?p ?o  } order by ?s";
@@ -37,45 +49,10 @@ var OneModelManager = {
                 if (err) {
                     return callback(err);
                 }
-                /*    var writer = new N3.Writer({
-                        prefixes: {
-                            c: 'http://example.org/cartoons#',
-                            foaf: 'http://xmlns.com/foaf/0.1/'
-                        }
-                    });
-                    writer.addQuad(
-                        writer.blank(
-                            namedNode('http://xmlns.com/foaf/0.1/givenName'),
-                            literal('Tom', 'en')),
-                        namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                        namedNode('http://example.org/cartoons#Cat')
-                    );
-                    writer.addQuad(quad(
-                        namedNode('http://example.org/cartoons#Jerry'),
-                        namedNode('http://xmlns.com/foaf/0.1/knows'),
-                        writer.blank([{
-                            predicate: namedNode('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),
-                            object: namedNode('http://example.org/cartoons#Cat'),
-                        }, {
-                            predicate: namedNode('http://xmlns.com/foaf/0.1/givenName'),
-                            object: literal('Tom', 'en'),
-                        }])
-                    ));
-                    writer.addQuad(
-                        namedNode('http://example.org/cartoons#Mammy'),
-                        namedNode('http://example.org/cartoons#hasPets'),
-                        writer.list([
-                            namedNode('http://example.org/cartoons#Tom'),
-                            namedNode('http://example.org/cartoons#Jerry'),
-                        ])
-                    );
-                    writer.end((error, result) => console.log(result));*/
 
-                //
 
                 var writer = new N3.Writer(
                     {
-                        // format: 'application/trig',
                         prefixes: {
                             rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
                             rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
@@ -257,3 +234,4 @@ module.exports = OneModelManager;
 /*OneModelManager.getOntology("http://data.total.com/resource/one-model/ontology/0.2/", function (err, result) {
 
 })*/
+//OneModelManager.getGraphUri("ISO_15926-part-14")

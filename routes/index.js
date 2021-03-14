@@ -387,10 +387,20 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         })
     })
     ,
-    router.get('/oneModel/ontology', function (req, res, next) {
-
-        OneModelManager.getOntology("http://data.total.com/resource/one-model/ontology/0.2/",function(err,result){
+    router.get('/ontology/*', function (req, res, next) {
+        if(req.params.length==0)
+          return  req.send("missing ontology label")
+        var name=req.params[0]
+        OneModelManager.getOntology(name,function(err,result){
           //  res.setHeader('Content-type', "text:plain");
+            // response.send(JSON.stringify(resultObj));
+            res.send(result);
+        })
+    })
+    ,router.get('/15926/part14/', function (req, res, next) {
+
+        OneModelManager.getOntology("http://standards.iso.org/iso/15926/part14/",function(err,result){
+            //  res.setHeader('Content-type', "text:plain");
             // response.send(JSON.stringify(resultObj));
             res.send(result);
         })

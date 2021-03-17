@@ -89,6 +89,33 @@ var Sparql_schema = (function () {
 
     }
 
+    self.getRestrictions = function (schema, options, callback) {
+        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var query = " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct *" +
+            fromStr +
+            "where {" +
+            "  ?domain rdfs:subClassOf ?x." +
+            "  ?x rdf:type owl:Restriction." +
+            "  ?x owl:onProperty ?prop." +
+            "  ?x owl:someValuesFrom ?range." +
+            "  optional {?domain rdfs:label ?domainLabel}" +
+            "    optional {?prop rdfs:label ?propLabel}" +
+            "    optional {?range rdfs:label ?rangeLabel}" +
+
+            "}"
+
+        var url = schema.sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "range", "domain"], {noType: 1})
+            return callback(null, result.results.bindings)
+
+        })
+
+    }
+
     self.getPropertiesRangeAndDomain = function (schema, propertyIds, words, options, callback) {
         var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
 
@@ -97,9 +124,9 @@ var Sparql_schema = (function () {
             options = {}
         var filterStr
         if (words) {
-            filterStr ="FILTER ( regex(str(?property),'"+words+"','i') ||regex(str(?subProperty),'"+words+"','i') || regex(?propertyLabel,'"+words+"','i')  || regex(?subPropertyLabel,'"+words+"','i') )"
+            filterStr = "FILTER ( regex(str(?property),'" + words + "','i') ||regex(str(?subProperty),'" + words + "','i') || regex(?propertyLabel,'" + words + "','i')  || regex(?subPropertyLabel,'" + words + "','i') )"
 
-        }else
+        } else
             filterStr = Sparql_common.setFilter("property", propertyIds)
         if (options.filter)
             filterStr += options.filter
@@ -108,12 +135,12 @@ var Sparql_schema = (function () {
             query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#>" +
                 "  select distinct * " + fromStr +
                 " WHERE  {    ?property   rdfs:subPropertyOf* ?superProperty.?superProperty rdf:type owl:ObjectProperty " + filterStr
-            if(words)
-                query+=  " ?property rdfs:label ?propertyLabel. "
+            if (words)
+                query += " ?property rdfs:label ?propertyLabel. "
             else
-                query+="  OPTIONAL{?property rdfs:label ?propertyLabel.} "
+                query += "  OPTIONAL{?property rdfs:label ?propertyLabel.} "
 
-            query+=    "  ?superProperty rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}" +
+            query += "  ?superProperty rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}" +
                 "     OPTIONAL{ ?superProperty rdfs:range ?range.  ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.}}" +
                 "} order by ?propertyLabel limit " + self.queryLimit
         } else {

@@ -19,31 +19,20 @@
       "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
       "object": "failure.Tag_Number"
     },
-
+    {
+      "subject": "failure.Temperature",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Temperature"
+    },
     {
       "subject": "failure.Manufacturer",
       "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
       "object": "failure.Manufacturer"
     },
     {
-      "subject": "failure.Functionnal_Location",
-      "predicate":"http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
-      "object": "failure.Pressure^^xsd:float"
-    },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000028_superprop",
-      "object": "failure.Temperature^^xsd:float"
-    },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
-      "object": "http://standards.iso.org/iso/15926/part14/Site"
-    },
-    {
-      "subject": "failure.Unit",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/Site"
+      "subject": "failure.Pressure",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Pressure"
     },
     {
       "subject": "failure.Unit",
@@ -68,6 +57,11 @@
     },
 
 
+
+
+
+
+
     {
       "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
@@ -89,29 +83,16 @@
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
     },
-
+    {
+      "subject": "failure.Temperature",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-45000028"
+    },
     {
       "subject": "failure.Manufacturer",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://standards.iso.org/iso/15926/part14/Organization"
     },
-    {
-      "subject": "failure.Concept_Niv2",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.posccaesar.org/rdl/RDS32354",
-      "object": {
-        "column": "Concept_Niv2",
-        "switch": {
-          "3. Measurement Failure": "http://data.total.com/resource/one-model/Failure#3",
-          "1. Mechanical Failure": "http://data.total.com/resource/one-model/Failure#1",
-          "6. General": "http://data.total.com/resource/one-model/Failure#6",
-          "5. External Factor": "http://data.total.com/resource/one-model/Failure#5",
-          "4. Electrical Failure": "http://data.total.com/resource/one-model/Failure#4",
-          "2. Material Failure": "http://data.total.com/resource/one-model/Failure#2"
-        }
-      }
-
-      },
     {
       "subject": "failure.Concept_Failure_Id",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -121,9 +102,9 @@
         "prefix": "http://data.total.com/resource/one-model/Failure#"
 
 
-      }
+        }
 
-    },
+      },
     {
       "subject": "failure.Concept_Failure_Id",
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
@@ -134,7 +115,16 @@
       "predicate": "http://data.total.com/resource/one-model/alters",
       "object": "failure.Functionnal_Location"
     },
-
+    {
+      "subject": "failure.Pressure",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-45000017"
+    },
+    {
+      "subject": "failure.Unit",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#Site"
+    },
     {
       "subject": "failure.Valid_From",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",

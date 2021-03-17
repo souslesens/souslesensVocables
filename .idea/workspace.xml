@@ -2,11 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/other/SIL/failureMappingx.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/SIL/failureMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/SIL/failureMapping.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/schemas.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/schemas.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADLmappingsOld.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappingsOld.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,9 +27,9 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="JavaScript File" />
         <option value="JS module" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -43,7 +50,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -52,18 +59,18 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADLbrowser" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\lineage" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\lineage" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\other\SIL" />
       <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
       <recent name="D:\GitHub\souslesensVocables\bin" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADL" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADLbrowser" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -156,7 +163,8 @@
       <workItem from="1614839275149" duration="51030000" />
       <workItem from="1615225380681" duration="797000" />
       <workItem from="1615368199694" duration="880000" />
-      <workItem from="1615453594286" duration="45070000" />
+      <workItem from="1615453594286" duration="64923000" />
+      <workItem from="1615877061869" duration="42024000" />
     </task>
     <servers />
   </component>
@@ -182,20 +190,30 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/routes/index.js</url>
           <line>361</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
           <line>521</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/triplesGenerator.js</url>
-          <line>174</line>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js</url>
+          <line>79</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="53" />
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js</url>
+          <line>612</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js</url>
+          <line>613</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="40" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

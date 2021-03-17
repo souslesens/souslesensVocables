@@ -7,7 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
- 
+
 var fs = require("fs")
 
 const util = require('./skosConverters/util.')
@@ -49,7 +49,7 @@ var triplesGenerator = {
             var uri = existingUrisMap[value]
             if (!uri) {
 
-                if (value  && value.indexOf && value.indexOf("TOTAL-") == 0) {
+                if (value && value.indexOf && value.indexOf("TOTAL-") == 0) {
 
                     uri = totalRdlUriPrefix + value
                     existingUrisMap[value] = uri;
@@ -75,8 +75,8 @@ var triplesGenerator = {
 
                 if (!subjectValue)
                     return;
-                if(subjectValue.trim)
-                subjectValue = subjectValue.trim()
+                if (subjectValue.trim)
+                    subjectValue = subjectValue.trim()
 
                 var subjectUri = getUriFromValue(subjectValue)
 
@@ -87,39 +87,58 @@ var triplesGenerator = {
 
                 var objectValue;
                 var objectSuffix = ""
+                var p;
 
 
-                if( mapping.object instanceof Object ){
-                    var column=item[mapping.object.column]
-                    if(mapping.object["switchValue"]){
-                        if(mapping.object["switchValue"][column])
-                            objectValue=mapping.object["switchValue"][column]
-                        else if(mapping.object["switchValue"].default)
-                            objectValue=mapping.object["switchValue"].default
+                if (mapping.object instanceof Object) {
+                    var value = item[mapping.object.column]
+                    if(!value || value.trim()=="")
+                        return
+                    value=value.trim()
+                    if (mapping.object["switch"]) {
+                        if (mapping.object["switch"][value])
+                            objectValue = mapping.object["switch"][value]
+                        else if (mapping.object["switch"].default)
+                            objectValue = mapping.object["switch"].default
                         else
                             return;
-if(  options.oneModelDictionary[objectValue]){
-    triples.push({subject: objectValue, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'"+options.oneModelDictionary[objectValue]+"'"})
-}
+                        if (options.oneModelDictionary[objectValue]) {
+                            triples.push({subject: objectValue, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + options.oneModelDictionary[objectValue] + "'"})
+                        }
+                    } else if (mapping.object["prefix"]) {
+                        objectValue = item[mapping.object.column]
+                        if(!objectValue || objectValue.trim()=="")
+                            return
+                        objectValue = mapping.object["prefix"] + objectValue.trim()
+                        if (!options.oneModelDictionary[objectValue])
+                            return;
+                        else {
+                            triples.push({subject: objectValue, predicate: "http://www.w3.org/2000/01/rdf-schema#label", object: "'" + options.oneModelDictionary[objectValue] + "'"})
+                        }
 
 
-                    }else
-                        return  callback("bad definition of mapping object")
+                    } else
+                        return callback("bad definition of mapping object")
 
-                }else {
+                } else  if((p=mapping.object.indexOf("^^xsd:"))>-1) {
+                        objectValue= "'"+item[mapping.object.substring(0,p)]+"'"+mapping.object.substring(p)
+
+
+
+                } else{
                     objectValue = item[mapping.object]
                 }
 
-                if (objectValue && objectValue.trim )
+                if (objectValue && objectValue.trim)
                     objectValue = objectValue.trim()
 
 
-                if (objectValue  && objectValue.indexOf && objectValue.indexOf("TOTAL-") == 0) {
+                if (objectValue && objectValue.indexOf && objectValue.indexOf("TOTAL-") == 0) {
                     var totalUri = getUriFromValue(objectValue)
-                    if(totalUri)
-                    triples.push({subject: subjectUri, predicate: mapping.predicate, object: totalUri})
+                    if (totalUri)
+                        triples.push({subject: subjectUri, predicate: mapping.predicate, object: totalUri})
                     else
-                        triples.push({subject: subjectUri, predicate: mapping.predicate, object: "'"+objectValue+"'"})
+                        triples.push({subject: subjectUri, predicate: mapping.predicate, object: "'" + objectValue + "'"})
                 } else if (mapping.object.indexOf && mapping.object.indexOf("http") == 0) {
 
                     triples.push({subject: subjectUri, predicate: mapping.predicate, object: mapping.object})
@@ -129,15 +148,15 @@ if(  options.oneModelDictionary[objectValue]){
 
                     if (!objectValue)
                         return;
-
-                    if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
-                        if (util.isInt(objectValue)) {
+                  if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                       if (util.isInt(objectValue)) {
                             objectSuffix = "^^xsd:integer"
                             objectValue = "'" + objectValue + "'" + objectSuffix;
                         } else if (util.isFloat(objectValue)) {
                             objectSuffix = "^^xsd:float"
                             objectValue = "'" + objectValue + "'" + objectSuffix;
                         }
+
                         triples.push({subject: subjectUri, predicate: mapping.object, object: "'" + util.formatStringForTriple(objectValue) + "'"})
 
                     } else {
@@ -188,8 +207,8 @@ if(  options.oneModelDictionary[objectValue]){
         var mappings
         var rdlDictonary = {}
         var rdlInverseDictonary = {};
-        var oneModelDictionary={}
-        var oneModelInverseDictionary={}
+        var oneModelDictionary = {}
+        var oneModelInverseDictionary = {}
         var sqlTable = "";
 
 
@@ -264,7 +283,7 @@ if(  options.oneModelDictionary[objectValue]){
 
                 function (callbackSeries) {
 
-                  
+
                     triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, options.getExistingUriMappings, null, function (err, result) {
                         if (err)
                             return callbackSeries(err)
@@ -311,11 +330,11 @@ if(  options.oneModelDictionary[objectValue]){
                     var processor = function (data, callbackProcessor) {
 
 
-                            options.existingUrisMap = existingUrisMap;
+                        options.existingUrisMap = existingUrisMap;
                         options.rdlDictonary = rdlDictonary
                         options.rdlInverseDictonary = rdlInverseDictonary,
-                        options.oneModelDictionary=oneModelDictionary;
-                        options.oneModelInverseDictionary=oneModelInverseDictionary;
+                            options.oneModelDictionary = oneModelDictionary;
+                        options.oneModelInverseDictionary = oneModelInverseDictionary;
                         triplesGenerator.generateSheetDataTriples(mappings.mappings, data, uriPrefix, options, function (err, result) {
                             if (err)
                                 return callbackProcessor(err)
@@ -674,20 +693,20 @@ if(  options.oneModelDictionary[objectValue]){
 
     },
 
-    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri,oneModelGraphUri,dbConnection, callback) {
+    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, dbConnection, callback) {
 
         sqlConnector.connection = dbConnection;
         var count = 0;
         async.eachSeries(mappingFileNames, function (mappingFile, callbackEach) {
 
             var mappingPath = mappingsDirPath + mappingFile
-            var replaceGraph =true;// ((count++) == 0)
+            var replaceGraph = true;// ((count++) == 0)
 
             var options = {
                 generateIds: 15,
                 sparqlServerUrl: sparqlServerUrl,
                 rdlGraphUri: rdlGraphUri,
-                oneModelGraphUri:oneModelGraphUri,
+                oneModelGraphUri: oneModelGraphUri,
                 replaceGraph: replaceGraph
             }
 
@@ -711,11 +730,11 @@ if(  options.oneModelDictionary[objectValue]){
         var str = ""
         var typesMap = {
 
-          /*  "attribute": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
-            "physicalObject": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-            "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject",*/
+            /*  "attribute": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
+              "physicalObject": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+              "functionalObject": "http://standards.iso.org/iso/15926/part14/FunctionalObject",*/
             "discipline": "http://w3id.org/readi/z018-rdl/Discipline",
-           /* "requirement": "https://w3id.org/requirement-ontology/rdl/REQ_0011"*/
+            /* "requirement": "https://w3id.org/requirement-ontology/rdl/REQ_0011"*/
         }
 
 
@@ -833,11 +852,11 @@ if (false) {// buildClov
 
     var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\clov\\"
     var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-    var rdlGraphUri= "http://data.total.com/resource/one-model/quantum-rdl/"
+    var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
     var adlGraphUri = "http://data.total.com/resource/one-model/assets/clov/"
     var mappingFileNames = [
-      //  "tagMapping.json",
-      //  "tagAttributeMapping.json",
+        //  "tagMapping.json",
+        //  "tagAttributeMapping.json",
         "tag2ModelMapping.json",
         "modelMapping.json",
         "modelAttributeMapping.json",
@@ -850,9 +869,9 @@ if (false) {// buildClov
         user: "root",
         password: "vi0lon",
         database: 'clov',
-        fetchSize:5000,
+        fetchSize: 5000,
     }
-    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri,oneModelGraphUri,dbConnection, function (err, result) {
+    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, function (err, result) {
         if (err)
             return console.log(err);
         return console.log("ALL DONE");
@@ -865,7 +884,7 @@ if (false) {// turbogen
     var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
     var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
     var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
-    var oneModelGraphUri="http://data.total.com/resource/one-model/ontology/0.2/"
+    var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
     var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
     var mappingFileNames = [
         /* "breakdowns.json"
@@ -888,37 +907,36 @@ if (false) {// turbogen
     }
 }
 
-    if (true) {// SIL
+if (true) {// SIL
 
 
-        var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\SIL\\"
-        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-        var rdlGraphUri= "http://data.total.com/resource/sil/ontology/0.1/"
-        var oneModelGraphUri="http://data.total.com/resource/one-model/ontology/0.2/"
-        var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
-        var mappingFileNames = [
-            /* "breakdowns.json"
-                "tagMapping.json",
-                "tagAttributeMapping.json",
-              "tag2ModelMapping.json",
-              "modelMapping.json",
-              "modelAttributeMapping.json",
-              "tag2tagMapping.json",*/
-            "failureMapping.json"
-        ]
+    var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\SIL\\"
+    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+    var rdlGraphUri = "http://data.total.com/resource/sil/ontology/0.1/"
+    var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
+    var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
+    var mappingFileNames = [
+        /* "breakdowns.json"
+            "tagMapping.json",
+            "tagAttributeMapping.json",
+          "tag2ModelMapping.json",
+          "modelMapping.json",
+          "modelAttributeMapping.json",
+          "tag2tagMapping.json",*/
+        "failureMapping.json"
+    ]
 
 
-        var dbConnection = {
-            host: "localhost",
-            user: "root",
-            password: "vi0lon",
-            database: 'sil',
-            fetchSize:5000,
-        }
+    var dbConnection = {
+        host: "localhost",
+        user: "root",
+        password: "vi0lon",
+        database: 'sil',
+        fetchSize: 5000,
+    }
 
 
-
-    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri,oneModelGraphUri,dbConnection, function (err, result) {
+    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, function (err, result) {
         if (err)
             return console.log(err);
         return console.log("ALL DONE");

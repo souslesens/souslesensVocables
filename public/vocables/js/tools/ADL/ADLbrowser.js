@@ -5,7 +5,8 @@ var ADLbrowser = (function () {
     var typeColors = []
     self.aspectsChildrenDepth = 8
     self.OneModelDictionary = {}
-
+    self.oneModelClasses = {}
+self.queryTypesArray=[]
     self.defaultNodeSize = 10;
     self.getPropertyColor = function (type, palette) {
         if (!palette)
@@ -76,17 +77,38 @@ var ADLbrowser = (function () {
             function (callbackSeries) {
                 Sparql_schema.getClasses(schema, null, function (err, result) {
                     result.forEach(function (item) {
+                        var classLabel = null;
                         if (item.classLabel)
-                            self.OneModelDictionary[item.class.value] = item.classLabel.value
+                            classLabel = item.classLabel.value
                         else
-                            self.OneModelDictionary[item.class.value] = item.class.value.substring(item.class.value.lastIndexOf("/") + 1)
+                            classLabel = item.class.value.substring(item.class.value.lastIndexOf("/") + 1)
+                        self.oneModelClasses[item.class.value] = classLabel
+
+                        self.OneModelDictionary[item.class.value] = classLabel
+
                     })
+                    callbackSeries()
                 })
-                callbackSeries()
-            }
+
+            },
+            function (callbackSeries) {
+                Sparql_schema.getRestrictions(schema, null, function (err, result) {
+                    result.forEach(function (item) {
+                        self.OneModelDictionary[item.domain.value] = item.domainLabel.value
+                        self.OneModelDictionary[item.prop.value] = item.propLabel.value
+                        self.OneModelDictionary[item.range.value] = item.range.value
+
+                    })
+                    callbackSeries()
+                })
+
+            },
+
+
         ], function (err) {
             if (err)
                 return MainController.UI.message(err);
+            // console.log(JSON.stringify(self.OneModelDictionary, null, 2))
         })
     }
 
@@ -214,6 +236,8 @@ var ADLbrowser = (function () {
                     self.currentSource = data.node.id
                     self.jstree.load.loadAdl()
                 }
+                self.adlModelCache = {}
+                self.queryTypesArray=[]
 
             },
             onSelectNodeOneModel: function (e, obj) {
@@ -348,9 +372,9 @@ var ADLbrowser = (function () {
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {label: "Physical Objects", type: "http://standards.iso.org/iso/15926/part14/PhysicalObject"},
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {label: "Disciplines", type: "http://w3id.org/readi/z018-rdl/Discipline"},
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {label: "Attributes", type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"},
-                   // "https://w3id.org/requirement-ontology/rdl/REQ_0011": {label: "Attributes", type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"}
+                    // "https://w3id.org/requirement-ontology/rdl/REQ_0011": {label: "Attributes", type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"}
 
-            }
+                }
                 var topIds = Object.keys(topObjects)
                 var jstreeData = []
                 async.eachSeries(topIds, function (parentId, callbackEach) {
@@ -391,101 +415,303 @@ var ADLbrowser = (function () {
                     return alert("select a source")
                 }
 
-                self.query.getAdlModel("all", null, function (err, result) {
+                var jstreeData = []
+                async.series([
+                        function (callbackSeries) {
+                            if (self.adlJstreeData) {
+                                jstreeData = self.adlJstreeData;
+                            }
+                            self.query.getOneModelDescription(function (err, result) {
+                                if (err)
+                                    MainController.UI.message(err)
 
-                    var jstreeData = []
-                    var existingNodes = {}
-                    var typesArray = []
+                                for (var key in result.allObjectsMap) {
+                                    var item = result.allObjectsMap[key]
+                                    if (item.type == "Class") {
+                                        if (!item.parent)
+                                            item.parent = "#"
+                                        jstreeData.push({
+                                            id: key,
+                                            parent: item.parent,
+                                            text: item.label,
+                                            data: {sourceType: "adl", role: "sub|obj", source: self.currentSource, id: key, label: item.label}
 
-                    result.forEach(function (item) {
-                        if (!item.objType)
-                            return;
-                        if (typesArray.indexOf(item.subType.value) < 0)
-                            typesArray.push(item.subType.value)
-
-
-                        var subId = item.subType.value
-                        var propId = item.subType.value + "_" + item.prop.value;
-                        var objId = null;
-                        if (item.objType)
-                            objId = item.subType.value + "_" + item.prop.value + "_" + item.objType.value;
+                                        })
 
 
-                        if (item.subType) {
-                            var label
-                            if (item.subTypeLabel)
-                                label = item.subTypeLabel.value;
-                            else
+                                    }
+                                }
+                                self.adlJstreeData = jstreeData
+                                callbackSeries()
+                            })
+                        },
+
+                        function (callbackSeries) {
+                            self.query.getADLclassesList(self.currentSource, function (err, adlClasses) {
+                                if (err)
+                                    return callbackSeries();
+                                var jstreeDataFiltered = []
+                                var map = {}
+                                jstreeData.forEach(function (item) {
+                                    if (adlClasses.indexOf(item.id) > -1) {
+                                        item.used = 1;
+                                        item.text = "<span class='adlNode'>" + item.data.label + "</span>"
+                                    }
+                                    map[item.id] = item
+                                })
+
+
+                                function recurseParents(id) {
+                                    if (map[id].used && map[map[id].parent]) {
+                                        map[map[id].parent].used = 1
+                                        recurseParents(map[id].parent)
+                                    }
+
+                                }
+
+                                jstreeData.forEach(function (item) {
+                                    if (item.used) {
+                                        recurseParents(item.id)
+                                    }
+                                })
+
+
+                                var uniqueIds = {}
+                                jstreeData.forEach(function (item) {
+                                    if (item.used && !uniqueIds[item.id]) {
+                                        uniqueIds[item.id] = 1
+                                        jstreeDataFiltered.push(item)
+                                    }
+
+
+                                })
+                                jstreeData.forEach(function (item) {
+                                    if (!uniqueIds[item.parent])
+                                        item.parent = "#"
+
+                                })
+                                jstreeData = jstreeDataFiltered
+                                callbackSeries();
+                            })
+                        }
+                    ], function (err) {
+
+
+                        var options = {
+
+                            selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
+                            openAll: true,
+                            contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+
+                        }
+                        //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
+                        common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                        $("#ADLbrowser_Tabs").tabs("option", "active", 0);
+                    }
+                )
+
+
+                if (false) {
+                    self.query.getAdlModel("all", null, "subject", function (err, result) {
+
+                        var jstreeData = []
+                        var existingNodes = {}
+                        var typesArray = []
+
+                        result.forEach(function (item) {
+                            if (!item.objType)
+                                return;
+                            if (typesArray.indexOf(item.subType.value) < 0)
+                                typesArray.push(item.subType.value)
+
+
+                            var subId = item.subType.value
+                            var propId = item.subType.value + "_" + item.prop.value;
+                            var objId = null;
+                            if (item.objType)
+                                objId = item.subType.value + "_" + item.prop.value + "_" + item.objType.value;
+
+
+                            if (item.subType) {
+                                var label
+                                /*   if (item.subTypeLabel)
+                                    label = item.subTypeLabel.value;
+                                 else*/
                                 label = self.OneModelDictionary[item.subType.value]
-                            if (!label)
-                                label = item.subType.value
-                            var color = self.getPropertyColor(item.subType.value)
-                            if (!existingNodes[subId]) {
+                                if (!label)
+                                    label = item.subType.value
+                                var color = self.getPropertyColor(item.subType.value)
+                                if (!existingNodes[subId]) {
 
-                                existingNodes[subId] = 1
+                                    existingNodes[subId] = 1
+                                    jstreeData.push({
+                                        id: subId,
+                                        text: "<span style='color:" + color + "'>" + label + "</span>",
+                                        parent: "#",
+                                        data: {sourceType: "adl", role: "subType", source: self.currentSource, id: item.subType.value, label: label}
+                                    })
+                                }
+                            }
+                            if (!existingNodes[propId]) {
+                                /*  if (item.propLabel)
+                                      label = item.propLabel.value;
+                                  else*/
+                                label = self.OneModelDictionary[item.prop.value]
+                                if (!label)
+                                    label = item.prop.value
+                                existingNodes[propId] = 1
                                 jstreeData.push({
-                                    id: subId,
-                                    text: "<span style='color:" + color + "'>" + label + "</span>",
-                                    parent: "#",
-                                    data: {sourceType: "adl", role: "subType", source: self.currentSource, id: item.subType.value, label: label}
+                                    id: propId,
+                                    text: label,
+                                    parent: subId,
+                                    data: {sourceType: "adl", role: "pred", source: self.currentSource, id: item.prop.value, label: label}
                                 })
                             }
-                        }
-                        if (!existingNodes[propId]) {
-                            if (item.propLabel)
-                                label = item.propLabel.value;
-                            else
-                                label = self.OneModelDictionary[propId]
-                            if (!label)
-                                label = item.prop.value
-                            existingNodes[propId] = 1
-                            jstreeData.push({
-                                id: propId,
-                                text: label,
-                                parent: subId,
-                                data: {sourceType: "adl", role: "pred", source: self.currentSource, id: item.prop.value, label: label}
-                            })
-                        }
-                        if (objId && !existingNodes[objId]) {
-                            if (typesArray.indexOf(item.objType.value) < 0)
-                                typesArray.push(item.objType.value)
+                            if (objId && !existingNodes[objId]) {
+                                if (typesArray.indexOf(item.objType.value) < 0)
+                                    typesArray.push(item.objType.value)
 
-                            existingNodes[objId] = 1
-                            if (item.objTypeLabel)
-                                label = item.objTypeLabel.value;
-                            else
+                                existingNodes[objId] = 1
+                                /*  if (item.objTypeLabel)
+                                      label = item.objTypeLabel.value;
+                                  else*/
                                 label = self.OneModelDictionary[item.objType.value]
-                            if (!label)
-                                label = item.objType.value
-                            var color = self.getPropertyColor(item.objType.value)
-                            jstreeData.push({
-                                id: objId,
-                                text: "<span style='color:" + color + "'>" + label + "</span>",
-                                parent: propId,
-                                data: {sourceType: "adl", role: "objType", source: self.currentSource, id: item.objType.value, label: label}
-                            })
+                                if (!label)
+                                    label = item.objType.value
+                                var color = self.getPropertyColor(item.objType.value)
+                                jstreeData.push({
+                                    id: objId,
+                                    text: "<span style='color:" + color + "'>" + label + "</span>",
+                                    parent: propId,
+                                    data: {sourceType: "adl", role: "objType", source: self.currentSource, id: item.objType.value, label: label}
+                                })
+                            }
+
+                        })
+
+
+                        var options = {
+
+                            selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
+                            openAll: true,
+                            contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+
                         }
+                        common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
+                        common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                        $("#ADLbrowser_Tabs").tabs("option", "active", 0);
+
 
                     })
 
-
-                    var options = {
-
-                        selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
-                        openAll: true,
-                        contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
-
-                    }
-                    common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                    common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
-                    $("#ADLbrowser_Tabs").tabs("option", "active", 0);
-
-
-                })
-
-
+                }
             }
 
+        },
+        updateAdlTree: function (node) {
+
+            self.query.getAdlModel(node.data.id, self.currentSource, "subjectOrObject", function (err, result) {
+                var jstreeData = [];
+                var existingNodes = {}
+
+                result.forEach(function (item) {
+
+                        var targetNode
+                    var role;
+                        if (node.data.id != item.subType.value) {
+                            targetNode = item.subType
+                        }else {
+                            targetNode = item.objType
+                        }
+                        if (!existingNodes[targetNode.value]) {
+                            existingNodes[targetNode.value] = 1
+                            jstreeData.push({
+                                id: targetNode.value,
+                                text: "<span class='adlNode'>"+self.oneModelDescription.allObjectsMap[targetNode.value].label+"</span>",
+                                parent: item.prop.value,
+                                data: {role: "sub|obj",property:item.prop.value,  id:targetNode.value, label: self.oneModelDescription.allObjectsMap[targetNode.value].label, source: self.currentSource}
+                            })
+
+                        }
+                        if (!existingNodes[item.prop.value]) {
+                            existingNodes[item.prop.value] = 1
+                            jstreeData.push({
+                                id: item.prop.value,
+                                text: self.oneModelDescription.allObjectsMap[item.prop.value].label,
+                                parent: node.data.id,
+                                data: {role: "prop", id: item.prop.value, label: self.oneModelDescription.allObjectsMap[item.prop.value].label, source: self.currentSource}
+                            })
+                        }
+                    }
+                )
+
+                        jstreeData.push({
+                            id: node.data.id,
+                            text: node.data.label,
+                            parent: "#",
+                            data: node.data
+                        })
+                        var options = {
+
+                            selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
+                            openAll: true,
+                            contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+
+                        }
+                        //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
+                        common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+
+            })
+
+            if (false) {
+                var sourceNode = _node
+                var domainConstraints = self.oneModelDescription.constraintsMap.domains[sourceNode.data.id] || []
+                domainConstraints = domainConstraints.concat(self.oneModelDescription.constraintsMap.ranges[sourceNode.data.id] || [])
+                // var rangeConstraints = self.oneModelDescription.constraintsMap.ranges[sourceNode.data.id]
+                var propConstraints = self.oneModelDescription.constraintsMap.properties
+                var jstreeData = [];
+
+                if (domainConstraints) {
+                    domainConstraints.forEach(function (prop) {
+                        jstreeData.push({
+                            id: prop,
+                            text: self.oneModelDescription.allObjectsMap[prop].label,
+                            parent: sourceNode.data.id,
+                            data: sourceNode.data
+                        })
+                        var propNodes = propConstraints[prop]
+                        for (var targetNode in propNodes) {
+                            if (targetNode != sourceNode.data.id) {
+                                jstreeData.push({
+                                    id: targetNode,
+                                    text: self.oneModelDescription.allObjectsMap[targetNode].label,
+                                    parent: prop,
+                                    data: self.oneModelDescription.allObjectsMap[targetNode]
+                                })
+                            }
+
+                        }
+
+                    })
+                }
+
+                jstreeData.push({
+                    id: sourceNode.data.id,
+                    text: sourceNode.data.label,
+                    parent: "#",
+                    data: sourceNode.data
+                })
+                var options = {
+
+                    selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
+                    openAll: true,
+                    contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+
+                }
+                //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
+                common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+
+            }
         }
         ,
         getJstreeConceptsContextMenu: function (jstreeDivId) {
@@ -553,6 +779,7 @@ var ADLbrowser = (function () {
             }
             return items;
         }
+
         ,
         getJstreeQueryContextMenu: function (jstreeDivId) {
 
@@ -584,7 +811,8 @@ var ADLbrowser = (function () {
 
             return items;
         }
-        , menuActions: {
+        ,
+        menuActions: {
             addAllNodesToGraph: function (node) {
                 MainController.UI.message("searching...")
                 $("#waitImg").css("display", "flex");
@@ -593,10 +821,12 @@ var ADLbrowser = (function () {
                     self.Graph.drawGraph(node)
                 }
             }
-            , removeNodesFromGraph: function (node) {
+            ,
+            removeNodesFromGraph: function (node) {
 
             }
-            , addQueryFilter: function (position) {
+            ,
+            addQueryFilter: function (position) {
                 var properties = [ADLbrowser.currentJstreeQueryNode.data]
                 common.fillSelectOptions("ADLbrowserQueryParams_property", properties, false, "label", "id")
                 $("#ADLbrowserQueryParamsDialog").css("left", position.x)
@@ -604,7 +834,8 @@ var ADLbrowser = (function () {
                 $("#ADLbrowserQueryParamsDialog").css("display", "block")
 
             }
-            , removeQueryFilter: function () {
+            ,
+            removeQueryFilter: function () {
                 $("#ADLbrowser_queryTreeDiv").jstree(true).delete_node(ADLbrowser.currentJstreeQueryNode.id)
             }
 
@@ -617,43 +848,111 @@ var ADLbrowser = (function () {
 
     self.query = {
 
-        getAdlModel: function (subjectType, source, callback) {
+        getOneModelDescription: function (callback) {
+            ADLcommon.Ontology.load(Config.ADLBrowser.OneModelSource, function (err, result) {
+                if (err) {
+                    callback(err)
+                }
+                self.oneModelDescription = result;
+                callback(null, result)
+            })
+        },
+
+        getADLclassesList: function (source, callback) {
+            var fromStr = Sparql_common.getFromStr(self.currentSource)
+
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?type" +
+                fromStr +
+                "WHERE {?sub rdf:type ?type}"
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                if (err) {
+                    return callback(err)
+                }
+                var array = []
+                result.results.bindings.forEach(function (item) {
+                    array.push(item.type.value)
+                })
+                return callback(null, array)
+            })
+        },
+
+        getAdlModel: function (subjectType, source, mode, callback) {
 
             if (!source)
                 source = self.currentSource;
             if (!self.adlModelCache)
                 self.adlModelCache = {}
 
-            if (self.adlModelCache[subjectType]) {
-                return callback(null, self.adlModelCache[subjectType])
+            if (self.adlModelCache[subjectType + "_" + mode]) {
+                return callback(null, self.adlModelCache[subjectType + "_" + mode])
             }
+            var model = []
+            async.series([
 
+                function (callbackSeries) {
+                    var fromStr = Sparql_common.getFromStr(self.currentSource)
+                    var filterStr = "";
 
-            var fromStr = Sparql_common.getFromStr(self.currentSource)
-            var filterStr = "";
-            if (subjectType != "all")
-                filterStr = "filter (?subType=<" + subjectType + "> ) "
-            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?prop ?subType ?objType" +
-                fromStr +
-                "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}" +
-                "}"
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
-                if (err) {
-                    return callback(err)
+                    var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct ?prop ?subType ?objType" +
+                        fromStr
+                    if (subjectType == "all") {
+                        query += "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}"
+
+                    } else if (mode == "subject") {
+                        filterStr = "filter (?subType=<" + subjectType + "> ) "
+                        query += "WHERE {?sub ?prop ?obj.filter (?prop !=<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>) {?sub rdf:type  ?subType. " + filterStr + "}  optional{?obj rdf:type ?objType}"
+                    } else if (mode == "subjectOrObject") {
+                        filterStr = "filter (?subType=<" + subjectType + ">  || ?objType=<" + subjectType + "> ) "
+                        query += "WHERE {   ?sub ?prop ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType." + filterStr + " optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}"
+
+                    }
+                    query += "}"
+                    var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err)
+                        }
+                        //   result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "subType", "objType"])
+                        self.adlModelCache[subjectType + "_" + mode] = result.results.bindings
+                        model = result.results.bindings
+                        return callbackSeries()
+                    })
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "subType", "objType"])
-                self.adlModelCache[subjectType] = result.results.bindings
-                return callback(null, result.results.bindings)
+                , function (callbackSeries) {
+                    var model2 = []
+                    model.forEach(function (item) {
+                        if (self.oneModelClasses[item.subType.value])
+                            model2.push(item)
+                        else
+                            var x = 3;
+
+                    })
+                    model = model2
+
+                    return callbackSeries()
+                }
+
+
+            ], function (err) {
+                if (err)
+                    return callback(err)
+                return callback(null, model)
+                return
             })
 
-        },
+        }
+
+        ,
+
 
         getNodeProperties: function (node, callback) {
             if (node.data.role == "pred")
                 return [node.data.id]
 
-            self.query.getAdlModel(node.data.type || node.data.id, null, function (err, result) {
+            self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -673,7 +972,8 @@ var ADLbrowser = (function () {
                 return callback(null, properties)
 
             })
-        },
+        }
+        ,
         showQueryParamsDialog: function (position, mode) {
             var field = self.currentJstreeNode.id
             self.query.getNodeProperties(self.currentJstreeNode, function (err, properties) {
@@ -683,11 +983,12 @@ var ADLbrowser = (function () {
                 $("#ADLbrowserQueryParams_type").html(self.currentJstreeNode.data.label)
                 common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property")
 
-                $("#ADLbrowserQueryParamsDialog").css("left", position.x)
+                $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
                 $("#ADLbrowserQueryParamsDialog").css("top", position.y)
                 $("#ADLbrowserQueryParamsDialog").css("display", "block")
             })
-        },
+        }
+        ,
         onQueryParamsDialogValidate: function () {
             var property = $("#ADLbrowserQueryParams_property").val()
             var operator = $("#ADLbrowserQueryParams_operator").val()
@@ -697,26 +998,34 @@ var ADLbrowser = (function () {
             $("#ADLbrowserQueryParamsDialog").css("display", "none")
             var filterStr = "";
             var numberOperators = ("<", ">", "<=", ">=")
+            var typeVarName;
+            if( self.queryTypesArray.length==0)
+                typeVarName="?sub"
+            else
+                typeVarName="?obj"
+
             if (property) {
                 if (value) {
                     if (operator == "contains")
-                        filterStr = " ?obj <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
+                        filterStr = typeVarName+" <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
                     else if (operator == "not contains")
-                        filterStr = " ?obj <" + property + "> ?x. filter regex(?x, '^((?!" + value + ").)*$','i') "
+                        filterStr = typeVarName+" <" + property + "> ?x. filter regex(?x, '^((?!" + value + ").)*$','i') "
                     else if (numberOperators.indexOf(operator) > -1)
-                        filterStr = " ?obj <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
+                        filterStr = typeVarName+" <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
 
                     else
-                        filterStr = " ?obj <" + property + "> ?x. filter (?x " + operator + value + ") "
+                        filterStr = typeVarName+" <" + property + "> ?x. filter (?x " + operator + value + ") "
                 } else {
 
 
-                    filterStr = "  ?obj <" + property + "> ?x. "
+                    filterStr =  typeVarName+" <" + property + "> ?x. "
                 }
 
 
             }
             var filterLabel = property + " " + operator + " " + value
+
+            self.jstree.updateAdlTree(self.currentJstreeNode)
             if (self.queryMode == "graph")
                 self.Graph.drawGraph(self.currentJstreeNode, filterStr)
             else if (self.queryMode == "query") {
@@ -733,13 +1042,14 @@ var ADLbrowser = (function () {
             $("#ADLbrowserQueryParamsDialog").css("display", "none")
 
 
-        },
+        }
+        ,
 
 
         addNodeToQueryTree: function (node, prop) {
 
 
-            self.query.getAdlModel(node.data.type || node.data.id, null, function (err, result) {
+            self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
                 var isNewTree = $("#ADLbrowser_queryTreeDiv").is(':empty');
                 var existingNodes = []
                 if (!isNewTree)
@@ -817,7 +1127,8 @@ var ADLbrowser = (function () {
 
 
         }
-        , addFilterToQueryTree: function (filterObj) {
+        ,
+        addFilterToQueryTree: function (filterObj) {
             var propId = ADLbrowser.currentJstreeQueryNode.id
             var id = "filter_" + common.getRandomHexaId(5)
             var jstreeData = [{
@@ -835,20 +1146,26 @@ var ADLbrowser = (function () {
 
 
         }
-        , clear() {
+        ,
+        clear() {
+            self.jstree.load.loadAdl();
+            self.queryTypesArray=[]
             $("#ADLbrowser_queryTreeDiv").jstree("destroy").empty();
 
         }
-        , showQuery: function () {
+        ,
+        showQuery: function () {
             self.query.execute(true)
-        },
+        }
+        ,
         execute: function (showQueryOnly) {
             if (Config.ADLBrowser.adlQueryMode == "SPARQL") {
                 self.query.executeSparqlQuery(showQueryOnly);
             } else if (Config.ADLBrowser.adlQueryMode == "SQL") {
                 self.query.executeSqlQuery(showQueryOnly);
             }
-        },
+        }
+        ,
         executeSparqlQuery: function (showQueryOnly) {
 
             //   var checkedNodes = $("#ADLbrowser_queryTreeDiv").jstree(true).get_checked(false)
@@ -960,10 +1277,12 @@ var ADLbrowser = (function () {
                 self.query.showQueryResultInDataTable(dataSet, cols)
             })
 
-        },
+        }
+        ,
         executeSqlQuery: function () {
         }
-        , showQueryResultInDataTable: function (dataSet, cols) {
+        ,
+        showQueryResultInDataTable: function (dataSet, cols) {
 
 
             $('#mainDialogDiv').dialog("open")
@@ -1002,7 +1321,9 @@ var ADLbrowser = (function () {
             $("#graphPopupDiv").html(html)
         },
         clearGraph: function () {
+            self.jstree.load.loadAdl();
             visjsGraph.clearGraph()
+            self.queryTypesArray=[]
         },
         collapseNode: function () {
             visjsGraph.collapseNode(self.currentJstreeNode.id)
@@ -1018,7 +1339,7 @@ var ADLbrowser = (function () {
             function execute(graphNodeFilterStr, callback) {
                 var source;
                 var query
-                if (node.data.sourceType == "rdl") {
+                if (false && node.data.sourceType == "rdl") {
                     source = self.currentSource
                     var fromStrAdl = Sparql_common.getFromStr(source)
                     var fromStrRdl = Sparql_common.getFromStr(Config.ADLBrowser.RDLsource)
@@ -1036,19 +1357,26 @@ var ADLbrowser = (function () {
 
 
                 }
-                if (node.data.sourceType == "adl") {
+                if (true || node.data.sourceType == "adl") {
                     source = self.currentSource
 
                     var fromStr = Sparql_common.getFromStr(source)
                     query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * " +
                         fromStr +
-                        "WHERE {" +
-                        "   ?sub ?pred ?obj. ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional{?obj rdfs:label ?objLabel}"
-                    // "filter(   ?" + node.data.role + " =<" + node.data.id + "> && regex(str(?pred),'part14'))" + filterStr +
-                    if (node.data.role == "sub|obj") {
-                        query += "filter(   ?sub =<" + node.data.id + "> || ?obj=<" + node.data.id + ">)"
+                        "WHERE {"
+                    if( self.queryTypesArray.length==0){
+                        query += "    ?sub rdf:type ?subType. optional {?sub rdfs:label ?subLabel} "
+                        query += "filter(   ?subType =<" + node.data.id + "> )"
+                    }else{
+                        query += "?sub <"+node.data.property+">|^<"+node.data.property+"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} "
+                        node.data.property
+                        query += "filter(   ?objType =<" + node.data.id + "> )"
+                    }
+                    self.queryTypesArray.push(node.data.id)
+               /*     if (node.data.role == "sub|obj") {
+                        query += "filter(   ?subType =<" + node.data.id + "> )"
                     } else
-                        query += "filter(   ?" + node.data.role + " =<" + node.data.id + "> )"
+                        query += "filter(   ?" + node.data.role + " =<" + node.data.id + "> )"*/
 
                     query += filterStr + graphNodeFilterStr
 
@@ -1056,7 +1384,7 @@ var ADLbrowser = (function () {
                     query += " }  limit 1000"
 
                 }
-                if (node.data.sourceType == "oneModel") {
+                if (false && node.data.sourceType == "oneModel") {
                     source = self.currentSource
                     query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * " +
                         "FROM <http://data.total.com/resource/one-model/assets/clov/>  from <http://data.total.com/resource/one-model/quantum-rdl/>" +

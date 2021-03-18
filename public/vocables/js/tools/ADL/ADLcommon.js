@@ -197,6 +197,7 @@ var ADLcommon = (function () {
 //return callbackSeries()
                         for (var classId in self.allObjectsMap) {
                             var item = self.allObjectsMap[classId]
+                           // if(classId==)
 if(item.parent){
                             if (item.type == "Class" ) {
                                 if (self.constraintsMap.domains[item.parent]) {

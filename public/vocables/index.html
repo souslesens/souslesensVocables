@@ -92,12 +92,14 @@
 
         var leftPanelWidth = 400
         var rightPanelWidth = 400
+        var w
+        var h
         $(function () {
             config = {loginMode: "none", appName: "VOCABLES"};
             authentication.init()
 
-            var w = $(document).width() - leftPanelWidth - 30;
-            var h = $(document).height() - 20;
+             w = $(document).width() - leftPanelWidth - 30;
+             h = $(document).height() - 20;
             // $("#centralPanel").width(w)
             $("#graphDiv").width(w)
             $("#blendDiv").width(w)

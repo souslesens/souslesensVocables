@@ -25,7 +25,7 @@
     }
 
     .adlNode{
-        background-color: #e78f08;
+        background-color: #95a4bd;
         margin: 2px;
         padding: 2px;
     }
@@ -76,13 +76,14 @@
 
 </div>
 
-<div id="ADLbrowserQueryParamsDialog" style="position: absolute;display: none; z-index: 100 ;width: 300px;height:80px;" class="vakata-context vakata-context">
+<div id="ADLbrowserQueryParamsDialog" style="position: absolute;display: none;padding: 5px; z-index: 100 ;width: 300px;" class="vakata-context vakata-context">
 
     <div>
         <button onclick="ADLbrowser.query.onQueryParamsDialogCancel()">X</button>
         <br>
         type <span id="ADLbrowserQueryParams_type"></span>
         property <select id="ADLbrowserQueryParams_property"></select>
+        <br>
         <br>
         <select id="ADLbrowserQueryParams_operator">
             <option>=</option>
@@ -92,7 +93,10 @@
             <option>contains</option>
             <option>not contains</option>
         </select>
-        <input id="ADLbrowserQueryParams_value" size="20">
+
+        <button onclick="ADLbrowser.query.listQueryParamsDialogFieldValues()">L</button>
+        <br>
+        <input id="ADLbrowserQueryParams_value" size="20">  <select id="ADLbrowserQueryParams_valuesSelect" onchange="ADLbrowser.query.onQueryParamsValuesSelect()" ></select>
         <button onclick="ADLbrowser.query.onQueryParamsDialogValidate()">OK</button>
     </div>
 

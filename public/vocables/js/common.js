@@ -246,8 +246,11 @@ var common = (function () {
                 position = "last"
             jstreeData.forEach(function (node) {
                 var parentNode = parentNodeId;
+
                 if (node.parent)
                     parentNode = node.parent
+                if(parentNode.indexOf("D101001101")>-1)
+                    var x=3
                 $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
                     $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
 
@@ -398,16 +401,16 @@ var common = (function () {
         }
 
         self.copyTextToClipboard = function (text) {
-          /*  async function copy() {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    console.log('Page URL copied to clipboard');
-                } catch (err) {
-                    console.error('Failed to copy: ', err);
-                }
-            }
-copy()
-            return;*/
+            /*  async function copy() {
+                  try {
+                      await navigator.clipboard.writeText(text);
+                      console.log('Page URL copied to clipboard');
+                  } catch (err) {
+                      console.error('Failed to copy: ', err);
+                  }
+              }
+  copy()
+              return;*/
 
             var textArea = document.createElement("textarea");
             textArea.style.position = 'fixed';
@@ -455,25 +458,24 @@ copy()
         }
 
 
+        self.createBGColorCssClasses=function(classPrefix,values,palette){
+            values.forEach(function(item,index){
+                var html=classPrefix+item+" :  { background-color:"+palette[index]+"}"
+
+                $("<style>").prop("type", "text/css").html(html).appendTo("head");
+            })
+
+        }
+
         self.pasteTextFromClipboard = function (callback) {
             async function paste() {
                 const text = await navigator.clipboard.readText();
                 callback(text)
-              //  alert('Pasted text: ', text);
+                //  alert('Pasted text: ', text);
             }
 
             paste()
-            /*  try {
-                  alert("a")
-                  navigator.clipboard.readText(function(err, result){
-                      alert(result)
-                      console.log('Pasted content: ', result);
-                  });
 
-              } catch (err) {
-                  alert("e")
-                  console.error('Failed to read clipboard contents: ', err);
-              }*/
 
         }
 

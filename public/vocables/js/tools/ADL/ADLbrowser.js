@@ -6,7 +6,7 @@ var ADLbrowser = (function () {
     self.aspectsChildrenDepth = 8
     self.OneModelDictionary = {}
     self.oneModelClasses = {}
-self.queryTypesArray=[]
+    self.queryTypesArray = []
     self.defaultNodeSize = 10;
     self.getPropertyColor = function (type, palette) {
         if (!palette)
@@ -237,7 +237,7 @@ self.queryTypesArray=[]
                     self.jstree.load.loadAdl()
                 }
                 self.adlModelCache = {}
-                self.queryTypesArray=[]
+                self.queryTypesArray = []
 
             },
             onSelectNodeOneModel: function (e, obj) {
@@ -247,6 +247,8 @@ self.queryTypesArray=[]
             ,
             onSelectNodeAdl: function (e, obj) {
                 ADLbrowser.currentJstreeNode = obj.node;
+                self.queryMode = "graph"
+                self.query.showQueryParamsDialog({x: w - 100, y: h / 3}, "graph")
                 $("#ADLbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
             }
 
@@ -455,7 +457,8 @@ self.queryTypesArray=[]
                                 jstreeData.forEach(function (item) {
                                     if (adlClasses.indexOf(item.id) > -1) {
                                         item.used = 1;
-                                        item.text = "<span class='adlNode'>" + item.data.label + "</span>"
+                                        var color = self.getPropertyColor(item.id)
+                                        item.text = "<span style='background-color: " + color + "'>" + item.data.label + "</span>"
                                     }
                                     map[item.id] = item
                                 })
@@ -477,14 +480,18 @@ self.queryTypesArray=[]
 
 
                                 var uniqueIds = {}
+
                                 jstreeData.forEach(function (item) {
                                     if (item.used && !uniqueIds[item.id]) {
                                         uniqueIds[item.id] = 1
                                         jstreeDataFiltered.push(item)
+
                                     }
 
 
                                 })
+
+
                                 jstreeData.forEach(function (item) {
                                     if (!uniqueIds[item.parent])
                                         item.parent = "#"
@@ -511,100 +518,6 @@ self.queryTypesArray=[]
                 )
 
 
-                if (false) {
-                    self.query.getAdlModel("all", null, "subject", function (err, result) {
-
-                        var jstreeData = []
-                        var existingNodes = {}
-                        var typesArray = []
-
-                        result.forEach(function (item) {
-                            if (!item.objType)
-                                return;
-                            if (typesArray.indexOf(item.subType.value) < 0)
-                                typesArray.push(item.subType.value)
-
-
-                            var subId = item.subType.value
-                            var propId = item.subType.value + "_" + item.prop.value;
-                            var objId = null;
-                            if (item.objType)
-                                objId = item.subType.value + "_" + item.prop.value + "_" + item.objType.value;
-
-
-                            if (item.subType) {
-                                var label
-                                /*   if (item.subTypeLabel)
-                                    label = item.subTypeLabel.value;
-                                 else*/
-                                label = self.OneModelDictionary[item.subType.value]
-                                if (!label)
-                                    label = item.subType.value
-                                var color = self.getPropertyColor(item.subType.value)
-                                if (!existingNodes[subId]) {
-
-                                    existingNodes[subId] = 1
-                                    jstreeData.push({
-                                        id: subId,
-                                        text: "<span style='color:" + color + "'>" + label + "</span>",
-                                        parent: "#",
-                                        data: {sourceType: "adl", role: "subType", source: self.currentSource, id: item.subType.value, label: label}
-                                    })
-                                }
-                            }
-                            if (!existingNodes[propId]) {
-                                /*  if (item.propLabel)
-                                      label = item.propLabel.value;
-                                  else*/
-                                label = self.OneModelDictionary[item.prop.value]
-                                if (!label)
-                                    label = item.prop.value
-                                existingNodes[propId] = 1
-                                jstreeData.push({
-                                    id: propId,
-                                    text: label,
-                                    parent: subId,
-                                    data: {sourceType: "adl", role: "pred", source: self.currentSource, id: item.prop.value, label: label}
-                                })
-                            }
-                            if (objId && !existingNodes[objId]) {
-                                if (typesArray.indexOf(item.objType.value) < 0)
-                                    typesArray.push(item.objType.value)
-
-                                existingNodes[objId] = 1
-                                /*  if (item.objTypeLabel)
-                                      label = item.objTypeLabel.value;
-                                  else*/
-                                label = self.OneModelDictionary[item.objType.value]
-                                if (!label)
-                                    label = item.objType.value
-                                var color = self.getPropertyColor(item.objType.value)
-                                jstreeData.push({
-                                    id: objId,
-                                    text: "<span style='color:" + color + "'>" + label + "</span>",
-                                    parent: propId,
-                                    data: {sourceType: "adl", role: "objType", source: self.currentSource, id: item.objType.value, label: label}
-                                })
-                            }
-
-                        })
-
-
-                        var options = {
-
-                            selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
-                            openAll: true,
-                            contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
-
-                        }
-                        common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                        common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
-                        $("#ADLbrowser_Tabs").tabs("option", "active", 0);
-
-
-                    })
-
-                }
             }
 
         },
@@ -612,29 +525,41 @@ self.queryTypesArray=[]
 
             self.query.getAdlModel(node.data.id, self.currentSource, "subjectOrObject", function (err, result) {
                 var jstreeData = [];
+
+
                 var existingNodes = {}
+
+                var isNewTree = self.queryTypesArray.length < 2
+                if (!isNewTree) {
+                    var existingNodesArray = common.getjsTreeNodes("ADLbrowser_adlJstreeDiv", true, "#")
+                    existingNodesArray.forEach(function (item) {
+                        existingNodes[item] = 1
+                    })
+                }
 
                 result.forEach(function (item) {
 
                         var targetNode
-                    var role;
+                        var role;
                         if (node.data.id != item.subType.value) {
                             targetNode = item.subType
-                        }else {
+                        } else {
                             targetNode = item.objType
                         }
-                        if (!existingNodes[targetNode.value]) {
-                            existingNodes[targetNode.value] = 1
+                        if (!existingNodes[node.data.id]) {
                             jstreeData.push({
-                                id: targetNode.value,
-                                text: "<span class='adlNode'>"+self.oneModelDescription.allObjectsMap[targetNode.value].label+"</span>",
-                                parent: item.prop.value,
-                                data: {role: "sub|obj",property:item.prop.value,  id:targetNode.value, label: self.oneModelDescription.allObjectsMap[targetNode.value].label, source: self.currentSource}
+                                id: node.data.id,
+                                text: "<span class='adlNode' style='background-color: " + self.getPropertyColor(node.data.id) + "'>" + node.data.label + "</span>",
+                                parent: "#",
+                                data: node.data
                             })
-
                         }
+                        if (item.prop.value.indexOf("D101001101") > -1)
+                            var x = 3
                         if (!existingNodes[item.prop.value]) {
                             existingNodes[item.prop.value] = 1
+                            if (!self.oneModelDescription.allObjectsMap[item.prop.value])
+                                self.oneModelDescription.allObjectsMap[item.prop.value] = {label: item.prop.value}
                             jstreeData.push({
                                 id: item.prop.value,
                                 text: self.oneModelDescription.allObjectsMap[item.prop.value].label,
@@ -642,76 +567,40 @@ self.queryTypesArray=[]
                                 data: {role: "prop", id: item.prop.value, label: self.oneModelDescription.allObjectsMap[item.prop.value].label, source: self.currentSource}
                             })
                         }
+                        if (!existingNodes[targetNode.value]) {
+                            existingNodes[targetNode.value] = 1
+                            if (!self.oneModelDescription.allObjectsMap[targetNode.value])
+                                self.oneModelDescription.allObjectsMap[targetNode.value] = {label: targetNode.value}
+                            jstreeData.push({
+                                id: targetNode.value,
+                                text: "<span class='adlNode' style='background-color: " + self.getPropertyColor(targetNode.value) + "'>" + self.oneModelDescription.allObjectsMap[targetNode.value].label + "</span>",
+                                parent: item.prop.value,
+                                data: {role: "sub|obj", property: item.prop.value, id: targetNode.value, label: self.oneModelDescription.allObjectsMap[targetNode.value].label, source: self.currentSource}
+                            })
+
+                        }
+
                     }
                 )
 
-                        jstreeData.push({
-                            id: node.data.id,
-                            text: node.data.label,
-                            parent: "#",
-                            data: node.data
-                        })
-                        var options = {
 
-                            selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
-                            openAll: true,
-                            contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+                if (isNewTree) {
+                    var options = {
 
-                        }
-                        //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                        common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                        selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
+                        openAll: true,
+                        contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+
+                    }
+                    //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
+                    common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                } else {
+                    common.addNodesToJstree("ADLbrowser_adlJstreeDiv", "#", jstreeData)
+                }
 
             })
 
-            if (false) {
-                var sourceNode = _node
-                var domainConstraints = self.oneModelDescription.constraintsMap.domains[sourceNode.data.id] || []
-                domainConstraints = domainConstraints.concat(self.oneModelDescription.constraintsMap.ranges[sourceNode.data.id] || [])
-                // var rangeConstraints = self.oneModelDescription.constraintsMap.ranges[sourceNode.data.id]
-                var propConstraints = self.oneModelDescription.constraintsMap.properties
-                var jstreeData = [];
 
-                if (domainConstraints) {
-                    domainConstraints.forEach(function (prop) {
-                        jstreeData.push({
-                            id: prop,
-                            text: self.oneModelDescription.allObjectsMap[prop].label,
-                            parent: sourceNode.data.id,
-                            data: sourceNode.data
-                        })
-                        var propNodes = propConstraints[prop]
-                        for (var targetNode in propNodes) {
-                            if (targetNode != sourceNode.data.id) {
-                                jstreeData.push({
-                                    id: targetNode,
-                                    text: self.oneModelDescription.allObjectsMap[targetNode].label,
-                                    parent: prop,
-                                    data: self.oneModelDescription.allObjectsMap[targetNode]
-                                })
-                            }
-
-                        }
-
-                    })
-                }
-
-                jstreeData.push({
-                    id: sourceNode.data.id,
-                    text: sourceNode.data.label,
-                    parent: "#",
-                    data: sourceNode.data
-                })
-                var options = {
-
-                    selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
-                    openAll: true,
-                    contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
-
-                }
-                //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
-
-            }
         }
         ,
         getJstreeConceptsContextMenu: function (jstreeDivId) {
@@ -986,6 +875,12 @@ self.queryTypesArray=[]
                 $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
                 $("#ADLbrowserQueryParamsDialog").css("top", position.y)
                 $("#ADLbrowserQueryParamsDialog").css("display", "block")
+                setTimeout(function(){
+                    $("#ADLbrowserQueryParams_operator").val("=")
+                    $("#ADLbrowserQueryParams_value").val("")
+                    $("#ADLbrowserQueryParams_valuesSelect").val("")
+                   
+                },500)
             })
         }
         ,
@@ -999,37 +894,50 @@ self.queryTypesArray=[]
             var filterStr = "";
             var numberOperators = ("<", ">", "<=", ">=")
             var typeVarName;
-            if( self.queryTypesArray.length==0)
-                typeVarName="?sub"
+            if (self.queryTypesArray.length == 0)
+                typeVarName = "?sub"
             else
-                typeVarName="?obj"
+                typeVarName = "?obj"
 
-            if (property) {
-                if (value) {
+            if (property && property != "") {
+                if (value && value != "") {
                     if (operator == "contains")
-                        filterStr = typeVarName+" <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
+                        filterStr = typeVarName + " <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
                     else if (operator == "not contains")
-                        filterStr = typeVarName+" <" + property + "> ?x. filter regex(?x, '^((?!" + value + ").)*$','i') "
+                        filterStr = typeVarName + " <" + property + "> ?x. filter regex(?x, '^((?!" + value + ").)*$','i') "
+                    else if ($("#ADLbrowserQueryParams_valuesSelect").val() != "")
+                        filterStr = typeVarName + " <" + property + "> ?x. filter (?x " + operator + "'"+value + "') "
                     else if (numberOperators.indexOf(operator) > -1)
-                        filterStr = typeVarName+" <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
+                        filterStr = typeVarName + " <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
 
                     else
-                        filterStr = typeVarName+" <" + property + "> ?x. filter (?x " + operator + value + ") "
+                        filterStr = typeVarName + " <" + property + "> ?x. filter (?x " + operator + value + ") "
                 } else {
 
-
-                    filterStr =  typeVarName+" <" + property + "> ?x. "
+                        filterStr = typeVarName + " <" + property + "> ?x. "
                 }
 
 
             }
             var filterLabel = property + " " + operator + " " + value
 
-            self.jstree.updateAdlTree(self.currentJstreeNode)
-            if (self.queryMode == "graph")
-                self.Graph.drawGraph(self.currentJstreeNode, filterStr)
-            else if (self.queryMode == "query") {
-                self.query.addFilterToQueryTree({label: filterLabel, content: filterStr})
+
+            if (self.queryMode == "graph") {
+                self.Graph.drawGraph(self.currentJstreeNode, filterStr, function (err, result) {
+                    $("#waitImg").css("display", "none");
+                    if (err)
+                        return MainController.UI.message(err)
+                    if (result == 0)
+                        return alert("no data found")
+                    self.jstree.updateAdlTree(self.currentJstreeNode)
+                })
+            } else if (self.queryMode == "query") {
+                self.query.addFilterToQueryTree({label: filterLabel, content: filterStr}, function (err, result) {
+                    $("#waitImg").css("display", "none");
+                    if (err || result == 0)
+                        return;
+                    self.jstree.updateAdlTree(self.currentJstreeNode)
+                })
             }
 
 
@@ -1147,9 +1055,39 @@ self.queryTypesArray=[]
 
         }
         ,
+        listQueryParamsDialogFieldValues() {
+            var field = self.currentJstreeNode.data.id;
+            var property = $("#ADLbrowserQueryParams_property").val();
+            if (!property || property == "")
+                return alert("select a property")
+            var fromStr = Sparql_common.getFromStr(self.currentSource)
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+                "Select  distinct ?obj ?objLabel " + fromStr + " where {" +
+                " ?sub <" + property + "> ?obj . ?sub rdf:type <" + field + ">. optional {?obj rdfs:label ?objLabel}" +
+                "} order by ?objLabel limit " + Config.ADLBrowser.queryLimit
+            var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: self.currentSource}, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+                var data = []
+                result.results.bindings.forEach(function (item) {
+                    var label
+                    if (!item.objLabel)
+                        label = item.obj.value
+                    else
+                        item.objLabel.value
+                    data.push({id: item.obj.value, label: label})
+                })
+                common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", data, true, "id", "label")
+            })
+
+        },
+        onQueryParamsValuesSelect: function () {
+            $("#ADLbrowserQueryParams_value").val($("#ADLbrowserQueryParams_valuesSelect").val())
+        },
         clear() {
             self.jstree.load.loadAdl();
-            self.queryTypesArray=[]
+            self.queryTypesArray = []
             $("#ADLbrowser_queryTreeDiv").jstree("destroy").empty();
 
         }
@@ -1162,11 +1100,20 @@ self.queryTypesArray=[]
             if (Config.ADLBrowser.adlQueryMode == "SPARQL") {
                 self.query.executeSparqlQuery(showQueryOnly);
             } else if (Config.ADLBrowser.adlQueryMode == "SQL") {
-                self.query.executeSqlQuery(showQueryOnly);
+                self.query.executeSqlQuery(showQueryOnly, function (err, result) {
+                    $("#waitImg").css("display", "none");
+                    if (err)
+                        return MainController.UI.message(err)
+                    if (result == 0)
+                        return alert("no data found")
+                    self.jstree.updateAdlTree(self.currentJstreeNode)
+
+
+                });
             }
         }
         ,
-        executeSparqlQuery: function (showQueryOnly) {
+        executeSparqlQuery: function (showQueryOnly, callback) {
 
             //   var checkedNodes = $("#ADLbrowser_queryTreeDiv").jstree(true).get_checked(false)
             var allNodes = common.getjsTreeNodes("ADLbrowser_queryTreeDiv")
@@ -1255,9 +1202,11 @@ self.queryTypesArray=[]
             var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: self.currentSource}, function (err, result) {
                 if (err)
-                    return MainController.UI.message(err)
-                if (result.length >= self.queryLimit)
-                    return MainController.UI.message("result too long >" + self.queryLimit + " lines ")
+                    return callback(err)
+                if (result.results.bindings.length >= self.queryLimit)
+                    return callback("result too long >" + self.queryLimit + " lines ")
+                if (result.results.bindings.length == 0)
+                    return callback(null, 0)
 
                 var dataSet = [];
                 var cols = [];
@@ -1275,6 +1224,7 @@ self.queryTypesArray=[]
                     dataSet.push(line)
                 })
                 self.query.showQueryResultInDataTable(dataSet, cols)
+                return callback(null, result.results.bindings.length)
             })
 
         }
@@ -1323,7 +1273,7 @@ self.queryTypesArray=[]
         clearGraph: function () {
             self.jstree.load.loadAdl();
             visjsGraph.clearGraph()
-            self.queryTypesArray=[]
+            self.queryTypesArray = []
         },
         collapseNode: function () {
             visjsGraph.collapseNode(self.currentJstreeNode.id)
@@ -1333,8 +1283,8 @@ self.queryTypesArray=[]
             ADLbrowser.query.showQueryParamsDialog(self.Graph.lastRightClickPosition);
 
         },
-        drawGraph: function (node, filterStr) {
-
+        drawGraph: function (node, filterStr, callback) {
+            var totalNodes = 0
 
             function execute(graphNodeFilterStr, callback) {
                 var source;
@@ -1364,19 +1314,19 @@ self.queryTypesArray=[]
                     query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * " +
                         fromStr +
                         "WHERE {"
-                    if( self.queryTypesArray.length==0){
+                    if (self.queryTypesArray.length == 0) {
                         query += "    ?sub rdf:type ?subType. optional {?sub rdfs:label ?subLabel} "
                         query += "filter(   ?subType =<" + node.data.id + "> )"
-                    }else{
-                        query += "?sub <"+node.data.property+">|^<"+node.data.property+"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} "
+                    } else {
+                        query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
                         node.data.property
                         query += "filter(   ?objType =<" + node.data.id + "> )"
                     }
-                    self.queryTypesArray.push(node.data.id)
-               /*     if (node.data.role == "sub|obj") {
-                        query += "filter(   ?subType =<" + node.data.id + "> )"
-                    } else
-                        query += "filter(   ?" + node.data.role + " =<" + node.data.id + "> )"*/
+
+                    /*     if (node.data.role == "sub|obj") {
+                             query += "filter(   ?subType =<" + node.data.id + "> )"
+                         } else
+                             query += "filter(   ?" + node.data.role + " =<" + node.data.id + "> )"*/
 
                     query += filterStr + graphNodeFilterStr
 
@@ -1402,12 +1352,13 @@ self.queryTypesArray=[]
                     }
                     result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
                     var data = result.results.bindings
+                    totalNodes += data.length
                     if (data.length == 0) {
-                        MainController.UI.message("no data found")
-                        $("#waitImg").css("display", "none");
+
+
                         return callback()
                     }
-
+                    self.queryTypesArray.push(node.data.id)
                     MainController.UI.message("drawing " + data.length + "nodes...")
                     var visjsData = {nodes: [], edges: []}
                     var existingNodes = visjsGraph.getExistingIdsMap()
@@ -1538,22 +1489,14 @@ self.queryTypesArray=[]
                     })
 
                 }, function (err) {
-                    $("#waitImg").css("display", "none");
-                    if (err)
-                        return MainController.UI.message(err)
-                    setTimeout(function () {
-                        ///   MainController.UI.message("")
-                    }, 1000)
+
+                    return callback(err, totalNodes)
                 })
 
             } else {
                 execute(graphNodeFilterStr, function (err, result) {
-                    $("#waitImg").css("display", "none");
-                    if (err)
-                        return MainController.UI.message(err)
-                    setTimeout(function () {
-                        MainController.UI.message("")
-                    }, 1000)
+                    return callback(err, totalNodes)
+
                 })
             }
         }

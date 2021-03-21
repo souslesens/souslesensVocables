@@ -2,8 +2,13 @@
   "mappings": [
     {
       "subject": "tag.ID",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "tag.TagNumber"
+    },
+    {
+      "subject": "tag.ID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#Tag"
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
     },
     {
       "subject": "tag.ID",
@@ -25,11 +30,7 @@
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
       "object": "tag.CMMSRequired"
     },
-    {
-      "subject": "tag.ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "tag.TagNumber"
-    },
+
     {
       "subject": "tag.FunctionalClassID",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",

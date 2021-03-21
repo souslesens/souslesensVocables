@@ -78,7 +78,7 @@ var ADLcommon = (function () {
                     function (callbackSeries) {
                         var objs = []
                         Sparql_OWL.getObjectRestrictions(self.currentSource, null, null, function (err, result) {
-                            console.log(JSON.stringify(result,null,2))
+                           // console.log(JSON.stringify(result,null,2))
                             if (err)
                                 return callbackSeries(err)
 

@@ -85,6 +85,10 @@ var triplesGenerator = {
                     return;
 
 
+                if (mapping.object == "Unit")
+                    var x = 3
+
+
                 var objectValue;
                 var objectSuffix = ""
                 var p;
@@ -92,9 +96,9 @@ var triplesGenerator = {
 
                 if (mapping.object instanceof Object) {
                     var value = item[mapping.object.column]
-                    if(!value || value.trim()=="")
+                    if (!value || value.trim() == "")
                         return
-                    value=value.trim()
+                    value = value.trim()
                     if (mapping.object["switch"]) {
                         if (mapping.object["switch"][value])
                             objectValue = mapping.object["switch"][value]
@@ -107,7 +111,7 @@ var triplesGenerator = {
                         }
                     } else if (mapping.object["prefix"]) {
                         objectValue = item[mapping.object.column]
-                        if(!objectValue || objectValue.trim()=="")
+                        if (!objectValue || objectValue.trim() == "")
                             return
                         objectValue = mapping.object["prefix"] + objectValue.trim()
                         if (!options.oneModelDictionary[objectValue])
@@ -120,13 +124,13 @@ var triplesGenerator = {
                     } else
                         return callback("bad definition of mapping object")
 
-                } else  if((p=mapping.object.indexOf("^^xsd:"))>-1) {
-                        objectValue= "'"+item[mapping.object.substring(0,p)]+"'"+mapping.object.substring(p)
+                } else if ((p = mapping.object.indexOf("^^xsd:")) > -1) {
+                    objectValue = "'" + item[mapping.object.substring(0, p)] + "'" + mapping.object.substring(p)
 
 
-
-                } else{
+                } else {
                     objectValue = item[mapping.object]
+
                 }
 
                 if (objectValue && objectValue.trim)
@@ -148,8 +152,8 @@ var triplesGenerator = {
 
                     if (!objectValue)
                         return;
-                  if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
-                       if (util.isInt(objectValue)) {
+                    if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                        if (util.isInt(objectValue)) {
                             objectSuffix = "^^xsd:integer"
                             objectValue = "'" + objectValue + "'" + objectSuffix;
                         } else if (util.isFloat(objectValue)) {
@@ -693,14 +697,15 @@ var triplesGenerator = {
 
     },
 
-    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, dbConnection, callback) {
+    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, dbConnection,replaceGraph, callback) {
 
         sqlConnector.connection = dbConnection;
         var count = 0;
         async.eachSeries(mappingFileNames, function (mappingFile, callbackEach) {
-
+if(count++>0)
+    replaceGraph=false
             var mappingPath = mappingsDirPath + mappingFile
-            var replaceGraph = true;// ((count++) == 0)
+
 
             var options = {
                 generateIds: 15,
@@ -817,36 +822,7 @@ var triplesGenerator = {
 module.exports = triplesGenerator;
 
 
-if (false) {
-    var sqlParams = {
-        dbName: "turbogenerator",
-        //   query: " select * from breakdown ",
-        query: "select * from model",
-        query: "select * from breakdown",
-        fetchSize: 1000
-    }
-
-    var uriPrefix = "http://data.total.com/resource/one-model/assets/turbogenerator/"
-
-
-    var options = {
-        generateIds: 15,
-        output: "ntTriples",
-        getExistingUriMappings: uriPrefix,
-        sparqlServerUrl: "http://51.178.139.80:8890/sparql",
-        rdlGraphUri: "http://data.total.com/resource/one-model/quantum-rdl/",
-        replaceGraph: false
-    }
-
-
-    // var mappings = "D:\\GitHub\\souslesensVocables\\other\\oneModel\\breakdownLabels.json"
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\TurboGenTagAttrMappings.json"
-    var mappings = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\breakdowns.json"
-    triplesGenerator.generateAdlSqlTriples(mappings, uriPrefix, sqlParams, options, function (err, result) {
-
-    })
-}
-
+if(true){
 if (false) {// buildClov
 
 
@@ -871,11 +847,8 @@ if (false) {// buildClov
         database: 'clov',
         fetchSize: 5000,
     }
-    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, function (err, result) {
-        if (err)
-            return console.log(err);
-        return console.log("ALL DONE");
-    })
+    var   replaceGraph=true;
+
 }
 
 if (false) {// turbogen
@@ -887,14 +860,15 @@ if (false) {// turbogen
     var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
     var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
     var mappingFileNames = [
-        /* "breakdowns.json"
-            "tagMapping.json",
-            "tagAttributeMapping.json",
-          "tag2ModelMapping.json",
-          "modelMapping.json",
-          "modelAttributeMapping.json",
-          "tag2tagMapping.json",*/
-        "requirementMapping.json"
+
+        "tagMapping.json",
+     "tagAttributeMapping.json",
+        "tag2ModelMapping.json",
+        "modelMapping.json",
+        "modelAttributeMapping.json",
+        "tag2tagMapping.json",
+        "requirementMapping.json",
+        "breakdowns.json",
     ]
 
 
@@ -905,6 +879,7 @@ if (false) {// turbogen
         database: 'turbogenerator',
         fetchSize: 5000,
     }
+    var   replaceGraph=true;
 }
 
 if (true) {// SIL
@@ -916,13 +891,6 @@ if (true) {// SIL
     var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
     var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
     var mappingFileNames = [
-        /* "breakdowns.json"
-            "tagMapping.json",
-            "tagAttributeMapping.json",
-          "tag2ModelMapping.json",
-          "modelMapping.json",
-          "modelAttributeMapping.json",
-          "tag2tagMapping.json",*/
         "failureMapping.json"
     ]
 
@@ -934,13 +902,15 @@ if (true) {// SIL
         database: 'sil',
         fetchSize: 5000,
     }
+    var replaceGraph=true
+}
 
 
-    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, function (err, result) {
-        if (err)
-            return console.log(err);
-        return console.log("ALL DONE");
-    })
+triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, replaceGraph,function (err, result) {
+    if (err)
+        return console.log(err);
+    return console.log("ALL DONE");
+})
 }
 
 if (false) {

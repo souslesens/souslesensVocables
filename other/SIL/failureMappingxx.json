@@ -2,11 +2,6 @@
   "mappings": [
     {
       "subject": "failure.Functionnal_Location",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "failure.Functionnal_Location"
-    },
-    {
-      "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": {
         "column": "Equipment_Category",
@@ -18,6 +13,17 @@
         }
 
       }
+    },
+    {
+      "subject": "failure.Tag_Number",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Tag_Number"
+    },
+
+    {
+      "subject": "failure.Manufacturer",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Manufacturer"
     },
     {
       "subject": "failure.Functionnal_Location",
@@ -33,67 +39,7 @@
       "subject": "failure.Functionnal_Location",
       "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
       "object": "failure.Unit"
-    }, {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "failure.Equipment_Desc"
     },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "failure.Working_Hours"
-    },
-
-
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "failure.Notif_Number"
-    },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    {
-      "subject": "failure.Manufacturer",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "failure.Manufacturer"
-    },
-    {
-      "subject": "failure.Manufacturer",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/Organization"
-    },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://w3id.org/readi/rdl/D101001101",
-      "object": "failure.Manufacturer"
-    },
-
-
-
-
-
-
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
-      "object": "failure.Unit"
-    },
-
-
     {
       "subject": "failure.Unit",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -103,11 +49,11 @@
       "subject": "failure.Unit",
       "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
       "object": "failure.Unit"
+    }, {
+      "subject": "failure.Valid_From",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Valid_From"
     },
-
-
-
-
 
 
 
@@ -116,38 +62,39 @@
 
 
     {
-      "subject": "failure.Tag_Number",
+      "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "failure.Tag_Number"
+      "object": "failure.Functionnal_Location"
     },
 
+
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Equipment_Desc"
+    },
+
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Working_Hours"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Functionnal_Location"
+    },
     {
       "subject": "failure.Tag_Number",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
     },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf",
-      "object": "failure.Tag_Number"
-    },
-
-
-
-
-
-
-
-
-
 
     {
-      "subject": "failure.Concept_Niv2",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "failure.Concept_Niv2"
+      "subject": "failure.Manufacturer",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Organization"
     },
-
-
     {
       "subject": "failure.Concept_Niv2",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -164,21 +111,38 @@
         }
       }
 
+      },
+    {
+      "subject": "failure.Concept_Niv2",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure.Concept_Niv2"
     },
 
-
-
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure.Notif_Number"
+    },
     {
       "subject": "failure.Concept_Niv2",
       "predicate": "http://data.total.com/resource/one-model/alters",
       "object": "failure.Functionnal_Location"
+    },
+
+    {
+      "subject": "failure.Valid_From",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Event"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://w3id.org/readi/rdl/D101001101",
+      "object": "failure.Manufacturer"
+    },
+    {
+      "subject": "failure.Functionnal_Location",
+      "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf",
+      "object": "failure.Tag_Number"
     }
-
-
-
-
-
-
-
   ]
 }

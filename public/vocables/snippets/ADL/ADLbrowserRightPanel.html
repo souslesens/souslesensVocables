@@ -17,9 +17,10 @@
 
         <ul>
             <li><a href="#ADLbrowserAdlTab">ADL</a></li>
-            <li><a href="#ADLbrowserOneModelTab">One-Model</a></li>
+            <!--    <li><a href="#ADLbrowserBITab">BI</a></li>
+                <li><a href="#ADLbrowserOneModelTab">One-Model</a></li>
 
-            <li><a href="#ADLbrowserRDLTab">RDL</a></li>
+                <li><a href="#ADLbrowserRDLTab">RDL</a></li>-->
 
 
         </ul>
@@ -28,12 +29,14 @@
         <div id="ADLbrowserAdlTab" style="width:100%;height:300px">
                 <div class="jstree" style="height: 350px" id="ADLbrowser_adlJstreeDiv"></div>
         </div>
+
+        <!--
         <div class="" id="ADLbrowserRDLTab" style="width: 320px;height: 300px">
 
                 <div class="jstree" style="height: 350px" id="ADLbrowser_rdlJstreeDiv"></div>
 
 
-            <!--     <button onclick='ADLbrowser_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
+
 
         </div>
 
@@ -43,20 +46,20 @@
 
 
 
-            <!--     <button onclick='ADLbrowser_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
 
-        </div>
+        </div>-->
 
 
     </div>
     <div style="width: 360px;background-color: #ddd4b0;border-radius: 3px;border: #6e2500 solid 1px;margin: 2px;padding: 2px" >
         <button onclick='ADLbrowser.Graph.clearGraph()'>clear graph</button>
         <button onclick="ADLbrowser.query.clear()"> clear query</button>
-        <select id="ADLbrowserAdlQueryOutputSelect">
+  <!--     <select id="ADLbrowserAdlQueryOutputSelect">
 
         <option>table</option>
         <option>graph</option>
-    </select>
+    </select>-->
+
         <button onclick="ADLbrowser.query.execute()"> execute</button><button onclick="ADLbrowser.query.showQuery()">Q</button>
     </div>
     <div style="width: 360px;height: 400px">

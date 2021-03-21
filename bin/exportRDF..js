@@ -28,10 +28,10 @@ var exportRDF = {
                 return console.log(err);
             var str = ""
 
-            result.sort(function(a,b){
-                if(a.subject.value>b.subject.value)
+            result.sort(function (a, b) {
+                if (a.subject.value > b.subject.value)
                     return 1
-                if(a.subject.value<b.subject.value)
+                if (a.subject.value < b.subject.value)
                     return -1
                 return 0
             })
@@ -42,14 +42,13 @@ var exportRDF = {
                     objectStr = "'" + item.object.value + "'"
                     if (item.object.lang)
                         objectStr += "@" + item.object.lang
-                }
-                else{
-                    objectStr ="<"+item.object.value+">"
+                } else {
+                    objectStr = "<" + item.object.value + ">"
                 }
 
-                str += "<" + item.subject.value + "> <" + item.predicate.value+"> "+objectStr+".\n"
+                str += "<" + item.subject.value + "> <" + item.predicate.value + "> " + objectStr + ".\n"
             })
-            fs.writeFileSync(filePath,str)
+            fs.writeFileSync(filePath, str)
         })
 
     }
@@ -105,4 +104,41 @@ module.exports = exportRDF
 var graphUri = "http://data.total.com/quantum/vocab/";
 var sparql_url = "http://51.178.139.80:8890/sparql";
 var filePath = "D:\\NLP\\ontologies\\quantum\\export.nt"
-exportRDF.export(sparql_url, graphUri, filePath)
+
+
+var map = {
+    "ISO_15926-part-14": "http://standards.iso.org/iso/15926/part14/",
+    "ONE-MODEL": "http://data.total.com/resource/one-model/ontology/0.2/",
+  "RDL-QUANTUM-MIN": "http://data.total.com/resource/one-model/quantum-rdl/",
+    "ONE-MODEL": "http://data.total.com/resource/one-model/ontology/0.2/",
+    "SIL-ONTOLOGY": "http://data.total.com/resource/sil/ontology/0.1/",
+    "ISO_15926-part-12": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
+    "ISO_15926-part-4": "http://standards.iso.org/iso/15926/part4/",
+    "CFIHOS_equipment": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
+    "NPD-MODEL": "http://sws.ifi.uio.no/vocab/npd-v2/",
+    "NPD-DATA": "http://sws.ifi.uio.no/data/npd-v2/",
+    "ISO_15926-part-13": "http://standards.iso.org/iso/15926/part13/",
+    "QUANTUM": "http://data.total.com/resource/quantum/",
+    "CFIHOS_READI": "http://w3id.org/readi/rdl/",
+
+
+}
+
+if(false) {
+    var sparql_url = "http://51.178.139.80:8890/sparql";
+    async.eachSeries(Object.keys(map), function (source, callbackEach) {
+        console.log("exporting " + source)
+        var graphUri = map[source];
+
+        var filePath = "D:\\NLP\\ontologies\\exports\\" + source + ".nt"
+        exportRDF.export(sparql_url, graphUri, filePath);
+        callbackEach()
+    })
+}
+if(true){
+    for(var source in map) {
+        var str = "ld_dir ('/etc/virtuoso-data/dumps/', 'rdfsOwlSimplified.ttl', 'http://data.total.com/resource/one-model/rdfsOwlSimplified/');"
+        console.log("ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/', '" + source + ".nt', '" + map[source] + "');")
+    }
+}
+

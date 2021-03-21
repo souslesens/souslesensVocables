@@ -2,13 +2,26 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/other/SIL/failureMappingxx.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/d3/d3.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/d3/hex-to-rgba.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserBI.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/graphHighlight.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportRDF..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/SIL/failureMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/SIL/failureMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/TurboGenTagAttrMappings.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/TurboGenTagAttrMappings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/tag2ModelMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/tag2ModelMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/tag2tagMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/tag2tagMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/tagAttributeMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/tagAttributeMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/tagMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/tagMapping.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -45,7 +58,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/other/turbogenerator" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -53,19 +66,19 @@
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2019.2\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\other\SIL" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\external\d3" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
+      <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
+      <recent name="D:\GitHub\souslesensVocables\bin" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADLbrowser" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\lineage" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\lineage" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\GitHub\souslesensVocables\other\SIL" />
-      <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
-      <recent name="D:\GitHub\souslesensVocables\bin" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADL" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -80,7 +93,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.bin\www">
+  <component name="RunManager" selected="Node.js.exportRDF..js">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
@@ -90,19 +103,19 @@
     <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportGraph..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="triplesGenerator.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="triplesGenerator.js" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="exportRDF..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportRDF..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="util..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="util..js" working-dir="$PROJECT_DIR$/bin/skosConverters">
+    <configuration name="triplesGenerator.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="triplesGenerator.js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.exportRDF..js" />
         <item itemvalue="Node.js.triplesGenerator.js" />
         <item itemvalue="Node.js.OneModelManager..js" />
         <item itemvalue="Node.js.ADLSqlConnector..js" />
         <item itemvalue="Node.js.exportGraph..js" />
-        <item itemvalue="Node.js.util..js" />
       </list>
     </recent_temporary>
   </component>
@@ -160,7 +173,8 @@
       <workItem from="1615368199694" duration="880000" />
       <workItem from="1615453594286" duration="64923000" />
       <workItem from="1615877061869" duration="54129000" />
-      <workItem from="1616066349257" duration="7341000" />
+      <workItem from="1616066349257" duration="9717000" />
+      <workItem from="1616133884239" duration="33587000" />
     </task>
     <servers />
   </component>

@@ -14,6 +14,7 @@ var request = require("request")
 
 var httpProxy = {
 
+    proxy:"http://j0417704:Clarisse1208@10.16.152.65:8080",
     get: function (url, options, callback) {
         if (!options.headers) {
             options.headers = {}
@@ -60,6 +61,8 @@ var httpProxy = {
             };
             options.form = params;
         }
+        if(url.indexOf("main.glb.corp.local"))
+            options.proxy=httpProxy.proxy
 
         request(options, function (error, response, body) {
             if (error) {
@@ -69,7 +72,7 @@ var httpProxy = {
 
 
 
-                if (typeof body == "string") {
+                if (typeof body === "string") {
                     body = body.trim()
                     if (body.indexOf("{") < 0)
                         return callback(body);//error

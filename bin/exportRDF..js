@@ -11,9 +11,10 @@
 var fs = require('fs')
 var httpProxy = require('./httpProxy.')
 var async = require('async')
+const util = require('./skosConverters/util.')
 var exportRDF = {
 
-    export: function (sparql_url, graphUri, filePath) {
+    export: function (sparql_url, graphUri, stream, callback) {
 
         var fromStr = "";
         if (graphUri)
@@ -22,41 +23,53 @@ var exportRDF = {
             fromStr +
             " where { ?subject ?predicate ?object.}"
 
-
-        exportRDF.POST_cursor(sparql_url, query, function (err, result) {
+        stream.write("with <" + graphUri + "> insert{\n")
+        exportRDF.POST_cursor(sparql_url, query, stream, function (err, result) {
             if (err)
                 return console.log(err);
-            var str = ""
 
-            result.sort(function (a, b) {
-                if (a.subject.value > b.subject.value)
-                    return 1
-                if (a.subject.value < b.subject.value)
-                    return -1
-                return 0
-            })
-
-            result.forEach(function (item) {
-                var objectStr = ""
-                if (item.object.type != "uri") {
-                    objectStr = "'" + item.object.value + "'"
-                    if (item.object.lang)
-                        objectStr += "@" + item.object.lang
-                } else {
-                    objectStr = "<" + item.object.value + ">"
-                }
-
-                str += "<" + item.subject.value + "> <" + item.predicate.value + "> " + objectStr + ".\n"
-            })
-            fs.writeFileSync(filePath, str)
+            callback(null)
         })
 
     }
-    , POST_cursor: function (url, query, callback) {
+    , appendToFileStream(stream, data, callback) {
+        var str = ""
+
+        data.sort(function (a, b) {
+            if (a.subject.value > b.subject.value)
+                return 1
+            if (a.subject.value < b.subject.value)
+                return -1
+            return 0
+        })
+
+        data.forEach(function (item) {
+            var objectStr = ""
+            if (item.object.type != "uri") {
+                if (item.object.value.indexOf("every part in every performance of the system") > -1)
+                    var x = 3;
+                objectStr = "'" + util.formatStringForTriple(item.object.value) + "'"
+                if (item.object.lang)
+                    objectStr += "@" + item.object.lang
+            } else {
+
+                objectStr = "<" + item.object.value + ">"
+
+            }
+
+            str += "<" + item.subject.value + "> <" + item.predicate.value + "> " + objectStr + ".\n"
+        })
+        stream.write(str);
+        callback(null)
+
+
+    }
+    , POST_cursor: function (url, query, stream, callback) {
         var offset = 0;
         var limit = 10000;
         var resultSize = 1;
-        var allData = []
+        var allData = [];
+        var maxLinesExport = 900000
 
         var p = query.toLowerCase().indexOf("limit")
         if (p > -1)
@@ -66,7 +79,7 @@ var exportRDF = {
 
         async.whilst(
             function (callbackTest) {//test
-                return (callbackTest(null, resultSize > 0));
+                return (callbackTest(null, resultSize > 0 || offset >= maxLinesExport));
             },
             function (callbackWhilst) {//iterate
 
@@ -82,18 +95,26 @@ var exportRDF = {
                     }
                 }
                 httpProxy.post(url, body.headers, body.params, function (err, data) {
+                    console.log("processed " + offset + " lines")
                     if (err)
                         return callbackWhilst(err);
                     var xx = data;
                     resultSize = data.results.bindings.length
-                    allData = allData.concat(data.results.bindings);
+                    allData = data.results.bindings;
                     offset += limit;
-                    callbackWhilst(null, data);
+                    exportRDF.appendToFileStream(stream, allData, function (err, result) {
+                        if (err)
+                            return callbackWhilst(err)
+                        callbackWhilst(null);
+                    })
+
 
                 })
 
             }, function (err) {
-                callback(err, allData)
+                stream.write("}\n")
+                stream.end();
+                callback(err)
             }
         )
     }
@@ -109,36 +130,74 @@ var filePath = "D:\\NLP\\ontologies\\quantum\\export.nt"
 var map = {
     "ISO_15926-part-14": "http://standards.iso.org/iso/15926/part14/",
     "ONE-MODEL": "http://data.total.com/resource/one-model/ontology/0.2/",
-  "RDL-QUANTUM-MIN": "http://data.total.com/resource/one-model/quantum-rdl/",
-    "ONE-MODEL": "http://data.total.com/resource/one-model/ontology/0.2/",
+    "CFIHOS_READI": "http://w3id.org/readi/rdl/",
+    "RDL-QUANTUM-MIN": "http://data.total.com/resource/one-model/quantum-rdl/",
     "SIL-ONTOLOGY": "http://data.total.com/resource/sil/ontology/0.1/",
     "ISO_15926-part-12": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
     "ISO_15926-part-4": "http://standards.iso.org/iso/15926/part4/",
     "CFIHOS_equipment": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
     "NPD-MODEL": "http://sws.ifi.uio.no/vocab/npd-v2/",
-    "NPD-DATA": "http://sws.ifi.uio.no/data/npd-v2/",
+
     "ISO_15926-part-13": "http://standards.iso.org/iso/15926/part13/",
     "QUANTUM": "http://data.total.com/resource/quantum/",
-    "CFIHOS_READI": "http://w3id.org/readi/rdl/",
+    "NPD-DATA": "http://sws.ifi.uio.no/data/npd-v2/",
 
 
 }
 
-if(false) {
+if (false) {
     var sparql_url = "http://51.178.139.80:8890/sparql";
     async.eachSeries(Object.keys(map), function (source, callbackEach) {
         console.log("exporting " + source)
         var graphUri = map[source];
 
         var filePath = "D:\\NLP\\ontologies\\exports\\" + source + ".nt"
-        exportRDF.export(sparql_url, graphUri, filePath);
-        callbackEach()
+        if (fs.existsSync(filePath))
+            fs.unlinkSync(filePath)
+        //   var filePath = "/var/lib/nodejs/souslesensVocables/public/exports/" + source + ".nt"
+        var stream = fs.createWriteStream(filePath, {flags: 'a'});
+
+
+        exportRDF.export(sparql_url, graphUri, stream, function (err, result) {
+            callbackEach()
+        });
+
+    }, function (err) {
+
     })
 }
-if(true){
-    for(var source in map) {
-        var str = "ld_dir ('/etc/virtuoso-data/dumps/', 'rdfsOwlSimplified.ttl', 'http://data.total.com/resource/one-model/rdfsOwlSimplified/');"
-        console.log("ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/', '" + source + ".nt', '" + map[source] + "');")
+if (true) {
+    for (var source in map) {
+        var graphUri=map[source]
+        var fileName=graphUri.substring(graphUri.lastIndexOf("/")+1)+"000001.ttl.gz"
+        console.log("ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" +fileName + "', '" + graphUri + "');")
+    }
+}
+if (false) {
+
+
+    for (var source in map) {
+        console.log("with <" + map[source] + ">" +
+            "delete {" +
+            "  ?sub ?pred ?obj ." +
+            "} " +
+            "where { ?sub ?pred ?obj .}")
+    }
+
+}
+if (false) {
+    for (var source in map) {
+        var str = "dump_one_graph ('" + map[source] + "', '/etc/virtuoso-data/exportOwl/"+ source +"', 1000000000); "
+        console.log(str)
+    }
+}
+
+
+
+if (false) {
+    for (var source in map) {
+        var str = "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '"+  map[source].substring(map[source].lastIndexOf("/"))+".ttl000001.ttl.gz', 'http://standards.iso.org/iso/15926/part14/');\n"
+        console.log(str)
     }
 }
 

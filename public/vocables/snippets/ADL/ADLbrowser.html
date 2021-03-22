@@ -100,7 +100,8 @@
         <button onclick="ADLbrowser.query.listQueryParamsDialogFieldValues()">List</button>
         <select id="ADLbrowserQueryParams_valuesSelect" onchange="ADLbrowser.query.onQueryParamsValuesSelect()"></select>
         <br>
-        <button onclick="ADLbrowser.query.onQueryParamsDialogValidate()">OK</button>
+        <button onclick="ADLbrowser.query.onQueryParamsDialogValidate('union')">∪</button>
+        <button onclick="ADLbrowser.query.onQueryParamsDialogValidate('intersection')">∩</button>
         <button onclick="ADLbrowser.query.onQueryParamsDialogCancel()">X</button>
 
         <button onclick="ADLbrowserBI.drawClasses()">BI</button>

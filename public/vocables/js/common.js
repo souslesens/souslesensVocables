@@ -18,7 +18,7 @@ var common = (function () {
             $(".jstree-anchor").css("font-size", "14px")
 
         }
-        self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField) {
+        self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField,selectedValue) {
 
 
             $("#" + selectId).find('option').remove().end()
@@ -44,9 +44,13 @@ var common = (function () {
                         value = item;
 
                     }
+                    var selected;
+                    if(selectedValue && value ==selectedValue)
+                        selected= "selected"
                     $("#" + selectId).append($('<option>', {
                         text: text,
-                        value: value
+                        value: value,
+                        selected:selected
                     }));
                 });
             } else {

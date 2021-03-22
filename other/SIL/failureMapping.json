@@ -19,16 +19,7 @@
 
       }
     },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate":"http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
-      "object": "failure.Pressure^^xsd:float"
-    },
-    {
-      "subject": "failure.Functionnal_Location",
-      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000028_superprop",
-      "object": "failure.Temperature^^xsd:float"
-    },
+
     {
       "subject": "failure.Functionnal_Location",
       "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
@@ -130,6 +121,17 @@
       "subject": "failure.Functionnal_Location",
       "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf",
       "object": "failure.Tag_Number"
+    },
+
+    {
+      "subject": "failure.Tag_Number",
+      "predicate":"http://w3id.org/readi/rdl/CFIHOS-40000512",
+      "object": "failure.Pressure^^xsd:float"
+    },
+    {
+      "subject": "failure.Tag_Number",
+      "predicate": "http://w3id.org/readi/rdl/CFIHOS-40000514",
+      "object": "failure.Temperature^^xsd:float"
     },
 
 

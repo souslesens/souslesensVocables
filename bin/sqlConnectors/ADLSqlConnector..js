@@ -111,14 +111,16 @@ var ADLSqlConnector = {
 
 
 
-    processFetchedData:function(dbName,query,fetchSize,startOffset, processor,callback){
+    processFetchedData:function(dbName,query,fetchSize,startOffset,maxOffset, processor,callback){
 
         var offset = startOffset
         var length = 1
         var allResults = []
+       if(!maxOffset)
+           maxOffset=10000000
         async.whilst(
             function test(cb) {
-                return cb(null, length > 0);
+                return cb(null, length > 0 && offset<maxOffset);
             },
             function iter(callbackWhilst) {
 

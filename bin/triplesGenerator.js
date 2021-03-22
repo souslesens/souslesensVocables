@@ -223,12 +223,12 @@ var triplesGenerator = {
                 function (callbackSeries) {
                     if (!options.replaceGraph)
                         return callbackSeries();
-                    var queryDeleteGraph = "with <" + uriPrefix + ">" +
+                 /*   var queryDeleteGraph = "with <" + uriPrefix + ">" +
                         "delete {" +
                         "  ?sub ?pred ?obj ." +
                         "} " +
-                        "where { ?sub ?pred ?obj .}"
-
+                        "where { ?sub ?pred ?obj .}"*/
+                    var  queryDeleteGraph = " CLEAR GRAPH <" + uriPrefix + ">"
                     var params = {query: queryDeleteGraph}
 
                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
@@ -297,7 +297,12 @@ var triplesGenerator = {
                 }
                 //prepare mappings
                 , function (callbackSeries) {
-                    mappings = JSON.parse(fs.readFileSync(mappingsPath));
+            try {
+                mappings = JSON.parse(fs.readFileSync(mappingsPath));
+            }
+            catch(e){
+                callbackSeries(e)
+            }
                     mappings.mappings.forEach(function (mapping) {
                         if (mapping.subject.indexOf("http") < 0) {
                             var array = mapping.subject.split(".")
@@ -395,7 +400,7 @@ var triplesGenerator = {
                     }
 
                     var sqlQuery = "select * from  " + sqlTable + " ";
-                    sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), processor, function (err, result) {
+                    sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
                         if (err)
                             return callbackSeries(err);
 
@@ -674,8 +679,10 @@ var triplesGenerator = {
                     }
                 }
                 httpProxy.post(body.url, body.headers, body.params, function (err, result) {
-                    if (err)
+                    if (err) {
+                        console.log(err)
                         return callbackWhilst(err);
+                    }
 
                     offset += result.results.bindings.length
                     resultSize = result.results.bindings.length
@@ -697,13 +704,13 @@ var triplesGenerator = {
 
     },
 
-    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, dbConnection,replaceGraph, callback) {
+    buidlADL: function (mappingsDirPath, mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, dbConnection, replaceGraph, callback) {
 
         sqlConnector.connection = dbConnection;
         var count = 0;
         async.eachSeries(mappingFileNames, function (mappingFile, callbackEach) {
-if(count++>0)
-    replaceGraph=false
+            if (count++ > 0)
+                replaceGraph = false
             var mappingPath = mappingsDirPath + mappingFile
 
 
@@ -712,7 +719,8 @@ if(count++>0)
                 sparqlServerUrl: sparqlServerUrl,
                 rdlGraphUri: rdlGraphUri,
                 oneModelGraphUri: oneModelGraphUri,
-                replaceGraph: replaceGraph
+                replaceGraph: replaceGraph,
+
             }
 
             console.log("creating triples for mapping " + mappingPath)
@@ -822,95 +830,98 @@ if(count++>0)
 module.exports = triplesGenerator;
 
 
-if(true){
-if (false) {// buildClov
+if (true) {
+    if (false) {// buildClov
 
 
-    var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\clov\\"
-    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-    var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
-    var adlGraphUri = "http://data.total.com/resource/one-model/assets/clov/"
-    var mappingFileNames = [
-        //  "tagMapping.json",
-        //  "tagAttributeMapping.json",
-        "tag2ModelMapping.json",
-        "modelMapping.json",
-        "modelAttributeMapping.json",
-        "tag2tagMapping.json",
-    ]
-
-
-    var dbConnection = {
-        host: "localhost",
-        user: "root",
-        password: "vi0lon",
-        database: 'clov',
-        fetchSize: 5000,
-    }
-    var   replaceGraph=true;
-
-}
-
-if (false) {// turbogen
-
-
-    var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
-    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-    var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
-    var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
-    var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
-    var mappingFileNames = [
-
+        var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\clov\\"
+        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/clov/"
+        var mappingFileNames = [
         "tagMapping.json",
-     "tagAttributeMapping.json",
-        "tag2ModelMapping.json",
-        "modelMapping.json",
-        "modelAttributeMapping.json",
-        "tag2tagMapping.json",
-        "requirementMapping.json",
-        "breakdowns.json",
-    ]
+            "tagAttributeMapping.json",
+            "tag2ModelMapping.json",
+           "modelMapping.json",
+            "modelAttributeMapping.json",
+            "tag2tagMapping.json",
+        ]
 
 
-    var dbConnection = {
-        host: "localhost",
-        user: "root",
-        password: "vi0lon",
-        database: 'turbogenerator',
-        fetchSize: 5000,
+        var dbConnection = {
+            host: "localhost",
+            user: "root",
+            password: "vi0lon",
+            database: 'clov',
+            fetchSize: 5000,
+            maxOffset:100000,
+        }
+        var replaceGraph = true;
+
     }
-    var   replaceGraph=true;
-}
 
-if (true) {// SIL
+    if (false) {// turbogen
 
 
-    var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\SIL\\"
-    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-    var rdlGraphUri = "http://data.total.com/resource/sil/ontology/0.1/"
-    var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
-    var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
-    var mappingFileNames = [
-        "failureMapping.json"
-    ]
+        var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
+        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
+        var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
+        var mappingFileNames = [
+
+            "tagMapping.json",
+            "tagAttributeMapping.json",
+            "tag2ModelMapping.json",
+            "modelMapping.json",
+            "modelAttributeMapping.json",
+            "tag2tagMapping.json",
+            "requirementMapping.json",
+            "breakdowns.json",
+        ]
 
 
-    var dbConnection = {
-        host: "localhost",
-        user: "root",
-        password: "vi0lon",
-        database: 'sil',
-        fetchSize: 5000,
+        var dbConnection = {
+            host: "localhost",
+            user: "root",
+            password: "vi0lon",
+            database: 'turbogenerator',
+            fetchSize: 5000,
+            maxOffset:null,
+        }
+        var replaceGraph = true;
     }
-    var replaceGraph=true
-}
+
+    if (true) {// SIL
 
 
-triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, replaceGraph,function (err, result) {
-    if (err)
-        return console.log(err);
-    return console.log("ALL DONE");
-})
+        var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\SIL\\"
+        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var rdlGraphUri = "http://data.total.com/resource/sil/ontology/0.1/"
+        var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
+        var mappingFileNames = [
+            "failureMapping.json"
+        ]
+
+
+        var dbConnection = {
+            host: "localhost",
+            user: "root",
+            password: "vi0lon",
+            database: 'sil',
+            fetchSize: 5000,
+            maxOffset:null,
+        }
+        var replaceGraph = true
+    }
+
+
+    triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, replaceGraph,function (err, result) {
+        if (err)
+            return console.log(err);
+        return console.log("ALL DONE");
+    })
 }
 
 if (false) {

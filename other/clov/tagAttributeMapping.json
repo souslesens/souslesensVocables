@@ -3,7 +3,7 @@
     {
       "subject": "tag_attribute.TagId",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#Tag"
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
     },
     {
       "subject": "tag_attribute.AttributeID",

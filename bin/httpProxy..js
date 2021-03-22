@@ -61,7 +61,7 @@ var httpProxy = {
             };
             options.form = params;
         }
-        if(url.indexOf("main.glb.corp.local"))
+        if(url.indexOf("main.glb.corp.local")>-1)
             options.proxy=httpProxy.proxy
 
         request(options, function (error, response, body) {

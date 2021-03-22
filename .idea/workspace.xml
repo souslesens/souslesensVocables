@@ -2,9 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/users/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/users/users.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/images/description.png" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/images/description.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/SIL/failureMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/SIL/failureMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/clov/tag2ModelMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/clov/tag2ModelMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/clov/tag2tagMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/clov/tag2tagMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/clov/tagAttributeMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/clov/tagAttributeMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/clov/tagMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/clov/tagMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -76,7 +92,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.exportRDF..js">
+  <component name="RunManager" selected="Node.js.triplesGenerator.js">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
@@ -94,8 +110,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.exportRDF..js" />
         <item itemvalue="Node.js.triplesGenerator.js" />
+        <item itemvalue="Node.js.exportRDF..js" />
         <item itemvalue="Node.js.OneModelManager..js" />
         <item itemvalue="Node.js.ADLSqlConnector..js" />
         <item itemvalue="Node.js.exportGraph..js" />
@@ -157,7 +173,7 @@
       <workItem from="1615453594286" duration="64923000" />
       <workItem from="1615877061869" duration="54129000" />
       <workItem from="1616066349257" duration="9717000" />
-      <workItem from="1616133884239" duration="49356000" />
+      <workItem from="1616133884239" duration="78121000" />
     </task>
     <servers />
   </component>
@@ -181,35 +197,34 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/routes/index.js</url>
-          <line>361</line>
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
-          <line>521</line>
-          <option name="timeStamp" value="33" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js</url>
-          <line>79</line>
-          <option name="timeStamp" value="37" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js</url>
-          <line>525</line>
-          <option name="timeStamp" value="39" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js</url>
-          <line>526</line>
-          <option name="timeStamp" value="40" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/exportRDF..js</url>
-          <line>172</line>
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>82</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="67" />
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/oneModel/OneModelManager..js</url>
+          <line>98</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="97" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/oneModel/OneModelManager..js</url>
+          <line>153</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="98" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/oneModel/OneModelManager..js</url>
+          <line>112</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="100" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/oneModel/OneModelManager..js</url>
+          <line>179</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="101" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

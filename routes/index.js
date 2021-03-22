@@ -25,6 +25,7 @@ router.get('/', function (req, res, next) {
 
 
 router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
+  //  console.log(JSON.stringify(req.body,null,2))
 
         if (req.body.executeQuery) {
             var queryObj = JSON.parse(req.body.executeQuery);

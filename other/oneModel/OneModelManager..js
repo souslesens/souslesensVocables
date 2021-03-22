@@ -1,13 +1,13 @@
 const httpProxy = require("../../bin/httpProxy.")
 const rdfParser = require("rdf-parse").default;
-var fs=require('fs')
-var path=require('path')
+var fs = require('fs')
+var path = require('path')
 const async = require("async");
 var util = require('../../bin/skosConverters/util.')
 const N3 = require('n3');
 const {DataFactory} = N3;
 const {namedNode, literal, defaultGraph, quad} = DataFactory;
-var graphUrisMap={}
+var graphUrisMap = {}
 
 
 var sparql_server_url = "http://51.178.139.80:8890/sparql"
@@ -15,21 +15,21 @@ var sparql_server_url = "http://51.178.139.80:8890/sparql"
 
 var OneModelManager = {
 
-    getGraphUri:function(sourceLabel){
-        if(graphUrisMap[sourceLabel])
+    getGraphUri: function (sourceLabel) {
+        if (graphUrisMap[sourceLabel])
             return graphUrisMap[sourceLabel]
 //"D:\\GitHub\\souslesensVocables\\public\\vocables\\config"
-        var sourcesFilePath= path.join(__dirname, "../../public/vocables/config/sources.json")
-        sourcesFilePath=path.resolve(sourcesFilePath)
+        var sourcesFilePath = path.join(__dirname, "../../public/vocables/config/sources.json")
+        sourcesFilePath = path.resolve(sourcesFilePath)
         try {
             var str = fs.readFileSync(sourcesFilePath)
             var sources = JSON.parse(str)
-            if(!sources[sourceLabel])
+            if (!sources[sourceLabel])
                 return "no source matching"
-            if(Array.isArray(sources[sourceLabel].graphUri))
+            if (Array.isArray(sources[sourceLabel].graphUri))
                 return sources[sourceLabel].graphUri[0]
             return sources[sourceLabel].graphUri
-        }catch(e){
+        } catch (e) {
             return e;
         }
 
@@ -37,9 +37,9 @@ var OneModelManager = {
 
     getOntology: function (sourceLabel, callback) {
 
-      var graphUri=OneModelManager.getGraphUri(sourceLabel)
-        if(graphUri.indexOf("http")!=0)
-            return callback(null,"ERROR reading graphUri :"+ sourceLabel+"  "+graphUri)
+        var graphUri = OneModelManager.getGraphUri(sourceLabel)
+        if (graphUri.indexOf("http") != 0)
+            return callback(null, "ERROR reading graphUri :" + sourceLabel + "  " + graphUri)
 
 
         var query = "select  ?s ?p ?o  from <" + graphUri + ">  WHERE { ?s ?p ?o  } order by ?s";
@@ -97,7 +97,7 @@ var OneModelManager = {
                 writer.end((error, result) => {
                     result = result.replace(/ a /g, " rdf:type ");
                     callback(null, result);
-                  //  console.log(result)
+                    //  console.log(result)
                 });
             }
         )
@@ -105,7 +105,7 @@ var OneModelManager = {
 
     uploadOntologyFromOwlFile: function (graphUri, filePath, callback) {
         var triples
-        if(!graphUri || !filePath)
+        if (!graphUri || !filePath)
             return callback("wrong params")
         async.series([
             // read triples
@@ -147,7 +147,7 @@ var OneModelManager = {
                 queryCreateGraph += triples;
 
                 queryCreateGraph += "}"
-
+console.log(triples)
 
                 var params = {query: queryCreateGraph}
 
@@ -164,10 +164,7 @@ var OneModelManager = {
 
 
         ], function (err) {
-
-            if (err) {
-
-            }
+            callback(err, "done")
 
         })
 

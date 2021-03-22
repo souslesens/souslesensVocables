@@ -564,10 +564,10 @@ var SourceBrowser = (function () {
             dataType: "json",
 
             success: function (data, textStatus, jqXHR) {
-                MainController.UI.message("Ontology updated")
+               alert("Ontology updated")
             }
             , error: function (err) {
-                MainController.UI.message(err)
+              alert(err)
             }
         })
 

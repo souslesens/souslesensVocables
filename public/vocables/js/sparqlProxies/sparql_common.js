@@ -16,9 +16,9 @@ var Sparql_common = (function () {
         if (!ids && !words)
             return "";
 
-        if (!words && ids.length==0)
+        if (!words && ids.length == 0)
             return "";
-        if (!ids && words.length==0)
+        if (!ids && words.length == 0)
             return "";
 
         function formatWord(str) {
@@ -48,7 +48,7 @@ var Sparql_common = (function () {
         varNames.forEach(function (varName) {
             if (words) {
                 if (Array.isArray(words)) {
-                    if(words.length==0)
+                    if (words.length == 0)
                         return "";
                     if (words[0] == null)
                         return ""
@@ -71,7 +71,7 @@ var Sparql_common = (function () {
 
                     if (!options.exactMatch) {
                         filters.push("regex(?" + varName + "Label, \"" + words + "\", \"i\")");
-                    }else{
+                    } else {
                         filters.push(" regex(?" + varName + "Label, \"^" + words + "$\", \"i\")");
                     }
                 }
@@ -79,10 +79,10 @@ var Sparql_common = (function () {
 
 
                 if (Array.isArray(ids)) {
-                    if(ids.length==0)
+                    if (ids.length == 0)
                         return "";
                     var p = ids.indexOf("#")
-                    if (p > -1 )
+                    if (p > -1)
                         ids.splice(p, 1)
                     if (ids[0] == null)
                         return ""
@@ -159,10 +159,15 @@ var Sparql_common = (function () {
         return fromStr;
     }
 
-    self.formatStringForTriple= function (str, forUri) {
+    self.formatString = function (str, forUri) {
+        return self.formatStringForTriple(str, forUri);
+    }
+
+
+    self.formatStringForTriple = function (str, forUri) {
         if (!str || !str.replace)
             return null;
-        str=str.trim()
+        str = str.trim()
         str = str.replace(/\\/gm, "")
         str = str.replace(/"/gm, "\\\"")
         // str = str.replace(/;/gm, "\\\;")
@@ -203,14 +208,14 @@ var Sparql_common = (function () {
     }
 
     self.getFromGraphStr = function (graphUris) {
-        if (!graphUris || graphUris=="")
+        if (!graphUris || graphUris == "")
             return "";
         if (Array.isArray(graphUris)) {
-            var fromStr =""
-                graphUris.forEach(function (item) {
-                    fromStr += " FROM <" + item + "> "
+            var fromStr = ""
+            graphUris.forEach(function (item) {
+                fromStr += " FROM <" + item + "> "
 
-                })
+            })
             return fromStr;
         } else {
             return " FROM <" + graphUris + ">"

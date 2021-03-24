@@ -54,7 +54,7 @@ var Import = (function () {
         var words2 = []
         words.forEach(function (word) {
          var newNodeId = common.getNewUri(Blender.currentSource)
-         word = Sparql_common.formatString(word.trim())
+         word = Sparql_common.formatStringForTriple(word.trim())
          if (!word)
           return;
 

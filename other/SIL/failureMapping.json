@@ -22,10 +22,6 @@
 
     {
       "subject": "failure.Functionnal_Location",
-      "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
-      "object": "failure.Unit"
-    }, {
-      "subject": "failure.Functionnal_Location",
       "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
       "object": "failure.Equipment_Desc"
     },

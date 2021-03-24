@@ -92,7 +92,8 @@ var triplesGenerator = {
                 var objectValue;
                 var objectSuffix = ""
                 var p;
-
+if(mapping.predicate=="http://standards.iso.org/iso/15926/part14/locatedRelativeTo")
+    var x=2
 
                 if (mapping.object instanceof Object) {
                     var value = item[mapping.object.column]
@@ -913,7 +914,7 @@ if (true) {
             fetchSize: 5000,
             maxOffset:null,
         }
-        var replaceGraph = true
+        var replaceGraph = false
     }
 
 

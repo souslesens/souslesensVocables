@@ -12,6 +12,9 @@
  */
 
 
+
+
+
 var Sparql_generic = (function () {
         var self = {};
         self.slicesSize = 25;
@@ -488,7 +491,7 @@ var Sparql_generic = (function () {
                                     var langStr = "";
                                     if (item.value["xml:lang"])
                                         langStr = "@" + item.value["xml:lang"]
-                                    valueStr = "'" + Sparql_common.formatString(item.value.value) + "'" + langStr
+                                    valueStr = "'" + Sparql_common.formatStringForTriple(item.value.value) + "'" + langStr
                                 }
                                 var triple = "<" + subject + "> <" + prop + "> " + valueStr + "."
                                 newTriples.push(triple)

@@ -251,7 +251,7 @@ var ADLbrowser = (function () {
             onSelectNodeAdl: function (e, obj) {
                 ADLbrowser.currentJstreeNode = obj.node;
                 self.queryMode = "graph"
-                self.query.showQueryParamsDialog({x: w - 100, y: h / 3}, "graph")
+                self.query.showQueryParamsDialog({x: w - 100, y: h / 3},)
                 $("#ADLbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
             }
 
@@ -545,6 +545,7 @@ var ADLbrowser = (function () {
 
                         var targetNode
 
+
                         var role;
 
                         if (node.data.id != item.subType.value) {
@@ -564,11 +565,13 @@ var ADLbrowser = (function () {
 
                         if (!existingNodes[targetNode.value]) {
                             existingNodes[targetNode.value] = 1
+                            var label = self.OneModelDictionary[targetNode.value]
+                            var propsLabel = "(" + self.OneModelDictionary[item.prop.value] + ")"
                             if (!self.oneModelDescription.allObjectsMap[targetNode.value])
                                 self.oneModelDescription.allObjectsMap[targetNode.value] = {label: targetNode.value}
                             jstreeData.push({
                                 id: targetNode.value,
-                                text: "<span class='adlNode' style='color: " + self.getPropertyColor(targetNode.value) + "'>" + self.oneModelDescription.allObjectsMap[targetNode.value].label + "</span>",
+                                text: "<span class='adlNode' style='color: " + self.getPropertyColor(targetNode.value) + "'>" + label + "</span> " + propsLabel,
                                 parent: node.data.id,
                                 data: {role: "sub|obj", property: item.prop.value, id: targetNode.value, label: self.oneModelDescription.allObjectsMap[targetNode.value].label, source: self.currentSource}
                             })
@@ -688,7 +691,7 @@ var ADLbrowser = (function () {
                         if (!self.currentSource)
                             return alert("select a source")
                         self.queryMode = "graph"
-                        self.query.showQueryParamsDialog(e.position, "graph")
+                        self.query.showQueryParamsDialog(e.position,)
 
 
                     }
@@ -906,14 +909,34 @@ var ADLbrowser = (function () {
             })
         }
         ,
-        showQueryParamsDialog: function (position, mode) {
-            var field = self.currentJstreeNode.id
-            self.query.getNodeProperties(self.currentJstreeNode, function (err, properties) {
-                var withBlankOption = false;
-                if (properties.length > 1)
-                    withBlankOption = true;
-                $("#ADLbrowserQueryParams_type").html(self.currentJstreeNode.data.label)
-                common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
+        showQueryParamsDialog: function (position) {
+            if (ADLbrowser.currentGraphNodeSelection) {
+                self.currentQueryDialogField = null
+                $("#ADLbrowserQueryParams_property").empty()
+                var possibleTypes = ADLbrowser.query.getAdlModel(ADLbrowser.currentGraphNodeSelection.data.type, ADLbrowser.currentGraphNodeSelection.data.source, "subjectOrObject", function (err, result) {
+                    if (err)
+                        return alert(err)
+
+
+                    var types = []
+                    result.forEach(function (item) {
+                        if (types.indexOf(item.subType.value) < 0)
+                            types.push({id:item.subType.value,label:self.OneModelDictionary[item.subType.value]})
+                        if (item.objType.value && types.indexOf(item.objType.value) < 0)
+                            types.push({id:item.objType.value,label:self.OneModelDictionary[item.objType.value]})
+
+                    })
+                    $("#ADLbrowserQueryParams_typeSelect").css("display", "block")
+                    common.fillSelectOptions("ADLbrowserQueryParams_typeSelect,true", types,true,"label","id")
+                })
+            } else {
+                self.currentQueryDialogField = self.currentJstreeNode.id
+                self.query.showNodeProperties(self.currentJstreeNode);
+                $("#ADLbrowserQueryParams_typeSelect").css("display", "none")
+            }
+
+
+
 
                 $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
                 $("#ADLbrowserQueryParamsDialog").css("top", position.y)
@@ -926,14 +949,29 @@ var ADLbrowser = (function () {
 
 
                 }, 500)
+
+        },
+
+        showNodeProperties:function(node){
+            self.query.getNodeProperties(node, function (err, properties) {
+                var withBlankOption = false;
+                if (properties.length > 1)
+                    withBlankOption = true;
+                $("#ADLbrowserQueryParams_type").html(node.data.label)
+                common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
             })
         }
+        , onSelectDialogField: function(type){
+            self.currentQueryDialogField = type
+            self.query.showNodeProperties({data:{type:type,id:type,label:self.OneModelDictionary[type]}})
+        }
+
         ,
         onQueryParamsDialogValidate: function (logicalMode) {
             var property = $("#ADLbrowserQueryParams_property").val()
             var operator = $("#ADLbrowserQueryParams_operator").val()
             var value = $("#ADLbrowserQueryParams_value").val()
-            var field = self.currentJstreeNode.id
+            var field = self.currentQueryDialogField
             var adlNodeObj = $("#ADLbrowser_adlJstreeDiv").jstree(true).get_node()
             $("#ADLbrowserQueryParamsDialog").css("display", "none")
             var filterStr = "";
@@ -1111,17 +1149,10 @@ var ADLbrowser = (function () {
             if (value != "")
                 filter = "FILTER (regex(?obj, \"^" + value + "\", \"i\") || regex(?objLabelLabel, \"^" + value + "\", \"i\") )"
 
+
             var filterGraphStr = ""
-            if (false && visjsGraph.data && visjsGraph.data.nodes) {
-                var existingNodes = visjsGraph.data.nodes.get()
-                var typeIds = []
-                existingNodes.forEach(function (item) {
-                    typeIds.push(item.id)
-
-                })
-                filterGraphStr = "?sub0 ?p ?sub " + Sparql_common.setFilter("sub0", typeIds)
-            }
-
+            if( ADLbrowser.currentGraphNodeSelection)
+                filterGraphStr = Sparql_common.setFilter("sub",ADLbrowser.currentGraphNodeSelection.id)
 
             if (!property || property == "")
                 return alert("select a property")

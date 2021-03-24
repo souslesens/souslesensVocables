@@ -92,8 +92,7 @@ var triplesGenerator = {
                 var objectValue;
                 var objectSuffix = ""
                 var p;
-if(mapping.predicate=="http://standards.iso.org/iso/15926/part14/locatedRelativeTo")
-    var x=2
+
 
                 if (mapping.object instanceof Object) {
                     var value = item[mapping.object.column]
@@ -900,7 +899,7 @@ if (true) {
         var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
         var rdlGraphUri = "http://data.total.com/resource/sil/ontology/0.1/"
         var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
-        var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/sil/0.2/"
         var mappingFileNames = [
             "failureMapping.json"
         ]
@@ -912,9 +911,9 @@ if (true) {
             password: "vi0lon",
             database: 'sil',
             fetchSize: 5000,
-            maxOffset:null,
+          //  maxOffset:6000,
         }
-        var replaceGraph = false
+        var replaceGraph = true
     }
 
 

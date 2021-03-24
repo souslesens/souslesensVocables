@@ -452,22 +452,6 @@
     "color": "#bcbd22"
   },
 
-"SIL-ONTOLOGY": {
-  "editable": true,
-  "graphUri": [
-    "http://data.total.com/resource/one-model/ontology/0.2/",
-    "http://data.total.com/resource/sil/ontology/0.1/",
-    "http://standards.iso.org/iso/15926/part14/"
-  ],
-  "sparql_server": {
-    "url": "_default"
-  },
-  "controller": "Sparql_OWL",
-  "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-  "schemaType": "OWL",
-  "schema": null,
-  "color": "#bcbd22"
-},
 
 
 
@@ -583,7 +567,7 @@
   },
   "ASSETS-SIL": {
     "graphUri":  [
-      "http://data.total.com/resource/one-model/assets/sil/"
+      "http://data.total.com/resource/one-model/assets/sil/0.2/"
     ],
 
 

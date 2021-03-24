@@ -311,12 +311,16 @@ var MainController = (function () {
         },
 
         openRightPanel: function () {
-            var w = $(document).width() - leftPanelWidth
-            var h = $(document).height() - 30;
+            var w = $(window).width() - leftPanelWidth
+            var h = $(window).height() - 30;
             // $("#centralPanel").width(w)
             $("#centralPanelDiv").width(w - rightPanelWidth)
+            $("#graphDiv").width(w - rightPanelWidth)
             $("#rightPanelToogleButton").css("display", "block")
             $("#rightPanelDiv").width(rightPanelWidth)
+            setTimeout(function() {
+                $("#graphDiv").hide().fadeIn('fast');}
+            ,500)
         },
         showCurrentQuery: function () {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>")

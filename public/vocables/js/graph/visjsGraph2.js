@@ -394,6 +394,10 @@ var visjsGraph = (function () {
                     nodes.push(edge.to)
                     recurse(edge.to)
                 }
+               /* if(includeParents && edge.to == nodeId){
+                    nodes.push(edge.from)
+                    recurse(edge.from)
+                }*/
             })
         }
 

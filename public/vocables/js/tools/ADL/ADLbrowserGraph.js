@@ -3,7 +3,7 @@ var ADLbrowserGraph = (function () {
 
     var self = {}
     self.defaultNodeSize = 10;
-    self.clusterSizeLimit = 100
+    self.clusterSizeLimit = 500
     self.clusteclusterShape = "box"
 
     self.setGraphPopupMenus = function (node, event) {
@@ -52,19 +52,27 @@ var ADLbrowserGraph = (function () {
             var graphNodeFilterStr = ""
             var slicedGraphNodes = [];
             var existingNodes2 = []
+
             //  if (options.logicalMode!="union" && visjsGraph.data && visjsGraph.data.nodes) {
             if (visjsGraph.data && visjsGraph.data.nodes) {
-                var existingNodes = visjsGraph.data.nodes.get();
+                var existingNodes
+                if( ADLbrowser.currentGraphNodeSelection) {
+                    existingNodes= visjsGraph.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id,true)
 
+                }else {
+                    existingNodes = visjsGraph.data.nodes.get();
+                }
 
-                existingNodes.forEach(function (node) {
-                    if (node.id.indexOf("cluster_") == 0) {
-                        existingNodes2 = existingNodes2.concat(node.data.clusterContent)
-                    } else {
-                        existingNodes2.push(node.id)
-                    }
-                })
+                    existingNodes.forEach(function (node) {
+                        if (node.id.indexOf("cluster_") == 0) {
+                            existingNodes2 = existingNodes2.concat(node.data.clusterContent)
+                        } else {
+                            existingNodes2.push(node.id)
+                        }
+                    })
+
             }
+
             if (options.logicalMode != "union") {
                 slicedGraphNodes = common.sliceArray(existingNodes2, 1000)
             } else {
@@ -78,10 +86,9 @@ var ADLbrowserGraph = (function () {
                 if (node.data.role == "obj" || node.data.role == "objType")
                     graphNodesRole = "sub"
 
-                var graphNodeFilterStr
-                if( ADLbrowser.currentGraphNodeSelection)
-                    graphNodeFilterStr = Sparql_common.setFilter("sub",ADLbrowser.currentGraphNodeSelection.id)
-                else
+
+
+                //else
                 graphNodeFilterStr= Sparql_common.setFilter(graphNodesRole, slice)
                 self.queryGraph(node, graphNodeFilterStr, options, function (err, data) {
                     if (err)
@@ -246,12 +253,12 @@ var ADLbrowserGraph = (function () {
             data.forEach(function (item) {
                 var p;
                 if (unclusteredNodesMap[item.sub.value]) {
-                    var edgeId = clusterId + "_" + unclusteredNodesMap[item.sub.value];
+                    var edgeId = unclusteredNodesMap[item.sub.value]+"_"+clusterId ;
                     if (!culteredEdges[edgeId]) {
                         culteredEdges[edgeId] = {
                             id: edgeId,
-                            from: clusterId,
-                            to: unclusteredNodesMap[item.sub.value],
+                            to: clusterId,
+                            from: unclusteredNodesMap[item.sub.value],
                             color: "#ccc",
                             value: 1
 
@@ -264,13 +271,13 @@ var ADLbrowserGraph = (function () {
                     }
                 } else {
                     if (existingNodes[item.sub.value]) {
-                        var edgeId = clusterId + "_" + item.sub.value;
+                        var edgeId =  item.sub.value+"_"+clusterId ;
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: clusterId,
-                                to: item.sub.value,
+                                to: clusterId,
+                                from: item.sub.value,
                                 color: "#ccc",
                                 value: 1
 
@@ -287,7 +294,16 @@ var ADLbrowserGraph = (function () {
 
         } else {
 
+var clusteredEdges={}
+            data.forEach(function (item) {
+                if(unclusteredNodesMap[item.sub.value]){
+                    var edgeId = unclusteredNodesMap[item.sub.value]+"_"+ item.obj.value
+                    if(!clusteredEdges[edgeId])
+                        clusteredEdges[edgeId]=0
+                    clusteredEdges[edgeId]+=1
 
+                }
+            })
             data.forEach(function (item) {
                 if (node.data.role.indexOf("sub") == 0) {
 
@@ -329,27 +345,33 @@ var ADLbrowserGraph = (function () {
                     }
                 }
                 if (item.obj) {
-                    if (unclusteredNodesMap[item.sub.value]) {
-                        var edgeId = item.obj.value + "_" + unclusteredNodesMap[item.sub.value]
+                    if (  unclusteredNodesMap[item.sub.value]) {
+
+
+                        var edgeId = unclusteredNodesMap[item.sub.value]+"_"+ item.obj.value
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: item.obj.value,
-                                to: unclusteredNodesMap[item.sub.value],
+                                to: item.obj.value,
+                                from: unclusteredNodesMap[item.sub.value],
+                             //   value:clusteredEdges[edgeId],
+                                label:""+clusteredEdges[edgeId],
+                                font:"12px arial blue",
+                                font:{background: "#ddd",strokeWidth:2},
                                 color: "#ccc"
 
                             })
                         }
 
                     } else {
-                        var edgeId = item.obj.value + "_" + item.sub.value
+                        var edgeId = item.sub.value + "_" + item.obj.value
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: item.obj.value,
-                                to: item.sub.value,
+                                from: item.sub.value,
+                                to: item.obj.value,
                                 color: "#ccc"
 
                             })

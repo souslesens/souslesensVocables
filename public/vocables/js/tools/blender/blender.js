@@ -282,6 +282,7 @@ var Blender = (function () {
 
         self.getJstreeConceptsContextMenu = function () {
             var menuItems = {}
+            $(".vakata-context jstree-contextmenu").css("z-index","6")
 
 
             if (!self.currentTreeNode || !self.currentTreeNode.data)

@@ -910,7 +910,7 @@ var ADLbrowser = (function () {
         }
         ,
         showQueryParamsDialog: function (position) {
-            if (ADLbrowser.currentGraphNodeSelection) {
+            if (false && ADLbrowser.currentGraphNodeSelection) {
                 self.currentQueryDialogField = null
                 $("#ADLbrowserQueryParams_property").empty()
                 var possibleTypes = ADLbrowser.query.getAdlModel(ADLbrowser.currentGraphNodeSelection.data.type, ADLbrowser.currentGraphNodeSelection.data.source, "subjectOrObject", function (err, result) {
@@ -988,9 +988,12 @@ var ADLbrowser = (function () {
                         filterStr = typeVarName + " <" + property + "> ?x. filter ( regex(?x,'" + value + "','i')) "
                     else if (operator == "not contains")
                         filterStr = typeVarName + " <" + property + "> ?x. filter regex(?x, '^((?!" + value + ").)*$','i') "
-                    else if ($("#ADLbrowserQueryParams_valuesSelect").val() != "")
-                        filterStr = typeVarName + " <" + property + "> ?x. filter (?x " + operator + "'" + value + "') "
-                    else if (numberOperators.indexOf(operator) > -1)
+                    else if ($("#ADLbrowserQueryParams_valuesSelect").val() != "") {
+                        if (value.indexOf("http") > -1)
+                            filterStr = typeVarName + " <" + property + "> ?x. filter (?x =<" + value + ">) "
+                        else
+                            filterStr = typeVarName + " <" + property + "> ?x. filter (?x " + operator + "'" + value + "') "
+                    } else if (numberOperators.indexOf(operator) > -1)
                         filterStr = typeVarName + " <" + property + "> ?x. filter ( xsd:float(?x)" + operator + value + ") "
 
                     else
@@ -1151,8 +1154,8 @@ var ADLbrowser = (function () {
 
 
             var filterGraphStr = ""
-            if( ADLbrowser.currentGraphNodeSelection)
-                filterGraphStr = Sparql_common.setFilter("sub",ADLbrowser.currentGraphNodeSelection.id)
+         /*   if( ADLbrowser.currentGraphNodeSelection)
+                filterGraphStr = Sparql_common.setFilter("sub",ADLbrowser.currentGraphNodeSelection.id)*/
 
             if (!property || property == "")
                 return alert("select a property")
@@ -1174,10 +1177,10 @@ var ADLbrowser = (function () {
                     if (!item.objLabel)
                         label = item.obj.value
                     else
-                        item.objLabel.value
+                        label = item.objLabel.value
                     data.push({id: item.obj.value, label: label})
                 })
-                common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", data, true, "id", "label")
+                common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", data, true,"label", "id", )
             })
 
         }

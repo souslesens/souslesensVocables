@@ -81,7 +81,6 @@ var Sparql_OWL = (function () {
             var owlPredicate = "subClassOf";
             if (options.owlType)
                 owlPredicate = options.owlType
-
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * " + fromStr + " where {" +
@@ -465,6 +464,7 @@ var Sparql_OWL = (function () {
                 "  OPTIONAL {?node owl:allValuesFrom ?value}. " +
                 "   OPTIONAL {?node owl:someValuesFrom ?value}. " +
                 "   OPTIONAL {?node owl:aValueFrom ?value}. " +
+                " OPTIONAL {?value rdfs:label ?valueLabel}" +
                 "} "
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit

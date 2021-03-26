@@ -136,31 +136,16 @@ var ADLcommon = (function () {
 
 
                     },
-                    // loadClasses
-                    /*    function (callbackSeries) {
 
-                            var filter = "?concept rdf:type owl:Class"
-                            Sparql_OWL.getItems(self.currentSource, {filter: filter}, function (err, result) {
-                                if (err)
-                                    return callbackSeries(err)
-                                result.forEach(function (item) {
-                                    if (self.constraintsMap.domains[item.concept.value] || self.constraintsMap.ranges[item.concept.value])
-                                        self.allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}}
-                                    allClassIds.push(item.concept.value)
-
-
-                                })
-                                callbackSeries()
-                            })
-                        },*/
                     // loadClasses
                     function (callbackSeries) {
 
-                        var depth = 5;
+                        var depth = 4;
                         Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
                             if (err)
                                 return callbackSeries(err)
                             result.forEach(function (item) {
+
                                 if (!self.allObjectsMap[item.concept.value]) {
                                     self.allObjectsMap[item.concept.value] = {type: "Class", label: item.conceptLabel.value, data: {}, parent: null}
 
@@ -187,6 +172,25 @@ var ADLcommon = (function () {
                                     }
 
                                 }
+                            })
+                            callbackSeries()
+                        })
+                    },
+                    // loadClasses
+                    function (callbackSeries) {
+
+                        var filter = "?concept rdf:type owl:Class"
+                        Sparql_OWL.getItems(self.currentSource, {filter: filter}, function (err, result) {
+                            if (err)
+                                return callbackSeries(err)
+                            result.forEach(function (item) {
+
+                                if (self.allObjectsMap[item.concept.value])
+                                // if (self.constraintsMap.domains[item.concept.value] || self.constraintsMap.ranges[item.concept.value])
+                                    self.allObjectsMap[item.concept.value].label= item.conceptLabel.value
+
+
+
                             })
                             callbackSeries()
                         })

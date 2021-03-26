@@ -4,14 +4,13 @@
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/SIL/failureMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/SIL/failureMapping.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -83,7 +82,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.triplesGenerator.js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
@@ -166,7 +165,8 @@
       <workItem from="1616066349257" duration="9717000" />
       <workItem from="1616133884239" duration="88928000" />
       <workItem from="1616498709402" duration="464000" />
-      <workItem from="1616499182105" duration="37992000" />
+      <workItem from="1616499182105" duration="46615000" />
+      <workItem from="1616765206072" duration="2983000" />
     </task>
     <servers />
   </component>

@@ -854,7 +854,7 @@ if (true) {
             password: "vi0lon",
             database: 'clov',
             fetchSize: 5000,
-            maxOffset:100000,
+         //   maxOffset:100000,
         }
         var replaceGraph = true;
 

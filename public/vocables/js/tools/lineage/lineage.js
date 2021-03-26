@@ -1089,7 +1089,7 @@ var Lineage_classes = (function () {
                 visjsGraph.network.fit()
                 $("#waitImg").css("display", "none");
 
-                if (Config.sources[source].schemaType != "INDIVIDUAL") {
+                if ( Config.sources[source].schemaType != "INDIVIDUAL") {
                     Lineage_classes.drawRestrictions(classIds)
                 }
 
@@ -1117,6 +1117,7 @@ var Lineage_classes = (function () {
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 var color = self.getSourceColor(source)
+                console.log(JSON.stringify(result,null,2))
                 result.forEach(function (item) {
 
                     if (!item.value) {

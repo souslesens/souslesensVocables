@@ -565,7 +565,11 @@ var ADLbrowser = (function () {
 
                         if (!existingNodes[targetNode.value]) {
                             existingNodes[targetNode.value] = 1
-                            var label = self.OneModelDictionary[targetNode.value]
+                            var label
+                                if(self.oneModelDescription.allObjectsMap[targetNode.value])
+                                    label= self.oneModelDescription.allObjectsMap[targetNode.value].label
+                            else
+                                    label=self.OneModelDictionary[targetNode.value]
                             var propsLabel = "(" + self.OneModelDictionary[item.prop.value] + ")"
                             if (!self.oneModelDescription.allObjectsMap[targetNode.value])
                                 self.oneModelDescription.allObjectsMap[targetNode.value] = {label: targetNode.value}
@@ -921,13 +925,13 @@ var ADLbrowser = (function () {
                     var types = []
                     result.forEach(function (item) {
                         if (types.indexOf(item.subType.value) < 0)
-                            types.push({id:item.subType.value,label:self.OneModelDictionary[item.subType.value]})
+                            types.push({id: item.subType.value, label: self.OneModelDictionary[item.subType.value]})
                         if (item.objType.value && types.indexOf(item.objType.value) < 0)
-                            types.push({id:item.objType.value,label:self.OneModelDictionary[item.objType.value]})
+                            types.push({id: item.objType.value, label: self.OneModelDictionary[item.objType.value]})
 
                     })
                     $("#ADLbrowserQueryParams_typeSelect").css("display", "block")
-                    common.fillSelectOptions("ADLbrowserQueryParams_typeSelect,true", types,true,"label","id")
+                    common.fillSelectOptions("ADLbrowserQueryParams_typeSelect,true", types, true, "label", "id")
                 })
             } else {
                 self.currentQueryDialogField = self.currentJstreeNode.id
@@ -936,23 +940,21 @@ var ADLbrowser = (function () {
             }
 
 
+            $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
+            $("#ADLbrowserQueryParamsDialog").css("top", position.y)
+            $("#ADLbrowserQueryParamsDialog").css("display", "block")
+            setTimeout(function () {
+                $("#ADLbrowserQueryParams_operator").val("=")
+                $("#ADLbrowserQueryParams_value").val("")
+                $("#ADLbrowserQueryParams_valuesSelect").val("")
+                common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", [""])
 
 
-                $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
-                $("#ADLbrowserQueryParamsDialog").css("top", position.y)
-                $("#ADLbrowserQueryParamsDialog").css("display", "block")
-                setTimeout(function () {
-                    $("#ADLbrowserQueryParams_operator").val("=")
-                    $("#ADLbrowserQueryParams_value").val("")
-                    $("#ADLbrowserQueryParams_valuesSelect").val("")
-                    common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", [""])
-
-
-                }, 500)
+            }, 500)
 
         },
 
-        showNodeProperties:function(node){
+        showNodeProperties: function (node) {
             self.query.getNodeProperties(node, function (err, properties) {
                 var withBlankOption = false;
                 if (properties.length > 1)
@@ -961,9 +963,9 @@ var ADLbrowser = (function () {
                 common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
             })
         }
-        , onSelectDialogField: function(type){
+        , onSelectDialogField: function (type) {
             self.currentQueryDialogField = type
-            self.query.showNodeProperties({data:{type:type,id:type,label:self.OneModelDictionary[type]}})
+            self.query.showNodeProperties({data: {type: type, id: type, label: self.OneModelDictionary[type]}})
         }
 
         ,
@@ -1154,8 +1156,8 @@ var ADLbrowser = (function () {
 
 
             var filterGraphStr = ""
-         /*   if( ADLbrowser.currentGraphNodeSelection)
-                filterGraphStr = Sparql_common.setFilter("sub",ADLbrowser.currentGraphNodeSelection.id)*/
+            /*   if( ADLbrowser.currentGraphNodeSelection)
+                   filterGraphStr = Sparql_common.setFilter("sub",ADLbrowser.currentGraphNodeSelection.id)*/
 
             if (!property || property == "")
                 return alert("select a property")
@@ -1180,7 +1182,7 @@ var ADLbrowser = (function () {
                         label = item.objLabel.value
                     data.push({id: item.obj.value, label: label})
                 })
-                common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", data, true,"label", "id", )
+                common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", data, true, "label", "id",)
             })
 
         }

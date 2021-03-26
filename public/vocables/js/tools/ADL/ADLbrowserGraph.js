@@ -5,7 +5,7 @@ var ADLbrowserGraph = (function () {
     self.defaultNodeSize = 10;
     self.clusterSizeLimit = 500
     self.clusteclusterShape = "box"
-
+self.edgeColor="#aaa";
     self.setGraphPopupMenus = function (node, event) {
 
         if (!node)
@@ -259,7 +259,7 @@ var ADLbrowserGraph = (function () {
                             id: edgeId,
                             to: clusterId,
                             from: unclusteredNodesMap[item.sub.value],
-                            color: "#ccc",
+                            color: self.edgeColor,
                             value: 1
 
                         }
@@ -278,7 +278,7 @@ var ADLbrowserGraph = (function () {
                                 id: edgeId,
                                 to: clusterId,
                                 from: item.sub.value,
-                                color: "#ccc",
+                                color: self.edgeColor,
                                 value: 1
 
                             })
@@ -359,7 +359,7 @@ var clusteredEdges={}
                                 label:""+clusteredEdges[edgeId],
                                 font:"12px arial blue",
                                 font:{background: "#ddd",strokeWidth:2},
-                                color: "#ccc"
+                                color: self.edgeColor
 
                             })
                         }
@@ -372,7 +372,7 @@ var clusteredEdges={}
                                 id: edgeId,
                                 from: item.sub.value,
                                 to: item.obj.value,
-                                color: "#ccc"
+                                color: self.edgeColor
 
                             })
                         }

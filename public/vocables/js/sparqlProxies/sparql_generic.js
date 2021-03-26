@@ -576,6 +576,7 @@ var Sparql_generic = (function () {
                                 item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
                         }
                         var id = item[field].value
+
                         if (!item[field + "Label"]) {
 
                             var p = id.lastIndexOf("#")

@@ -44,7 +44,7 @@ var ADLbrowser = (function () {
         async.series([
 
             function (callbackSeries) {
-                OwlSchema.initSourceSchema(Config.ADLBrowser.OneModelSource, function (err, _schema) {
+                OwlSchema.initSourceSchema(Config.ADL.OneModelSource, function (err, _schema) {
                     schema = _schema
                     if (err)
                         return callbackSeries(err)
@@ -176,7 +176,7 @@ var ADLbrowser = (function () {
 
     self.getRdlJstreeData = function (parent, parentType, callback) {
 
-        var fromStr = Sparql_common.getFromStr(Config.ADLBrowser.RDLsource)
+        var fromStr = Sparql_common.getFromStr(Config.ADL.RDLsource)
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "SELECT distinct * " + fromStr + " WHERE {" +
@@ -188,9 +188,9 @@ var ADLbrowser = (function () {
         var limit = Config.queryLimit;
         query += " } limit " + limit
 
-        var url = Config.sources[Config.ADLBrowser.RDLsource].sparql_server.url + "?format=json&query=";
+        var url = Config.sources[Config.ADL.RDLsource].sparql_server.url + "?format=json&query=";
         MainController.UI.message("searching...")
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADLBrowser.RDLsource}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: Config.ADL.RDLsource}, function (err, result) {
             if (err) {
                 return callback(err)
             }
@@ -203,7 +203,7 @@ var ADLbrowser = (function () {
                     id: item.id.value,
                     text: item.label.value,
                     parent: parent,
-                    data: {sourceType: "rdl", role: "sub", id: item.id.value, label: item.label.value, source: Config.ADLBrowser.RDLsource, type: parentType}
+                    data: {sourceType: "rdl", role: "sub", id: item.id.value, label: item.label.value, source: Config.ADL.RDLsource, type: parentType}
 
                 })
 
@@ -318,7 +318,7 @@ var ADLbrowser = (function () {
 
 
                 async.eachSeries(jstreeData, function (topAspect, callbackEach) {
-                    Sparql_generic.getNodeChildren(Config.ADLBrowser.OneModelSource, null, topAspect.id, self.aspectsChildrenDepth, null, function (err, result) {
+                    Sparql_generic.getNodeChildren(Config.ADL.OneModelSource, null, topAspect.id, self.aspectsChildrenDepth, null, function (err, result) {
                         if (err)
                             return callbackEach(err)
                         result.forEach(function (item) {
@@ -340,7 +340,7 @@ var ADLbrowser = (function () {
                                             id: item["child" + i].value,
                                             text: item["child" + i + "Label"].value,
                                             parent: parent,
-                                            data: {sourceType: "oneModel", source: Config.ADLBrowser.OneModelSource, id: item["child" + i].value, label: item["child" + i + "Label"].value,}
+                                            data: {sourceType: "oneModel", source: Config.ADL.OneModelSource, id: item["child" + i].value, label: item["child" + i + "Label"].value,}
                                         })
 
                                     }
@@ -383,7 +383,7 @@ var ADLbrowser = (function () {
                 var topIds = Object.keys(topObjects)
                 var jstreeData = []
                 async.eachSeries(topIds, function (parentId, callbackEach) {
-                    var parentType = Config.ADLBrowser.topRdlObjects[parentId].type
+                    var parentType = Config.ADL.topRdlObjects[parentId].type
                     self.getRdlJstreeData(parentId, parentType, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
@@ -392,7 +392,7 @@ var ADLbrowser = (function () {
                             text: topObjects[parentId].label,
                             parent: "#",
 
-                            data: {sourceType: "rdl", role: "sub", id: parentId, label: Config.ADLBrowser.topRdlObjects[parentId].label, type: parentType, source: Config.ADLBrowser.RDLsource}
+                            data: {sourceType: "rdl", role: "sub", id: parentId, label: Config.ADL.topRdlObjects[parentId].label, type: parentType, source: Config.ADL.RDLsource}
                         })
                         result.forEach(function (item) {
                             jstreeData.push(item)
@@ -788,7 +788,7 @@ var ADLbrowser = (function () {
     self.query = {
 
         getOneModelDescription: function (callback) {
-            ADLcommon.Ontology.load(Config.ADLBrowser.OneModelSource, function (err, result) {
+            ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
                 if (err) {
                     callback(err)
                 }
@@ -1166,12 +1166,12 @@ var ADLbrowser = (function () {
                 "Select  distinct ?obj ?objLabel " + fromStr + " where {" +
                 " ?sub <" + property + "> ?obj . ?sub rdf:type <" + field + ">. optional {?obj rdfs:label ?objLabel}" +
                 filter + filterGraphStr +
-                "} order by ?objLabel  ?obj limit " + Config.ADLBrowser.queryLimit
+                "} order by ?objLabel  ?obj limit " + Config.ADL.queryLimit
             var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: self.currentSource}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
-                if (result.results.bindings.length > Config.ADLBrowser.queryLimit)
+                if (result.results.bindings.length > Config.ADL.queryLimit)
                     return alert("Too many values found : > " + result.results.bindings.length)
                 var data = []
                 result.results.bindings.forEach(function (item) {
@@ -1209,9 +1209,9 @@ var ADLbrowser = (function () {
         }
         ,
         execute: function (showQueryOnly) {
-            if (Config.ADLBrowser.adlQueryMode == "SPARQL") {
+            if (Config.ADL.adlQueryMode == "SPARQL") {
                 self.query.executeSparqlQuery(showQueryOnly);
-            } else if (Config.ADLBrowser.adlQueryMode == "SQL") {
+            } else if (Config.ADL.adlQueryMode == "SQL") {
                 self.query.executeSqlQuery(showQueryOnly, function (err, result) {
                     $("#waitImg").css("display", "none");
                     if (err)
@@ -1259,8 +1259,8 @@ var ADLbrowser = (function () {
                     processedTypes.push(node.data.id)
                     if (index > 0) {//relation anonyme avec le precedent type
                         if (node.data.sourceType == "rdl") {
-                            if (sources.indexOf(Config.ADLBrowser.RDLsource) < 0)
-                                sources.push(Config.ADLBrowser.RDLsource)
+                            if (sources.indexOf(Config.ADL.RDLsource) < 0)
+                                sources.push(Config.ADL.RDLsource)
 
                         }
                         if (node.data.role.indexOf("sub") > -1)
@@ -1305,7 +1305,7 @@ var ADLbrowser = (function () {
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                 "Select " + selectStr + " " + fromStr + " where {"
                 + queryStr +
-                "} limit " + Config.ADLBrowser.queryLimit
+                "} limit " + Config.ADL.queryLimit
 
             if (showQueryOnly) {
                 return common.copyTextToClipboard(query)

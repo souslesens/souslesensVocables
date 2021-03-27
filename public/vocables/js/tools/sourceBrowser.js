@@ -167,20 +167,22 @@ var SourceBrowser = (function () {
                 label: "copy toClipboard",
                 action: function (e) {// pb avec source
 
-                    SourceBrowser.copyNodeToClipboard(self.currentTreeNode.data)
+                    Lineage_common.copyNodeToClipboard(self.currentTreeNode.data)
 
                 }
 
             }
-            items.pasteNodeFromClipboard = {
-                label: "paste from toClipboard",
-                action: function (e) {// pb avec source
+            if(Config.sources[Lineage_classes.currentSource].editable) {
+                items.pasteNodeFromClipboard = {
+                    label: "paste from Clipboard",
+                    action: function (e) {// pb avec source
 
-                    SourceBrowser.pasteNodeFromClipboard(self.currentTreeNode)
+                        Lineage_common.pasteNodeFromClipboard(self.currentTreeNode)
+
+                    }
 
                 }
 
-            }
             if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
                 items.uploadOntologyFromOwlFile = {
                     label: "upload Ontology FromOwl File",
@@ -189,6 +191,7 @@ var SourceBrowser = (function () {
 
                     }
                 }
+            }
             }
             if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
                 items.addToADLquery = {
@@ -490,60 +493,6 @@ var SourceBrowser = (function () {
     }
 
 
-    self.copyNodeToClipboard = function (nodeData) {
-        common.copyTextToClipboard(JSON.stringify(nodeData))
-
-    }
-
-    self.pasteNodeFromClipboard = function (parentNode) {
-        common.pasteTextFromClipboard(function (text) {
-            try {
-                var nodeData = JSON.parse(text)
-                var triples = [];
-                triples.push({
-                    subject: nodeData.id,
-                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object: "http://www.w3.org/2002/07/owl#Class",
-                    valueType: "uri"
-
-                })
-                triples.push({
-                    subject: nodeData.id,
-                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                    object: nodeData.label
-                })
-                triples.push({
-                    subject: nodeData.id,
-                    predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                    object: parentNode.data.id,
-                    valueType: "uri"
-                })
-
-                if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
-                    Sparql_generic.insertTriples(parentNode.data.source, triples, function (err, result) {
-                        if (err)
-                            return MainController.UI.message(err);
-                        nodeData.source = parentNode.data.source
-                        var jstreeData = [{
-                            id: nodeData.id,
-                            text: nodeData.label,
-                            parent: parentNode.id,
-                            data: nodeData,
-                        }]
-                        common.addNodesToJstree("LineagejsTreeDiv", parentNode.id, jstreeData)
-                    })
-                }
-
-
-            } catch (e) {
-                MainController.UI.message(e)
-            }
-
-
-        });
-
-
-    }
 
     self.uploadOntologyFromOwlFile = function () {
         var graphUri;

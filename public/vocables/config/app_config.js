@@ -20,7 +20,7 @@ var Config = (function () {
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-//self.loginMode = "none";
+ self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -31,9 +31,7 @@ var Config = (function () {
     self.searchDepth = 8
     self.Blender={openTaxonomyTreeOnLoad:1}
 
-   // self.ADLMappings={currentOntology:"ONE-MODEL"}
-    self.ADLMappings={currentOntology:"SIL-ONTOLOGY"}
-    self.ADLBrowser={
+    self.ADL={
         RDLsource:"RDL-QUANTUM-MIN",
         OneModelSource : "ONE-MODEL",
         adlQueryMode:"SPARQL", //or SQL

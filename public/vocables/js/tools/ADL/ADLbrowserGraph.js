@@ -124,7 +124,7 @@ self.edgeColor="#aaa";
         /*  if (false && node.data.sourceType == "rdl") {
            source = self.currentSource
            var fromStrAdl = Sparql_common.getFromStr(source)
-           var fromStrRdl = Sparql_common.getFromStr(Config.ADLBrowser.RDLsource)
+           var fromStrRdl = Sparql_common.getFromStr(Config.ADL.RDLsource)
            query = "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

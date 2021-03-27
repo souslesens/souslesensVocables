@@ -27,7 +27,7 @@ var ADLbrowserBI = (function () {
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: ADLbrowser.currentSource}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
-                if (result.results.bindings.length > Config.ADLBrowser.queryLimit)
+                if (result.results.bindings.length > Config.ADL.queryLimit)
                      alert("Too many values found : > " + result.results.bindings.length)
                 var data = []
                 result.results.bindings.forEach(function (item) {

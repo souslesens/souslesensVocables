@@ -1844,6 +1844,36 @@ Lineage_properties = (function () {
                 }
 
             }
+
+        }
+        if (MainController.currentTool == "lineage") {
+            items.graphNode = {
+                label: "graph Node",
+                action: function (e) {// pb avec source
+
+                    Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
+
+                }
+
+            }
+            items.copyNodeToClipboard = {
+                label: "copy to Clipboard",
+                action: function (e) {// pb avec source
+
+                    Lineage_common.copyNodeToClipboard(self.currentTreeNode.data)
+
+                }
+
+            }
+            items.pasteNodeFromClipboard = {
+                label: "paste from Clipboard",
+                action: function (e) {// pb avec source
+
+                    Lineage_common.pasteNodeFromClipboard(self.currentTreeNode)
+
+                }
+
+            }
         }
 
 
@@ -1910,7 +1940,7 @@ Lineage_properties = (function () {
                             parent: "#",
                             id: key,
                             text: self.properties[key].label,
-                            data: {id: key, label: self.properties[key].label, source: source}
+                            data: {type :"http://www.w3.org/2002/07/owl#ObjectProperty", id: key, label: self.properties[key].label, source: source}
                         })
                     }
                     if (true) {
@@ -1919,7 +1949,7 @@ Lineage_properties = (function () {
                                 parent: key,
                                 id: item.id,
                                 text: item.label,
-                                data: {id: item.id, label: item.label, source: source, parent: self.properties[key]}
+                                data: {type:"http://www.w3.org/2002/07/owl#ObjectProperty",id: item.id, label: item.label, source: source, parent: self.properties[key]}
                             })
 
                         })
@@ -2321,5 +2351,95 @@ Lineage_types = (function () {
 
 
     return self;
+
+})()
+
+
+Lineage_common=(function(){
+
+    var self={}
+    self.copyNodeToClipboard = function (nodeData) {
+        common.copyTextToClipboard(JSON.stringify(nodeData))
+
+    }
+
+    self.pasteNodeFromClipboard = function (parentNode) {
+        common.pasteTextFromClipboard(function (text) {
+            console.log(text)
+            try {
+                var nodeData = JSON.parse(text)
+                var triples = [];
+                if(parentNode.data.type=="http://www.w3.org/2002/07/owl#Class" && nodeData.type=="http://www.w3.org/2002/07/owl#Class") {
+                    triples.push({
+                        subject: nodeData.id,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: "http://www.w3.org/2002/07/owl#Class",
+                        valueType: "uri"
+
+                    })
+                    triples.push({
+                        subject: nodeData.id,
+                        predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                        object: nodeData.label
+                    })
+                    triples.push({
+                        subject: nodeData.id,
+                        predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                        object: parentNode.data.id,
+                        valueType: "uri"
+                    })
+                }
+              else  if(parentNode.data.type=="http://www.w3.org/2002/07/owl#ObjectProperty" && nodeData.type=="http://www.w3.org/2002/07/owl#ObjectProperty") {
+                    triples.push({
+                        subject: nodeData.id,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                        valueType: "uri"
+
+                    })
+                    triples.push({
+                        subject: nodeData.id,
+                        predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                        object: nodeData.label
+                    })
+                    triples.push({
+                        subject: nodeData.id,
+                        predicate: "http://www.w3.org/2000/01/rdf-schema#subPropertyOf",
+                        object: parentNode.data.id,
+                        valueType: "uri"
+                    })
+
+
+                }else{
+                  return alert (" paste from clipboard not allowed")
+                }
+
+                if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
+                    Sparql_generic.insertTriples(parentNode.data.source, triples, function (err, result) {
+                        if (err)
+                            return MainController.UI.message(err);
+                        nodeData.source = parentNode.data.source
+                        var jstreeData = [{
+                            id: nodeData.id,
+                            text: nodeData.label,
+                            parent: parentNode.id,
+                            data: nodeData,
+                        }]
+                        common.addNodesToJstree("LineagejsTreeDiv", parentNode.id, jstreeData)
+                    })
+                }
+
+
+            } catch (e) {
+                MainController.UI.message(e)
+            }
+
+
+        });
+
+
+    }
+    return self;
+
 
 })()

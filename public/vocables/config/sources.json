@@ -324,7 +324,6 @@
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/Object>",
     "schemaType": "OWL",
-    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -338,7 +337,6 @@
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
     "schemaType": "OWL",
-    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -362,7 +360,6 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
-    "ADLqueryController": "RDF",
     "schemaType": "OWL",
     "schema": null,
     "color": "#e377c2"
@@ -486,8 +483,6 @@
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
     "schemaType": "INDIVIDUAL",
 
-
-    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -541,7 +536,11 @@
     "schemaType": "INDIVIDUAL",
 
 
-    "ADLqueryController": "remoteSQL",
+    "dataSource": {
+      "type": "sql",
+      "connection": "_default",
+      "dbName": "turbogenerator"
+    },
     "schema": null,
     "color": "#bcbd22"
   },
@@ -559,9 +558,13 @@
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
     "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql",
+      "connection": "_default",
+      "dbName": "clov"
+    },
 
 
-    "ADLqueryController": "remoteSQL",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -577,9 +580,32 @@
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
     "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql",
+      "connection": "_default",
+      "dbName": "sil"
+    },
 
+    "schema": null,
+    "color": "#bcbd22"
+  },
 
-    "ADLqueryController": "remoteSQL",
+  "ASSETS-QUANTUM-REQ": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/quantum/requirements/0.2/"
+    ],
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql",
+      "connection": "_default",
+      "dbName": "quantum"
+    },
+
     "schema": null,
     "color": "#bcbd22"
   }

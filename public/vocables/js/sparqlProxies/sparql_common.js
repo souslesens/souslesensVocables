@@ -91,10 +91,10 @@ var Sparql_common = (function () {
                         if (id != "") {
                             if (conceptIdsStr != "")
                                 conceptIdsStr += ","
-                            if (id.indexOf("http") < 0)
-                                conceptIdsStr += id
-                            else
+                            if (id.indexOf("http") >-1 || id.indexOf("nodeID://")>-1)
                                 conceptIdsStr += "<" + id + ">"
+                            else
+                                conceptIdsStr += id
                         }
                     })
 
@@ -102,11 +102,13 @@ var Sparql_common = (function () {
                 } else {
                     if (ids == null)
                         return "";
-                    if (ids.indexOf("http") < 0)
-                        filters.push(" ?" + varName + " =" + ids);
-                    else
+                    if (ids.indexOf("http") >-1 || ids.indexOf("nodeID://")>-1)
                         filters.push(" ?" + varName + " =<" + ids + ">");
+                    else
+                        filters.push(" ?" + varName + " =" + ids);
+
                 }
+
 
             } else {
                 return "";

@@ -461,10 +461,9 @@ var Sparql_OWL = (function () {
                 "  ?id rdfs:subClassOf ?node. " + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
-                "  OPTIONAL {?node owl:allValuesFrom ?value}. " +
-                "   OPTIONAL {?node owl:someValuesFrom ?value}. " +
-                "   OPTIONAL {?node owl:aValueFrom ?value}. " +
-                " OPTIONAL {?value rdfs:label ?valueLabel}" +
+                "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
+                "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
+                "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "} "
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit

@@ -1,0 +1,22 @@
+https://hub.docker.com/r/skyplabs/webprotege
+
+docker run --name mongodb -d -v mongodb_data:/data/db mongo:3
+
+
+docker run --name webprotege -d \
+  -v webprotege_data:/srv/webprotege \
+  -v webprotege_logs:/var/log/webprotege \
+  --link mongodb -p 8888:8080 \
+  skyplabs/webprotege
+
+
+
+  -v webprotege_data:/data/webprotege \
+  -v webprotege_logs:/var/log/webprotege \
+
+
+  docker run --name webprotege -d \
+    -v webprotege_data:/home/debian/protegedata \
+    -v webprotege_logs:/var/log/webprotege \
+    --link mongodb -p 8888:8080 \
+    skyplabs/webprotege

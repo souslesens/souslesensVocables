@@ -892,7 +892,7 @@ if (true) {
         var replaceGraph = true;
     }
 
-    if (true) {// SIL
+    if (false) {// SIL
 
 
         var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\SIL\\"
@@ -912,6 +912,31 @@ if (true) {
             database: 'sil',
             fetchSize: 5000,
           //  maxOffset:6000,
+        }
+        var replaceGraph = true
+    }
+
+    if (true) {// quantum_REQ
+
+
+        var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\quantum\\"
+        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
+        var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/quantum/requirements/0.1/"
+        var mappingFileNames = [
+            "requirementAssembly.json",
+            "requirementPattern.json"
+        ]
+
+
+        var dbConnection = {
+            host: "localhost",
+            user: "root",
+            password: "vi0lon",
+            database: 'quantum',
+            fetchSize: 5000,
+            //  maxOffset:6000,
         }
         var replaceGraph = true
     }

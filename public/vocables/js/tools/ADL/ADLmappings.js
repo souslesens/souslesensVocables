@@ -51,7 +51,8 @@ var ADLmappings = (function () {
             MainController.UI.toogleRightPanel(true)
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             setTimeout(function () {
-                $("#rightPanelDiv").html(" <div> Ontology  Properties <div id=\"ADLmappings_ontologyPropertiesTree\" style=\"width:400px\"></div></div>")
+                $("#rightPanelDiv").html(" <button onclick=\"ADLmappings.Ontology.displayFilteredPropertiesTree(null,'types')\">reload</button>" +
+                    "<div> Ontology  Properties <div id=\"ADLmappings_ontologyPropertiesTree\" style=\"width:400px\"></div></div>")
                 self.currentSource = Config.ADL.OneModelSource;
                 self.initAdlsList()
                 ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
@@ -79,10 +80,10 @@ var ADLmappings = (function () {
             for (var key in Config.sources) {
                 var sourceObj = Config.sources[key];
                 if (sourceObj.schemaType == "INDIVIDUAL" && sourceObj.dataSource && sourceObj.dataSource.dbName) {
-                    adls.push({id:sourceObj.dataSource.dbName,label:key})
+                    adls.push({id: sourceObj.dataSource.dbName, label: key})
                 }
             }
-            common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true,"label","id")
+            common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true, "label", "id")
 
         }
 
@@ -100,7 +101,8 @@ var ADLmappings = (function () {
 
             displayFilteredPropertiesTree: function (columnNodeData, mode) {
                 var properties;
-
+                if (!columnNodeData)
+                    columnNodeData = {id: -1}
                 self.currentColumn = columnNodeData.id;
                 if (!self.typedObjectsMap[columnNodeData.id] || mode == "types") {
 
@@ -388,7 +390,7 @@ var ADLmappings = (function () {
 
             ,
             showSampleData: function (node) {
-                var limit = 10
+                var SampleSizelimit = 30
                 var dbName = node.data.source;
                 var table;
                 if (node.parents.length == 1)
@@ -476,7 +478,7 @@ var ADLmappings = (function () {
                     displaySampleData(self.sampleData[table])
                 } else {
 
-                    var sqlQuery = " select * from " + table + " limit " + limit;
+                    var sqlQuery = " select * from " + table + " limit " + SampleSizelimit;
 
                     $.ajax({
                         type: "POST",

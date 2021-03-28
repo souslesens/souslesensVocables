@@ -2107,10 +2107,10 @@ Lineage_properties = (function () {
 
                             visjsData.nodes.push({
                                 id: item.domain.value,
-                                label: item.domain.value,
+                                label: item.domainLabel.value,
                                 data: {
                                     id: item.domain.value,
-                                    label: item.domain.value,
+                                    label: item.domainLabel.value,
                                     source: self.currentSource
 
                                 },
@@ -2364,12 +2364,20 @@ Lineage_common=(function(){
     }
 
     self.pasteNodeFromClipboard = function (parentNode) {
+      //  console.log(JSON.stringify(parentNode.data))
         common.pasteTextFromClipboard(function (text) {
-            console.log(text)
+         //   console.log(text)
+
+
             try {
                 var nodeData = JSON.parse(text)
                 var triples = [];
+                var treeDiv
+
+                if(nodeData.id==parentNode.data.id)
+                    return alert("Cannot paste node inside its parent")
                 if(parentNode.data.type=="http://www.w3.org/2002/07/owl#Class" && nodeData.type=="http://www.w3.org/2002/07/owl#Class") {
+                    treeDiv="LineagejsTreeDiv"
                     triples.push({
                         subject: nodeData.id,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -2390,6 +2398,7 @@ Lineage_common=(function(){
                     })
                 }
               else  if(parentNode.data.type=="http://www.w3.org/2002/07/owl#ObjectProperty" && nodeData.type=="http://www.w3.org/2002/07/owl#ObjectProperty") {
+                  treeDiv="Lineage_propertiesTree"
                     triples.push({
                         subject: nodeData.id,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -2425,7 +2434,7 @@ Lineage_common=(function(){
                             parent: parentNode.id,
                             data: nodeData,
                         }]
-                        common.addNodesToJstree("LineagejsTreeDiv", parentNode.id, jstreeData)
+                        common.addNodesToJstree(treeDiv, parentNode.id, jstreeData)
                     })
                 }
 

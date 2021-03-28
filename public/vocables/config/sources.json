@@ -592,7 +592,7 @@
 
   "ASSETS-QUANTUM-REQ": {
     "graphUri":  [
-      "http://data.total.com/resource/one-model/assets/quantum/requirements/0.2/"
+      "http://data.total.com/resource/one-model/assets/quantum/requirements/0.1/"
     ],
 
     "sparql_server": {

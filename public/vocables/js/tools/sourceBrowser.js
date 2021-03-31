@@ -172,7 +172,7 @@ var SourceBrowser = (function () {
                 }
 
             }
-            if(Config.sources[Lineage_classes.currentSource].editable) {
+            if (Config.sources[Lineage_classes.currentSource].editable)
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (e) {// pb avec source
@@ -182,6 +182,14 @@ var SourceBrowser = (function () {
                     }
 
                 }
+            items.editNode = {
+                label: "Edit node",
+                action: function (obj, sss, cc) {
+                    SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
+
+                }
+            }
+
 
             if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
                 items.uploadOntologyFromOwlFile = {
@@ -192,20 +200,16 @@ var SourceBrowser = (function () {
                     }
                 }
             }
-            }
-            if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
+        }
+           /* if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
                 items.addToADLquery = {
                     label: "add to Asset Query",
                     action: function (e) {// pb avec source
                         ADLquery.showNodeProperties(self.currentTreeNode.data)
-
-
                     }
-
                 }
 
-            }
-        }
+        }*/
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source

@@ -860,7 +860,7 @@ if (true) {
 
     }
 
-    if (false) {// turbogen
+    if (true) {// turbogen
 
 
         var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
@@ -870,12 +870,11 @@ if (true) {
         var adlGraphUri = "http://data.total.com/resource/one-model/assets/turbogenerator/"
         var mappingFileNames = [
 
-            "tagMapping.json",
+         "tagMapping.json",
             "tagAttributeMapping.json",
             "tag2ModelMapping.json",
             "modelMapping.json",
             "modelAttributeMapping.json",
-            "tag2tagMapping.json",
             "requirementMapping.json",
             "breakdowns.json",
         ]
@@ -916,7 +915,7 @@ if (true) {
         var replaceGraph = true
     }
 
-    if (true) {// quantum_REQ
+    if (false) {// quantum_REQ
 
 
         var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\quantum\\"

@@ -2,7 +2,8 @@ var ADLbrowser = (function () {
 
 
     var self = {}
-    var typeColors = []
+    var typeColors = {}
+    var sourceShape = {}
     self.aspectsChildrenDepth = 8
     self.OneModelDictionary = {}
     self.oneModelClasses = {}
@@ -15,6 +16,17 @@ var ADLbrowser = (function () {
             typeColors[type] = common[palette][Object.keys(typeColors).length]
         return typeColors[type];
     }
+
+    var shapesPalette=[
+        "dot",  "square", "triangle", "triangleDown", "hexagon","star", "diamond",
+    ]
+    self.getSourceShape = function (source) {
+
+        if (!sourceShape[source])
+            sourceShape[source] = shapesPalette[Object.keys(sourceShape).length]
+        return sourceShape[source];
+    }
+
 
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").html("")
@@ -562,9 +574,9 @@ var ADLbrowser = (function () {
                                 data: node.data
                             })
                         }
-
-                        if (!existingNodes[targetNode.value]) {
-                            existingNodes[targetNode.value] = 1
+var propValueId=item.prop.value+"_"+targetNode.value
+                        if (!existingNodes[propValueId]) {
+                            existingNodes[propValueId] = 1
                             var label
                                 if(self.oneModelDescription.allObjectsMap[targetNode.value])
                                     label= self.oneModelDescription.allObjectsMap[targetNode.value].label
@@ -574,8 +586,8 @@ var ADLbrowser = (function () {
                             if (!self.oneModelDescription.allObjectsMap[targetNode.value])
                                 self.oneModelDescription.allObjectsMap[targetNode.value] = {label: targetNode.value}
                             jstreeData.push({
-                                id: targetNode.value,
-                                text: "<span class='adlNode' style='color: " + self.getPropertyColor(targetNode.value) + "'>" + label + "</span> " + propsLabel,
+                                id: propValueId,
+                                text: "<span class='adlNode' style='color: " + self.getPropertyColor(propValueId) + "'>" + label + "</span> " + propsLabel,
                                 parent: node.data.id,
                                 data: {role: "sub|obj", property: item.prop.value, id: targetNode.value, label: self.oneModelDescription.allObjectsMap[targetNode.value].label, source: self.currentSource}
                             })
@@ -606,8 +618,7 @@ var ADLbrowser = (function () {
                                     data: node.data
                                 })
                             }
-                            if (item.prop.value.indexOf("D101001101") > -1)
-                                var x = 3
+
                             if (!existingNodes[item.prop.value]) {
                                 existingNodes[item.prop.value] = 1
                                 if (!self.oneModelDescription.allObjectsMap[item.prop.value])

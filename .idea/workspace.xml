@@ -2,21 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/bin/dockerProtege" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/quantum/requirementAssembly.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/other/quantum/requirementPattern.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/turbogenerator/breakdownsOld.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/authentication..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/authentication..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/turbogenerator/requirementMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/requirementMapping.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLMappingRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLMappingRightPanel.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -53,7 +47,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/tools/ADL" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/other/turbogenerator" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -61,19 +55,19 @@
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2019.2\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\GitHub\souslesensVocables\other\SIL" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\external\d3" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
-      <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
-      <recent name="D:\GitHub\souslesensVocables\bin" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\ADLbrowser" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\lineage" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\snippets\lineage" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
+      <recent name="D:\GitHub\souslesensVocables\other\SIL" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\external\d3" />
+      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
+      <recent name="D:\GitHub\souslesensVocables\bin" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -88,7 +82,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Node.js.triplesGenerator.js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
       <method v="2" />
     </configuration>
@@ -172,7 +166,7 @@
       <workItem from="1616133884239" duration="88928000" />
       <workItem from="1616498709402" duration="464000" />
       <workItem from="1616499182105" duration="46615000" />
-      <workItem from="1616765206072" duration="29353000" />
+      <workItem from="1616765206072" duration="48007000" />
     </task>
     <servers />
   </component>

@@ -318,7 +318,7 @@ var clusteredEdges={}
                             visjsData.nodes.push({
                                 id: item.sub.value,
                                 label: item.subLabel.value,
-                                shape: subShape,
+                                shape: ADLbrowser.getSourceShape(ADLbrowser.currentSource),
                                 color: color,
                                 size: self.defaultNodeSize,
                                 data: {sourceType: node.data.sourceType, role: "sub", source: ADLbrowser.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
@@ -332,11 +332,12 @@ var clusteredEdges={}
                         existingNodes[item.obj.value] = 1
                         var color = "#ddd"
                         if (item.objType)
-                            color = ADLbrowser.getPropertyColor(item.objType.value)
+                           // color = ADLbrowser.getPropertyColor(item.objType.value)
+                            color=ADLbrowser.getPropertyColor(node.data.property+"_"+node.data.id);
                         visjsData.nodes.push({
                             id: item.obj.value,
                             label: item.objLabel.value,
-                            shape: "dot",
+                            shape: ADLbrowser.getSourceShape(ADLbrowser.currentSource),
                             color: color,
                             size: self.defaultNodeSize,
                             data: {sourceType: "adl", role: "sub", source: ADLbrowser.currentSource, type: item.objType.value, id: item.obj.value, label: item.objLabel.value}
@@ -365,8 +366,9 @@ var clusteredEdges={}
                         }
 
                     } else {
-                        var edgeId = item.sub.value + "_" + item.obj.value
-                        if (!existingNodes[edgeId]) {
+                        var edgeId = item.sub.value + "_" + item.obj.value;
+                        var inverseEdgeId=item.obj.value+ "_" +item.obj.value;
+                        if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
                                 id: edgeId,
@@ -414,6 +416,7 @@ if(!node || node.length==0)
 
             visjsGraph.data.nodes.add(visjsData.nodes)
             visjsGraph.data.edges.add(visjsData.edges)
+            visjsGraph.redraw()
             visjsGraph.network.fit()
         }
         callback()

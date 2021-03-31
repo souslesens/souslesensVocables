@@ -96,12 +96,15 @@ var visjsGraph = (function () {
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
         window.setTimeout(function () {
-            self.network.stopSimulation();
-            self.network.fit()
-            self.simulationOn = false;
-            if (_options.afterDrawing)
-                _options.afterDrawing()
+            if (!_options.layoutHierarchical) {
+                self.network.stopSimulation();
+                self.network.fit()
+                self.simulationOn = false;
+                if (_options.afterDrawing)
+                    _options.afterDrawing()
+            }
         }, self.simulationTimeOut)
+
 
         self.network.on("oncontext", function (params) {
 
@@ -129,11 +132,11 @@ var visjsGraph = (function () {
         });
 
         self.network.on("doubleClick", function (params) {
-            self.processClicks(params,_options, true)
+            self.processClicks(params, _options, true)
         });
 
         self.network.on("click", function (params) {
-            self.processClicks(params,_options)
+            self.processClicks(params, _options)
 
         }).on("hoverNode", function (params) {
             var nodeId = params.node;
@@ -216,7 +219,16 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var html = "<button onclick='visjsGraph.graphCsvToClipBoard()' style='position: relative; top:10px;left:10px'>CSV</button>"
+        var html = "<div  style='position: relative; top:10px;left:10px'><button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>"
+        if (true) {
+            html += "Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
+                "<option></option>" +
+                "<option>hierarchical vertical</option>" +
+                "<option>hierarchical horizontal</option>" +
+                "</div>" +
+
+                "</select>"
+        }
         $("#" + divId).append(html)
 
 
@@ -224,7 +236,55 @@ var visjsGraph = (function () {
             return callback()
 
     }
+    self.setLayout = function (layout) {
+        if (layout == "hierarchical vertical") {
+        currentDrawParams.options.layoutHierarchical = {
+                   direction: "UD",
+            levelSeparation:50,
+            nodeSpacing:50,
+            levelSeparation:200,
+            sortMethod:"hubsize",
+               }
 
+          /*  currentDrawParams.options.layout = {
+                "hierarchical": {
+                    "direction": "UD",
+                    "sortMethod": "directed"
+                }
+            }
+            currentDrawParams.options.physics = {
+                "hierarchicalRepulsion": {
+                    "avoidOverlap": 1
+                }
+            }*/
+
+        self.redraw()
+    }
+
+        if (layout == "hierarchical horizontal") {
+            currentDrawParams.options.layoutHierarchical = {
+                direction: "LR",
+                sortMethod:"hubsize",
+                levelSeparation:200,
+                sortMethod:"hubsize",
+             //   nodeSpacing:25,
+
+            }
+            currentDrawParams.options.edges= {
+                smooth: {
+                    type: "cubicBezier",
+                     forceDirection  : "horizontal",
+
+                        roundness: 0.4,
+                },
+            }
+
+                self.redraw()
+        } else {
+          //  currentDrawParams.options.layoutHierarchical = null
+           // self.redraw()
+        }
+    }
 
     self.exportGraph = function () {
 
@@ -381,8 +441,8 @@ var visjsGraph = (function () {
         return csvStr;
     }
     self.getNodeDescendantIds = function (nodeIds, includeParents) {
-        if(!Array.isArray(nodeIds))
-            nodeIds=[nodeIds]
+        if (!Array.isArray(nodeIds))
+            nodeIds = [nodeIds]
         var nodes = [];
         if (includeParents)
             nodes = nodeIds
@@ -394,10 +454,10 @@ var visjsGraph = (function () {
                     nodes.push(edge.to)
                     recurse(edge.to)
                 }
-               /* if(includeParents && edge.to == nodeId){
-                    nodes.push(edge.from)
-                    recurse(edge.from)
-                }*/
+                /* if(includeParents && edge.to == nodeId){
+                     nodes.push(edge.from)
+                     recurse(edge.from)
+                 }*/
             })
         }
 
@@ -409,8 +469,8 @@ var visjsGraph = (function () {
     }
 
     self.getNodeDescendants = function (nodeIds, includeParents) {
-      var nodeIds=  self.getNodeDescendantIds(nodeIds, includeParents) ;
-      return self.data.nodes.get(nodeIds)
+        var nodeIds = self.getNodeDescendantIds(nodeIds, includeParents);
+        return self.data.nodes.get(nodeIds)
 
     }
 
@@ -418,12 +478,12 @@ var visjsGraph = (function () {
     self.processClicks = function (params, _options, isDbleClick) {
 
         var now = new Date()
-        if ( (now -lastClickTime) < dbleClickIntervalDuration) {
+        if ((now - lastClickTime) < dbleClickIntervalDuration) {
             lastClickTime = now;
-          return
+            return
         }
-      if(isDbleClick)
-          var x=3
+        if (isDbleClick)
+            var x = 3
 
         if (params.edges.length == 0 && params.nodes.length == 0) {//simple click stop animation
 
@@ -479,14 +539,14 @@ var visjsGraph = (function () {
         }
     }
 
-    self.collapseNode=function(nodeId) {
+    self.collapseNode = function (nodeId) {
         var nodeEdges = visjsGraph.data.edges.get();
-        var targetEdges=[]
-        var targetNodes=[]
-        nodeEdges.forEach(function(edge){
-            if(edge.from==nodeId){
+        var targetEdges = []
+        var targetNodes = []
+        nodeEdges.forEach(function (edge) {
+            if (edge.from == nodeId) {
                 targetEdges.push(edge.id)
-                if(targetNodes.indexOf(edge.to)<0)
+                if (targetNodes.indexOf(edge.to) < 0)
                     targetNodes.push(edge.to)
             }
 

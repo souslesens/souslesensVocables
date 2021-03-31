@@ -1,30 +1,6 @@
 {
   "mappings": [
-    {
-      "subject": "breakdown.tagId1",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "breakdown.tagId2",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "breakdown.tagId3",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "breakdown.tagId4",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "breakdown.tagId5",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
+
 
     {
       "subject": "breakdown.uri1",
@@ -71,53 +47,8 @@
       "subject": "breakdown.uri4",
       "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
       "object": "breakdown.uri5"
-    },
+    }
 
-    {
-      "subject": "breakdown.tagId1",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.tagId2"
-    },
-    {
-      "subject": "breakdown.tagId2",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.tagId3"
-    },
-    {
-      "subject": "breakdown.tagId3",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.tagId4"
-    },
-    {
-      "subject": "breakdown.tagId4",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.tagId5"
-    },
-    {
-      "subject": "breakdown.tagId1",
-      "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-      "object": "breakdown.uri1"
-    },
-    {
-      "subject": "breakdown.tagId2",
-      "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-      "object": "breakdown.uri2"
-    }
-    ,
-    {
-      "subject": "breakdown.tagId3",
-      "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-      "object": "breakdown.uri3"
-    },
-    {
-      "subject": "breakdown.tagId4",
-      "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-      "object": "breakdown.uri4"
-    },
-    {
-      "subject": "breakdown.tagId5",
-      "predicate": "http://standards.iso.org/iso/15926/part14/represents",
-      "object": "breakdown.uri5"
-    }
+
   ]
 }

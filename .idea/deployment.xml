@@ -5,7 +5,7 @@
       <paths name="vps254642.ovh.net">
         <serverdata>
           <mappings>
-            <mapping deploy="/var/lib/nodejs/souslesensVocables/" local="$PROJECT_DIR$" web="http://vps254642.ovh.net" />
+            <mapping deploy="/var/lib/nodejs/souslesensVocables/" local="$PROJECT_DIR$" web="http://51.178.39.209" />
           </mappings>
         </serverdata>
       </paths>

@@ -17,6 +17,30 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3
 
 
  */
+    var self={
+
+    }
+
+
+    selfgetPathsBetweenNodes=function(source,fromNode, toNode,maxDistance){
+
+  fromStr = Sparql_common.getFromGraphStr(Config.sources[source].graphUri)
+    var owlPredicate = "subClassOf";
+    if (options.owlType)
+        owlPredicate = options.owlType
+    var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "select   distinct * " + fromStr + " where {" +
+
+
+      ".}"
+
+
+
+
+
+
+    return self;
 
 
 })()

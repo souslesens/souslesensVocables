@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/other/turbogenerator/breakdownsOld.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/sshConfigs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/bin_www.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/bin_www.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/webServers.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/webServers.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/triplesGenerator.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/triplesGenerator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/breakdowns.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/turbogenerator/requirementMapping.json" beforeDir="false" afterPath="$PROJECT_DIR$/other/turbogenerator/requirementMapping.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLbrowserGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/users/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/users/users.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/SPARQL_paths.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/SPARQL_paths.js" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -37,8 +39,14 @@
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
@@ -46,13 +54,15 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="10.16.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/other/turbogenerator" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.14.37" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bailletArchives" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="project.scopes" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2019.2\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
+    <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -69,18 +79,6 @@
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
       <recent name="D:\GitHub\souslesensVocables\bin" />
     </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/sqlConnectors/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/sqlConnectors">
@@ -108,6 +106,7 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -167,24 +166,27 @@
       <workItem from="1616498709402" duration="464000" />
       <workItem from="1616499182105" duration="46615000" />
       <workItem from="1616765206072" duration="48007000" />
+      <workItem from="1617173616754" duration="851000" />
+      <workItem from="1617175346244" duration="10628000" />
+      <workItem from="1617211349497" duration="1228000" />
+      <workItem from="1617262122131" duration="1435000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -192,13 +194,9 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
           <line>85</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="98" />
         </line-breakpoint>
       </breakpoints>
-      <default-breakpoints>
-        <breakpoint type="dart-exception" />
-      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

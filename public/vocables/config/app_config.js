@@ -20,7 +20,7 @@ var Config = (function () {
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
- self.loginMode = "none";
+ //self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -118,6 +118,14 @@ var Config = (function () {
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
             forbiddenTools: ["xlsx2mappings","evaluate","INDIVIDUALS","BLENDER"],
+            blender: {contextMenuActionStartLevel: 3}
+        },
+        reader_owl: {
+            allowedSourceSchemas: ["OWL"],
+            allowedSources: "ALL",
+            forbiddenSources: [],
+            allowedTools: "ALL",
+            forbiddenTools: ["xlsx2mappings","evaluate","INDIVIDUALS","BLENDER",],
             blender: {contextMenuActionStartLevel: 3}
         }
     }

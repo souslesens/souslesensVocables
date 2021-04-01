@@ -2,12 +2,11 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="2b6d922d-e7aa-4999-8688-087908bcd051" name="vps254642.ovh.net" url="http://vps254642.ovh.net">
-        <fileTransfer host="vps254642.ovh.net" port="22" accessType="SFTP">
+      <webServer id="2b6d922d-e7aa-4999-8688-087908bcd051" name="vps254642.ovh.net" url="http://51.178.39.209">
+        <fileTransfer accessType="SFTP" host="51.178.39.209" port="22" sshConfigId="40b28fc4-b6d8-4b46-ab11-d3b1b57f4d77" sshConfig="vps254642.ovh.net">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
-          <option name="port" value="22" />
         </fileTransfer>
       </webServer>
     </option>

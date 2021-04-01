@@ -7,6 +7,8 @@
   "P.Jallais":{"login":"P.Jallais","password":"thes_X32!","groups":["admin"]},
   "S.Dorleans": {"login":"S.Dorleans","password":"thes_X32!","groups":["admin_skos"]},
   "skosReader": {"login":"skosReader","password":"thes_X32!","groups":["reader_skos"]},
-  "skosBlender": {"login":"skosBlender","password":"thes_X32!","groups":["blender_skos"]}
+  "skosBlender": {"login":"skosBlender","password":"thes_X32!","groups":["blender_skos"]},
 
+  "ECCENCA": {"login":"ECCENCA","password":"ONE-sense!rDf","groups":["blender_skos"]},
+  "LOGILAB": {"login":"skosBlender","password":"ONE-sense!rDf","groups":["blender_skos"]}
 }

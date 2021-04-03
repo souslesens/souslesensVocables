@@ -50,6 +50,10 @@
    <!-- <script src="js/tools/lineage/ADLquery.js"></script>-->
 
     <script src="js/tools/ADL/ADLmappings.js"></script>
+    <script src="js/tools/ADL/ADLmappingGraph.js"></script>
+    <script src="js/tools/ADL/ADLmappingData.js"></script>
+
+
     <script src="js/tools/ADL/ADLbrowser.js"></script>
     <script src="js/tools/ADL/ADLbrowserBI.js"></script>
 
@@ -137,8 +141,7 @@
             })
 
 
-            MainController.UI.showToolsList("toolsTreeDiv")
-            MainController.loadSources()
+
             MainController.UI.setCredits();
         });
 
@@ -257,6 +260,13 @@
         }
 
 
+        .td_title{
+            padding: 3px;
+            font-weight: bold;
+        }
+        .td_value{
+            padding: 3px;
+        }
     </style>
 </head>
 <body>

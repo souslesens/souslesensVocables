@@ -17,7 +17,8 @@ var logger = require("../bin/logger..js");
 var httpProxy = require("../bin/httpProxy.")
 var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.")
 
-var OneModelManager=require('../other/oneModel/OneModelManager.')
+var OneModelManager=require('../other/oneModel/OneModelManager.');
+var ADLcontroller=require('../bin/ADL/ADLcontroller.')
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
@@ -288,7 +289,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
         }
         if (req.body.ADLquery) {
-            var ADLSqlConnector = require("../bin/sqlConnectors/ADLSqlConnector.")
+            var ADLSqlConnector = require("../bin/ADL/ADLSqlConnector.")
             if (req.body.getFromSparql) {
 
                 ADLSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), function (err, result) {
@@ -350,7 +351,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
 
         if (req.body.triplesGenerator) {
-            var triplesGenerator = require('../bin/triplesGenerator')
+            var triplesGenerator = require('../bin/ADL/triplesGenerator')
             if (req.body.getJsonModel)
                 triplesGenerator.getJsonModel(req.body.getJsonModel, function (err, result) {
                     processResponse(response, err, result)
@@ -364,6 +365,20 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
                 })
         }
+        if (req.body.ADL_SaveMappings) {
+            ADLcontroller.saveMappings(req.body.ADLsource,req.body.mappings, function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+        if (req.body.ADL_GetMappings) {
+            ADLcontroller.getMappings(req.body.ADL_GetMappings,function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+
+
 
 
 

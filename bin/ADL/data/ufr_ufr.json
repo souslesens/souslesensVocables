@@ -1,0 +1,31 @@
+{
+  "mappings": [
+    {
+      "subject": "ufr.Country",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Function"
+    },
+    {
+      "subject": "ufr.WaterDepth_m",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+    }
+  ],
+  "model": {
+    "http://standards.iso.org/iso/15926/part14/Function": [
+      "http://standards.iso.org/iso/15926/part14/Disposition",
+      "http://standards.iso.org/iso/15926/part14/RealizableEntity",
+      "http://standards.iso.org/iso/15926/part14/Aspect",
+      "http://www.w3.org/2002/07/owl#Thing",
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "#"
+    ],
+    "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute": [
+      "http://standards.iso.org/iso/15926/part14/Quality",
+      "http://standards.iso.org/iso/15926/part14/Aspect",
+      "http://www.w3.org/2002/07/owl#Thing",
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "#"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+<style>
+    #ADLmappings_Tabs {
+        height: 100%;
+    }
+
+    .ADLbrowser_Tab {
+        overflow: auto;
+        max-height: 500px;
+    }
+
+
+</style>
+<div>
+
+    <div id="ADLmappings_Tabs" style="width:360px;">
+
+        <ul>
+
+            <li><a href="#ADLmappings_OneModelTab">One-Model</a></li>
+            <li><a href="#ADLmappings_ReadiTab">Readi</a></li>
+
+
+        </ul>
+
+
+
+
+
+
+
+        <div id="ADLmappings_OneModelTab" style="width:100%;height:800px">
+
+
+        </div>
+        <div id="ADLmappings_ReadiTab" style="width:100%;height:800px">
+            <div id="GenericTools_searchAllDiv"  style="height: 50px"></div>
+            <div id="ADLmappings_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd" ></div>
+            <div style="width: 360px;height: 500px">
+                <div class="jstree" id="ADLmappingsjsOtherOntologiesTreeDiv"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+
+    $("#ADLmappings_Tabs").tabs()
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+    setTimeout(function(){
+        $("#GenericTools_searchInAllSources").prop("checked",true)
+        MainController.currentSource=Config.ADL.mappingAlternativeSource
+        SourceBrowser.currentTargetDiv = "ADLmappingsjsOtherOntologiesTreeDiv"
+        $("#GenericTools_searchSchemaType").val("OWL")
+
+    },300)
+
+
+</script>

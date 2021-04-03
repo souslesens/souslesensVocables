@@ -2423,6 +2423,7 @@ Lineage_common=(function(){
                   return alert (" paste from clipboard not allowed")
                 }
 
+              var message=""
                 if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
                     Sparql_generic.insertTriples(parentNode.data.source, triples, function (err, result) {
                         if (err)

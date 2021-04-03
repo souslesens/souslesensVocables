@@ -35,8 +35,10 @@ var authentication = (function () {
             authentication.currentUser = {
                 identifiant: "admin",
                 login: "none",
-                groupes: "admin"
+                groupes: ["admin"]
             }
+
+            MainController.onAfterLogin()
             if (typeof sparql_abstract !== 'undefined')
             sparql_abstract.initSources()
             //   mainController.init0();

@@ -590,6 +590,28 @@
     "color": "#bcbd22"
   },
 
+  "ASSETS-UFR": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/ufr/0.1/"
+    ],
+
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql",
+      "connection": "_default",
+      "dbName": "ufr"
+    },
+
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
   "ASSETS-QUANTUM-REQ": {
     "graphUri":  [
       "http://data.total.com/resource/one-model/assets/quantum/requirements/0.1/"

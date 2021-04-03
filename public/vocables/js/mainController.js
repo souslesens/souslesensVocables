@@ -64,6 +64,8 @@ var MainController = (function () {
                 return  Config.currentProfile=Config.profiles[group]
         })
         MainController.UI.configureUI();
+        MainController.UI.showToolsList("toolsTreeDiv")
+        MainController.loadSources()
 
 
     }

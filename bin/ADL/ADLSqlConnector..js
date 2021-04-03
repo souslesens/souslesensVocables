@@ -7,7 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var mysql = require('./mySQLproxy..js')
+var mysql = require('../mySQLproxy..js')
 const async=require('async')
 
 
@@ -17,8 +17,10 @@ var ADLSqlConnector = {
 
     connection: {
         host: "localhost",
-        user: "root",
-        password: "vi0lon",
+      //  user: "root",
+      //  password: "vi0lon",
+        user: "souslesens",
+        password: "vocables",
 
     },
 

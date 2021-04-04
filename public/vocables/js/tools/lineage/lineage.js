@@ -1865,14 +1865,34 @@ Lineage_properties = (function () {
                 }
 
             }
-            items.pasteNodeFromClipboard = {
-                label: "paste from Clipboard",
-                action: function (e) {// pb avec source
+            if (Config.sources[Lineage_classes.currentSource].editable) {
+                items.pasteNodeFromClipboard = {
+                    label: "paste from Clipboard",
+                    action: function (e) {// pb avec source
 
-                    Lineage_common.pasteNodeFromClipboard(self.currentTreeNode)
+                        Lineage_common.pasteNodeFromClipboard(self.currentTreeNode)
+
+                    }
 
                 }
+                items.deleteProperty = {
+                    label: "delete property",
+                    action: function (e) {// pb avec source
 
+                        Lineage_common.deleteNode(self.currentTreeNode,"Lineage_propertiesTree")
+
+                    }
+
+                }
+                items.editProperty = {
+                    label: "edit property",
+                    action: function (e) {// pb avec source
+
+                        Lineage_properties.editProperty(self.currentTreeNode)
+
+                    }
+
+                }
             }
         }
 
@@ -2362,6 +2382,22 @@ Lineage_common=(function(){
         common.copyTextToClipboard(JSON.stringify(nodeData))
 
     }
+
+
+    self.deleteNode=function(node,jstreeId){
+        if(node.children && node.children.length>0)
+            return alert("cannot delete node with children")
+        if(confirm("delete node "+node.data.label)){
+
+            Sparql_generic.deleteTriples (Lineage_classes.currentSource, node.data.id, null, null, function(err, result){
+                if(err)
+                    MainController.UI.message(err)
+                MainController.UI.message("node " +node.data.label+ " deleted")
+                $("#"+jstreeId).jstree(true).delete_node(node.id)
+            })
+        }
+    }
+
 
     self.pasteNodeFromClipboard = function (parentNode) {
       //  console.log(JSON.stringify(parentNode.data))

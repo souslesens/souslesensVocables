@@ -304,8 +304,10 @@ var Sparql_generic = (function () {
                 filterStr += Sparql_common.getUriFilter("p", predicateUri)
             if (objectUri)
                 filterStr += Sparql_common.getUriFilter("o", objectUri)
-
-            var query = "with <" + Config.sources[sourceLabel].graphUri + "> " +
+            var graphUri = Config.sources[sourceLabel].graphUri
+            if (Array.isArray(graphUri))
+                graphUri = graphUri[0]
+            var query = "with <" + graphUri + "> " +
                 " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}"
             var queryOptions = ""
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
@@ -344,8 +346,8 @@ var Sparql_generic = (function () {
 
         self.insertTriples = function (sourceLabel, triples, callback) {
             var graphUri = Config.sources[sourceLabel].graphUri
-            if(Array.isArray(graphUri))
-                graphUri=graphUri[0]
+            if (Array.isArray(graphUri))
+                graphUri = graphUri[0]
             var insertTriplesStr = "";
             triples.forEach(function (item, index) {
 
@@ -440,8 +442,6 @@ var Sparql_generic = (function () {
          */
 
 
-
-
         self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
             if (!options) {
                 options = {}
@@ -477,7 +477,7 @@ var Sparql_generic = (function () {
 
                             prop = item.prop.value
 
-                            if (options.skipPredicates && options.skipPredicates.indexOf(prop)> - 1) {
+                            if (options.skipPredicates && options.skipPredicates.indexOf(prop) > -1) {
                                 return
 
                             }

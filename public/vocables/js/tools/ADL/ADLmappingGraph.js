@@ -109,22 +109,7 @@ var ADLmappingGraph = (function () {
             $("#mainDialogDiv").html(html);
             $("#mainDialogDiv").dialog("open")
             setTimeout(function () {
-                Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, function (err, jsTreeData) {
-                    if (err)
-                        return MainController.UI.message(err)
 
-                    jsTreeData.forEach(function(item){
-                        if(item.parent=="#")
-                            item.parent=Config.ADL.OneModelSource
-                    })
-                    jsTreeData.push({id:Config.ADL.OneModelSource,text:Config.ADL.OneModelSource,parent:"#"})
-                    var options = {
-                        selectTreeNodeFn: ADLmappingGraph.graphActions.onPropertiesTreeNodeClick,
-                        openAll: true
-
-                    }
-                    common.loadJsTree("ADLmappingPropertiesTree", jsTreeData, options);
-                })
 
 
             })

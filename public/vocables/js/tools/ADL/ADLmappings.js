@@ -63,6 +63,8 @@ var ADLmappings = (function () {
                     ADLmappings.displayOneModelTree()
                 })
 
+                self.displayPropertiesTree("ADLmappingPropertiesTree")
+
 
             }, 200)
         }
@@ -162,6 +164,25 @@ var ADLmappings = (function () {
             common.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
 
+        self.displayPropertiesTree=function(treeDivId){
+            Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, function (err, jsTreeData) {
+                if (err)
+                    return MainController.UI.message(err)
+
+                jsTreeData.forEach(function(item){
+                    if(item.parent=="#")
+                        item.parent=Config.ADL.OneModelSource
+                })
+                jsTreeData.push({id:Config.ADL.OneModelSource,text:Config.ADL.OneModelSource,parent:"#"})
+                var options = {
+                    selectTreeNodeFn: ADLmappingGraph.graphActions.onPropertiesTreeNodeClick,
+                    openAll: true
+
+                }
+                common.loadJsTree(treeDivId, jsTreeData, options);
+            })
+        }
+
 
         self.AssignOntologyTypeToColumn = function (column, node) {
             ADLmappingData.setDataSampleColumntype(column, node)
@@ -222,11 +243,17 @@ var ADLmappings = (function () {
                                     node.data = []
                                     for (var key in item.object.switch) {
                                         var value = item.object.switch[key]
+                                        var label=key;
+                                        var parents=["?","#"]
+                                        if(data.model[value]) {
+                                            label=data.model[value].label
+                                            parents=data.model[value].parents
+                                        }
                                         node.data.push({
                                             condition: key,
                                             id: value,
-                                            label: data.model[value].label,
-                                            parents: data.model[value].parents
+                                            label: label,
+                                            parents:parents
                                         })
                                     }
                                 }
@@ -243,7 +270,18 @@ var ADLmappings = (function () {
                         }
                         //association
                         else if (item.object.indexOf("http") < 0) {
-                            var property = {data: {id: item.predicate, label: data.model[item.predicate].label}}
+                            if(data.model[item.predicate]){
+                                data.model[item.predicate]
+                            }
+
+                            if(!data.model[item.predicate]){
+                                data.model[item.predicate]= {
+                                    parents:["?","#"],
+                                    label: item.predicate
+                                }
+                            }
+                            var propLabel=data.model[item.predicate].label
+                            var property = {data: {id: item.predicate, label: propLabel}}
                             var assocation = {
                                 subject: {data: {columnId: item.subject}},
                                 object: {data: {columnId: item.object}}
@@ -287,16 +325,41 @@ var ADLmappings = (function () {
                     if (item.object.switch) {
                         for (var key in item.object.switch) {
                             var id = item.object.switch[key]
-                            model[item.object] = getOneModelTreeInfos(item.object)
+                            model[id] = getOneModelTreeInfos(id)
                         }
                     }
+
 
                 } else if (item.object.indexOf("http") > -1) {
                     model[item.object] = getOneModelTreeInfos(item.object)
                 }
 
 
+               var  propertyJstreeNode = $("#ADLmappingPropertiesTree").jstree(true).get_node(item.predicate)
+                if(propertyJstreeNode){
+                    model[item.predicate]= {
+                        parents: propertyJstreeNode.parents,
+                        label: propertyJstreeNode.data.label
+                    }
+                }else {
+                    model[item.predicate] = {
+                        parents: ["?", "#"],
+                        label: item.predicate
+                    }
+                }
             })
+
+
+
+
+            model["http://www.w3.org/2000/01/rdf-schema#label"] = {
+                label: "rdfs:label",
+                parents: [ADLmappingData.currentDatabase, "#"]
+            }
+            model["http://www.w3.org/2002/07/owl#DatatypeProperty"] = {
+                label: "owl:DatatypeProperty",
+                parents: [ADLmappingData.currentDatabase, "#"]
+            }
             return model;
 
         }

@@ -149,18 +149,8 @@
     {
       "subject": "failure2.Concept_Niv2",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.posccaesar.org/rdl/RDS32354",
-      "object": {
-        "column": "Concept_Niv2",
-        "switch": {
-          "3. Measurement Failure": "http://data.total.com/resource/one-model/Failure#3",
-          "1. Mechanical Failure": "http://data.total.com/resource/one-model/Failure#1",
-          "6. General": "http://data.total.com/resource/one-model/Failure#6",
-          "5. External Factor": "http://data.total.com/resource/one-model/Failure#5",
-          "4. Electrical Failure": "http://data.total.com/resource/one-model/Failure#4",
-          "2. Material Failure": "http://data.total.com/resource/one-model/Failure#2"
-        }
-      }
+      "object": "http://data.posccaesar.org/rdl/RDS32354"
+
 
     },
     {

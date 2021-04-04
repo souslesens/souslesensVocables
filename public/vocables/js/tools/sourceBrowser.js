@@ -172,7 +172,7 @@ var SourceBrowser = (function () {
                 }
 
             }
-            if (Config.sources[Lineage_classes.currentSource].editable)
+            if (Config.sources[Lineage_classes.currentSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (e) {// pb avec source
@@ -182,12 +182,23 @@ var SourceBrowser = (function () {
                     }
 
                 }
-            items.editNode = {
-                label: "Edit node",
-                action: function (obj, sss, cc) {
-                    SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
+                items.editNode = {
+                    label: "Edit node",
+                    action: function (obj, sss, cc) {
+                        SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false)
+
+                    }
+                }
+                items.deleteClass = {
+                    label: "delete Class",
+                    action: function (e) {// pb avec source
+
+                        Lineage_common.deleteNode(self.currentTreeNode,self.currentTargetDiv)
+
+                    }
 
                 }
+
             }
 
 

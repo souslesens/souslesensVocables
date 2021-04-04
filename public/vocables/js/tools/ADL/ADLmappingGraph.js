@@ -2,7 +2,10 @@ var ADLmappingGraph = (function () {
 
 
     var self = {}
-    self.mappedProperties = {mappings: {}, model: {}}
+
+    self.initMappedProperties=function() {
+        self.mappedProperties = {mappings: {}, model: {}}
+    }
 
     self.attrs = {
         table: {shape: "ellipse", color: "grey"},
@@ -19,10 +22,21 @@ var ADLmappingGraph = (function () {
             var visjsData = {nodes: [], edges: []}
 
 
+            var typeStr="";
+            if(Array.isArray(columnObj.types)){
+
+                columnObj.types.forEach(function(item,index){
+                    if(index>0)
+                        typeStr+="\n"
+                    typeStr+= item.type_label
+                })
+            }else
+                typeStr=typeObj.data.label
+
             if (!existingNodes[columnName]) {
                 visjsData.nodes.push({
                         id: columnName,
-                        label: columnName + "\n" + columnObj.type_label + "",
+                        label: columnName + "\n" + typeStr + "",
                         data: columnObj,
                         shape: ADLmappingGraph.attrs["column"].shape,
                         color: ADLmappingGraph.attrs["column"].color,
@@ -34,6 +48,7 @@ var ADLmappingGraph = (function () {
             if (!visjsGraph.data || !visjsGraph.data.nodes) {
                 var options = {
                     selectNodeFn: function (node, event) {
+                        MainController.UI.hidePopup("graphPopupDiv")
                         if (node)
                             self.currentNode = node;
                     },
@@ -88,7 +103,7 @@ var ADLmappingGraph = (function () {
                 "<div style='border: brown solid 1px;margin: 5px'>" + "property<br>" +
                 "<div id='ADLmappingPropertiesTree' style='width:400px;height: 400px;overflow: auto;'></div>" +
                 "</div>" +
-                "<button onclick='ADLmappingGraph.graphActions.validateAssociation()'>OK</button>" +
+                "<button onclick='ADLmappingGraph.graphActions.setAssociation()'>OK</button>" +
                 "<button onclick='ADLmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
 
             $("#mainDialogDiv").html(html);
@@ -124,34 +139,50 @@ var ADLmappingGraph = (function () {
 
         },
 
-        validateAssociation: function () {
-            var property = $("#ADLmappingPropertiesTree").jstree(true).get_selected(true)
-            if (!property || property.length == 0)
-                return alert("select a property")
-            property = property[0]
+        setAssociation: function (property,association) {
+            if(!property) {
+                property = $("#ADLmappingPropertiesTree").jstree(true).get_selected(true)
+                if (property && property.length >0)
+                    property = property[0]
+            }
+            if(!property)
+            return alert("select a property")
+            if(!association)
+                association=self.currentAssociation
             var existingNodes = visjsGraph.getExistingIdsMap()
             var visjsData = {nodes: [], edges: []}
 
 
-            var edgeId = self.currentAssociation.subject.data.columnId + "_" + property.data.id + "_" + self.currentAssociation.object.data.columnId
+            var edgeId = association.subject.data.columnId + "_" + property.data.id + "_" + association.object.data.columnId
             self.mappedProperties.mappings[edgeId] = {
-                subject: self.currentAssociation.subject.data.columnId,
+                subject: association.subject.data.columnId,
                 predicate: property.data.id,
-                object: self.currentAssociation.object.data.columnId,
+                object: association.object.data.columnId,
 
             }
-            self.mappedProperties.model[property.data.id] = property.parents
+            self.mappedProperties.model[property.data.id] = {parents:property.parents,label:property.data.label}
             if (!existingNodes[edgeId]) {
                 visjsData.edges.push({
                     id: edgeId,
-                    from: self.currentAssociation.subject.data.columnId,
-                    to: self.currentAssociation.object.data.columnId,
-                    label: property.data.id,
+                    from: association.subject.data.columnId,
+                    to: association.object.data.columnId,
+                    label: property.data.label,
                     arrow: {to: 1}
 
                 })
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    var options = {
+                        selectNodeFn: function (node, event) {
+                            if (node)
+                                self.currentNode = node;
+                        },
+                        onRightClickFn: self.graphActions.showGraphPopupMenu
+                    }
+                    visjsGraph.draw("ADLmappings_graph", visjsData, options)
+                } else {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                }
 
                 visjsGraph.network.fit()
 

@@ -19,6 +19,8 @@ var ADLmappingData = (function () {
 
     self.loadADL_SQLModel = function () {
 
+      //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
+            ADLmappings.clearMappings()
         var dbName = $("#ADLmappings_DatabaseSelect").val()
         self.currentADLdatabase = dbName;
         if (dbName == "")
@@ -95,18 +97,15 @@ var ADLmappingData = (function () {
 
         var options = {
             selectTreeNodeFn: function (event, obj) {
-                /*    self.currentModelJstreeNode = obj.node
-                    self.currentJstreeNode = obj.node;*/
-                var mode = "properties"
-                if (obj.event && obj.event.ctrlKey)
-                    mode = "types"
+
                 self.currentADLtable = obj.node
-                ADLmappings.displayOneModelTree(obj.node.data, mode)
                 self.showSampleData(obj.node)
+                setTimeout(function(){
                 ADLmappings.loadMappings(self.currentADLdatabase + "_" + self.currentADLtable.data.label)
+                },500)
 
             },
-            // contextMenu: self.jstreeContextMenu("Column")
+
         }
         common.loadJsTree("ADLmappings_dataModelTree", modelJstreeData, options)
         $("#waitImg").css("display", "none");
@@ -239,16 +238,19 @@ var ADLmappingData = (function () {
     }
 
     self.setDataSampleColumntype = function (columnId,typeObj) {
-        $("#dataSample_type_" + columnId.replace(".", "__")).html(typeObj.data.label)
+        var typeStr="";
+        if(Array.isArray(typeObj)){
+            typeStr+="<ul>"
+            typeObj.forEach(function(item,index){
+                typeStr+= "<li>"+item.data.label
+            })
+            typeStr+="</ul>"
+        }else
+            typeStr=typeObj.data.label
+        $("#dataSample_type_" + columnId.replace(".", "__")).html(typeStr)
 
 
-        ADLmappings.currentMappedColumns[columnId] = {
-            columnId: columnId,
-            type_id: typeObj.data.id,
-            type_label: typeObj.data.label,
-            type_parents: typeObj.parents,
 
-        }
     }
 
 

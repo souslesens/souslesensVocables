@@ -2,30 +2,45 @@
   "mappings": [
     {
       "subject": "ufr.Country",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/Function"
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
     },
     {
-      "subject": "ufr.WaterDepth_m",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+      "subject": "ufr.Field",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+    },
+    {
+      "subject": "ufr.Country",
+      "predicate": "http://standards.iso.org/iso/15926/part14/functionOf",
+      "object": "ufr.Field"
     }
   ],
   "model": {
-    "http://standards.iso.org/iso/15926/part14/Function": [
-      "http://standards.iso.org/iso/15926/part14/Disposition",
-      "http://standards.iso.org/iso/15926/part14/RealizableEntity",
-      "http://standards.iso.org/iso/15926/part14/Aspect",
-      "http://www.w3.org/2002/07/owl#Thing",
-      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "#"
-    ],
-    "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute": [
-      "http://standards.iso.org/iso/15926/part14/Quality",
-      "http://standards.iso.org/iso/15926/part14/Aspect",
-      "http://www.w3.org/2002/07/owl#Thing",
-      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "#"
-    ]
+    "http://standards.iso.org/iso/15926/part14/RealizableEntity": {
+      "parents": [
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "RealizableEntity"
+    },
+    "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject": {
+      "parents": [
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "InanimatePhysicalObject"
+    },
+    "http://standards.iso.org/iso/15926/part14/functionOf": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/dispositionOf",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "functionOf"
+    }
+  },
+  "infos": {
+    "lastModified": "2021-04-04T08:33:54.641Z",
+    "modifiedBy": "admin",
+    "comment": "dd"
   }
 }

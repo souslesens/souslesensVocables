@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/textEditor.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/users/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/users/users.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/authentification.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/authentification.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLMappingRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappingRightPanel.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
-    </list>
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -64,7 +54,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.14.37" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bailletArchives" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/bin/ADL/data" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -74,11 +64,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\bin\ADL\data" />
       <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
       <recent name="D:\GitHub\souslesensVocables\other\SIL" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\external\d3" />
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
-      <recent name="D:\GitHub\souslesensVocables\bin" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
@@ -178,7 +168,8 @@
       <workItem from="1617175346244" duration="10628000" />
       <workItem from="1617211349497" duration="1228000" />
       <workItem from="1617262122131" duration="26242000" />
-      <workItem from="1617437550194" duration="20823000" />
+      <workItem from="1617437550194" duration="23985000" />
+      <workItem from="1617513315962" duration="10004000" />
     </task>
     <servers />
   </component>
@@ -196,5 +187,17 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
+          <line>348</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

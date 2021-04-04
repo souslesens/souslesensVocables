@@ -1,0 +1,190 @@
+{
+  "mappings": [
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure2.Functionnal_Location"
+    },
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": {
+        "column": "Equipment_Category",
+        "switch": {
+          "Transmetteur de température": "http://w3id.org/readi/rdl/CFIHOS-30000476",
+          "Transmetteur de pression": "http://w3id.org/readi/rdl/CFIHOS-30000654"
+
+
+        }
+
+      }
+    },
+
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure2.Equipment_Desc"
+    },
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure2.Working_Hours"
+    },
+
+
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+      "object": "failure2.Notif_Number"
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "subject": "failure2.Manufacturer",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure2.Manufacturer"
+    },
+    {
+      "subject": "failure2.Manufacturer",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Organization"
+    },
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://w3id.org/readi/rdl/D101001101",
+      "object": "failure2.Manufacturer"
+    },
+
+
+
+
+
+
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
+      "object": "failure2.Unit"
+    },
+
+
+    {
+      "subject": "failure2.Unit",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/Site"
+    },
+    {
+      "subject": "failure2.Unit",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure2.Unit"
+    },
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "subject": "failure2.Tag_Number",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure2.Tag_Number"
+    },
+
+    {
+      "subject": "failure2.Tag_Number",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
+    },
+    {
+      "subject": "failure2.Functionnal_Location",
+      "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf",
+      "object": "failure2.Tag_Number"
+    },
+
+    {
+      "subject": "failure2.Tag_Number",
+      "predicate":"http://w3id.org/readi/rdl/CFIHOS-40000512",
+      "object": "failure2.Pressure^^xsd:float"
+    },
+    {
+      "subject": "failure2.Tag_Number",
+      "predicate": "http://w3id.org/readi/rdl/CFIHOS-40000514",
+      "object": "failure2.Temperature^^xsd:float"
+    },
+
+
+
+
+
+
+
+
+
+
+    {
+      "subject": "failure2.Concept_Niv2",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "failure2.Concept_Niv2"
+    },
+
+
+    {
+      "subject": "failure2.Concept_Niv2",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS32354",
+      "object": {
+        "column": "Concept_Niv2",
+        "switch": {
+          "3. Measurement Failure": "http://data.total.com/resource/one-model/Failure#3",
+          "1. Mechanical Failure": "http://data.total.com/resource/one-model/Failure#1",
+          "6. General": "http://data.total.com/resource/one-model/Failure#6",
+          "5. External Factor": "http://data.total.com/resource/one-model/Failure#5",
+          "4. Electrical Failure": "http://data.total.com/resource/one-model/Failure#4",
+          "2. Material Failure": "http://data.total.com/resource/one-model/Failure#2"
+        }
+      }
+
+    },
+    {
+    "subject": "failure2.Concept_Niv3",
+     "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+    "object": "failure2.Concept_Niv3"
+    },
+    {
+    "subject": "failure2.Concept_Niv3",
+      "predicate": "http://w3id.org/readi/rdl/D101001536",
+      "object": "failure2.Concept_Niv2"
+    },
+
+    {
+      "subject": "failure2.Concept_Niv2",
+      "predicate": "http://data.total.com/resource/one-model/alters",
+      "object": "failure2.Functionnal_Location"
+    }
+
+
+
+
+
+
+
+  ]
+}

@@ -3,7 +3,7 @@ var ADLmappingData = (function () {
     var self = {}
     self.sampleData = {}
     self.currentColumn = null
-    self.currentDatabase = null;
+    self.currentADLsource = null;
 
     self.initAdlsList = function () {
         var adls = []
@@ -19,8 +19,8 @@ var ADLmappingData = (function () {
 
     self.loadADL_SQLModel = function () {
 
-      //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
-            ADLmappings.clearMappings()
+        //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
+        ADLmappings.clearMappings()
         var dbName = $("#ADLmappings_DatabaseSelect").val()
         self.currentADLdatabase = dbName;
         if (dbName == "")
@@ -100,9 +100,9 @@ var ADLmappingData = (function () {
 
                 self.currentADLtable = obj.node
                 self.showSampleData(obj.node)
-                setTimeout(function(){
-                ADLmappings.loadMappings(self.currentADLdatabase + "_" + self.currentADLtable.data.label)
-                },500)
+                setTimeout(function () {
+                    ADLmappings.loadMappings(self.currentADLdatabase + "_" + self.currentADLtable.data.label)
+                }, 500)
 
             },
 
@@ -113,8 +113,9 @@ var ADLmappingData = (function () {
 
 
     self.showSampleData = function (node) {
-        var SampleSizelimit = 30
+        var SampleSizelimit = 30;
         var dbName = node.data.source;
+        self.currentADLsource = dbName
         var table;
         if (node.parents.length == 1)
             table = node.id
@@ -182,10 +183,10 @@ var ADLmappingData = (function () {
                 $(".dataSample_type").bind("click", function (event) {
                     if (event.ctrlKey) {
 
-                        var point = {x: event.client.X, y: event.client.Y}
+                        var point = {x: event.clientX - leftPanelWidth, y: event.clientY}
 
-                        var html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.setConditionOnValues();\"> remove Mapping</span>" +
-                            "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.setConditionOnValues();\"> setConditionOnValues</span>"
+                        var html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.removeMapping();\"> remove Mapping</span>" +
+                            "<span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"
 
                         $("#graphPopupDiv").html(html);
                         MainController.UI.showPopup(point, "graphPopupDiv")
@@ -237,22 +238,118 @@ var ADLmappingData = (function () {
         }
     }
 
-    self.setDataSampleColumntype = function (columnId,typeObj) {
-        var typeStr="";
-        if(Array.isArray(typeObj)){
-            typeStr+="<ul>"
-            typeObj.forEach(function(item,index){
-                typeStr+= "<li>"+item.data.label
+    self.setDataSampleColumntype = function (columnId, typeObj) {
+        var typeStr = "";
+        if (Array.isArray(typeObj.data)) {
+            typeStr += "<ul>"
+            typeObj.data.forEach(function (item, index) {
+                typeStr += "<li>" + item.label
             })
-            typeStr+="</ul>"
-        }else
-            typeStr=typeObj.data.label
+            typeStr += "</ul>"
+        } else
+            typeStr = typeObj.data.label
         $("#dataSample_type_" + columnId.replace(".", "__")).html(typeStr)
-
 
 
     }
 
+
+    self.menuActions = {
+        removeMapping: function () {
+
+        },
+        showAdvancedMappingDialog: function () {
+            self.assignConditionalTypeOn=true;
+            var array = self.currentColumn.split(".")
+            var column = array[1];
+            var table = array[0]
+            var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: {ADLquery: 1, getData: 1, dbName: self.currentADLsource, sqlQuery: sqlQuery},
+                dataType: "json",
+
+                success: function (data, textStatus, jqXHR) {
+                    var x = data
+                    if(data.length>=Config.ADL.maxDistinctValuesForAdvancedMapping)
+                        return alert(" too many distinct values :"+data.length)
+
+                    $("#mainDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
+                    $("#mainDialogDiv").dialog("open")
+                    setTimeout(function(){
+                        common.fillSelectOptions("ADLmapping_distinctColumnValuesSelect",data,null,column,column)
+                    },200)
+                }
+                , error: function (err) {
+                    MainController.UI.message(err)
+
+                }
+            })
+        },
+        validateConditionalTypeMappings:function(){
+            if(!confirm ("Validate conditional mappings"))
+                return;
+
+
+            self.assignConditionalTypeOn=false;
+            var types=[]
+         $("#ADLmapping_conditionalMappingsContainerDiv").children().each(function(){
+             var data=$(this).attr("data")
+             var array=data.split("|")
+             var condition=array[0];
+             var type=array[1];
+             var ontologyNode=ADLmappings.selectedOntologyNodes[type];
+             types.push({
+                 condition:condition,
+                 id: type,
+                 label: ontologyNode.data.label,
+                 parents: ontologyNode.parents,
+                 source:ontologyNode.data.source
+
+             })
+         })
+
+            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data:types})
+
+            $("#mainDialogDiv").dialog("close")
+
+
+        }
+        ,cancelConditionalTypeMappings:function(){
+            self.assignConditionalTypeOn=false;
+            $("#mainDialogDiv").dialog("close")
+
+        },
+
+    }
+    self.assignConditionalType=function( ontologyNode){
+
+        var conditionValue=$("#ADLmapping_distinctColumnValuesSelect").val();
+        if(conditionValue && conditionValue!=""){
+            var id=conditionValue+"|"+ontologyNode.data.id
+            var idEncoded=btoa(id.replace(/=/g,"^"))
+            var html="<div class='ADLmapping_conditionalMapping' data='"+id+"' id='"+idEncoded+"'>" +
+                "" +conditionValue+" = "+ontologyNode.data.label+
+                "<button style='margin-left: 100px' onclick='ADLmappingData.unAssignConditionalType(\""+idEncoded+"\")'>X</button> "+
+                "</div>" +
+
+                "</div>"
+
+
+
+            $("#ADLmapping_conditionalMappingsContainerDiv").append(html)
+
+
+
+        }
+
+    }
+    self.unAssignConditionalType=function(id){
+        var x=$("#"+id)
+        $("#"+id).remove()
+
+    }
 
     return self;
 

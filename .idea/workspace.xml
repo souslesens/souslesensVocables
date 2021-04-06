@@ -17,8 +17,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -169,7 +169,8 @@
       <workItem from="1617211349497" duration="1228000" />
       <workItem from="1617262122131" duration="26242000" />
       <workItem from="1617437550194" duration="23985000" />
-      <workItem from="1617513315962" duration="16377000" />
+      <workItem from="1617513315962" duration="28256000" />
+      <workItem from="1617640983473" duration="19577000" />
     </task>
     <servers />
   </component>
@@ -193,15 +194,18 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>402</line>
-          <properties lambdaOrdinal="-1" />
+          <line>473</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>282</line>
-          <properties lambdaOrdinal="-1" />
+          <line>335</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
+          <line>243</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

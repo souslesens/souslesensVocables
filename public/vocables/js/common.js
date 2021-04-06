@@ -32,7 +32,7 @@ var common = (function () {
                 data.forEach(function (item, index) {
                     var text, value;
                     if (textfield) {
-                        if (item[textfield].value && item[valueField].value) {
+                        if (item[textfield] && item[textfield].value && item[valueField].value) {
                             text = item[textfield].value;
                             value = item[valueField].value;
                         } else {
@@ -157,6 +157,7 @@ var common = (function () {
                     'check_callback': check_callbackFn
                 },
                 'dnd': options.dnd,
+              "search": options.searchPlugin,
                 types: options.types,
 
                 contextmenu: {items: options.contextMenu}

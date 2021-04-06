@@ -17,8 +17,6 @@ var ADLSqlConnector = {
 
     connection: {
         host: "localhost",
-      //  user: "root",
-      //  password: "vi0lon",
         user: "souslesens",
         password: "vocables",
 

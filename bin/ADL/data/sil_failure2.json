@@ -12,7 +12,8 @@
         "column": "Equipment_Category",
         "switch": {
           "Transmetteur de température": "http://w3id.org/readi/rdl/CFIHOS-30000476",
-          "Transmetteur de pression": "http://w3id.org/readi/rdl/CFIHOS-30000654"
+          "Transmetteur de pression": "http://w3id.org/readi/rdl/CFIHOS-30000654",
+
 
 
         }

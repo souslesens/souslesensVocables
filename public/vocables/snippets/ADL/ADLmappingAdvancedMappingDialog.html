@@ -1,0 +1,32 @@
+<style>
+
+    .ADLmapping_conditionalMapping{
+        border: #a1aec7 solid 1px;
+        border-radius: 2px;
+        background-color: #ddd;
+        width: 80%;
+        text-align: center;
+        margin:3px;
+        padding: 2px;
+    }
+</style>
+
+
+Advanded Mapping
+    <div style="display:flex;flex-direction: row">
+
+        <div style="width: 50%">distinct values in column<br>
+            Equipment_Category<br>
+            <select size="10" id="ADLmapping_distinctColumnValuesSelect"></select>
+        </div>
+        <div style="width: 50%">
+        <div id="ADLmapping_conditionalMappingsContainerDiv" style="display:flex;flex-direction: column;width: 100%;min-height: 300px">
+        </div>
+
+        <div>
+            <button onclick="ADLmappingData.menuActions.validateConditionalTypeMappings()"> Done</button>
+            <button onclick="ADLmappingData.menuActions.cancelConditionalTypeMappings()">Cancel</button>
+        </div>
+        </div>
+    </div>
+

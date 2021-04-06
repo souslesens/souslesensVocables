@@ -40,20 +40,30 @@ var ADLmappings = (function () {
 
         self.onLoaded = function () {
             self.init()
-
+            MainController.UI.openRightPanel()
 
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>  ");
 
             $("#actionDiv").html(" <div id=\"ADLmappings_dataModelTree\"  style=\"width:400px\"></div>");
             $("#accordion").accordion("option", {active: 2});
 
-            MainController.UI.toogleRightPanel(true)
+            //  MainController.UI.toogleRightPanel(true)
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             $("#rightPanelDiv").load("snippets/ADL/ADLmappingRightPanel.html");
             setTimeout(function () {
 
                 $("#ADLmappings_OneModelTab").html(" <button onclick=\"ADLmappings.displayOneModelTree()\">reload</button>" +
-                    "<div> Ontology  Properties <div id=\"ADLmappings_OneModelTree\" style=\"width:400px\"></div></div>")
+                    "<div> Ontology  Properties " +
+                    "<br></br>search    <input id=\"ADLmappings_OneModelSearchTree\" />" +
+                    "<div id=\"ADLmappings_OneModelTree\" style=\"width:400px\"></div></div>")
+
+                setTimeout(function () {
+                    $("#ADLmappings_OneModelSearchTree").keyup(function () {
+                        var searchString = $(this).val();
+                        $('#ADLmappings_OneModelTree').jstree('search', searchString);
+                    });
+
+                })
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
 
@@ -86,8 +96,13 @@ var ADLmappings = (function () {
 
         //!!! shared by OneModelOntology and sourceBrowser(search)
         self.selectTreeNodeFn = function (event, propertiesMap) {
+            if(!self.selectedOntologyNodes)
+                self.selectedOntologyNodes={}
+            self.selectedOntologyNodes[propertiesMap.node.data.id]=propertiesMap.node
             if (!ADLmappingData.currentColumn)
                 return alert("select a column")
+            if(ADLmappingData.assignConditionalTypeOn)
+                return ADLmappingData.assignConditionalType( propertiesMap.node)
             self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
         }
 
@@ -149,8 +164,11 @@ var ADLmappings = (function () {
 
 
             ADLcommon.Ontology.jstreeData_types.forEach(function (item) {
-                item.parent = Config.ADL.OneModelSource
+                if (item.parent == "#") {
+                    item.parent = Config.ADL.OneModelSource
+                }
                 propJstreeData.push(item)
+
             })
             propJstreeData.push({
                 id: Config.ADL.OneModelSource,
@@ -159,21 +177,29 @@ var ADLmappings = (function () {
             })
             var optionsClass = {
                 selectTreeNodeFn: self.selectTreeNodeFn,
-                openAll: true
+                openAll: true,
+                searchPlugin: {
+                    "case_insensitive": true,
+                   /* "ajax": {
+                        "url": "api/treeview"
+                    },*/
+                    "fuzzy": false,
+                    "show_only_matches": true
+                }
             }
             common.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
 
-        self.displayPropertiesTree=function(treeDivId){
+        self.displayPropertiesTree = function (treeDivId) {
             Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, function (err, jsTreeData) {
                 if (err)
                     return MainController.UI.message(err)
 
-                jsTreeData.forEach(function(item){
-                    if(item.parent=="#")
-                        item.parent=Config.ADL.OneModelSource
+                jsTreeData.forEach(function (item) {
+                    if (item.parent == "#")
+                        item.parent = Config.ADL.OneModelSource
                 })
-                jsTreeData.push({id:Config.ADL.OneModelSource,text:Config.ADL.OneModelSource,parent:"#"})
+                jsTreeData.push({id: Config.ADL.OneModelSource, text: Config.ADL.OneModelSource, parent: "#"})
                 var options = {
                     selectTreeNodeFn: ADLmappingGraph.graphActions.onPropertiesTreeNodeClick,
                     openAll: true
@@ -230,8 +256,15 @@ var ADLmappings = (function () {
                     self.clearMappings()
 
 
+                    var basicPredicates = {
+                        // "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        "http://www.w3.org/2000/01/rdf-schema#label": "rdfs:label",
+                        "http://www.w3.org/2002/07/owl#DatatypeProperty": "owl:DatatypeProperty"
+                    }
+                    var associations = []
                     data.mappings.forEach(function (item) {
-
+                        if (item.object == "failure2.Pressure^^xsd:float")
+                            var x = 3
                         /*   if(item.object.indexOf("http")==0 && !data.model[item.object])
                                return*/
                         //type
@@ -243,17 +276,17 @@ var ADLmappings = (function () {
                                     node.data = []
                                     for (var key in item.object.switch) {
                                         var value = item.object.switch[key]
-                                        var label=key;
-                                        var parents=["?","#"]
-                                        if(data.model[value]) {
-                                            label=data.model[value].label
-                                            parents=data.model[value].parents
+                                        var label = key;
+                                        var parents = ["?", "#"]
+                                        if (data.model[value]) {
+                                            label = data.model[value].label
+                                            parents = data.model[value].parents
                                         }
                                         node.data.push({
                                             condition: key,
                                             id: value,
                                             label: label,
-                                            parents:parents
+                                            parents: parents
                                         })
                                     }
                                 }
@@ -266,29 +299,69 @@ var ADLmappings = (function () {
                                 }
                             }
 
+
                             self.AssignOntologyTypeToColumn(item.subject, node)
                         }
+
                         //association
                         else if (item.object.indexOf("http") < 0) {
-                            if(data.model[item.predicate]){
+
+                            //label and DatatypeProperty
+                            if (basicPredicates[item.predicate]) {
+                                node = {
+                                    data: {
+                                        label: basicPredicates[item.predicate] + "<br>" + item.subject,
+                                    }
+                                }
+                                ADLmappingData.setDataSampleColumntype(item.object, node)
+                                var edgeId = item.subject + "_" + item.predicate + "_" + item.object
+                                ADLmappingGraph.mappedProperties.mappings[edgeId] = {
+                                    subject: item.subject,
+                                    predicate: item.predicate,
+                                    object: item.object,
+
+                                }
+
+                                return;
+                            } else if (data.model[item.predicate]) {
                                 data.model[item.predicate]
                             }
 
-                            if(!data.model[item.predicate]){
-                                data.model[item.predicate]= {
-                                    parents:["?","#"],
+                            if (!data.model[item.predicate]) {
+                                data.model[item.predicate] = {
+                                    parents: ["?", "#"],
                                     label: item.predicate
                                 }
                             }
-                            var propLabel=data.model[item.predicate].label
+                            var propLabel = data.model[item.predicate].label
                             var property = {data: {id: item.predicate, label: propLabel}}
                             var assocation = {
                                 subject: {data: {columnId: item.subject}},
                                 object: {data: {columnId: item.object}}
                             }
-                            ADLmappingGraph.graphActions.setAssociation(property, assocation)
+                            associations.push({property: property, association: assocation})
+
+
+                            var column = item.object
+                            var p = column.indexOf("^")
+                            // literal
+                            if (p > -1) {
+                                column = column.substring(0, p);
+
+                                var label = data.model[item.predicate].label + "<br>" + item.subject
+                                ADLmappingData.setDataSampleColumntype(column, {data: {label: label}})
+                            }
+
+
                         }
                     })
+                    associations.forEach(function (item) {
+                        ADLmappingGraph.graphActions.setAssociation(item.property, item.association)
+                    })
+                    if(data.infos){
+                        var  html="Last modified by : "+data.infos.modifiedBy+" "+data.infos.lastModified+ " "+ data.infos.comment
+                        $("#ADLmappings_mappingInfos").html(html)
+                    }
 
 
                 }, error: function (err) {
@@ -335,21 +408,19 @@ var ADLmappings = (function () {
                 }
 
 
-               var  propertyJstreeNode = $("#ADLmappingPropertiesTree").jstree(true).get_node(item.predicate)
-                if(propertyJstreeNode){
-                    model[item.predicate]= {
+                var propertyJstreeNode = $("#ADLmappingPropertiesTree").jstree(true).get_node(item.predicate)
+                if (propertyJstreeNode) {
+                    model[item.predicate] = {
                         parents: propertyJstreeNode.parents,
                         label: propertyJstreeNode.data.label
                     }
-                }else {
+                } else {
                     model[item.predicate] = {
                         parents: ["?", "#"],
                         label: item.predicate
                     }
                 }
             })
-
-
 
 
             model["http://www.w3.org/2000/01/rdf-schema#label"] = {
@@ -373,7 +444,7 @@ var ADLmappings = (function () {
             var mappingName = ADLmappingData.currentADLdatabase + "_" + ADLmappingData.currentADLtable.data.label
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
-            if (!comment)
+            if (comment === null)
                 return
             mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
             var payload = {
@@ -402,10 +473,23 @@ var ADLmappings = (function () {
             var data = {mappings: [], model: {}}
             for (var key in self.currentMappedColumns) {
                 var obj = self.currentMappedColumns[key]
+                var objObj = ""
+                if (obj.types.length > 1) {
+                    var switches = {}
+                    obj.types.forEach(function (item) {
+                        switches[item.condition] = item.type_id
+                    })
+                    objObj = {
+                        "column": obj.columnId,
+                        "switch": switches
+                    }
+                } else {
+                    objObj = obj.types[0].type_id
+                }
                 data.mappings.push({
                     subject: key,
                     predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object: obj.type_id
+                    object: objObj
                 })
 
                 obj.types.forEach(function (item) {

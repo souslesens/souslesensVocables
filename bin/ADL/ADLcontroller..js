@@ -20,7 +20,13 @@ var ADLcontroller={
         if(!fs.existsSync(filePath))
             return callback(null,null)
         fs.readFile(filePath,function(err,result){
-            callback(err,result)
+            try {
+                var json = JSON.parse(result)
+                callback(err,json)
+            }catch(e){
+                callback(e);
+            }
+
             })
     },
     generateTriples:function(config){

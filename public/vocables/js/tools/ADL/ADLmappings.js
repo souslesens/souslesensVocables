@@ -56,14 +56,15 @@ var ADLmappings = (function () {
                     "<div> Ontology  Properties " +
                     "<br></br>search    <input id=\"ADLmappings_OneModelSearchTree\" />" +
                     "<div id=\"ADLmappings_OneModelTree\" style=\"width:400px\"></div></div>")
+                var to = false;
+                $('#ADLmappings_OneModelSearchTree').keyup(function () {
+                    if(to) { clearTimeout(to); }
+                    to = setTimeout(function () {
+                        var searchString = $("#ADLmappings_OneModelSearchTree").val();
+                        $('#ADLmappings_OneModelTree').jstree(true).search(searchString);
+                    }, 250);
+                });
 
-                setTimeout(function () {
-                    $("#ADLmappings_OneModelSearchTree").keyup(function () {
-                        var searchString = $(this).val();
-                        $('#ADLmappings_OneModelTree').jstree('search', searchString);
-                    });
-
-                })
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
 
@@ -98,12 +99,15 @@ var ADLmappings = (function () {
         self.selectTreeNodeFn = function (event, propertiesMap) {
             if(!self.selectedOntologyNodes)
                 self.selectedOntologyNodes={}
-            self.selectedOntologyNodes[propertiesMap.node.data.id]=propertiesMap.node
-            if (!ADLmappingData.currentColumn)
-                return alert("select a column")
-            if(ADLmappingData.assignConditionalTypeOn)
-                return ADLmappingData.assignConditionalType( propertiesMap.node)
-            self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
+            self.selectedOntologyNodes[propertiesMap.node.data.id]=propertiesMap.node;
+            self.currentJstreeNode=propertiesMap.node;
+            self.currentJstreeNode.jstreeDiv=event.currentTarget.id
+            if (ADLmappingData.currentColumn) {
+
+                if (ADLmappingData.assignConditionalTypeOn)
+                    return ADLmappingData.assignConditionalType(propertiesMap.node)
+                self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
+            }
         }
 
 
@@ -118,7 +122,7 @@ var ADLmappings = (function () {
                     type: "DatatypePropertyOf",
                     id: "http://www.w3.org/2002/07/owl#DatatypeProperty",
                     label: "owl:DatatypeProperty",
-                    source: ADLmappingData.currentDatabase
+                    source: Config.ADL.OneModelSource
                 }
             })
 
@@ -131,7 +135,7 @@ var ADLmappings = (function () {
                         type: "http://www.w3.org/2002/07/owl#DatatypeProperty",
                         id: id,
                         label: id.substring(id.lastIndexOf(".") + 1),
-                        source: ADLmappingData.currentDatabase
+                        source: Config.ADL.OneModelSource
                     }
 
                 })
@@ -144,7 +148,7 @@ var ADLmappings = (function () {
                     type: "labelOf",
                     id: "http://www.w3.org/2000/01/rdf-schema#label",
                     label: "http://www.w3.org/2000/01/rdf-schema#label",
-                    source: ADLmappingData.currentDatabase
+                    source: Config.ADL.OneModelSource
                 }
             })
 
@@ -157,7 +161,7 @@ var ADLmappings = (function () {
                         type: "http://www.w3.org/2000/01/rdf-schema#label",
                         id: id,
                         label: id.substring(id.lastIndexOf(".") + 1),
-                        source: ADLmappingData.currentDatabase
+                        source: Config.ADL.OneModelSource
                     }
                 })
             }
@@ -166,7 +170,9 @@ var ADLmappings = (function () {
             ADLcommon.Ontology.jstreeData_types.forEach(function (item) {
                 if (item.parent == "#") {
                     item.parent = Config.ADL.OneModelSource
+
                 }
+                item.data.source=Config.ADL.OneModelSource
                 propJstreeData.push(item)
 
             })
@@ -180,12 +186,10 @@ var ADLmappings = (function () {
                 openAll: true,
                 searchPlugin: {
                     "case_insensitive": true,
-                   /* "ajax": {
-                        "url": "api/treeview"
-                    },*/
                     "fuzzy": false,
                     "show_only_matches": true
-                }
+                },
+                contextMenu: self.getJstreeConceptsContextMenu()
             }
             common.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
@@ -525,6 +529,42 @@ var ADLmappings = (function () {
             $(".dataSample_type").html("");
             visjsGraph.clearGraph()
         }
+
+
+
+        self.getJstreeConceptsContextMenu=function(){
+            var items = {}
+            items.nodeInfos = {
+                label: "node infos",
+                action: function (e, xx) {// pb avec source
+                    self.showNodeInfos()
+
+
+                }
+            }
+
+                items.openNode = {
+                    label: "open Node",
+                    action: function (e, xx) {// pb avec source
+
+                        SourceBrowser.openTreeNode( self.currentJstreeNode.jstreeDiv, self.currentJstreeNode.data.source, self.currentJstreeNode, null)
+
+
+                    }
+                }
+
+            return items;
+        }
+
+        self.showNodeInfos=function(node){
+            if (!node)
+                node = self.currentJstreeNode
+            MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+        }
+
+
+
+
 
         return self;
     }

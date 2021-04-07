@@ -1,9 +1,134 @@
 {
-  "mappings": [],
-  "model": {},
+  "mappings": [
+    {
+      "subject": "ufr.Country",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/QuantityDatum"
+    },
+    {
+      "subject": "ufr.Field",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/System"
+    },
+    {
+      "subject": "ufr.Supplier",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/PointInTime"
+    },
+    {
+      "subject": "ufr.WaterDepth_m",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-30000685"
+    },
+    {
+      "subject": "ufr.Type",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": {
+        "column": "ufr.Type",
+        "switch": {
+          "Static": "http://w3id.org/readi/rdl/CFIHOS-30000872",
+          "Dynamic 1": "http://w3id.org/readi/rdl/CFIHOS-30000871",
+          "Dynamic 2": "http://w3id.org/readi/rdl/CFIHOS-30000871",
+          "Dynamic": "http://w3id.org/readi/rdl/CFIHOS-30000871"
+        }
+      }
+    },
+    {
+      "subject": "ufr.Supplier",
+      "predicate": "http://standards.iso.org/iso/15926/part14/datumUOM",
+      "object": "ufr.WaterDepth_m"
+    },
+    {
+      "subject": "ufr.Country",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasArrangedPart",
+      "object": "ufr.Field"
+    },
+    {
+      "subject": "ufr.Type",
+      "predicate": "http://standards.iso.org/iso/15926/part14/dispositionOf",
+      "object": "ufr.WaterDepth_m"
+    }
+  ],
+  "model": {
+    "http://standards.iso.org/iso/15926/part14/QuantityDatum": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/InformationObject",
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "QuantityDatum"
+    },
+    "http://standards.iso.org/iso/15926/part14/System": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "System"
+    },
+    "http://standards.iso.org/iso/15926/part14/PointInTime": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/Event",
+        "http://standards.iso.org/iso/15926/part14/Activity",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "PointInTime"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-30000685": {
+      "parents": [
+        "http://w3id.org/readi/rdl/CFIHOS-30000529",
+        "http://w3id.org/readi/rdl/CFIHOS-30000314",
+        "http://w3id.org/readi/rdl/CFIHOS-30000311",
+        "http://w3id.org/readi/rdl/D101001053",
+        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+        "CFIHOS_READI",
+        "#"
+      ],
+      "label": "turbine"
+    },
+    "undefined": {},
+    "http://w3id.org/readi/rdl/CFIHOS-30000872": {
+      "label": "subsea static umbilical"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-30000871": {
+      "label": "subsea dynamic umbilical"
+    },
+    "http://standards.iso.org/iso/15926/part14/datumUOM": {
+      "parents": [
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "datumUOM"
+    },
+    "http://standards.iso.org/iso/15926/part14/hasArrangedPart": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/hasPart",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "hasArrangedPart"
+    },
+    "http://standards.iso.org/iso/15926/part14/dispositionOf": {
+      "parents": [
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "dispositionOf"
+    }
+  },
   "infos": {
-    "lastModified": "2021-04-06T17:18:31.806Z",
+    "lastModified": "2021-04-07T07:27:31.896Z",
     "modifiedBy": "admin",
-    "comment": ""
+    "comment": "gddfr'eztertgetretre"
   }
 }

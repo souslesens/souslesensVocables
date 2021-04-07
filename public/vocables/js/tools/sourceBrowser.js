@@ -172,7 +172,7 @@ var SourceBrowser = (function () {
                 }
 
             }
-            if (Config.sources[Lineage_classes.currentSource].editable) {
+            if (Lineage_classes.currentSource && Config.sources[Lineage_classes.currentSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (e) {// pb avec source

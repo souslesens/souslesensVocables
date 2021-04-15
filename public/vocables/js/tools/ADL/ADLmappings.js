@@ -42,7 +42,8 @@ var ADLmappings = (function () {
             self.init()
             MainController.UI.openRightPanel()
 
-            $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>  ");
+            $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
+                "<button onclick='TextAnnotator.init()'>text annotation</button>  ");
 
             $("#actionDiv").html(" <div id=\"ADLmappings_dataModelTree\"  style=\"width:400px\"></div>");
             $("#accordion").accordion("option", {active: 2});
@@ -50,20 +51,12 @@ var ADLmappings = (function () {
             //  MainController.UI.toogleRightPanel(true)
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             $("#rightPanelDiv").load("snippets/ADL/ADLmappingRightPanel.html");
+
+
             setTimeout(function () {
 
-                $("#ADLmappings_OneModelTab").html(" <button onclick=\"ADLmappings.displayOneModelTree()\">reload</button>" +
-                    "<div> Ontology  Properties " +
-                    "<br></br>search    <input id=\"ADLmappings_OneModelSearchTree\" />" +
-                    "<div id=\"ADLmappings_OneModelTree\" style=\"width:400px\"></div></div>")
-                var to = false;
-                $('#ADLmappings_OneModelSearchTree').keyup(function () {
-                    if(to) { clearTimeout(to); }
-                    to = setTimeout(function () {
-                        var searchString = $("#ADLmappings_OneModelSearchTree").val();
-                        $('#ADLmappings_OneModelTree').jstree(true).search(searchString);
-                    }, 250);
-                });
+                //  $("#ADLmappings_OneModelTab").html("")
+
 
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
@@ -76,7 +69,12 @@ var ADLmappings = (function () {
 
                 self.displayPropertiesTree("ADLmappingPropertiesTree")
 
-
+                $("#ADLmappings_AdvancedMappingDialogDiv").dialog({
+                    autoOpen: false,
+                    height: 800,
+                    width: 1000,
+                    modal: false,
+                });
             }, 200)
         }
 
@@ -84,7 +82,7 @@ var ADLmappings = (function () {
         self.onSourceSelect = function (source) {
 
             self.clearMappings()
-            OwlSchema.currentADLdatabaseSchema = null;
+            OwlSchema.currentADLdataSourceSchema = null;
             visjsGraph.clearGraph()
 
             ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
@@ -97,20 +95,58 @@ var ADLmappings = (function () {
 
         //!!! shared by OneModelOntology and sourceBrowser(search)
         self.selectTreeNodeFn = function (event, propertiesMap) {
-            if(!self.selectedOntologyNodes)
-                self.selectedOntologyNodes={}
-            self.selectedOntologyNodes[propertiesMap.node.data.id]=propertiesMap.node;
-            self.currentJstreeNode=propertiesMap.node;
-            self.currentJstreeNode.jstreeDiv=event.currentTarget.id
+            if (!self.selectedOntologyNodes)
+                self.selectedOntologyNodes = {}
+            self.selectedOntologyNodes[propertiesMap.node.data.id] = propertiesMap.node;
+            self.currentJstreeNode = propertiesMap.node;
+            self.currentJstreeNode.jstreeDiv = event.currentTarget.id
             if (ADLmappingData.currentColumn) {
-
-                if (ADLmappingData.assignConditionalTypeOn)
+                if (ADLadvancedMapping.addingValueManuallyToNode) {
+                    ADLadvancedMapping.addValueManuallyFromOntology(ADLadvancedMapping.addingValueManuallyToNode, propertiesMap.node)
+                }
+                else if (ADLadvancedMapping.assignConditionalTypeOn)
                     return ADLmappingData.assignConditionalType(propertiesMap.node)
-                self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
-            }
+                else
+                    self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
+            } else if (TextAnnotator.isAnnotatingText)
+                TextAnnotator.setAnnotation(propertiesMap.node)
         }
+        self.selectPropertyTreeNodeFn = function (event, propertiesMap) {
+            if (!self.selectedOntologyNodes)
+                self.selectedOntologyNodes = {}
+            self.selectedOntologyNodes[propertiesMap.node.data.id] = propertiesMap.node;
+            self.currentJstreeNode = propertiesMap.node;
+            self.currentJstreeNode.jstreeDiv = event.currentTarget.id
+            if (ADLmappingGraph.isAssigningProperty) {
+                $("#ADLMapping_graphPropertySpan").html(propertiesMap.node.data.label)
+            } else if (TextAnnotator.isAnnotatingText)
+                TextAnnotator.setAnnotation(propertiesMap.node)
+        },
 
 
+            self.contextMenuFn = function () {
+                var items = {}
+                items.nodeInfos = {
+                    label: "node infos",
+                    action: function (e, xx) {// pb avec source
+                        self.showNodeInfos()
+
+
+                    }
+                }
+
+                items.openNode = {
+                    label: "open Node",
+                    action: function (e, xx) {// pb avec source
+
+                        SourceBrowser.openTreeNode(self.currentJstreeNode.jstreeDiv, self.currentJstreeNode.data.source, self.currentJstreeNode, null)
+
+
+                    }
+                }
+
+                return items;
+            }
         self.displayOneModelTree = function () {
             var propJstreeData = []
 
@@ -172,7 +208,7 @@ var ADLmappings = (function () {
                     item.parent = Config.ADL.OneModelSource
 
                 }
-                item.data.source=Config.ADL.OneModelSource
+                item.data.source = Config.ADL.OneModelSource
                 propJstreeData.push(item)
 
             })
@@ -189,10 +225,11 @@ var ADLmappings = (function () {
                     "fuzzy": false,
                     "show_only_matches": true
                 },
-                contextMenu: self.getJstreeConceptsContextMenu()
+                contextMenu: self.contextMenuFn()
             }
             common.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
+
 
         self.displayPropertiesTree = function (treeDivId) {
             Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, function (err, jsTreeData) {
@@ -205,8 +242,14 @@ var ADLmappings = (function () {
                 })
                 jsTreeData.push({id: Config.ADL.OneModelSource, text: Config.ADL.OneModelSource, parent: "#"})
                 var options = {
-                    selectTreeNodeFn: ADLmappingGraph.graphActions.onPropertiesTreeNodeClick,
-                    openAll: true
+                    selectTreeNodeFn: self.selectPropertyTreeNodeFn,
+                    openAll: true,
+                    contextMenu: self.contextMenuFn,
+                    searchPlugin: {
+                        "case_insensitive": true,
+                        "fuzzy": false,
+                        "show_only_matches": true
+                    },
 
                 }
                 common.loadJsTree(treeDivId, jsTreeData, options);
@@ -225,7 +268,7 @@ var ADLmappings = (function () {
                 types.push({
                     type_id: item.id,
                     type_label: item.label,
-                    type_parents: node.parents,
+                    type_parents: node.parents || item.parents,
                     condition: item.condition
                 })
             })
@@ -243,7 +286,7 @@ var ADLmappings = (function () {
 
         self.loadMappings = function (name) {
             if (!name)
-                name = self.currentADLdatabase + "_" + self.currentADLtable.data.label
+                name = self.currentADLdataSource.name + "_" + self.currentADLtable.data.label
             var payload = {ADL_GetMappings: name}
             $.ajax({
                 type: "POST",
@@ -362,8 +405,8 @@ var ADLmappings = (function () {
                     associations.forEach(function (item) {
                         ADLmappingGraph.graphActions.setAssociation(item.property, item.association)
                     })
-                    if(data.infos){
-                        var  html="Last modified by : "+data.infos.modifiedBy+" "+data.infos.lastModified+ " "+ data.infos.comment
+                    if (data.infos) {
+                        var html = "Last modified by : " + data.infos.modifiedBy + " " + data.infos.lastModified + " " + data.infos.comment
                         $("#ADLmappings_mappingInfos").html(html)
                     }
 
@@ -445,7 +488,7 @@ var ADLmappings = (function () {
             MainController.UI.message("mappings copied to clipboard");
         }
         self.saveMappings = function () {
-            var mappingName = ADLmappingData.currentADLdatabase + "_" + ADLmappingData.currentADLtable.data.label
+            var mappingName = ADLmappingData.currentADLdataSource.name + "_" + ADLmappingData.currentADLtable.data.label
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
             if (comment === null)
@@ -528,42 +571,15 @@ var ADLmappings = (function () {
             ADLmappingGraph.initMappedProperties()
             $(".dataSample_type").html("");
             visjsGraph.clearGraph()
+            TextAnnotator.isAnnotatingText = false;
         }
 
 
-
-        self.getJstreeConceptsContextMenu=function(){
-            var items = {}
-            items.nodeInfos = {
-                label: "node infos",
-                action: function (e, xx) {// pb avec source
-                    self.showNodeInfos()
-
-
-                }
-            }
-
-                items.openNode = {
-                    label: "open Node",
-                    action: function (e, xx) {// pb avec source
-
-                        SourceBrowser.openTreeNode( self.currentJstreeNode.jstreeDiv, self.currentJstreeNode.data.source, self.currentJstreeNode, null)
-
-
-                    }
-                }
-
-            return items;
-        }
-
-        self.showNodeInfos=function(node){
+        self.showNodeInfos = function (node) {
             if (!node)
                 node = self.currentJstreeNode
             MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
         }
-
-
-
 
 
         return self;

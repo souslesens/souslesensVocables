@@ -16,8 +16,8 @@
 
         <ul>
 
-            <li><a href="#ADLmappings_OneModelTab">One-Model Classes</a></li>
-            <li><a href="#ADLmappings_OntologiesTab">Other Classes</a></li>
+            <li><a href="#ADLmappings_OneModelTab">One-Model</a></li>
+            <li><a href="#ADLmappings_OntologiesTab">Others</a></li>
             <li><a href="#ADLmappings_PropertiesTab">Properties</a></li>
 
 
@@ -25,6 +25,10 @@
 
 
         <div id="ADLmappings_OneModelTab" style="width:100%;height:800px">
+            <button onclick="ADLmappings.displayOneModelTree()">reload</button>
+            <div>
+            <br>search    <input id="ADLmappings_OneModelSearchTree" />
+            <div id="ADLmappings_OneModelTree" style=width:400px></div></div>
 
 
         </div>
@@ -40,6 +44,7 @@
 
         <div id="ADLmappings_PropertiesTab" style="width:100%;height:800px">
             <div style="width: 360px;height: 500px">
+               search    <input id="ADLmappings_propertiesSearchTree" />
                 <div class="jstree" id="ADLmappingPropertiesTree"></div>
             </div>
         </div>
@@ -60,6 +65,27 @@
         $("#GenericTools_searchSchemaType").val("OWL")
 
     }, 300)
+
+    var to = false;
+    $('#ADLmappings_OneModelSearchTree').keyup(function () {
+        if(to) { clearTimeout(to); }
+        to = setTimeout(function () {
+            var searchString = $("#ADLmappings_OneModelSearchTree").val();
+            $('#ADLmappings_OneModelTree').jstree(true).search(searchString);
+        }, 250);
+    });
+
+    var to2 = false;
+    $('#ADLmappings_propertiesSearchTree').keyup(function () {
+        if(to2) { clearTimeout(to2); }
+
+        to2 = setTimeout(function () {
+            var searchString = $("#ADLmappings_propertiesSearchTree").val();
+
+            var xx= $('#ADLmappingPropertiesTree').jstree(true)
+            $('#ADLmappingPropertiesTree').jstree(true).search(searchString);
+        }, 250);
+    });
 
 
 </script>

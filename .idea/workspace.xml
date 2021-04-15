@@ -17,8 +17,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -71,24 +71,24 @@
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
+      <recent name="D:\webstorm\souslesensVocables\other\oneModel" />
       <recent name="D:\webstorm\souslesensVocables\bin" />
+      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL" />
     </key>
   </component>
   <component name="RunManager" selected="Node.js.bin\www">
-    <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
+    <configuration name="SQLserverConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
-    <configuration name="OneModelManager..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="OneModelManager..js" working-dir="$PROJECT_DIR$/other/oneModel">
+    <configuration name="annotatorLive..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/annotatorLive..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportGraph..js" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="dictionaryManager..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" working-dir="$PROJECT_DIR$/bin/annotator">
       <method v="2" />
     </configuration>
-    <configuration name="exportRDF..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="exportRDF..js" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="dictionary..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/quantum/dictionary..js" working-dir="$PROJECT_DIR$/other/quantum">
       <method v="2" />
     </configuration>
     <configuration name="triplesGenerator.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/triplesGenerator.js" working-dir="$PROJECT_DIR$/bin">
@@ -96,11 +96,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.dictionaryManager..js" />
+        <item itemvalue="Node.js.annotatorLive..js" />
+        <item itemvalue="Node.js.dictionary..js" />
+        <item itemvalue="Node.js.SQLserverConnector..js" />
         <item itemvalue="Node.js.triplesGenerator.js" />
-        <item itemvalue="Node.js.exportRDF..js" />
-        <item itemvalue="Node.js.OneModelManager..js" />
-        <item itemvalue="Node.js.ADLSqlConnector..js" />
-        <item itemvalue="Node.js.exportGraph..js" />
       </list>
     </recent_temporary>
   </component>
@@ -170,7 +170,10 @@
       <workItem from="1617262122131" duration="26242000" />
       <workItem from="1617437550194" duration="23985000" />
       <workItem from="1617513315962" duration="28256000" />
-      <workItem from="1617640983473" duration="30520000" />
+      <workItem from="1617640983473" duration="73261000" />
+      <workItem from="1618075066852" duration="41216000" />
+      <workItem from="1618409683603" duration="9980000" />
+      <workItem from="1618461927860" duration="7734000" />
     </task>
     <servers />
   </component>
@@ -194,18 +197,48 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>477</line>
+          <line>520</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>339</line>
+          <line>382</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
           <line>243</line>
           <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
+          <line>22</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
+          <line>17</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/quantum/dictionary..js</url>
+          <line>28</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
+          <line>164</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
+          <line>56</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/oneModel/dictionaryManager..js</url>
+          <line>51</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -10,7 +10,7 @@
 
 var fs = require("fs")
 
-const util = require('../skosConverters/util.')
+const util = require('../util.')
 const xlsx2json = require('../xlsx2json.')
 const async = require('async')
 var httpProxy = require('../httpProxy.')

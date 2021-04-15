@@ -630,6 +630,26 @@
 
     "schema": null,
     "color": "#bcbd22"
+  },
+
+  "ASSETS-QUANTUM-RDL": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/quantum/rdl/0.1/"
+    ],
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "rdlquantum"
+    },
+
+    "schema": null,
+    "color": "#bcbd22"
   }
 
 

@@ -11,7 +11,7 @@
 var fs = require('fs')
 var httpProxy = require('./httpProxy.')
 var async = require('async')
-const util = require('./skosConverters/util.')
+const util = require('./util.')
 var exportRDF = {
 
     export: function (sparql_url, graphUri, stream, callback) {

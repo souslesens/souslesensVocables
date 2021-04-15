@@ -1,32 +1,84 @@
 <style>
 
-    .ADLmapping_conditionalMapping{
+    .ADLmapping_conditionalMapping {
         border: #a1aec7 solid 1px;
         border-radius: 2px;
         background-color: #ddd;
-        width: 80%;
+        display: flex;
+        justify-content: space-evenly;
         text-align: center;
-        margin:3px;
+        margin: 3px;
         padding: 2px;
+    }
+
+    .ADLmappingData_treeItem2 {
+        font-weight: normal;
     }
 </style>
 
 
-Advanded Mapping
-    <div style="display:flex;flex-direction: row">
+<div style="width: 100%">Advanded Mapping : distinct values in column<b><span id="ADLmappingData_column"> </span></b>
 
-        <div style="width: 50%">distinct values in column<br>
-            Equipment_Category<br>
-            <select size="10" id="ADLmapping_distinctColumnValuesSelect"></select>
-        </div>
-        <div style="width: 50%">
-        <div id="ADLmapping_conditionalMappingsContainerDiv" style="display:flex;flex-direction: column;width: 100%;min-height: 300px">
-        </div>
 
+</div>
+<div id="ADLMappingAdvancedMappings_tabs" style="width:100%;">
+    <ul>
+
+        <li><a href="#ADLMappingAdvancedMappings_automaticMapping">Automatic</a></li>
+        <li><a href="#ADLMappingAdvancedMappings_manualMapping">Manual </a></li>
+    </ul>
+
+    <div id="ADLMappingAdvancedMappings_manualMapping" style="display:flex;flex-direction:row;width:100%">
         <div>
+            <select size="10" style="max-width: 250px;height: 650px;overflow: auto"  id="ADLmapping_distinctColumnValuesSelect"></select>
+        </div>
+        <div>
+           <i> create mapping by selecting  a value on  left list and  then on right panel</i>
+            <div id="ADLadvancedMapping_manualMappingContainerDiv" style="display:flex;flex-direction: column;width: 600px;min-height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
             <button onclick="ADLmappingData.menuActions.validateConditionalTypeMappings()"> Done</button>
             <button onclick="ADLmappingData.menuActions.cancelConditionalTypeMappings()">Cancel</button>
         </div>
-        </div>
     </div>
+
+    <div id="ADLMappingAdvancedMappings_automaticMapping" style="width:95%;">
+        <button onclick="ADLadvancedMapping.setMappingTree('rdlQuantum_pickList')"> map with quantum RDL</button>
+
+
+        map with ontology <select id="ADLMappingAdvancedMappings_ontologiesSelect" onchange="ADLadvancedMapping.setMappingTree('souslesens_dictionary')">
+            <option value="">...</option>
+            <option>CFIHOS_READI</option>
+            <option>ISO_15926-PCA</option>
+            <option>ISO_15926-org</option>
+        </select>
+         <input type="checkbox" id="ADLMappingAdvancedMappings_onlyOrphansCBX" checked="checked">onlyOrphans
+        <input type="checkbox" id="ADLMappingAdvancedMappings_fuzzyMatching" >fuzzyMatching
+        <div id="ADLmapping_pickListContainerDiv"
+             style="display:flex;flex-direction: column;width: 97%;min-height: 580px; margin: 10px;   background: beige;overflow: auto">
+
+
+            <div id="advancedMappings_pickListMappingTree" class="jstree"></div>
+
+
+        </div>
+
+        <button onclick="ADLadvancedMapping.validateMapping()"> Save...</button>
+        <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>
+    </div>
+
+</div>
+
+
+
+
+
+
+
+<div id="advancedMappings_validateMappingDialog">
+
+</div>
+
+<script>
+
+    $("#ADLMappingAdvancedMappings_tabs").tabs()
+</script>
 

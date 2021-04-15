@@ -139,11 +139,6 @@ $("#ADLmappings_Tabs").tabs("option", "active", 2);
         cancelAssociation: function () {
             $("#mainDialogDiv").dialog("close")
 
-        }, onPropertiesTreeNodeClick: function (event, propertiesMap) {
-            if (ADLmappingGraph.isAssigningProperty) {
-                $("#ADLMapping_graphPropertySpan").html(propertiesMap.node.data.label)
-            }
-
         },
 
         setAssociation: function (property, association) {

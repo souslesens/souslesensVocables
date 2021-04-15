@@ -84,7 +84,7 @@ var SourceBrowser = (function () {
 
         if (options.targetDiv)
             self.currentTargetDiv = options.targetDiv
-        else if(!self.currentTargetDiv)
+        else if (!self.currentTargetDiv)
             self.currentTargetDiv = "actionDiv"
 
         if ($("#" + self.currentTargetDiv).length == 0) {
@@ -193,7 +193,7 @@ var SourceBrowser = (function () {
                     label: "delete Class",
                     action: function (e) {// pb avec source
 
-                        Lineage_common.deleteNode(self.currentTreeNode,self.currentTargetDiv)
+                        Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv)
 
                     }
 
@@ -212,15 +212,15 @@ var SourceBrowser = (function () {
                 }
             }
         }
-           /* if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
-                items.addToADLquery = {
-                    label: "add to Asset Query",
-                    action: function (e) {// pb avec source
-                        ADLquery.showNodeProperties(self.currentTreeNode.data)
-                    }
-                }
+        /* if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
+             items.addToADLquery = {
+                 label: "add to Asset Query",
+                 action: function (e) {// pb avec source
+                     ADLquery.showNodeProperties(self.currentTreeNode.data)
+                 }
+             }
 
-        }*/
+     }*/
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
@@ -259,7 +259,10 @@ var SourceBrowser = (function () {
             if (err) {
                 return MainController.UI.message(err);
             }
-            TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {source: sourceLabel, type: node.data.type})
+            TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {
+                source: sourceLabel,
+                type: node.data.type
+            })
             $("#waitImg").css("display", "none");
 
         })
@@ -411,8 +414,15 @@ var SourceBrowser = (function () {
                     if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);
 
+
                     self.editThesaurusConceptInfos(propertiesMap.node.data.source, propertiesMap.node)
-                }, contextMenu: self.getJstreeConceptsContextMenu()
+                },
+                contextMenu: function () {
+                    if (Config.tools[MainController.currentTool].controller.contextMenuFn)
+                        return Config.tools[MainController.currentTool].controller.contextMenuFn()
+                    else
+                        return self.getJstreeConceptsContextMenu()
+                }
             }
 
             common.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
@@ -477,7 +487,17 @@ var SourceBrowser = (function () {
                             if (item["broader" + (i + 1)])
                                 parentId = item["broader" + (i + 1)].value
 
-                            jstreeData.push({id: jstreeId, text: label, parent: parentId, data: {type:"http://www.w3.org/2002/07/owl#Class",source: sourceLabel, id: id, label: item["broader" + i + "Label"].value}})
+                            jstreeData.push({
+                                id: jstreeId,
+                                text: label,
+                                parent: parentId,
+                                data: {
+                                    type: "http://www.w3.org/2002/07/owl#Class",
+                                    source: sourceLabel,
+                                    id: id,
+                                    label: item["broader" + i + "Label"].value
+                                }
+                            })
                         }
                     }
                 }
@@ -488,7 +508,17 @@ var SourceBrowser = (function () {
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
                     var id = item.concept.value;
                     var jstreeId = itemId
-                    jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {type:"http://www.w3.org/2002/07/owl#Class",source: sourceLabel, id: id, label: item.conceptLabel.value}})
+                    jstreeData.push({
+                        id: jstreeId,
+                        text: text,
+                        parent: item["broader1"].value,
+                        data: {
+                            type: "http://www.w3.org/2002/07/owl#Class",
+                            source: sourceLabel,
+                            id: id,
+                            label: item.conceptLabel.value
+                        }
+                    })
                 } else {
                     /*
                        if (!existingNodes[jstreeId]) {
@@ -506,7 +536,6 @@ var SourceBrowser = (function () {
 
 
     }
-
 
 
     self.uploadOntologyFromOwlFile = function () {
@@ -528,10 +557,10 @@ var SourceBrowser = (function () {
             dataType: "json",
 
             success: function (data, textStatus, jqXHR) {
-               alert("Ontology updated")
+                alert("Ontology updated")
             }
             , error: function (err) {
-              alert(err)
+                alert(err)
             }
         })
 

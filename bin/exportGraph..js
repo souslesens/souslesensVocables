@@ -11,7 +11,7 @@
 const async = require('async')
 var fs = require('fs')
 var httpProxy = require('./httpProxy.')
-var util=require("./skosConverters/util.")
+var util=require("./util.")
 var exportGraph = {
     execute: function (serverUrl, graphUri, filePath) {
 

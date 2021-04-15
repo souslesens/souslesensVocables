@@ -16,7 +16,8 @@ const async=require('async')
 var ADLSqlConnector = {
 
     connection: {
-        host: "localhost",
+       // host: "localhost",
+        host: "51.178.39.209",
         user: "souslesens",
         password: "vocables",
 

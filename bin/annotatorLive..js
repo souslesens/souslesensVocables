@@ -13,7 +13,7 @@ var httpProxy = require('../bin/httpProxy.')
 var async = require('async')
 var spacyServerUrl = "http://vps475829.ovh.net/spacy/pos"
 var Inflector = require('inflected');
-const util = require("../bin/skosConverters/util.");
+const util = require("../bin/util.");
 
 
 var annotatorLive = {

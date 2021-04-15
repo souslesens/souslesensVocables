@@ -290,6 +290,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
         if (req.body.ADLquery) {
             var ADLSqlConnector = require("../bin/ADL/ADLSqlConnector.")
+            var SQLserverConnector = require("../bin/ADL/SQLserverConnector.")
             if (req.body.getFromSparql) {
 
                 ADLSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), function (err, result) {
@@ -299,18 +300,36 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
             }
 
             if (req.body.getModel) {
-                ADLSqlConnector.getADLmodel(req.body.getModel, function (err, result) {
-                    processResponse(response, err, result)
+                req.body.getModel=JSON.parse(req.body.getModel)
+                if(req.body.getModel.type== "sql.sqlserver"){
+                    SQLserverConnector.getADLmodel(req.body.getModel.dbName, function (err, result) {
+                        processResponse(response, err, result)
 
-                })
+                    })
+                }else {
+                    ADLSqlConnector.getADLmodel(req.body.getModel.dbName, function (err, result) {
+                        processResponse(response, err, result)
+
+                    })
+                }
             }
 
 
             if (req.body.getData) {
-                ADLSqlConnector.getData(req.body.dbName, req.body.sqlQuery, function (err, result) {
-                    processResponse(response, err, result)
+                req.body.dataSource=JSON.parse(req.body.dataSource)
+                if(req.body.dataSource.type== "sql.sqlserver") {
+                    SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, result) {
+                        processResponse(response, err, result)
 
-                })
+                    })
+                }
+                    else
+                    {
+                        ADLSqlConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, result) {
+                            processResponse(response, err, result)
+
+                        })
+                    }
             }
 
         }

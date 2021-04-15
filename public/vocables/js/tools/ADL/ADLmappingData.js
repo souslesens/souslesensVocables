@@ -3,14 +3,15 @@ var ADLmappingData = (function () {
     var self = {}
     self.sampleData = {}
     self.currentColumn = null
-    self.currentADLsource = null;
+    self.currentADLdataSource = null;
 
+    self.mappedValues = {}
     self.initAdlsList = function () {
         var adls = []
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
             if (sourceObj.schemaType == "INDIVIDUAL" && sourceObj.dataSource && sourceObj.dataSource.dbName) {
-                adls.push({id: sourceObj.dataSource.dbName, label: key})
+                adls.push({id: key, label: key})
             }
         }
         common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true, "label", "id")
@@ -21,19 +22,20 @@ var ADLmappingData = (function () {
 
         //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
         ADLmappings.clearMappings()
-        var dbName = $("#ADLmappings_DatabaseSelect").val()
-        self.currentADLdatabase = dbName;
-        if (dbName == "")
+        var source = $("#ADLmappings_DatabaseSelect").val();
+        self.currentSource = source
+        self.currentADLdataSource = Config.sources[source].dataSource;
+        if (source == "")
             return alert("select a ADL database")
 
         $.ajax({
             type: "POST",
             url: Config.serverUrl,
-            data: {ADLquery: 1, getModel: dbName},
+            data: {ADLquery: 1, getModel: JSON.stringify(self.currentADLdataSource)},
             dataType: "json",
 
             success: function (data, textStatus, jqXHR) {
-                self.showModelJstree(data, dbName)
+                self.showModelJstree(data, self.currentADLdataSource.dbName)
 
             },
             error: function (err) {
@@ -101,7 +103,7 @@ var ADLmappingData = (function () {
                 self.currentADLtable = obj.node
                 self.showSampleData(obj.node)
                 setTimeout(function () {
-                    ADLmappings.loadMappings(self.currentADLdatabase + "_" + self.currentADLtable.data.label)
+                    ADLmappings.loadMappings(self.currentADLdataSource.name + "_" + self.currentADLtable.data.label)
                 }, 500)
 
             },
@@ -115,7 +117,6 @@ var ADLmappingData = (function () {
     self.showSampleData = function (node) {
         var SampleSizelimit = 30;
         var dbName = node.data.source;
-        self.currentADLsource = dbName
         var table;
         if (node.parents.length == 1)
             table = node.id
@@ -176,12 +177,10 @@ var ADLmappingData = (function () {
 
             $("#ADLmappings_dataSampleDiv").html(str)
             setTimeout(function () {
-                /*  $(".dataSample_join").bind("click", function () {
 
-                  })*/
-
-                $(".dataSample_type").bind("click", function (event) {
-                    if (event.ctrlKey) {
+             /*   $(".dataSample_type").contextmenu(function (event) {*/
+              $(".dataSample_type").bind("dblclick", function (event) {
+                  event.stopPropagation();
 
                         var point = {x: event.clientX - leftPanelWidth, y: event.clientY}
 
@@ -192,7 +191,11 @@ var ADLmappingData = (function () {
                         MainController.UI.showPopup(point, "graphPopupDiv")
 
 
-                    }
+
+                })
+
+                $(".dataSample_type").bind("click", function (event) {
+                    MainController.UI.hidePopup( "graphPopupDiv")
                     var nodeId = $(this).attr("id").substring(16).replace("__", ".")
                     self.currentColumn = nodeId
                     /*    var mode = "properties"
@@ -200,7 +203,7 @@ var ADLmappingData = (function () {
                     var mode = "types"
                     $(".dataSample_type").removeClass("dataSample_type_selected")
                     $(this).addClass("dataSample_type_selected")
-                    //   ADLmappings.Ontology.showNodePropertiesTree(nodeId, mode)
+
 
 
                 })
@@ -218,11 +221,18 @@ var ADLmappingData = (function () {
         } else {
 
             var sqlQuery = " select * from " + table + " limit " + SampleSizelimit;
+            if (self.currentADLdataSource.type == "sql.sqlserver")
+                sqlQuery = " select top " + SampleSizelimit + " * from rdl." + table;
 
             $.ajax({
                 type: "POST",
                 url: Config.serverUrl,
-                data: {ADLquery: 1, getData: 1, dbName: dbName, sqlQuery: sqlQuery},
+                data: {
+                    ADLquery: 1,
+                    getData: 1,
+                    dataSource: JSON.stringify(self.currentADLdataSource),
+                    sqlQuery: sqlQuery
+                },
                 dataType: "json",
 
                 success: function (data, textStatus, jqXHR) {
@@ -259,95 +269,69 @@ var ADLmappingData = (function () {
 
         },
         showAdvancedMappingDialog: function () {
-            self.assignConditionalTypeOn=true;
-            var array = self.currentColumn.split(".")
-            var column = array[1];
-            var table = array[0]
-            var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: {ADLquery: 1, getData: 1, dbName: self.currentADLsource, sqlQuery: sqlQuery},
-                dataType: "json",
-
-                success: function (data, textStatus, jqXHR) {
-                    var x = data
-                    if(data.length>=Config.ADL.maxDistinctValuesForAdvancedMapping)
-                        return alert(" too many distinct values :"+data.length)
-
-                    $("#mainDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
-                    $("#mainDialogDiv").dialog("open")
-                    setTimeout(function(){
-                        common.fillSelectOptions("ADLmapping_distinctColumnValuesSelect",data,null,column,column)
-                    },200)
-                }
-                , error: function (err) {
-                    MainController.UI.message(err)
-
-                }
-            })
+            ADLadvancedMapping.showAdvancedMappingDialog();
         },
-        validateConditionalTypeMappings:function(){
-            if(!confirm ("Validate conditional mappings"))
+        validateConditionalTypeMappings: function () {
+            if (!confirm("Validate conditional mappings"))
                 return;
 
 
-            self.assignConditionalTypeOn=false;
-            var types=[]
-         $("#ADLmapping_conditionalMappingsContainerDiv").children().each(function(){
-             var data=$(this).attr("data")
-             var array=data.split("|")
-             var condition=array[0];
-             var type=array[1];
-             var ontologyNode=ADLmappings.selectedOntologyNodes[type];
-             types.push({
-                 condition:condition,
-                 id: type,
-                 label: ontologyNode.data.label,
-                 parents: ontologyNode.parents,
-                 source:ontologyNode.data.source
+            self.assignConditionalTypeOn = false;
+            var types = []
+            $("#ADLadvancedMapping_manualMappingContainerDiv").children().each(function () {
+                var data = $(this).attr("data")
+                var array = data.split("|")
+                var condition = array[0];
+                var type = array[1];
+                var ontologyNode = ADLmappings.selectedOntologyNodes[type];
+                types.push({
+                    condition: condition,
+                    id: type,
+                    label: ontologyNode.data.label,
+                    parents: ontologyNode.parents,
+                    source: ontologyNode.data.source
 
-             })
-         })
+                })
+            })
 
-            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data:types})
+            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data: types})
 
             $("#mainDialogDiv").dialog("close")
 
 
         }
-        ,cancelConditionalTypeMappings:function(){
-            self.assignConditionalTypeOn=false;
+        , cancelConditionalTypeMappings: function () {
+            self.assignConditionalTypeOn = false;
             $("#mainDialogDiv").dialog("close")
 
         },
 
-    }
-    self.assignConditionalType=function( ontologyNode){
 
-        var conditionValue=$("#ADLmapping_distinctColumnValuesSelect").val();
-        if(conditionValue && conditionValue!=""){
-            var id=conditionValue+"|"+ontologyNode.data.id
-            var idEncoded=btoa(id.replace(/=/g,"^"))
-            var html="<div class='ADLmapping_conditionalMapping' data='"+id+"' id='"+idEncoded+"'>" +
-                "" +conditionValue+" = "+ontologyNode.data.label+
-                "<button style='margin-left: 100px' onclick='ADLmappingData.unAssignConditionalType(\""+idEncoded+"\")'>X</button> "+
+    }
+    self.assignConditionalType = function (ontologyNode) {
+
+        var conditionValue = $("#ADLmapping_distinctColumnValuesSelect").val();
+        if (conditionValue && conditionValue != "") {
+            var data = conditionValue + "|" + ontologyNode.data.id
+            var id = "condition_" + common.getRandomHexaId(3)
+            // var idEncoded=btoa(id.replace(/=/g,"^"))
+            var html = "<div class='ADLmapping_conditionalMapping' data='" + data + "' id='" + id + "'>" +
+                "" + conditionValue + " = " + ontologyNode.data.label +
+                "<button style='margin-left: 100px' onclick='ADLmappingData.unAssignConditionalType(\"" + id + "\")'>X</button> " +
                 "</div>" +
 
                 "</div>"
 
 
-
-            $("#ADLmapping_conditionalMappingsContainerDiv").append(html)
-
+            $("#ADLadvancedMapping_manualMappingContainerDiv").append(html)
 
 
         }
 
     }
-    self.unAssignConditionalType=function(id){
-        var x=$("#"+id)
-        $("#"+id).remove()
+    self.unAssignConditionalType = function (id) {
+        //  id=atob(id)
+        $("#" + id).remove()
 
     }
 

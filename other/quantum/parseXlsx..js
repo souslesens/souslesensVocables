@@ -2,7 +2,7 @@ var fs = require('fs');
 
 const async = require('async');
 const XLSX = require('xlsx');
-const util = require('../../bin/skosConverters/util.')
+const util = require('../../bin/util.')
 
 
 var parseXlsx = {

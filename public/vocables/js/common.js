@@ -88,10 +88,13 @@ var common = (function () {
         }
 
 
-        self.getAllDescendants = function (jstreeDiv, nodeId) {
+        self.getNodeDescendants = function (jstreeDiv, nodeId,depth) {
             var nodes = [];
             var nodeIdsMap = {};
+            var currentLevel=0
             var recurse = function (nodeId) {
+                if((currentLevel++)>depth)
+                    return;
 
                 var node = $('#' + jstreeDiv).jstree(true).get_node(nodeId);
                 if (!nodeIdsMap[nodeId]) {
@@ -113,6 +116,8 @@ var common = (function () {
 
         self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
 
+
+
             if (!options)
                 options = {}
 
@@ -127,9 +132,10 @@ var common = (function () {
                 plugins.push("search")
             if (options.types)
                 plugins.push("types")
-            if (options.contextMenu)
+            if (options.contextMenu) {
+               // $(".jstree-contextmenu").css("z-index",100)
                 plugins.push("contextmenu")
-            if (options.dnd)
+            } if (options.dnd)
                 plugins.push("dnd")
             if (options.types)
                 plugins.push("types")

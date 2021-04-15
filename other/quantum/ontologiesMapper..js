@@ -1,7 +1,7 @@
 var fs = require('fs');
 const async = require('async');
 var httpProxy = require('../../bin/httpProxy.')
-var util = require('../../bin/skosConverters/util.')
+var util = require('../../bin/util.')
 var distinctTags = {};
 var sliceSize = 50
 

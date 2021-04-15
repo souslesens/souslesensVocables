@@ -15,12 +15,12 @@ var Config = (function () {
     if (window.location.href.indexOf("localhost") < 0)
         self.serverUrl = "../elastic";
     self.default_sparql_url = "http://51.178.139.80:8890/sparql"
-  //  self.default_sparql_url = "http://10.28.171.139:8890/sparql"
+    //  self.default_sparql_url = "http://10.28.171.139:8890/sparql"
 //    self.default_sparql_url="http://opeppa-updtlb03.main.glb.corp.local:8890/sparql"
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-self.loginMode = "none";
+   self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -29,32 +29,48 @@ self.loginMode = "none";
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 8
-    self.Blender={openTaxonomyTreeOnLoad:1}
+    self.Blender = {openTaxonomyTreeOnLoad: 1}
 
-    self.ADL={
-        RDLsource:"RDL-QUANTUM-MIN",
-        OneModelSource : "ONE-MODEL",
-        mappingAlternativeSource:"CFIHOS_READI",
-        adlQueryMode:"SPARQL", //or SQL
-        queryLimit:1000,
-        maxDistinctValuesForAdvancedMapping:200,
-         topRdlObjects : {
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801":{label:"Functional Objects" ,type:"http://standards.iso.org/iso/15926/part14/FunctionalObject"},
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723":{label:"Physical Objects",type:"http://standards.iso.org/iso/15926/part14/PhysicalObject"},
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000":{label:"Disciplines",type:"http://w3id.org/readi/z018-rdl/Discipline"},
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {label:"Attributes" ,type:"http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"}
+    self.ADL = {
+        RDLsource: "RDL-QUANTUM-MIN",
+        OneModelSource: "ONE-MODEL",
+        mappingAlternativeSource: "CFIHOS_READI",
+        adlQueryMode: "SPARQL", //or SQL
+        queryLimit: 1000,
+        maxDistinctValuesForAdvancedMapping: 5000,
+        oneModelDictionaryGraphURI:"http://data.total.com/resource/one-model/dictionary/",
+        topRdlObjects: {
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
+                label: "Functional Objects",
+                type: "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            },
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {
+                label: "Physical Objects",
+                type: "http://standards.iso.org/iso/15926/part14/PhysicalObject"
+            },
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {
+                label: "Disciplines",
+                type: "http://w3id.org/readi/z018-rdl/Discipline"
+            },
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {
+                label: "Attributes",
+                type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+            }
 
         }
     }
-
-
 
 
     self.sources = {}
     self.tools = {};
 
 
-    self.tools["sourceBrowser"] = {label: "Browse", multiSources: 0, controller: SourceBrowser, toolDescriptionImg: null}//"images/browse.png"}
+    self.tools["sourceBrowser"] = {
+        label: "Browse",
+        multiSources: 0,
+        controller: SourceBrowser,
+        toolDescriptionImg: null
+    }//"images/browse.png"}
     //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
     self.tools["sourceMatcher"] = {label: "Match", multiSources: 0, controller: SourceMatcher, toolDescriptionImg: null}//"images/match.png"}
     self.tools["evaluate"] = {label: "Evaluate", multiSources: 1, controller: Evaluate, toolDescriptionImg: null}//"images/evaluate.png"}
@@ -63,31 +79,33 @@ self.loginMode = "none";
 
     self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-    self.tools["SPARQL"] = {label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["SPARQL"] = {
+        label: "SPARQL endpoint",
+        multiSources: 0,
+        controller: SPARQL_endpoint,
+        toolDescriptionImg: null
+    }
 
-    self.tools["xlsx2mappings"] = {label: "ADLmappings", multiSources: 0, controller: ADLmappings, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["xlsx2mappings"] = {
+        label: "ADLmappings",
+        multiSources: 0,
+        controller: ADLmappings,
+        toolDescriptionImg: null
+    }
 
     self.tools["ADLbrowser"] = {label: "ADLbrowser", multiSources: 0, controller: ADLbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
 
-    // self.tools["ADLquery"] = {label: "Ontology", multiSources: 0, controller: ADLquery,toolDescriptionImg:null}
-
-    //  self.tools["annotator"] = {label: "Annotate", multiSources: 1, controller: Annotator, toolDescriptionImg: null}
-    // self.tools["childHood"] = {label: "ChildHood", multiSources: 1, controller: ChildHood, toolDescriptionImg: null}//"images/taxonomy.png"}
-    //  self.tools["importCSV"] = {label: "importCSV",controller: ImportCSV}
-
-    // self.tools["blender"] = {label: "Blender", multiSources: 0, controller: Blender, toolDescriptionImg: null}
 
 
-
-    self.profiles= {
+    self.profiles = {
         admin: {
-            allowedSourceSchemas: ["SKOS", "OWL","INDIVIDUALS"],
+            allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUALS"],
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools:  [],
+            forbiddenTools: [],
             blender: {contextMenuActionStartLevel: 0}
         },
         admin_skos: {
@@ -95,7 +113,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","evaluate"],
+            forbiddenTools: ["xlsx2mappings", "evaluate"],
             blender: {contextMenuActionStartLevel: 0}
         },
         blender_skos: {
@@ -103,7 +121,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","evaluate"],
+            forbiddenTools: ["xlsx2mappings", "evaluate"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_skos: {
@@ -111,32 +129,29 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","evaluate","BLENDER"],
+            forbiddenTools: ["xlsx2mappings", "evaluate", "BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_all: {
-            allowedSourceSchemas: ["SKOS","OWL"],
+            allowedSourceSchemas: ["SKOS", "OWL"],
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings","evaluate","INDIVIDUALS","BLENDER"],
+            forbiddenTools: ["xlsx2mappings", "evaluate", "INDIVIDUALS", "BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_owl: {
             allowedSourceSchemas: ["OWL"],
             allowedSources: "ALL",
             forbiddenSources: [],
-            allowedTools: ["lineage","ADLbrowser"],
-            forbiddenTools: ["xlsx2mappings","evaluate","INDIVIDUALS","BLENDER",],
+            allowedTools: ["lineage", "ADLbrowser"],
+            forbiddenTools: ["xlsx2mappings", "evaluate", "INDIVIDUALS", "BLENDER",],
             blender: {contextMenuActionStartLevel: 3}
         }
     }
 
 
     self.currentProfile = self.profiles["admin"]
-
-
-
 
 
     return self;

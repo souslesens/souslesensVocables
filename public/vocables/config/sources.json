@@ -470,6 +470,26 @@
     "protegeFilePath": "D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl"
   },
 
+  "ONE-DICTIONARY": {
+    "editable": true,
+    "graphUri": "http://data.total.com/resource/one-model/dictionary/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+
+  },
+
+
+
+
+
+
+
   "RDL-QUANTUM-MIN": {
     "graphUri":  [
       "http://data.total.com/resource/one-model/quantum-rdl/"

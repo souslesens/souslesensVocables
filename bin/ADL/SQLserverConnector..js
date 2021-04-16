@@ -49,9 +49,9 @@ var SQLserverConnector = {
     getADLmodel: function (dbName, callback) {
 
 
-        var query = "SELECT COLUMN_NAME,TABLE_NAME\n" +
+        var query = "SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
             "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-            "where  TABLE_SCHEMA='rdl'"
+            "where  TABLE_SCHEMA not in ('dbo')"
 
         sql.connect(config, err => {
             if (err)
@@ -65,10 +65,12 @@ var SQLserverConnector = {
 
                 var model = {}
                 result.recordset.forEach(function (item) {
-                    if (!model[item.TABLE_NAME]) {
-                        model[item.TABLE_NAME] = []
+                    var tableLabel=item.TABLE_SCHEMA+"."+item.TABLE_NAME
+                    if (!model[tableLabel]) {
+                        model[tableLabel] = []
                     }
-                    model[item.TABLE_NAME].push(item.COLUMN_NAME)
+                    model[tableLabel].push(item.COLUMN_NAME)
+
 
                 })
                 return callback(err, model);

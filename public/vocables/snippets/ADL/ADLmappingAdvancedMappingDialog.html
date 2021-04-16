@@ -18,7 +18,7 @@
 
 
 <div style="width: 100%">Advanded Mapping : distinct values in column<b><span id="ADLmappingData_column"> </span></b>
-
+    &nbsp;&nbsp;&nbsp;<span class="messageDiv" id="ADLMappingAdvancedMappings_messageSpan"></span>
 
 </div>
 <div id="ADLMappingAdvancedMappings_tabs" style="width:100%;">
@@ -30,50 +30,52 @@
 
     <div id="ADLMappingAdvancedMappings_manualMapping" style="display:flex;flex-direction:row;width:100%">
         <div>
-            <select size="10" style="max-width: 250px;height: 650px;overflow: auto"  id="ADLmapping_distinctColumnValuesSelect"></select>
+            <select size="10" style="max-width: 250px;height: 650px;overflow: auto"
+                    id="ADLmapping_distinctColumnValuesSelect"></select>
         </div>
         <div>
-           <i> create mapping by selecting  a value on  left list and  then on right panel</i>
-            <div id="ADLadvancedMapping_manualMappingContainerDiv" style="display:flex;flex-direction: column;width: 600px;min-height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
-            <button onclick="ADLmappingData.menuActions.validateConditionalTypeMappings()"> Done</button>
-            <button onclick="ADLmappingData.menuActions.cancelConditionalTypeMappings()">Cancel</button>
+            <i> create mapping by selecting a value on left list and then on right panel</i>
+            <div id="ADLadvancedMapping_manualMappingContainerDiv"
+                 style="display:flex;flex-direction: column;width: 600px;min-height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
+            <button onclick="ADLadvancedMapping.validateMapping('manualMapping')"> Save in dictionary</button>
+            <button onclick="ADLmappingData.menuActions.validateConditionalTypeMappings()"> Assign conditional Types
+            </button>
+            <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>
         </div>
     </div>
 
     <div id="ADLMappingAdvancedMappings_automaticMapping" style="width:95%;">
-        <button onclick="ADLadvancedMapping.setMappingTree('rdlQuantum_pickList')"> map with quantum RDL</button>
+        <button onclick="ADLadvancedMapping.setQuantumRdlMappingTree"> map with quantum RDL</button>
 
-
-        map with ontology <select id="ADLMappingAdvancedMappings_ontologiesSelect" onchange="ADLadvancedMapping.setMappingTree('souslesens_dictionary')">
-            <option value="">...</option>
-            <option>CFIHOS_READI</option>
-            <option>ISO_15926-PCA</option>
-            <option>ISO_15926-org</option>
+        type <select id="ADLMappingAdvancedMappings_typeSelect">
+        <option>class</option>
+        <option>named individual</option>
+    </select>
         </select>
-         <input type="checkbox" id="ADLMappingAdvancedMappings_onlyOrphansCBX" checked="checked">onlyOrphans
-        <input type="checkbox" id="ADLMappingAdvancedMappings_fuzzyMatching" >fuzzyMatching
-        <div id="ADLmapping_pickListContainerDiv"
-             style="display:flex;flex-direction: column;width: 97%;min-height: 580px; margin: 10px;   background: beige;overflow: auto">
-
-
-            <div id="advancedMappings_pickListMappingTree" class="jstree"></div>
-
-
+        map with ontology <select id="ADLMappingAdvancedMappings_ontologiesSelect"
+                                  onchange="ADLadvancedMapping.setDictionaryMappingTree()">
+        <option value="">...</option>
+        <option>CFIHOS_READI</option>
+        <option>ISO_15926-PCA</option>
+        <option>ISO_15926-org</option>
+    </select>
+        <input type="checkbox" id="ADLMappingAdvancedMappings_onlyOrphansCBX" checked="checked">onlyOrphans
+        <input type="checkbox" id="ADLMappingAdvancedMappings_fuzzyMatching">fuzzyMatching
+        <div id="ADLmapping_pickListContainerDiv" style="display:flex;flex-direction: column;width: 97%;min-height: 580px; margin: 10px;   background: beige;overflow: auto">
+            <div id="advancedMappings_pickListMappingTree"  class="jstree"></div>
         </div>
 
-        <button onclick="ADLadvancedMapping.validateMapping()"> Save...</button>
+        <button onclick="ADLadvancedMapping.validateMapping('automaticMapping')"> Save...</button>
         <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>
+
+        <button onclick="ADLadvancedMapping.exportTreeToCSV()">export CSV</button>
     </div>
 
 </div>
 
 
-
-
-
-
-
 <div id="advancedMappings_validateMappingDialog">
+
 
 </div>
 

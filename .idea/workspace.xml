@@ -17,8 +17,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -53,7 +53,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.14.37" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.14.41" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensGraph" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -173,7 +173,8 @@
       <workItem from="1617640983473" duration="73261000" />
       <workItem from="1618075066852" duration="41216000" />
       <workItem from="1618409683603" duration="9980000" />
-      <workItem from="1618461927860" duration="7734000" />
+      <workItem from="1618461927860" duration="19980000" />
+      <workItem from="1618555451091" duration="19430000" />
     </task>
     <servers />
   </component>
@@ -237,8 +238,26 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/oneModel/dictionaryManager..js</url>
-          <line>51</line>
+          <line>70</line>
           <option name="timeStamp" value="51" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <line>637</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <line>451</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <line>659</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="55" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

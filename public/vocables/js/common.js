@@ -18,7 +18,7 @@ var common = (function () {
             $(".jstree-anchor").css("font-size", "14px")
 
         }
-        self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField,selectedValue) {
+        self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
 
 
             $("#" + selectId).find('option').remove().end()
@@ -45,12 +45,12 @@ var common = (function () {
 
                     }
                     var selected;
-                    if(selectedValue && value ==selectedValue)
-                        selected= "selected"
+                    if (selectedValue && value == selectedValue)
+                        selected = "selected"
                     $("#" + selectId).append($('<option>', {
                         text: text,
                         value: value,
-                        selected:selected
+                        selected: selected
                     }));
                 });
             } else {
@@ -88,12 +88,12 @@ var common = (function () {
         }
 
 
-        self.getNodeDescendants = function (jstreeDiv, nodeId,depth) {
+        self.getNodeDescendants = function (jstreeDiv, nodeId, depth) {
             var nodes = [];
             var nodeIdsMap = {};
-            var currentLevel=0
+            var currentLevel = 0
             var recurse = function (nodeId) {
-                if((currentLevel++)>depth)
+                if ((currentLevel++) > depth)
                     return;
 
                 var node = $('#' + jstreeDiv).jstree(true).get_node(nodeId);
@@ -114,8 +114,23 @@ var common = (function () {
         };
 
 
-        self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
+        self.setTreeParentDivDimensions = function (jstreeDiv) {
+//$("#"+jstreeDiv).addClass("jstreeParent")
+            var p = $("#" + jstreeDiv).position()
+            var h = $(window).height() - p.top - 50
+            var w;
+            if (p.left < 600)
+                w = 380;
+            else
+                w = 340
+            $("#" + jstreeDiv).width(w)
+            $("#" + jstreeDiv).height(h)
+            $("#" + jstreeDiv).css('overflow', 'auto')
+            $("#" + jstreeDiv).css('margin-top', '5px')
 
+        }
+
+        self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
 
 
             if (!options)
@@ -133,9 +148,10 @@ var common = (function () {
             if (options.types)
                 plugins.push("types")
             if (options.contextMenu) {
-               // $(".jstree-contextmenu").css("z-index",100)
+                // $(".jstree-contextmenu").css("z-index",100)
                 plugins.push("contextmenu")
-            } if (options.dnd)
+            }
+            if (options.dnd)
                 plugins.push("dnd")
             if (options.types)
                 plugins.push("types")
@@ -163,7 +179,7 @@ var common = (function () {
                     'check_callback': check_callbackFn
                 },
                 'dnd': options.dnd,
-              "search": options.searchPlugin,
+                "search": options.searchPlugin,
                 types: options.types,
 
                 contextmenu: {items: options.contextMenu}
@@ -174,6 +190,8 @@ var common = (function () {
                 if (options.openAll)
                     $('#' + jstreeDiv).jstree(true).open_all();
                 self.setTreeAppearance()
+                if (!options.doNotAdjustDimensions)
+                    common.setTreeParentDivDimensions(jstreeDiv)
                 if (callback)
                     callback();
 
@@ -260,8 +278,8 @@ var common = (function () {
 
                 if (node.parent)
                     parentNode = node.parent
-                if(parentNode.indexOf("D101001101")>-1)
-                    var x=3
+                if (parentNode.indexOf("D101001101") > -1)
+                    var x = 3
                 $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
                     $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
 
@@ -469,9 +487,9 @@ var common = (function () {
         }
 
 
-        self.createBGColorCssClasses=function(classPrefix,values,palette){
-            values.forEach(function(item,index){
-                var html=classPrefix+item+" :  { background-color:"+palette[index]+"}"
+        self.createBGColorCssClasses = function (classPrefix, values, palette) {
+            values.forEach(function (item, index) {
+                var html = classPrefix + item + " :  { background-color:" + palette[index] + "}"
 
                 $("<style>").prop("type", "text/css").html(html).appendTo("head");
             })
@@ -486,6 +504,23 @@ var common = (function () {
             }
 
             paste()
+
+
+        }
+
+
+
+        self.deconcatSQLTableColumn=function(str){
+            var array= str.split(".")
+            if(array.length<2)
+            return null;
+            if(array.length==2){
+                return {table:array[0],column:array[1]}
+            }
+           else if(array.length==3){
+                return {table:array[0]+"."+array[1],column:array[2]}
+            }else
+                return null;
 
 
         }

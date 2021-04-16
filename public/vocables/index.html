@@ -172,6 +172,7 @@
 
         #actionDiv {
             width: 385px;
+            max-height: 550px;
         }
 
         .ui-accordion-content-active {
@@ -199,6 +200,12 @@
             overflow: auto;
             height: 600px ;
         }
+        .jstreeParent{
+            width:350px;
+            height: 600px;
+            overflow: auto;
+            border: #6e2500 1px groove;
+        }
 
         .infosTable {
             background-color: #d9d9d9;
@@ -220,7 +227,7 @@
             max-width: 400px;
         }
 
-        #messageDiv {
+        .messageDiv {
             font-weight: normal;
             font-size: 12px;
             color: #6e2500;
@@ -293,7 +300,7 @@
                     <!-- <button onclick="MainController.test()">T</button>-->
                 </td>
                 <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
-                <td><span id="messageDiv"></span></td>
+                <td><span class="messageDiv" id="messageDiv"></span></td>
             </tr>
         </table>
 

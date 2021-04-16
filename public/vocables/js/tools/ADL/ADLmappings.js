@@ -45,7 +45,7 @@ var ADLmappings = (function () {
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
                 "<button onclick='TextAnnotator.init()'>text annotation</button>  ");
 
-            $("#actionDiv").html(" <div id=\"ADLmappings_dataModelTree\"  style=\"width:400px\"></div>");
+            $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
             $("#accordion").accordion("option", {active: 2});
 
             //  MainController.UI.toogleRightPanel(true)

@@ -305,16 +305,16 @@ var triplesGenerator = {
             }
                     mappings.mappings.forEach(function (mapping) {
                         if (mapping.subject.indexOf("http") < 0) {
-                            var array = mapping.subject.split(".")
-                            mapping.subject = array[1]
+                            var obj=util.deconcatSQLTableColumn(mapping.subject)
+                            mapping.subject = obj.column
                             if (!sqlTable)
-                                sqlTable = array[0]
+                                sqlTable = obj.table
                         }
                         if (mapping.object.indexOf && mapping.object.indexOf("http") < 0) {
-                            var array = mapping.object.split(".")
-                            mapping.object = array[1]
+                            var obj=util.deconcatSQLTableColumn(mapping.object)
+                            mapping.object = obj.column
                             if (!sqlTable)
-                                sqlTable = array[0]
+                                sqlTable = obj.table
                         }
                     })
 
@@ -448,14 +448,14 @@ var triplesGenerator = {
                 //select xlsx sheets from mappings
                 function (callbackSeries) {
                     mappings.mappings.forEach(function (mapping) {
-                        var sheet = mapping.subject.split(".")[0]
+                        var sheet=util.deconcatSQLTableColumn(mapping.subject).table
                         if (mappingSheets.indexOf(sheet) < 0) {
                             mappingSheets.push(sheet)
                         }
                         if (!mapping.object)
                             return xx
                         if (mapping.object.indexOf && mapping.object.indexOf("http") < 0) {
-                            var sheet = mapping.object.split(".")[0]
+                            var sheet=util.deconcatSQLTableColumn(mapping.subject).table
                             if (mappingSheets.indexOf(sheet) < 0) {
                                 mappingSheets.push(sheet)
                             }
@@ -517,7 +517,7 @@ var triplesGenerator = {
                                         var x = 3;
                                     if (!subjectValue) {
                                         mappings.sheetJoinColumns[subject].forEach(function (col) {
-                                            col = col.split(".")[1]
+                                            var col=util.deconcatSQLTableColumn(col).column
                                             subjectValue = item[col];
                                             if (subjectValue)
                                                 return subjectColLinked = col;
@@ -577,9 +577,10 @@ var triplesGenerator = {
                 , function (callbackSeries) {
                     mappings.mappings.forEach(function (mapping) {
                         if (mapping.subject.indexOf("http") < 0)
-                            mapping.subject = mapping.subject.split(".")[1]
+                            mapping.subject=util.deconcatSQLTableColumn( mapping.subject).column
+
                         if (mapping.object.indexOf && mapping.object.indexOf("http") < 0)
-                            mapping.object = mapping.object.split(".")[1]
+                            mapping.object=util.deconcatSQLTableColumn( mapping.object).column
                     })
 
                     mappings.mappings.sort(function (a, b) {

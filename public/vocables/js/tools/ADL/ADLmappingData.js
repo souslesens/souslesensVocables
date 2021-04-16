@@ -222,7 +222,7 @@ var ADLmappingData = (function () {
 
             var sqlQuery = " select * from " + table + " limit " + SampleSizelimit;
             if (self.currentADLdataSource.type == "sql.sqlserver")
-                sqlQuery = " select top " + SampleSizelimit + " * from rdl." + table;
+                sqlQuery = " select top " + SampleSizelimit + " * from " + table;
 
             $.ajax({
                 type: "POST",
@@ -300,11 +300,7 @@ var ADLmappingData = (function () {
 
 
         }
-        , cancelConditionalTypeMappings: function () {
-            self.assignConditionalTypeOn = false;
-            $("#mainDialogDiv").dialog("close")
 
-        },
 
 
     }

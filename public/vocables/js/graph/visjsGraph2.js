@@ -51,7 +51,7 @@ var visjsGraph = (function () {
         var options = {
             interaction: {hover: true},
             width: "" + $("#" + divId).width() + "px",
-            height: "" + $("#" + divId).height() + "px",
+            height: "" + ($("#" + divId).height()-120) + "px",
             nodes: {
                 shape: 'dot',
                 size: 12,

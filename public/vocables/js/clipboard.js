@@ -83,6 +83,8 @@ if(!data.source)
         var newNodes = [];
         if(!visjsGraph.data)
             return;
+        if(! visjsGraph.data ||  !visjsGraph.data.nodes)
+            return
         visjsGraph.data.nodes.getIds().forEach(function (id) {
             var newNode = {id: id, hidden: false}
             if (selectedNodeId && selectedNodeId == id)

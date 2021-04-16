@@ -27,6 +27,20 @@ var util = {
 
 
     },
+    deconcatSQLTableColumn:function(str){
+        var array= str.split(".")
+        if(array.length<2)
+            return null;
+        if(array.length==2){
+            return {table:array[0],column:array[1]}
+        }
+        else if(array.length==3){
+            return {table:array[0]+"."+array[1],column:array[2]}
+        }else
+            return null;
+
+
+    },
 
 
     /**

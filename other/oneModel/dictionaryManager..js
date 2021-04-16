@@ -23,24 +23,43 @@ var DictionaryManager = {
 
 
             function (callbackWhilst) {//iterate
-                var query = "select distinct class,classLabel,source from souslesensDictionary order by classLabel"
+                var query = "select distinct * from souslesensDictionary order by classLabel"
                 SQLserverConnector.getData("rdlquantum", query, function (err, data) {
                     if (err)
                         callbackWhilst(err)
-                    var slices = util.sliceArray(data, 400)
+                    var slices = util.sliceArray(data, 200)
                     var distinctLabels={}
+
+                    var schemes={
+                        "CFIHOS_READI":  "http://w3id.org/readi/rdl/",
+                        "ISO_15926-PCA":  "http://staging.data.posccaesar.org/rdl/",
+                        "ISO_15926-org":  "http://data.15926.org/",
+                    }
+
+
                     async.eachSeries(slices, function (data, callbackSeries) {
-                        var sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                        var sparql = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                            " PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                             "WITH <" + dictionaryGraphUri + "> insert {\n"
                         data.forEach(function (item) {
+                            if(!item.source || !schemes[item.source])
+                                return;
                             var label=util.formatStringForTriple(item.classLabel)
                             var id=distinctLabels[label]
                             if(!id) {
                                 id = util.getRandomHexaId(15)
                                 distinctLabels[label] = id
                                 sparql += "<" + dictionaryGraphUri + id + "> rdfs:label '" + label + "'.\n"
+
                             }
+
+
                                 sparql += "<" + dictionaryGraphUri + id + "> owl:sameAs <" + item.class + ">.\n"
+                            if(! distinctLabels[item.class]) {
+                                distinctLabels[item.class]=1
+                                sparql += "<" + item.class+ "> skos:inScheme <" + schemes[item.source] + ">.\n"
+                                sparql += "<" + item.class + "> rdfs:label '" + util.formatStringForTriple(item.classLabel) + "'.\n"
+                            }
 
                         })
                         sparql+="}"

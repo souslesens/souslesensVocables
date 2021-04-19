@@ -186,6 +186,8 @@ var ADLmappingData = (function () {
 
                         var html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.removeMapping();\"> remove Mapping</span>" +
                             "<span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"
+               //   "<span class=\"popupMenuItem\" onclick=\"ADLadvancedMapping.executeBulkMappingSequence();\">executeBulkMappingSequence</span>"
+
 
                         $("#graphPopupDiv").html(html);
                         MainController.UI.showPopup(point, "graphPopupDiv")

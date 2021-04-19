@@ -38,4 +38,13 @@ var ADLcontroller={
 
 }
 
+/*var str='sdfdfsf(vdsfsf(sdgdgfdfg)dsgfdfg'
+
+var c1=(str.match(/\(/g) || []).length
+var c2=(str.match(/\)/g) || []).length
+if(c1!=c2)
+    var x=3
+
+str = str.replace(/\$/gm, "\\\$")
+console.log(str)*/
 module.exports=ADLcontroller;

@@ -12,6 +12,13 @@ var Sparql_common = (function () {
 
     var self = {};
 
+
+    var checkClosingBrackets=function(str){
+        var c1=(str.match(/\(/g) || []).length
+        var c2=(str.match(/\)/g) || []).length
+        return c1==c2
+    }
+
     self.setFilter = function (varName, ids, words, options) {
         if (!ids && !words)
             return "";
@@ -22,11 +29,15 @@ var Sparql_common = (function () {
             return "";
 
         function formatWord(str) {
-            var str = str.replace(/\\/g, "")
+           if(!checkClosingBrackets(str)){
+               str=str.replace(/[\(\)]/g,"")
+           }
+           return self.formatStringForTriple(str)
+         /*   var str = str.replace(/\\/g, "")
             str = str.replace(/\(/gm, "")
             str = str.replace(/\)/gm, "")
             str = str.replace(/\[/gm, "")
-            str = str.replace(/\]/gm, "")
+            str = str.replace(/\]/gm, "")*/
 
             return str
         }
@@ -169,6 +180,8 @@ var Sparql_common = (function () {
     self.formatStringForTriple = function (str, forUri) {
         if (!str || !str.replace)
             return null;
+        if(str.indexOf('$')>-1)
+            var x=3
         str = str.trim()
         str = str.replace(/\\/gm, "")
         str = str.replace(/"/gm, "\\\"")
@@ -178,6 +191,10 @@ var Sparql_common = (function () {
         //  str = str.replace(/\r/gm, "\\\\r")
         str = str.replace(/\r/gm, "")
         str = str.replace(/\t/gm, "\\\\t")
+        str = str.replace(/\$/gm, "\\\$")
+     //   str = str.replace(/\(/gm, "\\\(")
+     //   str = str.replace(/\)/gm, "\\\)")
+
         str = str.replace(/\\xa0/gm, " ")
         str = str.replace(/'/gm, "\\\'")
         if (forUri)

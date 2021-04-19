@@ -6,8 +6,8 @@ var ADLadvancedMapping = (function () {
     self.showAdvancedMappingDialog = function () {
         self.assignConditionalTypeOn = true;
         self.mappedValues = {}
-      var obj=common.deconcatSQLTableColumn(ADLmappingData.currentColumn)
-        var column =obj.column;
+        var obj = common.deconcatSQLTableColumn(ADLmappingData.currentColumn)
+        var column = obj.column;
         var table = obj.table
         var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
         if (ADLmappingData.currentADLdataSource.type == "sql.sqlserver")
@@ -29,7 +29,7 @@ var ADLadvancedMapping = (function () {
                     return alert(" too many distinct values :" + data.length)
 
                 ADLmappingData.currentColumnDistinctValues = [];
-                var colName=common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
+                var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
 
                 data.forEach(function (item) {
                     if (item[colName])
@@ -40,7 +40,7 @@ var ADLadvancedMapping = (function () {
                 $("#ADLmappings_AdvancedMappingDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
                 $("#ADLmappings_AdvancedMappingDialogDiv").dialog("open")
                 setTimeout(function () {
-                    $("#ADLmappingData_column").html(column)
+                    $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
                     common.fillSelectOptions("ADLmapping_distinctColumnValuesSelect", data, null, column, column)
                 }, 200)
             }
@@ -73,7 +73,7 @@ var ADLadvancedMapping = (function () {
     self.setQuantumRdlMappingTree = function () {
 
 
-        var colName =common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column[1]
+        var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column[1]
         var itemsStr = ""
         var fuzzyValues
 
@@ -97,7 +97,7 @@ var ADLadvancedMapping = (function () {
 
                 if (itemsStr != "")
                     itemsStr += ","
-                itemsStr += "'" + value + "'"
+                itemsStr += "'" + Sparql_common.formatStringForTriple(value) + "'"
 
                 if (!self.mappedValues[value])
                     self.mappedValues[value] = []
@@ -219,233 +219,355 @@ var ADLadvancedMapping = (function () {
     }
 
 
-    self.setDictionaryMappingTree = function () {
+    self.setDictionaryMappingTree = function (colName, type, ontologySource, fuzzyMatching, onlyOrphans, existingNodes, callback) {
+        var allowSingleWordMatching = true
+        if (!colName)
+            colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
+        if (!type)
+            type = "";// $("#ADLMappingAdvancedMappings_typeSelect").val()
+        if (!ontologySource)
+            ontologySource = $("#ADLMappingAdvancedMappings_ontologiesSelect").val();
+        if (!fuzzyMatching)
+            fuzzyMatching = $("#ADLMappingAdvancedMappings_fuzzyMatching").prop("checked")
+        if (!onlyOrphans)
+            onlyOrphans = $("#ADLMappingAdvancedMappings_onlyOrphansCBX").prop("checked")
+        var parentClass = $("#ADLMappingAdvancedMappings_parentClassLabel").val()
 
-        $("#ADLMappingAdvancedMappings_messageSpan").html("searching...")
-        var colName =common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column[1]
+        if (!existingNodes) {
+            existingNodes = {}
+            if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
+                var array = common.getjsTreeNodes("advancedMappings_pickListMappingTree", false, "#")
+                array.forEach(function (item) {
+                    if (!item.children)
+                        existingNodes[item.id] = 0
+                    else
+                        existingNodes[item.id] = item.children.length
+                })
+            }
+        }
+
+        if (ontologySource == "")
+            return
+
+        var sliceSize = 50;
         var itemsStr = ""
-        var fuzzyValues
-
-        //concat Quantum RDL
-        function unconcatQuantumRDL() {
-            var newValues = []
-
-
-            ADLmappingData.currentColumnDistinctValues.forEach(function (item, index) {
-                if (item.indexOf('|') > -1) {
-                    newValues = newValues.concat(item.split("|"))
-                    newValues.forEach(function (item) {
-                        item.trim()
-                    })
-                } else if (item.indexOf('-') > -1) {
-                    newValues = newValues.concat(item.split("-"))
-                    newValues.forEach(function (item) {
-                        item.trim()
-                    })
-                } else {
-                    newValues.push(Sparql_common.formatStringForTriple(item.trim()))
-                }
-            })
-
-            ADLmappingData.currentColumnDistinctValues = newValues;
-
-        }
-
-        if (false && ADLmappingData.currentSource == "ASSETS-QUANTUM-RDL") {
-            unconcatQuantumRDL()
-        }
-
-        fuzzyValues = null;
-        var fuzzyMatching = $("#ADLMappingAdvancedMappings_fuzzyMatching").prop("checked")
-        if (fuzzyMatching) {
-            fuzzyValues = {}
-            ADLmappingData.currentColumnDistinctValues.forEach(function (item, index) {
-                var itemLabel = item.toLowerCase()
-                if (item.trim().indexOf(" ") > -1) {
-
-                    var array = (item.split(/[\s\|\-]/g))
-                    array.forEach(function (fuzzyItem) {
-                        if (fuzzyItem == "")
-                            return;
-                        fuzzyItem = fuzzyItem.trim().toLowerCase()
-                        if (!fuzzyValues[fuzzyItem])
-                            fuzzyValues[fuzzyItem] = [];
-                        if (fuzzyValues[fuzzyItem].indexOf(itemLabel) < 0)
-                            fuzzyValues[fuzzyItem].push(itemLabel);
-
-                        if (fuzzyItem.charAt(item.length - 1) == "s") {
-                            var fuzzyItemSingular = fuzzyItem.substring(0, fuzzyItem.length - 1)
-                            if (!fuzzyValues[fuzzyItemSingular])
-                                fuzzyValues[fuzzyItemSingular] = [];
-                            if (fuzzyValues[fuzzyItemSingular].indexOf(itemLabel) < 0)
-                                fuzzyValues[fuzzyItemSingular].push(itemLabel);
-                        }
-                    })
-
-                }
-
-            })
-
-        }
+        var fuzzyValues = null;
+        var exactValues = []
+        var data = []
+        var jstreeData = [];
+        var totalMatches = 0;
+        var nodeIds = []
 
 
-        //reduce  query to orphans
+        var color = Lineage_classes.getSourceColor(ontologySource)
+
         var orphansFilter = []
-        if ($("#advancedMappings_pickListMappingTree").jstree(true) && $("#ADLMappingAdvancedMappings_onlyOrphansCBX").prop("checked"))
+        if ($("#advancedMappings_pickListMappingTree").jstree(true) && onlyOrphans)
             orphansFilter = $("#advancedMappings_pickListMappingTree").jstree().get_selected()
 
 
-        self.mappedValues = {}
-
-
-        var values = []
-        ADLmappingData.currentColumnDistinctValues.forEach(function (item) {
-
-
-            var value = item.toLowerCase()
-
-            if (orphansFilter.length > 0 && orphansFilter.indexOf(value) > -1) {
-                delete self.mappedValues[value]
-            } else {
-                values.push(value)
-                if (!self.mappedValues[value])
-                    self.mappedValues[value] = []
-            }
-
-        })
-
-
-        var type = $("#ADLMappingAdvancedMappings_typeSelect").val()
-        var ontologySource = $("#ADLMappingAdvancedMappings_ontologiesSelect").val();
         $("#ADLMappingAdvancedMappings_ontologiesSelect").val("");
-        if (ontologySource == "")
-            return
-        var schemes = {
-            "CFIHOS_READI": "http://w3id.org/readi/rdl/",
-            "ISO_15926-PCA": "http://staging.data.posccaesar.org/rdl/",
-            "CFIHOS-ISO": "http://data.15926.org/cfihos/",
-        }
-
-        var query = ""
-
-        var fromStr = Sparql_common.getFromStr(ontologySource)
-        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT distinct ?class ?classLabel  ?superClass ?superClassLabel ?type" + fromStr + "  WHERE {\n" +
-            "  ?class rdfs:label ?classLabel.\n" +
-            " optional {?class rdfs:subClassOf ?superClass. optional {?superClass rdfs:label ?superClassLabel}} "
-        if (fuzzyValues)
-            query += Sparql_common.setFilter("class", null, Object.keys(fuzzyValues), {exactMatch: false})
-        else
-            query += Sparql_common.setFilter("class", null, values, {exactMatch: true})
-
-        if (type == "class") {
-            query += "?class rdf:type ?type. filter(?type not in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>) && ?type=owl:Class) "
-        } else {
-            query += "?class rdf:type ?type. filter(?type in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>)) "
-        }
-
-        query += " } LIMIT 10000"
+        //concat Quantum RDL
+        /*  function unconcatQuantumRDL() {
+              var newValues = []
 
 
-        var url = Config.default_sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: "ONE-DICTIONARY"}, function (err, result) {
-            if (err) {
-                $("#waitImg").css("display", "none");
-                return alert(err)
-            }
+              ADLmappingData.currentColumnDistinctValues.forEach(function (item, index) {
+                  if (item.indexOf('|') > -1) {
+                      newValues = newValues.concat(item.split("|"))
+                      newValues.forEach(function (item) {
+                          item.trim()
+                      })
+                  } else if (item.indexOf('-') > -1) {
+                      newValues = newValues.concat(item.split("-"))
+                      newValues.forEach(function (item) {
+                          item.trim()
+                      })
+                  } else {
+                      newValues.push(Sparql_common.formatStringForTriple(item.trim()))
+                  }
+              })
+
+              ADLmappingData.currentColumnDistinctValues = newValues;
+
+          }
+
+          if (false && ADLmappingData.currentSource == "ASSETS-QUANTUM-RDL") {
+              unconcatQuantumRDL()
+          }*/
+        async.series([
 
 
-            var data = []
-            result.results.bindings.forEach(function (item) {
-                var obj = {}
-                for (var key in item) {
-                    obj[key] = item[key].value
-                }
-                data.push(obj);
+            function (callbackSeries) { //prepare query parameters
+                fuzzyValues = null;
 
-            })
-            $("#waitImg").css("display", "none");
-            if (data.length == 0)
-                $("#ADLMappingAdvancedMappings_messageSpan").html("no matching found")
+                if (fuzzyMatching) {
+                    fuzzyValues = {}
+
+                    // ADLmappingData.currentColumnDistinctValues=["electrical|electricity"]
+                    ADLmappingData.currentColumnDistinctValues.forEach(function (item, index) {
+                        if (onlyOrphans && existingNodes[item] > 0)
+                            return;
+                        var itemLabel = item.trim().toLowerCase()
+                        item = item.replace(/[\(\)\/]/g, "")
+                        item = item.replace(/and /g, "")
+                        //   if (item.trim().indexOf(" ") > -1) {
+
+                        var array1 = (item.split(/[\|\-]/g))
+
+                        array1.forEach(function (item) {
+                            var array = item.toLowerCase().trim().split(/\s/g)
+                            var words = []
+                            var escapeWords = ["", "of", "and"]
+                            array.forEach(function (word) {
+                                if (escapeWords.indexOf(word) > -1)
+                                    return;
+
+                                if (word.charAt(words.length - 1) == "s") {
+                                    var word = word.substring(0, word.length - 1)
+                                }
+                                words.push(word);
+                            })
+
+                            function add(str) {
+                                if (!fuzzyValues[str])
+                                    fuzzyValues[str] = [];
+                                if (fuzzyValues[str].indexOf(itemLabel) < 0)
+                                    fuzzyValues[str].push(itemLabel);
+
+                            }
+
+                            /*   if(words.length>=3) {
+                                   add(array[0]+".*"+array[1])
+                                   add(array[1]+".*"+array[2])
+                                   add(array[0]+".*"+array[2])
+
+                               }
+                                   add(array[0]+".*"+array[1])*/
+
+                            if (allowSingleWordMatching && existingNodes[array[0]] == 0) {
+                                add(array[0])
+                            }
 
 
-            var jstreeData = [];
-
-            var existingNodes = []
-            if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
-                existingNodes = common.getjsTreeNodes("advancedMappings_pickListMappingTree", true, "#")
-            }
-
-
-            for (var key in self.mappedValues) {
-                if (!fuzzyValues) {
-
-                    if (existingNodes.indexOf(key) < 0) {
-                        existingNodes.push(key)
-                        jstreeData.push({
-                            id: key,
-                            text: key,
-                            parent: "#",
-                            data:{id:key,label:key,source:null}
                         })
-                    }
-                }
-            }
 
 
-            data.forEach(function (item) {
-                if (self.mappedValues[item.classLabel]) {
-
-                    if (existingNodes.indexOf(item.class) < 0) {
-                        existingNodes.push(item.class)
-
-                        self.mappedValues[item.classLabel].push({
-                            source: item.source,
-                            id: item.class,
-                            classLabel: item.classLabel,
-                            superClass: item.superClass,
-                            superClassLabel: item.superClassLabel || "?",
-                            type: item.type
-                        })
-                    }
-                }
-
-
-            })
-            var totalMatches = 0;
-            var nodeIds = []
-            var color = Lineage_classes.getSourceColor(ontologySource)
-            for (var key in self.mappedValues) {
-
-                self.mappedValues[key].forEach(function (item) {
-
-
-                    var type = item.type.substring(item.type.lastIndexOf("#") + 1)
-                    var text = "<span style='font-weight:normal'> " + item.classLabel + " : " + type + " </span><span  style='color:" + color + "' class='ADLmappingData_treeItem2' >/" + (item.superClassLabel || "?") + "/" + ontologySource + "</i>"
-                    nodeIds.push(item.id)
-                    jstreeData.push({
-                        id: item.id,
-                        text: text,
-                        parent: key,
-                        data: {id: item.id, label: item.classLabel, source: ontologySource,type:type,superClass:item.superClass,superClassLabel:item.superClassLabel}
                     })
 
-                    totalMatches += 1
+                }
+                //reduce  query to orphans
+
+
+                self.mappedValues = {}
+                exactValues = []
+                orphansFilter = []
+                ADLmappingData.currentColumnDistinctValues.forEach(function (item) {
+                    var value = item.toLowerCase()
+                    // value= Sparql_common.formatStringForTriple(value);
+                    if (orphansFilter.length > 0 && orphansFilter.indexOf(value) > -1) {
+                        delete self.mappedValues[value]
+                    } else {
+                        exactValues.push(value)
+                        if (!self.mappedValues[value])
+                            self.mappedValues[value] = []
+                    }
                 })
-            }
+                callbackSeries()
+            },
 
-            if (fuzzyValues) {
+
+            function (callbackSeries) {  //executeQuery and concat result by fetch
+
+                var valuesSlices = []
+                if (fuzzyMatching) {
+                    valuesSlices = common.sliceArray(Object.keys(fuzzyValues), sliceSize)
+                } else {
+                    valuesSlices = common.sliceArray(exactValues, sliceSize)
+                }
+                var total = 0
+                async.eachSeries(valuesSlices, function (values, callbackEach) {
+
+                    $("#ADLMappingAdvancedMappings_messageSpan").html("searching..." + ontologySource + " " + (fuzzyMatching ? "fuzzy" : "exactMatch") + " .processed :" + (total+=values.length))
+
+                    var fromStr = Sparql_common.getFromStr(ontologySource)
+                    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "SELECT distinct ?class ?classLabel  ?superClass ?superClassLabel ?type" + fromStr + "  WHERE {\n" +
+                        "  ?class rdfs:label ?classLabel.\n"
+
+                    if (fuzzyMatching)
+                        query += Sparql_common.setFilter("class", null, values, {exactMatch: false})
+                    else
+                        query += Sparql_common.setFilter("class", null, values, {exactMatch: true})
+
+                    if (type == "class") {
+                        query += "?class rdf:type ?type. filter(?type not in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>) && ?type=owl:Class) "
+                    } else if (type == "named individual") {
+                        query += "?class rdf:type ?type. filter(?type in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>)) "
+                    } else {
+                        query += " optional{ ?class rdf:type ?type.}"
+                    }
+                    if (parentClass != "") {
+                        query += "?class rdfs:subClassOf+|rdf:type+ ?superClass. ?superClass rdfs:label ?superClassLabel. filter (regex(?superClassLabel,'" + parentClass + "','i'))"
+                    } else {
+                        query += " optional {?class rdfs:subClassOf|rdf:type ?superClass. optional {?superClass rdfs:label ?superClassLabel}} "
+                    }
+
+                    query += " } LIMIT 10000"
+
+
+                    var url = Config.sources[ontologySource].sparql_server.url + "?format=json&query=";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: ontologySource}, function (err, result) {
+                        if (err) {
+                            callbackSeries(err)
+                        }
+
+
+                        result.results.bindings.forEach(function (item) {
+                            var obj = {}
+                            for (var key in item) {
+                                obj[key] = item[key].value
+                            }
+                            data.push(obj);
+
+                        })
+                        //   return callbackSeries()
+                        callbackEach()
+                    })
+                }, function (err) {
+                    callbackSeries()
+                })
+
+            },
+
+
+            function (callbackSeries) {  //prepare jstreeData
+                $("#waitImg").css("display", "none");
+                if (data.length == 0)
+                    $("#ADLMappingAdvancedMappings_messageSpan").html("no matching found")
+
+
+                for (var key in self.mappedValues) {
+                    if (true || !fuzzyMatching) {
+
+                        if (!existingNodes[key]) {
+                            existingNodes[key] = 1
+                            jstreeData.push({
+                                id: key,
+                                text: key,
+                                parent: "#",
+                                data: {id: key, label: key, source: null}
+                            })
+                        }
+                    }
+                }
+
+
                 data.forEach(function (item) {
-                    var type = item.type.substring(item.type.lastIndexOf("#") + 1)
-                    if (fuzzyValues[item.classLabel]) {
+                    if (self.mappedValues[item.classLabel]) {
+
+                        if (!existingNodes[item.class]) {
+                            existingNodes[item.class] = 1
+
+                            self.mappedValues[item.classLabel].push({
+                                source: item.source,
+                                id: item.class,
+                                classLabel: item.classLabel,
+                                superClass: item.superClass,
+                                superClassLabel: item.superClassLabel || "?",
+                                type: item.type
+                            })
+                        }
+                    }
 
 
-                        fuzzyValues[item.classLabel].forEach(function (originalLabel) {
+                })
+
+                for (var key in self.mappedValues) {
+
+                    self.mappedValues[key].forEach(function (item) {
+
+
+                        var type = "?"
+                        if (item.type)
+                            type = item.type.substring(item.type.lastIndexOf("#") + 1)
+                        var text = "<span style='font-weight:normal'> " + item.classLabel + " : " + type + " </span><span  style='color:" + color + "' class='ADLmappingData_treeItem2' >/" + (item.superClassLabel || "?") + "/" + ontologySource + "</i>"
+                        nodeIds.push(item.id)
+                        jstreeData.push({
+                            id: item.id,
+                            text: text,
+                            parent: key,
+                            data: {
+                                id: item.id,
+                                label: item.classLabel,
+                                source: ontologySource,
+                                type: type,
+                                superClass: item.superClass,
+                                superClassLabel: item.superClassLabel
+                            }
+                        })
+
+                        totalMatches += 1
+                    })
+                }
+
+                if (fuzzyMatching) {
+                    var fuzzyFoundItems = {}
+                    var fuzzyWords = {}
+                    data.forEach(function (item) {
+                        fuzzyFoundItems[item.class] = item;
+                        var array = item.classLabel.toLowerCase().split(" ")
+                        array.forEach(function (word) {
+                            if (fuzzyValues[word]) {
+                                var originalLabels = fuzzyValues[word]
+                                originalLabels.forEach(function (originalLabel) {
+
+                                    if (!fuzzyWords[originalLabel])
+                                        fuzzyWords[originalLabel] = {}
+                                    if (!fuzzyWords[originalLabel][item.class])
+                                        fuzzyWords[originalLabel][item.class] = 0
+                                    fuzzyWords[originalLabel][item.class] += 1
+                                    if (originalLabel == item.classLabel)
+                                        fuzzyWords[originalLabel][item.class] = 10
+
+                                })
+                            }
+
+                        })
+                    })
+
+                    var fuzzyMatches = {}
+                    var minMatches = 2
+                    for (var originalLabel in fuzzyWords) {
+                        for (var classId in fuzzyWords[originalLabel]) {
+                            if (originalLabel.indexOf("corrosion") > -1)
+                                var x = 3
+                            if (fuzzyWords[originalLabel][classId] >= (minMatches)) {
+                                if (!fuzzyMatches[originalLabel])
+                                    fuzzyMatches[originalLabel] = []
+                                fuzzyMatches[originalLabel].push(fuzzyFoundItems[classId])
+                            }
+
+                        }
+
+                    }
+
+
+                    for (var originalLabel in fuzzyMatches) {
+                        //   if (fuzzyValues[item.classLabel]) {
+                        fuzzyMatches[originalLabel].forEach(function (item) {
+
+
+                            var type = "?"
+                            if (item.type)
+                                type = item.type.substring(item.type.lastIndexOf("#") + 1)
+
+                            //   fuzzyValues[item.classLabel].forEach(function (originalLabel) {
                             var id = originalLabel + "_" + item.classLabel
-                            if (existingNodes.indexOf(id) < 0) {
-                                existingNodes.push(id)
+                            if (!existingNodes[id]) {
+                                existingNodes[id] = 1
                                 item.source = ontologySource
                                 var text = "<span style='font-weight:normal;font-style:italic'> " + item.classLabel + " : " + type + " </span> <span  style='color:" + color + ";' class='ADLmappingData_treeItem2' ><i>/" + (item.superClassLabel || "?") + "/" + ontologySource + "</i>"
 
@@ -453,7 +575,15 @@ var ADLadvancedMapping = (function () {
                                     id: id,
                                     text: text,
                                     parent: originalLabel,
-                                    data: {id: item.class, fuzzy:true,label: item.classLabel, source: ontologySource,type:type,superClass:item.superClass,superClassLabel:item.superClassLabel}
+                                    data: {
+                                        id: item.class,
+                                        fuzzy: true,
+                                        label: item.classLabel,
+                                        source: ontologySource,
+                                        type: type,
+                                        superClass: item.superClass,
+                                        superClassLabel: item.superClassLabel
+                                    }
 
                                 })
                                 totalMatches += 1
@@ -464,34 +594,51 @@ var ADLadvancedMapping = (function () {
 
                     }
 
-                })
-            }
 
-
-            if ($("#advancedMappings_pickListMappingTree").jstree(true))
-                common.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
-            else {
-                var options = {
-                    openAll: true,
-                    withCheckboxes: true,
-                    contextMenu: ADLadvancedMapping.contextMenuFn(),
-                    selectTreeNodeFn: function (event, obj) {
-                        ADLadvancedMapping.currentTreeNode = obj.node
-                    },
-                    doNotAdjustDimensions: true
                 }
-                common.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
+                callbackSeries();
+            },
 
+
+            function (callbackSeries) {//draw jstree
+
+                if (callback) {
+                    return callback(null, {columnName: ADLmappingData.currentColumn, data: jstreeData})
+                }
+                if ($("#advancedMappings_pickListMappingTree").jstree(true))
+                    common.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
+                else {
+                    var options = {
+                        openAll: true,
+                        withCheckboxes: true,
+                        contextMenu: ADLadvancedMapping.contextMenuFn(),
+                        selectTreeNodeFn: function (event, obj) {
+                            ADLadvancedMapping.currentTreeNode = obj.node
+                        },
+                        doNotAdjustDimensions: true
+                    }
+                    common.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
+
+                }
+
+                if (!fuzzyMatching) {  //check added nodes if not fuzzyMatching
+                    setTimeout(function () {
+                        $("#advancedMappings_pickListMappingTree").jstree().check_node(nodeIds)
+                    }, 500)
+                }
+                $("#ADLMappingAdvancedMappings_messageSpan").html(totalMatches + "matches found")
+
+
+                callbackSeries();
             }
 
-            if (!fuzzyMatching) {  //check added nodes if not fuzzyMatching
-                setTimeout(function () {
-                    $("#advancedMappings_pickListMappingTree").jstree().check_node(nodeIds)
-                }, 500)
+        ], function (err) {
+            if (err) {
+                $("#waitImg").css("display", "none");
+                if (callback)
+                    return callback(err)
+                alert(err)
             }
-            $("#ADLMappingAdvancedMappings_messageSpan").html(totalMatches + "matches found")
-
-
         })
 
 
@@ -626,38 +773,45 @@ var ADLadvancedMapping = (function () {
         $("#ADLmappings_AdvancedMappingDialogDiv").dialog("close")
     }
 
-    self.exportTreeToCSV=function(){
-        var nodes = $("#advancedMappings_pickListMappingTree").jstree().get_json("#", {flat:false})
+    self.exportTreeToCSV0 = function () {
+        var nodes = $("#advancedMappings_pickListMappingTree").jstree().get_json("#", {flat: false})
 
 
-        var map={}
+        var map = {}
+        var childrenMap = {}
         nodes.forEach(function (node) {
-            map[node.id]=node
-            if( node.children){
-                node.children.forEach(function(item){
-                    map[item.id]=item
-                })
-            }
+            map[node.id] = node
+            /*  if (node.children) {
+                  node.children.forEach(function (item) {
+                      childrenMap[item.id] = item
+                  })
+              }*/
 
         })
 
-        var str="exactMatch\tid\ttype\tlabel\tsuperClass_Label\turi\tsuperClass_Uri\tsource\n"
-        for(var id in map){
-            if (map[id].children.length>0) {
+        var str = "exactMatch\tid\tlabel\tsuperClass_Label\turi\tsuperClass_Uri\tsource\ttype\n"
+        for (var id in map) {
+            if (map[id].children.length > 0) {
 
+                var hasExactMatch = false;
                 map[id].children.forEach(function (item) {
-                //    var item = map[nodeId]
+                    if (!item.fuzzy)
+                        hasExactMatch = true
+                })
+                map[id].children.forEach(function (item) {
+                    //    var item = map[nodeId]
                     if (true) {
-                       item = item.data
-                        var exactMatch=""
-                        if(!item.fuzzy)
-                            exactMatch="Y"
-                        str +=exactMatch+"\t"+ id + "\t" + item.type + "\t" + item.label + "\t" + item.superClassLabel   + "\t" + item.id + "\t" + item.superClass+ "\t" + item.source+"\n"
+                        item = item.data
+                        var matchType = "Fuzzy"
+                        if (hasExactMatch)
+                            var matchType = "Fuzzy+"
+                        if (!item.fuzzy)
+                            matchType = "Exact"
+                        str += matchType + "\t" + id + "\t" + item.label + "\t" + item.superClassLabel + "\t" + item.id + "\t" + item.superClass + "\t" + item.source + "\t" + item.type + "\n"
                     }
                 })
-            }
-            else{
-             str += id+"\n"
+            } else {
+                str += "No\t" + id + "\n"
             }
 
 
@@ -667,9 +821,115 @@ var ADLadvancedMapping = (function () {
     }
 
 
+    self.exportTreeToCSV = function (columnName, nodes) {
+        if (!nodes)
+            nodes = $("#advancedMappings_pickListMappingTree").jstree().get_json("#", {flat: true})
 
 
+        var map = {}
+        var childrenMap = {}
+        nodes.forEach(function (node) {
+            if (node.parent == "#") {
+                node.children = []
+                map[node.id] = node
+            }
+        })
+        nodes.forEach(function (node) {
+            if (node.parent != "#") {
+                if (map[node.parent])
+                    map[node.parent].children.push(node)
+            }
+        })
 
+        var str = "column\tstatus\tid\tlabel\tsuperClass_Label\turi\tsuperClass_Uri\tsource\ttype\n"
+        var existingNodes = {}
+        for (var id in map) {
+            if (map[id].children.length > 0) {
+
+                var hasFuzzy = false
+                /*   map[id].children.forEach(function (item) {
+                       console.log(item.fuzzy)
+                       if (item.fuzzy)
+                          hasFuzzy=true
+                   })*/
+
+                map[id].children.forEach(function (item) {
+                    //    var item = map[nodeId]
+                    var nodeId = id + "_" + item.class+"_"+item.source
+                    if (!existingNodes[nodeId]) {
+                        existingNodes[nodeId] = 1
+                        item = item.data
+                        var matchType = "Exact"
+                        if (item.fuzzy) {
+                            if (hasFuzzy)
+                                matchType = "Fuzzy+"
+                            else
+                                matchType = "Fuzzy"
+                        }
+
+                        str += columnName + "\t" + matchType + "\t" + id + "\t" + item.label + "\t" + item.superClassLabel + "\t" + item.id + "\t" + item.superClass + "\t" + item.source + "\t" + item.type + "\n"
+                    }
+                })
+            } else {
+                var matchType = "NO"
+                str += columnName + "\t" + matchType + "\t" + id + "\n"
+            }
+
+
+        }
+        common.copyTextToClipboard(str, function (err, result) {
+            if (err)
+                return alert(" copy to clipboard failed")
+            return alert("result copied to clipboard")
+        })
+
+
+    }
+
+
+    self.executeBulkMappingSequence = function () {
+        var colNames = [null]
+        //  var types = ["class", "named individual"]
+        var ontologySources = ["CFIHOS_READI", "ISO_15926-PCA", "ISO_15926-org"]
+        var fuzzyMatchings = [false, true]
+        var onlyOrphans = false
+
+        var columnLabel = ADLmappingData.currentColumn
+        var jstreeData = [];
+        var existingNodes = {}
+        async.eachSeries(colNames, function (colName, callbackColName) {
+            async.eachSeries(ontologySources, function (ontologySource, callbackOntologySource) {
+                async.eachSeries(fuzzyMatchings, function (fuzzyMatching, callbackType) {
+                    if (fuzzyMatching)
+                        onlyOrphans = true;
+
+                    self.setDictionaryMappingTree(colName, "", ontologySource, fuzzyMatching, onlyOrphans, existingNodes, function (err, result) {
+                        if (err)
+                            return callbackType(err);
+                        jstreeData = jstreeData.concat(result.data);
+                        result.data.forEach(function (item) {
+                            if (!item.children)
+                                existingNodes[item.id] = 0
+                            else
+                                existingNodes[item.id] = children.length
+                        })
+                        callbackType()
+                    })
+                }, function (err) {
+                    callbackOntologySource(err);
+                })
+
+            }, function (err) {
+                callbackColName(err);
+            })
+        }, function (err) {
+            var x = jstreeData
+            self.exportTreeToCSV(columnLabel, jstreeData)
+            console.log("DONE")
+        })
+
+
+    }
 
 
     return self;

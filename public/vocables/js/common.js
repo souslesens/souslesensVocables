@@ -429,17 +429,18 @@ var common = (function () {
             return prefix + common.getRandomHexaId(length)
         }
 
-        self.copyTextToClipboard = function (text) {
-            /*  async function copy() {
-                  try {
-                      await navigator.clipboard.writeText(text);
-                      console.log('Page URL copied to clipboard');
-                  } catch (err) {
-                      console.error('Failed to copy: ', err);
-                  }
-              }
-  copy()
-              return;*/
+        self.copyTextToClipboard = function (text,callback) {
+            async function copy() {
+                try {
+                    await navigator.clipboard.writeText(text);
+                 return callback();
+                } catch (err) {
+                    return callback(err);
+                }
+            }
+
+            copy()
+            return;
 
             var textArea = document.createElement("textarea");
             textArea.style.position = 'fixed';
@@ -509,17 +510,15 @@ var common = (function () {
         }
 
 
-
-        self.deconcatSQLTableColumn=function(str){
-            var array= str.split(".")
-            if(array.length<2)
-            return null;
-            if(array.length==2){
-                return {table:array[0],column:array[1]}
-            }
-           else if(array.length==3){
-                return {table:array[0]+"."+array[1],column:array[2]}
-            }else
+        self.deconcatSQLTableColumn = function (str) {
+            var array = str.split(".")
+            if (array.length < 2)
+                return null;
+            if (array.length == 2) {
+                return {table: array[0], column: array[1]}
+            } else if (array.length == 3) {
+                return {table: array[0] + "." + array[1], column: array[2]}
+            } else
                 return null;
 
 

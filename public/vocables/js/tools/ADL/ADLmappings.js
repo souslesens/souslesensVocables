@@ -286,7 +286,7 @@ var ADLmappings = (function () {
 
         self.loadMappings = function (name) {
             if (!name)
-                name = self.currentADLdataSource.name + "_" + self.currentADLtable.data.label
+                name = self.currentADLdataSource.dbName + "_" + self.currentADLtable.data.label
             var payload = {ADL_GetMappings: name}
             $.ajax({
                 type: "POST",
@@ -488,7 +488,7 @@ var ADLmappings = (function () {
             MainController.UI.message("mappings copied to clipboard");
         }
         self.saveMappings = function () {
-            var mappingName = ADLmappingData.currentADLdataSource.name + "_" + ADLmappingData.currentADLtable.data.label
+            var mappingName = ADLmappingData.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.label
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
             if (comment === null)

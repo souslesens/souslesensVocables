@@ -103,7 +103,7 @@ var ADLmappingData = (function () {
                 self.currentADLtable = obj.node
                 self.showSampleData(obj.node)
                 setTimeout(function () {
-                    ADLmappings.loadMappings(self.currentADLdataSource.name + "_" + self.currentADLtable.data.label)
+                    ADLmappings.loadMappings(self.currentADLdataSource.dbName + "_" + self.currentADLtable.data.label)
                 }, 500)
 
             },

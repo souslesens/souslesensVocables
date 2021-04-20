@@ -233,6 +233,8 @@ var ADLadvancedMapping = (function () {
             onlyOrphans = $("#ADLMappingAdvancedMappings_onlyOrphansCBX").prop("checked")
         var parentClass = $("#ADLMappingAdvancedMappings_parentClassLabel").val()
 
+
+        //reduce  query to orphans
         if (!existingNodes) {
             existingNodes = {}
             if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
@@ -245,7 +247,6 @@ var ADLadvancedMapping = (function () {
                 })
             }
         }
-
         if (ontologySource == "")
             return
 
@@ -345,7 +346,7 @@ var ADLadvancedMapping = (function () {
                                }
                                    add(array[0]+".*"+array[1])*/
 
-                            if (allowSingleWordMatching && existingNodes[array[0]] == 0) {
+                            if (allowSingleWordMatching ){//&& existingNodes[array[0]] == 0) {
                                 add(array[0])
                             }
 
@@ -356,7 +357,7 @@ var ADLadvancedMapping = (function () {
                     })
 
                 }
-                //reduce  query to orphans
+
 
 
                 self.mappedValues = {}
@@ -449,30 +450,17 @@ var ADLadvancedMapping = (function () {
                     $("#ADLMappingAdvancedMappings_messageSpan").html("no matching found")
 
 
-                for (var key in self.mappedValues) {
-                    if (true || !fuzzyMatching) {
-
-                        if (!existingNodes[key]) {
-                            existingNodes[key] = 1
-                            jstreeData.push({
-                                id: key,
-                                text: key,
-                                parent: "#",
-                                data: {id: key, label: key, source: null}
-                            })
-                        }
-                    }
-                }
-
+           var distinctMappedValues={}
 
                 data.forEach(function (item) {
-                    if (self.mappedValues[item.classLabel]) {
+                    var label=item.classLabel.toLowerCase()
+                    if (self.mappedValues[label]) {
 
-                        if (!existingNodes[item.class]) {
-                            existingNodes[item.class] = 1
+                        if (!distinctMappedValues[item.class]) {
+                            distinctMappedValues[item.class] = 1
 
-                            self.mappedValues[item.classLabel].push({
-                                source: item.source,
+                            self.mappedValues[label].push({
+                                source: ontologySource,
                                 id: item.class,
                                 classLabel: item.classLabel,
                                 superClass: item.superClass,
@@ -565,7 +553,7 @@ var ADLadvancedMapping = (function () {
                                 type = item.type.substring(item.type.lastIndexOf("#") + 1)
 
                             //   fuzzyValues[item.classLabel].forEach(function (originalLabel) {
-                            var id = originalLabel + "_" + item.classLabel
+                            var id = originalLabel + "_" + item.classLabel+"_"+ontologySource
                             if (!existingNodes[id]) {
                                 existingNodes[id] = 1
                                 item.source = ontologySource
@@ -601,6 +589,21 @@ var ADLadvancedMapping = (function () {
 
 
             function (callbackSeries) {//draw jstree
+                for (var key in self.mappedValues) {
+                    if (true || !fuzzyMatching) {
+
+                        if (!existingNodes[key+"_"+ontologySource]) {
+                            existingNodes[key+"_"+ontologySource] = 1
+                            jstreeData.push({
+                                id: key,
+                                text: key,
+                                parent: "#",
+                                data: {id: key, label: key, source: null}
+                            })
+                        }
+                    }
+                }
+
 
                 if (callback) {
                     return callback(null, {columnName: ADLmappingData.currentColumn, data: jstreeData})
@@ -773,52 +776,6 @@ var ADLadvancedMapping = (function () {
         $("#ADLmappings_AdvancedMappingDialogDiv").dialog("close")
     }
 
-    self.exportTreeToCSV0 = function () {
-        var nodes = $("#advancedMappings_pickListMappingTree").jstree().get_json("#", {flat: false})
-
-
-        var map = {}
-        var childrenMap = {}
-        nodes.forEach(function (node) {
-            map[node.id] = node
-            /*  if (node.children) {
-                  node.children.forEach(function (item) {
-                      childrenMap[item.id] = item
-                  })
-              }*/
-
-        })
-
-        var str = "exactMatch\tid\tlabel\tsuperClass_Label\turi\tsuperClass_Uri\tsource\ttype\n"
-        for (var id in map) {
-            if (map[id].children.length > 0) {
-
-                var hasExactMatch = false;
-                map[id].children.forEach(function (item) {
-                    if (!item.fuzzy)
-                        hasExactMatch = true
-                })
-                map[id].children.forEach(function (item) {
-                    //    var item = map[nodeId]
-                    if (true) {
-                        item = item.data
-                        var matchType = "Fuzzy"
-                        if (hasExactMatch)
-                            var matchType = "Fuzzy+"
-                        if (!item.fuzzy)
-                            matchType = "Exact"
-                        str += matchType + "\t" + id + "\t" + item.label + "\t" + item.superClassLabel + "\t" + item.id + "\t" + item.superClass + "\t" + item.source + "\t" + item.type + "\n"
-                    }
-                })
-            } else {
-                str += "No\t" + id + "\n"
-            }
-
-
-        }
-        var result = common.copyTextToClipboard(str)
-        MainController.UI.message(result);
-    }
 
 
     self.exportTreeToCSV = function (columnName, nodes) {
@@ -855,7 +812,7 @@ var ADLadvancedMapping = (function () {
 
                 map[id].children.forEach(function (item) {
                     //    var item = map[nodeId]
-                    var nodeId = id + "_" + item.class+"_"+item.source
+                    var nodeId = id + "_" + item.data.id+"_"+item.data.source
                     if (!existingNodes[nodeId]) {
                         existingNodes[nodeId] = 1
                         item = item.data
@@ -902,6 +859,8 @@ var ADLadvancedMapping = (function () {
                 async.eachSeries(fuzzyMatchings, function (fuzzyMatching, callbackType) {
                     if (fuzzyMatching)
                         onlyOrphans = true;
+                    else
+                        onlyOrphans = false;
 
                     self.setDictionaryMappingTree(colName, "", ontologySource, fuzzyMatching, onlyOrphans, existingNodes, function (err, result) {
                         if (err)
@@ -909,9 +868,9 @@ var ADLadvancedMapping = (function () {
                         jstreeData = jstreeData.concat(result.data);
                         result.data.forEach(function (item) {
                             if (!item.children)
-                                existingNodes[item.id] = 0
+                                existingNodes[item.id+"_"+item.data.source] = 0
                             else
-                                existingNodes[item.id] = children.length
+                                existingNodes[item.id+"_"+item.data.source] = children.length
                         })
                         callbackType()
                     })

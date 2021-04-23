@@ -1,24 +1,22 @@
 {
   "mappings": [
     {
-      "subject": "ufr.Country",
+      "subject": "ufr.Function",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/QuantityDatum"
-    },
-    {
-      "subject": "ufr.Field",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/System"
-    },
-    {
-      "subject": "ufr.Supplier",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/PointInTime"
-    },
-    {
-      "subject": "ufr.WaterDepth_m",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-30000685"
+      "object": {
+        "column": "ufr.Function",
+        "switch": {
+          "Water/gas inject": "http://data.posccaesar.org/rdl/RDS16553868",
+          "Gas Injection": "http://data.posccaesar.org/rdl/RDS16551037",
+          "WI": "http://data.posccaesar.org/rdl/RDS16551126",
+          "Bundle": "http://data.posccaesar.org/rdl/RDS13173600",
+          "Methanol": "http://data.15926.org/rdl/RDS16553958",
+          "Waterwash": "http://data.posccaesar.org/rdl/RDS9649322",
+          "Hydraulic jumper": "http://w3id.org/readi/rdl/CFIHOS-30000718",
+          "control system": "http://data.total.com/resource/quantum/TOTAL-P0000001986",
+          "Gas Lift": "http://data.posccaesar.org/rdl/RDS8127142155"
+        }
+      }
     },
     {
       "subject": "ufr.Type",
@@ -26,109 +24,262 @@
       "object": {
         "column": "ufr.Type",
         "switch": {
-          "Static": "http://w3id.org/readi/rdl/CFIHOS-30000872",
+          "Dynamic": "http://w3id.org/readi/rdl/CFIHOS-30000871",
           "Dynamic 1": "http://w3id.org/readi/rdl/CFIHOS-30000871",
           "Dynamic 2": "http://w3id.org/readi/rdl/CFIHOS-30000871",
-          "Dynamic": "http://w3id.org/readi/rdl/CFIHOS-30000871"
+          "Static": "http://w3id.org/readi/rdl/CFIHOS-30000872",
+          "Short": "http://w3id.org/readi/rdl/CFIHOS-30000725"
         }
       }
     },
     {
-      "subject": "ufr.Supplier",
-      "predicate": "http://standards.iso.org/iso/15926/part14/datumUOM",
-      "object": "ufr.WaterDepth_m"
+      "subject": "ufr.installationYear",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS404054"
+    },
+    {
+      "subject": "ufr.N_Data_sheet",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/Z101001179"
+    },
+    {
+      "subject": "ufr.OD_mm",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS358109"
+    },
+    {
+      "subject": "ufr.Mass_kgm",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-45000013_datum"
+    },
+    {
+      "subject": "ufr.BuoyancyFactor",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS9691487"
+    },
+    {
+      "subject": "ufr.quadType",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": {
+        "column": "ufr.quadType",
+        "switch": {
+          "Quad": "http://standards.iso.org/iso/15926/part14#quad_cable",
+          "Power cable": "http://data.posccaesar.org/rdl/RDS816974",
+          "Arm. Quad.": "http://data.posccaesar.org/rdl/RDS463364",
+          "arm. Quad": "http://data.posccaesar.org/rdl/RDS463364",
+          "pair": "http://standards.iso.org/iso/15926/part14#pair_cable"
+        }
+      }
+    },
+    {
+      "subject": "ufr.Type1",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS5997341"
     },
     {
       "subject": "ufr.Country",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasArrangedPart",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000039"
+    },
+    {
+      "subject": "ufr.Field",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/quantum/TOTAL-A0000000317"
+    },
+    {
+      "subject": "ufr.Supplier",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/D101001105"
+    },
+    {
+      "subject": "ufr.WaterDepth_m",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS8656916"
+    },
+    {
+      "subject": "ufr.Name",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
+    },
+    {
+      "subject": "ufr.Length_m",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/quantum/TOTAL-A0000000528"
+    },
+    {
+      "subject": "ufr.elecCableNb",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS7498446"
+    },
+    {
+      "subject": "ufr.quadSection_mm2",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/quantum/TOTAL-A0000002121"
+    },
+    {
+      "subject": "ufr.OptFibrNb",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/quantum/TOTAL-P0000002000"
+    },
+    {
+      "subject": "ufr.ID_1_mm",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS357209"
+    },
+    {
+      "subject": "ufr.MBR_m",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/rdl/RDS13103280"
+    },
+    {
+      "subject": "ufr.Route",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/dm/PointInSpace"
+    },
+    {
+      "subject": "ufr.Config",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": {
+        "column": "ufr.Config",
+        "switch": {
+          "U shape": "http://data.posccaesar.org/rdl/RDS11014235",
+          "Free Hanging": "http://data.posccaesar.org/rdl/RDS9667637"
+        }
+      }
+    },
+    {
+      "subject": "ufr.Name",
+      "predicate": "http://standards.iso.org/iso/15926/part14/residesIn",
       "object": "ufr.Field"
     },
     {
-      "subject": "ufr.Type",
-      "predicate": "http://standards.iso.org/iso/15926/part14/dispositionOf",
-      "object": "ufr.WaterDepth_m"
+      "subject": "ufr.Field",
+      "predicate": "http://standards.iso.org/iso/15926/part14/residesIn",
+      "object": "ufr.Country"
     }
   ],
   "model": {
-    "http://standards.iso.org/iso/15926/part14/QuantityDatum": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/InformationObject",
-        "http://standards.iso.org/iso/15926/part14/Object",
-        "http://www.w3.org/2002/07/owl#Thing",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        "ONE-MODEL",
-        "#"
-      ],
-      "label": "QuantityDatum"
+    "http://data.posccaesar.org/rdl/RDS16553868": {
+      "label": "INJECTION FLUID LINE"
     },
-    "http://standards.iso.org/iso/15926/part14/System": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/FunctionalObject",
-        "http://standards.iso.org/iso/15926/part14/Object",
-        "http://www.w3.org/2002/07/owl#Thing",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        "ONE-MODEL",
-        "#"
-      ],
-      "label": "System"
+    "http://data.posccaesar.org/rdl/RDS16551037": {
+      "label": "SUBSEA GAS INJECTION FLOWLINE"
     },
-    "http://standards.iso.org/iso/15926/part14/PointInTime": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/Event",
-        "http://standards.iso.org/iso/15926/part14/Activity",
-        "http://www.w3.org/2002/07/owl#Thing",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        "ONE-MODEL",
-        "#"
-      ],
-      "label": "PointInTime"
+    "http://data.posccaesar.org/rdl/RDS16551126": {
+      "label": "SUBSEA WATER INJECTION FLOWLINE"
     },
-    "http://w3id.org/readi/rdl/CFIHOS-30000685": {
-      "parents": [
-        "http://w3id.org/readi/rdl/CFIHOS-30000529",
-        "http://w3id.org/readi/rdl/CFIHOS-30000314",
-        "http://w3id.org/readi/rdl/CFIHOS-30000311",
-        "http://w3id.org/readi/rdl/D101001053",
-        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
-        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-        "CFIHOS_READI",
-        "#"
-      ],
-      "label": "turbine"
+    "http://data.posccaesar.org/rdl/RDS13173600": {
+      "label": "PIPELINE BUNDLE"
     },
-    "undefined": {},
-    "http://w3id.org/readi/rdl/CFIHOS-30000872": {
-      "label": "subsea static umbilical"
+    "http://data.15926.org/rdl/RDS16553958": {
+      "label": "METHANOL INJECTION LINE"
+    },
+    "http://data.posccaesar.org/rdl/RDS9649322": {
+      "label": "WATER WASHING"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-30000718": {
+      "label": "subsea jumper"
+    },
+    "http://data.total.com/resource/quantum/TOTAL-P0000001986": {
+      "label": "Subsea Control System and Equipment"
+    },
+    "http://data.posccaesar.org/rdl/RDS8127142155": {
+      "label": "GAS LIFT"
     },
     "http://w3id.org/readi/rdl/CFIHOS-30000871": {
       "label": "subsea dynamic umbilical"
     },
-    "http://standards.iso.org/iso/15926/part14/datumUOM": {
-      "parents": [
-        "ONE-MODEL",
-        "#"
-      ],
-      "label": "datumUOM"
+    "http://w3id.org/readi/rdl/CFIHOS-30000872": {
+      "label": "subsea static umbilical"
     },
-    "http://standards.iso.org/iso/15926/part14/hasArrangedPart": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/hasPart",
-        "ONE-MODEL",
-        "#"
-      ],
-      "label": "hasArrangedPart"
+    "http://w3id.org/readi/rdl/CFIHOS-30000725": {
+      "label": "subsea umbilical"
     },
-    "http://standards.iso.org/iso/15926/part14/dispositionOf": {
+    "http://data.posccaesar.org/rdl/RDS404054": {
+      "label": "INSTALLATION DATE"
+    },
+    "http://w3id.org/readi/rdl/Z101001179": {
+      "label": "IEC 61355 DA Data sheet"
+    },
+    "http://data.posccaesar.org/rdl/RDS358109": {
+      "label": "OUTSIDE DIAMETER"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-45000013_datum": {
+      "label": "Mass / Weight quantity datum"
+    },
+    "http://data.posccaesar.org/rdl/RDS9691487": {
+      "label": "BUOYING"
+    },
+    "http://standards.iso.org/iso/15926/part14#quad_cable": {
+      "label": "quad cable"
+    },
+    "http://data.posccaesar.org/rdl/RDS816974": {
+      "label": "SUBMERSIBLE POWER CABLE"
+    },
+    "http://data.posccaesar.org/rdl/RDS463364": {
+      "label": "CABLE ARMOUR"
+    },
+    "http://standards.iso.org/iso/15926/part14#pair_cable": {
+      "label": "pair cable"
+    },
+    "http://data.posccaesar.org/rdl/RDS5997341": {
+      "label": "STEEL ROD"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-00000039": {
+      "label": "ISO COUNTRY"
+    },
+    "http://data.total.com/resource/quantum/TOTAL-A0000000317": {
+      "label": "Site"
+    },
+    "http://w3id.org/readi/rdl/D101001105": {
       "parents": [
-        "ONE-MODEL",
+        "http://standards.iso.org/iso/15926/part14/Organization",
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "CFIHOS_READI",
         "#"
       ],
-      "label": "dispositionOf"
+      "label": "Manufacturer"
+    },
+    "http://data.posccaesar.org/rdl/RDS8656916": {
+      "label": "WATER DEPTH"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-00000028": {
+      "label": "Tag"
+    },
+    "http://data.total.com/resource/quantum/TOTAL-A0000000528": {
+      "label": "Pipeline Length"
+    },
+    "http://data.posccaesar.org/rdl/RDS7498446": {
+      "label": "NUMBER OF CABLES CONNECTED"
+    },
+    "http://data.total.com/resource/quantum/TOTAL-A0000002121": {
+      "label": "Cable Cross Sectional Area"
+    },
+    "http://data.total.com/resource/quantum/TOTAL-P0000002000": {
+      "label": "Subsea Fiber Optic"
+    },
+    "http://data.posccaesar.org/rdl/RDS357209": {
+      "label": "INSIDE DIAMETER"
+    },
+    "http://data.posccaesar.org/rdl/RDS13103280": {
+      "label": "PIPELINE PIG MINIMUM BEND RADIUS"
+    },
+    "http://data.posccaesar.org/dm/PointInSpace": {
+      "label": "point in space"
+    },
+    "http://data.posccaesar.org/rdl/RDS11014235": {
+      "label": "U-TUBE"
+    },
+    "http://data.posccaesar.org/rdl/RDS9667637": {
+      "label": "HANGING"
+    },
+    "http://standards.iso.org/iso/15926/part14/residesIn": {
+      "label": "residesIn"
     }
   },
   "infos": {
-    "lastModified": "2021-04-07T07:27:31.896Z",
+    "lastModified": "2021-04-07T15:25:32.643Z",
     "modifiedBy": "admin",
-    "comment": "gddfr'eztertgetretre"
+    "comment": "jcl"
   }
 }

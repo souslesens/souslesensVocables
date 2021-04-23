@@ -336,7 +336,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
+    "schemaType": "OWLXXXX",
     "schema": null,
     "color": "#bcbd22"
   },

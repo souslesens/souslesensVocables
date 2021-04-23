@@ -10,5 +10,6 @@
   "skosBlender": {"login":"skosBlender","password":"thes_X32!","groups":["blender_skos"]},
 
   "ECCENCA": {"login":"ECCENCA","password":"ONE-sense!rDf","groups":["reader_owl"]},
+  "CHANDRAKANT": {"login":"CHANDRAKANT","password":"ONE-sense!rDf","groups":["admin"]},
   "LOGILAB": {"login":"skosBlender","password":"ONE-sense!rDf","groups":["reader_owl"]}
 }

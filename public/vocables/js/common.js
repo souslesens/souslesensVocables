@@ -122,11 +122,14 @@ var common = (function () {
             if (p.left < 600)
                 w = 380;
             else
-                w = 340
+                w = 300
             $("#" + jstreeDiv).width(w)
             $("#" + jstreeDiv).height(h)
             $("#" + jstreeDiv).css('overflow', 'auto')
             $("#" + jstreeDiv).css('margin-top', '5px')
+            if (p.left < 600)
+            $("#" + jstreeDiv).css('margin-left', '-25px')
+
 
         }
 
@@ -190,7 +193,7 @@ var common = (function () {
                 if (options.openAll)
                     $('#' + jstreeDiv).jstree(true).open_all();
                 self.setTreeAppearance()
-                if (!options.doNotAdjustDimensions)
+             if (!options.doNotAdjustDimensions)
                     common.setTreeParentDivDimensions(jstreeDiv)
                 if (callback)
                     callback();
@@ -433,8 +436,12 @@ var common = (function () {
             async function copy() {
                 try {
                     await navigator.clipboard.writeText(text);
-                 return callback();
+                    return "graph copied in clipboard"
+                    if(callback)
+                 return callback("graph copied in clipboard");
                 } catch (err) {
+                    MainController.UI.message("graph copy failed")
+                    if(callback)
                     return callback(err);
                 }
             }

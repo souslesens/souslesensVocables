@@ -241,7 +241,7 @@ var ADLadvancedMapping = (function () {
                 var array = common.getjsTreeNodes("advancedMappings_pickListMappingTree", false, "#")
                 array.forEach(function (item) {
                     if (!item.children)
-                        existingNodes[item.id] = 0
+                        existingNodes[item.id] = -1
                     else
                         existingNodes[item.id] = item.children.length
                 })
@@ -450,28 +450,34 @@ var ADLadvancedMapping = (function () {
                     $("#ADLMappingAdvancedMappings_messageSpan").html("no matching found")
 
 
-           var distinctMappedValues={}
+                var distinctMappedValues = {}
 
                 data.forEach(function (item) {
-                    var label=item.classLabel.toLowerCase()
-                    if (self.mappedValues[label]) {
+                    var id=item.class + "_" + ontologySource
+                    if ( existingNodes[id]==null) {
+                        existingNodes[id] = -1
 
-                        if (!distinctMappedValues[item.class]) {
-                            distinctMappedValues[item.class] = 1
 
-                            self.mappedValues[label].push({
-                                source: ontologySource,
-                                id: item.class,
-                                classLabel: item.classLabel,
-                                superClass: item.superClass,
-                                superClassLabel: item.superClassLabel || "?",
-                                type: item.type
-                            })
+                        var label = item.classLabel.toLowerCase()
+                        if (self.mappedValues[label]) {
+
+                            if (!distinctMappedValues[item.class]) {
+                                distinctMappedValues[item.class] = 1
+
+                                self.mappedValues[label].push({
+                                    source: ontologySource,
+                                    id: item.class,
+                                    classLabel: item.classLabel,
+                                    superClass: item.superClass,
+                                    superClassLabel: item.superClassLabel || "?",
+                                    type: item.type
+                                })
+                            }
                         }
+
                     }
-
-
                 })
+
 
                 for (var key in self.mappedValues) {
 
@@ -482,7 +488,7 @@ var ADLadvancedMapping = (function () {
                         if (item.type)
                             type = item.type.substring(item.type.lastIndexOf("#") + 1)
                         var text = "<span style='font-weight:normal'> " + item.classLabel + " : " + type + " </span><span  style='color:" + color + "' class='ADLmappingData_treeItem2' >/" + (item.superClassLabel || "?") + "/" + ontologySource + "</i>"
-                        nodeIds.push(item.id)
+                        nodeIds.push(item.id+"_"+ontologySource)
                         jstreeData.push({
                             id: item.id,
                             text: text,
@@ -517,8 +523,10 @@ var ADLadvancedMapping = (function () {
                                     if (!fuzzyWords[originalLabel][item.class])
                                         fuzzyWords[originalLabel][item.class] = 0
                                     fuzzyWords[originalLabel][item.class] += 1
-                                    if (originalLabel == item.classLabel)
+                                    if (originalLabel == item.classLabel )
                                         fuzzyWords[originalLabel][item.class] = 10
+                                    if(self.mappedValues[item.classLabel])
+                                        fuzzyWords[originalLabel][item.class] = 0
 
                                 })
                             }
@@ -554,7 +562,7 @@ var ADLadvancedMapping = (function () {
 
                             //   fuzzyValues[item.classLabel].forEach(function (originalLabel) {
                             var id = originalLabel + "_" + item.classLabel+"_"+ontologySource
-                            if (!existingNodes[id]) {
+                            if (existingNodes[id]==null ) {
                                 existingNodes[id] = 1
                                 item.source = ontologySource
                                 var text = "<span style='font-weight:normal;font-style:italic'> " + item.classLabel + " : " + type + " </span> <span  style='color:" + color + ";' class='ADLmappingData_treeItem2' ><i>/" + (item.superClassLabel || "?") + "/" + ontologySource + "</i>"
@@ -592,8 +600,8 @@ var ADLadvancedMapping = (function () {
                 for (var key in self.mappedValues) {
                     if (true || !fuzzyMatching) {
 
-                        if (!existingNodes[key+"_"+ontologySource]) {
-                            existingNodes[key+"_"+ontologySource] = 1
+                        if (existingNodes[key]==null) {
+                            existingNodes[key] = 1
                             jstreeData.push({
                                 id: key,
                                 text: key,
@@ -608,8 +616,10 @@ var ADLadvancedMapping = (function () {
                 if (callback) {
                     return callback(null, {columnName: ADLmappingData.currentColumn, data: jstreeData})
                 }
-                if ($("#advancedMappings_pickListMappingTree").jstree(true))
+                if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
+
                     common.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
+                }
                 else {
                     var options = {
                         openAll: true,
@@ -813,7 +823,9 @@ var ADLadvancedMapping = (function () {
                 map[id].children.forEach(function (item) {
                     //    var item = map[nodeId]
                     var nodeId = id + "_" + item.data.id+"_"+item.data.source
-                    if (!existingNodes[nodeId]) {
+
+
+                    if (existingNodes[nodeId]!==null) {
                         existingNodes[nodeId] = 1
                         item = item.data
                         var matchType = "Exact"
@@ -849,6 +861,7 @@ var ADLadvancedMapping = (function () {
         //  var types = ["class", "named individual"]
         var ontologySources = ["CFIHOS_READI", "ISO_15926-PCA", "ISO_15926-org"]
         var fuzzyMatchings = [false, true]
+        var fuzzyMatchings = [false]
         var onlyOrphans = false
 
         var columnLabel = ADLmappingData.currentColumn

@@ -71,18 +71,15 @@
       <recent name="D:\GitHub\souslesensVocables\public\vocables\js\tools\ADL" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\webstorm\souslesensVocables\other\oneModel" />
-      <recent name="D:\webstorm\souslesensVocables\bin" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
+      <recent name="D:\webstorm\souslesensVocables\bin" />
+      <recent name="D:\webstorm\souslesensVocables\other\oneModel" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables" />
     </key>
   </component>
   <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="ADLcontroller..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" working-dir="$PROJECT_DIR$/bin/ADL">
-      <method v="2" />
-    </configuration>
-    <configuration name="SQLserverConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
     <configuration name="annotatorLive..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/annotatorLive..js" working-dir="$PROJECT_DIR$/bin">
@@ -94,13 +91,16 @@
     <configuration name="dictionary..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/quantum/dictionary..js" working-dir="$PROJECT_DIR$/other/quantum">
       <method v="2" />
     </configuration>
+    <configuration name="temporary..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/temporary..js" working-dir="$PROJECT_DIR$/bin/ADL/data">
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.temporary..js" />
         <item itemvalue="Node.js.ADLcontroller..js" />
         <item itemvalue="Node.js.dictionaryManager..js" />
         <item itemvalue="Node.js.annotatorLive..js" />
         <item itemvalue="Node.js.dictionary..js" />
-        <item itemvalue="Node.js.SQLserverConnector..js" />
       </list>
     </recent_temporary>
   </component>
@@ -174,7 +174,8 @@
       <workItem from="1618075066852" duration="41216000" />
       <workItem from="1618409683603" duration="9980000" />
       <workItem from="1618461927860" duration="19980000" />
-      <workItem from="1618555451091" duration="78076000" />
+      <workItem from="1618555451091" duration="95577000" />
+      <workItem from="1619100168042" duration="7334000" />
     </task>
     <servers />
   </component>
@@ -243,15 +244,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
-          <line>561</line>
-          <properties lambdaOrdinal="-1" />
+          <line>569</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
-          <line>884</line>
-          <properties lambdaOrdinal="-1" />
+          <line>897</line>
           <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <line>882</line>
+          <option name="timeStamp" value="58" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/temporary..js</url>
+          <line>28</line>
+          <option name="timeStamp" value="61" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

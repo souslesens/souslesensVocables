@@ -468,24 +468,31 @@ var SourceBrowser = (function () {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
 
-                        item["broader" + i].jstreeId = item["broader" + i].value + "_" + index
+                        item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
                     }
+
                 }
-                item.concept.jstreeId = item.concept.value + "_" + index;
+                item.concept.jstreeId = sourceLabel+"_"+item.concept.value + "_" + index;
             })
 
 
             result.forEach(function (item, index) {
+
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
+
+
+
                         var id = item["broader" + i].value
-                        var jstreeId = item["broader" + i].value
+                        if(id.indexOf("nodeID://")>-1)//skip anonym nodes
+                            return
+                        var jstreeId = item["broader" + i].jstreeId
                         if (!existingNodes[id]) {
                             existingNodes[id] = 1
                             var label = item["broader" + i + "Label"].value
                             var parentId = options.rootId;
                             if (item["broader" + (i + 1)])
-                                parentId = item["broader" + (i + 1)].value
+                                parentId = item["broader" + (i + 1)].jstreeId
 
                             jstreeData.push({
                                 id: jstreeId,
@@ -501,17 +508,18 @@ var SourceBrowser = (function () {
                         }
                     }
                 }
-                var itemId = item.concept.value
-                var jstreeId = item.concept.value + "_" + item["broader1"].value
+
+                var jstreeId = item.concept.jstreeId
                 if (!existingNodes[jstreeId]) {
                     existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
                     var id = item.concept.value;
-                    var jstreeId = itemId
+
+
                     jstreeData.push({
                         id: jstreeId,
                         text: text,
-                        parent: item["broader1"].value,
+                        parent: item["broader1"].jstreeId,
                         data: {
                             type: "http://www.w3.org/2002/07/owl#Class",
                             source: sourceLabel,

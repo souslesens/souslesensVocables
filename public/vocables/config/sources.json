@@ -632,6 +632,31 @@
     "color": "#bcbd22"
   },
 
+
+
+  "MDM_2.3_AFTWIN": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/aftwin_uk/0.1/"
+    ],
+
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "MDM_2.3_AFTWIN",
+      "table_schema": "dbo"
+    },
+
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
   "ASSETS-QUANTUM-REQ": {
     "graphUri":  [
       "http://data.total.com/resource/one-model/assets/quantum/requirements/0.1/"
@@ -651,6 +676,8 @@
     "schema": null,
     "color": "#bcbd22"
   },
+
+
 
   "ASSETS-QUANTUM-RDL": {
     "graphUri":  [

@@ -12,14 +12,14 @@ var SQLserverConnector = {
 
 
     test: function () {
-
+config.database="MDM_2.3_AFTWIN"
         sql.connect(config, err => {
             if (err)
                 return console.log(err)// ... error checks
 
             // Query
 
-            new sql.Request().query('select * from rdl.tblAttributePickListValue', (err, result) => {
+            new sql.Request().query('select * from dbo.tblModel', (err, result) => {
                 if (err)
                     // ... error checks
 
@@ -35,8 +35,8 @@ var SQLserverConnector = {
                 return console.log(err)// ... error checks
 
             // Query
-
-            new sql.Request().query(query, (err, result) => {
+//console.log(query)
+            new sql.Request().query( "use ["+dbName+"];"+query, (err, result) => {
                 if (err)
                   return callback(err)
 
@@ -48,10 +48,11 @@ var SQLserverConnector = {
 
     getADLmodel: function (dbName, callback) {
 
-
-        var query = "SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
-            "FROM INFORMATION_SCHEMA.COLUMNS\n" +
-            "where  TABLE_SCHEMA not in ('dbo')"
+        config.database=dbName
+        var query = "use ["+dbName+"]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
+            "FROM INFORMATION_SCHEMA.COLUMNS"
+   //   query +=" where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
+        query +="  order by TABLE_SCHEMA,TABLE_NAME "
 
         sql.connect(config, err => {
             if (err)
@@ -66,6 +67,8 @@ var SQLserverConnector = {
                 var model = {}
                 result.recordset.forEach(function (item) {
                     var tableLabel=item.TABLE_SCHEMA+"."+item.TABLE_NAME
+                 /*   if(dbName=="MDM_2.3_AFTWIN")
+                        tableLabel="dbo."+item.TABLE_NAME*/
                     if (!model[tableLabel]) {
                         model[tableLabel] = []
                     }
@@ -83,3 +86,5 @@ var SQLserverConnector = {
 }
 module.exports = SQLserverConnector
 //SQLserverConnector.getADLmodel()
+
+//SQLserverConnector.test()

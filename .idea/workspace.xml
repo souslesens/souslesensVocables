@@ -82,13 +82,13 @@
     <configuration name="ADLcontroller..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
+    <configuration name="SQLserverConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
+      <method v="2" />
+    </configuration>
     <configuration name="annotatorLive..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/annotatorLive..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <configuration name="dictionaryManager..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" working-dir="$PROJECT_DIR$/bin/annotator">
-      <method v="2" />
-    </configuration>
-    <configuration name="dictionary..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/quantum/dictionary..js" working-dir="$PROJECT_DIR$/other/quantum">
       <method v="2" />
     </configuration>
     <configuration name="temporary..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/temporary..js" working-dir="$PROJECT_DIR$/bin/ADL/data">
@@ -96,11 +96,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.SQLserverConnector..js" />
         <item itemvalue="Node.js.temporary..js" />
         <item itemvalue="Node.js.ADLcontroller..js" />
         <item itemvalue="Node.js.dictionaryManager..js" />
         <item itemvalue="Node.js.annotatorLive..js" />
-        <item itemvalue="Node.js.dictionary..js" />
       </list>
     </recent_temporary>
   </component>
@@ -176,6 +176,7 @@
       <workItem from="1618461927860" duration="19980000" />
       <workItem from="1618555451091" duration="95577000" />
       <workItem from="1619100168042" duration="7334000" />
+      <workItem from="1619260267361" duration="9271000" />
     </task>
     <servers />
   </component>
@@ -211,16 +212,6 @@
           <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
           <line>243</line>
           <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
-          <line>22</line>
-          <option name="timeStamp" value="13" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
-          <line>17</line>
-          <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/quantum/dictionary..js</url>
@@ -261,6 +252,12 @@
           <url>file://$PROJECT_DIR$/bin/ADL/temporary..js</url>
           <line>28</line>
           <option name="timeStamp" value="61" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
+          <line>15</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="79" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

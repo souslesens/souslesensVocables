@@ -176,7 +176,7 @@
       <workItem from="1618461927860" duration="19980000" />
       <workItem from="1618555451091" duration="95577000" />
       <workItem from="1619100168042" duration="7334000" />
-      <workItem from="1619260267361" duration="9271000" />
+      <workItem from="1619260267361" duration="17540000" />
     </task>
     <servers />
   </component>
@@ -258,6 +258,12 @@
           <line>15</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="79" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappingData.js</url>
+          <line>204</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="92" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

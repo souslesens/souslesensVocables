@@ -47,7 +47,7 @@ var ADLmappings = (function () {
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
             $("#accordion").accordion("option", {active: 2});
-
+            visjsGraph.clearGraph()
             //  MainController.UI.toogleRightPanel(true)
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             $("#rightPanelDiv").load("snippets/ADL/ADLmappingRightPanel.html");
@@ -280,7 +280,7 @@ var ADLmappings = (function () {
             ADLmappingGraph.drawNode(column)
 
             ADLmappingData.currentColumn = null;
-            $(".dataSample_type").removeClass("dataSample_type_selected")
+            $(".dataSample_type").removeClass("datasample_type_selected")
         }
 
 

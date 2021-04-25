@@ -135,7 +135,7 @@ var ADLmappingData = (function () {
                 for (var key in item) {
                     if (cols.indexOf(key) < 0) {
                         cols.push(key);
-                        var colId = table + "__" + key;
+                        var colId = table + "." + key;
                         var colType = "";
                         var colMappings = ""
                         var colJoins = ""
@@ -150,7 +150,9 @@ var ADLmappingData = (function () {
 
                         str += "<td class='dataSample_cell'>" + key + "</td>"
                         //   strJoins += "<td  class='dataSample_cell dataSample_join'<span id='dataSample_join_" + colId + "'>" + colJoins + "</span> </td>"
-                        strTypes += "<td  class='dataSample_cell dataSample_type'<span id='dataSample_type_" + colId + "'>" + colType + "</span> </td>"
+
+                        var id=common.encodeToJqueryId("datasample_type_" + colId).toLowerCase()
+                        strTypes += "<td  class='dataSample_cell dataSample_type'<span id='" + id + "'>" + colType + "</span> </td>"
 
                         //   strMappings += "<td  class='dataSample_cell dataSample_mapping'<span id='dataSample_mapping_" + colId + "'>" + colMappings + "</span> </td>"
                     }
@@ -198,13 +200,16 @@ var ADLmappingData = (function () {
 
                 $(".dataSample_type").bind("click", function (event) {
                     MainController.UI.hidePopup( "graphPopupDiv")
-                    var nodeId = $(this).attr("id").substring(16).replace("__", ".")
-                    self.currentColumn = nodeId
+
+                  //  var nodeId = $(this).attr("id").substring(16).replace("__", ".")
+                    var nodeId =common.decodeFromJqueryId( $(this).attr("id"))
+                    nodeId=nodeId.replace("datasample_type_","")
+                        self.currentColumn = nodeId
                     /*    var mode = "properties"
                         if (event.ctrlKey)*/
                     var mode = "types"
-                    $(".dataSample_type").removeClass("dataSample_type_selected")
-                    $(this).addClass("dataSample_type_selected")
+                    $(".dataSample_type").removeClass("datasample_type_selected")
+                    $(this).addClass("datasample_type_selected")
 
 
 
@@ -259,8 +264,10 @@ var ADLmappingData = (function () {
             })
             typeStr += "</ul>"
         } else
-            typeStr = typeObj.data.label
-        $("#dataSample_type_" + columnId.replace(".", "__")).html(typeStr)
+            typeStr = typeObj.data.label;
+        var jqueryId="#"+common.encodeToJqueryId("datasample_type_" +columnId)
+        var xx=$(jqueryId).attr("id");
+        $(jqueryId).html(typeStr)
 
 
     }

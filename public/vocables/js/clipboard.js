@@ -55,6 +55,7 @@ if(!data.source)
 
     self.clear = function () {
         $(".clipboardSelected").removeClass("clipboardSelected")
+
         blinkVisjsNode(null);
         content = []
     }

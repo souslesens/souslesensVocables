@@ -381,6 +381,17 @@ var common = (function () {
             return str.replace(/\//g, "_").replace(/\./g, "_");
 
         }
+        self.encodeToJqueryId = function (myId) {
+
+            return myId.replace(/\./g, "__e__");
+
+        }
+        self.decodeFromJqueryId = function (jqueryId) {
+
+            var str = jqueryId.toLowerCase().replace(/__e__/g, ".");
+            return str;
+
+        }
 
         /**
          * https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript

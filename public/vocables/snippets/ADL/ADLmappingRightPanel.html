@@ -12,27 +12,32 @@
 </style>
 <div>
 
-    <div id="ADLmappings_Tabs" style="width:360px;">
+    <div id="ADLmappings_Tabs" style="width:320px;">
 
         <ul>
+            <li style="background-color: papayawhip"><a href="#ADLmappings_LiteralsTab">Literals</a></li>
+            <li style="background-color: palegreen"><a href="#ADLmappings_OneModelTab">One-Model</a></li>
+            <li style="background-color: darkseagreen"><a href="#ADLmappings_OntologiesTab">Stds</a></li>
 
-            <li><a href="#ADLmappings_OneModelTab">One-Model</a></li>
-            <li><a href="#ADLmappings_OntologiesTab">Others</a></li>
-            <li><a href="#ADLmappings_PropertiesTab">Properties</a></li>
+            <li style="background-color: #86d5f8"><a href="#ADLmappings_PropertiesTab">Props</a></li>
 
 
         </ul>
 
-
-        <div id="ADLmappings_OneModelTab" style="width:100%;height:800px">
+        <div id="ADLmappings_LiteralsTab" style="width:320px;height:800px;background-color: papayawhip">
+            <div id="ADLmappings_LiteralsTree" style='width:360px;height: 600px;overflow: auto'></div>
+            <
+        </div>
+        <div id="ADLmappings_OneModelTab" style="width:320px;height:800px;background-color: limegreen">
             <button onclick="ADLmappings.displayOneModelTree()">reload</button>
             <div>
-            <br>search    <input id="ADLmappings_OneModelSearchTree" />
-            <div id="ADLmappings_OneModelTree" style='width:360px;height: 600px;overflow: auto'></div></div>
+                <br>search <input id="ADLmappings_OneModelSearchTree"/>
+                <div id="ADLmappings_OneModelTree" style='width:360px;height: 600px;overflow: auto'></div>
+            </div>
 
 
         </div>
-        <div id="ADLmappings_OntologiesTab" style="width:100%;height:800px">
+        <div id="ADLmappings_OntologiesTab" style="width:320px;height:800px;background-color: darkseagreen">
             <div id="GenericTools_searchAllDiv" style="height: 50px"></div>
             <div id="ADLmappings_sourceLabelDiv"
                  style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
@@ -42,9 +47,9 @@
 
         </div>
 
-        <div id="ADLmappings_PropertiesTab" style="width:100%;height:800px">
+        <div id="ADLmappings_PropertiesTab" style="width:100%;height:800px;background-color: #86d5f8">
             <div style="width: 360px;height: 600px;overflow: auto">
-               search    <input id="ADLmappings_propertiesSearchTree" />
+                search <input id="ADLmappings_propertiesSearchTree"/>
                 <div class="jstree" id="ADLmappingPropertiesTree"></div>
             </div>
         </div>
@@ -68,7 +73,9 @@
 
     var to = false;
     $('#ADLmappings_OneModelSearchTree').keyup(function () {
-        if(to) { clearTimeout(to); }
+        if (to) {
+            clearTimeout(to);
+        }
         to = setTimeout(function () {
             var searchString = $("#ADLmappings_OneModelSearchTree").val();
             $('#ADLmappings_OneModelTree').jstree(true).search(searchString);
@@ -77,12 +84,14 @@
 
     var to2 = false;
     $('#ADLmappings_propertiesSearchTree').keyup(function () {
-        if(to2) { clearTimeout(to2); }
+        if (to2) {
+            clearTimeout(to2);
+        }
 
         to2 = setTimeout(function () {
             var searchString = $("#ADLmappings_propertiesSearchTree").val();
 
-            var xx= $('#ADLmappingPropertiesTree').jstree(true)
+            var xx = $('#ADLmappingPropertiesTree').jstree(true)
             $('#ADLmappingPropertiesTree').jstree(true).search(searchString);
         }, 250);
     });

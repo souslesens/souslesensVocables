@@ -205,7 +205,7 @@ var Blender = (function () {
                 // Blender.currentDNDstartNodeParentId=Blender.currentTreeNode.parent
                 Blender.currentDNDstartNodeId = element.data.nodes[0];
 
-                Blender.currentDNDstartNode = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId)
+                Blender.currentDNDstartNode = common.jstree.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId)
                 Blender.currentDNDstartNodeParentId = Blender.currentDNDstartNode.parent
 
 
@@ -405,10 +405,10 @@ var Blender = (function () {
                     }
                 }
 
-                menuItems.deleteNode = {
+                menuItems.jstree.deleteNode = {
                     label: "Delete node",
                     action: function (obj, sss, cc) {
-                        self.menuActions.deleteNode("concept");
+                        self.menuActions.jstree.deleteNode("concept");
                     },
 
 
@@ -453,7 +453,7 @@ var Blender = (function () {
 
                 var newParentData = Blender.currentDNDoperation.parent.data;
                 var nodeData = Blender.currentDNDoperation.node.data
-                var oldParentData = common.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeParentId).data;
+                var oldParentData = common.jstree.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeParentId).data;
                 //   var oldParentData = Blender.currentTreeNode.data;
                 var broaderPredicate;
 
@@ -527,7 +527,7 @@ var Blender = (function () {
             },
 
 
-            deleteNode: function (type) {
+           deleteNode: function (type) {
                 if (!type)
                     alert(" no type")
 
@@ -606,7 +606,7 @@ var Blender = (function () {
 
                             },
                             function (callbackSeries) {// delete from tree
-                                common.deleteNode(treeDivId, node.id)
+                                common.jstree.deleteNode(treeDivId, node.id)
                                 if (type == "concept") {
                                     self.currentTreeNode = null;
                                 } else if (type == "collection") {
@@ -654,7 +654,7 @@ var Blender = (function () {
                         oldId = data.id;
                         newId = common.getNewUri(self.currentSource)
                         label = data.label;
-                        var existingNodes = common.getjsTreeNodes("Blender_conceptTreeDiv")
+                        var existingNodes = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv")
                         var ok = true
                         var previousId;
                         existingNodes.forEach(function (item) {
@@ -737,7 +737,7 @@ var Blender = (function () {
                                 }
                             }
                         ]
-                        common.addNodesToJstree("Blender_conceptTreeDiv", parentJstreeId, jstreeData)
+                        common.jstree.addNodesToJstree("Blender_conceptTreeDiv", parentJstreeId, jstreeData)
                     }
 
                     if (!callback)
@@ -765,7 +765,7 @@ var Blender = (function () {
 
                             Clipboard.clear();
 
-                            var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
+                            var existingNodeIds = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv", true)
                             var fromSource = data.source;
                             var toGraphUri = Config.sources[self.currentSource].graphUri
                             var id = data.id;
@@ -870,7 +870,7 @@ var Blender = (function () {
 
                     self.menuActions.pasteClipboardNodeOnly(function (err, result) {
 
-                        var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
+                        var existingNodeIds = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv", true)
                         var fromSource = data.source;
                         var toGraphUri = Config.sources[self.currentSource].graphUri
                         var id = data.id;
@@ -1135,7 +1135,7 @@ var Blender = (function () {
                         }]
 
 
-                        common.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
+                        common.jstree.addNodesToJstree(treeDiv, parentNode, jsTreeData, {})
                         //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
 
 
@@ -1243,8 +1243,13 @@ var Blender = (function () {
 
                     }
 
-                var result = common.copyTextToClipboard(str)
-                alert( "filtered taxonomy CSV copied in clipboard")
+                var result = common.copyTextToClipboard(str,function(err,result){
+                    if(err)
+                        return MainController.UI.message(err);
+                    MainController.UI.message(result);
+                    alert( "filtered taxonomy CSV copied in clipboard")
+                })
+
 
 
             })
@@ -1302,7 +1307,7 @@ var Blender = (function () {
                  //   console.log(JSON.stringify(jstreeData, null, 2))
                     var jsTreeOptions = self.getConceptJstreeOptions(false)
                     jsTreeOptions.openAll = true;
-                    common.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)
+                    common.jstree.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)
                 $("#Blender_tabs").tabs("option", "active", 0);
                 if(callback)
                     callback();

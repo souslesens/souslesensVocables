@@ -379,7 +379,7 @@ var h=$("#graphDiv").height();
             var isNewTree = $("#OntologyBrowser_queryTreeDiv").is(':empty');
             var existingNodes = []
             if (!isNewTree)
-                existingNodes = common.getjsTreeNodes("OntologyBrowser_queryTreeDiv", true)
+                existingNodes = common.jstree.getjsTreeNodes("OntologyBrowser_queryTreeDiv", true)
             var jstreeData = [];
 
             if (existingNodes.indexOf(OntologyBrowser.currentNode.id) < 0) {
@@ -394,7 +394,7 @@ var h=$("#graphDiv").height();
                 })
                 if (!isNewTree) {
 
-                    common.addNodesToJstree("OntologyBrowser_queryTreeDiv", "#", jstreeData)
+                    common.jstree.addNodesToJstree("OntologyBrowser_queryTreeDiv", "#", jstreeData)
                     jstreeData = []
                 }
 
@@ -422,9 +422,9 @@ var h=$("#graphDiv").height();
                     //  jsTreeOptions.onCheckNodeFn = OntologyBrowser.checkTreeNodeFn;
                     //  jsTreeOptions.withCheckboxes=true
 
-                    common.loadJsTree("OntologyBrowser_queryTreeDiv", jstreeData, jsTreeOptions)
+                    common.jstree.loadJsTree("OntologyBrowser_queryTreeDiv", jstreeData, jsTreeOptions)
                 } else {
-                    common.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentNode.id, jstreeData)
+                    common.jstree.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentNode.id, jstreeData)
                 }
 
             }
@@ -485,7 +485,7 @@ var h=$("#graphDiv").height();
 
             })
 
-            common.addNodesToJstree("OntologyBrowser_queryTreeDiv", node.id, jstreeData)
+            common.jstree.addNodesToJstree("OntologyBrowser_queryTreeDiv", node.id, jstreeData)
 
 
         },
@@ -506,14 +506,14 @@ var h=$("#graphDiv").height();
         },
 
         executeQuery: function () {
-            var nodes = common.getjsTreeNodes("OntologyBrowser_queryTreeDiv")
+            var nodes = common.jstree.getjsTreeNodes("OntologyBrowser_queryTreeDiv")
             var nodesMap = {}
             nodes.forEach(function (item) {
                 nodesMap[item.id] = item;
             })
 
 
-            var classNodeIds = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", "#").children;
+            var classNodeIds = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", "#").children;
 
             var filters = [];
             var selectFields = []
@@ -530,7 +530,7 @@ var h=$("#graphDiv").height();
 
                 var propertyNodes = []
                 var propertyNodes = []
-                var classNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId])
+                var classNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId])
 
                 if (index > 0) {// join classes
 
@@ -566,7 +566,7 @@ var h=$("#graphDiv").height();
 
                 query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . "
                 classNode.children.forEach(function (propertyNodeId) {
-                    var propertyNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [propertyNodeId])
+                    var propertyNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [propertyNodeId])
                     if (propertyNode.data.optional) {
                         query += "OPTIONAL {"
                         propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "")
@@ -576,7 +576,7 @@ var h=$("#graphDiv").height();
 
                     query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . "
                     propertyNode.children.forEach(function (filterNodeId) {
-                        var filterNode = common.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [filterNodeId])
+                        var filterNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [filterNodeId])
                         var operator = filterNode.data.operator;
                         var value = filterNode.data.value;
                         var range = propertyNode.data.range.value

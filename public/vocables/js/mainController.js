@@ -108,7 +108,7 @@ var MainController = (function () {
                     treeData.push({id: sourceLabel, text: sourceLabel, parent: Config.sources[sourceLabel].schemaType,})// data: Config.sources[sourceLabel]})
                 }
             })
-            common.loadJsTree(treeDiv, treeData, {
+            common.jstree.loadJsTree(treeDiv, treeData, {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,
                 selectTreeNodeFn: function (evt, obj) {
@@ -158,7 +158,7 @@ var MainController = (function () {
 
             }
             //})
-            common.loadJsTree(treeDiv, treeData, {
+            common.jstree.loadJsTree(treeDiv, treeData, {
 
                 selectTreeNodeFn: function (evt, obj) {
                     self.currentTool = obj.node.id;

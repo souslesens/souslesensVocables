@@ -64,10 +64,10 @@ var TreeController = (function () {
 
 
         if (parentNodeId == "#") {
-            common.loadJsTree(treeDivId, jstreeData, jsTreeOptions, callback)
+            common.jstree.loadJsTree(treeDivId, jstreeData, jsTreeOptions, callback)
 
         } else {
-            common.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions)
+            common.jstree.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions)
         }
         $("#waitImg").css("display", "none");
 

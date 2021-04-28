@@ -143,7 +143,7 @@ var ADLadvancedMapping = (function () {
 
                 var existingNodes = []
                 if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
-                    existingNodes = common.getjsTreeNodes("advancedMappings_pickListMappingTree", true, "#")
+                    existingNodes = common.jstree.getjsTreeNodes("advancedMappings_pickListMappingTree", true, "#")
                 }
 
 
@@ -190,7 +190,7 @@ var ADLadvancedMapping = (function () {
 
 
                 if ($("#advancedMappings_pickListMappingTree").jstree(true))
-                    common.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
+                    common.jstree.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
                 else {
                     var options = {
                         openAll: true,
@@ -200,7 +200,7 @@ var ADLadvancedMapping = (function () {
                             ADLadvancedMapping.currentTreeNode = obj.node
                         }
                     }
-                    common.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
+                    common.jstree.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
 
                 }
 
@@ -238,7 +238,7 @@ var ADLadvancedMapping = (function () {
         if (!existingNodes) {
             existingNodes = {}
             if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
-                var array = common.getjsTreeNodes("advancedMappings_pickListMappingTree", false, "#")
+                var array = common.jstree.getjsTreeNodes("advancedMappings_pickListMappingTree", false, "#")
                 array.forEach(function (item) {
                     if (!item.children)
                         existingNodes[item.id] = -1
@@ -618,7 +618,7 @@ var ADLadvancedMapping = (function () {
                 }
                 if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
 
-                    common.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
+                    common.jstree.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
                 }
                 else {
                     var options = {
@@ -630,7 +630,7 @@ var ADLadvancedMapping = (function () {
                         },
                         doNotAdjustDimensions: true
                     }
-                    common.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
+                    common.jstree.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
 
                 }
 
@@ -711,7 +711,7 @@ var ADLadvancedMapping = (function () {
             parent: labelNode.id,
             data: {id: ontologyNode.data.id, label: ontologyNode.data.label, source: ontologyNode.data.source}
         }]
-        common.addNodesToJstree("advancedMappings_pickListMappingTree", labelNode.id, jstreeData)
+        common.jstree.addNodesToJstree("advancedMappings_pickListMappingTree", labelNode.id, jstreeData)
         setTimeout(function () {
             $("#advancedMappings_pickListMappingTree").jstree().check_node(ontologyNode.data.id)
         }, 500)
@@ -734,7 +734,7 @@ var ADLadvancedMapping = (function () {
                 parent: node.id,
                 data: {id: newUri, label: node.text, source: "ONE-MODEL"}
             }]
-            common.addNodesToJstree("advancedMappings_pickListMappingTree", node.id, jstreeData)
+            common.jstree.addNodesToJstree("advancedMappings_pickListMappingTree", node.id, jstreeData)
             setTimeout(function () {
                 $("#advancedMappings_pickListMappingTree").jstree().check_node(newUri)
             }, 500)

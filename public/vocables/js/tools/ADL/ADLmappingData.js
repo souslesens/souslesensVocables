@@ -18,6 +18,7 @@ var ADLmappingData = (function () {
 
     }
 
+
     self.loadADL_SQLModel = function () {
 
         //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
@@ -109,7 +110,7 @@ var ADLmappingData = (function () {
             },
 
         }
-        common.loadJsTree("ADLmappings_dataModelTree", modelJstreeData, options)
+        common.jstree.loadJsTree("ADLmappings_dataModelTree", modelJstreeData, options)
         $("#waitImg").css("display", "none");
     }
 
@@ -151,7 +152,7 @@ var ADLmappingData = (function () {
                         str += "<td class='dataSample_cell'>" + key + "</td>"
                         //   strJoins += "<td  class='dataSample_cell dataSample_join'<span id='dataSample_join_" + colId + "'>" + colJoins + "</span> </td>"
 
-                        var id=common.encodeToJqueryId("datasample_type_" + colId).toLowerCase()
+                        var id = common.encodeToJqueryId("datasample_type_" + colId).toLowerCase()
                         strTypes += "<td  class='dataSample_cell dataSample_type'<span id='" + id + "'>" + colType + "</span> </td>"
 
                         //   strMappings += "<td  class='dataSample_cell dataSample_mapping'<span id='dataSample_mapping_" + colId + "'>" + colMappings + "</span> </td>"
@@ -180,37 +181,35 @@ var ADLmappingData = (function () {
             $("#ADLmappings_dataSampleDiv").html(str)
             setTimeout(function () {
 
-             /*   $(".dataSample_type").contextmenu(function (event) {*/
-              $(".dataSample_type").bind("dblclick", function (event) {
-                  event.stopPropagation();
+                /*   $(".dataSample_type").contextmenu(function (event) {*/
+                $(".dataSample_type").bind("dblclick", function (event) {
+                    event.stopPropagation();
 
-                        var point = {x: event.clientX - leftPanelWidth, y: event.clientY}
+                    var point = {x: event.clientX - leftPanelWidth, y: event.clientY}
 
-                        var html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.removeMapping();\"> remove Mapping</span>" +
-                            "<span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"
-               //   "<span class=\"popupMenuItem\" onclick=\"ADLadvancedMapping.executeBulkMappingSequence();\">executeBulkMappingSequence</span>"
+                    var html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.removeMapping();\"> remove Mapping</span>" +
+                        "<span class=\"popupMenuItem\" onclick=\"ADLmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"
+                    //   "<span class=\"popupMenuItem\" onclick=\"ADLadvancedMapping.executeBulkMappingSequence();\">executeBulkMappingSequence</span>"
 
 
-                        $("#graphPopupDiv").html(html);
-                        MainController.UI.showPopup(point, "graphPopupDiv")
-
+                    $("#graphPopupDiv").html(html);
+                    MainController.UI.showPopup(point, "graphPopupDiv")
 
 
                 })
 
                 $(".dataSample_type").bind("click", function (event) {
-                    MainController.UI.hidePopup( "graphPopupDiv")
+                    MainController.UI.hidePopup("graphPopupDiv")
 
-                  //  var nodeId = $(this).attr("id").substring(16).replace("__", ".")
-                    var nodeId =common.decodeFromJqueryId( $(this).attr("id"))
-                    nodeId=nodeId.replace("datasample_type_","")
-                        self.currentColumn = nodeId
+                    //  var nodeId = $(this).attr("id").substring(16).replace("__", ".")
+                    var nodeId = common.decodeFromJqueryId($(this).attr("id"))
+                    nodeId = nodeId.replace("datasample_type_", "")
+                    self.currentColumn = nodeId
                     /*    var mode = "properties"
                         if (event.ctrlKey)*/
                     var mode = "types"
                     $(".dataSample_type").removeClass("datasample_type_selected")
                     $(this).addClass("datasample_type_selected")
-
 
 
                 })
@@ -256,18 +255,28 @@ var ADLmappingData = (function () {
     }
 
     self.setDataSampleColumntype = function (columnId, typeObj) {
+        var jqueryId = "#" + common.encodeToJqueryId("datasample_type_" + columnId).toLowerCase()
+        if(!typeObj || typeObj=="")
+            return  $(jqueryId).html()
         var typeStr = "";
-        if (Array.isArray(typeObj.data)) {
-            typeStr += "<ul>"
-            typeObj.data.forEach(function (item, index) {
-                typeStr += "<li>" + item.label
-            })
-            typeStr += "</ul>"
-        } else
-            typeStr = typeObj.data.label;
-        var jqueryId="#"+common.encodeToJqueryId("datasample_type_" +columnId)
-        var xx=$(jqueryId).attr("id");
-        $(jqueryId).html(typeStr)
+        if (!Array.isArray(typeObj.data))
+            typeObj.data=[ typeObj.data]
+
+            if(typeObj.data.length==1) {
+              return  $(jqueryId).html( typeObj.data[0].label)
+            }
+
+        var typesStr = "<ul>"
+        typeObj.data.forEach(function (item, index) {
+            typesStr += "<li>" + item.label+"</li>"
+        })
+        typesStr += "</ul>"
+
+        $(jqueryId).html("<span title='"+typesStr+"'> multiple...</span>")
+
+
+
+
 
 
     }
@@ -275,7 +284,7 @@ var ADLmappingData = (function () {
 
     self.menuActions = {
         removeMapping: function () {
-
+            ADLmappings.unAssignOntologyTypeToColumn(self.currentColumn)
         },
         showAdvancedMappingDialog: function () {
             ADLadvancedMapping.showAdvancedMappingDialog();
@@ -305,11 +314,10 @@ var ADLmappingData = (function () {
 
             ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data: types})
 
-            $("#mainDialogDiv").dialog("close")
+            $("#ADLmappings_AdvancedMappingDialogDiv").dialog("close")
 
 
         }
-
 
 
     }

@@ -51,7 +51,7 @@ var visjsGraph = (function () {
         var options = {
             interaction: {hover: true},
             width: "" + $("#" + divId).width() + "px",
-            height: "" + ($("#" + divId).height()-120) + "px",
+            height: "" + ($("#" + divId).height()-50) + "px",
             nodes: {
                 shape: 'dot',
                 size: 12,
@@ -219,18 +219,27 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var html = "<div  style='position: relative; top:10px;left:10px'><button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>"
+        var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'><button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>"
         if (true) {
+            if(!$("#graphButtons").length) {
             html += "Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
-                "<option></option>" +
+                "<option ></option>"+
+                "<option >standard</option>" +
+
                 "<option>hierarchical vertical</option>" +
                 "<option>hierarchical horizontal</option>" +
                 "</div>" +
 
                 "</select>"
-        }
-        $("#" + divId).append(html)
 
+        var parent=$("#" + divId).parent()
+
+            $(parent).css("flex-direction","column")
+            $(parent).prepend(html)
+        }
+
+            html +="</div>"
+        }
 
         if (callback)
             return callback()
@@ -246,22 +255,11 @@ var visjsGraph = (function () {
             sortMethod:"hubsize",
                }
 
-          /*  currentDrawParams.options.layout = {
-                "hierarchical": {
-                    "direction": "UD",
-                    "sortMethod": "directed"
-                }
-            }
-            currentDrawParams.options.physics = {
-                "hierarchicalRepulsion": {
-                    "avoidOverlap": 1
-                }
-            }*/
 
         self.redraw()
     }
 
-        if (layout == "hierarchical horizontal") {
+      else  if (layout == "hierarchical horizontal") {
             currentDrawParams.options.layoutHierarchical = {
                 direction: "LR",
                 sortMethod:"hubsize",
@@ -281,8 +279,8 @@ var visjsGraph = (function () {
 
                 self.redraw()
         } else {
-          //  currentDrawParams.options.layoutHierarchical = null
-           // self.redraw()
+            currentDrawParams.options={}
+            self.redraw()
         }
     }
 
@@ -391,8 +389,12 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv()
-        var result = common.copyTextToClipboard(csv)
-        MainController.UI.message(result);
+       common.copyTextToClipboard(csv,function(err, result){
+            if( err)
+                MainController.UI.message(err);
+            MainController.UI.message(result);
+        })
+
     }
 
     self.toCsv = function (dataFields) {

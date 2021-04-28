@@ -94,7 +94,7 @@ var ExternalReferences = (function () {
 
             })
             if (newTreeNodes.length > 0)
-                common.addNodesToJstree("Blender_conceptTreeDiv", node.id, newTreeNodes)
+                common.jstree.addNodesToJstree("Blender_conceptTreeDiv", node.id, newTreeNodes)
 
 
         })
@@ -119,7 +119,7 @@ var ExternalReferences = (function () {
 
             async.eachSeries(dataArray, function (data, callbackEach) {
 
-                    var existingNodeIds = common.getjsTreeNodes("Blender_conceptTreeDiv", true)
+                    var existingNodeIds = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv", true)
                     var fromSource = data.source;
                     var fromGraphUri = Config.sources[fromSource].graphUri
                     var fromSparql_url = Config.sources[fromSource].sparql_server.url
@@ -144,7 +144,7 @@ var ExternalReferences = (function () {
                     if (err)
                         return MainController.UI.message(err);
                     var jsTreeOptions = {type: "externalReference", labelClass: "treeType_externalReference"}
-                    common.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.data.id, newTreeNodes)
+                    common.jstree.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.data.id, newTreeNodes)
                     Clipboard.clear();
                 }
             )

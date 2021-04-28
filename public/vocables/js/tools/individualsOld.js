@@ -313,7 +313,7 @@ var Individuals = (function () {
                             // contextMenu: self.jstreeContextMenu("Class"),
                             openAll: true
                         }
-                        common.loadJsTree("Individuals_ontologyClassesTree", classJstreeData, optionsClass)
+                        common.jstree.loadJsTree("Individuals_ontologyClassesTree", classJstreeData, optionsClass)
                         callbackSeries()
                     }
                     ,
@@ -370,7 +370,7 @@ var Individuals = (function () {
                             }
 
 
-                            common.loadJsTree("Individuals_ontologyPropertiesTree", propertyJstreeData, optionsProperty)
+                            common.jstree.loadJsTree("Individuals_ontologyPropertiesTree", propertyJstreeData, optionsProperty)
                             callbackSeries()
                         })
                     }
@@ -505,7 +505,7 @@ var Individuals = (function () {
                         },
                         contextMenu: self.jstreeContextMenu("Column")
                     }
-                    common.loadJsTree("Individuals_dataModelTree", modelJstreeData, options)
+                    common.jstree.loadJsTree("Individuals_dataModelTree", modelJstreeData, options)
                     $("#waitImg").css("display", "none");
                 }
                 , error: function (err) {

@@ -63,7 +63,7 @@ var ADLquery = (function () {
                 }
 
             })
-            common.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
+            common.jstree.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
 
    /*         var propsMap = {}
             result.forEach(function (item) {
@@ -86,7 +86,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     data: item
                 })
 
-                common.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
+                common.jstree.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
 
            jstreeData = []
                 item.domains.forEach(function (item) {
@@ -107,7 +107,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     })
                 })
 
-                common.addNodesToJstree(jstreeTargetDiv, propId, jstreeData)
+                common.jstree.addNodesToJstree(jstreeTargetDiv, propId, jstreeData)
             }*/
 
         })
@@ -375,7 +375,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 var isNewTree = $("#ADLquery_queryTreeDiv").is(':empty');
                 var existingNodes = []
                 if (!isNewTree)
-                    existingNodes = common.getjsTreeNodes("ADLquery_queryTreeDiv", true)
+                    existingNodes = common.jstree.getjsTreeNodes("ADLquery_queryTreeDiv", true)
                 var jstreeData = [];
 
                 if (existingNodes.indexOf(ADLquery.currentNode.id) < 0) {
@@ -393,7 +393,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     })
                     if (!isNewTree) {
 
-                        common.addNodesToJstree("ADLquery_queryTreeDiv", "#", jstreeData)
+                        common.jstree.addNodesToJstree("ADLquery_queryTreeDiv", "#", jstreeData)
                         jstreeData = []
                     }
 
@@ -424,9 +424,9 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     //  jsTreeOptions.onCheckNodeFn = ADLquery.checkTreeNodeFn;
                     //  jsTreeOptions.withCheckboxes=true
 
-                    common.loadJsTree("ADLquery_queryTreeDiv", jstreeData, jsTreeOptions)
+                    common.jstree.loadJsTree("ADLquery_queryTreeDiv", jstreeData, jsTreeOptions)
                 } else {
-                    common.addNodesToJstree("ADLquery_queryTreeDiv", ADLquery.currentNode.id, jstreeData)
+                    common.jstree.addNodesToJstree("ADLquery_queryTreeDiv", ADLquery.currentNode.id, jstreeData)
                 }
             }
             ,
@@ -531,7 +531,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                     })
 
-                    common.addNodesToJstree("ADLquery_queryTreeDiv", node.id, jstreeData)
+                    common.jstree.addNodesToJstree("ADLquery_queryTreeDiv", node.id, jstreeData)
 
 
                 },
@@ -560,14 +560,14 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 executeOntologyIndividualsQuery: function () {
 
-                    var nodes = common.getjsTreeNodes("ADLquery_queryTreeDiv")
+                    var nodes = common.jstree.getjsTreeNodes("ADLquery_queryTreeDiv")
                     var nodesMap = {}
                     nodes.forEach(function (item) {
                         nodesMap[item.id] = item;
                     })
 
 
-                    var classNodeIds = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", "#").children;
+                    var classNodeIds = common.jstree.getjsTreeNodeObj("ADLquery_queryTreeDiv", "#").children;
 
                     var filters = [];
                     var selectFields = []
@@ -584,7 +584,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         var propertyNodes = []
                         var propertyNodes = []
-                        var classNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [classNodeId])
+                        var classNode = common.jstree.getjsTreeNodeObj("ADLquery_queryTreeDiv", [classNodeId])
 
                         if (index > 0) {// join classes
 
@@ -620,7 +620,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . "
                         classNode.children.forEach(function (propertyNodeId) {
-                            var propertyNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [propertyNodeId])
+                            var propertyNode = common.jstree.getjsTreeNodeObj("ADLquery_queryTreeDiv", [propertyNodeId])
                             if (propertyNode.data.optional) {
                                 query += "OPTIONAL {"
                                 propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "")
@@ -630,7 +630,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                             query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . "
                             propertyNode.children.forEach(function (filterNodeId) {
-                                var filterNode = common.getjsTreeNodeObj("ADLquery_queryTreeDiv", [filterNodeId])
+                                var filterNode = common.jstree.getjsTreeNodeObj("ADLquery_queryTreeDiv", [filterNodeId])
                                 var operator = filterNode.data.operator;
                                 var value = filterNode.data.value;
                                 var range = propertyNode.data.range.value
@@ -700,7 +700,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     var isNewTree = $("#ADLquery_queryTreeDiv").is(':empty');
                     if (isNewTree) {//query only class (not properties)
                     } else {
-                        var nodes = common.getjsTreeNodes("ADLquery_queryTreeDiv")
+                        var nodes = common.jstree.getjsTreeNodes("ADLquery_queryTreeDiv")
                         var nodesMap = {}
                         nodes.forEach(function (item) {
                             nodesMap[item.id] = item;
@@ -727,7 +727,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         classNodeIds.forEach(function (classNodeId, index) {
 
-                            var props = common.getjsTreeNodes("ADLquery_queryTreeDiv", false, [classNodeId])
+                            var props = common.jstree.getjsTreeNodes("ADLquery_queryTreeDiv", false, [classNodeId])
 
 
                             var labels = []

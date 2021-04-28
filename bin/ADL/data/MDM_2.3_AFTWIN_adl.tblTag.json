@@ -1,0 +1,90 @@
+{
+  "mappings": [
+    {
+      "subject": "adl.tbltag.id",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
+    },
+    {
+      "subject": "adl.tbltag.functionalclassid",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+    },
+    {
+      "subject": "adl.tbltag.servicedescription",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+    },
+    {
+      "subject": "adl.tbltag.status",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.posccaesar.org/dm/Status"
+    },
+    {
+      "subject": "adl.tbltag.id",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+      "object": "adl.tbltag.servicedescription"
+    },
+    {
+      "subject": "adl.tbltag.id",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+      "object": "adl.tbltag.functionalclassid"
+    },
+    {
+      "subject": "adl.tbltag.id",
+      "predicate": "http://w3id.org/readi/rdl/CFIHOS-10000025",
+      "object": "adl.tbltag.status"
+    }
+  ],
+  "model": {
+    "http://w3id.org/readi/rdl/CFIHOS-00000028": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "Tag"
+    },
+    "http://standards.iso.org/iso/15926/part14/FunctionalObject": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "FunctionalObject"
+    },
+    "http://data.posccaesar.org/dm/Status": {
+      "parents": [
+        "ISO_15926-PCA_http://data.posccaesar.org/dm/ClassOfIndividual_0",
+        "ISO_15926-PCA_http://data.posccaesar.org/dm/Class_0",
+        "ISO_15926-PCA_http://data.posccaesar.org/dm/AbstractObject_0",
+        "ISO_15926-PCA_http://data.posccaesar.org/dm/Thing_0",
+        "ISO_15926-PCA_http://www.w3.org/2002/07/owl#Thing_0",
+        "ISO_15926-PCA",
+        "#"
+      ],
+      "label": "status"
+    },
+    "http://standards.iso.org/iso/15926/part14/hasFunctionalPart": {
+      "label": "hasFunctionalPart"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-10000025": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/qualityOf",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "tagStatus"
+    }
+  },
+  "infos": {
+    "lastModified": "2021-04-28T08:59:25.776Z",
+    "modifiedBy": "admin",
+    "comment": ""
+  }
+}

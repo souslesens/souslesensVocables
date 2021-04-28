@@ -448,6 +448,18 @@
     "schema": null,
     "color": "#bcbd22"
   },
+  "DEXPI": {
+    "editable": false,
+    "graphUri": "http://sandbox.dexpi.org/informationmodel/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://sandbox.dexpi.org/informationmodel/TechnicalItem>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
 
 
 
@@ -512,8 +524,7 @@
 
 
 
-  "_comment": "**************************************************************Obsolete***************************************",
-  "_comment": "**************************************************************Obsolete***************************************",
+  "_comment": "**************************************************************Obsolete***************************************", "_comment": "**************************************************************Obsolete***************************************",
   "CFIHOS": {
     "graphUri": "",
     "sparql_server": {
@@ -530,7 +541,6 @@
     "schema": null,
     "color": "#bcbd22"
   },
-
 
 
 

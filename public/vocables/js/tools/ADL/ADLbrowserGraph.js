@@ -57,7 +57,7 @@ self.edgeColor="#aaa";
             if (visjsGraph.data && visjsGraph.data.nodes) {
                 var existingNodes
                 if( ADLbrowser.currentGraphNodeSelection) {
-                    existingNodes= visjsGraph.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id,true)
+                    existingNodes= visjsGraph.jstree.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id,true)
 
                 }else {
                     existingNodes = visjsGraph.data.nodes.get();

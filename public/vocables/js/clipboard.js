@@ -70,12 +70,13 @@ if(!data.source)
 
             stopInterv = _stop//!!! variable globale
             setInt = setInterval(function () {
-                if (stopInterv && !hidden)
+                if (stopInterv && !hidden && setInt) {
                     clearInterval(setInt)
-                visjsGraph.data.nodes.update({
-                    id: nodeId, hidden: hidden
-                });
-                hidden = !hidden
+                    visjsGraph.data.nodes.update({
+                        id: nodeId, hidden: hidden
+                    });
+                    hidden = !hidden
+                }
 
             }, 500);
         }

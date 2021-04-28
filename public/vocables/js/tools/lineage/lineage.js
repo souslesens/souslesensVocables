@@ -489,8 +489,11 @@ var Lineage_classes = (function () {
                 text += item.child1.value + "," + item.child1Label.value + "\n"
             })
 
-            var result = common.copyTextToClipboard(text)
-            MainController.UI.message(result);
+             common.copyTextToClipboard(text,function(err,result){
+                if(err)
+                    return MainController.UI.message(err);
+                MainController.UI.message(result);
+            })
         }
 
         self.listClusterContent = function (clusterNode) {
@@ -513,7 +516,7 @@ var Lineage_classes = (function () {
                 contextMenu: SourceBrowser.getJstreeConceptsContextMenu()
             }
 
-            common.loadJsTree(SourceBrowser.currentTargetDiv, jstreeData, jstreeOptions)
+            common.jstree.loadJsTree(SourceBrowser.currentTargetDiv, jstreeData, jstreeOptions)
         }
 
         self.openCluster = function (clusterNode) {
@@ -587,7 +590,7 @@ var Lineage_classes = (function () {
                     } else {
                         var nodes = []
                         if (descendantsAlso) {
-                            var nodes = visjsGraph.getNodeDescendants(node.id, true)
+                            var nodes = visjsGraph.jstree.getNodeDescendants(node.id, true)
                         } else {
                             nodes.push(node)
                         }
@@ -829,7 +832,7 @@ var Lineage_classes = (function () {
                     )
 
                 })
-                common.loadJsTree("lineage_individualsPropertiesTree", jstreeData, {openAll: true});
+                common.jstree.loadJsTree("lineage_individualsPropertiesTree", jstreeData, {openAll: true});
 
                 if (false) {
                     Sparql_OWL.getIndividualProperties(sourceLabel, null, null, null, {distinct: "property"}, function (err, result) {
@@ -864,7 +867,7 @@ var Lineage_classes = (function () {
 
                         })
 
-                        common.loadJsTree("lineage_individualsPropertiesTree", jstreeData);
+                        common.jstree.loadJsTree("lineage_individualsPropertiesTree", jstreeData);
                     })
                 }
 
@@ -1817,7 +1820,7 @@ Lineage_properties = (function () {
                 return MainController.UI.message(err)
             var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true}
             options.contextMenu = self.jstreeContextMenu()
-            common.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
+            common.jstree.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
         })
 
     }
@@ -1879,7 +1882,7 @@ Lineage_properties = (function () {
                     label: "delete property",
                     action: function (e) {// pb avec source
 
-                        Lineage_common.deleteNode(self.currentTreeNode,"Lineage_propertiesTree")
+                        Lineage_common.jstree.deleteNode(self.currentTreeNode,"Lineage_propertiesTree")
 
                     }
 
@@ -2288,7 +2291,7 @@ Lineage_properties = (function () {
         }, function (err) {
             var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true}
             options.contextMenu = self.jstreeContextMenu()
-            common.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+            common.jstree.loadJsTree("Lineage_propertiesTree", jstreeData, options);
         })
 
     }
@@ -2379,7 +2382,11 @@ Lineage_common=(function(){
 
     var self={}
     self.copyNodeToClipboard = function (nodeData) {
-        common.copyTextToClipboard(JSON.stringify(nodeData))
+        common.copyTextToClipboard(JSON.stringify(nodeData),function(err,result){
+            if(err)
+                return MainController.UI.message(err);
+            MainController.UI.message(result);
+        })
 
     }
 
@@ -2471,7 +2478,7 @@ Lineage_common=(function(){
                             parent: parentNode.id,
                             data: nodeData,
                         }]
-                        common.addNodesToJstree(treeDiv, parentNode.id, jstreeData)
+                        common.jstree.addNodesToJstree(treeDiv, parentNode.id, jstreeData)
                     })
                 }
 

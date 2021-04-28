@@ -162,7 +162,7 @@ var Evaluate = (function () {
                     }*/
             }
 
-            common.loadJsTree(self.categoriesTreeId, nodes, {selectTreeNodeFn: Evaluate.onTreeClickNode, types: types});
+            common.jstree.loadJsTree(self.categoriesTreeId, nodes, {selectTreeNodeFn: Evaluate.onTreeClickNode, types: types});
 
         })
 
@@ -218,7 +218,7 @@ var Evaluate = (function () {
 
             })
 
-            common.addNodesToJstree("evaluate_treeDiv", broaderId, nodes);
+            common.jstree.addNodesToJstree("evaluate_treeDiv", broaderId, nodes);
 
         })
     }
@@ -549,7 +549,7 @@ var Evaluate = (function () {
 
             })
 
-            common.addNodesToJstree(self.categoriesTreeId, subject.id, nodes);
+            common.jstree.addNodesToJstree(self.categoriesTreeId, subject.id, nodes);
 
 
         })

@@ -90,7 +90,7 @@ var Import = (function () {
                 })
             })
 
-            common.addNodesToJstree(treeDivId, parentNode, jsTreeData, {})
+            common.jstree.addNodesToJstree(treeDivId, parentNode, jsTreeData, {})
 
         })
         self.clearImportNodesDialog()

@@ -193,7 +193,7 @@ var SourceBrowser = (function () {
                     label: "delete Class",
                     action: function (e) {// pb avec source
 
-                        Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv)
+                        Lineage_common.jstree.deleteNode(self.currentTreeNode, self.currentTargetDiv)
 
                     }
 
@@ -249,7 +249,7 @@ var SourceBrowser = (function () {
     self.openTreeNode = function (divId, sourceLabel, node, options) {
         if (!options)
             options = {}
-        var existingNodes = common.getjsTreeNodes(divId, true)
+        var existingNodes = common.jstree.getjsTreeNodes(divId, true)
         if (node.children.length > 0)
             if (!options.ctrlKey)
                 return;
@@ -317,7 +317,7 @@ var SourceBrowser = (function () {
                 return $("#" + self.currentTargetDiv).html("No data found")
             }
 
-            common.loadJsTree(self.currentTargetDiv, jstreeData, {
+            common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, {
                 openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
                     if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
                         return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);
@@ -425,7 +425,7 @@ var SourceBrowser = (function () {
                 }
             }
 
-            common.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
+            common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
             setTimeout(function () {
                 MainController.UI.updateActionDivLabel("Multi source search :" + term)
                 MainController.UI.message("");
@@ -484,7 +484,7 @@ var SourceBrowser = (function () {
 
 
                         var id = item["broader" + i].value
-                        if(id.indexOf("nodeID://")>-1)//skip anonym nodes
+                        if(false && id.indexOf("nodeID://")>-1)//skip anonym nodes
                             return
                         var jstreeId = item["broader" + i].jstreeId
                         if (!existingNodes[id]) {

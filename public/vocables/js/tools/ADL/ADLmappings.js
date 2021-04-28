@@ -49,6 +49,7 @@ var ADLmappings = (function () {
             $("#accordion").accordion("option", {active: 2});
             visjsGraph.clearGraph()
             //  MainController.UI.toogleRightPanel(true)
+            $("#graphDiv").html("")
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             $("#rightPanelDiv").load("snippets/ADL/ADLmappingRightPanel.html");
 
@@ -66,7 +67,7 @@ var ADLmappings = (function () {
                         return MainController.UI.message(err)
                     ADLmappings.displayOneModelTree()
                 })
-
+                self.displayLiteralsTree()
                 self.displayPropertiesTree("ADLmappingPropertiesTree")
 
                 $("#ADLmappings_AdvancedMappingDialogDiv").dialog({
@@ -75,7 +76,7 @@ var ADLmappings = (function () {
                     width: 1000,
                     modal: false,
                 });
-            }, 200)
+            }, 500)
         }
 
         //
@@ -83,7 +84,6 @@ var ADLmappings = (function () {
 
             self.clearMappings()
             OwlSchema.currentADLdataSourceSchema = null;
-            visjsGraph.clearGraph()
 
             ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
                 if (err)
@@ -99,12 +99,14 @@ var ADLmappings = (function () {
                 self.selectedOntologyNodes = {}
             self.selectedOntologyNodes[propertiesMap.node.data.id] = propertiesMap.node;
             self.currentJstreeNode = propertiesMap.node;
+
+
+
             self.currentJstreeNode.jstreeDiv = event.currentTarget.id
             if (ADLmappingData.currentColumn) {
                 if (ADLadvancedMapping.addingValueManuallyToNode) {
                     ADLadvancedMapping.addValueManuallyFromOntology(ADLadvancedMapping.addingValueManuallyToNode, propertiesMap.node)
-                }
-                else if (ADLadvancedMapping.assignConditionalTypeOn)
+                } else if (ADLadvancedMapping.assignConditionalTypeOn)
                     return ADLmappingData.assignConditionalType(propertiesMap.node)
                 else
                     self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
@@ -147,6 +149,25 @@ var ADLmappings = (function () {
 
                 return items;
             }
+        self.displayLiteralsTree = function () {
+            var optionsClass = {
+                selectTreeNodeFn: self.selectTreeNodeFn,
+                openAll: true,
+
+            }
+            var jstreeData=[]
+            self.literalValues.forEach(function(item){
+                jstreeData.push({
+                    id:item,
+                    text: item,
+                    parent:"#",
+                    data:{source:"xsd",id:item,label:item}
+
+
+                })
+            })
+            common.jstree.loadJsTree("ADLmappings_LiteralsTree", jstreeData, optionsClass)
+        }
         self.displayOneModelTree = function () {
             var propJstreeData = []
 
@@ -227,7 +248,7 @@ var ADLmappings = (function () {
                 },
                 contextMenu: self.contextMenuFn()
             }
-            common.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
+            common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
 
 
@@ -252,7 +273,7 @@ var ADLmappings = (function () {
                     },
 
                 }
-                common.loadJsTree(treeDivId, jsTreeData, options);
+                common.jstree.loadJsTree(treeDivId, jsTreeData, options);
             })
         }
 
@@ -278,6 +299,18 @@ var ADLmappings = (function () {
             }
 
             ADLmappingGraph.drawNode(column)
+
+            ADLmappingData.currentColumn = null;
+            $(".dataSample_type").removeClass("datasample_type_selected")
+        }
+
+        self.unAssignOntologyTypeToColumn = function (column, node) {
+            ADLmappingData.setDataSampleColumntype(column, "")
+
+
+            delete ADLmappings.currentMappedColumns[column]
+
+            ADLmappingGraph.graphActions.removeNode(column)
 
             ADLmappingData.currentColumn = null;
             $(".dataSample_type").removeClass("datasample_type_selected")
@@ -484,8 +517,12 @@ var ADLmappings = (function () {
 
         self.displayMappings = function () {
             var mappings = self.generateMappings()
-            common.copyTextToClipboard(JSON.stringify(mappings, null, 2))
-            MainController.UI.message("mappings copied to clipboard");
+            common.copyTextToClipboard(JSON.stringify(mappings, null, 2), function (err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+                MainController.UI.message(result);
+            })
+
         }
         self.saveMappings = function () {
             var mappingName = ADLmappingData.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.label
@@ -570,7 +607,9 @@ var ADLmappings = (function () {
             self.currentMappedColumns = {}
             ADLmappingGraph.initMappedProperties()
             $(".dataSample_type").html("");
-            visjsGraph.clearGraph()
+            //  visjsGraph.clearGraph()
+            //  $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
+
             TextAnnotator.isAnnotatingText = false;
         }
 
@@ -582,6 +621,46 @@ var ADLmappings = (function () {
         }
 
 
+        self.literalValues = [
+            'xsd:string',
+            'xsd:integer',
+            'xsd:int',
+            'xsd:decimal',
+            'xsd:float',
+            'xsd:dateTime',
+            'xsd:boolean',
+            'xsd:double',
+            'xsd:short',
+            /*   'xsd:nonNegativeInteger',
+               'xsd:negativeInteger',
+                'xsd:positiveInteger',
+               'xsd:nonPositiveInteger',
+               'xsd:long',
+               'xsd:unsignedLong',
+               'xsd:hexBinary',
+               'xsd:gYear',
+               'xsd:anyURI',
+               'xsd:NMTOKEN',
+               'xsd:normalizedString',
+               'xsd:unsignedInt',
+               'xsd:base64Binary',
+               'xsd:time',
+               'xsd:gMonthDay',
+               'xsd:token',
+               'xsd:Name',
+
+               'xsd:unsignedShort',
+
+               'xsd:date',
+               'xsd:gDay',
+               'xsd:language',
+               'xsd:NCName',
+               'xsd:byte',
+               'xsd:unsignedByte',
+
+               'xsd:gYearMonth',
+               'xsd:gMonth',*/
+        ]
         return self;
     }
 

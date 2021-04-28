@@ -90,10 +90,10 @@ var Collection = (function () {
             }
 
 
-            menuItems.deleteNode = {
+            menuItems.jstree.deleteNode = {
                 label: "Delete node",
                 action: function (obj, sss, cc) {
-                    Blender.menuActions.deleteNode("collection");
+                    Blender.menuActions.jstree.deleteNode("collection");
                 },
 
 
@@ -134,7 +134,7 @@ var Collection = (function () {
 
 
     self.openTreeNode = function (divId, sourceLabel, node, callback) {
-        var existingNodes = common.getjsTreeNodes(divId, true)
+        var existingNodes = common.jstree.getjsTreeNodes(divId, true)
         if (!node.children || node.children.length > 0)
             return;
 
@@ -168,7 +168,7 @@ var Collection = (function () {
             if (err)
                 return MainController.UI.message(err)
 
-          //  common.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
+          //  common.jstree.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
             MainController.UI.message("node " + self.currentCandidateNode.data.label + " assigned to collection " + Collection.currentTreeNode.data.label)
             return self.currentCandidateNode = null;
         })

@@ -124,7 +124,7 @@ var ADLmappingGraph = (function () {
                 "</div>" +
                 "<button onclick='ADLmappingGraph.graphActions.setAssociation()'>OK</button>" +
                 "<button onclick='ADLmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
-$("#ADLmappings_Tabs").tabs("option", "active", 2);
+$("#ADLmappings_Tabs").tabs("option", "active", 3);
             $("#mainDialogDiv").html(html);
             $("#mainDialogDiv").dialog("open")
             ADLmappingGraph.isAssigningProperty = true
@@ -227,6 +227,10 @@ $("#ADLmappings_Tabs").tabs("option", "active", 2);
             $("#mainDialogDiv").dialog("close")
 
 
+        }
+        ,
+        removeNode:function(column){
+            visjsGraph.data.nodes.remove(column)
         }
     }
 

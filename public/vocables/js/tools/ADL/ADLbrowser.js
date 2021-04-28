@@ -172,7 +172,7 @@ var ADLbrowser = (function () {
 
             })
 
-            common.addNodesToJstree("ADLbrowserItemsjsTreeDiv", self.currentSource, jstreeData)
+            common.jstree.addNodesToJstree("ADLbrowserItemsjsTreeDiv", self.currentSource, jstreeData)
             MainController.UI.message("")
             $("#waitImg").css("display", "none");
 
@@ -235,7 +235,7 @@ var ADLbrowser = (function () {
                     ADLbrowser.getRdlJstreeData(obj.node.data.id, obj.node.data.type, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
-                        common.addNodesToJstree("ADLbrowser_rdlJstreeDiv", obj.node.data.id, result)
+                        common.jstree.addNodesToJstree("ADLbrowser_rdlJstreeDiv", obj.node.data.id, result)
                     })
                 $("#ADLbrowser_rdlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv")
             },
@@ -288,7 +288,7 @@ var ADLbrowser = (function () {
                     selectTreeNodeFn: self.jstree.events.onSelectNodeAdlList,
                     contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
                 }
-                common.loadJsTree("ADLbrowserItemsjsTreeDiv", jstreeData, options, function (err, result) {
+                common.jstree.loadJsTree("ADLbrowserItemsjsTreeDiv", jstreeData, options, function (err, result) {
 
                 })
             }
@@ -376,7 +376,7 @@ var ADLbrowser = (function () {
                         openAll: true,
 
                     }
-                    common.loadJsTree("ADLbrowser_oneModelJstreeDiv", jstreeData, options, function (err, result) {
+                    common.jstree.loadJsTree("ADLbrowser_oneModelJstreeDiv", jstreeData, options, function (err, result) {
 
                     })
                 })
@@ -420,7 +420,7 @@ var ADLbrowser = (function () {
                         contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv"),
 
                     }
-                    common.loadJsTree("ADLbrowser_rdlJstreeDiv", jstreeData, options)
+                    common.jstree.loadJsTree("ADLbrowser_rdlJstreeDiv", jstreeData, options)
 
                 })
 
@@ -528,7 +528,7 @@ var ADLbrowser = (function () {
 
                         }
                         //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                        common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                        common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
                         $("#ADLbrowser_Tabs").tabs("option", "active", 0);
                     }
                 )
@@ -547,7 +547,7 @@ var ADLbrowser = (function () {
 
                 var isNewTree = self.queryTypesArray.length < 2
                 if (!isNewTree) {
-                    var existingNodesArray = common.getjsTreeNodes("ADLbrowser_adlJstreeDiv", true, "#")
+                    var existingNodesArray = common.jstree.getjsTreeNodes("ADLbrowser_adlJstreeDiv", true, "#")
                     existingNodesArray.forEach(function (item) {
                         existingNodes[item] = 1
                     })
@@ -663,9 +663,9 @@ var propValueId=item.prop.value+"_"+targetNode.value
 
                     }
                     //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                    common.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                    common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
                 } else {
-                    common.addNodesToJstree("ADLbrowser_adlJstreeDiv", "#", jstreeData)
+                    common.jstree.addNodesToJstree("ADLbrowser_adlJstreeDiv", "#", jstreeData)
                 }
 
             })
@@ -1061,7 +1061,7 @@ var propValueId=item.prop.value+"_"+targetNode.value
                 var isNewTree = $("#ADLbrowser_queryTreeDiv").is(':empty');
                 var existingNodes = []
                 if (!isNewTree)
-                    existingNodes = common.getjsTreeNodes("ADLbrowser_queryTreeDiv", true)
+                    existingNodes = common.jstree.getjsTreeNodes("ADLbrowser_queryTreeDiv", true)
                 var jstreeData = [];
                 var typeId = "type" + common.getRandomHexaId(5)
                 if (existingNodes.indexOf(node.data.id) < 0) {
@@ -1082,7 +1082,7 @@ var propValueId=item.prop.value+"_"+targetNode.value
                     if (!isNewTree) {
                         var options = {}
 
-                        common.addNodesToJstree("ADLbrowser_queryTreeDiv", "#", jstreeData)
+                        common.jstree.addNodesToJstree("ADLbrowser_queryTreeDiv", "#", jstreeData)
                         jstreeData = []
                     }
                     setTimeout(function () {
@@ -1126,9 +1126,9 @@ var propValueId=item.prop.value+"_"+targetNode.value
                         withCheckboxes: true,
 
                     }
-                    common.loadJsTree("ADLbrowser_queryTreeDiv", jstreeData, options)
+                    common.jstree.loadJsTree("ADLbrowser_queryTreeDiv", jstreeData, options)
                 } else {
-                    common.addNodesToJstree("ADLbrowser_queryTreeDiv", node.data.id, jstreeData)
+                    common.jstree.addNodesToJstree("ADLbrowser_queryTreeDiv", node.data.id, jstreeData)
                 }
 
             })
@@ -1146,7 +1146,7 @@ var propValueId=item.prop.value+"_"+targetNode.value
                 data: {type: "propertyFilter", content: filterObj.content}
 
             }]
-            common.addNodesToJstree("ADLbrowser_queryTreeDiv", propId, jstreeData)
+            common.jstree.addNodesToJstree("ADLbrowser_queryTreeDiv", propId, jstreeData)
             setTimeout(function () {
                     $("#ADLbrowser_queryTreeDiv").jstree(true).select_node(id)
                 }, 200
@@ -1239,7 +1239,7 @@ var propValueId=item.prop.value+"_"+targetNode.value
         executeSparqlQuery: function (showQueryOnly, callback) {
 
             //   var checkedNodes = $("#ADLbrowser_queryTreeDiv").jstree(true).get_checked(false)
-            var allNodes = common.getjsTreeNodes("ADLbrowser_queryTreeDiv")
+            var allNodes = common.jstree.getjsTreeNodes("ADLbrowser_queryTreeDiv")
             var nodesMap = {}
             allNodes.forEach(function (item) {
                 console.log(item.id)

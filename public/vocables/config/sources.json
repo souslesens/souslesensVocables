@@ -371,7 +371,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
-    "schemaType": "OWL",
+    "schemaType": "OWLXXX",
     "schema": null,
     "color": "#bcbd22"
   },
@@ -490,7 +490,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
+    "schemaType": "OWLxxx",
     "schema": null,
     "color": "#bcbd22"
 

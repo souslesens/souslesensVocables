@@ -11,5 +11,9 @@
 
   "ECCENCA": {"login":"ECCENCA","password":"ONE-sense!rDf","groups":["reader_owl"]},
   "CHANDRAKANT": {"login":"CHANDRAKANT","password":"ONE-sense!rDf","groups":["admin"]},
-  "LOGILAB": {"login":"skosBlender","password":"ONE-sense!rDf","groups":["reader_owl"]}
+  "LOGILAB": {"login":"skosBlender","password":"ONE-sense!rDf","groups":["reader_owl"]},
+
+  "R.DAIAN": {"login":"R.DAIAN","password":"ONE-sense!rDf","groups":["reader_owl"]},
+  "D.SIMON": {"login":"D.SIMON","password":"ONE-sense!rDf","groups":["reader_owl"]},
+  "F.VERLHEST": {"login":"F.VERLHEST","password":"ONE-sense!rDf","groups":["reader_owl"]}
 }

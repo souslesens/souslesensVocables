@@ -3,15 +3,43 @@
     {
       "subject": "rl.tbltypicalassemblypattern.typicalassemblyrequirementid",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "https://w3id.org/requirement-ontology/rdl/REQ_0011"
+    },
+    {
+      "subject": "rl.tbltypicalassemblypattern.id",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "https://w3id.org/requirement-ontology/rdl/REQ_0008"
     },
     {
       "subject": "rl.tbltypicalassemblypattern.name",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://www.w3.org/2000/01/rdf-schema#label"
+      "object": "xsd:string"
+    },
+    {
+      "subject": "rl.tbltypicalassemblypattern.typicalassemblyrequirementid",
+      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0018",
+      "object": "rl.tbltypicalassemblypattern.id"
+    },
+    {
+      "subject": "rl.tbltypicalassemblypattern.id",
+      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+      "object": "rl.tbltypicalassemblypattern.name"
     }
   ],
   "model": {
+    "https://w3id.org/requirement-ontology/rdl/REQ_0011": {
+      "parents": [
+        "https://w3id.org/requirement-ontology/rdl/REQ_0007",
+        "https://w3id.org/requirement-ontology/rdl/REQ_0009",
+        "http://standards.iso.org/iso/15926/part14/InformationObject",
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "Requirement"
+    },
     "https://w3id.org/requirement-ontology/rdl/REQ_0008": {
       "parents": [
         "https://w3id.org/requirement-ontology/rdl/REQ_0009",
@@ -24,15 +52,43 @@
       ],
       "label": "SCD Clause"
     },
-    "http://www.w3.org/2000/01/rdf-schema#label": {
+    "xsd:string": {
       "parents": [
         "#"
       ],
-      "label": "http://www.w3.org/2000/01/rdf-schema#label"
+      "label": "xsd:string"
+    },
+    "https://w3id.org/requirement-ontology/rdl/REQ_0018": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/hasRole",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "has SCD clause"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop": {
+      "parents": [
+        "#"
+      ],
+      "label": "rdfs:label"
+    }
+  },
+  "graph": {
+    "rl.tbltypicalassemblypattern.typicalassemblyrequirementid": {
+      "x": 48,
+      "y": 144
+    },
+    "rl.tbltypicalassemblypattern.id": {
+      "x": 61,
+      "y": 378
+    },
+    "rl.tbltypicalassemblypattern.name": {
+      "x": 400,
+      "y": 316
     }
   },
   "infos": {
-    "lastModified": "2021-04-28T09:33:39.582Z",
+    "lastModified": "2021-04-29T12:31:54.158Z",
     "modifiedBy": "admin",
     "comment": ""
   }

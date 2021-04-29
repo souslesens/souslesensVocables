@@ -1,0 +1,37 @@
+Property ASSOCIATION<br>
+
+<div style="display: flex;flex-direction: row">
+    <div style="width:50%">
+        <table>
+            <tbody>
+            <tr>
+                <td class="td_title">Subject</td>
+                <td class="td_value" ><span id="ADLMapping_graphAssociationSubjectSpan"></span></td>
+
+            </tr>
+            <tr>
+                <td class="td_title">Object</td>
+                <td class="td_value"><span id="ADLMapping_graphAssociationObjectSpan"></span></td>
+            </tr>
+            <tr>
+                <td class="td_title">Property</td>
+                <td><span id="ADLMapping_graphPropertySpan"
+                                            style="font-weight:bold;color: #86d5f8">select  a property...</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <br>
+        <button onclick="ADLmappingGraph.graphActions.setAssociation()">OK</button>
+        <button onclick="ADLmappingGraph.graphActions.cancelAssociation()">Cancel</button>
+    </div>
+    <div id="ADLmappings_PropertiesTab" style="width:50%;height:100%;">
+
+        search <input id="ADLmappings_propertiesSearchTree"/>
+        <div class="jstree" id="ADLmappingPropertiesTree" style="width:50%;height:600px !important;background-color: #86d5f8">
+        </div>
+    </div>
+
+
+</div>
+

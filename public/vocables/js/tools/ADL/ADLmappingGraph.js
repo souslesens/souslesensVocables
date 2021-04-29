@@ -15,7 +15,7 @@ var ADLmappingGraph = (function () {
 
     },
 
-        self.drawNode = function (columnName) {
+        self.drawNode = function (columnName, color, position) {
 
             var columnObj = ADLmappings.currentMappedColumns[columnName]
 
@@ -35,14 +35,20 @@ var ADLmappingGraph = (function () {
                 typeStr = typeObj.data.label
 
             if (!existingNodes[columnName]) {
-                visjsData.nodes.push({
-                        id: columnName,
-                        label: columnName + "\n" + typeStr + "",
-                        data: columnObj,
-                        shape: ADLmappingGraph.attrs["column"].shape,
-                        color: ADLmappingGraph.attrs["column"].color,
-                    }
-                )
+                var node = {
+                    id: columnName,
+                    label: columnName + "\n" + typeStr + "",
+                    data: columnObj,
+                    shape: ADLmappingGraph.attrs["column"].shape,
+                    color: color,
+                }
+                if (position) {
+                    node.x = position.x;
+                    node.y = position.y;
+                    node.fixed = {x: true, y: true};
+                }
+                visjsData.nodes.push(node);
+
             }
 
 
@@ -53,14 +59,17 @@ var ADLmappingGraph = (function () {
                         if (node)
                             self.currentNode = node;
                     },
-                    onRightClickFn: self.graphActions.showGraphPopupMenu
+                    onRightClickFn: self.graphActions.showGraphPopupMenu,
+                    keepNodePositionOnDrag: 1
                 }
                 visjsGraph.draw("ADLmappings_graph", visjsData, options)
             } else {
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
             }
-            visjsGraph.network.fit()
+            setTimeout(function () {
+                visjsGraph.network.fit()
+            }, 300)
 
 
         }
@@ -112,20 +121,39 @@ var ADLmappingGraph = (function () {
             })
 
 
-            var html = "MAPPING ASSOCIATION<br>" +
-                "<table>" +
-                "<tr><td class='td_title'>Subject</td><td class='td_value>" + self.currentAssociation.subject.data.columnId + "</td><td class='td_value'>" + subjectLabel + "</td></tr>" +
-                "<tr><td class='td_title'>Object</td><td class='td_value>" + self.currentAssociation.object.data.columnId + "</td><td class='td_value>" + objectLabel + "</td></tr>" +
-                "<tr><td class='td_title'>Property</td><td colspan='2' class='td_value></td><td class='td_value> <span id='ADLMapping_graphPropertySpan' style='font-weight:bold'>select  a property...</span></td></tr>" +
+            /* var html = "MAPPING ASSOCIATION<br>" +
+                  "<table>" +
+                  "<tr><td class='td_title'>Subject</td><td class='td_value>" + self.currentAssociation.subject.data.columnId + "</td><td class='td_value'>" + subjectLabel + "</td></tr>" +
+                  "<tr><td class='td_title'>Object</td><td class='td_value>" + self.currentAssociation.object.data.columnId + "</td><td class='td_value>" + objectLabel + "</td></tr>" +
+                  "<tr><td class='td_title'>Property</td><td colspan='2' class='td_value></td><td class='td_value> <span id='ADLMapping_graphPropertySpan' style='font-weight:bold'>select  a property...</span></td></tr>" +
 
-                "</table>" +
-                /*  "<div style='border: brown solid 1px;margin: 5px'>" + "property<br>" +
-                  "<div id='ADLmappingPropertiesTree' style='width:400px;height: 400px;overflow: auto;'></div>" +*/
-                "</div>" +
-                "<button onclick='ADLmappingGraph.graphActions.setAssociation()'>OK</button>" +
-                "<button onclick='ADLmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
-$("#ADLmappings_Tabs").tabs("option", "active", 3);
-            $("#mainDialogDiv").html(html);
+                  "</table>" +
+
+                  "</div>" +
+                  "<button onclick='ADLmappingGraph.graphActions.setAssociation()'>OK</button>" +
+                  "<button onclick='ADLmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
+  $("#ADLmappings_Tabs").tabs("option", "active", 3);
+              $("#mainDialogDiv").html(html);*/
+            $("#mainDialogDiv").load("snippets/ADL/ADLPropertyassocationDialog.html");
+            setTimeout(function () {
+                $("#ADLMapping_graphAssociationSubjectSpan").html(self.currentAssociation.subject.data.columnId + "->" + subjectLabel)
+                $("#ADLMapping_graphAssociationObjectSpan").html(self.currentAssociation.object.data.columnId + "->" + objectLabel)
+                ADLmappings.displayPropertiesTree("ADLmappingPropertiesTree")
+                var to2 = false;
+                $('#ADLmappings_propertiesSearchTree').keyup(function () {
+                    if (to2) {
+                        clearTimeout(to2);
+                    }
+
+                    to2 = setTimeout(function () {
+                        var searchString = $("#ADLmappings_propertiesSearchTree").val();
+
+                        var xx = $('#ADLmappingPropertiesTree').jstree(true)
+                        $('#ADLmappingPropertiesTree').jstree(true).search(searchString);
+                    }, 250);
+                });
+
+            })
             $("#mainDialogDiv").dialog("open")
             ADLmappingGraph.isAssigningProperty = true
             setTimeout(function () {
@@ -199,21 +227,23 @@ $("#ADLmappings_Tabs").tabs("option", "active", 3);
                                 self.currentNode = node;
                         },
                         onRightClickFn: self.graphActions.showGraphPopupMenu,
+                        keepNodePositionOnDrag: 1,
 
-                        "physics": {
-                            "barnesHut": {
-                                "gravitationalConstant": -34200,
-                                "centralGravity": 0.35,
-                                "springLength": 400
-                            },
-                            "minVelocity": 0.75
-                        }
+                        /*    "physics": {
+                                "barnesHut": {
+                                    "gravitationalConstant": -34200,
+                                    "centralGravity": 0.35,
+                                    "springLength": 400
+                                },
+                                "minVelocity": 0.75
+                            }*/
                     }
                     visjsGraph.draw("ADLmappings_graph", visjsData, options)
                 } else {
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
                 }
+                visjsGraph.network.fit()
 
                 /*   setTimeout(function(){
                        visjsGraph.network.moveTo({
@@ -229,7 +259,7 @@ $("#ADLmappings_Tabs").tabs("option", "active", 3);
 
         }
         ,
-        removeNode:function(column){
+        removeNode: function (column) {
             visjsGraph.data.nodes.remove(column)
         }
     }

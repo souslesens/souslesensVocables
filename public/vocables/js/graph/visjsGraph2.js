@@ -170,10 +170,20 @@ var visjsGraph = (function () {
 
         })
 
+          /*  .on("dragStart", function (params) {
+                var nodeId = params.nodes[0]
+                //   var nodes = self.data.nodes.getIds();
+                var newNodes = [];
+                var fixed = true;
+                if (params.event.srcEvent.altKey)
+                    fixed = false;
+                newNodes.push({id: nodeId, fixed: fixed})
+                visjsGraph.data.nodes.update(newNodes)
 
+            })*/
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
-                    if (!params.event.srcEvent.ctrlKey)
+                    if (!params.event.srcEvent.ctrlKey && !currentDrawParams.options.keepNodePositionOnDrag)
                         return;
                     var nodeId = params.nodes[0]
                     //   var nodes = self.data.nodes.getIds();
@@ -475,6 +485,15 @@ var visjsGraph = (function () {
         return self.data.nodes.get(nodeIds)
 
     }
+
+    self.getNodesPosition= function (){
+        var nodes = self.data.nodes.getIds();
+        var positions=self.network.getPositions()
+        return positions
+    }
+
+
+
 
 
     self.processClicks = function (params, _options, isDbleClick) {

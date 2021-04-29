@@ -102,6 +102,7 @@ var ADLmappingData = (function () {
             selectTreeNodeFn: function (event, obj) {
 
                 self.currentADLtable = obj.node
+                ADLmappings.clearMappings()
                 self.showSampleData(obj.node)
                 setTimeout(function () {
                     ADLmappings.loadMappings(self.currentADLdataSource.dbName + "_" + self.currentADLtable.data.label)
@@ -266,11 +267,11 @@ var ADLmappingData = (function () {
               return  $(jqueryId).html( typeObj.data[0].label)
             }
 
-        var typesStr = "<ul>"
+        var typesStr = ""
         typeObj.data.forEach(function (item, index) {
-            typesStr += "<li>" + item.label+"</li>"
+            typesStr += "-" + item.condition+" : "+item.label+"\n"
         })
-        typesStr += "</ul>"
+        typesStr += ""
 
         $(jqueryId).html("<span title='"+typesStr+"'> multiple...</span>")
 

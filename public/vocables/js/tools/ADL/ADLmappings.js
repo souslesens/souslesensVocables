@@ -68,7 +68,7 @@ var ADLmappings = (function () {
                     ADLmappings.displayOneModelTree()
                 })
                 self.displayLiteralsTree()
-                self.displayPropertiesTree("ADLmappingPropertiesTree")
+                //   self.displayPropertiesTree("ADLmappingPropertiesTree")
 
                 $("#ADLmappings_AdvancedMappingDialogDiv").dialog({
                     autoOpen: false,
@@ -101,7 +101,6 @@ var ADLmappings = (function () {
             self.currentJstreeNode = propertiesMap.node;
 
 
-
             self.currentJstreeNode.jstreeDiv = event.currentTarget.id
             if (ADLmappingData.currentColumn) {
                 if (ADLadvancedMapping.addingValueManuallyToNode) {
@@ -113,6 +112,8 @@ var ADLmappings = (function () {
             } else if (TextAnnotator.isAnnotatingText)
                 TextAnnotator.setAnnotation(propertiesMap.node)
         }
+
+
         self.selectPropertyTreeNodeFn = function (event, propertiesMap) {
             if (!self.selectedOntologyNodes)
                 self.selectedOntologyNodes = {}
@@ -155,13 +156,13 @@ var ADLmappings = (function () {
                 openAll: true,
 
             }
-            var jstreeData=[]
-            self.literalValues.forEach(function(item){
+            var jstreeData = []
+            self.literalValues.forEach(function (item) {
                 jstreeData.push({
-                    id:item,
+                    id: item,
                     text: item,
-                    parent:"#",
-                    data:{source:"xsd",id:item,label:item}
+                    parent: "#",
+                    data: {source: "xsd", id: item, label: item}
 
 
                 })
@@ -257,11 +258,52 @@ var ADLmappings = (function () {
                 if (err)
                     return MainController.UI.message(err)
 
+
+
+
                 jsTreeData.forEach(function (item) {
                     if (item.parent == "#")
                         item.parent = Config.ADL.OneModelSource
                 })
                 jsTreeData.push({id: Config.ADL.OneModelSource, text: Config.ADL.OneModelSource, parent: "#"})
+
+
+
+                var jsTreeData2=[{
+                    id: "http://www.w3.org/2000/01/rdf-schema#",
+                    text: "rdfs:label",
+                    parent: "#",
+                    data: {
+                        "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+                        "id": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+                        "label": "rdfs:label",
+                        "source": "RDFS",
+                        "parent": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+                    }
+                },
+                    {
+                        id: "http://www.w3.org/2002/07/owl##DatatypeProperty",
+                        text: "owl:DatatypeProperty",
+                        parent: "#",
+                        data: {
+                            "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+                            "id": "http://www.w3.org/2002/07/owl##DatatypeProperty",
+                            "label": "owl:DatatypeProperty",
+                            "source": "OWL",
+                            "parent": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"
+                        }
+                    }
+
+
+
+                ]
+
+
+
+                jsTreeData=jsTreeData2.concat(jsTreeData)
+
+
+
                 var options = {
                     selectTreeNodeFn: self.selectPropertyTreeNodeFn,
                     openAll: true,
@@ -297,8 +339,8 @@ var ADLmappings = (function () {
                 columnId: column,
                 types: types,
             }
-
-            ADLmappingGraph.drawNode(column)
+            var color = self.sourceTypeColors[node.jstreeDiv]
+            ADLmappingGraph.drawNode(column, color,node.position)
 
             ADLmappingData.currentColumn = null;
             $(".dataSample_type").removeClass("datasample_type_selected")
@@ -379,6 +421,18 @@ var ADLmappings = (function () {
                                 }
                             }
 
+
+                            if (data.model[item.object].parents.indexOf("ONE-MODEL") > -1)
+                                node.jstreeDiv = "ADLmappings_OneModelTree"
+                            else if (item.object.indexOf("xsd") > -1)
+                                node.jstreeDiv = "ADLmappings_LiteralsTree"
+                            else
+                                node.jstreeDiv = "ADLmappingsjsOtherOntologiesTreeDiv"
+
+
+                        if(data.graph && data.graph[item.subject]){
+                            node.position=data.graph[item.subject]
+                        }
 
                             self.AssignOntologyTypeToColumn(item.subject, node)
                         }
@@ -554,7 +608,7 @@ var ADLmappings = (function () {
         }
         self.generateMappings = function () {
 
-            var data = {mappings: [], model: {}}
+            var data = {mappings: [], model: {},graph:{}}
             for (var key in self.currentMappedColumns) {
                 var obj = self.currentMappedColumns[key]
                 var objObj = ""
@@ -579,6 +633,8 @@ var ADLmappings = (function () {
                 obj.types.forEach(function (item) {
                     data.model[item.type_id] = {parents: item.type_parents, label: item.type_label}
                 })
+
+               data.graph= visjsGraph.getNodesPosition()
 
 
             }
@@ -607,9 +663,9 @@ var ADLmappings = (function () {
             self.currentMappedColumns = {}
             ADLmappingGraph.initMappedProperties()
             $(".dataSample_type").html("");
-            //  visjsGraph.clearGraph()
+            visjsGraph.clearGraph()
             //  $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
-
+            ADLadvancedMapping.assignConditionalTypeOn
             TextAnnotator.isAnnotatingText = false;
         }
 
@@ -661,6 +717,15 @@ var ADLmappings = (function () {
                'xsd:gYearMonth',
                'xsd:gMonth',*/
         ]
+
+        self.sourceTypeColors = {
+            ADLmappings_LiteralsTree: "#d9bb73",
+            ADLmappings_OneModelTree: "#d0e5a6",
+            ADLmappingsjsOtherOntologiesTreeDiv: "darkseagreen",
+            ADLmappingPropertiesTree: "#86d5f8"
+        }
+
+
         return self;
     }
 

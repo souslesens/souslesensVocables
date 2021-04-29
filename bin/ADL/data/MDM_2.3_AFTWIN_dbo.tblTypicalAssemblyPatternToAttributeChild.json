@@ -1,0 +1,67 @@
+{
+  "mappings": [
+    {
+      "subject": "dbo.tbltypicalassemblypatterntoattributechild.typicalassemblypatternid",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "https://w3id.org/requirement-ontology/rdl/REQ_0008"
+    },
+    {
+      "subject": "dbo.tbltypicalassemblypatterntoattributechild.attributeid",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+    },
+    {
+      "subject": "dbo.tbltypicalassemblypatterntoattributechild.typicalassemblypatternid",
+      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0018",
+      "object": "dbo.tbltypicalassemblypatterntoattributechild.attributeid"
+    }
+  ],
+  "model": {
+    "https://w3id.org/requirement-ontology/rdl/REQ_0008": {
+      "parents": [
+        "https://w3id.org/requirement-ontology/rdl/REQ_0009",
+        "http://standards.iso.org/iso/15926/part14/InformationObject",
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "SCD Clause"
+    },
+    "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/Quality",
+        "http://standards.iso.org/iso/15926/part14/Aspect",
+        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "TOTAL-Attribute"
+    },
+    "https://w3id.org/requirement-ontology/rdl/REQ_0018": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/hasRole",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "has SCD clause"
+    }
+  },
+  "graph": {
+    "dbo.tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": {
+      "x": -203,
+      "y": -79
+    },
+    "dbo.tbltypicalassemblypatterntoattributechild.attributeid": {
+      "x": 63,
+      "y": 31
+    }
+  },
+  "infos": {
+    "lastModified": "2021-04-29T12:47:50.735Z",
+    "modifiedBy": "admin",
+    "comment": ""
+  }
+}

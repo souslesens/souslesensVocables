@@ -6,6 +6,11 @@
       "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
     },
     {
+      "subject": "adl.tblmodel.physicalclassid",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/CFIHOS-30000311"
+    },
+    {
       "subject": "adl.tblmodel.oemid",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://standards.iso.org/iso/15926/part14/Organization"
@@ -16,19 +21,14 @@
       "object": "xsd:string"
     },
     {
-      "subject": "adl.tblmodel.physicalclassid",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/PhysicalObject"
-    },
-    {
       "subject": "adl.tblmodel.status",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.15926.org/dm/Status"
+      "object": "xsd:string"
     },
     {
-      "subject": "adl.tblmodel.id",
-      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
-      "object": "adl.tblmodel.modelnumber"
+      "subject": "adl.tblmodel.physicalclassid",
+      "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
+      "object": "adl.tblmodel.id"
     },
     {
       "subject": "adl.tblmodel.id",
@@ -37,13 +37,13 @@
     },
     {
       "subject": "adl.tblmodel.id",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
-      "object": "adl.tblmodel.physicalclassid"
+      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+      "object": "adl.tblmodel.modelnumber"
     },
     {
-      "subject": "adl.tblmodel.status",
-      "predicate": "http://standards.iso.org/iso/15926/part14/qualityOf",
-      "object": "adl.tblmodel.id"
+      "subject": "adl.tblmodel.id",
+      "predicate": "http://w3id.org/readi/rdl/D101001536",
+      "object": "adl.tblmodel.status"
     }
   ],
   "model": {
@@ -57,6 +57,14 @@
         "#"
       ],
       "label": "CFIHOS Model Part"
+    },
+    "http://w3id.org/readi/rdl/CFIHOS-30000311": {
+      "parents": [
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "equipment class"
     },
     "http://standards.iso.org/iso/15926/part14/Organization": {
       "parents": [
@@ -74,65 +82,49 @@
       ],
       "label": "xsd:string"
     },
-    "http://standards.iso.org/iso/15926/part14/PhysicalObject": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/Object",
-        "http://www.w3.org/2002/07/owl#Thing",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        "ONE-MODEL",
-        "#"
-      ],
-      "label": "PhysicalObject"
-    },
-    "http://data.15926.org/dm/Status": {
-      "parents": [
-        "CFIHOS-ISO_http://data.15926.org/dm/ClassOfIndividual_0",
-        "CFIHOS-ISO_http://data.15926.org/dm/Class_0",
-        "CFIHOS-ISO_http://data.15926.org/dm/AbstractObject_0",
-        "CFIHOS-ISO_http://data.15926.org/dm/Thing_0",
-        "CFIHOS-ISO",
-        "#"
-      ],
-      "label": "Status"
-    },
-    "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop": {
-      "label": "rdfs:label"
+    "http://standards.iso.org/iso/15926/part14/hasInstalled": {
+      "label": "hasInstalled"
     },
     "http://w3id.org/readi/rdl/D101001101": {
       "label": "Manufacturer"
     },
-    "http://standards.iso.org/iso/15926/part14/hasInstalled": {
-      "label": "hasInstalled"
+    "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop": {
+      "label": "rdfs:label"
     },
-    "http://standards.iso.org/iso/15926/part14/qualityOf": {
-      "label": "qualityOf"
+    "http://w3id.org/readi/rdl/D101001536": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/isAbout",
+        "ONE-MODEL",
+        "#"
+      ],
+      "label": "CFIHOS picklist property"
     }
   },
   "graph": {
     "adl.tblmodel.id": {
-      "x": -72,
-      "y": -45
-    },
-    "adl.tblmodel.oemid": {
-      "x": -261,
-      "y": 87
-    },
-    "adl.tblmodel.modelnumber": {
-      "x": 219,
-      "y": -44
+      "x": 126,
+      "y": 129
     },
     "adl.tblmodel.physicalclassid": {
-      "x": -456,
-      "y": -233
+      "x": 430,
+      "y": 244
+    },
+    "adl.tblmodel.oemid": {
+      "x": -22,
+      "y": -42
+    },
+    "adl.tblmodel.modelnumber": {
+      "x": 276,
+      "y": -15
     },
     "adl.tblmodel.status": {
-      "x": -7,
-      "y": -189
+      "x": 552,
+      "y": 98
     }
   },
   "infos": {
-    "lastModified": "2021-04-29T14:20:51.142Z",
-    "modifiedBy": "admin",
+    "lastModified": "2021-04-29T13:31:47.162Z",
+    "modifiedBy": "Fauconnet",
     "comment": ""
   }
 }

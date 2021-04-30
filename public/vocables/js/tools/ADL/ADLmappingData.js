@@ -89,10 +89,10 @@ var ADLmappingData = (function () {
         var existingNodes = {}
         for (var key in data) {
             modelJstreeData.push({
-                id: key,
+                id:  key.toLowerCase().replace(/\./g,"_"),
                 text: key,
                 parent: "#",
-                data: {type: "table", id: key, label: key, source: source}
+                data: {type: "table", id: key.toLowerCase(), label: key, source: source}
             })
 
 
@@ -121,7 +121,7 @@ var ADLmappingData = (function () {
         var dbName = node.data.source;
         var table;
         if (node.parents.length == 1)
-            table = node.id
+            table = node.data.id
         if (node.parents.length == 2)
             table = node.parent
         if (node.parents.length == 3)

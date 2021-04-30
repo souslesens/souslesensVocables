@@ -44,7 +44,13 @@ config.database="MDM_2.3_AFTWIN"
             })
         })
     },
+/*
 
+
+SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
+
+
+ */
 
     getADLmodel: function (dbName, callback) {
 

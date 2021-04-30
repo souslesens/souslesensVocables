@@ -61,6 +61,8 @@ var common = (function () {
             setTreeParentDivDimensions : function (jstreeDiv) {
 //$("#"+jstreeDiv).addClass("jstreeParent")
                 var p = $("#" + jstreeDiv).position()
+                if(p.top>200)//in case jstreeDiv in inactive tab
+                    p.top=200
                 var h = $(window).height() - p.top - 50
                 var w;
                 if (p.left < 600)
@@ -71,7 +73,7 @@ var common = (function () {
                 $("#" + jstreeDiv).height(h)
                 $("#" + jstreeDiv).css('overflow', 'auto')
                 $("#" + jstreeDiv).css('margin-top', '5px')
-                if (p.left < 600)
+                if (false && p.left < 600)
                     $("#" + jstreeDiv).css('margin-left', '-25px')
 
 
@@ -529,14 +531,17 @@ var common = (function () {
         }
 
 
-        self.deconcatSQLTableColumn = function (str) {
+        self.deconcatSQLTableColumn = function (str,removeSchema) {
             var array = str.split(".")
             if (array.length < 2)
                 return null;
             if (array.length == 2) {
                 return {table: array[0], column: array[1]}
             } else if (array.length == 3) {
+                if(!removeSchema)
                 return {table: array[0] + "." + array[1], column: array[2]}
+                else
+                    return {table:  array[1], column: array[2]}
             } else
                 return null;
 

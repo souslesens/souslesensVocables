@@ -27,6 +27,7 @@ var SourceBrowser = (function () {
     self.onSourceSelect = function (sourceLabel) {
         MainController.currentSource = sourceLabel;
         OwlSchema.currentSourceSchema = null;
+        self.currentTargetDiv = "currentSourceTreeDiv"
         self.showThesaurusTopConcepts(sourceLabel,)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match" +
@@ -91,11 +92,12 @@ var SourceBrowser = (function () {
             var html = "<div id='" + self.currentTargetDiv + "'></div>"
             $("#actionDiv").html(html);
         }
+        $("#accordion").accordion("option", {active: 2});
         options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getTopConcepts(sourceLabel, options, function (err, result) {
             if (err)
                 return MainController.UI.message(err);
-            $("#accordion").accordion("option", {active: 2});
+
             if (result.length == 0) {
                 Collection.currentCollectionFilter = null;
                 $("#waitImg").css("display", "none");

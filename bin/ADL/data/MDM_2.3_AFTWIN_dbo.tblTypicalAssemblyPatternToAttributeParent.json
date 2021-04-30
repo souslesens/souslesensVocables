@@ -41,11 +41,6 @@
       "label": "TOTAL-Attribute"
     },
     "https://w3id.org/requirement-ontology/rdl/REQ_0020": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/hasRole",
-        "ONE-MODEL",
-        "#"
-      ],
       "label": "has demand"
     }
   },
@@ -60,8 +55,8 @@
     }
   },
   "infos": {
-    "lastModified": "2021-04-29T12:48:30.369Z",
-    "modifiedBy": "admin",
+    "lastModified": "2021-04-29T13:34:39.211Z",
+    "modifiedBy": "Fauconnet",
     "comment": ""
   }
 }

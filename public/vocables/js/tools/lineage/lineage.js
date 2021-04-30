@@ -623,12 +623,14 @@ var Lineage_classes = (function () {
                     var idsSlices = common.sliceArray(ids, Sparql_generic.slicesSize);
                     var similarIds = []
                     async.eachSeries(idsSlices, function (ids, callbackEachSlice) {
-                        var filter = Sparql_common.setFilter("concept", ids, null)
-                        filter = " ?prop  rdfs:subClassOf* owl:sameAs.\n" +
-                            "  ?concept ?prop ?similar " + filter
+                        var filter = Sparql_common.setFilter("similar", ids, null)
+                      /*  filter = " ?prop  rdfs:subClassOf* owl:sameAs.\n" +
+                            "  ?concept ?prop ?similar " + filter*/
+
+                        filter ="?concept <http://w3id.org/readi/z018-rdl/sameinPCA> ?similar. "+filter
 
                         var options = {filter: filter}
-                        Sparql_generic.getItems("QUANTUM", options, function (err, result) {
+                        Sparql_generic.getItems("ISO_15926-PCA", options, function (err, result) {
                             if (err) {
                                 return callbackEachSlice(err);
                             }

@@ -43,7 +43,9 @@ var ADLmappings = (function () {
             MainController.UI.openRightPanel()
 
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
-                "<button onclick='TextAnnotator.init()'>text annotation</button>  ");
+                "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
+            "<button onclick='ADLassetGraph.drawAsset()'>Asset Graph</button>  "
+            );
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
             $("#accordion").accordion("option", {active: 2});
@@ -76,7 +78,16 @@ var ADLmappings = (function () {
                     width: 1000,
                     modal: false,
                 });
+
+                $("#ADLassetGraphDiv").dialog({
+                    autoOpen: false,
+                    height: 1000,
+                    width: 1300,
+                    modal: false,
+                })
+
             }, 500)
+
         }
 
         //

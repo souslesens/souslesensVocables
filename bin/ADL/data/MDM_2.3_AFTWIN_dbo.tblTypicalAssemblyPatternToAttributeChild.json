@@ -12,7 +12,7 @@
     },
     {
       "subject": "dbo.tbltypicalassemblypatterntoattributechild.typicalassemblypatternid",
-      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0018",
+      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0021",
       "object": "dbo.tbltypicalassemblypatterntoattributechild.attributeid"
     }
   ],
@@ -40,28 +40,28 @@
       ],
       "label": "TOTAL-Attribute"
     },
-    "https://w3id.org/requirement-ontology/rdl/REQ_0018": {
+    "https://w3id.org/requirement-ontology/rdl/REQ_0021": {
       "parents": [
         "http://standards.iso.org/iso/15926/part14/hasRole",
         "ONE-MODEL",
         "#"
       ],
-      "label": "has SCD clause"
+      "label": "has scope"
     }
   },
   "graph": {
     "dbo.tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": {
-      "x": -203,
-      "y": -79
+      "x": -47,
+      "y": -15
     },
     "dbo.tbltypicalassemblypatterntoattributechild.attributeid": {
-      "x": 63,
-      "y": 31
+      "x": 104,
+      "y": 164
     }
   },
   "infos": {
-    "lastModified": "2021-04-29T12:47:50.735Z",
-    "modifiedBy": "admin",
+    "lastModified": "2021-04-29T13:34:23.141Z",
+    "modifiedBy": "Fauconnet",
     "comment": ""
   }
 }

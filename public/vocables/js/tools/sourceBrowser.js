@@ -155,7 +155,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        if (MainController.currentTool == "lineage") {
+        if (MainController.currentTool == "lineage" || MainController.currentTool == "ADLmappings") {
             items.graphNode = {
                 label: "graph Node",
                 action: function (e) {// pb avec source
@@ -214,15 +214,7 @@ var SourceBrowser = (function () {
                 }
             }
         }
-        /* if (MainController.currentSource && Config.showAssetQueyMenu && Config.sources[MainController.currentSource].ADLqueryController) {
-             items.addToADLquery = {
-                 label: "add to Asset Query",
-                 action: function (e) {// pb avec source
-                     ADLquery.showNodeProperties(self.currentTreeNode.data)
-                 }
-             }
 
-     }*/
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
@@ -237,14 +229,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        /* , items.toCSV = {
-             label: "toCSV",
-             action: function () {
-                 var node = skosEditor.editSkosMenuNode;
-                 skosEditor.toCsv(node)
-             }
 
-         }*/
         return items;
     }
 

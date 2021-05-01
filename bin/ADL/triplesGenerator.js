@@ -861,7 +861,7 @@ if (true) {
 
     }
 
-    if (true) {// turbogen
+    if (false) {// turbogen
 
 
         var mappingsDirPath = "D:\\GitHub\\souslesensVocables\\other\\turbogenerator\\"
@@ -940,6 +940,35 @@ if (true) {
         }
         var replaceGraph = true
     }
+
+
+    if (true) {// AFtwin UK
+
+
+        var mappingsDirPath = "D:\\webstorm\\souslesensVocables\\bin\\ADL\\data\\"
+        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
+        var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/"
+        var adlGraphUri = "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
+        var mappingFileNames = [
+            "MDM_2.3_AFTWIN_adl.tblModel.json",
+            "MDM_2.3_AFTWIN_adl.tblModelAttribute.json"
+        ]
+
+
+        var dbConnection = {
+            host: "localhost",
+            user: "root",
+            password: "vi0lon",
+            database: 'quantum',
+            fetchSize: 5000,
+            //  maxOffset:6000,
+        }
+        var replaceGraph = true
+    }
+
+
+
 
 
     triplesGenerator.buidlADL(mappingsDirPath, mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, dbConnection, replaceGraph,function (err, result) {

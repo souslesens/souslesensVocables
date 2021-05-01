@@ -51,6 +51,7 @@ var OwlSchema = (function () {
             }
 
             if (!sourceSchema) {
+                console.log(sourceLabel)
                 if(! Config.sources[sourceLabel])
                     var x=3
                 sourceSchema = {

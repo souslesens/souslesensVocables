@@ -43,8 +43,9 @@ var ADLmappings = (function () {
             MainController.UI.openRightPanel()
 
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
-                "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
-            "<button onclick='ADLassetGraph.drawAsset()'>Asset Graph</button>  "
+              //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
+            "<button onclick='ADLassetGraph.drawAsset()'>mapping Graph</button>  "+
+            "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
             );
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
@@ -84,6 +85,13 @@ var ADLmappings = (function () {
                     height: 1000,
                     width: 1300,
                     modal: false,
+                    close: function( event, ui ) {
+                        ADLmappings.isShowingAssetGraph=false
+                    },
+                    open: function( event, ui ) {
+                        ADLmappings.isShowingAssetGraph=true
+                    }
+
                 })
 
             }, 500)
@@ -106,6 +114,10 @@ var ADLmappings = (function () {
 
         //!!! shared by OneModelOntology and sourceBrowser(search)
         self.selectTreeNodeFn = function (event, propertiesMap) {
+
+
+
+
             if (!self.selectedOntologyNodes)
                 self.selectedOntologyNodes = {}
             self.selectedOntologyNodes[propertiesMap.node.data.id] = propertiesMap.node;
@@ -138,7 +150,7 @@ var ADLmappings = (function () {
         },
 
 
-            self.contextMenuFn = function () {
+            self.contextMenuFn = function (treeDiv) {
                 var items = {}
                 items.nodeInfos = {
                     label: "node infos",
@@ -155,6 +167,29 @@ var ADLmappings = (function () {
 
                         SourceBrowser.openTreeNode(self.currentJstreeNode.jstreeDiv, self.currentJstreeNode.data.source, self.currentJstreeNode, null)
 
+
+                    }
+                }
+                if (treeDiv!="ADLmappings_OneModelTree") {
+                    items.copyNodeToClipboard = {
+                        label: "copy toClipboard",
+                        action: function (e) {// pb avec source
+
+                            Lineage_common.copyNodeToClipboard(self.currentJstreeNode.data)
+
+                        }
+
+                    }
+                }
+
+                if (treeDiv=="ADLmappings_OneModelTree") {
+                    items.pasteNodeFromClipboard = {
+                        label: "paste from Clipboard",
+                        action: function (e) {// pb avec source
+
+                            Lineage_common.pasteNodeFromClipboard(self.currentJstreeNode)
+
+                        }
 
                     }
                 }
@@ -258,7 +293,7 @@ var ADLmappings = (function () {
                     "fuzzy": false,
                     "show_only_matches": true
                 },
-                contextMenu: self.contextMenuFn()
+                contextMenu: self.contextMenuFn("ADLmappings_OneModelTree")
             }
             common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
@@ -318,7 +353,7 @@ var ADLmappings = (function () {
                 var options = {
                     selectTreeNodeFn: self.selectPropertyTreeNodeFn,
                     openAll: true,
-                    contextMenu: self.contextMenuFn,
+                    contextMenu: self.contextMenuFn("ADLmappingPropertiesTree"),
                     searchPlugin: {
                         "case_insensitive": true,
                         "fuzzy": false,

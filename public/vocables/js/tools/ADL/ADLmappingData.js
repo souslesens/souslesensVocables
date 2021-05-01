@@ -100,6 +100,9 @@ var ADLmappingData = (function () {
 
         var options = {
             selectTreeNodeFn: function (event, obj) {
+                if(ADLmappings.isShowingAssetGraph){
+                    return ADLassetGraph.zoomOnTable(obj.node.data)
+                }
 
                 self.currentADLtable = obj.node
                 ADLmappings.clearMappings()

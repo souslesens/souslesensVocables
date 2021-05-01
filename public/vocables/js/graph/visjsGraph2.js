@@ -576,6 +576,15 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.remove(targetNodes)
     }
 
+    self.highlightNode=function (id, label){
+
+        if(id) {
+
+        }
+
+
+    }
+
     return self;
 
 

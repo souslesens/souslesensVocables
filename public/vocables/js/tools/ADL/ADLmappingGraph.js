@@ -80,17 +80,31 @@ var ADLmappingGraph = (function () {
         showGraphPopupMenu: function (node, point, e) {
             var top = $("#ADLmappings_graph").position().top
             point.y += top
-            self.currentNode = node;
-            if (!node)
-                MainController.UI.hidePopup("graphPopupDiv")
+            var html="";
+            if(node.from){//edge
+                self.currentEdge = node;
+                html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.deleteProperty();\"> delete Property</span>"
 
-            var html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertySubject();\"> is property subject</span>" +
-                "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertyObject();\"> is property object</span>"
 
+
+            }else {
+
+                self.currentNode = node;
+                if (!node)
+                    MainController.UI.hidePopup("graphPopupDiv")
+
+                 html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertySubject();\"> is property subject</span>" +
+                    "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertyObject();\"> is property object</span>"
+            }
             $("#graphPopupDiv").html(html);
             MainController.UI.showPopup(point, "graphPopupDiv")
         },
+        deleteProperty: function () {
+            delete self.mappedProperties.mappings[self.currentEdge.id]
+           visjsGraph.data.edges.remove(self.currentEdge.id)
 
+
+        },
 
         isPropertySubject: function () {
             self.currentAssociation = {
@@ -222,21 +236,15 @@ var ADLmappingGraph = (function () {
 
                 if (!visjsGraph.data || !visjsGraph.data.nodes) {
                     var options = {
-                        selectNodeFn: function (node, event) {
+                        onclickFn: function (node, event) {
+                            return;
                             if (node)
                                 self.currentNode = node;
                         },
                         onRightClickFn: self.graphActions.showGraphPopupMenu,
                         keepNodePositionOnDrag: 1,
 
-                        /*    "physics": {
-                                "barnesHut": {
-                                    "gravitationalConstant": -34200,
-                                    "centralGravity": 0.35,
-                                    "springLength": 400
-                                },
-                                "minVelocity": 0.75
-                            }*/
+
                     }
                     visjsGraph.draw("ADLmappings_graph", visjsData, options)
                 } else {

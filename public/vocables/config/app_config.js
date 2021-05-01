@@ -86,7 +86,7 @@ self.loginMode = "none";
         toolDescriptionImg: null
     }
 
-    self.tools["xlsx2mappings"] = {
+    self.tools["ADLmappings"] = {
         label: "ADLmappings",
         multiSources: 0,
         controller: ADLmappings,
@@ -113,7 +113,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings", "evaluate"],
+            forbiddenTools: ["ADLmappings", "evaluate"],
             blender: {contextMenuActionStartLevel: 0}
         },
         blender_skos: {
@@ -121,7 +121,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings", "evaluate"],
+            forbiddenTools: ["ADLmappings", "evaluate"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_skos: {
@@ -129,7 +129,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings", "evaluate", "BLENDER"],
+            forbiddenTools: ["ADLmappings", "evaluate", "BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_all: {
@@ -137,7 +137,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["xlsx2mappings", "evaluate", "INDIVIDUALS", "BLENDER"],
+            forbiddenTools: ["ADLmappings", "evaluate", "INDIVIDUALS", "BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_owl: {
@@ -145,7 +145,7 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: [],
             allowedTools: ["lineage", "ADLbrowser"],
-            forbiddenTools: ["xlsx2mappings", "evaluate", "INDIVIDUALS", "BLENDER",],
+            forbiddenTools: ["ADLmappings", "evaluate", "INDIVIDUALS", "BLENDER",],
             blender: {contextMenuActionStartLevel: 3}
         }
     }

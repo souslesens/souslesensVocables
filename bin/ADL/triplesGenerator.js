@@ -15,6 +15,7 @@ const xlsx2json = require('../xlsx2json.')
 const async = require('async')
 var httpProxy = require('../httpProxy.')
 var sqlConnector = require('./ADLSqlConnector.')
+var SQLserverConnector = require('./SQLserverConnector.')
 var idsCache = {}
 
 
@@ -67,9 +68,21 @@ var triplesGenerator = {
             return uri;
         }
 
-        data.forEach(function (item, index) {
-            mappings.forEach(function (mapping, index) {
-
+        data.forEach(function (item, indexItem) {
+            mappings.forEach(function (mapping, indexMapping) {
+                if(indexItem==0) {
+                    var obj = util.deconcatSQLTableColumn(mapping.subject)
+                    if (obj && obj.column)
+                        mapping.subject = obj.column
+                    var obj = util.deconcatSQLTableColumn(mapping.object)
+                    if (obj && obj.column)
+                        mapping.object = obj.column
+                }
+                var item2={}
+                for(var key in item){
+                    item2[key.toLowerCase()]=item[key]
+                }
+                item=item2
 
                 var subjectValue = item[mapping.subject]
 
@@ -214,6 +227,7 @@ var triplesGenerator = {
         var oneModelDictionary = {}
         var oneModelInverseDictionary = {}
         var sqlTable = "";
+        var dbConnection=null;
 
 
         async.series([
@@ -284,11 +298,11 @@ var triplesGenerator = {
                     })
                 },
 
-
+// get previously created uris
                 function (callbackSeries) {
 
 
-                    triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, options.getExistingUriMappings, null, function (err, result) {
+                    triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, uriPrefix, null, function (err, result) {
                         if (err)
                             return callbackSeries(err)
                         existingUrisMap = result;
@@ -298,25 +312,14 @@ var triplesGenerator = {
                 //prepare mappings
                 , function (callbackSeries) {
             try {
-                mappings = JSON.parse(fs.readFileSync(mappingsPath));
+                var str=fs.readFileSync(mappingsPath)
+                mappings = JSON.parse(str);
             }
             catch(e){
                 callbackSeries(e)
             }
-                    mappings.mappings.forEach(function (mapping) {
-                        if (mapping.subject.indexOf("http") < 0) {
-                            var obj=util.deconcatSQLTableColumn(mapping.subject)
-                            mapping.subject = obj.column
-                            if (!sqlTable)
-                                sqlTable = obj.table
-                        }
-                        if (mapping.object.indexOf && mapping.object.indexOf("http") < 0) {
-                            var obj=util.deconcatSQLTableColumn(mapping.object)
-                            mapping.object = obj.column
-                            if (!sqlTable)
-                                sqlTable = obj.table
-                        }
-                    })
+                    sqlTable=mappings.data.adlTable
+                dbConnection=mappings.data.adlSource
 
                     mappings.mappings.sort(function (a, b) {
                         var p = a.predicate.indexOf("#type");
@@ -400,13 +403,24 @@ var triplesGenerator = {
                     }
 
                     var sqlQuery = "select * from  " + sqlTable + " ";
-                    sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
-                        if (err)
-                            return callbackSeries(err);
+                    if(dbConnection.type== "sql.sqlserver") {
+                        SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
+                            if (err)
+                                return callbackSeries(err);
 
-                        callbackSeries()
+                            callbackSeries()
 
-                    })
+                        })
+                    }
+                    else {
+                        sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
+                            if (err)
+                                return callbackSeries(err);
+
+                            callbackSeries()
+
+                        })
+                    }
 
 
                 }
@@ -603,6 +617,10 @@ var triplesGenerator = {
                     mappingSheets.forEach(function (sheet) {
 
                         options.existingUrisMap = existingUrisMap;
+
+
+
+
 
                         triplesGenerator.generateSheetDataTriples(mappings.mappings, dataArray, uriPrefix, options, function (err, result) {
                             if (err)

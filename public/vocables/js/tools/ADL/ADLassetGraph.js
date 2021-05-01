@@ -1,6 +1,27 @@
 var ADLassetGraph = (function () {
     var self = {}
 
+    self.highlightMappedTables = function (assetLabel) {
+
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: {getAssetGlobalMappings: assetLabel},
+            dataType: "json",
+
+            success: function (data, textStatus, jqXHR) {
+                data.mappings.forEach(function (mapping) {
+
+
+                    //mark table in tables tree
+                    var anchor = $("#" + common.deconcatSQLTableColumn(mapping.subject).table.replace(/\./g, "_") + "_anchor")
+                    anchor.css("color", "#86d5f8")
+                })
+            }, error(err) {
+                alert("Cannot load mappingFiles")
+            }
+        })
+    }
 
     self.drawAsset = function (assetLabel) {
 
@@ -28,8 +49,8 @@ var ADLassetGraph = (function () {
                 var existingNodes = {}
 
                 assetMappings.mappings.sort(function (a, b) {
-                    var subjectA = common.deconcatSQLTableColumn(a.subject,true).column
-                    var subjectB = common.deconcatSQLTableColumn(b.subject,true).column
+                    var subjectA = common.deconcatSQLTableColumn(a.subject, true).column
+                    var subjectB = common.deconcatSQLTableColumn(b.subject, true).column
                     if (subjectA = "id" && subjectB != "id")
                         return -1
                     if (subjectA != "id" && subjectB == "id")
@@ -43,7 +64,7 @@ var ADLassetGraph = (function () {
                     var anchor = $("#" + common.deconcatSQLTableColumn(mapping.subject).table.replace(/\./g, "_") + "_anchor")
                     anchor.css("color", "#86d5f8")
 
-                    var subjectObj = common.deconcatSQLTableColumn(mapping.subject,true)
+                    var subjectObj = common.deconcatSQLTableColumn(mapping.subject, true)
                     var subjectId = subjectObj.table + "." + subjectObj.column
 
                     if (subjectObj.column != "id" && (subjectObj.column.indexOf("id") == subjectObj.column.length - 2)) {
@@ -52,9 +73,9 @@ var ADLassetGraph = (function () {
 
                         var subjectBis = relationalKeys[subjectId]
                         if (!subjectBis)
-                            return console.log("Missing primary key to"+ mapping.subject);
+                            return console.log("Missing primary key to" + mapping.subject);
 
-                        subjectId=subjectBis;
+                        subjectId = subjectBis;
                         /*   var edgeId = subjectId + "_" + "join" + "_" +subjectBis
                            if (!existingNodes[edgeId]) {
                                existingNodes[edgeId] = 1
@@ -69,9 +90,9 @@ var ADLassetGraph = (function () {
                     }
 
 
-                    var borderWidth=1;
-                    if(subjectObj.column == "id" )
-                        borderWidth=6
+                    var borderWidth = 1;
+                    if (subjectObj.column == "id")
+                        borderWidth = 6
                     //   var subjectId = subjectObj.table + "." + subjectObj.column
                     if (!existingNodes[subjectId]) {
                         existingNodes[subjectId] = 1
@@ -80,16 +101,16 @@ var ADLassetGraph = (function () {
                             label: subjectId,
                             shape: "box",
                             color: "#eee8dd",
-                            borderWidth:borderWidth,
+                            borderWidth: borderWidth,
                             data: {}
 
                         })
 
                     }
-                    var objectId= mapping.object
-                    var objectObj=common.deconcatSQLTableColumn(mapping.object,true)
-                    if(objectObj)
-                        objectId=  objectObj.table + "." + objectObj.column
+                    var objectId = mapping.object
+                    var objectObj = common.deconcatSQLTableColumn(mapping.object, true)
+                    if (objectObj)
+                        objectId = objectObj.table + "." + objectObj.column
 
                     if (!existingNodes[objectId] || objectId.indexOf("xsd") > -1) {
                         existingNodes[objectId] = 1
@@ -107,7 +128,7 @@ var ADLassetGraph = (function () {
                             } else if (objectId.indexOf("xsd") > -1) {
                                 colorKey = "ADLmappings_LiteralsTree"
                                 shape = "star"
-                                objectId=objectId+common.getRandomHexaId(3)
+                                objectId = objectId + common.getRandomHexaId(3)
                             } else {
 
                                 colorKey = "ADLmappingsjsOtherOntologiesTreeDiv"
@@ -118,7 +139,7 @@ var ADLassetGraph = (function () {
 
 
                         visjsData.nodes.push({
-                            id:objectId,
+                            id: objectId,
                             label: label,
                             data: {},
                             shape: shape,
@@ -127,7 +148,7 @@ var ADLassetGraph = (function () {
                         })
 
                     }
-                    var edgeId = subjectId + "_" + mapping.predicate + "_" +objectId
+                    var edgeId = subjectId + "_" + mapping.predicate + "_" + objectId
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
                         var label = null
@@ -215,8 +236,8 @@ var ADLassetGraph = (function () {
                 var existingNodes = {}
 
 
-                var classes={}
-var columns={}
+                var classes = {}
+                var columns = {}
                 assetMappings.mappings.forEach(function (mapping) {
 
 
@@ -226,11 +247,10 @@ var columns={}
                         classes[mapping.object][mapping.subject] = {}
 
 
-                    }
-                    else{
+                    } else {
                         if (!columns[mapping.subject])
-                            columns[mapping.subject]={direct:{},inverse:{}}
-                        columns[mapping.subject].direct:{},inverse:{}}
+                            columns[mapping.subject] = {direct: {}, inverse: {}}
+                        // columns[mapping.subject].direct:{},inverse:{}}
 
                     }
                 })
@@ -242,36 +262,36 @@ var columns={}
 
 
                 assetMappings.mappings.forEach(function (mapping) {
-                    var subjectObj = common.deconcatSQLTableColumn(mapping.subject,true)
+                    var subjectObj = common.deconcatSQLTableColumn(mapping.subject, true)
                     var subjectId = subjectObj.table + "." + subjectObj.column
 
                     if (subjectObj.column != "id" && (subjectObj.column.indexOf("id") == subjectObj.column.length - 2)) {
 
-                      //  var subjectBis = relationalKeys[mapping.subject.substring(mapping.subject.indexOf(".") + 1)]
+                        //  var subjectBis = relationalKeys[mapping.subject.substring(mapping.subject.indexOf(".") + 1)]
 
                         var subjectBis = relationalKeys[subjectId]
                         if (!subjectBis)
-                            return console.log("Missing primary key to"+ mapping.subject);
+                            return console.log("Missing primary key to" + mapping.subject);
 
-                        subjectId=subjectBis;
-                     /*   var edgeId = subjectId + "_" + "join" + "_" +subjectBis
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: subjectId,
-                                to: subjectBis,
-                                dashes: true,
-                                color:"blue"
-                            })
-                        }*/
+                        subjectId = subjectBis;
+                        /*   var edgeId = subjectId + "_" + "join" + "_" +subjectBis
+                           if (!existingNodes[edgeId]) {
+                               existingNodes[edgeId] = 1
+                               visjsData.edges.push({
+                                   id: edgeId,
+                                   from: subjectId,
+                                   to: subjectBis,
+                                   dashes: true,
+                                   color:"blue"
+                               })
+                           }*/
                     }
 
 
-                var borderWidth=1;
-                    if(subjectObj.column == "id" )
-                        borderWidth=6
-                 //   var subjectId = subjectObj.table + "." + subjectObj.column
+                    var borderWidth = 1;
+                    if (subjectObj.column == "id")
+                        borderWidth = 6
+                    //   var subjectId = subjectObj.table + "." + subjectObj.column
                     if (!existingNodes[subjectId]) {
                         existingNodes[subjectId] = 1
                         visjsData.nodes.push({
@@ -279,16 +299,16 @@ var columns={}
                             label: subjectId,
                             shape: "box",
                             color: "#eee8dd",
-                            borderWidth:borderWidth,
+                            borderWidth: borderWidth,
                             data: {}
 
                         })
 
                     }
-                    var objectId= mapping.object
-                    var objectObj=common.deconcatSQLTableColumn(mapping.object,true)
-                    if(objectObj)
-                        objectId=  objectObj.table + "." + objectObj.column
+                    var objectId = mapping.object
+                    var objectObj = common.deconcatSQLTableColumn(mapping.object, true)
+                    if (objectObj)
+                        objectId = objectObj.table + "." + objectObj.column
 
                     if (!existingNodes[objectId] || objectId.indexOf("xsd") > -1) {
                         existingNodes[objectId] = 1
@@ -306,7 +326,7 @@ var columns={}
                             } else if (objectId.indexOf("xsd") > -1) {
                                 colorKey = "ADLmappings_LiteralsTree"
                                 shape = "star"
-                                objectId=objectId+common.getRandomHexaId(3)
+                                objectId = objectId + common.getRandomHexaId(3)
                             } else {
 
                                 colorKey = "ADLmappingsjsOtherOntologiesTreeDiv"
@@ -317,7 +337,7 @@ var columns={}
 
 
                         visjsData.nodes.push({
-                            id:objectId,
+                            id: objectId,
                             label: label,
                             data: {},
                             shape: shape,
@@ -326,7 +346,7 @@ var columns={}
                         })
 
                     }
-                    var edgeId = subjectId + "_" + mapping.predicate + "_" +objectId
+                    var edgeId = subjectId + "_" + mapping.predicate + "_" + objectId
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
                         var label = null
@@ -387,11 +407,11 @@ var columns={}
 
 
     }
-    self.zoomOnTable=function(nodeData){
- var visjsId=nodeData.id+".id"
-      var obj=common.deconcatSQLTableColumn(visjsId,true)
-        visjsId=obj.table+"."+obj.column
-        visjsGraph.network.focus(visjsId,{
+    self.zoomOnTable = function (nodeData) {
+        var visjsId = nodeData.id + ".id"
+        var obj = common.deconcatSQLTableColumn(visjsId, true)
+        visjsId = obj.table + "." + obj.column
+        visjsGraph.network.focus(visjsId, {
             scale: 1,
             animation: true
 

@@ -79,13 +79,13 @@
     </key>
   </component>
   <component name="RunManager" selected="Node.js.triplesGenerator.js">
+    <configuration name="ADLSqlConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
+      <method v="2" />
+    </configuration>
     <configuration name="ADLcontroller..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
     <configuration name="SQLserverConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
-      <method v="2" />
-    </configuration>
-    <configuration name="dictionaryManager..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" working-dir="$PROJECT_DIR$/bin/annotator">
       <method v="2" />
     </configuration>
     <configuration name="temporary..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/temporary..js" working-dir="$PROJECT_DIR$/bin/ADL/data">
@@ -97,10 +97,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Node.js.triplesGenerator.js" />
-        <item itemvalue="Node.js.ADLcontroller..js" />
         <item itemvalue="Node.js.SQLserverConnector..js" />
+        <item itemvalue="Node.js.ADLSqlConnector..js" />
+        <item itemvalue="Node.js.ADLcontroller..js" />
         <item itemvalue="Node.js.temporary..js" />
-        <item itemvalue="Node.js.dictionaryManager..js" />
       </list>
     </recent_temporary>
   </component>
@@ -177,7 +177,7 @@
       <workItem from="1618555451091" duration="95577000" />
       <workItem from="1619100168042" duration="7334000" />
       <workItem from="1619260267361" duration="32235000" />
-      <workItem from="1619591144016" duration="66406000" />
+      <workItem from="1619591144016" duration="72770000" />
     </task>
     <servers />
   </component>
@@ -201,7 +201,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>657</line>
+          <line>661</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -255,13 +255,8 @@
           <option name="timeStamp" value="61" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
-          <line>15</line>
-          <option name="timeStamp" value="79" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappingData.js</url>
-          <line>208</line>
+          <line>211</line>
           <option name="timeStamp" value="92" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -277,7 +272,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>280</line>
+          <line>300</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="104" />
         </line-breakpoint>
@@ -289,27 +284,21 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/triplesGenerator.js</url>
-          <line>402</line>
+          <line>453</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="106" />
+          <option name="timeStamp" value="111" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/triplesGenerator.js</url>
-          <line>681</line>
+          <line>448</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="107" />
+          <option name="timeStamp" value="112" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/triplesGenerator.js</url>
-          <line>654</line>
+          <line>386</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="109" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/triplesGenerator.js</url>
-          <line>290</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="110" />
+          <option name="timeStamp" value="155" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

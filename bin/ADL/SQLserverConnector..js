@@ -1,5 +1,5 @@
 const sql = require('mssql')
-
+const async=require('async')
 const config = {
     user: 'sa',
     password: 'Fa1#majeur',
@@ -86,7 +86,65 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
             })
         })
 
-    }
+    },
+
+    processFetchedData:function(connection,query,fetchSize,startOffset,maxOffset, processor,callback){
+
+        var offset = startOffset
+        var length = 1
+        var allResults = []
+        if(!maxOffset)
+            maxOffset=10000000
+        async.whilst(
+            function test(cb) {
+                return cb(null, length > 0 && offset<maxOffset);
+            },
+            function iter(callbackWhilst) {
+
+
+                //  query=query+" offset "+(""+offset);
+
+                var query2 = query+" ORDER BY (SELECT NULL) OFFSET "+offset+" ROWS FETCH NEXT "+fetchSize+" ROWS ONLY"
+                offset += fetchSize;
+                console.log("processed lines: "+offset)
+                SQLserverConnector.connection=connection;
+                SQLserverConnector.getData(connection.dbName,query2,function (err, result) {
+                    if (err) {
+                        console.log("error "+err)
+                        console.log(query2)
+                        return callbackWhilst(err);
+                    }
+                    length = result.length
+                    if(processor) {
+                        processor(result, function (err, resultProcessor) {
+                            if (err)  {
+
+                                return callbackWhilst(err);
+                            }
+                            return callbackWhilst();
+                        })
+                    }
+                    else{
+                        allResults=allResults.concat(result);
+                        return callbackWhilst();
+                    }
+
+
+                })
+            },
+            function (err, n) {
+                if (err)
+                    return callback(err);
+                callback(null, allResults);
+
+            }
+        )
+
+
+
+
+
+    },
 
 
 }

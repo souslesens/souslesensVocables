@@ -631,6 +631,10 @@ var ADLmappings = (function () {
             if (comment === null)
                 return
             mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
+            mappings.data={
+                adlSource:ADLmappingData.currentADLdataSource,
+                adlTable:ADLmappingData.currentADLtable.text
+            }
             var payload = {
                 ADL_SaveMappings: true,
                 mappings: JSON.stringify(mappings, null, 2),

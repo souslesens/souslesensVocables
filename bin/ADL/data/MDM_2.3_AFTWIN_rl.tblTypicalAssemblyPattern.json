@@ -59,17 +59,9 @@
       "label": "xsd:string"
     },
     "https://w3id.org/requirement-ontology/rdl/REQ_0018": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/hasRole",
-        "ONE-MODEL",
-        "#"
-      ],
       "label": "has SCD clause"
     },
     "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop": {
-      "parents": [
-        "#"
-      ],
       "label": "rdfs:label"
     }
   },
@@ -88,8 +80,17 @@
     }
   },
   "infos": {
-    "lastModified": "2021-04-29T12:31:54.158Z",
+    "lastModified": "2021-05-01T13:55:25.260Z",
     "modifiedBy": "admin",
     "comment": ""
+  },
+  "data": {
+    "adlSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "MDM_2.3_AFTWIN",
+      "table_schema": "dbo"
+    },
+    "adlTable": "rl.tblTypicalAssemblyPattern"
   }
 }

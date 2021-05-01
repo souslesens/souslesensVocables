@@ -28,6 +28,8 @@ var util = {
 
     },
     deconcatSQLTableColumn:function(str){
+        if(str.indexOf(":")>-1)
+            return null;
         var array= str.split(".")
         if(array.length<2)
             return null;

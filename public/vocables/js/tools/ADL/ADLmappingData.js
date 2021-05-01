@@ -37,6 +37,9 @@ var ADLmappingData = (function () {
 
             success: function (data, textStatus, jqXHR) {
                 self.showModelJstree(data, self.currentADLdataSource.dbName)
+                setTimeout(function(){
+                    ADLassetGraph.highlightMappedTables(self.currentSource)
+                },2000)
 
             },
             error: function (err) {

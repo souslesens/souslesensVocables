@@ -41,11 +41,6 @@
       "label": "TOTAL-Attribute"
     },
     "https://w3id.org/requirement-ontology/rdl/REQ_0021": {
-      "parents": [
-        "http://standards.iso.org/iso/15926/part14/hasRole",
-        "ONE-MODEL",
-        "#"
-      ],
       "label": "has scope"
     }
   },
@@ -60,8 +55,17 @@
     }
   },
   "infos": {
-    "lastModified": "2021-04-29T13:34:23.141Z",
-    "modifiedBy": "Fauconnet",
+    "lastModified": "2021-05-01T13:55:08.306Z",
+    "modifiedBy": "admin",
     "comment": ""
+  },
+  "data": {
+    "adlSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "MDM_2.3_AFTWIN",
+      "table_schema": "dbo"
+    },
+    "adlTable": "dbo.tblTypicalAssemblyPatternToAttributeChild"
   }
 }

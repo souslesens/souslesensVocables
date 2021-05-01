@@ -37,7 +37,7 @@ var ADLcontroller = {
         var dir = path.join(__dirname, "data/")
         dir = path.resolve(dir)
         var files = fs.readdirSync(dir)
-        var globalJson = {mappings: [], model: {}, relationalKeysMap: ADLcontroller.relationalKeysMap}
+        var globalJson = {mappings: [], model: {}, relationalKeysMap: ADLcontroller.relationalKeysMap, data:{},infos:{}}
         async.eachSeries(files, function (file, callbackEach) {
             if (file.indexOf(source) == 0) {
                 fs.readFile(dir + "/" + file, function (err, result) {
@@ -49,6 +49,8 @@ var ADLcontroller = {
                         for (var key in json.model) {
                             globalJson.model[key] = json.model[key]
                         }
+                        globalJson.data[file]=json.data
+                        globalJson.infos[file]=json.infos
 
                         callbackEach()
                     } catch (e) {

@@ -129,6 +129,10 @@
       "dbName": "MDM_2.3_AFTWIN",
       "table_schema": "dbo"
     },
-    "adlTable": "adl.tblModel"
+    "adlTable": "adl.tblmodel",
+    "build": {
+      "createdDate": "2021-05-01T17:09:58.530Z",
+      "triples": 44273
+    }
   }
 }

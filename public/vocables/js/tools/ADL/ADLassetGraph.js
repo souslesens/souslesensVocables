@@ -9,14 +9,16 @@ var ADLassetGraph = (function () {
             data: {getAssetGlobalMappings: assetLabel},
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
-                data.mappings.forEach(function (mapping) {
+            success: function (result, textStatus, jqXHR) {
+                for (var key in result.data) {
+                    var table = result.data[key].adlTable.toLowerCase()
+                    var anchor = $("#" + table.replace(/\./g, "_") + "_anchor")
+                    if (result.data[key].build)
+                        anchor.css("color", "#cc51ee")
+                    else
+                        anchor.css("color", "#86d5f8")
+                }
 
-
-                    //mark table in tables tree
-                    var anchor = $("#" + common.deconcatSQLTableColumn(mapping.subject).table.replace(/\./g, "_") + "_anchor")
-                    anchor.css("color", "#86d5f8")
-                })
             }, error(err) {
                 alert("Cannot load mappingFiles")
             }

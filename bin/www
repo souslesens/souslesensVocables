@@ -8,6 +8,11 @@ var app = require('../app');
 var debug = require('debug')('souslesensvocables:server');
 var http = require('http');
 
+
+
+
+
+
 /**
  * Get port from environment and store in Express.
  */
@@ -20,6 +25,26 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+
+
+
+
+
+
+var io = require('socket.io')(server);
+//var socket = require('../routes/socket.js');
+io.sockets.on('connection', function (client) {
+  socket.stuff(client, io);
+  console.log('Client connected ip :'+ client.conn.remoteAddress+" at "+new Date());
+
+
+  client.on('join', function(data) {
+     console.log(data);
+    client.emit('messages', 'Hello from server');
+  });
+
+
+});
 
 /**
  * Listen on provided port, on all network interfaces.

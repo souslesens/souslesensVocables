@@ -24,7 +24,7 @@ $("#Genealogy_nodeInfosDialogDiv").dialog({
     <div>
         <button onclick="Genealogy.searchConcepts($('#searchWordInput').val())">Search</button>
         <input type="checkbox" checked="checked" id="exactMatchCBX">Exact Match&nbsp;
-        &nbsp;<input type="checkbox" id='allConceptsCbx' onchange="common.onAllTreeCbxChange($(this),'conceptsJstreeDiv')">select All
+        &nbsp;<input type="checkbox" id='allConceptsCbx' onchange="common.jstree.onAllTreeCbxChange($(this),'conceptsJstreeDiv')">select All
     </div>
 
 

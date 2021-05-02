@@ -16,14 +16,15 @@ const async = require('async')
 var httpProxy = require('../httpProxy.')
 var sqlConnector = require('./ADLSqlConnector.')
 var SQLserverConnector = require('./SQLserverConnector.')
+var socket = require('../../routes/socket.js');
 var idsCache = {}
 
 
 var originalADLproperty = "http://data.total.com/resource/one-model#originalIdOf"
 var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId"
 var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri"
-var totalRdlUriPrefix = "http://data.total.com/resource/one-model/quantum-rdl/"
-var triplesGenerator = {
+var totalRdlADLgraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
+var ADLbuilder = {
 
     getJsonModel: function (filePath, callback) {
         var data = JSON.parse(fs.readFileSync(filePath))
@@ -32,7 +33,7 @@ var triplesGenerator = {
     }
 
 
-    , generateMappingFileTriples(mappings, data, uriPrefix, options, callback) {
+    , generateMappingFileTriples(mappings, data, ADLgraphUri, options, callback) {
         if (!options)
             options = {}
 
@@ -49,7 +50,7 @@ var triplesGenerator = {
 
                 if (value && value.indexOf && value.indexOf("TOTAL-") == 0) {
 
-                    uri = totalRdlUriPrefix + value
+                    uri = totalRdlADLgraphUri + value
                     existingUrisMap[value] = uri;
                     var subjectLabel = options.rdlDictonary[uri];
                     if (!subjectLabel)
@@ -61,7 +62,7 @@ var triplesGenerator = {
                             object: "'" + util.formatStringForTriple(subjectLabel) + "'"
                         })
                 } else {
-                    uri = uriPrefix + util.getRandomHexaId(options.generateIds)
+                    uri = ADLgraphUri + util.getRandomHexaId(options.generateIds)
                     existingUrisMap[value] = uri
                     triples.push({
                         subject: uri,
@@ -208,7 +209,7 @@ var triplesGenerator = {
                             if (!objectValue && options.generateIds) {
                                 var newUri = false
                                 if (!existingUrisMap[objectValue]) {
-                                    existingUrisMap[objectValue] = uriPrefix + util.getRandomHexaId(options.generateIds)
+                                    existingUrisMap[objectValue] = ADLgraphUri + util.getRandomHexaId(options.generateIds)
                                     triples.push({
                                         subject: existingUrisMap[objectValue],
                                         predicate: originalADLproperty,
@@ -238,9 +239,10 @@ var triplesGenerator = {
 
     },
 
-    generateAdlSqlTriples: function (mappingFilePath, uriPrefix, sqlParams, options, callback) {
+    generateAdlSqlTriples: function (mappingFilePath, ADLgraphUri, options, callback) {
         if (!options)
             options = {}
+        var sqlParams = {fetchSize: 5000}
         var existingUrisMap = {}
         var mappingSheets = []
         var dataArray = [];
@@ -263,12 +265,12 @@ var triplesGenerator = {
                 function (callbackSeries) {
                     if (!options.replaceGraph)
                         return callbackSeries();
-                    /*   var queryDeleteGraph = "with <" + uriPrefix + ">" +
+                    /*   var queryDeleteGraph = "with <" + ADLgraphUri + ">" +
                            "delete {" +
                            "  ?sub ?pred ?obj ." +
                            "} " +
                            "where { ?sub ?pred ?obj .}"*/
-                    var queryDeleteGraph = " CLEAR GRAPH <" + uriPrefix + ">"
+                    var queryDeleteGraph = " CLEAR GRAPH <" + ADLgraphUri + ">"
                     var params = {query: queryDeleteGraph}
 
                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
@@ -328,7 +330,7 @@ var triplesGenerator = {
                 function (callbackSeries) {
 
 
-                    triplesGenerator.getExistingLabelUriMap(options.sparqlServerUrl, uriPrefix, null, function (err, result) {
+                    ADLbuilder.getExistingLabelUriMap(options.sparqlServerUrl, ADLgraphUri, null, function (err, result) {
                         if (err)
                             return callbackSeries(err)
                         existingUrisMap = result;
@@ -373,7 +375,7 @@ var triplesGenerator = {
                         options.rdlInverseDictonary = rdlInverseDictonary,
                             options.oneModelDictionary = oneModelDictionary;
                         options.oneModelInverseDictionary = oneModelInverseDictionary;
-                        triplesGenerator.generateMappingFileTriples(mappings.mappings, data, uriPrefix, options, function (err, result) {
+                        ADLbuilder.generateMappingFileTriples(mappings.mappings, data, ADLgraphUri, options, function (err, result) {
                             if (err)
                                 return callbackProcessor(err)
 
@@ -400,7 +402,7 @@ var triplesGenerator = {
                                     triplesStr += "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n"
                                 })
 
-                                var queryGraph = "with <" + uriPrefix + ">" +
+                                var queryGraph = "with <" + ADLgraphUri + ">" +
                                     "insert {"
                                 queryGraph += triplesStr;
 
@@ -453,10 +455,11 @@ var triplesGenerator = {
                 function (callbackSeries) {
                     try {
                         var str = fs.readFileSync(mappingFilePath)
-                       var  mappings = JSON.parse(str);
+                        var mappings = JSON.parse(str);
                         mappings.data.build = {
                             createdDate: new Date(),
-                            triples: totalTriples
+                            triples: totalTriples,
+                            graphUri: ADLgraphUri,
                         }
                     } catch (e) {
                         return callbackSeries(e)
@@ -471,7 +474,7 @@ var triplesGenerator = {
 
             , function (err) {
 
-                    return callback(err)
+                return callback(err)
 
             })
 
@@ -538,7 +541,7 @@ var triplesGenerator = {
 
     buidlADL: function (mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, callback) {
 
-        sqlConnector.connection = dbConnection;
+
         var count = 0;
         async.eachSeries(mappingFileNames, function (mappingFileName, callbackEach) {
             if (count++ > 0)
@@ -547,7 +550,9 @@ var triplesGenerator = {
             var dir = path.join(__dirname, "data/")
             dir = path.resolve(dir)
             var mappingFilePath = dir + "/" + mappingFileName
-
+            if (mappingFilePath.indexOf(".json") < 0)
+                mappingFilePath += ".json"
+            mappingFileName = path.resolve(mappingFilePath)
 
             var options = {
                 generateIds: 15,
@@ -559,7 +564,7 @@ var triplesGenerator = {
             }
 
             console.log("creating triples for mapping " + mappingFileName)
-            triplesGenerator.generateAdlSqlTriples(mappingFilePath, graphUri, dbConnection, options, function (err, result) {
+            ADLbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, result) {
                 return callbackEach(err)
             })
 
@@ -574,13 +579,13 @@ var triplesGenerator = {
 
 }
 
-module.exports = triplesGenerator;
+module.exports = ADLbuilder;
 
 
-if (true) {
+if (false) {
 
 
-    if (true) {// AFtwin UK
+    if (false) {// AFtwin UK
 
 
         var mappingsDirPath = "D:\\webstorm\\souslesensVocables\\bin\\ADL\\data\\"
@@ -606,7 +611,7 @@ if (true) {
     }
 
 
-    triplesGenerator.buidlADL(mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, function (err, result) {
+    ADLbuilder.buidlADL(mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, function (err, result) {
         if (err)
             return console.log(err);
         return console.log("ALL DONE");

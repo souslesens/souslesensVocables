@@ -39,7 +39,7 @@ var ADLmappingData = (function () {
                 self.showModelJstree(data, self.currentADLdataSource.dbName)
                 setTimeout(function(){
                     ADLassetGraph.highlightMappedTables(self.currentSource)
-                },2000)
+                },500)
 
             },
             error: function (err) {
@@ -105,6 +105,7 @@ var ADLmappingData = (function () {
             selectTreeNodeFn: function (event, obj) {
                 if(ADLmappings.isShowingAssetGraph){
                     return ADLassetGraph.zoomOnTable(obj.node.data)
+
                 }
 
                 self.currentADLtable = obj.node
@@ -115,6 +116,8 @@ var ADLmappingData = (function () {
                 }, 500)
 
             },
+            withCheckboxes:true
+            ,
 
         }
         common.jstree.loadJsTree("ADLmappings_dataModelTree", modelJstreeData, options)

@@ -1148,7 +1148,7 @@ var Blender = (function () {
                                parentNodeId=parentNodeId.parent
                                $("#" + treeDiv).jstree(true).refresh_node(parentNodeId)*/
 
-                            common.setTreeAppearance();
+                            common.jstree.setTreeAppearance();
                         }
                     }
                     $("#Blender_PopupEditDiv").dialog("close")

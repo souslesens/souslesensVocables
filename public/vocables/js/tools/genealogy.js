@@ -18,7 +18,7 @@ var Genealogy = (function () {
 
     self.onSourceSelect = function () {
         var html = "<button onclick='Genealogy.showActionPanel()'>OK</button>"
-        html += "&nbsp;<input type='checkbox' id='allConceptsCbx' onchange=\"common.onAllTreeCbxChange($(this),'sourcesTreeDiv')\"> All"
+        html += "&nbsp;<input type='checkbox' id='allConceptsCbx' onchange=\"common.jstree.onAllTreeCbxChange($(this),'sourcesTreeDiv')\"> All"
         $("#sourceDivControlPanelDiv").html(html)
 
     }

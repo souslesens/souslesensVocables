@@ -54,6 +54,8 @@
     <script src="js/tools/ADL/ADLmappingData.js"></script>
     <script src="js/tools/ADL/ADLadvancedMapping.js"></script>
     <script src="js/tools/ADL/ADLassetGraph.js"></script>
+    <script src="js/tools/ADL/ADLbuild.js"></script>
+
 
 
     <script src="js/tools/ADL/TextAnnotator.js"></script>
@@ -91,6 +93,8 @@
     <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
     <script src="js/sparqlProxies/sparql_NPD.js"></script>
 
+
+    <script src="js/external/socket.io.js"></script>
 
     <!--  <script src="js/authentification.js"></script>-->
 
@@ -147,7 +151,15 @@
                 modal: false,
             })
 
-
+          //  var socket = io();
+            var socket = io();
+            socket.on('connect', function (data) {
+                socket.emit('join', 'Hello World from client');
+            });
+            socket.on('messages', function (message) {
+                ("#ADLbuild_infosDiv").html("<span class='ADLbuild_infosOK'>"+message+"</span>")
+            })
+            socket.emit('join', {xx:"email: user1@example.com"});
 
             MainController.UI.setCredits();
         });

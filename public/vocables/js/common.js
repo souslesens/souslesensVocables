@@ -12,7 +12,178 @@ var common = (function () {
         var self = {};
 
         self.jstree={
-            getjsTreeNodes : function (jstreeDiv, IdsOnly, parentNodeId) {
+            loadJsTree : function (jstreeDiv, jstreeData, options, callback) {
+
+
+                if (!options)
+                    options = {}
+
+                var plugins = [];
+                if (!options.cascade)
+                    options.cascade = "xxx"
+                if (options.selectDescendants)
+                    options.cascade = "down"
+                if (options.withCheckboxes)
+                    plugins.push("checkbox")
+                if (options.searchPlugin)
+                    plugins.push("search")
+                if (options.types)
+                    plugins.push("types")
+                if (options.contextMenu) {
+                    // $(".jstree-contextmenu").css("z-index",100)
+                    plugins.push("contextmenu")
+                }
+                if (options.dnd)
+                    plugins.push("dnd")
+                if (options.types)
+                    plugins.push("types")
+
+
+                var check_callbackFn = function (op, node, parent, position, more) {
+                    if (op == 'move_node' && options.dropAllowedFn) {
+                        return options.dropAllowedFn(op, node, parent, position, more)
+                    } else {
+                        return true;
+                    }
+                }
+
+
+                if ($('#' + jstreeDiv).jstree)
+                    $('#' + jstreeDiv).jstree("destroy")
+                $('#' + jstreeDiv).jstree({
+
+                    /* "checkbox": {
+                         "keep_selected_style": false
+                     },*/
+                    "plugins": plugins,
+                    "core": {
+                        'data': jstreeData,
+                        'check_callback': check_callbackFn
+                    },
+                    'dnd': options.dnd,
+                    "search": options.searchPlugin,
+                    "checkbox": {
+                        tie_selection : false,
+                        whole_node : false
+                    },
+                    types: options.types,
+
+                    contextmenu: {items: options.contextMenu}
+
+
+                }).on('loaded.jstree', function () {
+
+                    if (options.openAll)
+                        $('#' + jstreeDiv).jstree(true).open_all();
+                    self.jstree.setTreeAppearance()
+                    if (!options.doNotAdjustDimensions)
+                        common.jstree.setTreeParentDivDimensions(jstreeDiv)
+                    if (callback)
+                        callback();
+
+
+                }).on("select_node.jstree",
+                    function (evt, obj) {
+
+                        if (options.selectTreeNodeFn)
+                            options.selectTreeNodeFn(evt, obj);
+                    }).on('open_node.jstree', function (evt, obj) {
+                    self.jstree.setTreeAppearance()
+                    if (options.onOpenNodeFn) {
+                        options.onOpenNodeFn(evt, obj);
+                    }
+
+                }).on("check_node.jstree", function (evt, obj) {
+
+                    if (options.onCheckNodeFn) {
+                        options.onCheckNodeFn(evt, obj);
+                    }
+
+
+                }).on("uncheck_node.jstree", function (evt, obj) {
+
+
+                    if (options.onUncheckNodeFn) {
+                        options.onUncheckNodeFn(evt, obj);
+                    }
+
+
+                }).on("create_node.jstree", function (parent, node, position) {
+                    if (options.onCreateNodeFn) {
+                        options.onCreateNodeFn(parent, node, position)
+                        self.jstree.setTreeAppearance()
+                    }
+                }).on("delete_node.jstree", function (node, parent) {
+                    if (options.onjstree.deleteNodeFn) {
+                        options.onjstree.deleteNodeFn(node, parent)
+                        self.jstree.setTreeAppearance()
+                    }
+                })
+                    .on("move_node.jstree", function (node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance) {
+                        if (options.onMoveNodeFn) {
+                            options.onMoveNodeFn(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance);
+                            self.jstree.setTreeAppearance()
+                        }
+
+                    })
+                    .on("show_contextmenu", function (node, x, y) {
+                        if (options.onShowContextMenu)
+                            options.onShowContextMenu(node, x, y)
+                    });
+
+
+                if (options.dnd) {
+                    if (options.dnd.drag_start) {
+                        $(document).on('dnd_start.vakata', function (data, element, helper, event) {
+                            options.dnd.drag_start(data, element, helper, event)
+                        });
+                    }
+                    if (options.dnd.drag_move) {
+                        $(document).on('dnd_move.vakata Event', function (data, element, helper, event) {
+                            options.dnd.drag_move(data, element, helper, event)
+                        });
+                    }
+                    if (options.dnd.drag_stop) {
+                        $(document).on('dnd_stop.vakata Event', function (data, element, helper, event) {
+                            options.dnd.drag_stop(data, element, helper, event)
+                        });
+                    }
+                }
+
+
+            },
+            addNodesToJstree :function (jstreeDiv, parentNodeId, jstreeData, options) {
+                if (!options)
+                    options = {}
+                var position = "first"
+                if (options.positionLast)
+                    position = "last"
+                jstreeData.forEach(function (node) {
+                    var parentNode = parentNodeId;
+
+                    if (node.parent)
+                        parentNode = node.parent
+                    if (parentNode.indexOf("D101001101") > -1)
+                        var x = 3
+                    $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
+                        $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
+
+                    })
+
+                })
+                setTimeout(function () {
+                    self.jstree.setTreeAppearance()
+                    //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
+
+                    var offset = $(document.getElementById(parentNodeId)).offset();
+                }, 500)
+            },
+
+            deleteNode : function (jstreeDiv, nodeId) {
+                $("#" + jstreeDiv).jstree(true).delete_node(nodeId)
+                self.jstree.setTreeAppearance()
+            },
+            getjsTreeNodes: function (jstreeDiv, IdsOnly, parentNodeId) {
                 if (!parentNodeId)
                     parentNodeId = "#"
                 var idList = [];
@@ -79,183 +250,27 @@ var common = (function () {
 
             },
 
-            loadJsTree : function (jstreeDiv, jstreeData, options, callback) {
 
 
-                if (!options)
-                    options = {}
 
-                var plugins = [];
-                if (!options.cascade)
-                    options.cascade = "xxx"
-                if (options.selectDescendants)
-                    options.cascade = "down"
-                if (options.withCheckboxes)
-                    plugins.push("checkbox")
-                if (options.searchPlugin)
-                    plugins.push("search")
-                if (options.types)
-                    plugins.push("types")
-                if (options.contextMenu) {
-                    // $(".jstree-contextmenu").css("z-index",100)
-                    plugins.push("contextmenu")
-                }
-                if (options.dnd)
-                    plugins.push("dnd")
-                if (options.types)
-                    plugins.push("types")
-
-
-                var check_callbackFn = function (op, node, parent, position, more) {
-                    if (op == 'move_node' && options.dropAllowedFn) {
-                        return options.dropAllowedFn(op, node, parent, position, more)
-                    } else {
-                        return true;
-                    }
-                }
-
-
-                if ($('#' + jstreeDiv).jstree)
-                    $('#' + jstreeDiv).jstree("destroy")
-                $('#' + jstreeDiv).jstree({
-
-                    /* "checkbox": {
-                         "keep_selected_style": false
-                     },*/
-                    "plugins": plugins,
-                    "core": {
-                        'data': jstreeData,
-                        'check_callback': check_callbackFn
-                    },
-                    'dnd': options.dnd,
-                    "search": options.searchPlugin,
-                    types: options.types,
-
-                    contextmenu: {items: options.contextMenu}
-
-
-                }).on('loaded.jstree', function () {
-
-                    if (options.openAll)
-                        $('#' + jstreeDiv).jstree(true).open_all();
-                    self.setTreeAppearance()
-                    if (!options.doNotAdjustDimensions)
-                        common.jstree.setTreeParentDivDimensions(jstreeDiv)
-                    if (callback)
-                        callback();
-
-
-                }).on("select_node.jstree",
-                    function (evt, obj) {
-
-                        if (options.selectTreeNodeFn)
-                            options.selectTreeNodeFn(evt, obj);
-                    }).on('open_node.jstree', function (evt, obj) {
-                    self.setTreeAppearance()
-                    if (options.onOpenNodeFn) {
-                        options.onOpenNodeFn(evt, obj);
-                    }
-
-                }).on("check_node.jstree", function (evt, obj) {
-
-                    if (options.onCheckNodeFn) {
-                        options.onCheckNodeFn(evt, obj);
-                    }
-
-
-                }).on("uncheck_node.jstree", function (evt, obj) {
-
-
-                    if (options.onUncheckNodeFn) {
-                        options.onUncheckNodeFn(evt, obj);
-                    }
-
-
-                }).on("create_node.jstree", function (parent, node, position) {
-                    if (options.onCreateNodeFn) {
-                        options.onCreateNodeFn(parent, node, position)
-                        self.setTreeAppearance()
-                    }
-                }).on("delete_node.jstree", function (node, parent) {
-                    if (options.onjstree.deleteNodeFn) {
-                        options.onjstree.deleteNodeFn(node, parent)
-                        self.setTreeAppearance()
-                    }
-                })
-                    .on("move_node.jstree", function (node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance) {
-                        if (options.onMoveNodeFn) {
-                            options.onMoveNodeFn(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance);
-                            self.setTreeAppearance()
-                        }
-
-                    })
-                    .on("show_contextmenu", function (node, x, y) {
-                        if (options.onShowContextMenu)
-                            options.onShowContextMenu(node, x, y)
-                    });
-
-
-                if (options.dnd) {
-                    if (options.dnd.drag_start) {
-                        $(document).on('dnd_start.vakata', function (data, element, helper, event) {
-                            options.dnd.drag_start(data, element, helper, event)
-                        });
-                    }
-                    if (options.dnd.drag_move) {
-                        $(document).on('dnd_move.vakata Event', function (data, element, helper, event) {
-                            options.dnd.drag_move(data, element, helper, event)
-                        });
-                    }
-                    if (options.dnd.drag_stop) {
-                        $(document).on('dnd_stop.vakata Event', function (data, element, helper, event) {
-                            options.dnd.drag_stop(data, element, helper, event)
-                        });
-                    }
-                }
-
+           setTreeAppearance : function () {
+                $(".jstree-themeicon").css("display", "none")
+                $(".jstree-anchor").css("line-height", "18px")
+                $(".jstree-anchor").css("height", "18px")
+                $(".jstree-anchor").css("font-size", "14px")
 
             },
-
-            addNodesToJstree :function (jstreeDiv, parentNodeId, jstreeData, options) {
-                if (!options)
-                    options = {}
-                var position = "first"
-                if (options.positionLast)
-                    position = "last"
-                jstreeData.forEach(function (node) {
-                    var parentNode = parentNodeId;
-
-                    if (node.parent)
-                        parentNode = node.parent
-                    if (parentNode.indexOf("D101001101") > -1)
-                        var x = 3
-                    $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
-                        $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
-
-                    })
-
-                })
-                setTimeout(function () {
-                    self.setTreeAppearance()
-                    //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-
-                    var offset = $(document.getElementById(parentNodeId)).offset();
-                }, 500)
-            },
-
-            deleteNode : function (jstreeDiv, nodeId) {
-                $("#" + jstreeDiv).jstree(true).delete_node(nodeId)
-                self.setTreeAppearance()
+            onAllTreeCbxChange : function (allCBX, jstreeDiv) {
+                var checked = $(allCBX).prop("checked")
+                if (checked) {
+                    $("#" + jstreeDiv).jstree(true).check_all()
+                } else {
+                    $("#" + jstreeDiv).jstree(true).uncheck_all()
+                }
             }
         }
 
-        self.setTreeAppearance = function () {
-            $(".jstree-themeicon").css("display", "none")
-            $(".jstree-anchor").css("line-height", "18px")
-            $(".jstree-anchor").css("height", "18px")
-            $(".jstree-anchor").css("font-size", "14px")
 
-        }
         self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
 
 
@@ -305,14 +320,7 @@ var common = (function () {
         }
 
 
-        self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
-            var checked = $(allCBX).prop("checked")
-            if (checked) {
-                $("#" + jstreeDiv).jstree(true).check_all()
-            } else {
-                $("#" + jstreeDiv).jstree(true).uncheck_all()
-            }
-        }
+
 
 
         self.getAllsourcesWithType = function (type) {

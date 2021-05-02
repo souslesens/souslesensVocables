@@ -1,6 +1,6 @@
 var ADLassetGraph = (function () {
     var self = {}
-
+ self.currentADLgraphURI=null;
     self.highlightMappedTables = function (assetLabel) {
 
         $.ajax({
@@ -17,6 +17,9 @@ var ADLassetGraph = (function () {
                         anchor.css("color", "#cc51ee")
                     else
                         anchor.css("color", "#86d5f8")
+
+                    if(result.data[key].build && result.data[key].build.graphUri)
+                        self.currentADLgraphURI=result.data[key].build.graphUri
                 }
 
             }, error(err) {

@@ -118,7 +118,7 @@
     }
   },
   "infos": {
-    "lastModified": "2021-05-01T13:54:37.948Z",
+    "lastModified": "2021-05-02T13:27:30.628Z",
     "modifiedBy": "admin",
     "comment": ""
   },
@@ -129,10 +129,11 @@
       "dbName": "MDM_2.3_AFTWIN",
       "table_schema": "dbo"
     },
-    "adlTable": "adl.tblmodel",
+    "adlTable": "adl.tblModel",
     "build": {
-      "createdDate": "2021-05-01T17:09:58.530Z",
-      "triples": 44273
+      "createdDate": "2021-05-02T10:48:54.575Z",
+      "triples": 44273,
+      "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
     }
   }
 }

@@ -45,7 +45,8 @@ var ADLmappings = (function () {
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
               //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
             "<button onclick='ADLassetGraph.drawAsset()'>mapping Graph</button>  "+
-            "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
+                "<button onclick='ADLbuild.initDialog()'>Build triples</button>  "
+         //   "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
             );
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
@@ -430,12 +431,9 @@ var ADLmappings = (function () {
                         "http://www.w3.org/2002/07/owl#DatatypeProperty": "owl:DatatypeProperty"
                     }
                     var associations = []
+                    self.currentMappingData=data.data
                     data.mappings.forEach(function (item) {
-                        if (item.object == "failure2.Pressure^^xsd:float")
-                            var x = 3
-                        /*   if(item.object.indexOf("http")==0 && !data.model[item.object])
-                               return*/
-                        //type
+
                         if (item.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                             var node = {}
                             if (typeof item.object === "object") {
@@ -633,7 +631,8 @@ var ADLmappings = (function () {
             mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
             mappings.data={
                 adlSource:ADLmappingData.currentADLdataSource,
-                adlTable:ADLmappingData.currentADLtable.text
+                adlTable:ADLmappingData.currentADLtable.text,
+                build:self.currentMappingData.build
             }
             var payload = {
                 ADL_SaveMappings: true,

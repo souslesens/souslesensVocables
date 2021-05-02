@@ -1,6 +1,7 @@
 var fs = require('fs')
 var path = require('path')
 var async = require('async')
+var socket = require('../../routes/socket.js');
 var ADLcontroller = {
     getSourceFilePath: function (source) {
         var filePath = path.join(__dirname, "data/" + source + ".json")
@@ -16,6 +17,7 @@ var ADLcontroller = {
         })
     },
     getMappings: function (source, callback) {
+        socket.message("eeeeeee")
         var filePath = ADLcontroller.getSourceFilePath(source);
         if (!fs.existsSync(filePath))
             return callback(null, null)

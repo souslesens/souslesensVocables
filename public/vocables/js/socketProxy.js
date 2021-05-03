@@ -1,8 +1,6 @@
+var socket = io();
+socket.emit('chat message', "hello from Client");
 
-
-
-        var socket = io();
-              socket.on('connect', function (data) {
-                  socket.emit('join', 'Hello World from client');
-              });
-              socket.on('messages', function (message) {
+socket.on('ADLbuild', function (data) {
+    ADLbuild.serverMessage(data)
+})

@@ -7,9 +7,9 @@ socket.stuff = function(_client, io){
 
     client=_client;
 };
-socket.message=function (message){
+socket.message=function (channel,message){
 
     if(client && client.emit) {
-        client.emit('messages', message);
+        client.emit(channel, message);
     }
 }

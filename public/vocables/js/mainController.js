@@ -161,6 +161,9 @@ var MainController = (function () {
             common.jstree.loadJsTree(treeDiv, treeData, {
 
                 selectTreeNodeFn: function (evt, obj) {
+
+
+
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
                     Clipboard.clear();

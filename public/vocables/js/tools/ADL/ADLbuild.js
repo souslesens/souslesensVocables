@@ -6,11 +6,12 @@ var ADLbuild = (function () {
         if (!currentADL || currentADL == "")
             return alert("select an ADL")
 
+            if(!ADLmappings.checkMappingEditionSave())
+                return
 
 
 
-
-            $("#mainDialogDiv").load("snippets/ADL/ADLbuildDialog.html");
+        $("#mainDialogDiv").load("snippets/ADL/ADLbuildDialog.html");
         $("#mainDialogDiv").dialog("open");
         setTimeout(function () {
             var graphUri = "http://data.total.com/resource/one-model/assets/..."
@@ -25,6 +26,7 @@ var ADLbuild = (function () {
 
     }
     self.buildTriples = function () {
+        $("#ADLbuild_infosDiv").html("")
         self.checked_tables = $("#ADLmappings_dataModelTree").jstree().get_checked();
         if (self.checked_tables.length == 0)
             return alert("Select mapped tables")
@@ -38,6 +40,11 @@ var ADLbuild = (function () {
         var rdlGraphUri = $("#ADLbuild_rdlGraphUri").val()
         var oneModelGraphUri = $("#ADLbuild_oneModelGraphUri").val()
         var replaceGraph = $("#ADLbuild_replaceGraph").prop("checked")
+
+
+
+        if(replaceGraph && !confirm("erase existing graph"))
+            return
 
         if (adlGraphUri.indexOf("...") > -1) {
             return alert("enter a valid graph URI")
@@ -60,16 +67,19 @@ var ADLbuild = (function () {
             dataType: "json",
 
             success: function (result, textStatus, jqXHR) {
-                $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosError'>ALL DONE</span>")
+                $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
 
             }, error(err) {
-                $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosError'>" + err + "</span>")
+                $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosError'>" + err + "</span><br>")
             }
         })
 
         //  triplesGenerator.buidlADL(mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, function (err, result) {
 
 
+    }
+    self.serverMessage=function(message){
+        $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosServer'>"+message+"</span><br>")
     }
 
     self.cancelBuild = function () {

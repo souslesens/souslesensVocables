@@ -93,8 +93,9 @@
     <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
     <script src="js/sparqlProxies/sparql_NPD.js"></script>
 
-
     <script src="js/external/socket.io.js"></script>
+    <script src="js/socketProxy.js"></script>
+
 
     <!--  <script src="js/authentification.js"></script>-->
 
@@ -113,6 +114,7 @@
         var rightPanelWidth = 400
         var w
         var h
+
         $(function () {
             config = {loginMode: "none", appName: "VOCABLES"};
             authentication.init()
@@ -135,7 +137,12 @@
 
             $("#accordion").accordion()
             $("#accordion").accordion("option", {active: 0});
+            $("#accordion").on("accordionbeforeactivate",function( event, ui ) {
+                if(!ADLmappings.checkMappingEditionSave())
+                    return false;
+            })
             $("#accordion").on("accordionactivate", function (event, ui) {
+
 
                 if (false && ui.newPanel[0].id == "blenderPanelDiv") {
                     //Blender.initPanel();
@@ -151,18 +158,13 @@
                 modal: false,
             })
 
-          //  var socket = io();
-            var socket = io();
-            socket.on('connect', function (data) {
-                socket.emit('join', 'Hello World from client');
-            });
-            socket.on('messages', function (message) {
-                ("#ADLbuild_infosDiv").html("<span class='ADLbuild_infosOK'>"+message+"</span>")
-            })
-            socket.emit('join', {xx:"email: user1@example.com"});
+
+
+
 
             MainController.UI.setCredits();
         });
+
 
 
     </script>

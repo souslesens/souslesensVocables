@@ -91,6 +91,11 @@
       "dbName": "MDM_2.3_AFTWIN",
       "table_schema": "dbo"
     },
-    "adlTable": "rl.tblTypicalAssemblyPattern"
+    "adlTable": "rl.tblTypicalAssemblyPattern",
+    "build": {
+      "createdDate": "2021-05-03T12:41:20.057Z",
+      "triples": 130,
+      "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
+    }
   }
 }

@@ -127,6 +127,7 @@ var ADLmappings = (function () {
 
             self.currentJstreeNode.jstreeDiv = event.currentTarget.id
             if (ADLmappingData.currentColumn) {
+                ADLmappings.isModifyingMapping=true;
                 if (ADLadvancedMapping.addingValueManuallyToNode) {
                     ADLadvancedMapping.addValueManuallyFromOntology(ADLadvancedMapping.addingValueManuallyToNode, propertiesMap.node)
                 } else if (ADLadvancedMapping.assignConditionalTypeOn)
@@ -406,6 +407,21 @@ var ADLmappings = (function () {
         }
 
 
+        self.checkMappingEditionSave=function(){
+
+            if(ADLmappings.isModifyingMapping) {
+                if (confirm("continue without saving current mapping  ?")) {
+                    ADLmappings.isModifyingMapping=false
+                    return true
+                }
+                return false;
+            }
+            else{
+                return true
+            }
+
+
+        }
         self.loadMappings = function (name) {
             if (!name)
                 name = self.currentADLdataSource.dbName + "_" + self.currentADLtable.data.label
@@ -623,11 +639,16 @@ var ADLmappings = (function () {
 
         }
         self.saveMappings = function () {
+
             var mappingName = ADLmappingData.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.label
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
             if (comment === null)
                 return
+
+            self.isModifyingMapping=false;
+            if(!self.currentMappingData)
+                self.currentMappingData={}
             mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
             mappings.data={
                 adlSource:ADLmappingData.currentADLdataSource,

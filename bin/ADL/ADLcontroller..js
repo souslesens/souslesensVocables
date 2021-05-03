@@ -1,7 +1,9 @@
 var fs = require('fs')
 var path = require('path')
 var async = require('async')
-var socket = require('../../routes/socket.js');
+
+
+
 var ADLcontroller = {
     getSourceFilePath: function (source) {
         var filePath = path.join(__dirname, "data/" + source + ".json")
@@ -17,7 +19,7 @@ var ADLcontroller = {
         })
     },
     getMappings: function (source, callback) {
-        socket.message("eeeeeee")
+
         var filePath = ADLcontroller.getSourceFilePath(source);
         if (!fs.existsSync(filePath))
             return callback(null, null)
@@ -127,7 +129,9 @@ var ADLcontroller = {
         'tblTag.MaintenanceSystemID': 'tblAttributePickListValue.ID',
         'tblTag.CorrosionLoopID': 'tblAttributePickListValue.ID',
         'tblTag.CorrosionLoopTypeID': 'tblAttributePickListValue.ID',
-        'tblModel.OEMID': 'tblCompany.ID',
+        'tblModel.OEMID': 'tblOrganisation.ID',
+
+     //   'tblModel.OEMID': 'tblCompany.ID',   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!wrong table name
         'tblModel.PhysicalClassID': 'tblPhysicalClass.ID',
         'tblModelItem.ModelID': 'tblModel.ID',
         'tblDocumentAttribute.DocumentID': 'tblDocument.ID',
@@ -221,6 +225,9 @@ var ADLcontroller = {
         'tbltypicalassemblypatterntoattributechild.typicalassemblypatternid': 'tblTypicalAssemblyPattern.ID',
         'tbltypicalassemblypatterntoattributechild.attributeid': 'tblAttribute.ID',
         'tbltypicalassemblypatterntoattributechild.typicalassemblypatternid': 'tblTypicalAssemblyPattern.ID',
+
+
+
     }
 
 

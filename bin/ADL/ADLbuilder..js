@@ -17,6 +17,7 @@ var httpProxy = require('../httpProxy.')
 var sqlConnector = require('./ADLSqlConnector.')
 var SQLserverConnector = require('./SQLserverConnector.')
 var socket = require('../../routes/socket.js');
+
 var idsCache = {}
 
 
@@ -112,6 +113,11 @@ var ADLbuilder = {
                 var objectSuffix = ""
                 var p;
 
+                if (mapping.object == "xsd:string")
+                    var x = 3
+
+                if (mapping.predicate == "rdfs:label")
+                    var x = 3
 
                 if (mapping.object instanceof Object) {
                     var value = item[mapping.object.column]
@@ -232,8 +238,8 @@ var ADLbuilder = {
             })
         })
 
-        console.log("missing TOTAL subject IDs " + JSON.stringify(missingTotalSubjects));
-        console.log("missing TOTAL objects IDs " + JSON.stringify(missingTotalObjects));
+        //  console.log("missing TOTAL subject IDs " + JSON.stringify(missingTotalSubjects));
+        //  console.log("missing TOTAL objects IDs " + JSON.stringify(missingTotalObjects));
         callback(null, {triples: triples, urisMap: options.existingUrisMap})
 
 
@@ -412,10 +418,10 @@ var ADLbuilder = {
 
                                 httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
                                     if (err) {
-                                        console.log(err)
+                                        socket.message(err)
                                         return callbackEach(err);
                                     }
-                                    console.log(JSON.stringify(result))
+                                    socket.message("ADLbuild", "triples created: " + totalTriples)
                                     totalTriples += triples.length
                                     return callbackEach(null)
                                 })
@@ -514,14 +520,14 @@ var ADLbuilder = {
                 }
                 httpProxy.post(body.url, body.headers, body.params, function (err, result) {
                     if (err) {
-                        console.log(err)
+                        socket.message("ADLbuild", err)
                         return callbackWhilst(err);
                     }
 
                     offset += result.results.bindings.length
                     resultSize = result.results.bindings.length
 
-                    console.log("existing ids retrieved " + offset)
+                    socket.message("ADLbuild", "existing ids retrieved " + offset)
 
                     result.results.bindings.forEach(function (item) {
                         existingUrisMap[item.oneModelId.value] = item.term.value
@@ -540,13 +546,14 @@ var ADLbuilder = {
 
 
     buidlADL: function (mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, callback) {
-
-
+        if (replaceGraph == "false")
+            replaceGraph = false;
+        var totalTriples = 0
         var count = 0;
         async.eachSeries(mappingFileNames, function (mappingFileName, callbackEach) {
             if (count++ > 0)
                 replaceGraph = false
-
+            socket.message("ADLbuild", "-----------Processing " + mappingFileName + "--------------")
             var dir = path.join(__dirname, "data/")
             dir = path.resolve(dir)
             var mappingFilePath = dir + "/" + mappingFileName
@@ -563,14 +570,21 @@ var ADLbuilder = {
 
             }
 
-            console.log("creating triples for mapping " + mappingFileName)
+            socket.message("ADLbuild", "creating triples for mapping " + mappingFileName)
             ADLbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, result) {
-                return callbackEach(err)
+                if (err)
+                    return callbackEach(err)
+                //  totalTriples += result.length
+                return callbackEach()
+
             })
 
 
         }, function (err) {
-            callback(err)
+            if (err)
+                callback(err)
+            //   socket.message("ADLbuild", "total triples created " + totalTriples)
+            callback()
         })
 
 
@@ -613,8 +627,8 @@ if (false) {
 
     ADLbuilder.buidlADL(mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, function (err, result) {
         if (err)
-            return console.log(err);
-        return console.log("ALL DONE");
+            return socket.message("ADLbuild", err);
+        return socket.message("ADLbuild", "ALL DONE");
     })
 }
 

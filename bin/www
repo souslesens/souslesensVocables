@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('souslesensvocables:server');
 var http = require('http');
+var socket = require('../routes/socket.js');
 
 
 
@@ -30,21 +31,19 @@ var server = http.createServer(app);
 
 
 
+const Server  = require("socket.io");
+const io = new Server(server);
 
-var io = require('socket.io')(server);
-//var socket = require('../routes/socket.js');
-io.sockets.on('connection', function (client) {
+io.on('connection', (client) => {
   socket.stuff(client, io);
-  console.log('Client connected ip :'+ client.conn.remoteAddress+" at "+new Date());
-
-
+  console.log('a user connected');
   client.on('join', function(data) {
-     console.log(data);
-    client.emit('messages', 'Hello from server');
+    console.log(data);
+     client.emit('messages', 'Hello from server');
   });
-
-
 });
+
+
 
 /**
  * Listen on provided port, on all network interfaces.

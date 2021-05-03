@@ -103,6 +103,10 @@ var ADLmappingData = (function () {
 
         var options = {
             selectTreeNodeFn: function (event, obj) {
+                if(!ADLmappings.checkMappingEditionSave())
+                    return
+
+
                 if(ADLmappings.isShowingAssetGraph){
                     return ADLassetGraph.zoomOnTable(obj.node.data)
 
@@ -126,6 +130,7 @@ var ADLmappingData = (function () {
 
 
     self.showSampleData = function (node) {
+        ADLmappings.isModifyingMapping=false;
         var SampleSizelimit = 30;
         var dbName = node.data.source;
         var table;
@@ -209,6 +214,7 @@ var ADLmappingData = (function () {
                 })
 
                 $(".dataSample_type").bind("click", function (event) {
+
                     MainController.UI.hidePopup("graphPopupDiv")
 
                     //  var nodeId = $(this).attr("id").substring(16).replace("__", ".")

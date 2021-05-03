@@ -54,7 +54,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.14.43" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../mail2pdfimap" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -64,11 +64,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\external" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL\data" />
       <recent name="D:\GitHub\souslesensVocables\other\turbogenerator" />
       <recent name="D:\GitHub\souslesensVocables\other\SIL" />
-      <recent name="D:\GitHub\souslesensVocables\public\vocables\js\external\d3" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
@@ -179,6 +179,7 @@
       <workItem from="1619260267361" duration="32235000" />
       <workItem from="1619591144016" duration="90068000" />
       <workItem from="1619962281242" duration="384000" />
+      <workItem from="1620019723693" duration="17981000" />
     </task>
     <servers />
   </component>
@@ -202,17 +203,17 @@
       <breakpoints>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>660</line>
+          <line>681</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>513</line>
+          <line>529</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
-          <line>243</line>
+          <line>246</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -257,12 +258,12 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappingData.js</url>
-          <line>214</line>
+          <line>220</line>
           <option name="timeStamp" value="92" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
-          <line>370</line>
+          <line>371</line>
           <option name="timeStamp" value="93" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -282,23 +283,31 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>413</line>
+          <line>419</line>
           <option name="timeStamp" value="155" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>466</line>
+          <line>472</line>
           <option name="timeStamp" value="172" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>342</line>
-          <option name="timeStamp" value="187" />
+          <line>119</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="197" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>555</line>
-          <option name="timeStamp" value="188" />
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <line>31</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="198" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <line>14</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="199" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

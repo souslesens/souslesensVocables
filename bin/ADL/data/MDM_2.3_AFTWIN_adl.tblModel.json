@@ -131,8 +131,8 @@
     },
     "adlTable": "adl.tblModel",
     "build": {
-      "createdDate": "2021-05-02T10:48:54.575Z",
-      "triples": 44273,
+      "createdDate": "2021-05-03T13:46:32.527Z",
+      "triples": 44270,
       "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
     }
   }

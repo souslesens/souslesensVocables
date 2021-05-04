@@ -118,7 +118,7 @@
     }
   },
   "infos": {
-    "lastModified": "2021-05-02T13:27:30.628Z",
+    "lastModified": "2021-05-04T09:29:50.428Z",
     "modifiedBy": "admin",
     "comment": ""
   },
@@ -131,8 +131,8 @@
     },
     "adlTable": "adl.tblModel",
     "build": {
-      "createdDate": "2021-05-03T13:46:32.527Z",
-      "triples": 44270,
+      "createdDate": "2021-05-04T10:02:55.286Z",
+      "triples": 44273,
       "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
     }
   }

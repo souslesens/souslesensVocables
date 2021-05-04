@@ -524,6 +524,7 @@ var ADLbrowser = (function () {
 
                             selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
                             openAll: true,
+                            doNotAdjustDimensions:true,
                             contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
 
                         }
@@ -659,6 +660,7 @@ var propValueId=item.prop.value+"_"+targetNode.value
 
                         selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
                         openAll: true,
+                        doNotAdjustDimensions:true,
                         contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
 
                     }

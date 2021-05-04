@@ -68,7 +68,7 @@
     },
     "adlTable": "dbo.tblTypicalAssemblyPatternToAttributeChild",
     "build": {
-      "createdDate": "2021-05-03T12:41:38.305Z",
+      "createdDate": "2021-05-04T10:03:50.265Z",
       "triples": 97,
       "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
     }

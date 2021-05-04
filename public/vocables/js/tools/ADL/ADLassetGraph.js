@@ -1,32 +1,7 @@
 var ADLassetGraph = (function () {
     var self = {}
  self.currentADLgraphURI=null;
-    self.highlightMappedTables = function (assetLabel) {
 
-        $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {getAssetGlobalMappings: assetLabel},
-            dataType: "json",
-
-            success: function (result, textStatus, jqXHR) {
-                for (var key in result.data) {
-                    var table = result.data[key].adlTable.toLowerCase()
-                    var anchor = $("#" + table.replace(/\./g, "_") + "_anchor")
-                    if (result.data[key].build)
-                        anchor.css("color", "#cc51ee")
-                    else
-                        anchor.css("color", "#86d5f8")
-
-                    if(result.data[key].build && result.data[key].build.graphUri)
-                        self.currentADLgraphURI=result.data[key].build.graphUri
-                }
-
-            }, error(err) {
-                alert("Cannot load mappingFiles")
-            }
-        })
-    }
 
     self.drawAsset = function (assetLabel) {
 

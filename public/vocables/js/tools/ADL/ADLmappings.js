@@ -424,7 +424,7 @@ var ADLmappings = (function () {
         }
         self.loadMappings = function (name) {
             if (!name)
-                name = self.currentADLdataSource.dbName + "_" + self.currentADLtable.data.label
+                name = self.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
             var payload = {ADL_GetMappings: name}
             $.ajax({
                 type: "POST",
@@ -639,21 +639,31 @@ var ADLmappings = (function () {
 
         }
         self.saveMappings = function () {
+            var mappingName=ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable || ADLmappingData.currentADLtable.data.label
 
-            var mappingName = ADLmappingData.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.label
+
+            mappingName = ADLmappingData.currentADLdataSource.dbName + "_" +  mappingName
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
             if (comment === null)
                 return
 
             self.isModifyingMapping=false;
-            if(!self.currentMappingData)
-                self.currentMappingData={}
             mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
-            mappings.data={
-                adlSource:ADLmappingData.currentADLdataSource,
-                adlTable:ADLmappingData.currentADLtable.text,
-                build:self.currentMappingData.build
+            if(!self.currentMappingData) {
+                self.currentMappingData = {}
+
+                mappings.data = {
+                    adlSource: ADLmappingData.currentADLdataSource,
+                    adlTable: ADLmappingData.currentADLtable.text,
+                  //  build: self.currentMappingData.build
+                }
+                if (ADLmappingData.currentADLtable.data.sql) {
+                    mappings.data.sql = ADLmappingData.currentADLtable.data.sql
+                    mappings.data.adlTable = ADLmappingData.currentADLtable.data.adlTable
+                }
+            }else{
+                mappings.data=self.currentMappingData
             }
             var payload = {
                 ADL_SaveMappings: true,

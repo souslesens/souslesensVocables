@@ -46,6 +46,7 @@ var ADLbuild = (function () {
         if(replaceGraph && !confirm("erase existing graph"))
             return
 
+
         if (adlGraphUri.indexOf("...") > -1) {
             return alert("enter a valid graph URI")
         }

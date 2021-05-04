@@ -70,6 +70,36 @@ var ADLcontroller = {
         })
 
     },
+
+
+    getADLschema:function(source,callback) {
+
+        ADLcontroller.getAssetGlobalMappings(source, function (err, globalJson) {
+            if(err)
+                return callback(err)
+
+            var predicatesMap={}
+            globalJson.mappings.forEach(function(item){
+                if(!predicatesMap[item.predicate])
+                    predicatesMap[item.predicate]={subjects:{},objects:{}}
+                    if(item.object.indexOf("http")>-1) {
+                        if(! predicatesMap[item.predicate].objects[item.object])
+                        predicatesMap[item.predicate].objects[item.object] = []
+                        predicatesMap[item.predicate].objects[item.object].push(item.subject)
+                    }
+
+
+
+            })
+            var x=predicatesMap
+
+
+
+        })
+    }
+
+
+    ,
     relationalKeysMap: {
         'tblUnitOfMeasure.UnitOfMeasureDimensionID': 'tblUnitOfMeasureDimension.ID',
         'tblUnitOfMeasure.BaseUnitID': 'tblUnitOfMeasure.ID',
@@ -244,5 +274,5 @@ str = str.replace(/\$/gm, "\\\$")
 console.log(str)*/
 module.exports = ADLcontroller;
 
-
+ADLcontroller.getADLschema("MDM_2.3_AFTWIN")
 //ADLcontroller.getAssetGlobalMappings("MDM")

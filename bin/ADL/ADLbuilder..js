@@ -546,8 +546,7 @@ var ADLbuilder = {
 
 
     buidlADL: function (mappingFileNames, sparqlServerUrl, graphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, callback) {
-        if (replaceGraph == "false")
-            replaceGraph = false;
+
         var totalTriples = 0
         var count = 0;
         async.eachSeries(mappingFileNames, function (mappingFileName, callbackEach) {

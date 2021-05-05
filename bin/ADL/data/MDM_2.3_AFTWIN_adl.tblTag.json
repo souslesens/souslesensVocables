@@ -57,7 +57,7 @@
     },
     {
       "subject": "adl.tbltag.servicedescription",
-      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
       "object": "adl.tbltag.tagnumber"
     },
     {
@@ -128,7 +128,7 @@
     "http://w3id.org/readi/rdl/CFIHOS-10000025": {
       "label": "tagStatus"
     },
-    "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop": {
+    "http://www.w3.org/2000/01/rdf-schema#label": {
       "label": "rdfs:label"
     },
     "http://w3id.org/readi/rdl/D101001536": {

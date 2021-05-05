@@ -237,6 +237,7 @@ var ADLassetGraph = (function () {
                 var predicates = {}
                 var classes = {}
                 assetMappings.mappings.forEach(function (mapping) {
+
                     if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                         if (!classes[mapping.subject])
                             classes[mapping.subject] = mapping.object

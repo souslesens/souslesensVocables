@@ -5,7 +5,7 @@ var ADLbrowserGraph = (function () {
     self.defaultNodeSize = 10;
     self.clusterSizeLimit = 500
     self.clusteclusterShape = "box"
-self.edgeColor="#aaa";
+    self.edgeColor = "#aaa";
     self.setGraphPopupMenus = function (node, event) {
 
         if (!node)
@@ -31,15 +31,15 @@ self.edgeColor="#aaa";
 
         },
         self.selectNode = function () {
-        ADLbrowser.currentGraphNodeSelection=self.currentGraphNode
+            ADLbrowser.currentGraphNodeSelection = self.currentGraphNode
             $("#ADLbrowser_selectionDiv").html(self.currentGraphNode.data.label)
-        //    ADLbrowser.query.showQueryParamsDialog(ADLbrowserGraph.lastRightClickPosition,self.currentGraphNode);
+            //    ADLbrowser.query.showQueryParamsDialog(ADLbrowserGraph.lastRightClickPosition,self.currentGraphNode);
 
         },
         self.cancelGraphNodeSelection = function () {
-            ADLbrowser.currentGraphNodeSelection=null
+            ADLbrowser.currentGraphNodeSelection = null
             $("#ADLbrowser_selectionDiv").html("ALL NODES")
-         //   ADLbrowser.jstree.load.loadAdl();
+            //   ADLbrowser.jstree.load.loadAdl();
         }
         ,
         self.drawGraph = function (node, options, callback) {
@@ -56,20 +56,20 @@ self.edgeColor="#aaa";
             //  if (options.logicalMode!="union" && visjsGraph.data && visjsGraph.data.nodes) {
             if (visjsGraph.data && visjsGraph.data.nodes) {
                 var existingNodes
-                if( ADLbrowser.currentGraphNodeSelection) {
-                    existingNodes= visjsGraph.jstree.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id,true)
+                if (ADLbrowser.currentGraphNodeSelection) {
+                    existingNodes = visjsGraph.jstree.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id, true)
 
-                }else {
+                } else {
                     existingNodes = visjsGraph.data.nodes.get();
                 }
 
-                    existingNodes.forEach(function (node) {
-                        if (node.id.indexOf("cluster_") == 0) {
-                            existingNodes2 = existingNodes2.concat(node.data.clusterContent)
-                        } else {
-                            existingNodes2.push(node.id)
-                        }
-                    })
+                existingNodes.forEach(function (node) {
+                    if (node.id.indexOf("cluster_") == 0) {
+                        existingNodes2 = existingNodes2.concat(node.data.clusterContent)
+                    } else {
+                        existingNodes2.push(node.id)
+                    }
+                })
 
             }
 
@@ -86,10 +86,15 @@ self.edgeColor="#aaa";
                 if (node.data.role == "obj" || node.data.role == "objType")
                     graphNodesRole = "sub"
 
+                if(options.logicalMode = "union")
+                    graphNodesRole = "sub"
+                else
+                    graphNodesRole = "obj"
+
 
 
                 //else
-                graphNodeFilterStr= Sparql_common.setFilter(graphNodesRole, slice)
+                graphNodeFilterStr = Sparql_common.setFilter(graphNodesRole, slice)
                 self.queryGraph(node, graphNodeFilterStr, options, function (err, data) {
                     if (err)
                         return callbackEach(err)
@@ -102,7 +107,7 @@ self.edgeColor="#aaa";
                 if (allData.length == 0) {
                     return callback(null, 0)
                 }
-               // ADLbrowserGraph.cancelGraphNodeSelection();
+                // ADLbrowserGraph.cancelGraphNodeSelection();
                 ADLbrowser.queryTypesArray.push(node.data.id)
                 totalNodes += allData.length
                 self.executeDrawGraph(node, allData, options, function (err, result) {
@@ -121,24 +126,7 @@ self.edgeColor="#aaa";
             filterStr = "";
         var source = ADLbrowser.currentSource
         var query
-        /*  if (false && node.data.sourceType == "rdl") {
-           source = self.currentSource
-           var fromStrAdl = Sparql_common.getFromStr(source)
-           var fromStrRdl = Sparql_common.getFromStr(Config.ADL.RDLsource)
-           query = "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>" +
-               "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-               "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-               "SELECT distinct * " + fromStrAdl + fromStrRdl + " WHERE {" +
-               filterStr +
-               "  ?obj rdfs:subClassOf ?sub." +
-               "  ?obj rdfs:label ?objLabel." +
-               "  ?sub rdfs:label ?subLabel." +
-               "  ?obj rdf:type ?objType." +
-               "   ?sub rdf:type ?subType." +
-               " }  limit 1000"
 
-
-       }*/
         var fromStr = Sparql_common.getFromStr(source)
         query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct * " +
             fromStr +
@@ -147,7 +135,11 @@ self.edgeColor="#aaa";
             query += "    ?sub rdf:type ?subType. optional {?sub rdfs:label ?subLabel} "
             query += "filter(   ?subType =<" + node.data.id + "> )"
         } else {
-            query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
+            if (node.data.property)
+                query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
+            query += "?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
+            //  query += "?sub <" + node.data.property +"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
+
             node.data.property
             query += "filter(   ?objType =<" + node.data.id + "> )"
         }
@@ -243,7 +235,11 @@ self.edgeColor="#aaa";
                 data: {
                     sourceType: node.data.sourceType,
                     clusterContent: clusterContent,
-                    role: "cluster", source: ADLbrowser.currentSource, type: type, id: clusterId, label: label + "_" + clusterContent.length
+                    role: "cluster",
+                    source: ADLbrowser.currentSource,
+                    type: type,
+                    id: clusterId,
+                    label: label + "_" + clusterContent.length
                 }
 
             })
@@ -253,7 +249,7 @@ self.edgeColor="#aaa";
             data.forEach(function (item) {
                 var p;
                 if (unclusteredNodesMap[item.sub.value]) {
-                    var edgeId = unclusteredNodesMap[item.sub.value]+"_"+clusterId ;
+                    var edgeId = unclusteredNodesMap[item.sub.value] + "_" + clusterId;
                     if (!culteredEdges[edgeId]) {
                         culteredEdges[edgeId] = {
                             id: edgeId,
@@ -271,7 +267,7 @@ self.edgeColor="#aaa";
                     }
                 } else {
                     if (existingNodes[item.sub.value]) {
-                        var edgeId =  item.sub.value+"_"+clusterId ;
+                        var edgeId = item.sub.value + "_" + clusterId;
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
                             visjsData.edges.push({
@@ -294,13 +290,13 @@ self.edgeColor="#aaa";
 
         } else {
 
-var clusteredEdges={}
+            var clusteredEdges = {}
             data.forEach(function (item) {
-                if(unclusteredNodesMap[item.sub.value]){
-                    var edgeId = unclusteredNodesMap[item.sub.value]+"_"+ item.obj.value
-                    if(!clusteredEdges[edgeId])
-                        clusteredEdges[edgeId]=0
-                    clusteredEdges[edgeId]+=1
+                if (unclusteredNodesMap[item.sub.value]) {
+                    var edgeId = unclusteredNodesMap[item.sub.value] + "_" + item.obj.value
+                    if (!clusteredEdges[edgeId])
+                        clusteredEdges[edgeId] = 0
+                    clusteredEdges[edgeId] += 1
 
                 }
             })
@@ -321,7 +317,14 @@ var clusteredEdges={}
                                 shape: ADLbrowser.getSourceShape(ADLbrowser.currentSource),
                                 color: color,
                                 size: self.defaultNodeSize,
-                                data: {sourceType: node.data.sourceType, role: "sub", source: ADLbrowser.currentSource, type: item.subType.value, id: item.sub.value, label: item.subLabel.value}
+                                data: {
+                                    sourceType: node.data.sourceType,
+                                    role: "sub",
+                                    source: ADLbrowser.currentSource,
+                                    type: item.subType.value,
+                                    id: item.sub.value,
+                                    label: item.subLabel.value
+                                }
 
                             })
                         }
@@ -332,34 +335,41 @@ var clusteredEdges={}
                         existingNodes[item.obj.value] = 1
                         var color = "#ddd"
                         if (item.objType)
-                           // color = ADLbrowser.getPropertyColor(item.objType.value)
-                            color=ADLbrowser.getPropertyColor(node.data.property+"_"+node.data.id);
+                            // color = ADLbrowser.getPropertyColor(item.objType.value)
+                            color = ADLbrowser.getPropertyColor(node.data.property + "_" + node.data.id);
                         visjsData.nodes.push({
                             id: item.obj.value,
                             label: item.objLabel.value,
                             shape: ADLbrowser.getSourceShape(ADLbrowser.currentSource),
                             color: color,
                             size: self.defaultNodeSize,
-                            data: {sourceType: "adl", role: "sub", source: ADLbrowser.currentSource, type: item.objType.value, id: item.obj.value, label: item.objLabel.value}
+                            data: {
+                                sourceType: "adl",
+                                role: "sub",
+                                source: ADLbrowser.currentSource,
+                                type: item.objType.value,
+                                id: item.obj.value,
+                                label: item.objLabel.value
+                            }
 
                         })
                     }
                 }
                 if (item.obj) {
-                    if (  unclusteredNodesMap[item.sub.value]) {
+                    if (unclusteredNodesMap[item.sub.value]) {
 
 
-                        var edgeId = unclusteredNodesMap[item.sub.value]+"_"+ item.obj.value
+                        var edgeId = unclusteredNodesMap[item.sub.value] + "_" + item.obj.value
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
                                 id: edgeId,
                                 to: item.obj.value,
                                 from: unclusteredNodesMap[item.sub.value],
-                             //   value:clusteredEdges[edgeId],
-                                label:""+clusteredEdges[edgeId],
-                                font:"12px arial blue",
-                                font:{background: "#ddd",strokeWidth:2},
+                                //   value:clusteredEdges[edgeId],
+                                label: "" + clusteredEdges[edgeId],
+                                font: "12px arial blue",
+                                font: {background: "#ddd", strokeWidth: 2},
                                 color: self.edgeColor
 
                             })
@@ -367,7 +377,7 @@ var clusteredEdges={}
 
                     } else {
                         var edgeId = item.sub.value + "_" + item.obj.value;
-                        var inverseEdgeId=item.obj.value+ "_" +item.obj.value;
+                        var inverseEdgeId = item.obj.value + "_" + item.obj.value;
                         if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
@@ -397,8 +407,8 @@ var clusteredEdges={}
 
                 },
                 onRightClickFn: function (node, point, event) {
-if(!node || node.length==0)
-    return;
+                    if (!node || node.length == 0)
+                        return;
                     ADLbrowser.currentJstreeNode = node
 
                     MainController.UI.showPopup(point, "graphPopupDiv")

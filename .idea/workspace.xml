@@ -71,11 +71,11 @@
       <recent name="D:\GitHub\souslesensVocables\other\SIL" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL\mappings" />
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL\browser" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL\data\old" />
       <recent name="D:\webstorm\souslesensVocables\bin" />
-      <recent name="D:\webstorm\souslesensVocables\other\oneModel" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets" />
     </key>
   </component>
   <component name="RunManager" selected="Node.js.bin\www">
@@ -179,7 +179,7 @@
       <workItem from="1619260267361" duration="32235000" />
       <workItem from="1619591144016" duration="90068000" />
       <workItem from="1619962281242" duration="384000" />
-      <workItem from="1620019723693" duration="54142000" />
+      <workItem from="1620019723693" duration="68071000" />
     </task>
     <servers />
   </component>
@@ -202,12 +202,12 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
           <line>691</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
           <line>529</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
@@ -237,17 +237,17 @@
           <option name="timeStamp" value="51" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>569</line>
           <option name="timeStamp" value="54" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>897</line>
           <option name="timeStamp" value="56" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>882</line>
           <option name="timeStamp" value="58" />
         </line-breakpoint>
@@ -257,12 +257,12 @@
           <option name="timeStamp" value="61" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappingData.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
           <line>326</line>
           <option name="timeStamp" value="92" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappings.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
           <line>371</line>
           <option name="timeStamp" value="93" />
         </line-breakpoint>
@@ -273,7 +273,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>560</line>
+          <line>561</line>
           <option name="timeStamp" value="104" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -298,28 +298,34 @@
           <option name="timeStamp" value="197" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>31</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="198" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLadvancedMapping.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>14</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="199" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLmappingData.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
           <line>95</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="205" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>427</line>
+          <line>428</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="214" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
+          <line>49</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="215" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

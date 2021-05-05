@@ -37,7 +37,7 @@
     },
     {
       "subject": "adl.tblmodel.id",
-      "predicate": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
       "object": "adl.tblmodel.modelnumber"
     },
     {
@@ -88,7 +88,7 @@
     "http://w3id.org/readi/rdl/D101001101": {
       "label": "Manufacturer"
     },
-    "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop": {
+    "http://www.w3.org/2000/01/rdf-schema#label": {
       "label": "rdfs:label"
     },
     "http://w3id.org/readi/rdl/D101001536": {

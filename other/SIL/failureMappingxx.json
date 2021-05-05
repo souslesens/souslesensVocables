@@ -27,7 +27,7 @@
     },
     {
       "subject": "failure.Functionnal_Location",
-      "predicate":"http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+      "predicate":"http://www.w3.org/2000/01/rdf-schema#label",
       "object": "failure.Pressure^^xsd:float"
     },
     {

@@ -323,7 +323,7 @@ var ADLmappings = (function () {
                     parent: "#",
                     data: {
                         "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
-                        "id": "http://w3id.org/readi/rdl/CFIHOS-45000017_superprop",
+                        "id": "http://www.w3.org/2000/01/rdf-schema#label",
                         "label": "rdfs:label",
                         "source": "RDFS",
                         "parent": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"

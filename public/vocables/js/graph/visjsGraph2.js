@@ -42,6 +42,8 @@ var visjsGraph = (function () {
         currentDrawParams = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
+        if(_options.simulationTimeOut)
+            self.simulationTimeOut=_options.simulationTimeOut
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
         self.data = {
@@ -170,17 +172,17 @@ var visjsGraph = (function () {
 
         })
 
-          /*  .on("dragStart", function (params) {
+          .on("dragStart", function (params) {
                 var nodeId = params.nodes[0]
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
-                var fixed = true;
-                if (params.event.srcEvent.altKey)
-                    fixed = false;
+                var fixed = false;
+              /*  if (params.event.srcEvent.altKey)
+                    fixed = false;*/
                 newNodes.push({id: nodeId, fixed: fixed})
                 visjsGraph.data.nodes.update(newNodes)
 
-            })*/
+            })
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
                     if (!params.event.srcEvent.ctrlKey && !currentDrawParams.options.keepNodePositionOnDrag)

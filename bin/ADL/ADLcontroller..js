@@ -75,22 +75,36 @@ var ADLcontroller = {
     getADLschema:function(source,callback) {
 
         ADLcontroller.getAssetGlobalMappings(source, function (err, globalJson) {
-            if(err)
+            if (err)
                 return callback(err)
 
-            var predicatesMap={}
+            var predicatesMap = {}
+            var typesMap = {}
+            globalJson.mappings.forEach(function (item) {
+                if (item.predicate == "\"http://www.w3.org/1999/02/22-rdf-syntax-ns#type\"") {
+                    if (!typesMap[item.subject])
+                        typesMap[item.subject] = item.object
+                }
+            })
+
             globalJson.mappings.forEach(function(item){
                 if(!predicatesMap[item.predicate])
-                    predicatesMap[item.predicate]={subjects:{},objects:{}}
-                    if(item.object.indexOf("http")>-1) {
-                        if(! predicatesMap[item.predicate].objects[item.object])
-                        predicatesMap[item.predicate].objects[item.object] = []
-                        predicatesMap[item.predicate].objects[item.object].push(item.subject)
+                    predicatesMap[item.predicate]={}
+                if (item.predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                var subjectType=typesMap[item.subject]
+                    var objectType=typesMap[item.objectType]
+
+
+                            if (!predicatesMap[subjectType])
+                                predicatesMap[subjectType] = []
+                    predicatesMap[subjectType].push(objectType)
+
+
+
                     }
 
-
-
             })
+
             var x=predicatesMap
 
 

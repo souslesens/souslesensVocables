@@ -276,6 +276,7 @@ var ADLbuilder = {
                            "  ?sub ?pred ?obj ." +
                            "} " +
                            "where { ?sub ?pred ?obj .}"*/
+                    socket.message("ADLbuild", "clearing Graph")
                     var queryDeleteGraph = " CLEAR GRAPH <" + ADLgraphUri + ">"
                     var params = {query: queryDeleteGraph}
 
@@ -294,6 +295,7 @@ var ADLbuilder = {
                         "  ?sub rdfs:label ?subLabel ." +
                         "} "
                     var params = {query: query}
+                    socket.message("ADLbuild", "loading RDL dictionary ")
                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
                         if (err)
                             return callbackSeries(err)
@@ -311,7 +313,7 @@ var ADLbuilder = {
 
                 // load ONE-MODEL dictionary
                 function (callbackSeries) {
-
+                    socket.message("ADLbuild", "loading ONE MODEL graph ")
                     var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                         "select ?sub ?subLabel  from <" + options.oneModelGraphUri + "> where {" +
                         "  ?sub rdfs:label ?subLabel ." +
@@ -335,7 +337,7 @@ var ADLbuilder = {
 // get previously created uris
                 function (callbackSeries) {
 
-
+                    socket.message("ADLbuild", "loading ADL existing IDS ")
                     ADLbuilder.getExistingLabelUriMap(options.sparqlServerUrl, ADLgraphUri, null, function (err, result) {
                         if (err)
                             return callbackSeries(err)

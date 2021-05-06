@@ -9,9 +9,7 @@ var ADLbrowser = (function () {
     self.oneModelClasses = {}
     self.queryTypesArray = []
     self.defaultNodeSize = 10;
-    self.classes = {}
-    self.existingNodesIds = {}
-    self.model = null
+
     self.getPropertyColor = function (type, palette) {
         if (!palette)
             palette = "paletteIntense"
@@ -409,6 +407,8 @@ var ADLbrowser = (function () {
             ,
             loadRdl: function (aspectNode) {
 
+
+
                 var topObjects = {
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
                         label: "Functional Objects",
@@ -469,172 +469,16 @@ var ADLbrowser = (function () {
                 })
 
 
-            }
-            ,
+            },
             loadAdl: function (node) {
+                return ADLbrowserQuery.loadAdl((node))
+
                 if (!self.currentSource) {
                     return alert("select a source")
                 }
 
 
                 var jstreeData = []
-
-
-                if (true) {
-
-                    var buildClasses = {}
-                    async.series([
-                            //get adl types Stats
-                            function (callbackSeries) {
-
-                                var filterClassesStr = ""
-                                if (node)
-                                    filterClassesStr = Sparql_common.setFilter("sub", node.data.id)
-                                var fromStr = Sparql_common.getFromStr(self.currentSource)
-                                var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                                    "SELECT (COUNT(?sub) AS ?count) ?type " + fromStr + " WHERE {\n" +
-                                    "  ?sub rdf:type ?type\n" +
-                                    "} group by ?type"
-
-                                var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
-
-                                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.currentSource}, function (err, result) {
-                                    if (err) {
-                                        return callbackSeries(err)
-                                    }
-                                    result.results.bindings.forEach(function (item) {
-                                        buildClasses[item.type.value] = {
-                                            count: item.count.value,
-                                            color: Lineage_classes.getPropertyColor(item.type.value)
-                                        }
-                                    })
-
-                                    return callbackSeries();
-                                })
-
-
-                            },
-                            //get classes from mappings
-                            function (callbackSeries) {
-                                if (node)
-                                    return callbackSeries();
-                                ADLassetGraph.drawAsset(self.currentSource, function (err, result) {
-                                    self.model = result.model;
-                                    for (var predicate in result.predicates) {
-                                        for (var subject in result.predicates[predicate]) {
-                                            if (buildClasses[subject]) {
-                                                if (!self.classes[subject])
-                                                    self.classes[subject] = {}
-                                                if (!self.classes[subject][predicate])
-                                                    self.classes[subject][predicate] = []
-                                                result.predicates[predicate][subject].forEach(function (object) {
-                                                    if (buildClasses[object])
-                                                        self.classes[subject][predicate].push(object)
-                                                })
-                                            }
-                                        }
-
-                                    }
-                                    return callbackSeries();
-                                })
-                            },
-                            function (callbackSeries) {
-                                if (!node) {
-                                    self.existingNodesIds = {}
-                                }
-                                var newParents = []
-                                for (var subject in self.classes) {
-                                    if (true || !node || node.data.id == subject) {
-                                        var subjectId;
-                                        if (!self.existingNodesIds [subject]) {
-
-                                            subjectId = common.getRandomHexaId(4)
-
-                                            self.existingNodesIds [subject] = subjectId
-                                            var label = self.model[subject].label + " (" + buildClasses[subject].count + ")";
-                                            label = "<span style='color:" + buildClasses[subject].color + "'>" + label + "</span>"
-                                            jstreeData.push({
-                                                id: subjectId,
-                                                text: label,
-                                                parent: "#",
-                                                data: {
-                                                    id: subject,
-                                                    type: "subject",
-                                                    label: self.model[subject].label,
-                                                    count: buildClasses[subject].count,
-                                                    role: "sub"
-
-                                                }
-                                            })
-                                        } else {
-                                          ;//  subjectId = self.existingNodesIds [node.data.id]
-                                        }
-                                        if (true || node) {
-                                            for (var predicate in self.classes[subject]) {
-                                                var predicateLabel = predicate;
-                                                if (self.model[predicate])
-                                                    predicateLabel = self.model[predicate].label
-
-                                                self.classes[subject][predicate].forEach(function (object) {
-
-
-                                                        var objectId = common.getRandomHexaId(4);
-                                                        if (true || self.existingNodesIds [object]) {
-                                                            self.existingNodesIds [object] = objectId
-
-                                                            var label = self.model[object].label + " (" + buildClasses[object].count + ") " + predicateLabel;
-                                                            label = "<span style='color:" + buildClasses[subject].color + "'>" + label + "</span>"
-                                                            jstreeData.push({
-                                                                id: objectId,
-                                                                text: label,
-                                                                parent: subjectId,
-                                                                data: {
-                                                                    id: object,
-                                                                    type: "object",
-                                                                    label: self.model[object].label,
-                                                                    count: buildClasses[object].count,
-                                                                    color: buildClasses[subject].color,
-                                                                    predicate: predicate,
-                                                                    role: "obj"
-                                                                }
-                                                            })
-                                                        }
-
-                                                })
-                                            }
-                                        }
-                                    }
-
-
-                                }
-
-
-                                return callbackSeries();
-
-
-                            }],
-                        function (err) {
-                            if (false) {
-                              ;//  common.jstree.addNodesToJstree("ADLbrowser_adlJstreeDiv", self.existingNodesIds [node.data.id], jstreeData)
-                            } else {
-                                var options = {
-
-                                    selectTreeNodeFn: ADLbrowserQuery.onSelectAdl,
-                                    openAll: true,
-                                    doNotAdjustDimensions: true,
-                                    contextMenu: self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
-
-                                }
-                                //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
-                                common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
-                                $("#ADLbrowser_Tabs").tabs("option", "active", 0);
-                            }
-
-                        })
-                    return
-
-                }
 
 
                 async.series([

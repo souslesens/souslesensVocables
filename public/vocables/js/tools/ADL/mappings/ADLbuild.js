@@ -15,8 +15,8 @@ var ADLbuild = (function () {
         $("#mainDialogDiv").dialog("open");
         setTimeout(function () {
             var graphUri = "http://data.total.com/resource/one-model/assets/..."
-            if (ADLassetGraph.currentADLgraphURI)
-                graphUri = ADLassetGraph.currentADLgraphURI
+            if (ADLmappingData.currentADLgraphURI)
+                graphUri = ADLmappingData.currentADLgraphURI
             $("#ADLbuild_sparqlServerUrl").val(Config.default_sparql_url)
             $("#ADLbuild_adlGraphUri").val(graphUri)
             $("#ADLbuild_rdlGraphUri").val("http://data.total.com/resource/one-model/quantum-rdl/")

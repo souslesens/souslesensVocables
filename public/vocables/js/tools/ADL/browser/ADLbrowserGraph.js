@@ -57,7 +57,7 @@ var ADLbrowserGraph = (function () {
             if (visjsGraph.data && visjsGraph.data.nodes) {
                 var existingNodes
                 if (ADLbrowser.currentGraphNodeSelection) {
-                    existingNodes = visjsGraph.jstree.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id, true)
+                    existingNodes = visjsGraph.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id, true)
 
                 } else {
                     existingNodes = visjsGraph.data.nodes.get();
@@ -82,14 +82,14 @@ var ADLbrowserGraph = (function () {
             async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
                 var graphNodesRole = "sub"
                 if (node.data.role == "sub" || node.data.role == "subType")
-                    graphNodesRole = "obj"
-                if (node.data.role == "obj" || node.data.role == "objType")
                     graphNodesRole = "sub"
+                if (node.data.role == "obj" || node.data.role == "objType")
+                    graphNodesRole = "obj"
 
-                if(options.logicalMode = "union")
+            /*    if(options.logicalMode = "union")
                     graphNodesRole = "sub"
                 else
-                    graphNodesRole = "obj"
+                    graphNodesRole = "obj"*/
 
 
 
@@ -135,8 +135,10 @@ var ADLbrowserGraph = (function () {
             query += "    ?sub rdf:type ?subType. optional {?sub rdfs:label ?subLabel} "
             query += "filter(   ?subType =<" + node.data.id + "> )"
         } else {
-            if (node.data.property)
-                query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
+            if (node.data.property) {
+              query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
+               // query += "?sub <" + node.data.property + "> ?obj.   "
+            }
             query += "?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
             //  query += "?sub <" + node.data.property +"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
 
@@ -218,11 +220,13 @@ var ADLbrowserGraph = (function () {
             var item0 = data[0]
             if (true || item0.obj) {
                 label = ADLbrowser.currentJstreeNode.data.label
-                color = ADLbrowser.getPropertyColor(ADLbrowser.currentJstreeNode.id)
+              color=  self.buildClasses[ADLbrowser.currentJstreeNode.id]
+              //  color = ADLbrowser.getPropertyColor(ADLbrowser.currentJstreeNode.id)
                 type = ADLbrowser.currentJstreeNode.id
             } else {
                 label = ADLbrowser.currentJstreeNode.data.label
-                color = ADLbrowser.getPropertyColor(item0.subType.value)
+                color=  self.buildClasses[ADLbrowser.currentJstreeNode.id]
+               // color = ADLbrowser.getPropertyColor(item0.subType.value)
                 type = item0.subType.value
             }
 

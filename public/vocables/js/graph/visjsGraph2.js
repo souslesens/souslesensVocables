@@ -174,6 +174,8 @@ var visjsGraph = (function () {
 
           .on("dragStart", function (params) {
                 var nodeId = params.nodes[0]
+              if(!nodeId)
+                  return;
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
@@ -231,7 +233,9 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'><button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>"
+        var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
+            "<button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>"+
+        "<button onclick='visjsGraph.toSVG()'>image</button>"
         if (true) {
             if(!$("#graphButtons").length) {
             html += "Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
@@ -583,6 +587,37 @@ var visjsGraph = (function () {
         if(id) {
 
         }
+
+
+    }
+
+
+    self.toSVG=function(){
+
+        var c =document.getElementsByTagName("canvas")[0]
+        var canvasSVGContext = new CanvasSVG.Deferred();	canvasSVGContext.wrapCanvas(c);
+        var canvasContext = c.getContext("2d");
+        function drawCanvas(ctx) {
+            ctx.fillStyle = "#FF0000";
+            ctx.fillRect(0,0,150,75);
+        }
+        drawCanvas(canvasContext); document.getElementById("captions").appendChild(canvasContext.getSVG());
+
+
+
+
+
+      /*  var canvas=document.getElementsByTagName("canvas")[0]
+        const ctx = canvas.getContext('2d');
+
+
+
+        var mySerializedSVG = ctx.getSerializedSvg();
+        common.copyTextToClipboard(mySerializedSVG)
+      //  var dataURL = canvas.toDataURL();
+        // set canvasImg image src to dataURL
+        // so it can be saved as an image
+       // document.getElementById('canvasImg').src = dataURL;*/
 
 
     }

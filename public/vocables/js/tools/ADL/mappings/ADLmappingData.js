@@ -81,6 +81,7 @@ var ADLmappingData = (function () {
 
     }
 
+
     self.showModelJstree = function (data, source) {
 
         if (self.currentMappingsMap) {
@@ -118,7 +119,7 @@ var ADLmappingData = (function () {
                 ADLmappings.clearMappings()
                 self.showSampleData(obj.node)
                 setTimeout(function () {
-                    var name=self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
+                    var name = self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
                     ADLmappings.loadMappings(self.currentADLdataSource.dbName + "_" + name)
                 }, 500)
 
@@ -144,51 +145,54 @@ var ADLmappingData = (function () {
         return items;
     }
     self.addMappingDataToTableTree = function (assetLabel) {
+        ADLassetGraph.getBuiltMappingsStats(assetLabel, function (err, builtClasses) {
+            if (err)
+                return alert(err);
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: {getAssetGlobalMappings: assetLabel},
+                dataType: "json",
 
-        $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {getAssetGlobalMappings: assetLabel},
-            dataType: "json",
+                success: function (result, textStatus, jqXHR) {
+                    // add filteredViews to tables
+                    for (var key in result.data) {
+                        var obj = result.data[key]
+                        if (obj.sql) {
+                            var table = obj.adlTable.toLowerCase()
+                            var tableId = table.replace(/\./g, "_")
+                            var view = obj.adlView.toLowerCase()
+                            var viewId = view.replace(/\./g, "_")
+                            var node = {
+                                id: viewId,
+                                text: view,
+                                parent: tableId,
+                                data: obj
 
-            success: function (result, textStatus, jqXHR) {
-                // add filteredViews to tables
-                for (var key in result.data) {
-                    var obj=result.data[key]
-                    if( obj.sql){
-                        var table = obj.adlTable.toLowerCase()
-                        var tableId = table.replace(/\./g, "_")
-                        var view = obj.adlView.toLowerCase()
-                        var viewId = view.replace(/\./g, "_")
-                        var node={
-                            id:viewId,
-                            text:view,
-                            parent:tableId,
-                            data: obj
-
+                            }
+                            common.jstree.addNodesToJstree("ADLmappings_dataModelTree", tableId, [node])
                         }
-                        common.jstree.addNodesToJstree("ADLmappings_dataModelTree",tableId, [node])
+
+
                     }
 
+                    //color of labels
+                    for (var key in result.data) {
+                        var table = result.data[key].adlTable.toLowerCase()
+                        var anchor = $("#" + table.replace(/\./g, "_") + "_anchor")
+                        if (result.data[key].build)
+                            anchor.css("color", "#cc51ee")
+                        else
+                            anchor.css("color", "#86d5f8")
 
+                        if (result.data[key].build && result.data[key].build.graphUri)
+                            self.currentADLgraphURI = result.data[key].build.graphUri
+                    }
+
+                }, error(err) {
+                    alert("Cannot load mappingFiles")
                 }
-
-                //color of labels
-                for (var key in result.data) {
-                    var table = result.data[key].adlTable.toLowerCase()
-                    var anchor = $("#" + table.replace(/\./g, "_") + "_anchor")
-                    if (result.data[key].build)
-                        anchor.css("color", "#cc51ee")
-                    else
-                        anchor.css("color", "#86d5f8")
-
-                    if(result.data[key].build && result.data[key].build.graphUri)
-                        self.currentADLgraphURI=result.data[key].build.graphUri
-                }
-
-            }, error(err) {
-                alert("Cannot load mappingFiles")
-            }
+            })
         })
     }
 
@@ -221,13 +225,13 @@ var ADLmappingData = (function () {
         var id = self.currentADLtable.id + "_" + suffix
         var label = self.currentADLtable.text + "_" + suffix
         var data = {
-           sql :sql,
-            type : "filteredView",
-            label : label,
-            id:id,
-            adlTable:self.currentADLtable.text,
-            adlView:id,
-            comment:comment
+            sql: sql,
+            type: "filteredView",
+            label: label,
+            id: id,
+            adlTable: self.currentADLtable.text,
+            adlView: id,
+            comment: comment
 
         }
 
@@ -244,7 +248,7 @@ var ADLmappingData = (function () {
         ADLmappings.isModifyingMapping = false;
         var SampleSizelimit = 30;
         var dbName = node.data.source;
-        var table =node.data.adlTable ||  node.data.label
+        var table = node.data.adlTable || node.data.label
 
 
         function displaySampleData(data) {

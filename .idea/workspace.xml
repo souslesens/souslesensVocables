@@ -179,7 +179,7 @@
       <workItem from="1619260267361" duration="32235000" />
       <workItem from="1619591144016" duration="90068000" />
       <workItem from="1619962281242" duration="384000" />
-      <workItem from="1620019723693" duration="68071000" />
+      <workItem from="1620019723693" duration="91699000" />
     </task>
     <servers />
   </component>
@@ -272,11 +272,6 @@
           <option name="timeStamp" value="94" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>561</line>
-          <option name="timeStamp" value="104" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js</url>
           <line>133</line>
           <option name="timeStamp" value="105" />
@@ -317,15 +312,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>428</line>
+          <line>493</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="214" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>49</line>
+          <line>55</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="215" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js</url>
+          <line>603</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="216" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js</url>
+          <line>599</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="217" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

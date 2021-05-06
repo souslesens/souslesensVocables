@@ -395,25 +395,41 @@ var ADLadvancedMapping = (function () {
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                        "SELECT distinct ?class ?classLabel  ?superClass ?superClassLabel ?type" + fromStr + "  WHERE {\n" +
-                        "  ?class rdfs:label ?classLabel.\n"
+                        "SELECT distinct ?class ?classLabel  ?superClass ?superClassLabel ?type" + fromStr + "  WHERE {\n"
 
-                    if (fuzzyMatching)
-                        query += Sparql_common.setFilter("class", null, values, {exactMatch: false})
+
+
+                      var clause=  "  ?class rdfs:label ?classLabel."
+
+                    if (fuzzyMatching) {
+                        clause += Sparql_common.setFilter("class", null, values, {exactMatch: false})
+
+
+                    }
                     else
-                        query += Sparql_common.setFilter("class", null, values, {exactMatch: true})
+                        clause += Sparql_common.setFilter("class", null, values, {exactMatch: true})
+
+
+
+
+
 
                     if (type == "class") {
-                        query += "?class rdf:type ?type. filter(?type not in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>) && ?type=owl:Class) "
+                        clause += "?class rdf:type ?type. filter(?type not in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>) && ?type=owl:Class) "
                     } else if (type == "named individual") {
-                        query += "?class rdf:type ?type. filter(?type in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>)) "
+                        clause += "?class rdf:type ?type. filter(?type in(owl:NamedIndividual,<http://w3id.org/readi/rdl/D101001497>,<http://w3id.org/readi/rdl/D101001500>)) "
                     } else {
-                        query += " optional{ ?class rdf:type ?type.}"
+                        clause += " optional{ ?class rdf:type ?type.}"
                     }
                     if (parentClass != "") {
-                        query += "?class rdfs:subClassOf+|rdf:type+ ?superClass. ?superClass rdfs:label ?superClassLabel. filter (regex(?superClassLabel,'" + parentClass + "','i'))"
+                        clause += "?class rdfs:subClassOf+|rdf:type+ ?superClass. ?superClass rdfs:label ?superClassLabel. filter (regex(?superClassLabel,'" + parentClass + "','i'))"
                     } else {
-                        query += " optional {?class rdfs:subClassOf|rdf:type ?superClass. optional {?superClass rdfs:label ?superClassLabel}} "
+                        clause += " optional {?class rdfs:subClassOf|rdf:type ?superClass. optional {?superClass rdfs:label ?superClassLabel}} "
+                    }
+
+                    query+="{"+clause+"}";
+                    if (fuzzyMatching) {
+                        query+=  " MINUS { ?class rdfs:label ?classLabel."+ Sparql_common.setFilter("class", null, values, {exactMatch: true})+"}"
                     }
 
                     query += " } LIMIT 10000"
@@ -861,7 +877,7 @@ var ADLadvancedMapping = (function () {
         //  var types = ["class", "named individual"]
         var ontologySources = ["CFIHOS_READI", "ISO_15926-PCA", "ISO_15926-org"]
         var fuzzyMatchings = [false, true]
-        var fuzzyMatchings = [false]
+       var fuzzyMatchings = [true]
         var onlyOrphans = false
 
         var columnLabel = ADLmappingData.currentColumn

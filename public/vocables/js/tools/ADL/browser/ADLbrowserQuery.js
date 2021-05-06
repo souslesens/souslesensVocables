@@ -1,8 +1,17 @@
 var ADLbrowserQuery = (function () {
 
     var self = {}
+    self.classes = {}
+    self.existingNodesIds = {}
+    self.model = null
+    self.onSelectADLtreeNode = function (event, obj) {
 
-    self.onSelectAdl = function (event, obj) {
+        if (obj.node.id == "..")
+            return self.loadAdl()
+
+      //  return self.loadAdl(obj.node)
+
+
         self.currentJstreeNode = obj.node;
         ADLbrowser.currentJstreeNode = obj.node;
         ADLbrowser.queryMode = "graph"
@@ -35,10 +44,10 @@ var ADLbrowserQuery = (function () {
 
     self.showNodeProperties = function (node) {
         var properties = []
-        for (var predicate in ADLbrowser.classes[node.data.id]) {
+        for (var predicate in self.classes[node.data.id]) {
             var label = predicate;
-            if (ADLbrowser.model[predicate])
-                label = ADLbrowser.model[predicate].label
+            if (self.model[predicate])
+                label = self.model[predicate].label
             properties.push({
                 propertyLabel: label,
                 property: predicate
@@ -256,6 +265,223 @@ var ADLbrowserQuery = (function () {
             }
 
         })
+
+
+    }
+
+
+    self.loadAdl = function (node) {
+        if (!ADLbrowser.currentSource) {
+            return alert("select a source")
+        }
+
+
+        var jstreeData = []
+
+
+        async.series([
+                //get adl types Stats
+                function (callbackSeries) {
+
+                    var filterClassesStr = ""
+                    if (node)
+                        return callbackSeries()
+
+                    self.buildClasses = {}
+                    ADLassetGraph.getBuiltMappingsStats(ADLbrowser.currentSource, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        self.buildClasses = result
+                        return callbackSeries();
+                    })
+
+
+                },
+                //get classes from mappings
+                function (callbackSeries) {
+                    if (node)
+                        return callbackSeries();
+                    ADLassetGraph.drawAsset(ADLbrowser.currentSource, function (err, result) {
+                        self.model = result.model;
+                        for (var predicate in result.predicates) {
+                            for (var subject in result.predicates[predicate]) {
+                                if (self.buildClasses[subject]) {
+                                    if (!self.classes[subject])
+                                        self.classes[subject] = {}
+                                    if (!self.classes[subject][predicate])
+                                        self.classes[subject][predicate] = []
+                                    result.predicates[predicate][subject].forEach(function (object) {
+                                        if (self.buildClasses[object])
+                                            self.classes[subject][predicate].push(object)
+                                    })
+                                }
+                            }
+
+                        }
+                        return callbackSeries();
+                    })
+                },
+                function (callbackSeries) {
+
+                    var objectsMap = {}
+                    for (var subject in self.classes) {
+                        for (var predicate in self.classes[subject]) {
+
+                            self.classes[subject][predicate].forEach(function (object) {
+                                if (!objectsMap[object]) {
+                                    objectsMap[object] = {}
+                                }
+                                if (!objectsMap[object][predicate])
+                                    objectsMap[object][predicate] = []
+                                if (objectsMap[object][predicate].indexOf(subject) < 0)
+                                    objectsMap[object][predicate].push(subject)
+
+
+                            })
+
+                        }
+                    }
+
+
+                    var newParents = []
+                    var topNodeId
+                    for (var subject in self.classes) {
+                        if (!node || node.data.id == subject) {// at the beginning all nodes and then only node and children
+                            var countStr = ""
+                            if (!node)
+                                countStr = " (" + self.buildClasses[subject].count + ")"
+                            var subjectId = common.getRandomHexaId(4)
+                            topNodeId = subjectId
+                            var label = self.model[subject].label + countStr;
+                            label = "<span style='color:" + self.buildClasses[subject].color + "'>" + label + "</span>"
+                            jstreeData.push({
+                                id: subjectId,
+                                text: label,
+                                parent: "#",
+                                data: {
+                                    id: subject,
+                                    type: "subject",
+                                    label: self.model[subject].label,
+                                    count: self.buildClasses[subject].count,
+                                    role: "sub"
+
+                                }
+                            })
+
+                            if (node) {
+
+                                var existingChildren = {}
+                                for (var predicate in self.classes[subject]) {
+                                    var predicateLabel = predicate;
+                                    if (self.model[predicate])
+                                        predicateLabel = self.model[predicate].label
+
+                                    self.classes[subject][predicate].forEach(function (object) {
+
+
+                                        var objectId = common.getRandomHexaId(4);
+
+
+                                        var label = predicateLabel + " " + self.model[object].label;
+                                        if (!existingChildren[label]) {
+                                            existingChildren[label] = 1
+                                            label = "<span style='color:" + self.buildClasses[object].color + "'>" + label + "</span>"
+                                            jstreeData.push({
+                                                id: objectId,
+                                                text: label,
+                                                parent: subjectId,
+                                                data: {
+                                                    id: object,
+                                                    type: "object",
+                                                    label: self.model[object].label,
+                                                    count: self.buildClasses[object].count,
+                                                    color: self.buildClasses[subject].color,
+                                                    property: predicate,
+                                                    role: "obj"
+                                                }
+                                            })
+                                        }
+
+
+                                    })
+                                }
+
+
+                            }
+                        }
+                    }
+                        //relations inverses
+                        if (node && objectsMap[node.data.id]) {
+                            var existingChildren={}
+                            for (var predicate in self.classes[node.data.id]) {
+                                var predicateLabel = predicate;
+                                if (self.model[predicate])
+                                    predicateLabel = self.model[predicate].label
+                                if (objectsMap[node.data.id][predicate]) {
+                                    objectsMap[node.data.id][predicate].forEach(function (object) {
+
+
+                                        var objectId = common.getRandomHexaId(4);
+
+
+                                        var label = "<-" + predicateLabel + " " + self.model[object].label;
+                                        if (!existingChildren[label]) {
+                                            existingChildren[label] = 1
+                                            label = "<span style='color:" + self.buildClasses[object].color + "'>" + label + "</span>"
+                                            jstreeData.push({
+                                                id: objectId,
+                                                text: label,
+                                                parent: topNodeId,
+                                                data: {
+                                                    id: object,
+                                                    type: "subject",
+                                                    label: self.model[object].label,
+                                                    count: self.buildClasses[object].count,
+                                                    color: self.buildClasses[subject].color,
+                                                    property: predicate,
+                                                    role: "sub"
+                                                }
+                                            })
+                                        }
+
+
+                                    })
+                                }
+                            }
+                        }
+
+
+
+
+
+                    return callbackSeries();
+
+
+                }],
+            function (err) {
+                if (err)
+                    return alert(err)
+
+                var backNode = {
+                    id: "..",
+                    text: "..",
+                    parent: "#"
+                }
+                jstreeData.splice(0, 0, backNode)
+                var options = {
+
+                    selectTreeNodeFn: ADLbrowserQuery.onSelectADLtreeNode,
+                    openAll: true,
+                    doNotAdjustDimensions: true,
+                    contextMenu: ADLbrowser.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
+
+                }
+                //  common.fillSelectOptions("ADLbrowser_searchAllSourcestypeSelect", typesArray, true)
+                common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
+                $("#ADLbrowser_Tabs").tabs("option", "active", 0);
+
+
+            })
 
 
     }

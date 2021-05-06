@@ -11,11 +11,6 @@
       "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
-      "subject": "adl.tbltag.servicedescription",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
       "subject": "adl.tbltag.status",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "http://data.posccaesar.org/dm/Status"
@@ -41,9 +36,19 @@
       "object": "xsd:boolean"
     },
     {
+      "subject": "adl.tbltag.servicedescription",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "xsd:string"
+    },
+    {
+      "subject": "adl.tbltag.servicedescription",
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "adl.tbltag.tagnumber"
+    },
+    {
       "subject": "adl.tbltag.id",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "adl.tbltag.servicedescription"
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "adl.tbltag.tagnumber"
     },
     {
       "subject": "adl.tbltag.id",
@@ -54,11 +59,6 @@
       "subject": "adl.tbltag.id",
       "predicate": "http://w3id.org/readi/rdl/CFIHOS-10000025",
       "object": "adl.tbltag.status"
-    },
-    {
-      "subject": "adl.tbltag.servicedescription",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "adl.tbltag.tagnumber"
     },
     {
       "subject": "adl.tbltag.id",
@@ -74,6 +74,11 @@
       "subject": "adl.tbltag.id",
       "predicate": "http://www.w3.org/2002/07/owl##DatatypeProperty",
       "object": "adl.tbltag.cmimsrequired"
+    },
+    {
+      "subject": "adl.tbltag.id",
+      "predicate": "http://standards.iso.org/iso/15926/part14/isAbout",
+      "object": "adl.tbltag.servicedescription"
     }
   ],
   "model": {
@@ -128,14 +133,20 @@
     "http://w3id.org/readi/rdl/CFIHOS-10000025": {
       "label": "tagStatus"
     },
-    "http://www.w3.org/2000/01/rdf-schema#label": {
-      "label": "rdfs:label"
-    },
     "http://w3id.org/readi/rdl/D101001536": {
       "label": "CFIHOS picklist property"
     },
     "http://www.w3.org/2002/07/owl##DatatypeProperty": {
       "label": "owl:DatatypeProperty"
+    },
+    "http://standards.iso.org/iso/15926/part14/isAbout": {
+      "label": "isAbout"
+    },
+    "http://www.w3.org/2000/01/rdf-schema#label": {
+      "parents": [
+        "#"
+      ],
+      "label": "rdfs:label"
     }
   },
   "graph": {
@@ -144,20 +155,16 @@
       "y": -33
     },
     "adl.tbltag.functionalclassid": {
-      "x": 17,
-      "y": 127
-    },
-    "adl.tbltag.servicedescription": {
-      "x": -543,
-      "y": -104
+      "x": -11,
+      "y": 138
     },
     "adl.tbltag.status": {
-      "x": -264,
-      "y": 136
+      "x": -373,
+      "y": 91
     },
     "adl.tbltag.tagnumber": {
-      "x": -246,
-      "y": -199
+      "x": -466,
+      "y": -145
     },
     "adl.tbltag.validationstatus": {
       "x": 153,
@@ -168,12 +175,16 @@
       "y": -12
     },
     "adl.tbltag.cmimsrequired": {
-      "x": -35,
-      "y": -152
+      "x": -58,
+      "y": -201
+    },
+    "adl.tbltag.servicedescription": {
+      "x": 218,
+      "y": 71
     }
   },
   "infos": {
-    "lastModified": "2021-05-04T17:42:42.926Z",
+    "lastModified": "2021-05-06T09:12:23.906Z",
     "modifiedBy": "admin",
     "comment": ""
   },

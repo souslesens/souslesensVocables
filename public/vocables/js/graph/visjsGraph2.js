@@ -42,8 +42,8 @@ var visjsGraph = (function () {
         currentDrawParams = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
-        if(_options.simulationTimeOut)
-            self.simulationTimeOut=_options.simulationTimeOut
+        if (_options.simulationTimeOut)
+            self.simulationTimeOut = _options.simulationTimeOut
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
         self.data = {
@@ -53,7 +53,7 @@ var visjsGraph = (function () {
         var options = {
             interaction: {hover: true},
             width: "" + $("#" + divId).width() + "px",
-            height: "" + ($("#" + divId).height()-50) + "px",
+            height: "" + ($("#" + divId).height() - 50) + "px",
             nodes: {
                 shape: 'dot',
                 size: 12,
@@ -172,15 +172,15 @@ var visjsGraph = (function () {
 
         })
 
-          .on("dragStart", function (params) {
+            .on("dragStart", function (params) {
                 var nodeId = params.nodes[0]
-              if(!nodeId)
-                  return;
+                if (!nodeId)
+                    return;
                 //   var nodes = self.data.nodes.getIds();
                 var newNodes = [];
                 var fixed = false;
-              /*  if (params.event.srcEvent.altKey)
-                    fixed = false;*/
+                /*  if (params.event.srcEvent.altKey)
+                      fixed = false;*/
                 newNodes.push({id: nodeId, fixed: fixed})
                 visjsGraph.data.nodes.update(newNodes)
 
@@ -234,27 +234,27 @@ var visjsGraph = (function () {
 
 
         var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
-            "<button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>"+
-        "<button onclick='visjsGraph.toSVG()'>image</button>"
+            "export <button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>" +
+            "<button onclick='visjsGraph.toSVG()'>SVG img</button>"
         if (true) {
-            if(!$("#graphButtons").length) {
-            html += "Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
-                "<option ></option>"+
-                "<option >standard</option>" +
+            if (!$("#graphButtons").length) {
+                html += "&nbsp;&nbsp;Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
+                    "<option ></option>" +
+                    "<option >standard</option>" +
 
-                "<option>hierarchical vertical</option>" +
-                "<option>hierarchical horizontal</option>" +
-                "</div>" +
+                    "<option>hierarchical vertical</option>" +
+                    "<option>hierarchical horizontal</option>" +
+                    "</div>" +
 
-                "</select>"
+                    "</select>"
 
-        var parent=$("#" + divId).parent()
+                var parent = $("#" + divId).parent()
 
-            $(parent).css("flex-direction","column")
-            $(parent).prepend(html)
-        }
+                $(parent).css("flex-direction", "column")
+                $(parent).prepend(html)
+            }
 
-            html +="</div>"
+            html += "</div>"
         }
 
         if (callback)
@@ -263,39 +263,37 @@ var visjsGraph = (function () {
     }
     self.setLayout = function (layout) {
         if (layout == "hierarchical vertical") {
-        currentDrawParams.options.layoutHierarchical = {
-                   direction: "UD",
-            levelSeparation:50,
-            nodeSpacing:50,
-            levelSeparation:200,
-            sortMethod:"hubsize",
-               }
+            currentDrawParams.options.layoutHierarchical = {
+                direction: "UD",
+                levelSeparation: 50,
+                nodeSpacing: 50,
+                levelSeparation: 200,
+                sortMethod: "hubsize",
+            }
 
 
-        self.redraw()
-    }
-
-      else  if (layout == "hierarchical horizontal") {
+            self.redraw()
+        } else if (layout == "hierarchical horizontal") {
             currentDrawParams.options.layoutHierarchical = {
                 direction: "LR",
-                sortMethod:"hubsize",
-                levelSeparation:200,
-                sortMethod:"hubsize",
-             //   nodeSpacing:25,
+                sortMethod: "hubsize",
+                levelSeparation: 200,
+                sortMethod: "hubsize",
+                //   nodeSpacing:25,
 
             }
-            currentDrawParams.options.edges= {
+            currentDrawParams.options.edges = {
                 smooth: {
                     type: "cubicBezier",
-                     forceDirection  : "horizontal",
+                    forceDirection: "horizontal",
 
-                        roundness: 0.4,
+                    roundness: 0.4,
                 },
             }
 
-                self.redraw()
+            self.redraw()
         } else {
-            currentDrawParams.options={}
+            currentDrawParams.options = {}
             self.redraw()
         }
     }
@@ -405,8 +403,8 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv()
-       common.copyTextToClipboard(csv,function(err, result){
-            if( err)
+        common.copyTextToClipboard(csv, function (err, result) {
+            if (err)
                 MainController.UI.message(err);
             MainController.UI.message(result);
         })
@@ -492,14 +490,11 @@ var visjsGraph = (function () {
 
     }
 
-    self.getNodesPosition= function (){
+    self.getNodesPosition = function () {
         var nodes = self.data.nodes.getIds();
-        var positions=self.network.getPositions()
+        var positions = self.network.getPositions()
         return positions
     }
-
-
-
 
 
     self.processClicks = function (params, _options, isDbleClick) {
@@ -582,9 +577,9 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.remove(targetNodes)
     }
 
-    self.highlightNode=function (id, label){
+    self.highlightNode = function (id, label) {
 
-        if(id) {
+        if (id) {
 
         }
 
@@ -592,32 +587,10 @@ var visjsGraph = (function () {
     }
 
 
-    self.toSVG=function(){
+    self.toSVG = function () {
 
-        var c =document.getElementsByTagName("canvas")[0]
-        var canvasSVGContext = new CanvasSVG.Deferred();	canvasSVGContext.wrapCanvas(c);
-        var canvasContext = c.getContext("2d");
-        function drawCanvas(ctx) {
-            ctx.fillStyle = "#FF0000";
-            ctx.fillRect(0,0,150,75);
-        }
-        drawCanvas(canvasContext); document.getElementById("captions").appendChild(canvasContext.getSVG());
-
-
-
-
-
-      /*  var canvas=document.getElementsByTagName("canvas")[0]
-        const ctx = canvas.getContext('2d');
-
-
-
-        var mySerializedSVG = ctx.getSerializedSvg();
-        common.copyTextToClipboard(mySerializedSVG)
-      //  var dataURL = canvas.toDataURL();
-        // set canvasImg image src to dataURL
-        // so it can be saved as an image
-       // document.getElementById('canvasImg').src = dataURL;*/
+        SVGexport.toSVG(self.network)
+        self.redraw()
 
 
     }

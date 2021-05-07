@@ -82,9 +82,9 @@ var ADLbrowserGraph = (function () {
             async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
                 var graphNodesRole = "sub"
                 if (node.data.role == "sub" || node.data.role == "subType")
-                    graphNodesRole = "sub"
-                if (node.data.role == "obj" || node.data.role == "objType")
                     graphNodesRole = "obj"
+                if (node.data.role == "obj" || node.data.role == "objType")
+                    graphNodesRole = "sub"
 
             /*    if(options.logicalMode = "union")
                     graphNodesRole = "sub"

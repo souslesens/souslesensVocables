@@ -148,7 +148,7 @@ var ADLbrowserQuery = (function () {
                     filterStr = typeVarName + " <" + property + "> ?x. filter (?x " + operator + value + ") "
             } else {
 
-                filterStr = typeVarName + " <" + property + "> ?x. "
+                filterStr = "";//typeVarName + " <" + property + "> ?x. "
             }
 
 

@@ -20,7 +20,7 @@ var Config = (function () {
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
-self.loginMode = "none";
+//self.loginMode = "none";
     self.appName = "VOCABLES";
     self.debug = {query: 1}
     self.enableCollections = false;
@@ -137,15 +137,15 @@ self.loginMode = "none";
             allowedSources: "ALL",
             forbiddenSources: ["Dbpedia"],
             allowedTools: "ALL",
-            forbiddenTools: ["ADLmappings", "evaluate", "INDIVIDUALS", "BLENDER"],
+            forbiddenTools: [ "evaluate", "INDIVIDUALS", "BLENDER"],
             blender: {contextMenuActionStartLevel: 3}
         },
         reader_owl: {
             allowedSourceSchemas: ["OWL"],
             allowedSources: "ALL",
             forbiddenSources: [],
-            allowedTools: ["lineage", "ADLbrowser"],
-            forbiddenTools: ["ADLmappings", "evaluate", "INDIVIDUALS", "BLENDER",],
+            allowedTools: ["lineage", "ADLbrowser","ADLmappings"],
+            forbiddenTools: ["evaluate", "INDIVIDUALS", "BLENDER",],
             blender: {contextMenuActionStartLevel: 3}
         }
     }

@@ -116,6 +116,7 @@ var ADLbrowserQuery = (function () {
         }
 
     self.onQueryParamsDialogValidate = function (logicalMode) {
+
         var property = $("#ADLbrowserQueryParams_property").val()
         var operator = $("#ADLbrowserQueryParams_operator").val()
         var value = $("#ADLbrowserQueryParams_value").val()
@@ -157,6 +158,7 @@ var ADLbrowserQuery = (function () {
 
 
         if (self.queryMode == "graph") {
+            ADLbrowser.query.addNodeToQueryTree(self.currentJstreeNode)
             var options = {filter: filterStr, logicalMode: logicalMode}
             ADLbrowserGraph.drawGraph(self.currentJstreeNode, options, function (err, result) {
                 $("#waitImg").css("display", "none");
@@ -166,12 +168,12 @@ var ADLbrowserQuery = (function () {
                     return alert("no data found")
                 self.updateAdlTree(self.currentJstreeNode)
             })
-        } else if (self.queryMode == "query") {
-            self.query.addFilterToQueryTree({label: filterLabel, content: filterStr}, function (err, result) {
+        }  if (true || self.queryMode == "query") {
+            ADLbrowser.query.addFilterToQueryTree({label: filterLabel, content: filterStr}, function (err, result) {
                 $("#waitImg").css("display", "none");
                 if (err || result == 0)
                     return;
-                self.updateAdlTree(self.currentJstreeNode)
+                ADLbrowser.updateAdlTree(self.currentJstreeNode)
             })
         }
 

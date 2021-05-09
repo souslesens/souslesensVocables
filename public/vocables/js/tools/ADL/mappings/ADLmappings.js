@@ -65,6 +65,9 @@ var ADLmappings = (function () {
 
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
+                if(authentication.currentUser.groupes.indexOf("reader">-1)){
+                    $("#ADLmappings_saveMappingsButton").prop("disabled",true)
+                }
 
                 ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
                     if (err)

@@ -1214,7 +1214,8 @@ var ADLbrowser = (function () {
         }
         ,
         addFilterToQueryTree: function (filterObj) {
-            var propId = ADLbrowser.currentJstreeQueryNode.id
+            return
+            var propId = ADLbrowser.currentJstreeNode.id
             var id = "filter_" + common.getRandomHexaId(5)
             var jstreeData = [{
                 id: id,

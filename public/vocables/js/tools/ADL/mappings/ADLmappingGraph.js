@@ -80,20 +80,19 @@ var ADLmappingGraph = (function () {
         showGraphPopupMenu: function (node, point, e) {
             var top = $("#ADLmappings_graph").position().top
             point.y += top
-            var html="";
-            if(node.from){//edge
+            var html = "";
+            if (node.from) {//edge
                 self.currentEdge = node;
                 html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.deleteProperty();\"> delete Property</span>"
 
 
-
-            }else {
+            } else {
 
                 self.currentNode = node;
                 if (!node)
                     MainController.UI.hidePopup("graphPopupDiv")
 
-                 html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertySubject();\"> is property subject</span>" +
+                html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertySubject();\"> is property subject</span>" +
                     "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertyObject();\"> is property object</span>"
             }
             $("#graphPopupDiv").html(html);
@@ -101,7 +100,7 @@ var ADLmappingGraph = (function () {
         },
         deleteProperty: function () {
             delete self.mappedProperties.mappings[self.currentEdge.id]
-           visjsGraph.data.edges.remove(self.currentEdge.id)
+            visjsGraph.data.edges.remove(self.currentEdge.id)
 
 
         },
@@ -270,6 +269,202 @@ var ADLmappingGraph = (function () {
         removeNode: function (column) {
             visjsGraph.data.nodes.remove(column)
         }
+    }
+
+    self.graphClassesAndProperties = function (source, graphDiv, options,callback) {
+        if (!source)
+            source = ADLmappingData.currentSource
+        if (!source) {
+            return alert("select a source")
+        }
+
+
+        self.classes = {}
+        var visjsData = {nodes: [], edges: []}
+
+
+        async.series([
+                //get adl types Stats
+                function (callbackSeries) {
+
+                    var filterClassesStr = ""
+
+                    self.buildClasses = {}
+                    ADLassetGraph.getBuiltMappingsStats(source, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        self.buildClasses = result
+                        return callbackSeries();
+                    })
+
+
+                },
+                //get classes from mappings
+                function (callbackSeries) {
+
+                    ADLassetGraph.drawAsset(source, function (err, result) {
+                        self.model = result.model;
+                        for (var predicate in result.predicates) {
+                            for (var subject in result.predicates[predicate]) {
+                                if (self.buildClasses[subject]) {
+                                    if (!self.classes[subject])
+                                        self.classes[subject] = {}
+                                    if (!self.classes[subject][predicate])
+                                        self.classes[subject][predicate] = []
+                                    result.predicates[predicate][subject].forEach(function (object) {
+                                        if (self.buildClasses[object])
+                                            self.classes[subject][predicate].push(object)
+                                    })
+                                }
+                            }
+
+                        }
+                        return callbackSeries();
+                    })
+                },
+                function (callbackSeries) {
+
+                    var objectsMap = {}
+                    for (var subject in self.classes) {
+                        for (var predicate in self.classes[subject]) {
+
+                            self.classes[subject][predicate].forEach(function (object) {
+                                if (!objectsMap[object]) {
+                                    objectsMap[object] = {}
+                                }
+                                if (!objectsMap[object][predicate])
+                                    objectsMap[object][predicate] = []
+                                if (objectsMap[object][predicate].indexOf(subject) < 0)
+                                    objectsMap[object][predicate].push(subject)
+
+
+                            })
+
+                        }
+                    }
+
+                    var existingNodes = {}
+                    var newParents = []
+                    var topNodeId
+                    for (var subject in self.classes) {
+                        if (!existingNodes[subject]) {
+                            existingNodes[subject] = 1
+                            var countStr = ""
+                            countStr = " (" + self.buildClasses[subject].count + ")"
+                            var label = self.model[subject].label
+                            var color = self.buildClasses[subject].color
+                            var shape = "box"
+                            if (subject.indexOf("xsd:") > -1) {
+                                shape = "star"
+                                color = "#ffe0aa"
+                            }
+
+                            visjsData.nodes.push({
+                                id: subject,
+                                label: label,
+                                shape: shape,
+                                color: color,
+
+                                data: {
+                                    id: subject,
+                                    type: "subject",
+                                    label: self.model[subject].label,
+                                    count: self.buildClasses[subject].count,
+
+
+                                }
+                            })
+
+
+                            var existingChildren = {}
+                            for (var predicate in self.classes[subject]) {
+
+
+                                self.classes[subject][predicate].forEach(function (object) {
+                                    var edgeId = subject + "_" + predicate + "_" + object
+                                    if (!existingNodes[edgeId]) {
+                                        existingNodes[edgeId] = 1
+                                        var predicateLabel = predicate;
+                                        if (self.model[predicate])
+                                            predicateLabel = self.model[predicate].label
+
+
+                                        visjsData.edges.push({
+                                            id: edgeId,
+                                            from: subject,
+                                            to: object,
+                                            label: predicateLabel
+
+                                        })
+                                    }
+
+                                    if (!existingNodes[object]) {
+                                        existingNodes[object] = 1
+                                        var label = self.model[object].label;
+                                        var color = self.buildClasses[object].color
+                                        var shape = "box"
+                                        if (object.indexOf("xsd:") > -1) {
+                                            shape = "star"
+                                            color = "#ffe0aa"
+                                        }
+                                        visjsData.nodes.push({
+                                            id: object,
+                                            label: label,
+                                            shape: shape,
+                                            color: color,
+                                            data: {
+                                                id: object,
+                                                type: "subject",
+                                                label: label,
+
+
+                                            }
+                                        })
+                                    }
+                                })
+
+                            }
+                        }
+                    }
+
+
+                    return callbackSeries();
+
+
+                }],
+            function (err) {
+                if (err)
+                    return alert(err)
+
+                if (!graphDiv) {
+                    graphDiv = "ADLmappings_GlobalGraph"
+
+                    $("#ADLassetGraphDiv").dialog("open")
+                    setTimeout(function () {
+
+                        $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:100%'></div>")
+                        // $("#mainDialogDiv").height()
+                        if (!options)
+                            options = {}
+                        visjsGraph.draw(graphDiv, visjsData, options)
+                        visjsGraph.network.fit()
+                    })
+                }else{
+                    $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:100%'></div>")
+                    // $("#mainDialogDiv").height()
+                    if (!options)
+                        options = {}
+                    visjsGraph.draw(graphDiv, visjsData, options)
+                    visjsGraph.network.fit()
+
+                }
+                if(callback)
+                    return callback(null,{model:self.model, classes:self.classes})
+
+
+            })
+
+
     }
 
 

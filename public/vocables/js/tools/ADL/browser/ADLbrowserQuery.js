@@ -4,16 +4,17 @@ var ADLbrowserQuery = (function () {
     self.classes = {}
     self.existingNodesIds = {}
     self.model = null
+    self.queryMode="graph"
     self.onSelectADLtreeNode = function (event, obj) {
 
         if (obj.node.id == "..")
             return self.loadAdl()
 
-      //  return self.loadAdl(obj.node)
+        //  return self.loadAdl(obj.node)
 
 
-        self.currentJstreeNode = obj.node;
-        ADLbrowser.currentJstreeNode = obj.node;
+        self.currentNode = obj.node;
+        ADLbrowser.currentNode = obj.node;
         ADLbrowser.queryMode = "graph"
         self.queryMode = "graph"
         self.showQueryParamsDialog({x: w - 100, y: h / 3},)
@@ -23,12 +24,13 @@ var ADLbrowserQuery = (function () {
 
     self.showQueryParamsDialog = function (position) {
 
-        self.currentQueryDialogField = self.currentJstreeNode.data.id
-        self.showNodeProperties(self.currentJstreeNode);
+        self.currentQueryDialogField = self.currentNode.data.id
+        self.showNodeProperties(self.currentNode);
         $("#ADLbrowserQueryParams_typeSelect").css("display", "none")
 
 
-        $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
+     //   $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
+        $("#ADLbrowserQueryParamsDialog").css("left", position.x+200)
         $("#ADLbrowserQueryParamsDialog").css("top", position.y)
         $("#ADLbrowserQueryParamsDialog").css("display", "block")
         setTimeout(function () {
@@ -64,7 +66,7 @@ var ADLbrowserQuery = (function () {
 
     }
     self.listQueryParamsDialogFieldValues = function () {
-        var field = self.currentJstreeNode.data.id;
+        var field = self.currentNode.data.id;
         var property = $("#ADLbrowserQueryParams_property").val();
         var value = $("#ADLbrowserQueryParams_value").val()
 
@@ -121,7 +123,6 @@ var ADLbrowserQuery = (function () {
         var operator = $("#ADLbrowserQueryParams_operator").val()
         var value = $("#ADLbrowserQueryParams_value").val()
         var field = self.currentQueryDialogField
-        var adlNodeObj = $("#ADLbrowser_adlJstreeDiv").jstree(true).get_node()
         $("#ADLbrowserQueryParamsDialog").css("display", "none")
         var filterStr = "";
         var numberOperators = ("<", ">", "<=", ">=")
@@ -158,22 +159,23 @@ var ADLbrowserQuery = (function () {
 
 
         if (self.queryMode == "graph") {
-            ADLbrowser.query.addNodeToQueryTree(self.currentJstreeNode)
+            ADLbrowser.query.addNodeToQueryTree(self.currentNode)
             var options = {filter: filterStr, logicalMode: logicalMode}
-            ADLbrowserGraph.drawGraph(self.currentJstreeNode, options, function (err, result) {
+            ADLbrowserGraph.drawGraph(self.currentNode, options, function (err, result) {
                 $("#waitImg").css("display", "none");
                 if (err)
                     return MainController.UI.message(err)
                 if (result == 0)
                     return alert("no data found")
-                self.updateAdlTree(self.currentJstreeNode)
+                self.updateAdlTree(self.currentNode)
             })
-        }  if (true || self.queryMode == "query") {
+        }
+        if (true || self.queryMode == "query") {
             ADLbrowser.query.addFilterToQueryTree({label: filterLabel, content: filterStr}, function (err, result) {
                 $("#waitImg").css("display", "none");
                 if (err || result == 0)
                     return;
-                ADLbrowser.updateAdlTree(self.currentJstreeNode)
+                ADLbrowser.updateAdlTree(self.currentNode)
             })
         }
 
@@ -270,12 +272,34 @@ var ADLbrowserQuery = (function () {
 
 
     }
+self.graphActions={
+        clickGraph:function(obj,point){
+            if(obj.from)
+                self.currentEdge=obj
+            else {
+                self.currentNode = obj
+                ADLbrowserQuery.showQueryParamsDialog(point)
+            }
+        }
+
+
+
+
+}
 
 
     self.loadAdl = function (node) {
         if (!ADLbrowser.currentSource) {
             return alert("select a source")
         }
+        var options = {onclickFn:ADLbrowserQuery.graphActions.clickGraph}
+        var graphDiv = "graphDiv"
+       // var graphDiv = "ADLbrowser_adlJstreeDiv"
+        return ADLmappingGraph.graphClassesAndProperties(ADLbrowser.currentSource, graphDiv, options,function(err, result){
+            self.classes=result.classes
+            self.model=result.model
+        })
+
 
 
         var jstreeData = []
@@ -412,48 +436,45 @@ var ADLbrowserQuery = (function () {
                             }
                         }
                     }
-                        //relations inverses
-                        if (node && objectsMap[node.data.id]) {
-                            var existingChildren={}
-                            for (var predicate in self.classes[node.data.id]) {
-                                var predicateLabel = predicate;
-                                if (self.model[predicate])
-                                    predicateLabel = self.model[predicate].label
-                                if (objectsMap[node.data.id][predicate]) {
-                                    objectsMap[node.data.id][predicate].forEach(function (object) {
+                    //relations inverses
+                    if (node && objectsMap[node.data.id]) {
+                        var existingChildren = {}
+                        for (var predicate in self.classes[node.data.id]) {
+                            var predicateLabel = predicate;
+                            if (self.model[predicate])
+                                predicateLabel = self.model[predicate].label
+                            if (objectsMap[node.data.id][predicate]) {
+                                objectsMap[node.data.id][predicate].forEach(function (object) {
 
 
-                                        var objectId = common.getRandomHexaId(4);
+                                    var objectId = common.getRandomHexaId(4);
 
 
-                                        var label = "<-" + predicateLabel + " " + self.model[object].label;
-                                        if (!existingChildren[label]) {
-                                            existingChildren[label] = 1
-                                            label = "<span style='color:" + self.buildClasses[object].color + "'>" + label + "</span>"
-                                            jstreeData.push({
-                                                id: objectId,
-                                                text: label,
-                                                parent: topNodeId,
-                                                data: {
-                                                    id: object,
-                                                    type: "subject",
-                                                    label: self.model[object].label,
-                                                    count: self.buildClasses[object].count,
-                                                    color: self.buildClasses[subject].color,
-                                                    property: predicate,
-                                                    role: "sub"
-                                                }
-                                            })
-                                        }
+                                    var label = "<-" + predicateLabel + " " + self.model[object].label;
+                                    if (!existingChildren[label]) {
+                                        existingChildren[label] = 1
+                                        label = "<span style='color:" + self.buildClasses[object].color + "'>" + label + "</span>"
+                                        jstreeData.push({
+                                            id: objectId,
+                                            text: label,
+                                            parent: topNodeId,
+                                            data: {
+                                                id: object,
+                                                type: "subject",
+                                                label: self.model[object].label,
+                                                count: self.buildClasses[object].count,
+                                                color: self.buildClasses[subject].color,
+                                                property: predicate,
+                                                role: "sub"
+                                            }
+                                        })
+                                    }
 
 
-                                    })
-                                }
+                                })
                             }
                         }
-
-
-
+                    }
 
 
                     return callbackSeries();

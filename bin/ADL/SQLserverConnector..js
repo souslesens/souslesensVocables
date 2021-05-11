@@ -1,9 +1,11 @@
 const sql = require('mssql')
 const async=require('async')
 const config = {
-    user: 'sa',
-    password: 'Fa1#majeur',
-    server: '51.178.39.209', // You can use 'localhost\\instance' to connect to named instance
+ //   user: 'sa',
+  //  password: 'Fa1#majeur',
+    user: 'ECCENCA',
+     password: 'ONE-sense!rDf',
+    server: '51.178.39.209',
     database: 'rdlquantum',
 }
 

@@ -44,8 +44,11 @@ var ADLmappings = (function () {
 
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
               //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
-            "<button onclick='ADLassetGraph.drawAsset()'>mapping Graph</button>  "+
-                "<button onclick='ADLbuild.initDialog()'>Build triples</button>  "
+            "<button onclick='ADLassetGraph.drawAsset()'>Mappings Graph</button>  "+
+                "  <button onclick=\"ADLmappingGraph.graphClassesAndProperties()\">Classes Graph</button>"+
+                "<button id='ADLmappings_buildTriplesButton' onclick='ADLbuild.initDialog()'>Build Triples</button>  "
+
+
          //   "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
             );
 
@@ -65,8 +68,10 @@ var ADLmappings = (function () {
 
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
-                if(authentication.currentUser.groupes.indexOf("reader">-1)){
+                if(authentication.currentUser.groupes.indexOf("reader")>-1){
                     $("#ADLmappings_saveMappingsButton").prop("disabled",true)
+                    $("#ADLmappings_buildTriplesButton").prop("disabled",true)
+
                 }
 
                 ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {

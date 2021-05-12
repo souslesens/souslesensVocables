@@ -99,6 +99,8 @@ var visjsGraph = (function () {
         self.simulationOn = true;
         window.setTimeout(function () {
             if (!_options.layoutHierarchical) {
+                if(!self.network.stopSimulation)
+                    return;
                 self.network.stopSimulation();
                 self.network.fit()
                 self.simulationOn = false;
@@ -302,10 +304,14 @@ var visjsGraph = (function () {
 
     }
     self.clearGraph = function () {// comment ca marche  bad doc???
-        if (self.network)
+      /*  if (self.network)
             self.network.destroy();
         $("#graph_legendDiv").html("");
-        self.data = {};
+        self.data = {};*/
+        if(self.data &&   self.data.nodes) {
+            self.data.nodes.remove(self.data.nodes.getIds())
+            self.data.edges.remove(self.data.edges.getIds())
+        }
 
     }
 

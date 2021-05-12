@@ -23,6 +23,7 @@ var ADLmappingData = (function () {
 
         //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
         ADLmappings.clearMappings()
+
         var source = $("#ADLmappings_DatabaseSelect").val();
         self.currentSource = source
         self.currentADLdataSource = Config.sources[source].dataSource;
@@ -117,6 +118,8 @@ var ADLmappingData = (function () {
 
                 self.currentADLtable = obj.node
                 ADLmappings.clearMappings()
+
+
                 self.showSampleData(obj.node)
                 setTimeout(function () {
                     var name = self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
@@ -383,7 +386,7 @@ var ADLmappingData = (function () {
     self.setDataSampleColumntype = function (columnId, typeObj) {
         var jqueryId = "#" + common.encodeToJqueryId("datasample_type_" + columnId).toLowerCase()
         if (!typeObj || typeObj == "")
-            return $(jqueryId).html()
+            return $(jqueryId).html("")
         var typeStr = "";
         if (!Array.isArray(typeObj.data))
             typeObj.data = [typeObj.data]

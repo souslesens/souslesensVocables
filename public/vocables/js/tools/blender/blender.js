@@ -405,7 +405,7 @@ var Blender = (function () {
                     }
                 }
 
-                menuItems.jstree.deleteNode = {
+                menuItems.deleteNode = {
                     label: "Delete node",
                     action: function (obj, sss, cc) {
                         self.menuActions.jstree.deleteNode("concept");

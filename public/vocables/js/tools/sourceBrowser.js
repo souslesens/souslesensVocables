@@ -455,11 +455,12 @@ var SourceBrowser = (function () {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
 
-                        item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
+                  //   item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
+                     item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value
                     }
 
                 }
-                item.concept.jstreeId = sourceLabel+"_"+item.concept.value + "_" + index;
+                item.concept.jstreeId = sourceLabel+"_"+item.concept.value ;
             })
 
 
@@ -474,8 +475,8 @@ var SourceBrowser = (function () {
                         if(false && id.indexOf("nodeID://")>-1)//skip anonym nodes
                             return
                         var jstreeId = item["broader" + i].jstreeId
-                        if (!existingNodes[id]) {
-                            existingNodes[id] = 1
+                        if (!existingNodes[jstreeId]) {
+                            existingNodes[jstreeId] = 1
                             var label = item["broader" + i + "Label"].value
                             var parentId = options.rootId;
                             if (item["broader" + (i + 1)])
@@ -514,13 +515,6 @@ var SourceBrowser = (function () {
                             label: item.conceptLabel.value
                         }
                     })
-                } else {
-                    /*
-                       if (!existingNodes[jstreeId]) {
-                           existingNodes[jstreeId] = 1;
-                           var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
-                           jstreeData.push({id: jstreeId, text: text, parent: item["broader1"].value, data: {source: sourceLabel, id: itemId}})
-                       }*/
                 }
             })
 //console.log(JSON.stringify(jstreeData))

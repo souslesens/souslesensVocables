@@ -306,7 +306,10 @@ var ADLmappingGraph = (function () {
                         self.model = result.model;
                         for (var predicate in result.predicates) {
                             for (var subject in result.predicates[predicate]) {
-                                if (self.buildClasses[subject]) {
+                                if(!self.buildClasses[subject]){
+                                    self.buildClasses[subject]={count:0, color:Lineage_classes.getPropertyColor(subject)}
+                                }
+                                if (true ||self.buildClasses[subject]) {
                                     if (!self.classes[subject])
                                         self.classes[subject] = {}
                                     if (!self.classes[subject][predicate])
@@ -316,6 +319,7 @@ var ADLmappingGraph = (function () {
                                             self.classes[subject][predicate].push(object)
                                     })
                                 }
+
                             }
 
                         }
@@ -350,6 +354,7 @@ var ADLmappingGraph = (function () {
                         if (!existingNodes[subject]) {
                             existingNodes[subject] = 1
                             var countStr = ""
+                            if(self.buildClasses[subject])
                             countStr = " (" + self.buildClasses[subject].count + ")"
                             var label = self.model[subject].label
                             var color = self.buildClasses[subject].color
@@ -369,7 +374,7 @@ var ADLmappingGraph = (function () {
                                     id: subject,
                                     type: "subject",
                                     label: self.model[subject].label,
-                                    count: self.buildClasses[subject].count,
+                                    count: self.buildClasses[subject]?self.buildClasses[subject].count:0,
 
 
                                 }
@@ -381,6 +386,9 @@ var ADLmappingGraph = (function () {
 
 
                                 self.classes[subject][predicate].forEach(function (object) {
+                                    if(object.indexOf("xsd:")>-1)
+                                        return
+
                                     var edgeId = subject + "_" + predicate + "_" + object
                                     if (!existingNodes[edgeId]) {
                                         existingNodes[edgeId] = 1

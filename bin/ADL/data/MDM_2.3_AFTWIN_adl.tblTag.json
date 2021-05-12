@@ -3,17 +3,7 @@
     {
       "subject": "adl.tbltag.id",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "adl.tbltag.functionalclassid",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "adl.tbltag.status",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.posccaesar.org/dm/Status"
+      "object": "http://w3id.org/readi/rdl/D101001495"
     },
     {
       "subject": "adl.tbltag.tagnumber",
@@ -21,29 +11,14 @@
       "object": "xsd:string"
     },
     {
-      "subject": "adl.tbltag.validationstatus",
+      "subject": "adl.tbltag.functionalclassid",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "xsd:string"
-    },
-    {
-      "subject": "adl.tbltag.tagtype",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "xsd:string"
-    },
-    {
-      "subject": "adl.tbltag.cmimsrequired",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "xsd:boolean"
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
       "subject": "adl.tbltag.servicedescription",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "xsd:string"
-    },
-    {
-      "subject": "adl.tbltag.servicedescription",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "adl.tbltag.tagnumber"
     },
     {
       "subject": "adl.tbltag.id",
@@ -52,46 +27,30 @@
     },
     {
       "subject": "adl.tbltag.id",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+      "predicate": "http://standards.iso.org/iso/15926/part14/represents",
       "object": "adl.tbltag.functionalclassid"
     },
     {
       "subject": "adl.tbltag.id",
-      "predicate": "http://w3id.org/readi/rdl/CFIHOS-10000025",
-      "object": "adl.tbltag.status"
-    },
-    {
-      "subject": "adl.tbltag.id",
-      "predicate": "http://w3id.org/readi/rdl/D101001536",
-      "object": "adl.tbltag.validationstatus"
-    },
-    {
-      "subject": "adl.tbltag.id",
-      "predicate": "http://w3id.org/readi/rdl/D101001536",
-      "object": "adl.tbltag.tagtype"
-    },
-    {
-      "subject": "adl.tbltag.id",
       "predicate": "http://www.w3.org/2002/07/owl##DatatypeProperty",
-      "object": "adl.tbltag.cmimsrequired"
-    },
-    {
-      "subject": "adl.tbltag.id",
-      "predicate": "http://standards.iso.org/iso/15926/part14/isAbout",
       "object": "adl.tbltag.servicedescription"
     }
   ],
   "model": {
-    "http://w3id.org/readi/rdl/CFIHOS-00000028": {
+    "http://w3id.org/readi/rdl/D101001495": {
       "parents": [
-        "http://standards.iso.org/iso/15926/part14/FunctionalObject",
-        "http://standards.iso.org/iso/15926/part14/Object",
-        "http://www.w3.org/2002/07/owl#Thing",
+        "http://www.w3.org/2004/02/skos/core#Concept",
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
         "ONE-MODEL",
         "#"
       ],
-      "label": "Tag"
+      "label": "CFIHOS Tag Type"
+    },
+    "xsd:string": {
+      "parents": [
+        "#"
+      ],
+      "label": "xsd:string"
     },
     "http://standards.iso.org/iso/15926/part14/FunctionalObject": {
       "parents": [
@@ -103,88 +62,39 @@
       ],
       "label": "FunctionalObject"
     },
-    "http://data.posccaesar.org/dm/Status": {
-      "parents": [
-        "ISO_15926-PCA_http://data.posccaesar.org/dm/ClassOfIndividual_0",
-        "ISO_15926-PCA_http://data.posccaesar.org/dm/Class_0",
-        "ISO_15926-PCA_http://data.posccaesar.org/dm/AbstractObject_0",
-        "ISO_15926-PCA_http://data.posccaesar.org/dm/Thing_0",
-        "ISO_15926-PCA_http://www.w3.org/2002/07/owl#Thing_0",
-        "ISO_15926-PCA",
-        "#"
-      ],
-      "label": "status"
+    "http://www.w3.org/2000/01/rdf-schema#label": {
+      "label": "rdfs:label"
     },
-    "xsd:string": {
-      "parents": [
-        "#"
-      ],
-      "label": "xsd:string"
-    },
-    "xsd:boolean": {
-      "parents": [
-        "#"
-      ],
-      "label": "xsd:boolean"
-    },
-    "http://standards.iso.org/iso/15926/part14/hasFunctionalPart": {
-      "label": "hasFunctionalPart"
-    },
-    "http://w3id.org/readi/rdl/CFIHOS-10000025": {
-      "label": "tagStatus"
-    },
-    "http://w3id.org/readi/rdl/D101001536": {
-      "label": "CFIHOS picklist property"
+    "http://standards.iso.org/iso/15926/part14/represents": {
+      "label": "represents"
     },
     "http://www.w3.org/2002/07/owl##DatatypeProperty": {
-      "label": "owl:DatatypeProperty"
-    },
-    "http://standards.iso.org/iso/15926/part14/isAbout": {
-      "label": "isAbout"
-    },
-    "http://www.w3.org/2000/01/rdf-schema#label": {
       "parents": [
         "#"
       ],
-      "label": "rdfs:label"
+      "label": "owl:DatatypeProperty"
     }
   },
   "graph": {
     "adl.tbltag.id": {
-      "x": -195,
-      "y": -33
-    },
-    "adl.tbltag.functionalclassid": {
-      "x": -11,
-      "y": 138
-    },
-    "adl.tbltag.status": {
-      "x": -373,
-      "y": 91
+      "x": -144,
+      "y": -18
     },
     "adl.tbltag.tagnumber": {
-      "x": -466,
-      "y": -145
+      "x": 94,
+      "y": 115
     },
-    "adl.tbltag.validationstatus": {
-      "x": 153,
-      "y": -148
-    },
-    "adl.tbltag.tagtype": {
-      "x": 180,
-      "y": -12
-    },
-    "adl.tbltag.cmimsrequired": {
-      "x": -58,
-      "y": -201
+    "adl.tbltag.functionalclassid": {
+      "x": 138,
+      "y": -103
     },
     "adl.tbltag.servicedescription": {
-      "x": 218,
-      "y": 71
+      "x": -202,
+      "y": 90
     }
   },
   "infos": {
-    "lastModified": "2021-05-10T08:26:48.076Z",
+    "lastModified": "2021-05-12T14:35:27.988Z",
     "modifiedBy": "admin",
     "comment": ""
   },
@@ -197,8 +107,8 @@
     },
     "adlTable": "adl.tblTag",
     "build": {
-      "createdDate": "2021-05-04T18:22:53.350Z",
-      "triples": 1546538,
+      "createdDate": "2021-05-12T17:12:39.593Z",
+      "triples": 943323,
       "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
     }
   }

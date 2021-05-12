@@ -54,9 +54,11 @@ var ADLmappings = (function () {
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
             $("#accordion").accordion("option", {active: 2});
-            visjsGraph.clearGraph()
+           //
+
             //  MainController.UI.toogleRightPanel(true)
             $("#graphDiv").html("")
+            visjsGraph.clearGraph()
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             $("#rightPanelDiv").load("snippets/ADL/ADLmappingRightPanel.html");
 
@@ -111,6 +113,10 @@ var ADLmappings = (function () {
         self.onSourceSelect = function (source) {
 
             self.clearMappings()
+            visjsGraph.clearGraph()
+         //   visjsGraph.data.nodes()
+            //  MainController.UI.toogleRightPanel(true)
+
             OwlSchema.currentADLdataSourceSchema = null;
 
             ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
@@ -431,9 +437,11 @@ var ADLmappings = (function () {
 
         }
         self.loadMappings = function (name) {
+
             if (!name)
                 name = self.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
             var payload = {ADL_GetMappings: name}
+
             $.ajax({
                 type: "POST",
                 url: Config.serverUrl,
@@ -446,7 +454,6 @@ var ADLmappings = (function () {
                         data.model = self.generateADLModel(data.mappings)
 
                     }
-                    self.clearMappings()
 
 
                     var basicPredicates = {
@@ -509,7 +516,7 @@ var ADLmappings = (function () {
                         else if (item.object.indexOf("http") < 0) {
 
                             //label and DatatypeProperty
-                            if (basicPredicates[item.predicate]) {
+                            if (false && basicPredicates[item.predicate]) {
                                 node = {
                                     data: {
                                         label: basicPredicates[item.predicate] + "<br>" + item.subject,

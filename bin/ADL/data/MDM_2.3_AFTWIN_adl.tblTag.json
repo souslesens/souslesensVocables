@@ -11,14 +11,14 @@
       "object": "xsd:string"
     },
     {
-      "subject": "adl.tbltag.functionalclassid",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
       "subject": "adl.tbltag.servicedescription",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
       "object": "xsd:string"
+    },
+    {
+      "subject": "adl.tbltag.functionalclassid",
+      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      "object": "http://w3id.org/readi/rdl/D101001053"
     },
     {
       "subject": "adl.tbltag.id",
@@ -52,15 +52,13 @@
       ],
       "label": "xsd:string"
     },
-    "http://standards.iso.org/iso/15926/part14/FunctionalObject": {
+    "http://w3id.org/readi/rdl/D101001053": {
       "parents": [
-        "http://standards.iso.org/iso/15926/part14/Object",
-        "http://www.w3.org/2002/07/owl#Thing",
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
         "ONE-MODEL",
         "#"
       ],
-      "label": "FunctionalObject"
+      "label": "Artefact"
     },
     "http://www.w3.org/2000/01/rdf-schema#label": {
       "label": "rdfs:label"
@@ -69,9 +67,6 @@
       "label": "represents"
     },
     "http://www.w3.org/2002/07/owl##DatatypeProperty": {
-      "parents": [
-        "#"
-      ],
       "label": "owl:DatatypeProperty"
     }
   },
@@ -84,17 +79,17 @@
       "x": 94,
       "y": 115
     },
-    "adl.tbltag.functionalclassid": {
-      "x": 138,
-      "y": -103
-    },
     "adl.tbltag.servicedescription": {
       "x": -202,
       "y": 90
+    },
+    "adl.tbltag.functionalclassid": {
+      "x": 119,
+      "y": -58
     }
   },
   "infos": {
-    "lastModified": "2021-05-12T14:35:27.988Z",
+    "lastModified": "2021-05-13T10:36:09.592Z",
     "modifiedBy": "admin",
     "comment": ""
   },
@@ -107,8 +102,8 @@
     },
     "adlTable": "adl.tblTag",
     "build": {
-      "createdDate": "2021-05-12T17:12:39.593Z",
-      "triples": 943323,
+      "createdDate": "2021-05-13T16:01:24.882Z",
+      "triples": 742268,
       "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
     }
   }

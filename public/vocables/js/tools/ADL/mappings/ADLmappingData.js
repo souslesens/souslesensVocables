@@ -36,11 +36,25 @@ var ADLmappingData = (function () {
             data: {ADLquery: 1, getModel: JSON.stringify(self.currentADLdataSource)},
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
-                self.showModelJstree(data, self.currentADLdataSource.dbName)
-                setTimeout(function () {
-                    self.addMappingDataToTableTree(self.currentSource)
-                }, 500)
+            success: function (tablesData, textStatus, jqXHR) {
+
+
+                self.addMappingDataToTableData(self.currentSource, function (err, mappingData) {
+                    if (err)
+                        return alert(err)
+                    var data = {}
+                    for (var table in tablesData) {
+                        data[table] = {
+                            columns: tablesData[table],
+                            mappings: mappingData[self.currentADLdataSource.dbName + "_" + table + ".json"],
+                            source: self.currentADLdataSource.dbName
+                        }
+
+                    }
+
+                    self.showModelJstree(data)
+                })
+
 
             },
             error: function (err) {
@@ -51,39 +65,8 @@ var ADLmappingData = (function () {
 
     }
 
-    self.loadXlsModel = function (path) {
 
-        var path = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BCmodel.json"
-        var payload = {
-            triplesGenerator: 1,
-            getJsonModel: path
-        }
-
-
-        $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
-            dataType: "json",
-
-            success: function (data, textStatus, jqXHR) {
-                self.showModelJstree(data, path)
-            }
-            , error: function (err) {
-
-
-                $("#waitImg").css("display", "none");
-                console.log(JSON.stringify(err))
-                console.log(JSON.stringify(query))
-                MainController.UI.message(err.responseText);
-            }
-        })
-
-
-    }
-
-
-    self.showModelJstree = function (data, source) {
+    self.showModelJstree = function (data) {
 
         if (self.currentMappingsMap) {
 
@@ -94,12 +77,27 @@ var ADLmappingData = (function () {
         var existingNodes = {}
         for (var key in data) {
             var parent = "#";
+            var nodeData = {};
+            var label = key
+            if (data[key].mappings) {
+                nodeData = data[key].mappings
+
+                if (data[key].mappings.build) {
+                    label = "<span style='color:#cc51ee'>" + label + "</span>"
+                    self.currentADLgraphURI = data[key].mappings.build.graphUri
+                } else
+                    label = "<span style='color:#86d5f8'>" + label + "</span>"
+            }
+            nodeData.type = "table";
+            nodeData.id = key.toLowerCase()
+            nodeData.label = key;
+            source:  data[key].source;
 
             modelJstreeData.push({
                 id: key.toLowerCase().replace(/\./g, "_"),
-                text: key,
+                text: label,
                 parent: parent,
-                data: {type: "table", id: key.toLowerCase(), label: key, source: source}
+                data: nodeData
             })
 
 
@@ -147,7 +145,7 @@ var ADLmappingData = (function () {
         }
         return items;
     }
-    self.addMappingDataToTableTree = function (assetLabel) {
+    self.addMappingDataToTableData = function (assetLabel, callback) {
         ADLassetGraph.getBuiltMappingsStats(assetLabel, function (err, builtClasses) {
             if (err)
                 return alert(err);
@@ -158,9 +156,14 @@ var ADLmappingData = (function () {
                 dataType: "json",
 
                 success: function (result, textStatus, jqXHR) {
-                    // add filteredViews to tables
+
+                    return callback(null, result.data)
+
+
                     for (var key in result.data) {
                         var obj = result.data[key]
+
+
                         if (obj.sql) {
                             var table = obj.adlTable.toLowerCase()
                             var tableId = table.replace(/\./g, "_")
@@ -193,7 +196,7 @@ var ADLmappingData = (function () {
                     }
 
                 }, error(err) {
-                    alert("Cannot load mappingFiles")
+                    callback(err)
                 }
             })
         })

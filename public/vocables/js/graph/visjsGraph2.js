@@ -312,6 +312,7 @@ var visjsGraph = (function () {
             self.data.nodes.remove(self.data.nodes.getIds())
             self.data.edges.remove(self.data.edges.getIds())
         }
+        self.data=null
 
     }
 

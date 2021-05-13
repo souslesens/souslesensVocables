@@ -54,7 +54,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.14.43" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/graph" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/bin/ADL" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -181,7 +181,7 @@
       <workItem from="1619962281242" duration="384000" />
       <workItem from="1620019723693" duration="103799000" />
       <workItem from="1620391311238" duration="8915000" />
-      <workItem from="1620626815268" duration="33623000" />
+      <workItem from="1620626815268" duration="52340000" />
     </task>
     <servers />
   </component>
@@ -205,12 +205,12 @@
       <breakpoints>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
-          <line>706</line>
+          <line>708</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
-          <line>544</line>
+          <line>546</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -260,12 +260,12 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
-          <line>329</line>
+          <line>332</line>
           <option name="timeStamp" value="92" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
-          <line>385</line>
+          <line>387</line>
           <option name="timeStamp" value="93" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -280,18 +280,13 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>421</line>
+          <line>422</line>
           <option name="timeStamp" value="155" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>474</line>
+          <line>475</line>
           <option name="timeStamp" value="172" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>119</line>
-          <option name="timeStamp" value="197" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
@@ -305,12 +300,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
-          <line>96</line>
+          <line>79</line>
           <option name="timeStamp" value="205" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>493</line>
+          <line>45</line>
           <option name="timeStamp" value="214" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -338,5 +333,10 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="NodeJSConfigurationType">
+        <watch expression="globalJson.relationalKeysMap" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

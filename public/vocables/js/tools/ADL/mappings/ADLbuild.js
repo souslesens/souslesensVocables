@@ -25,6 +25,25 @@ var ADLbuild = (function () {
 
 
     }
+
+    self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
+        var checked = $(allCBX).prop("checked")
+        var jsonNodes = $('#'+jstreeDiv).jstree(true).get_json('#', { flat: true });
+        var nodes=[]
+        var graphUri
+        $.each(jsonNodes, function (i, val) {
+            if( val.data.adlSource) {
+                nodes.push($(val).attr('id'))
+
+            }
+
+
+        })
+
+        $("#" + jstreeDiv).jstree(true).check_node(nodes);
+
+    }
+
     self.buildTriples = function () {
         $("#ADLbuild_infosDiv").html("")
         self.checked_tables = $("#ADLmappings_dataModelTree").jstree().get_checked();

@@ -248,6 +248,7 @@ var ADLbuilder = {
     generateAdlSqlTriples: function (mappingFilePath, ADLgraphUri, options, callback) {
         if (!options)
             options = {}
+        options.sparqlServerUrl+="?timeout=600000&debug=on"
         var sqlParams = {fetchSize: 5000}
         var existingUrisMap = {}
         var mappingSheets = []

@@ -44,8 +44,8 @@ var ADLmappings = (function () {
 
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
               //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
-            "<button onclick='ADLassetGraph.drawAsset()'>Mappings Graph</button>  "+
-                "  <button onclick=\"ADLmappingGraph.graphClassesAndProperties()\">Classes Graph</button>"+
+            "<button onclick='ADLassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  "+
+                "  <button onclick=\"ADLassetGraph.drawClassesAndPropertiesGraph()\">Classes Graph</button>"+
                 "<button id='ADLmappings_buildTriplesButton' onclick='ADLbuild.initDialog()'>Build Triples</button>  "
 
 
@@ -76,11 +76,9 @@ var ADLmappings = (function () {
 
                 }
 
-                ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
-                    if (err)
-                        return MainController.UI.message(err)
+
                     ADLmappings.displayOneModelTree()
-                })
+
                 self.displayLiteralsTree()
                 //   self.displayPropertiesTree("ADLmappingPropertiesTree")
 
@@ -93,8 +91,8 @@ var ADLmappings = (function () {
 
                 $("#ADLassetGraphDiv").dialog({
                     autoOpen: false,
-                    height: 1000,
-                    width: 1300,
+                    height: 900,
+                    width: 1100,
                     modal: false,
                     close: function( event, ui ) {
                         ADLmappings.isShowingAssetGraph=false
@@ -232,86 +230,90 @@ var ADLmappings = (function () {
             common.jstree.loadJsTree("ADLmappings_LiteralsTree", jstreeData, optionsClass)
         }
         self.displayOneModelTree = function () {
-            var propJstreeData = []
+            ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err)
+                var propJstreeData = []
 
-            propJstreeData.push({
-                id: "http://www.w3.org/2002/07/owl#DatatypeProperty",
-                text: "owl:DatatypePropertyOf",
-                parent: "#",
-                data: {
-                    type: "DatatypePropertyOf",
+                propJstreeData.push({
                     id: "http://www.w3.org/2002/07/owl#DatatypeProperty",
-                    label: "owl:DatatypeProperty",
-                    source: Config.ADL.OneModelSource
-                }
-            })
-
-            for (var id in self.typedObjectsMap) {
-                propJstreeData.push({
-                    id: id + common.getRandomHexaId(3),
-                    text: id,
-                    parent: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                    text: "owl:DatatypePropertyOf",
+                    parent: "#",
                     data: {
-                        type: "http://www.w3.org/2002/07/owl#DatatypeProperty",
-                        id: id,
-                        label: id.substring(id.lastIndexOf(".") + 1),
+                        type: "DatatypePropertyOf",
+                        id: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                        label: "owl:DatatypeProperty",
                         source: Config.ADL.OneModelSource
                     }
-
                 })
-            }
-            propJstreeData.push({
-                id: "http://www.w3.org/2000/01/rdf-schema#label",
-                text: "rdfs:labelOf",
-                parent: "#",
-                data: {
-                    type: "labelOf",
+
+                for (var id in self.typedObjectsMap) {
+                    propJstreeData.push({
+                        id: id + common.getRandomHexaId(3),
+                        text: id,
+                        parent: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                        data: {
+                            type: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                            id: id,
+                            label: id.substring(id.lastIndexOf(".") + 1),
+                            source: Config.ADL.OneModelSource
+                        }
+
+                    })
+                }
+                propJstreeData.push({
                     id: "http://www.w3.org/2000/01/rdf-schema#label",
-                    label: "http://www.w3.org/2000/01/rdf-schema#label",
-                    source: Config.ADL.OneModelSource
-                }
-            })
-
-            for (var id in self.typedObjectsMap) {
-                propJstreeData.push({
-                    id: id + common.getRandomHexaId(3),
-                    text: id,
-                    parent: "http://www.w3.org/2000/01/rdf-schema#label",
+                    text: "rdfs:labelOf",
+                    parent: "#",
                     data: {
-                        type: "http://www.w3.org/2000/01/rdf-schema#label",
-                        id: id,
-                        label: id.substring(id.lastIndexOf(".") + 1),
+                        type: "labelOf",
+                        id: "http://www.w3.org/2000/01/rdf-schema#label",
+                        label: "http://www.w3.org/2000/01/rdf-schema#label",
                         source: Config.ADL.OneModelSource
                     }
                 })
-            }
 
-
-            ADLcommon.Ontology.jstreeData_types.forEach(function (item) {
-                if (item.parent == "#") {
-                    item.parent = Config.ADL.OneModelSource
-
+                for (var id in self.typedObjectsMap) {
+                    propJstreeData.push({
+                        id: id + common.getRandomHexaId(3),
+                        text: id,
+                        parent: "http://www.w3.org/2000/01/rdf-schema#label",
+                        data: {
+                            type: "http://www.w3.org/2000/01/rdf-schema#label",
+                            id: id,
+                            label: id.substring(id.lastIndexOf(".") + 1),
+                            source: Config.ADL.OneModelSource
+                        }
+                    })
                 }
-                item.data.source = Config.ADL.OneModelSource
-                propJstreeData.push(item)
 
+
+                ADLcommon.Ontology.jstreeData_types.forEach(function (item) {
+                    if (item.parent == "#") {
+                        item.parent = Config.ADL.OneModelSource
+
+                    }
+                    item.data.source = Config.ADL.OneModelSource
+                    propJstreeData.push(item)
+
+                })
+                propJstreeData.push({
+                    id: Config.ADL.OneModelSource,
+                    text: Config.ADL.OneModelSource,
+                    parent: "#"
+                })
+                var optionsClass = {
+                    selectTreeNodeFn: self.selectTreeNodeFn,
+                    openAll: true,
+                    searchPlugin: {
+                        "case_insensitive": true,
+                        "fuzzy": false,
+                        "show_only_matches": true
+                    },
+                    contextMenu: self.contextMenuFn("ADLmappings_OneModelTree")
+                }
+                common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
             })
-            propJstreeData.push({
-                id: Config.ADL.OneModelSource,
-                text: Config.ADL.OneModelSource,
-                parent: "#"
-            })
-            var optionsClass = {
-                selectTreeNodeFn: self.selectTreeNodeFn,
-                openAll: true,
-                searchPlugin: {
-                    "case_insensitive": true,
-                    "fuzzy": false,
-                    "show_only_matches": true
-                },
-                contextMenu: self.contextMenuFn("ADLmappings_OneModelTree")
-            }
-            common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
         }
 
 
@@ -768,6 +770,9 @@ var ADLmappings = (function () {
         self.showNodeInfos = function (node) {
             if (!node)
                 node = self.currentJstreeNode
+            if(Array.isArray(node.data)){
+                node.data=node.data[0];
+            }
             MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
         }
 

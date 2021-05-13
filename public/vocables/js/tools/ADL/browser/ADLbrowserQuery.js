@@ -4,7 +4,7 @@ var ADLbrowserQuery = (function () {
     self.classes = {}
     self.existingNodesIds = {}
     self.model = null
-    self.queryMode="graph"
+    self.queryMode="count"
     self.onSelectADLtreeNode = function (event, obj) {
 
         if (obj.node.id == "..")
@@ -16,13 +16,17 @@ var ADLbrowserQuery = (function () {
         self.currentNode = obj.node;
         ADLbrowser.currentNode = obj.node;
         ADLbrowser.queryMode = "graph"
-        self.queryMode = "graph"
+        self.queryMode = "count"
         self.showQueryParamsDialog({x: w - 100, y: h / 3},)
         //   $("#ADLbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
 
     }
 
     self.showQueryParamsDialog = function (position) {
+
+    self.hideQueryParamsDialog = function () {
+        $("#ADLbrowserQueryParamsDialog").css("display", "none")
+    }
 
         self.currentQueryDialogField = self.currentNode.data.id
         self.showNodeProperties(self.currentNode);
@@ -157,7 +161,16 @@ var ADLbrowserQuery = (function () {
         }
         var filterLabel = property + " " + operator + " " + value
 
-
+        if (self.queryMode == "count") {
+            var options = {filter: filterStr, logicalMode: logicalMode}
+            ADLbrowserGraph.addCountNodesToGraph(self.currentNode, options, function (err, result) {
+                $("#waitImg").css("display", "none");
+                if (err)
+                    return MainController.UI.message(err)
+                if (result == 0)
+                    return alert("no data found")
+            })
+        }
         if (self.queryMode == "graph") {
             ADLbrowser.query.addNodeToQueryTree(self.currentNode)
             var options = {filter: filterStr, logicalMode: logicalMode}
@@ -274,6 +287,8 @@ var ADLbrowserQuery = (function () {
     }
 self.graphActions={
         clickGraph:function(obj,point){
+            if(!obj)
+                return  ADLbrowserQuery.hideQueryParamsDialog(point) ;
             if(obj.from)
                 self.currentEdge=obj
             else {
@@ -295,7 +310,7 @@ self.graphActions={
         var options = {onclickFn:ADLbrowserQuery.graphActions.clickGraph}
         var graphDiv = "graphDiv"
        // var graphDiv = "ADLbrowser_adlJstreeDiv"
-        return ADLmappingGraph.graphClassesAndProperties(ADLbrowser.currentSource, graphDiv, options,function(err, result){
+        return ADLassetGraph.drawClassesAndPropertiesGraph(ADLbrowser.currentSource, graphDiv, options,function(err, result){
             self.classes=result.classes
             self.model=result.model
         })
@@ -327,7 +342,7 @@ self.graphActions={
                 function (callbackSeries) {
                     if (node)
                         return callbackSeries();
-                    ADLassetGraph.drawAsset(ADLbrowser.currentSource, function (err, result) {
+                    ADLassetGraph.drawAssetTablesMappingsGraph(ADLbrowser.currentSource, function (err, result) {
                         self.model = result.model;
                         for (var predicate in result.predicates) {
                             for (var subject in result.predicates[predicate]) {

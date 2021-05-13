@@ -42,6 +42,94 @@ var ADLbrowserGraph = (function () {
             //   ADLbrowser.jstree.load.loadAdl();
         }
         ,
+
+        self.addCountNodesToGraph=function(node, options, callback){
+
+
+            var filterStr = "";
+            if (options.filter)
+                filterStr = options.filter
+            if (!filterStr)
+                filterStr = "";
+            var source = ADLbrowser.currentSource
+            var query
+
+            var fromStr = Sparql_common.getFromStr(source)
+            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+                "select (count(distinct ?sub) as ?count) " +
+                fromStr +
+                "WHERE {"
+            if (ADLbrowser.queryTypesArray.length == 0 || options.logicalMode == "union") {
+                query += "    ?sub rdf:type ?subType. optional {?sub rdfs:label ?subLabel} "
+                query += "filter(   ?subType =<" + node.data.id + "> )"
+            } else {
+                if (node.data.property) {
+                    query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
+                    // query += "?sub <" + node.data.property + "> ?obj.   "
+                }
+                query += "?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
+                //  query += "?sub <" + node.data.property +"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
+
+                node.data.property
+                query += "filter(   ?objType =<" + node.data.id + "> )"
+            }
+
+var graphNodeFilterStr=""
+            query += filterStr + graphNodeFilterStr
+
+
+            query += " }  limit 20000"
+
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+            MainController.UI.message("searching...")
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                // $("#waitImg").css("display", "none");
+                if (err) {
+                    return MainController.UI.message(err)
+                }
+                var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
+
+              var count=result.results.bindings[0].count.value
+
+
+                var visjsData={nodes:[],edges:[]}
+
+
+                var nodeId=node.id+"_count"
+                visjsGraph.data.nodes.remove(nodeId)
+                visjsData.nodes.push({
+                    id:nodeId,
+                    label:count,
+                    shape: "circle",
+                    size:30,
+                    color :"#ffe0aa"
+                })
+                var edgeId=node.id+"_countEdge"
+                visjsGraph.data.edges.remove(edgeId)
+                visjsData.edges.push({
+                    id:edgeId,
+                    from:node.id,
+                    to: nodeId,
+                    smooth:true
+
+
+                })
+
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+
+
+            })
+
+        }
+
+
+
+
+
+
+
         self.drawGraph = function (node, options, callback) {
             if (!options)
                 options = {}

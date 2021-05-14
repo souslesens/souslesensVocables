@@ -563,6 +563,9 @@ var ADLbuilder = {
                 mappingFilePath += ".json"
             mappingFileName = path.resolve(mappingFilePath)
 
+            if(!fs.existsSync(mappingFileName)){
+                return callbackEach("file "+mappingFileName+" does not exist")
+            }
             var options = {
                 generateIds: 15,
                 sparqlServerUrl: sparqlServerUrl,

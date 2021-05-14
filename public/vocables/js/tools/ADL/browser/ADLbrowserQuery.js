@@ -4,7 +4,8 @@ var ADLbrowserQuery = (function () {
     self.classes = {}
     self.existingNodesIds = {}
     self.model = null
-    self.queryMode="count"
+    self.queryMode = "count";
+    self.queryFilterNodes = []
     self.onSelectADLtreeNode = function (event, obj) {
 
         if (obj.node.id == "..")
@@ -22,19 +23,20 @@ var ADLbrowserQuery = (function () {
 
     }
 
-    self.showQueryParamsDialog = function (position) {
 
     self.hideQueryParamsDialog = function () {
         $("#ADLbrowserQueryParamsDialog").css("display", "none")
     }
+
+    self.showQueryParamsDialog = function (position) {
 
         self.currentQueryDialogField = self.currentNode.data.id
         self.showNodeProperties(self.currentNode);
         $("#ADLbrowserQueryParams_typeSelect").css("display", "none")
 
 
-     //   $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
-        $("#ADLbrowserQueryParamsDialog").css("left", position.x+200)
+        //   $("#ADLbrowserQueryParamsDialog").css("left", position.x - 200)
+        $("#ADLbrowserQueryParamsDialog").css("left", position.x + 200)
         $("#ADLbrowserQueryParamsDialog").css("top", position.y)
         $("#ADLbrowserQueryParamsDialog").css("display", "block")
         setTimeout(function () {
@@ -285,36 +287,157 @@ var ADLbrowserQuery = (function () {
 
 
     }
-self.graphActions={
-        clickGraph:function(obj,point){
-            if(!obj)
-                return  ADLbrowserQuery.hideQueryParamsDialog(point) ;
-            if(obj.from)
-                self.currentEdge=obj
+
+    self.graphActions = {
+
+
+        clickGraph: function (obj, point) {
+            MainController.UI.hidePopup("graphPopupDiv")
+            if (!obj)
+                return ADLbrowserQuery.hideQueryParamsDialog(point);
+            if (obj.from)
+                self.currentEdge = obj
             else {
                 self.currentNode = obj
-                ADLbrowserQuery.showQueryParamsDialog(point)
+                if (obj.data.type == "count") {
+
+                    self.graphActions.showGraphPopupMenu(self.currentNode, point)
+
+                } else //class
+                {
+
+                    ADLbrowserQuery.showQueryParamsDialog(point)
+                }
             }
+        }
+        , showGraphPopupMenu: function (node, point, e) {
+
+            var top = $("#graphDiv").position().top
+            point.y += top
+            var html = "";
+            if (node.from) {//edge
+
+            } else {
+
+                html = "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserQuery.graphActions.listCountItems();\"> list items</span>" +
+                    //   "<span class=\"popupMenuItem\" onclick=\"ADLbrowserQuery.graphActions.addToGraph();\"> Add to graph</span>" +
+                    "<span class=\"popupMenuItem\" onclick=\"ADLbrowserQuery.graphActions.setAsFilter();\"> Set as filter</span>"+
+                "<span class=\"popupMenuItem\" onclick=\"ADLbrowserQuery.graphActions.executeQuery();\"> Execute  Query</span>"
+            }
+            $("#graphPopupDiv").html(html);
+            MainController.UI.showPopup(point, "graphPopupDiv")
+        },
+        listCountItems: function () {
+
+            var query = ""
+            var source = ADLbrowser.currentSource
+            var fromStr = Sparql_common.getFromStr(source)
+            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+                "select distinct ?sub ?subLabel  " +
+                fromStr +
+                "WHERE {"
+
+            var where = self.currentNode.data.queryWhere
+            query += where + " } order by ?subLabel limit 10000"
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+            MainController.UI.message("searching...")
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                // $("#waitImg").css("display", "none");
+                if (err) {
+                    return MainController.UI.message(err)
+                }
+                var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"])
+                var jstreeData = []
+                result.results.bindings.forEach(function (item) {
+                    jstreeData.push(
+                        {
+                            id: item.sub.value,
+                            text: item.subLabel.value,
+                            parent: "#",
+                            data: self.currentNode.data
+                        })
+
+                })
+
+
+                common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, {})
+
+            })
+
+
+            MainController.UI.hidePopup("graphPopupDiv")
+        },
+        addToGraph: function () {
+            MainController.UI.hidePopup("graphPopupDiv")
+
+        },
+        setAsFilter: function () {
+            self.queryFilterNodes.push(self.currentNode);
+            visjsGraph.data.nodes.update({
+                id: self.currentNode.id,
+                shape: "star",
+                color: {border: "#de1e5e"}
+            })
+
+            MainController.UI.hidePopup("graphPopupDiv")
+
+        }
+        ,
+
+        executeQuery:function(){
+var where=""
+            var select =""
+            queryFilterNodes.forEach(function(item){
+
+            })
+
+
+
         }
 
 
-
-
-}
+    }
 
 
     self.loadAdl = function (node) {
         if (!ADLbrowser.currentSource) {
             return alert("select a source")
         }
-        var options = {onclickFn:ADLbrowserQuery.graphActions.clickGraph}
-        var graphDiv = "graphDiv"
-       // var graphDiv = "ADLbrowser_adlJstreeDiv"
-        return ADLassetGraph.drawClassesAndPropertiesGraph(ADLbrowser.currentSource, graphDiv, options,function(err, result){
-            self.classes=result.classes
-            self.model=result.model
-        })
+        var options = {
+            onclickFn: ADLbrowserQuery.graphActions.clickGraph,
 
+            layoutHierarchical: {
+                direction: "LR",
+                sortMethod: "hubsize",
+                // levelSeparation: 200,
+            },
+            edges: {
+                "smooth": {
+                    "type": "straightCross",
+                    "forceDirection": "none",
+                    "roundness": 0.25
+                }
+            }
+        }
+        var graphDiv = "graphDiv"
+        // var graphDiv = "ADLbrowser_adlJstreeDiv"
+        return ADLassetGraph.drawClassesAndPropertiesGraph(ADLbrowser.currentSource, graphDiv, options, function (err, result) {
+            self.classes = result.classes
+            self.model = result.model
+            /*  setTimeout(function(){
+                 //tag
+                      var obj= {
+                          id:"http://w3id.org/readi/rdl/D101001495",
+                          fixed : {x: true, y: true},
+                          x: 0,
+                         y: 0
+                      }
+                      visjsGraph.data.nodes.update(obj)
+
+
+              },500)*/
+        })
 
 
         var jstreeData = []

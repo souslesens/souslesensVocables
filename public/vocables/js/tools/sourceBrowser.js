@@ -195,7 +195,7 @@ var SourceBrowser = (function () {
                     label: "delete Class",
                     action: function (e) {// pb avec source
 
-                        Lineage_common.jstree.deleteNode(self.currentTreeNode, self.currentTargetDiv)
+                        Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv)
 
                     }
 

@@ -51,7 +51,7 @@ var ADLbuild = (function () {
             return alert("Select mapped tables")
         var tables = []
         self.checked_tables.forEach(function (table) {
-            tables.push(ADLmappingData.currentADLdataSource.dbName + "_" + table.replace(/_/g,"."))
+            tables.push(ADLmappingData.currentADLdataSource.dbName + "_" + table.replace(/_/,"."))
         })
 
         var sparqlServerUrl = $("#ADLbuild_sparqlServerUrl").val()
@@ -90,7 +90,7 @@ var ADLbuild = (function () {
                 $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
 
             }, error(err) {
-                $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosError'>" + err + "</span><br>")
+                $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosError'>" + err.responseText+ "</span><br>")
             }
         })
 

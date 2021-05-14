@@ -1,13 +1,18 @@
 const sql = require('mssql')
 const async=require('async')
 const config = {
- //   user: 'sa',
-  //  password: 'Fa1#majeur',
-    user: 'ECCENCA',
-     password: 'ONE-sense!rDf',
+   user: 'sa',
+  password: 'Fa1#majeur',
+ //   user: 'ECCENCA',
+ //    password: 'ONE-sense!rDf',
     server: '51.178.39.209',
     database: 'rdlquantum',
 }
+
+
+//update dbo.QUANTUM_BOMST_TPUK_ELFR set breakdown= left (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))))
+//update dbo.QUANTUM_BOMST_TPUK_ELFR set tag= right (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))+1)-1)
+
 
 //sudo docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Fa1#majeur' -e 'MSSQL_PID=Express' -p 1433:1433 --restart always  -v /var/opt/mssql/data:/var/opt/mssql/data -v /var/opt/mssql/log:/var/opt/mssql/log -v /var/opt/mssql/secrets:/var/opt/mssql/secrets -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
 var SQLserverConnector = {
@@ -84,6 +89,7 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
 
 
                 })
+
                 return callback(err, model);
             })
         })

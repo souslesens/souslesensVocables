@@ -13,7 +13,7 @@
 <div>
 
 
-    <div id="ADLbrowser_Tabs" style="width:360px;height: 450px">
+    <div id="ADLbrowser_Tabs" style="width:360px;">
 
         <ul>
             <li><a href="#ADLbrowserAdlTab">ADL</a></li>
@@ -26,55 +26,63 @@
         </ul>
 
 
-        <div id="ADLbrowserAdlTab" style="width:100%;height:350px">
-            <div><span style="font-weight: bold;background-color: #dad55e;" id="ADLbrowser_selectionDiv"></span>
-                <button onclick="ADLbrowserGraph.cancelGraphNodeSelection()">X</button>
-            </div>
-                <div class="jstree" style="height: 400px !important;" id="ADLbrowser_adlJstreeDiv"></div>
+        <div id="ADLbrowserAdlTab" style="width:100%;">
+            <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
+
+
+            <!--
+
+                      <div><span style="font-weight: bold;background-color: #dad55e;" id="ADLbrowser_selectionDiv"></span>
+                          <button onclick="ADLbrowserGraph.cancelGraphNodeSelection()">X</button>
+                      </div>
+                          <div class="jstree" style="height: 400px !important;" id="ADLbrowser_adlJstreeDiv"></div>
+                  </div>
+
+
+                  <div class="" id="ADLbrowserRDLTab" style="width: 320px;height: 300px">
+
+                          <div class="jstree" style="height: 350px" id="ADLbrowser_rdlJstreeDiv"></div>
+
+
+
+
+                  </div>
+
+                  <div class="" id="ADLbrowserOneModelTab" style="width: 320px;height:300px">
+
+                          <div class="jstree" style="height: 350px" id="ADLbrowser_oneModelJstreeDiv"></div>
+
+
+
+
+                  </div>
+
+
+              </div>
+              <div style="width: 360px;background-color: #ddd4b0;border-radius: 3px;border: #6e2500 solid 1px;margin: 2px;margin-top:150px;padding: 2px" >
+                  <button onclick='ADLbrowserGraph.clearGraph()'>clear graph</button>
+
+                  <button onclick="ADLbrowser.query.clear()"> clear query</button>
+                <select id="ADLbrowserAdlQueryOutputSelect">
+
+                  <option>table</option>
+                  <option>graph</option>
+              </select>
+
+                  <button onclick="ADLbrowser.query.execute()"> execute</button><button onclick="ADLbrowser.query.showQuery()">Q</button>
+              </div>
+              <div style="width: 360px;height: 400px">
+                  query builder
+
+                      <div class="jstree" style="height: 350px" id="ADLbrowser_queryTreeDiv"></div>
+
+
+
+              </div>-->
+
+
         </div>
-
-        <!--
-        <div class="" id="ADLbrowserRDLTab" style="width: 320px;height: 300px">
-
-                <div class="jstree" style="height: 350px" id="ADLbrowser_rdlJstreeDiv"></div>
-
-
-
-
-        </div>
-
-        <div class="" id="ADLbrowserOneModelTab" style="width: 320px;height:300px">
-
-                <div class="jstree" style="height: 350px" id="ADLbrowser_oneModelJstreeDiv"></div>
-
-
-
-
-        </div>-->
-
-
     </div>
-    <div style="width: 360px;background-color: #ddd4b0;border-radius: 3px;border: #6e2500 solid 1px;margin: 2px;margin-top:150px;padding: 2px" >
-        <button onclick='ADLbrowserGraph.clearGraph()'>clear graph</button>
-
-        <button onclick="ADLbrowser.query.clear()"> clear query</button>
-  <!--     <select id="ADLbrowserAdlQueryOutputSelect">
-
-        <option>table</option>
-        <option>graph</option>
-    </select>-->
-
-        <button onclick="ADLbrowser.query.execute()"> execute</button><button onclick="ADLbrowser.query.showQuery()">Q</button>
-    </div>
-    <div style="width: 360px;height: 400px">
-        query builder
-
-            <div class="jstree" style="height: 350px" id="ADLbrowser_queryTreeDiv"></div>
-
-
-
-    </div>
-
 </div>
 
 <script>

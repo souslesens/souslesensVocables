@@ -43,14 +43,16 @@ var ADLbrowserGraph = (function () {
         }
         ,
 
-        self.addCountNodesToGraph=function(node, options, callback){
-
+        self.addCountNodesToGraph = function (node, options, callback) {
+            var queryFilterNodes = ADLbrowserQuery.queryFilterNodes;
 
             var filterStr = "";
             if (options.filter)
                 filterStr = options.filter
             if (!filterStr)
                 filterStr = "";
+
+
             var source = ADLbrowser.currentSource
             var query
 
@@ -59,26 +61,32 @@ var ADLbrowserGraph = (function () {
                 "select (count(distinct ?sub) as ?count) " +
                 fromStr +
                 "WHERE {"
-            if (ADLbrowser.queryTypesArray.length == 0 || options.logicalMode == "union") {
-                query += "    ?sub rdf:type ?subType. optional {?sub rdfs:label ?subLabel} "
-                query += "filter(   ?subType =<" + node.data.id + "> )"
-            } else {
-                if (node.data.property) {
-                    query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
-                    // query += "?sub <" + node.data.property + "> ?obj.   "
-                }
-                query += "?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
-                //  query += "?sub <" + node.data.property +"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
 
-                node.data.property
-                query += "filter(   ?objType =<" + node.data.id + "> )"
-            }
+            var where = ""
+            var varName = "?" + Sparql_common.formatStringForTriple(ADLbrowserQuery.model[node.data.id].label,true);
+            filterStr = filterStr.replace(/\?x/g, varName + "_x")
 
-var graphNodeFilterStr=""
-            query += filterStr + graphNodeFilterStr
+            where += varName + "    rdf:type "+varName+"Type. optional {"+varName+" rdfs:label " + varName + "Label} "
+            where += "filter(   "+varName+"Type =<" + node.data.id + "> )"
+            where += filterStr
 
 
-            query += " }  limit 20000"
+            var previousVarName = varName
+            queryFilterNodes.forEach(function (filterNode, index) {
+                var varName2 = "?" + ADLbrowserQuery.model[filterNode.data.class].label;
+
+                where += previousVarName + "<>" + varName2
+                previousVarName = varName2
+                var filter2 = filterNode.data.filter;
+                where += filter2
+
+
+            })
+
+
+
+
+            query += where + " }  limit 20000"
 
 
             var url = Config.sources[source].sparql_server.url + "?format=json&query=";
@@ -90,28 +98,39 @@ var graphNodeFilterStr=""
                 }
                 var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
 
-              var count=result.results.bindings[0].count.value
+                var count = result.results.bindings[0].count.value
 
 
-                var visjsData={nodes:[],edges:[]}
+                var visjsData = {nodes: [], edges: []}
 
 
-                var nodeId=node.id+"_count"
+                var nodeId = node.id + "_count"
                 visjsGraph.data.nodes.remove(nodeId)
                 visjsData.nodes.push({
-                    id:nodeId,
-                    label:count,
+                    id: nodeId,
+                    label: count,
                     shape: "circle",
-                    size:30,
-                    color :"#ffe0aa"
+                    font: "14 arial black",
+                    color: "#ffe0aa",
+                    data: {
+                        type: "count",
+                        class: node.id,
+                        count: count,
+                        filter: options.filter,
+                        queryWhere: where
+                    },
+                    //   fixed:{y:true},
+                    //   y:-300
+
                 })
-                var edgeId=node.id+"_countEdge"
+                var edgeId = node.id + "_countEdge"
                 visjsGraph.data.edges.remove(edgeId)
                 visjsData.edges.push({
-                    id:edgeId,
-                    from:node.id,
+                    id: edgeId,
+                    from: node.id,
                     to: nodeId,
-                    smooth:true
+                    // label:options.filter,
+                    length: 5
 
 
                 })
@@ -125,54 +144,49 @@ var graphNodeFilterStr=""
         }
 
 
+    self.drawGraph = function (node, options, callback) {
+        if (!options)
+            options = {}
 
+        if (!ADLbrowser.currentSource)
+            return alert("select a source")
+        var totalNodes = 0
+        var graphNodeFilterStr = ""
+        var slicedGraphNodes = [];
+        var existingNodes2 = []
 
+        //  if (options.logicalMode!="union" && visjsGraph.data && visjsGraph.data.nodes) {
+        if (visjsGraph.data && visjsGraph.data.nodes) {
+            var existingNodes
+            if (ADLbrowser.currentGraphNodeSelection) {
+                existingNodes = visjsGraph.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id, true)
 
-
-
-        self.drawGraph = function (node, options, callback) {
-            if (!options)
-                options = {}
-
-            if (!ADLbrowser.currentSource)
-                return alert("select a source")
-            var totalNodes = 0
-            var graphNodeFilterStr = ""
-            var slicedGraphNodes = [];
-            var existingNodes2 = []
-
-            //  if (options.logicalMode!="union" && visjsGraph.data && visjsGraph.data.nodes) {
-            if (visjsGraph.data && visjsGraph.data.nodes) {
-                var existingNodes
-                if (ADLbrowser.currentGraphNodeSelection) {
-                    existingNodes = visjsGraph.getNodeDescendants(ADLbrowser.currentGraphNodeSelection.id, true)
-
-                } else {
-                    existingNodes = visjsGraph.data.nodes.get();
-                }
-
-                existingNodes.forEach(function (node) {
-                    if (node.id.indexOf("cluster_") == 0) {
-                        existingNodes2 = existingNodes2.concat(node.data.clusterContent)
-                    } else {
-                        existingNodes2.push(node.id)
-                    }
-                })
-
-            }
-
-            if (options.logicalMode != "union") {
-                slicedGraphNodes = common.sliceArray(existingNodes2, 1000)
             } else {
-                slicedGraphNodes.push([]);
+                existingNodes = visjsGraph.data.nodes.get();
             }
-            var allData = []
-            async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
-                var graphNodesRole = "sub"
-                if (node.data.role == "sub" || node.data.role == "subType")
-                    graphNodesRole = "obj"
-                if (node.data.role == "obj" || node.data.role == "objType")
-                    graphNodesRole = "sub"
+
+            existingNodes.forEach(function (node) {
+                if (node.id.indexOf("cluster_") == 0) {
+                    existingNodes2 = existingNodes2.concat(node.data.clusterContent)
+                } else {
+                    existingNodes2.push(node.id)
+                }
+            })
+
+        }
+
+        if (options.logicalMode != "union") {
+            slicedGraphNodes = common.sliceArray(existingNodes2, 1000)
+        } else {
+            slicedGraphNodes.push([]);
+        }
+        var allData = []
+        async.eachSeries(slicedGraphNodes, function (slice, callbackEach) {
+            var graphNodesRole = "sub"
+            if (node.data.role == "sub" || node.data.role == "subType")
+                graphNodesRole = "obj"
+            if (node.data.role == "obj" || node.data.role == "objType")
+                graphNodesRole = "sub"
 
             /*    if(options.logicalMode = "union")
                     graphNodesRole = "sub"
@@ -180,32 +194,31 @@ var graphNodeFilterStr=""
                     graphNodesRole = "obj"*/
 
 
-
-                //else
-                graphNodeFilterStr = Sparql_common.setFilter(graphNodesRole, slice)
-                self.queryGraph(node, graphNodeFilterStr, options, function (err, data) {
-                    if (err)
-                        return callbackEach(err)
-                    totalNodes += data.length
-                    allData = allData.concat(data)
-                    return callbackEach()
-                })
-
-            }, function (err) {
-                if (allData.length == 0) {
-                    return callback(null, 0)
-                }
-                // ADLbrowserGraph.cancelGraphNodeSelection();
-                ADLbrowser.queryTypesArray.push(node.data.id)
-                totalNodes += allData.length
-                self.executeDrawGraph(node, allData, options, function (err, result) {
-                    return callback(err, totalNodes)
-                })
-
+            //else
+            graphNodeFilterStr = Sparql_common.setFilter(graphNodesRole, slice)
+            self.queryGraph(node, graphNodeFilterStr, options, function (err, data) {
+                if (err)
+                    return callbackEach(err)
+                totalNodes += data.length
+                allData = allData.concat(data)
+                return callbackEach()
             })
 
+        }, function (err) {
+            if (allData.length == 0) {
+                return callback(null, 0)
+            }
+            // ADLbrowserGraph.cancelGraphNodeSelection();
+            ADLbrowser.queryTypesArray.push(node.data.id)
+            totalNodes += allData.length
+            self.executeDrawGraph(node, allData, options, function (err, result) {
+                return callback(err, totalNodes)
+            })
 
-        }
+        })
+
+
+    }
     self.queryGraph = function (node, graphNodeFilterStr, options, callback) {
         var filterStr = "";
         if (options.filter)
@@ -224,8 +237,8 @@ var graphNodeFilterStr=""
             query += "filter(   ?subType =<" + node.data.id + "> )"
         } else {
             if (node.data.property) {
-              query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
-               // query += "?sub <" + node.data.property + "> ?obj.   "
+                query += "?sub <" + node.data.property + ">|^<" + node.data.property + "> ?obj.   "
+                // query += "?sub <" + node.data.property + "> ?obj.   "
             }
             query += "?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
             //  query += "?sub <" + node.data.property +"> ?obj.  ?sub rdf:type ?subType. ?obj rdf:type ?objType. optional {?sub rdfs:label ?subLabel} optional {?obj rdfs:label ?objLabel} "
@@ -308,13 +321,13 @@ var graphNodeFilterStr=""
             var item0 = data[0]
             if (true || item0.obj) {
                 label = ADLbrowser.currentJstreeNode.data.label
-              color=  self.buildClasses[ADLbrowser.currentJstreeNode.id]
-              //  color = ADLbrowser.getPropertyColor(ADLbrowser.currentJstreeNode.id)
+                color = self.buildClasses[ADLbrowser.currentJstreeNode.id]
+                //  color = ADLbrowser.getPropertyColor(ADLbrowser.currentJstreeNode.id)
                 type = ADLbrowser.currentJstreeNode.id
             } else {
                 label = ADLbrowser.currentJstreeNode.data.label
-                color=  self.buildClasses[ADLbrowser.currentJstreeNode.id]
-               // color = ADLbrowser.getPropertyColor(item0.subType.value)
+                color = self.buildClasses[ADLbrowser.currentJstreeNode.id]
+                // color = ADLbrowser.getPropertyColor(item0.subType.value)
                 type = item0.subType.value
             }
 

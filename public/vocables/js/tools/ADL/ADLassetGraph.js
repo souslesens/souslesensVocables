@@ -442,7 +442,7 @@ var ADLassetGraph = (function () {
                                     color = "#ffe0aa"
                                 }
 
-                                visjsData.nodes.push({
+                               var obj={
                                     id: subject,
                                     label: label,
                                     shape: shape,
@@ -456,7 +456,9 @@ var ADLassetGraph = (function () {
 
 
                                     }
-                                })
+                                }
+
+                                visjsData.nodes.push(obj)
 
                             }
                             for (var predicate in self.classes[subject]) {
@@ -478,7 +480,8 @@ var ADLassetGraph = (function () {
                                             id: edgeId,
                                             from: subject,
                                             to: object,
-                                            label: predicateLabel
+                                            label: predicateLabel,
+
 
                                         })
                                     }

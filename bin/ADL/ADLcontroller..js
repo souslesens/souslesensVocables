@@ -26,6 +26,7 @@ var ADLcontroller = {
         fs.readFile(filePath, function (err, result) {
             try {
                 var json = JSON.parse(result)
+              //  json.data.fileName=filePath
                 callback(err, json)
             } catch (e) {
                 callback(e);

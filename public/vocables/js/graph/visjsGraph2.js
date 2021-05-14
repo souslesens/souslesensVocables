@@ -97,9 +97,10 @@ var visjsGraph = (function () {
         self.globalOptions = options
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
+        // self.network.startSimulation()
         window.setTimeout(function () {
             if (!_options.layoutHierarchical) {
-                if(!self.network.stopSimulation)
+                if (!self.network.stopSimulation)
                     return;
                 self.network.stopSimulation();
                 self.network.fit()
@@ -237,7 +238,9 @@ var visjsGraph = (function () {
 
         var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
             "export <button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>" +
-            "<button onclick='visjsGraph.toSVG()'>SVG img</button>"
+            "<button onclick='visjsGraph.toSVG()'>SVG img</button>"+
+            "<button onclick='visjsGraph.exportGraph()'>copy Graph</button>"
+
         if (true) {
             if (!$("#graphButtons").length) {
                 html += "&nbsp;&nbsp;Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
@@ -267,11 +270,13 @@ var visjsGraph = (function () {
         if (layout == "hierarchical vertical") {
             currentDrawParams.options.layoutHierarchical = {
                 direction: "UD",
-                levelSeparation: 50,
-                nodeSpacing: 50,
-                levelSeparation: 200,
+                //   levelSeparation: 50,
+                //   nodeSpacing: 50,
+                //  levelSeparation: 200,
                 sortMethod: "hubsize",
+                // sortMethod:"directed",
             }
+            currentDrawParams.simulationTimeOut = 10000
 
 
             self.redraw()
@@ -279,8 +284,10 @@ var visjsGraph = (function () {
             currentDrawParams.options.layoutHierarchical = {
                 direction: "LR",
                 sortMethod: "hubsize",
+                //  sortMethod:"directed",
                 levelSeparation: 200,
-                sortMethod: "hubsize",
+                parentCentralization: true
+
                 //   nodeSpacing:25,
 
             }
@@ -301,18 +308,47 @@ var visjsGraph = (function () {
     }
 
     self.exportGraph = function () {
-
+        var nodes = visjsGraph.data.nodes.get();
+        var edges = visjsGraph.data.edges.get();
+        var nodesMap = {}
+        nodes.forEach(function (node) {
+            nodesMap[node.id] = node
+        })
+        edges.forEach(function (edge) {
+            edge.fromNode = nodesMap[edge.from]
+            edge.toNode = nodesMap[edge.to]
+        })
+        var str = JSON.stringify(edges)
+        common.copyTextToClipboard(str)
     }
+
+    self.importGraph = function (str) {
+        var edges=json.parse()
+        var nodes = visjsGraph.data.nodes.get();
+        var edges = visjsGraph.data.edges.get();
+        var nodesMap = {}
+        nodes.forEach(function (node) {
+            nodesMap[node.id] = node
+        })
+        edges.forEach(function (edge) {
+            edge.fromNode = nodesMap[edge.from]
+            edge.toNode = nodesMap[edge.to]
+        })
+        var str = JSON.stringify(edges)
+        common.copyTextToClipboard(str)
+    }
+
+
     self.clearGraph = function () {// comment ca marche  bad doc???
-      /*  if (self.network)
-            self.network.destroy();
-        $("#graph_legendDiv").html("");
-        self.data = {};*/
-        if(self.data &&   self.data.nodes) {
+        /*  if (self.network)
+              self.network.destroy();
+          $("#graph_legendDiv").html("");
+          self.data = {};*/
+        if (self.data && self.data.nodes) {
             self.data.nodes.remove(self.data.nodes.getIds())
             self.data.edges.remove(self.data.edges.getIds())
         }
-        self.data=null
+        self.data = null
 
     }
 

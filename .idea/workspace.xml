@@ -182,6 +182,7 @@
       <workItem from="1620019723693" duration="103799000" />
       <workItem from="1620391311238" duration="8915000" />
       <workItem from="1620626815268" duration="92118000" />
+      <workItem from="1621083998733" duration="11252000" />
     </task>
     <servers />
   </component>
@@ -316,37 +317,31 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
           <line>284</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="216" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>10</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="218" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js</url>
           <line>178</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="224" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js</url>
           <line>177</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="225" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js</url>
           <line>92</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="238" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>552</line>
-          <properties lambdaOrdinal="-1" />
+          <line>590</line>
           <option name="timeStamp" value="241" />
         </line-breakpoint>
       </breakpoints>

@@ -123,6 +123,13 @@ var ADLbrowserQuery = (function () {
                 self.query.showNodeProperties({data: {type: type, id: type, label: self.OneModelDictionary[type]}})
             }
 
+        self.onOperatorSelect = function (operator) {
+            if (operator == "LIST") {
+                self.listQueryParamsDialogFieldValues()
+                $("#ADLbrowserQueryParams_operator").val("=")
+            }
+        }
+
         self.onQueryParamsDialogValidate = function (logicalMode) {
 
             var property = $("#ADLbrowserQueryParams_property").val()
@@ -171,6 +178,12 @@ var ADLbrowserQuery = (function () {
             else
                 filterLabel = self.model[property].label + " " + operator + " " + value
 
+            filterStr += varName + "    rdf:type " + varName + "Type."
+            filterStr += "filter(   " + varName + "Type =<" + field + "> )"
+
+            if (filterStr.indexOf("Label") < 0)
+                filterStr += "optional {" + varName + " rdfs:label " + varName + "Label} "
+
 
             if (self.queryMode == "count") {
                 var options = {
@@ -188,9 +201,10 @@ var ADLbrowserQuery = (function () {
                         if (err)
                             return MainController.UI.message(err)
                         var filterId = nodeData.id;
+                        if(queryResult.data.length==0)
                         var html = "<div class='ADLbrowser_filterDiv' id='" + filterId + "'>" +
+                            "<input type='checkbox'  checked='checked' class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
                             "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
-                            "<button title='graph nodes' onclick='ADLbrowserQuery.graphActions.graphFilter(\"" + filterId + "\")'>G</button>&nbsp;" +
                             "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
                             "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
                         "</div>"
@@ -199,26 +213,6 @@ var ADLbrowserQuery = (function () {
 
 
                     })
-                })
-            }
-            if (self.queryMode == "graph") {
-                ADLbrowser.query.addNodeToQueryTree(self.currentNode)
-                var options = {filter: filterStr, logicalMode: logicalMode}
-                ADLbrowserGraph.drawGraph(self.currentNode, options, function (err, result) {
-                    $("#waitImg").css("display", "none");
-                    if (err)
-                        return MainController.UI.message(err)
-                    if (result == 0)
-                        return alert("no data found")
-                    self.updateAdlTree(self.currentNode)
-                })
-            }
-            if (true || self.queryMode == "query") {
-                ADLbrowser.query.addFilterToQueryTree({label: filterLabel, content: filterStr}, function (err, result) {
-                    $("#waitImg").css("display", "none");
-                    if (err || result == 0)
-                        return;
-                    ADLbrowser.updateAdlTree(self.currentNode)
                 })
             }
 
@@ -328,10 +322,23 @@ var ADLbrowserQuery = (function () {
 
         self.graphActions = {
 
+
+            backToModel: function () {
+                var visjsData = {
+                    nodes: self.ALDmodelGraph.nodes,
+                    edges: self.ALDmodelGraph.edges,
+                }
+                var options = self.ALDmodelGraph.params.options;
+
+                visjsGraph.draw("graphDiv", visjsData, options)
+                self.ALDmodelGraph=null;
+
+
+            },
             listFilter: function (id) {
                 var filterData = self.getQueryFilter(id)
                 var options = {
-                    filter: filterData.data,
+                    filter: filterData.filter,
                     filterLabel: filterData.filterLabel,
                     logicalMode: "union",
                     varName: filterData.varName,
@@ -340,21 +347,21 @@ var ADLbrowserQuery = (function () {
                 var node = {data: {id: id}}
                 self.executeQuery(self.currentNode, options, function (err, queryResult) {
                     var jstreeData = []
-                    var keyName=filterData.varName.substring(1)
+                    var keyName = filterData.varName.substring(1)
                     queryResult.data.forEach(function (item) {
                         jstreeData.push(
                             {
                                 id: item[keyName].value,
-                                text: item[keyName+"Label"].value,
+                                text: item[keyName + "Label"].value,
                                 parent: "#",
                                 data: self.currentNode.data
                             })
 
                     })
-                    jstreeData.sort(function(a,b){
-                        if(a.text>b.text)
+                    jstreeData.sort(function (a, b) {
+                        if (a.text > b.text)
                             return 1;
-                        if(a.text<b.text)
+                        if (a.text < b.text)
                             return -1;
                         return 0;
                     })
@@ -365,9 +372,43 @@ var ADLbrowserQuery = (function () {
                 })
             },
 
-            graphFilter: function (id) {
+            queryFilters: function (output) {
+                var selectVars = []
+                $(".ADLbrowser_graphFilterCBX").each(function () {
+
+                    if ($(this).prop("checked")) {
+                        var filterDiv = $(this).parent()
+                        var filterId = filterDiv.attr("id")
+                        var filterObj = self.getQueryFilter(filterId)
+                        selectVars.push(filterObj.varName)
+                    }
+
+                })
 
 
+                var options = {
+                    logicalMode: "union",
+                    selectVars: selectVars
+
+                }
+                self.executeQuery(null, options, function (err, queryResult) {
+
+                    if (output == "graph") {
+
+
+                        if (!self.ALDmodelGraph) {//save modelGraph before drawing quryGraph
+                            self.ALDmodelGraph = {nodes: [], edges: [], params: {}}
+                            self.ALDmodelGraph.nodes = visjsGraph.data.nodes.get()
+                            self.ALDmodelGraph.edges = visjsGraph.data.edges.get()
+                            self.ALDmodelGraph.params = visjsGraph.currentDrawParams
+                        }
+
+                        ADLbrowserGraph.drawGraph("graphDiv", queryResult, {selectVars: selectVars})
+
+
+                    }
+
+                })
             }
 
             ,
@@ -483,51 +524,41 @@ var ADLbrowserQuery = (function () {
             ,
 
 
-            setAsFilter: function () {
-                self.queryFilterNodes.splice(0, 0, ADLbrowserQuery.currentNode);
-                visjsGraph.data.nodes.update({
-                    id: ADLbrowserQuery.currentNode.id,
-                    shape: "star",
-                    color: {border: "#de1e5e"}
-                })
-
-                MainController.UI.hidePopup("graphPopupDiv")
-
-            }
-            ,
-
-
         }
 
         self.executeQuery = function (node, options, callback) {
             var queryFilterNodes = ADLbrowserQuery.queryFilterNodes;
             var filterStr = "";
-            if (options.filter)
-                filterStr = options.filter
-            if (!filterStr)
-                filterStr = "";
-            var source = ADLbrowser.currentSource
-
             var where = ""
             var varName = options.varName;
-            //    filterStr = filterStr.replace(/\?x/g, varName + "_x")
+            var previousVarName = null;
+            var source = ADLbrowser.currentSource
+            if (varName) {// add filter to query
+                if (options.filter)
+                    filterStr = options.filter
+                if (!filterStr)
+                    filterStr = "";
 
-            where += varName + "    rdf:type " + varName + "Type. optional {" + varName + " rdfs:label " + varName + "Label} "
-            where += "filter(   " + varName + "Type =<" + node.data.id + "> )"
-            where += filterStr
+
+                //    filterStr = filterStr.replace(/\?x/g, varName + "_x")
 
 
-            var previousVarName = varName
+                where += filterStr
 
 
-            // join classes (anonym predicate
+                previousVarName = varName
+            }
+
+
+            // join classes (anonym predicate)
             queryFilterNodes.forEach(function (filterNodeData, index) {
                 if (!filterNodeData)
                     return
                 var varName2 = filterNodeData.varName;
                 if (previousVarName == varName2)
                     return
-                where += previousVarName + " ?prop_" + index + " " + varName2 + ". "
+                if (previousVarName)
+                    where += previousVarName + " ?prop_" + index + " " + varName2 + ". "
                 previousVarName = varName2
                 var filter2 = filterNodeData.filter;
                 where += filter2
@@ -537,12 +568,19 @@ var ADLbrowserQuery = (function () {
 
 
             var fromStr = Sparql_common.getFromStr(source)
-           var  query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
             if (options.count)
                 query += "select (count(distinct " + varName + ") as ?count) "
-            else
-                query += "select distinct " + varName + " "+ varName + "Label "
+            else if (options.selectVars) {
+                var selectVarsStr = ""
+                options.selectVars.forEach(function (varName, index) {
+                    selectVarsStr += varName + " " + varName + "Label "
+                })
+                query += "select distinct " + selectVarsStr
 
+            } else {
+                query += "select distinct " + varName + " " + varName + "Label "
+            }
             query += fromStr +
                 "WHERE {"
 

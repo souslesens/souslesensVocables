@@ -86,18 +86,20 @@
         <br>
         <!--- -->
 
-        <select id="ADLbrowserQueryParams_operator">
+        <select id="ADLbrowserQueryParams_operator" onclick="ADLbrowserQuery.onOperatorSelect($(this).val())">
             <option>=</option>
+            <option>contains</option>
+            <option>LIST</option>
             <option>!=</option>
             <option><</option>
             <option selected>></option>
-            <option>contains</option>
+
             <option>not contains</option>
         </select>
         <input id="ADLbrowserQueryParams_value" size="20" value="100">
 
         <br>
-        <button onclick="ADLbrowserQuery.listQueryParamsDialogFieldValues()">List</button>
+     <!--   <button onclick="ADLbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
         <select id="ADLbrowserQueryParams_valuesSelect" onchange="ADLbrowser.query.onQueryParamsValuesSelect()"></select>
         <br>
      <!--   <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">∪</button>
@@ -110,6 +112,11 @@
 
 </div>
 
+<div id="ADLbrowser_graphDialogDiv">
+    <div id="ADLbrowser_graphDiv" style="height: 760px; width: 980px"></div>
+
+
+</div>
 
 <div id="GraphHighlight_legendDiv"
      style="visibility:hidden;z-index:20;border: 1px;border-style: solid;padding: 5px;background-color: #fafafa;max-height: 400px;max-width: 250px;overflow: auto"></div>
@@ -124,4 +131,11 @@
 
     }
     $("#ADLbrowser_Tabs").tabs()
+    $("#ADLbrowser_graphDialogDiv").dialog({
+        autoOpen: false,
+        height: 800,
+        width: 1000,
+        modal: false,
+    });
+
 </script>

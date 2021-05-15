@@ -200,6 +200,7 @@ var Sparql_common = (function () {
         if (forUri) {
             str = str.replace(/ /gm, "_")
             str = str.replace(/-/gm, "_")
+            str = str.replace(/\//gm, "_")
         }
 
 

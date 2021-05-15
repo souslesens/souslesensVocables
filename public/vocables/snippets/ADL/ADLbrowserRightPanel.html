@@ -43,7 +43,16 @@
 
 
         <div id="ADLbrowserAdlTab" style="width:100%; display: flex;flex-direction: column">
-           <div> <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset</button></div>
+
+           <div>
+               <button onclick="ADLbrowserQuery.graphActions.backToModel()">Model</button>
+               <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
+               <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph </button>
+               <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table </button>
+
+
+           </div>
+
             <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column" >
 
             </div>

@@ -26,20 +26,21 @@ var visjsGraph = (function () {
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
     self.showNodesLabelMinScale = 0.5
-    var currentDrawParams;
+   self.currentDrawParams;
+    
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500
 
     self.simulationOn = false;
     self.redraw = function () {
-        if (!currentDrawParams)
+        if (!self.currentDrawParams)
             return;
         var visjsData = {nodes: self.data.nodes.get(), edges: self.data.edges.get()}
-        self.draw(currentDrawParams.divId, visjsData, currentDrawParams.options, currentDrawParams.callback)
+        self.draw(self.currentDrawParams.divId, visjsData, self.currentDrawParams.options, self.currentDrawParams.callback)
 
     }
     self.draw = function (divId, visjsData, _options, callback) {
-        currentDrawParams = {divId: divId, options: _options, callback: callback}
+        self.currentDrawParams = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
         if (_options.simulationTimeOut)
@@ -190,7 +191,7 @@ var visjsGraph = (function () {
             })
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
-                    if (!params.event.srcEvent.ctrlKey && !currentDrawParams.options.keepNodePositionOnDrag)
+                    if (!params.event.srcEvent.ctrlKey && !self.currentDrawParams.options.keepNodePositionOnDrag)
                         return;
                     var nodeId = params.nodes[0]
                     //   var nodes = self.data.nodes.getIds();
@@ -268,7 +269,7 @@ var visjsGraph = (function () {
     }
     self.setLayout = function (layout) {
         if (layout == "hierarchical vertical") {
-            currentDrawParams.options.layoutHierarchical = {
+            self.currentDrawParams.options.layoutHierarchical = {
                 direction: "UD",
                 //   levelSeparation: 50,
                 //   nodeSpacing: 50,
@@ -276,12 +277,12 @@ var visjsGraph = (function () {
                 sortMethod: "hubsize",
                 // sortMethod:"directed",
             }
-            currentDrawParams.simulationTimeOut = 10000
+            self.currentDrawParams.simulationTimeOut = 10000
 
 
             self.redraw()
         } else if (layout == "hierarchical horizontal") {
-            currentDrawParams.options.layoutHierarchical = {
+            self.currentDrawParams.options.layoutHierarchical = {
                 direction: "LR",
                 sortMethod: "hubsize",
                 //  sortMethod:"directed",
@@ -291,7 +292,7 @@ var visjsGraph = (function () {
                 //   nodeSpacing:25,
 
             }
-            currentDrawParams.options.edges = {
+            self.currentDrawParams.options.edges = {
                 smooth: {
                     type: "cubicBezier",
                     forceDirection: "horizontal",
@@ -302,7 +303,7 @@ var visjsGraph = (function () {
 
             self.redraw()
         } else {
-            currentDrawParams.options = {}
+            self.currentDrawParams.options = {}
             self.redraw()
         }
     }

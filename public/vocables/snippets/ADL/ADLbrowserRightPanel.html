@@ -7,6 +7,22 @@
         overflow: auto;
         max-height: 500px;
     }
+    .ADLbrowser_filterContainerDiv{
+        border: grey solid 2px;
+        background-color: #d7d4f0;
+        margin:3px;
+        padding: 3px;
+    }
+    .ADLbrowser_filterDiv{
+
+        border: #6e2500 solid 2px;
+        background-color: #d7d4f0;
+        border-radius: 3px;
+        margin:3px;
+        padding: 3px;
+
+
+    }
 
 
 </style>
@@ -26,7 +42,11 @@
         </ul>
 
 
-        <div id="ADLbrowserAdlTab" style="width:100%;">
+        <div id="ADLbrowserAdlTab" style="width:100%; display: flex;flex-direction: column">
+           <div> <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset</button></div>
+            <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column" >
+
+            </div>
             <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
 
 

@@ -181,7 +181,7 @@
       <workItem from="1619962281242" duration="384000" />
       <workItem from="1620019723693" duration="103799000" />
       <workItem from="1620391311238" duration="8915000" />
-      <workItem from="1620626815268" duration="77781000" />
+      <workItem from="1620626815268" duration="92118000" />
     </task>
     <servers />
   </component>
@@ -321,12 +321,6 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>424</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="217" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>10</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="218" />
@@ -348,6 +342,12 @@
           <line>92</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="238" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
+          <line>552</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="241" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

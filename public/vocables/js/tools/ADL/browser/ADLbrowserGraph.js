@@ -43,103 +43,68 @@ var ADLbrowserGraph = (function () {
         }
         ,
 
-        self.addCountNodesToGraph = function (node, options, callback) {
-            var queryFilterNodes = ADLbrowserQuery.queryFilterNodes;
-
-            var filterStr = "";
-            if (options.filter)
-                filterStr = options.filter
-            if (!filterStr)
-                filterStr = "";
+        self.addCountNodesToGraph = function (node, data, options, callback) {
 
 
-            var source = ADLbrowser.currentSource
-            var query
-
-            var fromStr = Sparql_common.getFromStr(source)
-            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-                "select (count(distinct ?sub) as ?count) " +
-                fromStr +
-                "WHERE {"
-
-            var where = ""
-            var varName = "?" + Sparql_common.formatStringForTriple(ADLbrowserQuery.model[node.data.id].label,true);
-            filterStr = filterStr.replace(/\?x/g, varName + "_x")
-
-            where += varName + "    rdf:type "+varName+"Type. optional {"+varName+" rdfs:label " + varName + "Label} "
-            where += "filter(   "+varName+"Type =<" + node.data.id + "> )"
-            where += filterStr
+            var count = data.data[0].count.value
 
 
-            var previousVarName = varName
-            queryFilterNodes.forEach(function (filterNode, index) {
-                var varName2 = "?" + ADLbrowserQuery.model[filterNode.data.class].label;
+            var visjsData = {nodes: [], edges: []}
 
-                where += previousVarName + "<>" + varName2
-                previousVarName = varName2
-                var filter2 = filterNode.data.filter;
-                where += filter2
+
+            var nodeId = options.varName.substring(1) + "_filter"
+            var color = Lineage_classes.getPropertyColor(ADLbrowserQuery.currentNode.id)
+            visjsGraph.data.nodes.remove(nodeId)
+            var nodeData = {
+                type: "count",
+                class: node.id,
+                count: count,
+                filter: options.filter,
+                filterStr: options.filterStr,
+                varName: options.varName,
+                color: color,
+                id: nodeId
+
+            }
+            //   var color = "#ffe0aa"
+
+
+            visjsData.nodes.push({
+                id: nodeId,
+                label: count,
+                shape: "circle",
+                font: "14 arial black",
+                color: color,
+                data: nodeData,
+                //   fixed:{y:true},
+                //   y:-300
+
+            })
+            var edgeId = node.id + "_countEdge"
+            visjsGraph.data.edges.remove(edgeId)
+            visjsData.edges.push({
+                id: edgeId,
+                from: node.id,
+                to: nodeId,
+                label: options.filterLabel,
+                font: {color: color},
+                length: 5
 
 
             })
 
+            visjsGraph.data.nodes.add(visjsData.nodes)
+            visjsGraph.data.edges.add(visjsData.edges)
+
+            ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
 
 
-
-            query += where + " }  limit 20000"
-
-
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-            MainController.UI.message("searching...")
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
-                // $("#waitImg").css("display", "none");
-                if (err) {
-                    return MainController.UI.message(err)
-                }
-                var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj"])
-
-                var count = result.results.bindings[0].count.value
-
-
-                var visjsData = {nodes: [], edges: []}
-
-
-                var nodeId = node.id + "_count"
-                visjsGraph.data.nodes.remove(nodeId)
-                visjsData.nodes.push({
-                    id: nodeId,
-                    label: count,
-                    shape: "circle",
-                    font: "14 arial black",
-                    color: "#ffe0aa",
-                    data: {
-                        type: "count",
-                        class: node.id,
-                        count: count,
-                        filter: options.filter,
-                        queryWhere: where
-                    },
-                    //   fixed:{y:true},
-                    //   y:-300
-
-                })
-                var edgeId = node.id + "_countEdge"
-                visjsGraph.data.edges.remove(edgeId)
-                visjsData.edges.push({
-                    id: edgeId,
-                    from: node.id,
-                    to: nodeId,
-                    // label:options.filter,
-                    length: 5
-
-
-                })
-
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-
-
+            visjsGraph.data.nodes.update({
+                id: ADLbrowserQuery.currentNode.id,
+                color: color
             })
+
+            return callback(null, nodeData)
 
         }
 

@@ -376,10 +376,12 @@ var ADLassetGraph = (function () {
                                 var x = 0;
                             for (var subject in result.predicates[predicate]) {
                                 if (!self.buildClasses[subject]) {
+                                    var color=Lineage_classes.getPropertyColor(subject)
                                     self.buildClasses[subject] = {
                                         count: 0,
-                                        color: Lineage_classes.getPropertyColor(subject)
+                                        color: color
                                     }
+                                    self.model[subject].color=color
                                 }
 
                                 if (!self.classes[subject])
@@ -401,32 +403,14 @@ var ADLassetGraph = (function () {
                 },
                 function (callbackSeries) {
 
-                    /*  var objectsMap = {}
-                      for (var subject in self.classes) {
-                          for (var predicate in self.classes[subject]) {
 
-                              self.classes[subject][predicate].forEach(function (object) {
-                                  if (!objectsMap[object]) {
-                                      objectsMap[object] = {}
-                                  }
-                                  if (!objectsMap[object][predicate])
-                                      objectsMap[object][predicate] = []
-                                  if (objectsMap[object][predicate].indexOf(subject) < 0)
-                                      objectsMap[object][predicate].push(subject)
-
-
-                              })
-
-                          }
-                      }*/
 
                     var existingNodes = {}
                     var newParents = []
                     var topNodeId
                     for (var subject in self.classes) {
-                        console.log(subject);
-                        if (subject.indexOf("1053") > -1)
-                            var x = 5
+
+
                         if (subject.indexOf("xsd:") < 0) {
 
                             if (!existingNodes[subject]) {
@@ -435,7 +419,7 @@ var ADLassetGraph = (function () {
                                 if (self.buildClasses[subject])
                                     countStr = " (" + self.buildClasses[subject].count + ")"
                                 var label = self.model[subject].label+countStr;
-                                var color = self.buildClasses[subject].color
+                                var color = options.nodeColor || self.buildClasses[subject].color
                                 var shape = "box"
                                 if (subject.indexOf("xsd:") > -1) {
                                     shape = "star"
@@ -493,7 +477,7 @@ var ADLassetGraph = (function () {
                                         if (self.buildClasses[subject])
                                             countStr = " (" + self.buildClasses[subject].count + ")"
                                         label=label+countStr
-                                        var color = self.buildClasses[object].color
+                                        var color = options.nodeColor || self.buildClasses[object].color
                                         var shape = "box"
                                         if (object.indexOf("xsd:") > -1) {
                                             shape = "star"

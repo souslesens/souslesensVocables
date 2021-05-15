@@ -197,8 +197,10 @@ var Sparql_common = (function () {
 
         str = str.replace(/\\xa0/gm, " ")
         str = str.replace(/'/gm, "\\\'")
-        if (forUri)
+        if (forUri) {
             str = str.replace(/ /gm, "_")
+            str = str.replace(/-/gm, "_")
+        }
 
 
         return str;
@@ -207,6 +209,7 @@ var Sparql_common = (function () {
 
     self.formatUrl = function (str) {
         str = str.replace(/%\d*/gm, "_")
+
         return str;
     }
 

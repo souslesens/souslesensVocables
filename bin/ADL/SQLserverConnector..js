@@ -11,9 +11,32 @@ const config = {
 
 
 //update dbo.QUANTUM_BOMST_TPUK_ELFR set breakdown= left (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))))
-//update dbo.QUANTUM_BOMST_TPUK_ELFR set tag= right (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))+1)-1)
+//update dbo.QUANTUM_BOMST_TPUK_ELFR set tag= RIGHT(Functional_Location, CHARINDEX('/', REVERSE('/' + Functional_Location)) - 1)
+
+/*
+select Functional_Location,  RIGHT(Functional_Location, CHARINDEX('/', REVERSE('/' + Functional_Location)) - 1)
+  FROM [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR]
 
 
+
+update [EF_SAP].[dbo].[Functional_Locations_IH06] set functionalClass=FunctionalClassID
+  FROM [MDM_2.3_AFTWIN].[adl].[tblTag] c  JOIN [EF_SAP].[dbo].[Functional_Locations_IH06] t  on c.tagnumber=t.tag
+
+update [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] set RDL_physicalClassId=PhysicalClassID
+  FROM [MDM_2.3_AFTWIN].[adl].[tblModel] c  JOIN [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] t  on c.[ModelNumber]=t.[Manufacture_Part_Number]
+
+
+
+update [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] set RDL_physicalClassLabel=name
+  FROM [rdlquantum].[rdl].[tblPhysicalClass] c  JOIN [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] t  on c.[ModelNumber]=t.[Manufacture_Part_Number]
+
+update [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] set RDL_functionalClassLabel=name
+FROM [rdlquantum].[rdl].[tblfunctionalClass] c  JOIN [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] t  on c.id=t.RDL_functionalClassId
+
+
+
+
+*/
 //sudo docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Fa1#majeur' -e 'MSSQL_PID=Express' -p 1433:1433 --restart always  -v /var/opt/mssql/data:/var/opt/mssql/data -v /var/opt/mssql/log:/var/opt/mssql/log -v /var/opt/mssql/secrets:/var/opt/mssql/secrets -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
 var SQLserverConnector = {
 

@@ -77,6 +77,14 @@ var ADLbuilder = {
 
         data.forEach(function (item, indexItem) {
             mappings.forEach(function (mapping, indexMapping) {
+
+                if(mapping.subject.indexOf("functionalclassid")>-1)
+                    var x=3
+
+                if(item[mapping.subject]=="TOTAL-P0000000874")
+                    var x=3
+
+
                 if (indexItem == 0) {
                     var obj = util.deconcatSQLTableColumn(mapping.subject)
                     if (obj && obj.column)
@@ -165,6 +173,7 @@ var ADLbuilder = {
                     objectValue = item[mapping.object]
 
                 }
+
 
                 if (objectValue && objectValue.trim)
                     objectValue = objectValue.trim()
@@ -280,7 +289,7 @@ var ADLbuilder = {
                     socket.message("ADLbuild", "clearing Graph")
                     var queryDeleteGraph = " CLEAR GRAPH <" + ADLgraphUri + ">"
                     var params = {query: queryDeleteGraph}
-
+                    socket.message("ADLbuild", "delete graph "+ADLgraphUri)
                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
 
                         callbackSeries(err);
@@ -337,7 +346,8 @@ var ADLbuilder = {
 
 // get previously created uris
                 function (callbackSeries) {
-
+                    if (options.replaceGraph)
+                        return callbackSeries();
                     socket.message("ADLbuild", "loading ADL existing IDS ")
                     ADLbuilder.getExistingLabelUriMap(options.sparqlServerUrl, ADLgraphUri, null, function (err, result) {
                         if (err)

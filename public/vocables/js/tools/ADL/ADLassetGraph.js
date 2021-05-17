@@ -65,6 +65,9 @@ var ADLassetGraph = (function () {
 
 
                 mappingsData.mappings.forEach(function (mapping) {
+                    if(mapping.subject.indexOf("functionalclass")>-1)
+                        var x=3
+
 
                     if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                         if (!classes[mapping.subject])
@@ -83,24 +86,25 @@ var ADLassetGraph = (function () {
 
                         var subjectBis = relationalKeys[subjectId]
 
-                        if (!subjectBis)
-                            return console.log("Missing primary key to" + mapping.subject);
+                        if (subjectBis) {
+                            //  return console.log("Missing primary key to" + mapping.subject);
 
 
-                        var edgeId = subjectId + "_" + "join" + "_" + subjectBis
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: subjectId,
-                                to: subjectBis,
-                                dashes: true,
-                                color: "blue"
-                            })
+                            var edgeId = subjectId + "_" + "join" + "_" + subjectBis
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: subjectId,
+                                    to: subjectBis,
+                                    dashes: true,
+                                    color: "blue"
+                                })
+                            }
+                            subjectId = subjectBis;
+                        } else {
+
                         }
-                        subjectId = subjectBis;
-                    } else {
-
                     }
 
 
@@ -344,7 +348,8 @@ var ADLassetGraph = (function () {
         if (!source) {
             return alert("select a source")
         }
-
+if(!options)
+    options={}
 
         self.classes = {}
         var visjsData = {nodes: [], edges: []}
@@ -420,6 +425,9 @@ var ADLassetGraph = (function () {
                                     countStr = " (" + self.buildClasses[subject].count + ")"
                                 var label = self.model[subject].label+countStr;
                                 var color = options.nodeColor || self.buildClasses[subject].color
+                                if(!options.nodeColor)
+                                    self.model[subject].color=color
+
                                 var shape = "box"
                                 if (subject.indexOf("xsd:") > -1) {
                                     shape = "star"
@@ -465,6 +473,7 @@ var ADLassetGraph = (function () {
                                             from: subject,
                                             to: object,
                                             label: predicateLabel,
+                                            arrows:{to:true}
 
 
                                         })
@@ -478,6 +487,8 @@ var ADLassetGraph = (function () {
                                             countStr = " (" + self.buildClasses[subject].count + ")"
                                         label=label+countStr
                                         var color = options.nodeColor || self.buildClasses[object].color
+                                        if(!options.nodeColor)
+                                            self.model[object].color=color
                                         var shape = "box"
                                         if (object.indexOf("xsd:") > -1) {
                                             shape = "star"

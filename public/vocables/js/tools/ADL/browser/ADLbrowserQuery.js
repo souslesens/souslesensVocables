@@ -213,7 +213,7 @@ var ADLbrowserQuery = (function () {
                         if (err)
                             return MainController.UI.message(err)
 
-                        if (nodeData.count==0)
+                        if (nodeData.count == 0)
                             return
 
                         ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
@@ -354,6 +354,7 @@ var ADLbrowserQuery = (function () {
             },
             listFilter: function (id) {
                 var filterData = self.getQueryFilter(id)
+                self.currentFilterData = filterData
                 /*  var options = {
                       filter: filterData.filter,
                       filterLabel: filterData.filterLabel,
@@ -372,15 +373,18 @@ var ADLbrowserQuery = (function () {
                     var jstreeData = []
                     var keyName = filterData.varName.substring(1)
                     queryResult.data.forEach(function (item) {
-                        jstreeData.push(
-                            {
-                                id: item[keyName].value,
-                                text: item[keyName + "Label"].value,
-                                parent: "#",
-                                data: self.currentNode.data
-                            })
+                        if (item[keyName]) {
+                            jstreeData.push(
+                                {
+                                    id: item[keyName].value,
+                                    text: item[keyName + "Label"].value,
+                                    parent: "#",
+                                    data: self.currentNode.data
+                                })
+                        }
 
                     })
+
                     jstreeData.sort(function (a, b) {
                         if (a.text > b.text)
                             return 1;
@@ -389,13 +393,17 @@ var ADLbrowserQuery = (function () {
                         return 0;
                     })
 
+                    var options = {
+                        withCheckboxes: true,
+                    }
+                    common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, options)
 
-                    common.jstree.loadJsTree("ADLbrowser_adlJstreeDiv", jstreeData, {})
 
                 })
             },
 
             queryFilters: function (output) {
+
                 var selectVars = []
                 $(".ADLbrowser_graphFilterCBX").each(function () {
 
@@ -430,6 +438,10 @@ var ADLbrowserQuery = (function () {
 
 
                     }
+                    if(output=="table"){
+                        ADLbrowserDataTable.showQueryResult ( queryResult, {selectVars: selectVars})
+
+                    }
 
                 })
             }
@@ -450,9 +462,15 @@ var ADLbrowserQuery = (function () {
             ,
 
             resetAllFilters: function () {
+                // self.graphActions.removeIndividualsFilter()
+                //  self.graphActions.backToModel();
+
                 // self.queryFilterNodes.forEach(function (filterData, index) {
                 // self.previousVarNames=[]
                 previousVarName = null;
+                if ($('#ADLbrowser_adlJstreeDiv').jstree)
+                    $('#ADLbrowser_adlJstreeDiv').jstree("destroy")
+
                 while (self.queryFilterNodes.length > 0) {
                     var filterData = self.queryFilterNodes[0]
                     self.graphActions.removeFilter(filterData.id)
@@ -461,7 +479,16 @@ var ADLbrowserQuery = (function () {
 
             }
             ,
+            /*   addIndividualsFilter:function(){
+                   var checkedIds=$("#ADLbrowser_adlJstreeDiv").jstree().get_checked();
+                   self.individualFilters={varName:self.currentFilterData.varName,ids:checkedIds}
 
+
+               },*/
+               clearIndividualsFilter:function(){
+                  if( $("#ADLbrowser_adlJstreeDiv").jstree(true))
+                   $("#ADLbrowser_adlJstreeDiv").jstree().deselect_all(true)
+               },
 
             clickGraph: function (obj, point) {
                 MainController.UI.hidePopup("graphPopupDiv")
@@ -564,11 +591,6 @@ var ADLbrowserQuery = (function () {
                     filterStr = options.filter
                 if (!filterStr)
                     filterStr = "";
-
-
-                //    filterStr = filterStr.replace(/\?x/g, varName + "_x")
-
-
                 where += filterStr
 
 
@@ -604,7 +626,7 @@ var ADLbrowserQuery = (function () {
                     if (subjectOb.predicates[subPredicate].indexOf(objectId) > -1) {
                         predicates.push(subPredicate)
                         where += "" + previousVarName + " <" + subPredicate + "> " + varName2 + ". "
-                        if(!options.count) {
+                        if (!options.count) {
                             where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
                             where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
                             where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
@@ -624,7 +646,7 @@ var ADLbrowserQuery = (function () {
                         if (objectOb.predicates && objectOb.predicates[objPredicate].indexOf(subjectId) > -1) {
                             predicates.push(objPredicate)
                             where += "" + varName2 + " <" + objPredicate + "> " + previousVarName + ". "
-                            if(!options.count) {
+                            if (!options.count) {
                                 where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
                                 where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
                                 where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
@@ -652,6 +674,21 @@ var ADLbrowserQuery = (function () {
             if (message)
                 return callback(message)
 
+            //checked chexkboxes in class individuals
+            if ($("#ADLbrowser_adlJstreeDiv").jstree(true)) {
+                var checkedIds = $("#ADLbrowser_adlJstreeDiv").jstree().get_checked();
+                if (checkedIds && checkedIds.length > 0) {
+                    self.individualFilters = {varName: self.currentFilterData.varName, ids: checkedIds}
+
+                    var idsStr = "";
+                    self.individualFilters.ids.forEach(function (id, index) {
+                        if (index > 0)
+                            idsStr += ","
+                        idsStr += "<" + id + ">"
+                    })
+                    where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))"
+                }
+            }
 
             var fromStr = Sparql_common.getFromStr(source)
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -660,13 +697,13 @@ var ADLbrowserQuery = (function () {
             else if (options.selectVars) {
                 var selectVarsStr = ""
                 options.selectVars.forEach(function (varName, index) {
-                    selectVarsStr += varName + " " + varName + "Label "+ varName + "Type "
+                    selectVarsStr += varName + " " + varName + "Label " + varName + "Type "
 
                 })
                 query += "select distinct " + selectVarsStr
 
             } else {
-                query += "select distinct " + varName + " " + varName + "Label "+ varName + "Type "
+                query += "select distinct " + varName + " " + varName + "Label " + varName + "Type "
             }
             query += fromStr +
                 "WHERE {"
@@ -681,14 +718,14 @@ var ADLbrowserQuery = (function () {
                 if (err) {
                     return callback(err)
                 }
-            /*    result.results.bindings.forEach(function (item) {
-                    for (var key in item) {
-                        if (key != "count")
-                            if (!item[key + "Label"])
-                                item[key + "Label"] = {value: Sparql_common.getLabelFromId(item[key].value)}
+                /*    result.results.bindings.forEach(function (item) {
+                        for (var key in item) {
+                            if (key != "count")
+                                if (!item[key + "Label"])
+                                    item[key + "Label"] = {value: Sparql_common.getLabelFromId(item[key].value)}
 
-                    }
-                })*/
+                        }
+                    })*/
                 var data = result.results.bindings;
 
                 callback(null, {data: data, filter: filterStr})

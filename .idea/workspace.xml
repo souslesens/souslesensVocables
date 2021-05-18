@@ -184,7 +184,7 @@
       <workItem from="1620626815268" duration="92118000" />
       <workItem from="1621083998733" duration="12348000" />
       <workItem from="1621141784361" duration="17467000" />
-      <workItem from="1621233812525" duration="22118000" />
+      <workItem from="1621233812525" duration="36886000" />
     </task>
     <servers />
   </component>
@@ -333,7 +333,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>674</line>
+          <line>710</line>
           <option name="timeStamp" value="241" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">

@@ -21,7 +21,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
 
-   self.loginMode = "none";
+    self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}

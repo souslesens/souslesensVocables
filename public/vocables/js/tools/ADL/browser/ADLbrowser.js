@@ -263,6 +263,8 @@ var ADLbrowser = (function () {
                     // self.jstree.load.loadAdl(data.node)
                     //  self.currentJstreeNode = data.node
                 } else {
+                    MainController.writeUserLog(authentication.currentUser, "ADLbrowser", data.node.id)
+
                     if (self.currentSource != data.node.id)
                         self.adlJstreeData = null
                     self.currentSource = data.node.id

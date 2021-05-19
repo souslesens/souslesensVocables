@@ -513,7 +513,7 @@
     },
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
 
     "schema": null,
     "color": "#bcbd22"
@@ -563,7 +563,7 @@
     },
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
 
 
     "dataSource": {
@@ -587,7 +587,7 @@
       },
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
     "dataSource": {
       "type": "sql",
       "connection": "_default",
@@ -609,7 +609,7 @@
     },
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
     "dataSource": {
       "type": "sql",
       "connection": "_default",
@@ -631,7 +631,7 @@
     },
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
     "dataSource": {
       "type": "sql",
       "connection": "_default",
@@ -701,7 +701,7 @@
     },
     "controller": "Sparql_INDIVIDUALS",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
     "dataSource": {
       "type": "sql.sqlserver",
       "connection": "_default",
@@ -722,7 +722,7 @@
       "url": "_default"
     },
     "controller": "Sparql_INDIVIDUALS",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
     "dataSource": {
       "type": "sql",
       "connection": "_default",
@@ -744,7 +744,7 @@
       "url": "_default"
     },
     "controller": "Sparql_INDIVIDUALS",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUAL_X",
     "dataSource": {
       "type": "sql.sqlserver",
       "connection": "_default",

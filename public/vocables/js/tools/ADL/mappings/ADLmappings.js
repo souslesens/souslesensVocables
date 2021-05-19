@@ -109,7 +109,7 @@ var ADLmappings = (function () {
 
         //
         self.onSourceSelect = function (source) {
-
+            MainController.writeUserLog(authentication.currentUser, "ADLmappings", source)
             self.clearMappings()
             visjsGraph.clearGraph()
          //   visjsGraph.data.nodes()

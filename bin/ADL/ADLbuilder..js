@@ -78,11 +78,11 @@ var ADLbuilder = {
         data.forEach(function (item, indexItem) {
             mappings.forEach(function (mapping, indexMapping) {
 
-                if(mapping.subject.indexOf("functionalclassid")>-1)
-                    var x=3
+                if (mapping.subject.indexOf("functionalclassid") > -1)
+                    var x = 3
 
-                if(item[mapping.subject]=="TOTAL-P0000000874")
-                    var x=3
+                if (item[mapping.subject] == "TOTAL-P0000000874")
+                    var x = 3
 
 
                 if (indexItem == 0) {
@@ -257,7 +257,7 @@ var ADLbuilder = {
     generateAdlSqlTriples: function (mappingFilePath, ADLgraphUri, options, callback) {
         if (!options)
             options = {}
-        options.sparqlServerUrl+="?timeout=600000&debug=on"
+        options.sparqlServerUrl += "?timeout=600000&debug=on"
         var sqlParams = {fetchSize: 5000}
         var existingUrisMap = {}
         var mappingSheets = []
@@ -271,7 +271,8 @@ var ADLbuilder = {
         var oneModelInverseDictionary = {}
         var sqlTable = "";
         var dbConnection = null;
-        var totalTriples = 0
+        var totalTriples = 0;
+        var selectColumns = []
 
 
         async.series([
@@ -289,7 +290,7 @@ var ADLbuilder = {
                     socket.message("ADLbuild", "clearing Graph")
                     var queryDeleteGraph = " CLEAR GRAPH <" + ADLgraphUri + ">"
                     var params = {query: queryDeleteGraph}
-                    socket.message("ADLbuild", "delete graph "+ADLgraphUri)
+                    socket.message("ADLbuild", "delete graph " + ADLgraphUri)
                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
 
                         callbackSeries(err);
@@ -449,9 +450,23 @@ var ADLbuilder = {
                         })
 
                     }
+                    var selectStr = ""
+                    for (var mapping in mappings.mappings) {
+                        mappings.mappings.forEach(function(mapping) {
+                            var column=mapping.subject;
+                            column=column.substring(column.lastIndexOf(".")+1)
+                            if (selectStr.indexOf(column) < 0) {
+                                if (selectStr != "")
+                                    selectStr += ","
+                                selectStr +=column
+                            }
+                        })
+                    }
 
-                    var sqlQuery = "select * from  " + sqlTable + " ";
+
+                    var sqlQuery = "select distinct "+selectStr+" from  " + sqlTable + " ";
                     if (dbConnection.type == "sql.sqlserver") {
+                        sqlQuery+=" ORDER BY "+selectStr+" "
                         SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
                             if (err)
                                 return callbackSeries(err);
@@ -573,8 +588,8 @@ var ADLbuilder = {
                 mappingFilePath += ".json"
             mappingFileName = path.resolve(mappingFilePath)
 
-            if(!fs.existsSync(mappingFileName)){
-                return callbackEach("file "+mappingFileName+" does not exist")
+            if (!fs.existsSync(mappingFileName)) {
+                return callbackEach("file " + mappingFileName + " does not exist")
             }
             var options = {
                 generateIds: 15,

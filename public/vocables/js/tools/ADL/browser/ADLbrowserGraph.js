@@ -2,14 +2,14 @@ var ADLbrowserGraph = (function () {
 
 
         var self = {}
-        self.defaultNodeSize = 10;
+        self.defaultNodeSize = 5;
         self.setGraphPopupMenus = function (node, event) {
 
             if (!node)
                 return;
 
             var html =
-                "    <span class=\"popupMenuItem\" style='font-weight: bold'> "+node.label+"</span>" +
+                "    <span class=\"popupMenuItem\" style='font-weight: bold'> " + node.label + "</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.showGraphNodeInfos();\"> node infos</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.selectNode()\">selectNode</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"ADLbrowserGraph.collapseNode();\">collapse </span>" +
@@ -36,8 +36,9 @@ var ADLbrowserGraph = (function () {
                         if (predicate.indexOf("label") > -1)
                             return;
                         if (predicate.indexOf("type") > -1)
-                            return;;
-                        retainedPredicates.push({predicate: predicate, object: object})
+                            return;
+                        ;
+                        retainedPredicates.push({predicate: predicate, inverse: false, object: object})
                     })
 
                 }
@@ -50,7 +51,7 @@ var ADLbrowserGraph = (function () {
                             if (predicate.indexOf("type") > -1)
                                 return;
                             if (object == classId)
-                                retainedPredicates.push({predicate: predicate, inverse: true, object: classId})
+                                retainedPredicates.push({predicate: predicate, inverse: true, object: subject})
                         })
                     }
                 }
@@ -218,6 +219,7 @@ var ADLbrowserGraph = (function () {
                                 from: previousId,
                                 to: id,
 
+
                             })
                         }
                     }
@@ -249,7 +251,15 @@ var ADLbrowserGraph = (function () {
                         ADLbrowserGraph.lastRightClickPosition = point
 
 
-                    }
+                    }, edges: {
+                        smooth: {
+                            type: "cubicBezier",
+                            forceDirection: "horizontal",
+
+                            roundness: 0.4,
+                        },
+                        arrows: {to: 1}
+                    },
 
                 }
                 visjsGraph.draw(graphDiv, visjsData, visjsOptions)
@@ -267,62 +277,25 @@ var ADLbrowserGraph = (function () {
 
         self.expandNode = function (predicateStr) {
 
-            /*    var classId = self.currentGraphNode.data.type
-                var classes = ADLbrowserQuery.classes
-                var where = ""
 
-
-                var predicates = classes[classId]
-                var retainedPredicates = []
-                for (var predicate in predicates) {
-                    if (predicate.indexOf("label") > -1)
-                        ;
-                    if (predicate.indexOf("type") > -1)
-                        ;
-                    retainedPredicates.push(predicate)
-
-
-                }
-
-
-                var where = ""
-                var predicatesInStr = "";
-                var selectStr = "";
-
-                retainedPredicates.forEach(function (predicateId, index) {
-                    if (index > 0)
-                        predicatesInStr += ","
-                    predicatesInStr += "<" + predicateId + ">"
-
-
-                })
-                 var filter = " FILTER (?prop in(" + predicatesInStr + ")) "
-                var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-                    "Select  distinct * " + fromStr + " where {" +
-                    "{ <" + self.currentGraphNode.data.id + "> ?prop ?obj .?obj rdf:type ?objType. optional {?obj rdfs:label ?objLabel} } " +
-                    " UNION { ?obj  ?prop  <" + self.currentGraphNode.data.id + ">.?obj rdf:type ?objType.  optional {?obj rdfs:label ?objLabel} } " +
-                    "} LIMIT " + Config.ADL.queryLimit
-    */
             if (predicateStr == "")
                 return
             var array = predicateStr.split("|")
             var predicate = array[0];
             var objectClass = array[1]
-            var inverse = array.length > 2
+            var inverse = array[2]
 
             var fromStr = Sparql_common.getFromStr(ADLbrowser.currentSource)
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                 "Select  distinct * " + fromStr + " where {"
-            if (!inverse)
+            if (inverse == "false")
                 query += " <" + self.currentGraphNode.data.id + "> <" + predicate + "> ?obj .?obj rdf:type ?objType."// filter (?objType=<" + objectClass + ">)"
             else
                 query += " ?obj <" + predicate + "> <" + self.currentGraphNode.data.id + "> .?obj rdf:type ?objType. "//filter (?objType=<" + objectClass + ">)"
-            query += " optional {?obj rdfs:label ?objLabel}  "+
+            query += " optional {?obj rdfs:label ?objLabel}  " +
 
                 "} LIMIT " + Config.ADL.queryLimit
-
-
 
 
             var url = Config.sources[ADLbrowser.currentSource].sparql_server.url + "?format=json&query=";
@@ -346,7 +319,7 @@ var ADLbrowserGraph = (function () {
                         visjsData.nodes.push({
                             id: objId,
                             label: item.objLabel.value,
-                            shape: "triangle",
+                            shape: "dot",
                             color: color,
                             data: {
                                 type: item.objType.value,
@@ -364,7 +337,8 @@ var ADLbrowserGraph = (function () {
                         visjsData.edges.push({
                             id: edgeId,
                             from: self.currentGraphNode.data.id,
-                            to: objId
+                            to: objId,
+
 
                         })
 

@@ -135,7 +135,7 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
 
                 //  query=query+" offset "+(""+offset);
 
-                var query2 = query+" ORDER BY (SELECT NULL) OFFSET "+offset+" ROWS FETCH NEXT "+fetchSize+" ROWS ONLY"
+                var query2 = query+" OFFSET "+offset+" ROWS FETCH NEXT "+fetchSize+" ROWS ONLY"
                 offset += fetchSize;
                 console.log("processed lines: "+offset)
                 SQLserverConnector.connection=connection;

@@ -613,8 +613,11 @@ var ADLbrowserQuery = (function () {
 
 
                 if (index == 0) {
-                    if (!varName2)
+                    if (!varName2) {
+                        var filter2 = filterNodeData.filter;
+                        where += filter2
                         return;
+                    }
                     previousVarName = queryFilterNodes[index].varName
                 } else {
                     previousVarName = queryFilterNodes[index - 1].varName
@@ -771,6 +774,42 @@ var ADLbrowserQuery = (function () {
             })
 
 
+        }
+
+        self.searchTerm=function(){
+            var term=$("#ADLbrowser_onSearchAllInput").val();
+            if(term=="")
+                return;
+            if(!ADLbrowser.currentSource)
+                return alert("select a source")
+
+            var fromStr = Sparql_common.getFromStr(ADLbrowser.currentSource)
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+
+                query += "select ?sub ?sublabel ?subType from "+fromStr+" where { ?sub rdfs:label ?subLabel.?sub rdf:type ?subType. filter (regex(?subLabel,'"+term+"','i'))} limit 1000"
+            else if (options.selectVars) {
+                var selectVarsStr = ""
+                options.selectVars.forEach(function (varName, index) {
+                    selectVarsStr += varName + " " + varName + "Label " + varName + "Type "
+
+                })
+                query += "select distinct " + selectVarsStr
+
+            } else {
+                query += "select distinct " + varName + " " + varName + "Label " + varName + "Type "
+            }
+            query += fromStr +
+                "WHERE {"
+
+            query += where + " }  limit 20000"
+
+
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+            MainController.UI.message("searching...")
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                // $("#waitImg").css("display", "none");
+                if (err) {
+                    return callback(err)
         }
 
 

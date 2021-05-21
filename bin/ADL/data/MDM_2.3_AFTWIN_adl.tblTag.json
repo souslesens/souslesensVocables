@@ -11,19 +11,9 @@
       "object": "xsd:string"
     },
     {
-      "subject": "adl.tbltag.servicedescription",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "xsd:string"
-    },
-    {
       "subject": "adl.tbltag.functionalclassid",
       "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/D101001053"
-    },
-    {
-      "subject": "adl.tbltag.id",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "adl.tbltag.tagnumber"
+      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
     },
     {
       "subject": "adl.tbltag.id",
@@ -32,8 +22,8 @@
     },
     {
       "subject": "adl.tbltag.id",
-      "predicate": "http://www.w3.org/2002/07/owl##DatatypeProperty",
-      "object": "adl.tbltag.servicedescription"
+      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+      "object": "adl.tbltag.tagnumber"
     }
   ],
   "model": {
@@ -52,44 +42,47 @@
       ],
       "label": "xsd:string"
     },
-    "http://w3id.org/readi/rdl/D101001053": {
+    "http://standards.iso.org/iso/15926/part14/FunctionalObject": {
       "parents": [
+        "http://standards.iso.org/iso/15926/part14/Object",
+        "http://www.w3.org/2002/07/owl#Thing",
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
         "ONE-MODEL",
         "#"
       ],
-      "label": "Artefact"
-    },
-    "http://www.w3.org/2000/01/rdf-schema#label": {
-      "label": "rdfs:label"
+      "label": "FunctionalObject"
     },
     "http://standards.iso.org/iso/15926/part14/represents": {
+      "parents": [
+        "http://standards.iso.org/iso/15926/part14/isAbout",
+        "ONE-MODEL",
+        "#"
+      ],
       "label": "represents"
     },
-    "http://www.w3.org/2002/07/owl##DatatypeProperty": {
-      "label": "owl:DatatypeProperty"
+    "http://www.w3.org/2000/01/rdf-schema#label": {
+      "parents": [
+        "#"
+      ],
+      "label": "rdfs:label"
     }
   },
   "graph": {
     "adl.tbltag.id": {
-      "x": -144,
-      "y": -18
+      "x": -146,
+      "y": 112
     },
     "adl.tbltag.tagnumber": {
-      "x": 94,
-      "y": 115
-    },
-    "adl.tbltag.servicedescription": {
-      "x": -202,
-      "y": 90
+      "x": 110,
+      "y": 138
     },
     "adl.tbltag.functionalclassid": {
-      "x": 119,
-      "y": -58
+      "x": 28,
+      "y": -17
     }
   },
   "infos": {
-    "lastModified": "2021-05-13T10:36:09.592Z",
+    "lastModified": "2021-05-21T08:10:53.418Z",
     "modifiedBy": "admin",
     "comment": ""
   },
@@ -102,9 +95,9 @@
     },
     "adlTable": "adl.tblTag",
     "build": {
-      "createdDate": "2021-05-13T16:01:24.882Z",
-      "triples": 742268,
-      "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
+      "createdDate": "2021-05-21T08:12:32.157Z",
+      "triples": 943327,
+      "graphUri": "http://data.total.com/resource/one-model/assets/aftwin-uk/0.2/"
     }
   }
 }

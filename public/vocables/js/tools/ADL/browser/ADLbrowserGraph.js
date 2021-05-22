@@ -25,37 +25,10 @@ var ADLbrowserGraph = (function () {
             }, 500)
         },
 
+
             self.setGraphPopupMenuAllowedExpandsSelect = function () {
-                var classId = self.currentGraphNode.data.type
-                var classes = ADLbrowserQuery.classes
-                var predicates = classes[classId]
-                var retainedPredicates = []
-                for (var predicate in predicates) {
-
-                    predicates[predicate].forEach(function (object) {
-                        if (predicate.indexOf("label") > -1)
-                            return;
-                        if (predicate.indexOf("type") > -1)
-                            return;
-                        ;
-                        retainedPredicates.push({predicate: predicate, inverse: false, object: object})
-                    })
-
-                }
-                //inverse
-                for (var subject in classes) {
-                    for (var predicate in classes[subject]) {
-                        classes[subject][predicate].forEach(function (object) {
-                            if (predicate.indexOf("label") > -1)
-                                return;
-                            if (predicate.indexOf("type") > -1)
-                                return;
-                            if (object == classId)
-                                retainedPredicates.push({predicate: predicate, inverse: true, object: subject})
-                        })
-                    }
-                }
-
+                var classId = self.currentGraphNode.data.type;
+                var retainedPredicates = ADLbrowserQuery.getClassPredicates(classId)
                 var array = []
                 retainedPredicates.forEach(function (item) {
                     array.push({
@@ -106,7 +79,9 @@ var ADLbrowserGraph = (function () {
 
 
                 var nodeId = options.varName.substring(1) + "_filter"
-                var color = Lineage_classes.getPropertyColor(ADLbrowserQuery.currentNode.id)
+                var color = "#adc"
+                if (ADLbrowserQuery.currentNode)
+                    var color = Lineage_classes.getPropertyColor(ADLbrowserQuery.currentNode.id)
 
                 visjsGraph.data.nodes.remove(nodeId)
                 var nodeData = {
@@ -117,7 +92,8 @@ var ADLbrowserGraph = (function () {
                     filterLabel: options.filterLabel,
                     varName: options.varName,
                     color: color,
-                    id: nodeId
+                    id: nodeId,
+                    predicate: options.predicate
 
                 }
                 //   var color = "#ffe0aa"
@@ -168,6 +144,12 @@ var ADLbrowserGraph = (function () {
             var source = ADLbrowser.currentSource
 
             var existingNodes = {}
+            if (self.currentGraph) {
+                if (options.addToGraph)
+                    existingNodes = self.restoreCurrentGraph()
+            } else
+                self.currentGraph = null;
+
             MainController.UI.message("drawing " + data.length + "nodes...")
             var visjsData = {nodes: [], edges: []}
             var keys = {}
@@ -230,7 +212,14 @@ var ADLbrowserGraph = (function () {
 
             MainController.UI.message("drawing...")
 
-            if (true || !visjsGraph.data || !visjsGraph.data.nodes) {
+            if (self.currentGraph && options.addToGraph) {
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+                visjsGraph.redraw()
+                visjsGraph.network.fit()
+                self.storeGraph()
+
+            } else {
                 var visjsOptions = {
                     onclickFn: function (node, point, event) {
                         ADLbrowser.currentJstreeNode = node
@@ -258,17 +247,12 @@ var ADLbrowserGraph = (function () {
 
                             roundness: 0.4,
                         },
-                        arrows: {to: 1}
+                        arrows: {to: true}
                     },
 
                 }
                 visjsGraph.draw(graphDiv, visjsData, visjsOptions)
-            } else {
-
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-                visjsGraph.redraw()
-                visjsGraph.network.fit()
+                self.storeGraph()
             }
             if (callback)
                 callback()
@@ -353,6 +337,31 @@ var ADLbrowserGraph = (function () {
 
             })
 
+
+        }
+        self.storeGraph = function () {
+            if (visjsGraph.data) {//save modelGraph before drawing quryGraph
+                self.currentGraph = {nodes: [], edges: [], params: {}}
+                self.currentGraph.nodes = visjsGraph.data.nodes.get()
+                self.currentGraph.edges = visjsGraph.data.edges.get()
+                self.currentGraph.params = visjsGraph.currentDrawParams
+            }
+        }
+
+        self.restoreCurrentGraph = function () {
+            var visjsData = {
+                nodes: self.currentGraph.nodes,
+                edges: self.currentGraph.edges,
+            }
+            var options = self.currentGraph.params.options;
+            visjsGraph.draw("graphDiv", visjsData, options)
+            var oldIds = self.currentGraph.nodes
+            oldIds = oldIds.concat(self.currentGraph.edges)
+            var existingNodes = {}
+            oldIds.forEach(function (obj) {
+                existingNodes[obj.id] = 1;
+            })
+            return existingNodes;
 
         }
 

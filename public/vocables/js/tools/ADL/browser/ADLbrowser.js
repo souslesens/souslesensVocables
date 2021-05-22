@@ -260,8 +260,7 @@ var ADLbrowser = (function () {
             onSelectNodeAdlList: function (event, data) {
                 $("#ADLbrowserItemsjsTreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
                 if (data.node.parent != "#") {// after search
-                    // self.jstree.load.loadAdl(data.node)
-                    //  self.currentJstreeNode = data.node
+                  ADLbrowserQuery.setFilterFromSearchedTerm(data.node)
                 } else {
                     MainController.writeUserLog(authentication.currentUser, "ADLbrowser", data.node.id)
 
@@ -283,7 +282,7 @@ var ADLbrowser = (function () {
             onSelectNodeAdl: function (e, obj) {
                 ADLbrowser.currentJstreeNode = obj.node;
                 self.queryMode = "graph"
-                self.query.showQueryParamsDialog({x: w - 100, y: h / 3},)
+                self.query.showQueryParamsDialog({x: w - 100, y: h / 3})
                 $("#ADLbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_adlJstreeDiv")
             }
 

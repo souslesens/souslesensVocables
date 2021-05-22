@@ -32,6 +32,36 @@ var ADLbrowserQuery = (function () {
 
         self.showQueryParamsDialog = function (position) {
 
+
+    var firstClass = ADLbrowserQuery.queryFilterNodes.length == 0
+    self.currentQueryDialogPredicates=[]
+            if(!firstClass) {
+                var predicates = self.getClassPredicates(self.currentNode.data.id)
+                var ok = false;
+                self.currentQueryDialogPredicates = []
+
+
+                predicates.forEach(function (item) {
+                    item.predicateLabel = self.model[item.predicate].label
+                    if (firstClass) {
+                        self.currentQueryDialogPredicates.push(item)
+                    } else {
+                        ADLbrowserQuery.queryFilterNodes.forEach(function (filter) {
+                            var previousClass = filter.class
+                            if (item.object == previousClass) {
+                                ok = true
+
+                                if (item.inverse) item.predicateLabel = "^" + item.predicateLabel
+                                self.currentQueryDialogPredicates.push(item)
+                            }
+
+                        })
+                    }
+                })
+                if (!ok)
+                    return alert("class have to be contiguous in the graph")
+            }
+
             self.currentQueryDialogField = self.currentNode.data.id
             self.showNodeProperties(self.currentNode);
             $("#ADLbrowserQueryParams_typeSelect").css("display", "none")
@@ -47,9 +77,51 @@ var ADLbrowserQuery = (function () {
                 $("#ADLbrowserQueryParams_valuesSelect").val("")
                 common.fillSelectOptions("ADLbrowserQueryParams_valuesSelect", [""])
 
+                var emptyOptions = self.currentQueryDialogPredicates.length > 1
+                common.fillSelectOptions("ADLbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", 'predicate')
+                if (self.currentNode.data.searchedLabel) {
+                    var array=[{label:" rdfs:label",id:"http://www.w3.org/2000/01/rdf-schema#label"}]
+                    common.fillSelectOptions("ADLbrowserQueryParams_property", array, false,"label","id")
+
+                    $("#ADLbrowserQueryParams_value").val(self.currentNode.data.searchedLabel)
+                }
+
 
             }, 500)
 
+        }
+
+
+        self.getClassPredicates = function (classId) {
+            var classes = ADLbrowserQuery.classes
+            var predicates = classes[classId]
+            var retainedPredicates = []
+            for (var predicate in predicates) {
+
+                predicates[predicate].forEach(function (object) {
+                    if (predicate.indexOf("label") > -1)
+                        return;
+                    if (predicate.indexOf("type") > -1)
+                        return;
+                    ;
+                    retainedPredicates.push({predicate: predicate, inverse: false, object: object})
+                })
+
+            }
+            //inverse
+            for (var subject in classes) {
+                for (var predicate in classes[subject]) {
+                    classes[subject][predicate].forEach(function (object) {
+                        if (predicate.indexOf("label") > -1)
+                            return;
+                        if (predicate.indexOf("type") > -1)
+                            return;
+                        if (object == classId)
+                            retainedPredicates.push({predicate: predicate, inverse: true, object: subject})
+                    })
+                }
+            }
+            return retainedPredicates;
         }
         self.onQueryParamsValuesSelect = function () {
             var value = $("#ADLbrowserQueryParams_valuesSelect").val()
@@ -130,15 +202,17 @@ var ADLbrowserQuery = (function () {
             }
 
         self.onOperatorSelect = function (operator) {
-            if (operator == "LIST") {
-                self.listQueryParamsDialogFieldValues()
-                $("#ADLbrowserQueryParams_operator").val("=")
-            }
+
         }
 
 
         self.onQueryParamsDialogValidate = function (logicalMode) {
 
+            var predicate = $("#ADLbrowserQueryParams_predicateSelect").val();
+            if (predicate == "" && self.queryFilterNodes.length > 0)
+                return alert("select a predicate")
+            
+            var predicateIndex= $("#ADLbrowserQueryParams_predicateSelect")[0].selectedIndex;
             var property = $("#ADLbrowserQueryParams_property").val()
             var operator = $("#ADLbrowserQueryParams_operator").val()
             var value = $("#ADLbrowserQueryParams_value").val()
@@ -147,7 +221,7 @@ var ADLbrowserQuery = (function () {
             var filterStr = "";
             var numberOperators = ("<", ">", "<=", ">=")
 
-            var varName = "?" + Sparql_common.formatStringForTriple(self.model[field].label, true)
+            var varName = "?" + Sparql_common.formatStringForTriple(self.model[field].label, true)+"_"+self.queryFilterNodes.length
             if (!self.varNamesMap[varName]) {
                 var color = self.model[field].color
                 self.varNamesMap[varName] = {id: field, predicates: self.classes[field], color: color}
@@ -171,8 +245,12 @@ var ADLbrowserQuery = (function () {
                             filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " =<" + value + ">) "
                         else
                             filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
-                    } else if (numberOperators.indexOf(operator) > -1)
+                    } else if (numberOperators.indexOf(operator) > -1) {
+                        if(!common.isNumber(value) && operator=="=")
+                            filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
+                        else
                         filterStr = varName + " <" + property + "> " + varNameX + ". filter ( xsd:float(" + varNameX + ")" + operator + value + ") "
+                    }
 
                     else
                         filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + value + ") "
@@ -202,7 +280,8 @@ var ADLbrowserQuery = (function () {
                     filterLabel: filterLabel,
                     logicalMode: logicalMode,
                     varName: varName,
-                    count: 1
+                    count: 1,
+                    predicate: self.currentQueryDialogPredicates[predicateIndex]
                 }
                 self.executeQuery(self.currentNode, options, function (err, queryResult) {
                     if (err)
@@ -341,6 +420,11 @@ var ADLbrowserQuery = (function () {
 
 
             backToModel: function () {
+
+
+
+                if(!self.ALDmodelGraph)
+                    return;
                 var visjsData = {
                     nodes: self.ALDmodelGraph.nodes,
                     edges: self.ALDmodelGraph.edges,
@@ -355,13 +439,7 @@ var ADLbrowserQuery = (function () {
             listFilter: function (id) {
                 var filterData = self.getQueryFilter(id)
                 self.currentFilterData = filterData
-                /*  var options = {
-                      filter: filterData.filter,
-                      filterLabel: filterData.filterLabel,
-                      logicalMode: "union",
-                      varName: filterData.varName,
 
-                  }*/
                 var options = {
                     logicalMode: "union",
                     selectVars: [filterData.varName]
@@ -374,10 +452,15 @@ var ADLbrowserQuery = (function () {
                     var keyName = filterData.varName.substring(1)
                     queryResult.data.forEach(function (item) {
                         if (item[keyName]) {
+                            var label=""
+                            if(item[keyName + "Label"])
+                                label=item[keyName + "Label"].value
+                            else
+                               label=Sparql_common.getLabelFromId(item[keyName].value)
                             jstreeData.push(
                                 {
                                     id: item[keyName].value,
-                                    text: item[keyName + "Label"].value,
+                                    text:label,
                                     parent: "#",
                                     data: self.currentNode.data
                                 })
@@ -402,7 +485,7 @@ var ADLbrowserQuery = (function () {
                 })
             },
 
-            queryFilters: function (output) {
+            queryFilters: function (output,addToGraph) {
 
                 var selectVars = []
                 $(".ADLbrowser_graphFilterCBX").each(function () {
@@ -434,12 +517,12 @@ var ADLbrowserQuery = (function () {
                             self.ALDmodelGraph.params = visjsGraph.currentDrawParams
                         }
 
-                        ADLbrowserGraph.drawGraph("graphDiv", queryResult, {selectVars: selectVars})
+                        ADLbrowserGraph.drawGraph("graphDiv", queryResult, {addToGraph:addToGraph,selectVars: selectVars})
 
 
                     }
-                    if(output=="table"){
-                        ADLbrowserDataTable.showQueryResult ( queryResult, {selectVars: selectVars})
+                    if (output == "table") {
+                        ADLbrowserDataTable.showQueryResult(queryResult, {selectVars: selectVars})
 
                     }
 
@@ -462,20 +545,19 @@ var ADLbrowserQuery = (function () {
             ,
 
             resetAllFilters: function () {
-                // self.graphActions.removeIndividualsFilter()
-                //  self.graphActions.backToModel();
+                ADLbrowserQuery.graphActions.backToModel();
+                setTimeout(function() {
 
-                // self.queryFilterNodes.forEach(function (filterData, index) {
-                // self.previousVarNames=[]
-                previousVarName = null;
-                if ($('#ADLbrowser_adlJstreeDiv').jstree)
-                    $('#ADLbrowser_adlJstreeDiv').jstree("destroy")
+                    previousVarName = null;
+                    if ($('#ADLbrowser_adlJstreeDiv').jstree)
+                        $('#ADLbrowser_adlJstreeDiv').jstree("destroy")
 
-                while (self.queryFilterNodes.length > 0) {
-                    var filterData = self.queryFilterNodes[0]
-                    self.graphActions.removeFilter(filterData.id)
+                    while (self.queryFilterNodes.length > 0) {
+                        var filterData = self.queryFilterNodes[0]
+                        self.graphActions.removeFilter(filterData.id)
 
-                }
+                    }
+                },500)
 
             }
             ,
@@ -485,12 +567,12 @@ var ADLbrowserQuery = (function () {
 
 
                },*/
-               clearIndividualsFilter:function(){
-                  if( $("#ADLbrowser_adlJstreeDiv").jstree(true))
-                   $("#ADLbrowser_adlJstreeDiv").jstree().deselect_all(true)
-               },
+            clearIndividualsFilter: function () {
+                if ($("#ADLbrowser_adlJstreeDiv").jstree(true))
+                    $("#ADLbrowser_adlJstreeDiv").jstree().deselect_all(true)
+            },
 
-            clickGraph: function (obj, point) {
+            clickClassesGraph: function (obj, point) {
                 MainController.UI.hidePopup("graphPopupDiv")
                 if (!obj)
                     return ADLbrowserQuery.hideQueryParamsDialog(point);
@@ -528,8 +610,6 @@ var ADLbrowserQuery = (function () {
                 MainController.UI.showPopup(point, "graphPopupDiv")
             }
             ,
-
-
 
 
             listCountItems: function () {
@@ -627,6 +707,37 @@ var ADLbrowserQuery = (function () {
                 var subjectOb = self.varNamesMap[previousVarName];
                 var objectId = self.varNamesMap[varName2].id
 
+                var predicateStr
+                if(options.predicate) {// when count (precicate comes from dialog
+                    predicateStr = " <" + options.predicate.predicate + "> "
+                    if(true ||options.predicate.inverse)
+                        predicateStr +="|^"+predicateStr
+                }
+                else {
+                    var previouPredicate= queryFilterNodes[index-1].predicate
+                    predicateStr = " <" + previouPredicate.predicate + "> "
+                    if(true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
+                        predicateStr +="|^"+predicateStr
+                }
+
+
+
+                where += "" +  varName2+ predicateStr + previousVarName + ". "
+                if (!options.count) {
+                    where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
+                    where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
+                    where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
+                    where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
+
+                }
+                var filter2 = filterNodeData.filter;
+                where += filter2
+
+
+/*
+
+
+
 
                 for (var subPredicate in subjectOb.predicates) {
                     if (subjectOb.predicates[subPredicate].indexOf(objectId) > -1) {
@@ -673,7 +784,7 @@ var ADLbrowserQuery = (function () {
                     return message = "no matching predicate"
                 if (predicates.length > 1)
                     return message = "more than one predicate"
-
+*/
 
             })
 
@@ -747,20 +858,9 @@ var ADLbrowserQuery = (function () {
             }
             self.graphActions.resetAllFilters()
             var options = {
-                onclickFn: ADLbrowserQuery.graphActions.clickGraph,
+                onclickFn: ADLbrowserQuery.graphActions.clickClassesGraph,
 
-                /*  layoutHierarchical: {
-                      direction: "LR",
-                      sortMethod: "hubsize",
-                      // levelSeparation: 200,
-                  },
-                  edges: {
-                      "smooth": {
-                          "type": "straightCross",
-                          "forceDirection": "none",
-                          "roundness": 0.25
-                      }
-                  },*/
+
                 //  nodeColor: "#ddd",
                 keepNodePositionOnDrag: true
 
@@ -776,32 +876,18 @@ var ADLbrowserQuery = (function () {
 
         }
 
-        self.searchTerm=function(){
-            var term=$("#ADLbrowser_onSearchAllInput").val();
-            if(term=="")
+        self.searchTerm = function () {
+            var term = $("#ADLbrowser_searchTermInput").val();
+            if (term == "")
                 return;
-            if(!ADLbrowser.currentSource)
+            if (!ADLbrowser.currentSource)
                 return alert("select a source")
-
-            var fromStr = Sparql_common.getFromStr(ADLbrowser.currentSource)
+            var source = ADLbrowser.currentSource
+            var fromStr = Sparql_common.getFromStr(source)
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
 
-                query += "select ?sub ?sublabel ?subType from "+fromStr+" where { ?sub rdfs:label ?subLabel.?sub rdf:type ?subType. filter (regex(?subLabel,'"+term+"','i'))} limit 1000"
-            else if (options.selectVars) {
-                var selectVarsStr = ""
-                options.selectVars.forEach(function (varName, index) {
-                    selectVarsStr += varName + " " + varName + "Label " + varName + "Type "
-
-                })
-                query += "select distinct " + selectVarsStr
-
-            } else {
-                query += "select distinct " + varName + " " + varName + "Label " + varName + "Type "
-            }
-            query += fromStr +
-                "WHERE {"
-
-            query += where + " }  limit 20000"
+            query += "select ?sub ?subLabel ?subType  " + fromStr + " where { ?sub rdfs:label ?subLabel.?sub rdf:type ?subType." +
+                " filter (regex(?subLabel,'" + term + "','i'))} limit 1000"
 
 
             var url = Config.sources[source].sparql_server.url + "?format=json&query=";
@@ -810,6 +896,107 @@ var ADLbrowserQuery = (function () {
                 // $("#waitImg").css("display", "none");
                 if (err) {
                     return callback(err)
+                }
+
+
+                var types = {}
+                result.results.bindings.forEach(function (item) {
+                    var type = item.subType.value;
+                    var id = item.sub.value;
+                    var label = item.subLabel.value
+
+                    if (!types[type])
+                        types[type] = [];
+                    types[type].push({id: id, label: label})
+
+                })
+
+                var jstreeData = []
+                for (var type in types) {
+                    jstreeData.push({
+                        id: type,
+                        text: self.model[type].label,
+                        parent: source
+                    })
+                    types[type].forEach(function (item) {
+                        jstreeData.push({
+                            id: item.id,
+                            text: item.label,
+                            parent: type,
+                            data: {
+                                id: item.id,
+                                label: item.label,
+                                type: type
+                            }
+                        })
+                    })
+                }
+
+                common.jstree.addNodesToJstree("ADLbrowserItemsjsTreeDiv", source, jstreeData)
+
+
+            })
+
+
+        }
+
+        self.setFilterFromSearchedTerm = function (node) {
+
+          // transform searched tree node into graph current node as if clicked
+            self.currentNode = {
+                id:node.data.type,
+                label:node.text,
+                data:{
+                    id:node.data.type,
+                    label:node.text,
+                    searchedLabel :node.data.label
+                }
+            }
+            return self.showQueryParamsDialog({x: 500, y: 500})
+            var varName = "?" + self.model[nodeData.type].label
+
+            var node = {}
+
+            var options = {
+                "filter": varName + " rdf:type <" + nodeData.type + ">. filter (" + varName + " =<" + nodeData.id + ">)  ",
+                "filterLabel": "rdfs:label = " + nodeData.label + "",
+                "logicalMode": "union",
+                "varName": varName,
+                "count": 1
+            }
+
+            self.executeQuery(node, options, function (err, queryResult) {
+                if (err)
+                    return alert(err)
+
+                var varName = options.varName
+                self.currentNode = visjsGraph.data.nodes.get()
+                ADLbrowserGraph.addCountNodesToGraph(self.currentNode, queryResult, options, function (err, nodeData) {
+
+                    $("#waitImg").css("display", "none");
+                    if (err)
+                        return MainController.UI.message(err)
+
+                    if (nodeData.count == 0)
+                        return
+
+                    ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
+                    var filterId = nodeData.id;
+
+                    var html = "<div class='ADLbrowser_filterDiv' id='" + filterId + "'>" +
+                        "<input type='checkbox'  checked='checked' class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
+                        "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                        "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
+                        "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
+                    "</div>"
+
+                    $("#ADLbrowser_filterDiv").prepend(html)
+
+
+                })
+            })
+
+
         }
 
 

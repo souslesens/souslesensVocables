@@ -51,7 +51,7 @@
             </div>
             <div id="ADLbrowser_searchAllDiv" style="display: flex;flex-direction: column;height: 100px">
                 <div>
-                    <input id='ADLbrowser_searchAllSourcesTermInput' style="width: 200px" value="">
+                    <input id='ADLbrowser_searchTermInput' style="width: 200px" value="">
                     <button id="ADLbrowser_onSearchAllInput" onclick='ADLbrowserQuery.searchTerm()'>Search</button>
                 </div>
 
@@ -64,7 +64,8 @@
 
 
             </div>
-            <div id="ADLbrowser_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
+            <div id="ADLbrowser_sourceLabelDiv"
+                 style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
 
             <div class="jstree" id="ADLbrowserItemsjsTreeDiv"></div>
 
@@ -76,17 +77,19 @@
 
 </div>
 
-<div id="ADLbrowserQueryParamsDialog" style="position: absolute;display: none;padding: 5px; z-index: 100 ;width: 300px;" class="vakata-context vakata-context">
+<div id="ADLbrowserQueryParamsDialog" style="position: absolute;display: none;padding: 5px; z-index: 100 ;width: 400px;"
+     class="vakata-context vakata-context">
 
     <div>
-<select id="ADLbrowserQueryParams_typeSelect" onchange="ADLbrowser.query.onSelectDialogField($(this).val())"></select>
+        <select id="ADLbrowserQueryParams_typeSelect"
+                onchange="ADLbrowser.query.onSelectDialogField($(this).val())"></select>
 
         <span style="font-weight: bold" id="ADLbrowserQueryParams_type"></span>&nbsp;
         <select id="ADLbrowserQueryParams_property" style="width: 200px"></select>
         <br>
         <!--- -->
 
-        <select id="ADLbrowserQueryParams_operator" onclick="ADLbrowserQuery.onOperatorSelect($(this).val())">
+        <div><select id="ADLbrowserQueryParams_operator" onclick="ADLbrowserQuery.onOperatorSelect($(this).val())">
             <option>=</option>
             <option>contains</option>
             <option>LIST</option>
@@ -96,20 +99,28 @@
 
             <option>not contains</option>
         </select>
-        <input id="ADLbrowserQueryParams_value" size="20" value="100">
+            <input id="ADLbrowserQueryParams_value" size="20" value="100"></div>
 
-        <br>
-     <!--   <button onclick="ADLbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
-        <select id="ADLbrowserQueryParams_valuesSelect" onchange="ADLbrowserQuery.onQueryParamsValuesSelect()"></select>
-        <br>
-     <!--   <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">∪</button>
-        <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('intersection')">∩</button>-->
-        <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">count</button>
-        <button onclick="ADLbrowserQuery.onQueryParamsDialogCancel()">X</button>-->
+        <div>
+            <!--   <button onclick="ADLbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
+            <button onclick=" ADLbrowserQuery.listQueryParamsDialogFieldValues() ;$('#ADLbrowserQueryParams_operator').val('=')">LIST </button>
+            <select id="ADLbrowserQueryParams_valuesSelect"
+                    onchange="ADLbrowserQuery.onQueryParamsValuesSelect()" style="width: 200px"></select>
+        </div>
+        <div>
+            predicate<select id="ADLbrowserQueryParams_predicateSelect"></select>
+        </div>
+        <div>
+            <!--   <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">∪</button>
+               <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('intersection')">∩</button>-->
+            <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">count</button>
+            <button onclick="ADLbrowserQuery.onQueryParamsDialogCancel()">X</button>
 
-        <button onclick="ADLbrowserBI.drawClasses()">BI</button>
+            <!-- <button onclick="ADLbrowserBI.drawClasses()">BI</button>-->
+        </div>
+
+
     </div>
-
 </div>
 
 <div id="ADLbrowser_graphDialogDiv">

@@ -509,7 +509,7 @@ var ADLbrowserGraph = (function () {
                 })
             })
         }
-        var options={}
+        var options={withCheckboxes:true}
        common.jstree.loadJsTree("ADLbrowserGraph_nodesJstree",jstreedata,options)
 
     }

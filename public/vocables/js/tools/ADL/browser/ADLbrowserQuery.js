@@ -36,7 +36,7 @@ var ADLbrowserQuery = (function () {
     var firstClass = ADLbrowserQuery.queryFilterNodes.length == 0
     self.currentQueryDialogPredicates=[]
             if(!firstClass) {
-                var predicates = self.getClassPredicates(self.currentNode.data.id)
+                var predicates = self.getClassesPredicates(self.currentNode.data.id)
                 var ok = false;
                 self.currentQueryDialogPredicates = []
 
@@ -92,37 +92,59 @@ var ADLbrowserQuery = (function () {
         }
 
 
-        self.getClassPredicates = function (classId) {
+        self.getClassesPredicates = function (classIds,withInverse) {
             var classes = ADLbrowserQuery.classes
-            var predicates = classes[classId]
+            if(!Array.isArray(classIds))
+                classIds=[classIds]
+
+var uniquePredicates={}
             var retainedPredicates = []
-            for (var predicate in predicates) {
+            classIds.forEach(function (classId) {
+                var predicates = classes[classId]
+                for (var predicate in predicates) {
 
-                predicates[predicate].forEach(function (object) {
-                    if (predicate.indexOf("label") > -1)
-                        return;
-                    if (predicate.indexOf("type") > -1)
-                        return;
-                    ;
-                    retainedPredicates.push({predicate: predicate, inverse: false, object: object})
-                })
-
-            }
-            //inverse
-            for (var subject in classes) {
-                for (var predicate in classes[subject]) {
-                    classes[subject][predicate].forEach(function (object) {
+                    predicates[predicate].forEach(function (object) {
                         if (predicate.indexOf("label") > -1)
                             return;
                         if (predicate.indexOf("type") > -1)
                             return;
-                        if (object == classId)
-                            retainedPredicates.push({predicate: predicate, inverse: true, object: subject})
+                        ;
+                        if(!uniquePredicates[predicate+object]) {
+                            uniquePredicates[predicate+object]=1
+                            var label=ADLbrowserQuery.model[classId].label+"-"+ADLbrowserQuery.model[predicate].label+"->"+ADLbrowserQuery.model[object].label
+                            var id=classId+"|"+predicate+"|"+object
+                            retainedPredicates.push({predicate: predicate, inverse: false, object: object,id:id, label:label})
+                        }
                     })
+
                 }
-            }
+                if(true || withInverse) {
+                    //inverse
+                    for (var subject in classes) {
+                        for (var predicate in classes[subject]) {
+                            classes[subject][predicate].forEach(function (object) {
+                                if (predicate.indexOf("label") > -1)
+                                    return;
+                                if (predicate.indexOf("type") > -1)
+                                    return;
+                                if (object == classId) {
+                                    if (!uniquePredicates["^" + predicate + object]) {
+                                        uniquePredicates["^" + predicate + object] = 1
+                                        var label=ADLbrowserQuery.model[object].label+"-"+ADLbrowserQuery.model[predicate].label+"->"+ADLbrowserQuery.model[classId].label
+                                        var id=object+"|"+predicate+"|"+classId
+                                        retainedPredicates.push({predicate: predicate, inverse: true, object: subject,id:id, label:label})
+                                    }
+                                }
+                            })
+                        }
+                    }
+                }
+            })
             return retainedPredicates;
+
         }
+
+
         self.onQueryParamsValuesSelect = function () {
             var value = $("#ADLbrowserQueryParams_valuesSelect").val()
             $("#ADLbrowserQueryParams_value").val(value)

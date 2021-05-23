@@ -47,9 +47,10 @@ var ADLbrowser = (function () {
 
             SourceBrowser.currentTargetDiv = "ADLbrowserItemsjsTreeDiv"
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL")
+       //     $("#ADLbrowser_Tabs").tabs({})
 
 
-        }, 200)
+        }, 1000)
     }
 
     self.initOneModelDictionary = function () {

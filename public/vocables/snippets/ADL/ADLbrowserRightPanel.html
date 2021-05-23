@@ -7,18 +7,20 @@
         overflow: auto;
         max-height: 500px;
     }
-    .ADLbrowser_filterContainerDiv{
+
+    .ADLbrowser_filterContainerDiv {
         border: grey solid 2px;
         background-color: #d7d4f0;
-        margin:3px;
+        margin: 3px;
         padding: 3px;
     }
-    .ADLbrowser_filterDiv{
+
+    .ADLbrowser_filterDiv {
 
         border: #6e2500 solid 2px;
         background-color: #d7d4f0;
         border-radius: 3px;
-        margin:3px;
+        margin: 3px;
         padding: 3px;
 
 
@@ -26,38 +28,38 @@
 
 
 </style>
+
 <div>
 
 
-    <div id="ADLbrowser_Tabs" style="width:360px;">
+    <div id="ADLbrowser_accordion" style="width:360px;">
 
-        <ul>
-            <li><a href="#ADLbrowserAdlTab">ADL</a></li>
-            <!--    <li><a href="#ADLbrowserBITab">BI</a></li>
-                <li><a href="#ADLbrowserOneModelTab">One-Model</a></li>
-
-                <li><a href="#ADLbrowserRDLTab">RDL</a></li>-->
+     <!--   <ul>
+            <li><a href="#ADLbrowserTabs_AdlTab">ADL</a></li>
+            <li><a href="#ADLbrowser_GraphTab">Graph</a></li>
+            <li><a href="#ADLbrowser_TableTab">Table</a></li>
 
 
-        </ul>
+
+        </ul>-->
+
+        <h3><span class="title">ADL </span></h3>
+        <div id="ADLbrowserTabs_AdlTab" style="width:100%; display: flex;flex-direction: column">
+
+            <div>
+                <button onclick="ADLbrowserQuery.graphActions.backToModel()">Model</button>
+                <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
+                <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
+                <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
+                <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
 
 
-        <div id="ADLbrowserAdlTab" style="width:100%; display: flex;flex-direction: column">
+            </div>
 
-           <div>
-               <button onclick="ADLbrowserQuery.graphActions.backToModel()">Model</button>
-               <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
-               <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph </button>
-               <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
-               <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table </button>
+            <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column">
 
 
-           </div>
-
-            <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column" >
-
-
-            <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
+                <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
 
             </div>
             <!--   <div  id="ADLbrowser_adlJstreeActionDiv">
@@ -66,66 +68,54 @@
 
         </div>
 
-            <!--
+        <h3><span class="title">Graph </span></h3>
+        <div id="ADLbrowser_GraphTab">
+            expand<select id="ADLbrowserGraph_expandSelect" onchange="ADLbrowserGraph.expandGraph($(this).val())"></select><br>
 
-                      <div><span style="font-weight: bold;background-color: #dad55e;" id="ADLbrowser_selectionDiv"></span>
-                          <button onclick="ADLbrowserGraph.cancelGraphNodeSelection()">X</button>
-                      </div>
-                          <div class="jstree" style="height: 400px !important;" id="ADLbrowser_adlJstreeDiv"></div>
-                  </div>
+            <div id="ADLbrowserGraph_nodesJstree" class="jstree" style="width: 300px;height: 400px">
 
-
-                  <div class="" id="ADLbrowserRDLTab" style="width: 320px;height: 300px">
-
-                          <div class="jstree" style="height: 350px" id="ADLbrowser_rdlJstreeDiv"></div>
-
-
-
-
-                  </div>
-
-                  <div class="" id="ADLbrowserOneModelTab" style="width: 320px;height:300px">
-
-                          <div class="jstree" style="height: 350px" id="ADLbrowser_oneModelJstreeDiv"></div>
-
-
-
-
-                  </div>
-
-
-              </div>
-              <div style="width: 360px;background-color: #ddd4b0;border-radius: 3px;border: #6e2500 solid 1px;margin: 2px;margin-top:150px;padding: 2px" >
-                  <button onclick='ADLbrowserGraph.clearGraph()'>clear graph</button>
-
-                  <button onclick="ADLbrowser.query.clear()"> clear query</button>
-                <select id="ADLbrowserAdlQueryOutputSelect">
-
-                  <option>table</option>
-                  <option>graph</option>
-              </select>
-
-                  <button onclick="ADLbrowser.query.execute()"> execute</button><button onclick="ADLbrowser.query.showQuery()">Q</button>
-              </div>
-              <div style="width: 360px;height: 400px">
-                  query builder
-
-                      <div class="jstree" style="height: 350px" id="ADLbrowser_queryTreeDiv"></div>
-
-
-
-              </div>-->
+            </div>
 
 
         </div>
+
+        <h3><span class="title">Table </span></h3>
+        <div id="ADLbrowser_TableTab">
+
+        </div>
+
+
+
+
+
     </div>
 </div>
 
+
 <script>
+
+
     $("#ADLbrowser_searchAllDiv").load("./snippets/searchAll.html");
     setTimeout(function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
+
+
+        $("#ADLbrowser_accordion").accordion()
+        $("#ADLbrowser_accordion").accordion("option", {active: 0});
+        $("#ADLbrowser_accordion").on("accordionbeforeactivate",function( event, ui ) {
+            if(!ADLmappings.checkMappingEditionSave())
+                return false;
+        })
+        $("#ADLbrowser_accordion").on("accordionactivate", function (event, ui) {
+
+
+            if ( ui.newPanel[0].id == "ADLbrowser_GraphTab") {
+                ADLbrowserGraph.initGraphTab()
+
+            }
+        })
+
     }, 300)
 
-    $("#ADLbrowser_Tabs").tabs()
+
 </script>

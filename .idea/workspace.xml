@@ -9,6 +9,7 @@
       <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
@@ -195,7 +196,7 @@
       <workItem from="1621083998733" duration="12348000" />
       <workItem from="1621141784361" duration="17467000" />
       <workItem from="1621233812525" duration="68646000" />
-      <workItem from="1621574187664" duration="43447000" />
+      <workItem from="1621574187664" duration="57095000" />
     </task>
     <servers />
   </component>

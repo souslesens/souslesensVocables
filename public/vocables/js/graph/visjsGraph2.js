@@ -26,8 +26,8 @@ var visjsGraph = (function () {
     self.defaultTextSize = 14;
     self.defaultNodeSize = 7;
     self.showNodesLabelMinScale = 0.5
-   self.currentDrawParams;
-    
+    self.currentDrawParams;
+
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500
 
@@ -239,7 +239,7 @@ var visjsGraph = (function () {
 
         var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
             "export <button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>" +
-            "<button onclick='visjsGraph.toSVG()'>SVG img</button>"+
+            "<button onclick='visjsGraph.toSVG()'>SVG img</button>" +
             "<button onclick='visjsGraph.exportGraph()'>copy Graph</button>"
 
         if (true) {
@@ -324,7 +324,7 @@ var visjsGraph = (function () {
     }
 
     self.importGraph = function (str) {
-        var edges=json.parse()
+        var edges = json.parse()
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
         var nodesMap = {}
@@ -621,16 +621,67 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.remove(targetNodes)
     }
 
-    self.highlightNode = function (id, label) {
+    self.focusOnNode = function (id, label) {
 
         if (id) {
 
+            var newNodes = []
+            self.data.nodes.getIds().forEach(function (nodeId) {
+                var shape = "dot"
+                var size = self.defaultNodeSize
+                if (nodeId == id) {
+                    shape = "star"
+                    size = 14
+                }
+                newNodes.push({id: nodeId, shape: shape, size: size})
+            })
+            visjsGraph.data.nodes.update(newNodes)
+
+
+            setTimeout(function () {
+                self.network.focus(id, {
+                    scale: 1,
+                    animation: true
+
+                })
+
+            }, 100)
         }
 
 
     }
 
+    self.setNodesProperty = function (conditions, hide) {
+        var nodes = self.data.nodes.get();
+        var newNodes = []
+        nodes.forEach(function (node) {
+            for (var key in conditions) {
+                if (node.data[key] == conditions[key]) {
+                    newNodes.push({id: node.id, hidden: hide})
+                }
+            }
 
+        })
+        visjsGraph.data.nodes.update(newNodes)
+
+
+    }
+
+    self.hideShowNodes = function (conditions, hide) {
+        var nodes = self.data.nodes.get();
+        var newNodes = []
+        nodes.forEach(function (node) {
+            for (var key in conditions) {
+                if (node.data[key] == conditions[key]) {
+                    newNodes.push({id: node.id, hidden: hide})
+                }
+            }
+
+        })
+        visjsGraph.data.nodes.update(newNodes)
+
+
+    }
     self.toSVG = function () {
 
         SVGexport.toSVG(self.network)

@@ -249,10 +249,13 @@ var ADLbrowserGraph = (function () {
                     },
                     arrows: {to: true}
                 },
+                keepNodePositionOnDrag:true
 
             }
             visjsGraph.draw(graphDiv, visjsData, visjsOptions)
             self.storeGraph()
+            $("#ADLbrowser_accordion").accordion("option", {active: 1});
+            self.dataTree.setGraphNodesTree()
         }
         if (callback)
             callback()
@@ -471,7 +474,7 @@ var ADLbrowserGraph = (function () {
             var retainedPredicates = ADLbrowserQuery.getClassesPredicates(classes)
             common.fillSelectOptions("ADLbrowserGraph_expandSelect", retainedPredicates, true, "label", "id")
 
-            self.setGraphNodesTree(existingClasses)
+            self.dataTree.setGraphNodesTree(existingClasses)
 
 
         })
@@ -479,39 +482,92 @@ var ADLbrowserGraph = (function () {
 
     }
 
-    self.setGraphNodesTree = function (classesMap) {
-        var jstreedata = []
+    self.dataTree= {
+        setGraphNodesTree: function (classesMap) {
 
-        for (var classId in classesMap) {
-            var label = ADLbrowserQuery.model[classId].label
-            var color = ADLbrowserQuery.model[classId].color
-            jstreedata.push({
-                id: "Graph" + classId,
-                text: "<span style='color:" + color + "'>" + ADLbrowserQuery.model[classId].label + "</span>",
-                parent: "#",
-                data: {
-                    id: classId,
-                    label: label
-                }
+            if( !classesMap) {
+                var nodes = visjsGraph.data.nodes.get();
+                var classesMap = {}
+                nodes.forEach(function (item, index) {
+                    if (!classesMap[item.data.type])
+                        classesMap[item.data.type] = []
+                    classesMap[item.data.type].push({id: item.data.id, label: item.data.label})
 
-            })
-            classesMap[classId].forEach(function (item) {
+                })
+            }
+
+            var jstreedata = []
+
+            for (var classId in classesMap) {
+                var label = ADLbrowserQuery.model[classId].label
+                var color = ADLbrowserQuery.model[classId].color
                 jstreedata.push({
-                    id: item.id,
-                    text: item.label,
-                    parent: "Graph" + classId,
+                    id: "Graph" + classId,
+                    text: "<span style='color:" + color + "'>" + ADLbrowserQuery.model[classId].label + "</span>",
+                    parent: "#",
                     data: {
-                        id: item.id,
-                        label: item.label,
-                        type: item.type
+                        id: classId,
+                        label: label,
+                        type:classId,
                     }
 
                 })
-            })
-        }
-        var options={withCheckboxes:true}
-       common.jstree.loadJsTree("ADLbrowserGraph_nodesJstree",jstreedata,options)
+                classesMap[classId].forEach(function (item) {
+                    jstreedata.push({
+                        id: item.id,
+                        text: item.label,
+                        parent: "Graph" + classId,
+                        data: {
+                            id: item.id,
+                            label: item.label,
+                            type: item.type
+                        }
 
+                    })
+                })
+            }
+            var options = {
+                contextMenu: self.dataTree.getJstreeContextMenu(),
+                selectTreeNodeFn:self.dataTree.selectTreeNodeFn
+            }
+
+
+
+                common.jstree.loadJsTree("ADLbrowserGraph_nodesJstree", jstreedata, options)
+
+
+        }
+        ,selectTreeNodeFn:function(event,obj){
+            self.dataTree.currentTreeNode=obj.node
+            if(obj.node. parent=="#")
+                ;
+            else
+                visjsGraph.focusOnNode( self.dataTree.currentTreeNode.id)
+
+        }
+
+        , getJstreeContextMenu: function () {
+            var items = {}
+
+                items.hideNodes = {
+                    label: "hide nodes",
+                    action: function (e, xx) {// pb avec source
+                       if(ADLbrowserGraph.dataTree.currentTreeNode.parent=="#")
+                        visjsGraph.hideShowNodes({type:ADLbrowserGraph.dataTree.currentTreeNode.data.type},true)
+
+                    }
+                }
+            items.showNodes = {
+                label: "show nodes",
+                action: function (e, xx) {// pb avec source
+                    if(ADLbrowserGraph.dataTree.currentTreeNode.parent=="#")
+                    visjsGraph.hideShowNodes({type:ADLbrowserGraph.dataTree.currentTreeNode.data.type},false)
+
+                }
+            }
+                return items
+
+        }
     }
 
 

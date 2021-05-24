@@ -65,8 +65,8 @@ var ADLassetGraph = (function () {
 
 
                 mappingsData.mappings.forEach(function (mapping) {
-                    if(mapping.subject.indexOf("functionalclass")>-1)
-                        var x=3
+                    if (mapping.subject.indexOf("functionalclass") > -1)
+                        var x = 3
 
 
                     if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
@@ -348,8 +348,8 @@ var ADLassetGraph = (function () {
         if (!source) {
             return alert("select a source")
         }
-if(!options)
-    options={}
+        if (!options)
+            options = {}
 
         self.classes = {}
         var visjsData = {nodes: [], edges: []}
@@ -381,12 +381,12 @@ if(!options)
                                 var x = 0;
                             for (var subject in result.predicates[predicate]) {
                                 if (!self.buildClasses[subject]) {
-                                    var color=Lineage_classes.getPropertyColor(subject)
+                                    var color = Lineage_classes.getPropertyColor(subject)
                                     self.buildClasses[subject] = {
                                         count: 0,
                                         color: color
                                     }
-                                    self.model[subject].color=color
+                                    self.model[subject].color = color
                                 }
 
                                 if (!self.classes[subject])
@@ -409,7 +409,6 @@ if(!options)
                 function (callbackSeries) {
 
 
-
                     var existingNodes = {}
                     var newParents = []
                     var topNodeId
@@ -423,10 +422,10 @@ if(!options)
                                 var countStr = ""
                                 if (self.buildClasses[subject])
                                     countStr = " (" + self.buildClasses[subject].count + ")"
-                                var label = self.model[subject].label+countStr;
+                                var label = self.model[subject].label + countStr;
                                 var color = options.nodeColor || self.buildClasses[subject].color
-                                if(!options.nodeColor)
-                                    self.model[subject].color=color
+                                if (!options.nodeColor)
+                                    self.model[subject].color = color
 
                                 var shape = "box"
                                 if (subject.indexOf("xsd:") > -1) {
@@ -434,7 +433,7 @@ if(!options)
                                     color = "#ffe0aa"
                                 }
 
-                               var obj={
+                                var obj = {
                                     id: subject,
                                     label: label,
                                     shape: shape,
@@ -473,7 +472,7 @@ if(!options)
                                             from: subject,
                                             to: object,
                                             label: predicateLabel,
-                                            arrows:{to:true}
+                                            arrows: {to: true}
 
 
                                         })
@@ -485,10 +484,10 @@ if(!options)
                                         var countStr = ""
                                         if (self.buildClasses[subject])
                                             countStr = " (" + self.buildClasses[subject].count + ")"
-                                        label=label+countStr
+                                        label = label + countStr
                                         var color = options.nodeColor || self.buildClasses[object].color
-                                        if(!options.nodeColor)
-                                            self.model[object].color=color
+                                        if (!options.nodeColor)
+                                            self.model[object].color = color
                                         var shape = "box"
                                         if (object.indexOf("xsd:") > -1) {
                                             shape = "star"
@@ -534,6 +533,7 @@ if(!options)
                         // $("#mainDialogDiv").height()
                         if (!options)
                             options = {}
+                        options.keepNodePositionOnDrag = true
                         visjsGraph.draw(graphDiv, visjsData, options)
                         visjsGraph.network.fit()
                     })

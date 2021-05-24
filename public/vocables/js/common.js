@@ -93,14 +93,16 @@ var common = (function () {
                         options.onOpenNodeFn(evt, obj);
                     }
 
-                }).on("check_node.jstree", function (evt, obj) {
+                }).
+                on("check_node.jstree", function (evt, obj) {
 
                     if (options.onCheckNodeFn) {
                         options.onCheckNodeFn(evt, obj);
                     }
 
 
-                }).on("uncheck_node.jstree", function (evt, obj) {
+                }).
+                on("uncheck_node.jstree", function (evt, obj) {
 
 
                     if (options.onUncheckNodeFn) {
@@ -108,12 +110,14 @@ var common = (function () {
                     }
 
 
-                }).on("create_node.jstree", function (parent, node, position) {
+                }).
+                on("create_node.jstree", function (parent, node, position) {
                     if (options.onCreateNodeFn) {
                         options.onCreateNodeFn(parent, node, position)
                         self.jstree.setTreeAppearance()
                     }
-                }).on("delete_node.jstree", function (node, parent) {
+                }).
+                on("delete_node.jstree", function (node, parent) {
                     if (options.onjstree.deleteNodeFn) {
                         options.onjstree.deleteNodeFn(node, parent)
                         self.jstree.setTreeAppearance()

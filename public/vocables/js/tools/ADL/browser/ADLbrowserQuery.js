@@ -130,7 +130,7 @@ var uniquePredicates={}
                                 if (object == classId) {
                                     if (!uniquePredicates["^" + predicate + object]) {
                                         uniquePredicates["^" + predicate + object] = 1
-                                        var label=ADLbrowserQuery.model[object].label+"-"+ADLbrowserQuery.model[predicate].label+"->"+ADLbrowserQuery.model[classId].label
+                                        var label=ADLbrowserQuery.model[subject].label+"-"+ADLbrowserQuery.model[predicate].label+"->"+ADLbrowserQuery.model[classId].label
                                         var id=object+"|"+predicate+"|"+classId
                                         retainedPredicates.push({predicate: predicate, inverse: true, object: subject,id:id, label:label})
                                     }

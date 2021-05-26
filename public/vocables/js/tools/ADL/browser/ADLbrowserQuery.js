@@ -33,10 +33,10 @@ var ADLbrowserQuery = (function () {
         self.showQueryParamsDialog = function (position) {
 
 
-    var firstClass = ADLbrowserQuery.queryFilterNodes.length == 0
-    self.currentQueryDialogPredicates=[]
-            if(!firstClass) {
-                var predicates = self.getClassesPredicates(self.currentNode.data.id)
+            var firstClass = ADLbrowserQuery.queryFilterNodes.length == 0
+            self.currentQueryDialogPredicates = []
+            if (!firstClass) {
+                var predicates = self.getClassesPredicates(self.currentNode.data.id, true)
                 var ok = false;
                 self.currentQueryDialogPredicates = []
 
@@ -80,8 +80,8 @@ var ADLbrowserQuery = (function () {
                 var emptyOptions = self.currentQueryDialogPredicates.length > 1
                 common.fillSelectOptions("ADLbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", 'predicate')
                 if (self.currentNode.data.searchedLabel) {
-                    var array=[{label:" rdfs:label",id:"http://www.w3.org/2000/01/rdf-schema#label"}]
-                    common.fillSelectOptions("ADLbrowserQueryParams_property", array, false,"label","id")
+                    var array = [{label: " rdfs:label", id: "http://www.w3.org/2000/01/rdf-schema#label"}]
+                    common.fillSelectOptions("ADLbrowserQueryParams_property", array, false, "label", "id")
 
                     $("#ADLbrowserQueryParams_value").val(self.currentNode.data.searchedLabel)
                 }
@@ -92,12 +92,12 @@ var ADLbrowserQuery = (function () {
         }
 
 
-        self.getClassesPredicates = function (classIds,withInverse) {
+        self.getClassesPredicates = function (classIds, withInverse) {
             var classes = ADLbrowserQuery.classes
-            if(!Array.isArray(classIds))
-                classIds=[classIds]
+            if (!Array.isArray(classIds))
+                classIds = [classIds]
 
-var uniquePredicates={}
+            var uniquePredicates = {}
             var retainedPredicates = []
             classIds.forEach(function (classId) {
                 var predicates = classes[classId]
@@ -109,16 +109,23 @@ var uniquePredicates={}
                         if (predicate.indexOf("type") > -1)
                             return;
                         ;
-                        if(!uniquePredicates[predicate+object]) {
-                            uniquePredicates[predicate+object]=1
-                            var label=ADLbrowserQuery.model[classId].label+"-"+ADLbrowserQuery.model[predicate].label+"->"+ADLbrowserQuery.model[object].label
-                            var id=classId+"|"+predicate+"|"+object
-                            retainedPredicates.push({predicate: predicate, inverse: false, object: object,id:id, label:label})
+                        if (!uniquePredicates[predicate + object]) {
+                            uniquePredicates[predicate + object] = 1
+                            var label = ADLbrowserQuery.model[classId].label + "-" + ADLbrowserQuery.model[predicate].label + "->" + ADLbrowserQuery.model[object].label
+                            var id = classId + "|" + predicate + "|" + object
+                            retainedPredicates.push({
+                                predicate: predicate,
+                                inverse: false,
+                                subject: classId,
+                                object: object,
+                                id: id,
+                                label: label
+                            })
                         }
                     })
 
                 }
-                if(true || withInverse) {
+                if (true || withInverse) {
                     //inverse
                     for (var subject in classes) {
                         for (var predicate in classes[subject]) {
@@ -130,9 +137,29 @@ var uniquePredicates={}
                                 if (object == classId) {
                                     if (!uniquePredicates["^" + predicate + object]) {
                                         uniquePredicates["^" + predicate + object] = 1
-                                        var label=ADLbrowserQuery.model[subject].label+"-"+ADLbrowserQuery.model[predicate].label+"->"+ADLbrowserQuery.model[classId].label
-                                        var id=object+"|"+predicate+"|"+classId
-                                        retainedPredicates.push({predicate: predicate, inverse: true, object: subject,id:id, label:label})
+                                        if (false) {
+                                            var label = ADLbrowserQuery.model[subject].label + "-" + ADLbrowserQuery.model[predicate].label + "->" + ADLbrowserQuery.model[classId].label
+                                            var id = subject + "|" + predicate + "|" + classId
+                                            retainedPredicates.push({
+                                                predicate: predicate,
+                                                inverse: true,
+                                                subject: subject,
+                                                object: classId,
+                                                id: id,
+                                                label: label
+                                            })
+                                        } else {
+                                            var label = ADLbrowserQuery.model[classId].label + "-" + ADLbrowserQuery.model[predicate].label + "->" + ADLbrowserQuery.model[subject].label
+                                            var id = classId + "|" + predicate + "|" + subject
+                                            retainedPredicates.push({
+                                                predicate: predicate,
+                                                inverse: true,
+                                                subject: classId,
+                                                object: subject,
+                                                id: id,
+                                                label: label
+                                            })
+                                        }
                                     }
                                 }
                             })
@@ -144,8 +171,14 @@ var uniquePredicates={}
 
         }
 
-
-        self.onQueryParamsValuesSelect = function () {
+        self.onQueryParamsListClick = function () {
+            var listValue = $("#ADLbrowserQueryParams_valuesSelect").val()
+            if (listValue == "") {
+                ADLbrowserQuery.listQueryParamsDialogFieldValues();
+                return $('#ADLbrowserQueryParams_operator').val('=')
+            }
+        }
+        self.onQueryParamsListChange = function () {
             var value = $("#ADLbrowserQueryParams_valuesSelect").val()
             $("#ADLbrowserQueryParams_value").val(value)
             self.onQueryParamsDialogValidate("union")
@@ -171,7 +204,9 @@ var uniquePredicates={}
             common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
 
         }
+
         self.listQueryParamsDialogFieldValues = function () {
+
             var field = self.currentNode.data.id;
             var property = $("#ADLbrowserQueryParams_property").val();
             var value = $("#ADLbrowserQueryParams_value").val()
@@ -233,8 +268,8 @@ var uniquePredicates={}
             var predicate = $("#ADLbrowserQueryParams_predicateSelect").val();
             if (predicate == "" && self.queryFilterNodes.length > 0)
                 return alert("select a predicate")
-            
-            var predicateIndex= $("#ADLbrowserQueryParams_predicateSelect")[0].selectedIndex;
+
+            var predicateIndex = $("#ADLbrowserQueryParams_predicateSelect")[0].selectedIndex;
             var property = $("#ADLbrowserQueryParams_property").val()
             var operator = $("#ADLbrowserQueryParams_operator").val()
             var value = $("#ADLbrowserQueryParams_value").val()
@@ -243,7 +278,7 @@ var uniquePredicates={}
             var filterStr = "";
             var numberOperators = ("<", ">", "<=", ">=")
 
-            var varName = "?" + Sparql_common.formatStringForTriple(self.model[field].label, true)+"_"+self.queryFilterNodes.length
+            var varName = "?" + Sparql_common.formatStringForTriple(self.model[field].label, true) + "_" + self.queryFilterNodes.length
             if (!self.varNamesMap[varName]) {
                 var color = self.model[field].color
                 self.varNamesMap[varName] = {id: field, predicates: self.classes[field], color: color}
@@ -268,13 +303,11 @@ var uniquePredicates={}
                         else
                             filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
                     } else if (numberOperators.indexOf(operator) > -1) {
-                        if(!common.isNumber(value) && operator=="=")
+                        if (!common.isNumber(value) && operator == "=")
                             filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
                         else
-                        filterStr = varName + " <" + property + "> " + varNameX + ". filter ( xsd:float(" + varNameX + ")" + operator + value + ") "
-                    }
-
-                    else
+                            filterStr = varName + " <" + property + "> " + varNameX + ". filter ( xsd:float(" + varNameX + ")" + operator + value + ") "
+                    } else
                         filterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + value + ") "
                 } else {
 
@@ -308,7 +341,7 @@ var uniquePredicates={}
                 self.executeQuery(self.currentNode, options, function (err, queryResult) {
                     if (err)
                         return alert(err)
-                    ADLbrowserGraph.addCountNodesToGraph(self.currentNode, queryResult, options, function (err, nodeData) {
+                    ADLbrowserGraph.addCountNodeToModelGraph(self.currentNode, queryResult, options, function (err, nodeData) {
 
                         $("#waitImg").css("display", "none");
                         if (err)
@@ -444,8 +477,7 @@ var uniquePredicates={}
             backToModel: function () {
 
 
-
-                if(!self.ALDmodelGraph)
+                if (!self.ALDmodelGraph)
                     return;
                 var visjsData = {
                     nodes: self.ALDmodelGraph.nodes,
@@ -474,15 +506,15 @@ var uniquePredicates={}
                     var keyName = filterData.varName.substring(1)
                     queryResult.data.forEach(function (item) {
                         if (item[keyName]) {
-                            var label=""
-                            if(item[keyName + "Label"])
-                                label=item[keyName + "Label"].value
+                            var label = ""
+                            if (item[keyName + "Label"])
+                                label = item[keyName + "Label"].value
                             else
-                               label=Sparql_common.getLabelFromId(item[keyName].value)
+                                label = Sparql_common.getLabelFromId(item[keyName].value)
                             jstreeData.push(
                                 {
                                     id: item[keyName].value,
-                                    text:label,
+                                    text: label,
                                     parent: "#",
                                     data: self.currentNode.data
                                 })
@@ -507,7 +539,7 @@ var uniquePredicates={}
                 })
             },
 
-            queryFilters: function (output,addToGraph) {
+            queryFilters: function (output, addToGraph) {
 
                 var selectVars = []
                 $(".ADLbrowser_graphFilterCBX").each(function () {
@@ -539,7 +571,10 @@ var uniquePredicates={}
                             self.ALDmodelGraph.params = visjsGraph.currentDrawParams
                         }
 
-                        ADLbrowserGraph.drawGraph("graphDiv", queryResult, {addToGraph:addToGraph,selectVars: selectVars})
+                        ADLbrowserGraph.drawGraph("graphDiv", queryResult, {
+                            addToGraph: addToGraph,
+                            selectVars: selectVars
+                        })
 
 
                     }
@@ -568,7 +603,7 @@ var uniquePredicates={}
 
             resetAllFilters: function () {
                 ADLbrowserQuery.graphActions.backToModel();
-                setTimeout(function() {
+                setTimeout(function () {
 
                     previousVarName = null;
                     if ($('#ADLbrowser_adlJstreeDiv').jstree)
@@ -579,7 +614,9 @@ var uniquePredicates={}
                         self.graphActions.removeFilter(filterData.id)
 
                     }
-                },500)
+                    visjsGraph.data.nodes.remove(ADLbrowserGraph.zeroCountIds)
+                    ADLbrowserGraph.zeroCountIds = []
+                }, 500)
 
             }
             ,
@@ -701,6 +738,12 @@ var uniquePredicates={}
 
             }
 
+            var queryFilterNodesMap={}
+            queryFilterNodes.forEach(function(filter){
+                if(filter.predicate)
+                queryFilterNodesMap[filter.predicate.predicate]=filter.predicate
+            })
+
 
             // join classes (anonym predicate)
             var message = null
@@ -709,7 +752,8 @@ var uniquePredicates={}
             queryFilterNodes.forEach(function (filterNodeData, index) {
                 if (!filterNodeData)
                     return
-
+if(!queryFilterNodesMap[options.predicate])
+    ;
 
                 var predicates = [];
 
@@ -730,21 +774,19 @@ var uniquePredicates={}
                 var objectId = self.varNamesMap[varName2].id
 
                 var predicateStr
-                if(options.predicate) {// when count (precicate comes from dialog
+                if (options.predicate) {// when count (predicate comes from dialog
                     predicateStr = " <" + options.predicate.predicate + "> "
-                    if(true ||options.predicate.inverse)
-                        predicateStr +="|^"+predicateStr
-                }
-                else {
-                    var previouPredicate= queryFilterNodes[index-1].predicate
+                    if (true || options.predicate.inverse)
+                        predicateStr += "|^" + predicateStr
+                } else {
+                    var previouPredicate = queryFilterNodes[index - 1].predicate
                     predicateStr = " <" + previouPredicate.predicate + "> "
-                    if(true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
-                        predicateStr +="|^"+predicateStr
+                    if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
+                        predicateStr += "|^" + predicateStr
                 }
 
 
-
-                where += "" +  varName2+ predicateStr + previousVarName + ". "
+                where += "" + varName2 + predicateStr + previousVarName + ". "
                 if (!options.count) {
                     where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
                     where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
@@ -755,58 +797,6 @@ var uniquePredicates={}
                 var filter2 = filterNodeData.filter;
                 where += filter2
 
-
-/*
-
-
-
-
-                for (var subPredicate in subjectOb.predicates) {
-                    if (subjectOb.predicates[subPredicate].indexOf(objectId) > -1) {
-                        predicates.push(subPredicate)
-                        where += "" + previousVarName + " <" + subPredicate + "> " + varName2 + ". "
-                        if (!options.count) {
-                            where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
-                            where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
-                            where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
-                            where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
-
-                        }
-                        var filter2 = filterNodeData.filter;
-                        where += filter2
-
-                    }
-                }
-                if (predicates.length == 0) {
-                    var objectOb = self.varNamesMap[varName2];
-                    var subjectId = self.varNamesMap[previousVarName].id
-
-                    for (var objPredicate in objectOb.predicates) {
-                        if (objectOb.predicates && objectOb.predicates[objPredicate].indexOf(subjectId) > -1) {
-                            predicates.push(objPredicate)
-                            where += "" + varName2 + " <" + objPredicate + "> " + previousVarName + ". "
-                            if (!options.count) {
-                                where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
-                                where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
-                                where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
-                                where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
-
-                            }
-                            var filter2 = filterNodeData.filter;
-                            where += filter2
-
-                        }
-                    }
-
-
-                }
-
-
-                if (predicates.length == 0)
-                    return message = "no matching predicate"
-                if (predicates.length > 1)
-                    return message = "more than one predicate"
-*/
 
             })
 
@@ -964,60 +954,17 @@ var uniquePredicates={}
 
         self.setFilterFromSearchedTerm = function (node) {
 
-          // transform searched tree node into graph current node as if clicked
+            // transform searched tree node into graph current node as if clicked
             self.currentNode = {
-                id:node.data.type,
-                label:node.text,
-                data:{
-                    id:node.data.type,
-                    label:node.text,
-                    searchedLabel :node.data.label
+                id: node.data.type,
+                label: node.text,
+                data: {
+                    id: node.data.type,
+                    label: node.text,
+                    searchedLabel: node.data.label
                 }
             }
             return self.showQueryParamsDialog({x: 500, y: 500})
-            var varName = "?" + self.model[nodeData.type].label
-
-            var node = {}
-
-            var options = {
-                "filter": varName + " rdf:type <" + nodeData.type + ">. filter (" + varName + " =<" + nodeData.id + ">)  ",
-                "filterLabel": "rdfs:label = " + nodeData.label + "",
-                "logicalMode": "union",
-                "varName": varName,
-                "count": 1
-            }
-
-            self.executeQuery(node, options, function (err, queryResult) {
-                if (err)
-                    return alert(err)
-
-                var varName = options.varName
-                self.currentNode = visjsGraph.data.nodes.get()
-                ADLbrowserGraph.addCountNodesToGraph(self.currentNode, queryResult, options, function (err, nodeData) {
-
-                    $("#waitImg").css("display", "none");
-                    if (err)
-                        return MainController.UI.message(err)
-
-                    if (nodeData.count == 0)
-                        return
-
-                    ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
-                    var filterId = nodeData.id;
-
-                    var html = "<div class='ADLbrowser_filterDiv' id='" + filterId + "'>" +
-                        "<input type='checkbox'  checked='checked' class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
-                        "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
-                        "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
-                        "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
-                    "</div>"
-
-                    $("#ADLbrowser_filterDiv").prepend(html)
-
-
-                })
-            })
-
 
         }
 

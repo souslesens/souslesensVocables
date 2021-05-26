@@ -90,6 +90,7 @@ var ADLmappingData = (function () {
             }
             nodeData.type = "table";
             nodeData.id = key.toLowerCase()
+            nodeData.adlTable = key
             nodeData.label = key;
             source:  data[key].source;
 

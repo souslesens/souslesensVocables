@@ -139,7 +139,7 @@ var ADLSqlConnector = {
                     }
                     length = result.length
                     if(processor) {
-                        processor(result, function (err, resultProcessor) {
+                        processor(result,uniqueTriples, function (err, resultProcessor) {
                             if (err)  {
 
                                 return callbackWhilst(err);

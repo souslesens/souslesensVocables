@@ -78,12 +78,6 @@ var ADLbuilder = {
         data.forEach(function (item, indexItem) {
             mappings.forEach(function (mapping, indexMapping) {
 
-                if (mapping.subject.indexOf("functionalclassid") > -1)
-                    var x = 3
-
-                if (item[mapping.subject] == "TOTAL-P0000000874")
-                    var x = 3
-
 
                 if (indexItem == 0) {
                     var obj = util.deconcatSQLTableColumn(mapping.subject)
@@ -121,11 +115,6 @@ var ADLbuilder = {
                 var objectSuffix = ""
                 var p;
 
-                if (mapping.object == "xsd:string")
-                    var x = 3
-
-                if (mapping.predicate == "rdfs:label")
-                    var x = 3
 
                 if (mapping.object instanceof Object) {
                     var value = item[mapping.object.column]
@@ -273,7 +262,7 @@ var ADLbuilder = {
         var dbConnection = null;
         var totalTriples = 0;
         var selectColumns = []
-
+        var uniqueTriples = {}
 
         async.series([
 
@@ -356,7 +345,17 @@ var ADLbuilder = {
                         existingUrisMap = result;
                         callbackSeries();
                     })
+                },
+
+
+                //get uniqueTriples map // TO IMPLEMENT
+                function (callbackSeries) {
+                    return callbackSeries()
+
                 }
+
+
+
                 //prepare mappings
                 , function (callbackSeries) {
                     try {
@@ -387,7 +386,7 @@ var ADLbuilder = {
                 function (callbackSeries) {
 
 
-                    var processor = function (data, callbackProcessor) {
+                    var processor = function (data,uniqueTriples, callbackProcessor) {
 
 
                         options.existingUrisMap = existingUrisMap;
@@ -413,13 +412,17 @@ var ADLbuilder = {
                                 triples.forEach(function (triple) {
                                     var value = triple.object
 
-                                    if (!triple.subject)
-                                        var x = 3
-                                    if (!triple.object)
-                                        var x = 3
+
                                     if (value.indexOf("http") == 0)
                                         value = "<" + value + ">"
-                                    triplesStr += "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n"
+                                    var tripleStr = "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n"
+                                    var tripleHash = util.hashCode(tripleStr)
+                                    if (uniqueTriples[tripleHash])
+                                        return;
+                                    else {
+                                        uniqueTriples[tripleHash] = 1
+                                        triplesStr += tripleStr
+                                    }
                                 })
 
                                 var queryGraph = "with <" + ADLgraphUri + ">" +
@@ -452,22 +455,22 @@ var ADLbuilder = {
                     }
                     var selectStr = ""
                     for (var mapping in mappings.mappings) {
-                        mappings.mappings.forEach(function(mapping) {
-                            var column=mapping.subject;
-                            column=column.substring(column.lastIndexOf(".")+1)
+                        mappings.mappings.forEach(function (mapping) {
+                            var column = mapping.subject;
+                            column = column.substring(column.lastIndexOf(".") + 1)
                             if (selectStr.indexOf(column) < 0) {
                                 if (selectStr != "")
                                     selectStr += ","
-                                selectStr +=column
+                                selectStr += column
                             }
                         })
                     }
 
 
-                    var sqlQuery = "select distinct "+selectStr+" from  " + sqlTable + " ";
+                    var sqlQuery = "select distinct " + selectStr + " from  " + sqlTable + " ";
                     if (dbConnection.type == "sql.sqlserver") {
-                        sqlQuery+=" ORDER BY "+selectStr+" "
-                        SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
+                        sqlQuery += " ORDER BY " + selectStr + " "
+                        SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor,uniqueTriples, function (err, result) {
                             if (err)
                                 return callbackSeries(err);
 
@@ -475,7 +478,7 @@ var ADLbuilder = {
 
                         })
                     } else {
-                        sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, function (err, result) {
+                        sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples,function (err, result) {
                             if (err)
                                 return callbackSeries(err);
                             callbackSeries()

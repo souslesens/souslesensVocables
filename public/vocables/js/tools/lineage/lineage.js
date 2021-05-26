@@ -24,7 +24,7 @@ var Lineage_classes = (function () {
 
 
         var self = {}
-        self.maxClusterOpeningLength = 50
+        self.maxClusterOpeningLength =200
         self.currentSource;
         var graphContext = {}
         self.propertyColors = {}
@@ -1331,6 +1331,7 @@ var Lineage_classes = (function () {
                     html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> open cluster</span>"
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterContent();\"> list cluster content</span>"
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"
+
             }
 
             if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].ADLqueryController) {

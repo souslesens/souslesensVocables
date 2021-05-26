@@ -1279,7 +1279,7 @@ var ADLbrowser = (function () {
 
         }
         ,
-        onQueryParamsValuesSelect: function () {
+        onQueryParamsListChange: function () {
             var value = $("#ADLbrowserQueryParams_valuesSelect").val()
             if (value == "List...") {
                 ADLbrowser.query.listQueryParamsDialogFieldValues()

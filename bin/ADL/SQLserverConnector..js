@@ -119,7 +119,7 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
 
     },
 
-    processFetchedData:function(connection,query,fetchSize,startOffset,maxOffset, processor,callback){
+    processFetchedData:function(connection,query,fetchSize,startOffset,maxOffset, processor,uniqueTriples,callback){
 
         var offset = startOffset
         var length = 1
@@ -147,7 +147,7 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
                     }
                     length = result.length
                     if(processor) {
-                        processor(result, function (err, resultProcessor) {
+                        processor(result,uniqueTriples, function (err, resultProcessor) {
                             if (err)  {
 
                                 return callbackWhilst(err);

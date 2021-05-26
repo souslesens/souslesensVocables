@@ -667,12 +667,12 @@ var ADLmappings = (function () {
 
             self.isModifyingMapping=false;
             mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
-            if(!self.currentMappingData) {
+            if(true || !self.currentMappingData) {
                 self.currentMappingData = {}
 
                 mappings.data = {
                     adlSource: ADLmappingData.currentADLdataSource,
-                    adlTable: ADLmappingData.currentADLtable.text,
+                    adlTable: ADLmappingData.currentADLtable.data.adlTable,
                   //  build: self.currentMappingData.build
                 }
                 if (ADLmappingData.currentADLtable.data.sql) {

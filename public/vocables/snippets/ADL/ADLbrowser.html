@@ -103,9 +103,11 @@
 
         <div>
             <!--   <button onclick="ADLbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
-            <button onclick=" ADLbrowserQuery.listQueryParamsDialogFieldValues() ;$('#ADLbrowserQueryParams_operator').val('=')">LIST </button>
+         <!--   <button onclick=" ADLbrowserQuery.listQueryParamsDialogFieldValues() ;$('#ADLbrowserQueryParams_operator').val('=')">
+
+                LIST </button>-->
             <select id="ADLbrowserQueryParams_valuesSelect"
-                    onchange="ADLbrowserQuery.onQueryParamsValuesSelect()" style="width: 200px"></select>
+                    onchange="ADLbrowserQuery.onQueryParamsListChange()"  onclick="ADLbrowserQuery.onQueryParamsListClick()" style="width: 200px"></select>
         </div>
         <div>
             predicate<select id="ADLbrowserQueryParams_predicateSelect"></select>
@@ -114,6 +116,12 @@
             <!--   <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">∪</button>
                <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('intersection')">∩</button>-->
             <button onclick="ADLbrowserQuery.onQueryParamsDialogValidate('union')">count</button>
+            <select id="ADLbrowserQueryParams_booleanSelect">
+                <option>only</option>
+                <option>OR</option>
+                <option>AND</option>
+            </select>
+
             <button onclick="ADLbrowserQuery.onQueryParamsDialogCancel()">X</button>
 
             <!-- <button onclick="ADLbrowserBI.drawClasses()">BI</button>-->

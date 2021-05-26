@@ -27,18 +27,17 @@ var util = {
 
 
     },
-    deconcatSQLTableColumn:function(str){
-        if(str.indexOf(":")>-1)
+    deconcatSQLTableColumn: function (str) {
+        if (str.indexOf(":") > -1)
             return null;
-        var array= str.split(".")
-        if(array.length<2)
+        var array = str.split(".")
+        if (array.length < 2)
             return null;
-        if(array.length==2){
-            return {table:array[0],column:array[1]}
-        }
-        else if(array.length==3){
-            return {table:array[0]+"."+array[1],column:array[2]}
-        }else
+        if (array.length == 2) {
+            return {table: array[0], column: array[1]}
+        } else if (array.length == 3) {
+            return {table: array[0] + "." + array[1], column: array[2]}
+        } else
             return null;
 
 
@@ -114,6 +113,14 @@ var util = {
             }
         }
         return obj;
+    },
+
+    hashCode: function (str) {
+        var hash = 0;
+        for (var i = 0; i < str.length; i++) {
+            hash = ~~(((hash << 5) - hash) + str.charCodeAt(i));
+        }
+        return hash;
     }
     ,
     base64_encodeFile: function (file) {

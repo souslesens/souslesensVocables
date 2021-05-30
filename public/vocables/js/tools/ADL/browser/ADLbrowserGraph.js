@@ -237,8 +237,8 @@ var ADLbrowserGraph = (function () {
                         ADLbrowser.currentJstreeNode = node
 
                         MainController.UI.showPopup(point, "graphPopupDiv")
-                        self.currentGraphNode = node;
-                        self.setGraphPopupMenus(node, event)
+                        ADLbrowserGraph.currentGraphNode = node;
+                        ADLbrowserGraph.setGraphPopupMenus(node, event)
                         point.x += leftPanelWidth
                         ADLbrowserGraph.lastRightClickPosition = point
 
@@ -351,7 +351,7 @@ var ADLbrowserGraph = (function () {
                 self.currentGraph = {nodes: [], edges: [], params: {}}
                 self.currentGraph.nodes = visjsGraph.data.nodes.get()
                 self.currentGraph.edges = visjsGraph.data.edges.get()
-                self.currentGraph.params = visjsGraph.currentDrawParams
+                self.currentGraph.params = visjsGraph.currentContext
             }
         }
 

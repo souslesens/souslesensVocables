@@ -568,7 +568,7 @@ var ADLbrowserQuery = (function () {
                             self.ALDmodelGraph = {nodes: [], edges: [], params: {}}
                             self.ALDmodelGraph.nodes = visjsGraph.data.nodes.get()
                             self.ALDmodelGraph.edges = visjsGraph.data.edges.get()
-                            self.ALDmodelGraph.params = visjsGraph.currentDrawParams
+                            self.ALDmodelGraph.params = visjsGraph.currentContext
                         }
 
                         ADLbrowserGraph.drawGraph("graphDiv", queryResult, {

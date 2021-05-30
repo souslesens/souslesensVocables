@@ -19,6 +19,7 @@ var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.")
 
 var OneModelManager = require('../other/oneModel/OneModelManager.');
 var ADLcontroller = require('../bin/ADL/ADLcontroller.')
+var DataController=require('../bin/DataController.')
 var ADLbuilder = require("../bin/ADL/ADLbuilder.")
 /* GET home page. */
 router.get('/', function (req, res, next) {
@@ -404,8 +405,29 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
                     })
                 }
 
+        if (req.body.saveData) {
+            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
+                processResponse(response, err, result)
 
-            },
+            })
+        }
+
+        if (req.body.listDirFiles) {
+            DataController.getFilesList(req.body.dir, function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+        if (req.body.readDataFile) {
+            DataController.readfile(req.body.dir,req.body.fileName, function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+
+
+
+    },
 
 
             router.get('/heatMap', function (req, res, next) {

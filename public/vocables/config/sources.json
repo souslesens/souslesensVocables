@@ -644,7 +644,7 @@
 
   "MDM_2.3_AFTWIN": {
     "graphUri":  [
-      "http://data.total.com/resource/one-model/assets/aftwin-uk/0.3/"
+      "http://data.total.com/resource/one-model/assets/aftwin-uk/0.4/"
     ],
 
 
@@ -664,6 +664,30 @@
     "schema": null,
     "color": "#bcbd22"
   },
+  "MIE": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/mie/0.1/"
+    ],
+
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "MIE",
+      "table_schema": "dbo"
+    },
+
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+
 
   "VALVES": {
     "graphUri":  [

@@ -666,22 +666,7 @@ var ADLmappings = (function () {
                 return
 
             self.isModifyingMapping=false;
-            mappings.infos = {lastModified: new Date(), modifiedBy: authentication.currentUser.identifiant, comment}
-            if(true || !self.currentMappingData) {
-                self.currentMappingData = {}
 
-                mappings.data = {
-                    adlSource: ADLmappingData.currentADLdataSource,
-                    adlTable: ADLmappingData.currentADLtable.data.adlTable,
-                  //  build: self.currentMappingData.build
-                }
-                if (ADLmappingData.currentADLtable.data.sql) {
-                    mappings.data.sql = ADLmappingData.currentADLtable.data.sql
-                    mappings.data.adlTable = ADLmappingData.currentADLtable.data.adlTable
-                }
-            }else{
-                mappings.data=self.currentMappingData
-            }
             var payload = {
                 ADL_SaveMappings: true,
                 mappings: JSON.stringify(mappings, null, 2),
@@ -747,6 +732,21 @@ var ADLmappings = (function () {
             for (var key in ADLmappingGraph.mappedProperties.model) {
 
                 data.model[key] = ADLmappingGraph.mappedProperties.model[key]
+            }
+            if(true || !self.currentMappingData) {
+                self.currentMappingData = {}
+
+                data.data = {
+                    adlSource: ADLmappingData.currentADLdataSource,
+                    adlTable: ADLmappingData.currentADLtable.data.adlTable,
+                    //  build: self.currentMappingData.build
+                }
+                if (ADLmappingData.currentADLtable.data.sql) {
+                    data.data.sql = ADLmappingData.currentADLtable.data.sql
+                    data.data.adlTable = ADLmappingData.currentADLtable.data.adlTable
+                }
+            }else{
+                data.data=self.currentMappingData
             }
 
 

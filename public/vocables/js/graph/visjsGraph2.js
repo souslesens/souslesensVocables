@@ -242,7 +242,9 @@ var visjsGraph = (function () {
             "<button onclick='visjsGraph.toSVG()'>SVG img</button>" +
             "<button onclick='visjsGraph.exportGraph()'>copy Graph</button>" +
             "<button onclick='visjsGraph.saveGraph()'>save Graph</button>" +
-            "Load<select id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'>save Graph</select>"
+            "Load<select id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>"+
+            "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>addToCurrentGraph"
+
 
         if (true) {
             if (!$("#graphButtons").length) {
@@ -744,6 +746,7 @@ var visjsGraph = (function () {
             return;
         if (!fileName)
             fileName = $("#visjsGraph_savedGraphsSelect").val()
+        var addToCurrentGraph=$("#visjsGraph_addToCurrentGraphCBX").prop("checked")
         if (!fileName || fileName == "")
             return;
         var payload = {
@@ -759,22 +762,45 @@ var visjsGraph = (function () {
             success: function (result, textStatus, jqXHR) {
                 var data = JSON.parse(result.result);
                 var positions = data.positions
+                var visjsData = {nodes: [], edges: []}
+                var existingNodes={}
+                if(addToCurrentGraph)
+                    existingNodes=self.getExistingIdsMap();
                 data.nodes.forEach(function (node) {
-                    if (node.fixed && positions[node.id]) {
-                        node.x = positions[node.id].x;
-                        node.y = positions[node.id].y;
+                    if(!existingNodes[node.id]) {
+                        existingNodes[node.id]=1
+                        if (node.fixed && positions[node.id]) {
+                            node.x = positions[node.id].x;
+                            node.y = positions[node.id].y;
+                        }
+                        visjsData.nodes.push(node)
+                    }
+                })
+
+                data.edges.forEach(function (edge) {
+                    if(!existingNodes[edge.id]) {
+                        existingNodes[edge.id]=1
+                        visjsData.edges.push(edge)
                     }
                 })
 
 
-                var visjsData = {nodes: data.nodes, edges: data.edges}
-                var context = data.context
-                for(var key in context.options){
-                    if(key.indexOf("Fn")>0){
-                        context.options[key]= eval(key+"="+context.options[key]);
+                if(addToCurrentGraph &&  self.data.nodes && self.data.nodes.getIds().length>0 ){
+                    self.data.nodes.add(visjsData.nodes)
+                    self.data.edges.add(visjsData.edges)
+
+                }else{
+                    //functions
+                    var context = data.context
+                    for(var key in context.options){
+                        if(key.indexOf("Fn")>0){
+                            context.options[key]= eval(key+"="+context.options[key]);
+                        }
                     }
+                    self.draw(context.divId, visjsData, context.options, context.callback)
                 }
-                self.draw(context.divId, visjsData, context.options, context.callback)
+
+
 
 
 

@@ -96,6 +96,16 @@
     "groups": [
       "reader_owl"
     ]
+  },
+  "JEMS": {
+    "login": "JEMS",
+    "password": "ONE-sense!rDf",
+    "groups": [
+      "reader_skos_blend"
+    ]
+
+
+
   }
 }
 

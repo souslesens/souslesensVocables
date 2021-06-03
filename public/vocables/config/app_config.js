@@ -21,7 +21,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
 
-  self.loginMode = "none";
+ // self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}
@@ -148,6 +148,14 @@ var Config = (function () {
             forbiddenSources: [],
             allowedTools: ["lineage", "ADLbrowser","ADLmappings","SPARQL"],
             forbiddenTools: ["evaluate", "INDIVIDUALS", "BLENDER",],
+            blender: {contextMenuActionStartLevel: 3}
+        }
+        , reader_skos_blend: {
+            allowedSourceSchemas: ["SKOS"],
+            allowedSources: ["Total-CTG","GEMET","USGS","TermSciences"],
+            forbiddenSources: [],
+            allowedTools: ["sourceBrowser", "sourceMatcher","ancestors","blender","TAXONOMY"],
+            forbiddenTools: [],
             blender: {contextMenuActionStartLevel: 3}
         }
     }

@@ -483,7 +483,9 @@ var ADLbrowserQuery = (function () {
                     nodes: self.ALDmodelGraph.nodes,
                     edges: self.ALDmodelGraph.edges,
                 }
-                var options = self.ALDmodelGraph.params.options;
+                var options = {}
+                if (self.ALDmodelGraph.params)
+                    options = self.ALDmodelGraph.params.options;
 
                 visjsGraph.draw("graphDiv", visjsData, options)
                 self.ALDmodelGraph = null;
@@ -738,10 +740,10 @@ var ADLbrowserQuery = (function () {
 
             }
 
-            var queryFilterNodesMap={}
-            queryFilterNodes.forEach(function(filter){
-                if(filter.predicate)
-                queryFilterNodesMap[filter.predicate.predicate]=filter.predicate
+            var queryFilterNodesMap = {}
+            queryFilterNodes.forEach(function (filter) {
+                if (filter.predicate)
+                    queryFilterNodesMap[filter.predicate.predicate] = filter.predicate
             })
 
 
@@ -752,8 +754,8 @@ var ADLbrowserQuery = (function () {
             queryFilterNodes.forEach(function (filterNodeData, index) {
                 if (!filterNodeData)
                     return
-if(!queryFilterNodesMap[options.predicate])
-    ;
+                if (!queryFilterNodesMap[options.predicate])
+                    ;
 
                 var predicates = [];
 

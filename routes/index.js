@@ -19,7 +19,7 @@ var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.")
 
 var OneModelManager = require('../other/oneModel/OneModelManager.');
 var ADLcontroller = require('../bin/ADL/ADLcontroller.')
-var DataController=require('../bin/DataController.')
+var DataController=require('../bin/dataController.')
 var ADLbuilder = require("../bin/ADL/ADLbuilder.")
 /* GET home page. */
 router.get('/', function (req, res, next) {

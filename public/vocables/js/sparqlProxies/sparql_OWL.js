@@ -155,9 +155,21 @@ var Sparql_OWL = (function () {
             fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
 
-            var query = "select * " + fromStr +
-                " where {<" + conceptId + "> ?prop ?value. } ";
-            " }"
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                "select * " + fromStr +
+                " where {{<" + conceptId + "> ?prop ?value.  ";
+            if (options.getValuesLabels)
+                query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
+            query += "}"
+
+            if (options.inverseProperties) {
+                query += "UNION {?value  ?prop <" + conceptId + "> .  ";
+                if (options.getValuesLabels)
+                    query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
+                query += "}"
+            }
+
+            query += " }"
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
@@ -398,9 +410,11 @@ var Sparql_OWL = (function () {
             if (!options) {
                 options = {}
             }
-
-
-            var filterStr = Sparql_common.setFilter("domain", ids);
+            var filterStr = "";
+            if (ids)
+                filterStr = Sparql_common.setFilter("domain", ids);
+            if(options.propIds)
+                filterStr = Sparql_common.setFilter("prop", options.propIds);
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -412,9 +426,13 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel" + fromStr +
-                " WHERE {" +
-                "   ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty " +
-                "OPTIONAL{?prop rdfs:label ?propLabel.}  " +
+                " WHERE {"
+            if (options.inheritedProperties)
+                query += "   ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty "
+            else
+                query += "   ?prop rdf:type owl:ObjectProperty "
+
+            query += "OPTIONAL{?prop rdfs:label ?propLabel.}  " +
                 "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
                 " ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " + "OPTIONAL{?domain rdfs:label ?domainLabel.} " +
                 " OPTIONAL {?subProp rdfs:subPropertyOf ?prop. {?subProp rdfs:label ?subPropLabel.}} " + filterStr

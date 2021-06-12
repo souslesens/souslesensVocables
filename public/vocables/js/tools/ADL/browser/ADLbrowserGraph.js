@@ -12,7 +12,7 @@ var ADLbrowserGraph = (function () {
             var html =
                 "<span class=\"popupMenuItem\" style='font-weight: bold;color:"+ADLbrowserQuery.model[node.data.type].color+"'> " + ADLbrowserQuery.model[node.data.type].label + "</span>" +
                 "    <span class=\"popupMenuItem\" style='font-weight: bold'> " + node.label + "</span>" +
-                "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.showGraphNodeInfos();\"> node infos</span>" +
+                "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.showgraphNodeNeighborhood();\"> node infos</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.selectNode()\">selectNode</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"ADLbrowserGraph.collapseNode();\">collapse </span>" +
                 //  "    <span  class=\"popupMenuItem\"onclick=\"ADLbrowserGraph.expandNode();\">expandNode </span>" +
@@ -45,7 +45,7 @@ var ADLbrowserGraph = (function () {
 
 
             }
-        self.showGraphNodeInfos = function () {
+        self.showgraphNodeNeighborhood = function () {
             ADLbrowser.showNodeInfos(self.currentGraphNode)
         }
 

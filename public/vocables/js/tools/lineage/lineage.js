@@ -24,7 +24,7 @@ var Lineage_classes = (function () {
 
 
         var self = {}
-        self.maxClusterOpeningLength =200
+        self.maxClusterOpeningLength = 200
         self.currentSource;
         var graphContext = {}
         self.propertyColors = {}
@@ -145,7 +145,6 @@ var Lineage_classes = (function () {
         }
 
 
-
         self.selectTreeNodeFn = function (event, propertiesMap) {
             SourceBrowser.currentTreeNode = propertiesMap.node;
             self.currentTreeNode = propertiesMap.node;
@@ -237,7 +236,7 @@ var Lineage_classes = (function () {
         self.drawNewGraph = function (visjsData) {
             graphContext = {}
             var options = {
-
+                keepNodePositionOnDrag: true,
                 onclickFn: Lineage_classes.graphActions.onNodeClick,
                 onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
                 "physics": {
@@ -245,7 +244,8 @@ var Lineage_classes = (function () {
                         "springLength": 0,
                         "damping": 0.15
                     },
-                    "minVelocity": 0.75
+                    "minVelocity": 0.75,
+
                 }
                 //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
@@ -489,8 +489,8 @@ var Lineage_classes = (function () {
                 text += item.child1.value + "," + item.child1Label.value + "\n"
             })
 
-             common.copyTextToClipboard(text,function(err,result){
-                if(err)
+            common.copyTextToClipboard(text, function (err, result) {
+                if (err)
                     return MainController.UI.message(err);
                 MainController.UI.message(result);
             })
@@ -624,10 +624,10 @@ var Lineage_classes = (function () {
                     var similarIds = []
                     async.eachSeries(idsSlices, function (ids, callbackEachSlice) {
                         var filter = Sparql_common.setFilter("similar", ids, null)
-                      /*  filter = " ?prop  rdfs:subClassOf* owl:sameAs.\n" +
-                            "  ?concept ?prop ?similar " + filter*/
+                        /*  filter = " ?prop  rdfs:subClassOf* owl:sameAs.\n" +
+                              "  ?concept ?prop ?similar " + filter*/
 
-                        filter ="?concept <http://w3id.org/readi/z018-rdl/sameinPCA> ?similar. "+filter
+                        filter = "?concept <http://w3id.org/readi/z018-rdl/sameinPCA> ?similar. " + filter
 
                         var options = {filter: filter}
                         Sparql_generic.getItems("ISO_15926-PCA", options, function (err, result) {
@@ -1094,7 +1094,7 @@ var Lineage_classes = (function () {
                 visjsGraph.network.fit()
                 $("#waitImg").css("display", "none");
 
-                if ( Config.sources[source].schemaType != "INDIVIDUAL") {
+                if (Config.sources[source].schemaType != "INDIVIDUAL") {
                     Lineage_classes.drawRestrictions(classIds)
                 }
 
@@ -1122,7 +1122,7 @@ var Lineage_classes = (function () {
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 var color = self.getSourceColor(source)
-                console.log(JSON.stringify(result,null,2))
+                console.log(JSON.stringify(result, null, 2))
                 result.forEach(function (item) {
 
                     if (!item.value) {
@@ -1177,6 +1177,219 @@ var Lineage_classes = (function () {
                 visjsGraph.network.fit()
                 $("#waitImg").css("display", "none");
 
+            })
+
+        }
+
+        self.graphNodeNeighborhood = function (nodeData, propFilter) {
+            /*    var sourceOptions=Config.sources[self.currentSource].options;
+                if(sourceOptions && sourceOptions.graphPropertiesFilterRegex)
+                     var graphPropertiesFilterRegex =new RegExp(sourceOptions.graphPropertiesFilterRegex);*/
+
+
+            if (propFilter == "ranges") {
+
+
+                Sparql_OWL.getObjectProperties(self.currentSource, [nodeData.id], {}, function (err, result) {
+                    if (err) {
+                        return MainController.UI.message(err);
+                    }
+                    var visjsData = {nodes: [], edges: []}
+                    var existingIds = visjsGraph.getExistingIdsMap()
+var hasProperties=false
+var labelStr="<b>"+nodeData.label+"</b>\n"
+                        result.forEach(function (item) {
+                            hasProperties=true
+                            var propLabel
+                            if (item.propLabel)
+                                propLabel = item.propLabel.value
+                            else
+                                propLabel = Sparql_common.getLabelFromId(item.prop.value)
+                            var rangeLabel
+                            if (item.rangeLabel)
+                                rangeLabel = item.rangeLabel.value
+                            else
+                                rangeLabel = Sparql_common.getLabelFromId(item.range.value)
+                            labelStr+="<i>"+propLabel+" : </i>"+rangeLabel+"\n"
+
+                        })
+                    var color = Lineage_classes.getSourceColor(self.currentSource)
+                    if (!existingIds[nodeData.id]) {
+                        existingIds[nodeData.id] = 1
+                        var node = {
+                            id: nodeData.id,
+                            label: nodeData.label,
+                            shape: defaultShape,
+                            size: defaultShapeSize,
+                            color: color,
+                            font: {multi: true, size: 10},
+                            data: {
+                                source: self.currentSource,
+                                id: nodeData.id,
+                                label: nodeData.label,
+                            }
+                        }
+
+                        visjsData.nodes.push(node)
+                    }
+                    var color="#ddd"
+                    var id=nodeData.id+"_range"
+                    if (hasProperties && !existingIds[id]) {
+                        existingIds[id] = 1
+                        var node = {
+                            id:id,
+                            label: labelStr,
+                            shape: "box",
+
+                            color: color,
+                            font: {multi: true, size: 10},
+                            data: {
+                                source: self.currentSource,
+                                id: nodeData.id,
+                                label: nodeData.label,
+                            }
+                        }
+                        visjsData.nodes.push(node)
+
+                        visjsData.edges.push({
+                            id:nodeData.id+"_"+id,
+                            from: nodeData.id,
+                            to:id,
+                            width:5
+
+
+                        })
+                    }
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+
+
+
+                })
+
+
+                return;
+
+
+            }
+
+
+            var graphPropertiesFilterRegex = null;
+
+            var graphUri = Config.sources[self.currentSource].graphUri;
+            var sparql_url = Config.sources[self.currentSource].sparql_server.url;
+            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                "select * " + fromStr + " where {";
+            if (propFilter == "outcoming")
+                query += "<" + nodeData.id + "> ?prop ?value.  ";
+            else if (propFilter == "incoming")
+                query += " ?value ?prop  <" + nodeData.id + ">.  ";
+
+            query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
+            query += "}"
+            var url = sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: self.currentSource}, function (err, result) {
+                if (err) {
+                    return MainController.UI.message(err);
+                }
+                var data = result.results.bindings
+
+                var color = Lineage_classes.getSourceColor(self.currentSource)
+                var visjsData = {nodes: [], edges: []}
+                var existingIds = visjsGraph.getExistingIdsMap()
+                if (!existingIds[nodeData.id]) {
+                    existingIds[nodeData.id] = 1
+                    var node = {
+                        id: nodeData.id,
+                        label: nodeData.label,
+                        shape: defaultShape,
+                        size: defaultShapeSize,
+                        color: color,
+                        font: {multi: true, size: 10},
+                        data: {
+                            source: self.currentSource,
+                            id: nodeData.id,
+                            label: nodeData.label,
+                        }
+                    }
+
+                    visjsData.nodes.push(node)
+                }
+                var distinctProps = {}
+                data.forEach(function (item) {
+                    if (item.valueLabel) {
+                        if (!distinctProps[item.prop.value])
+                            distinctProps[item.prop.value] = 1
+                        if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
+                            //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
+                            if (!existingIds[item.value.value]) {
+                                existingIds[item.value.value] = 1
+                                var node = {
+                                    id: item.value.value,
+                                    label: item.valueLabel.value,
+                                    shape: "square",
+                                    color: color,
+                                    size: defaultShapeSize,
+                                    font: {multi: true, size: 10},
+                                    data: {
+                                        source: self.currentSource,
+                                        id: item.value.value,
+                                        label: item.valueLabel.value,
+                                    }
+                                }
+                                visjsData.nodes.push(node)
+                            }
+                            var propLabel
+                            if (item.propLabel)
+                                propLabel = item.propLabel.value
+                            else
+                                propLabel = Sparql_common.getLabelFromId(item.prop.value)
+                            var edgeId = nodeData.id + "_" + item.value.value
+                            var inverseEdgeId = item.value.value + "_" + nodeData.id
+                            var arrows
+                            if (propFilter == "outcoming")
+                                arrows = {
+                                    to: {
+                                        enabled: true,
+                                        type: defaultEdgeArrowType,
+                                        scaleFactor: 0.5
+                                    },
+                                }
+                            if (propFilter == "incoming")
+                                arrows = {
+                                    from: {
+                                        enabled: true,
+                                        type: defaultEdgeArrowType,
+                                        scaleFactor: 0.5
+                                    },
+                                }
+
+                            if (!existingIds[edgeId] && !existingIds[inverseEdgeId]) {
+                                existingIds[edgeId] = 1
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: nodeData.id,
+                                    label: propLabel,
+                                    font: {multi: true, size: 8},
+                                    to: item.value.value,
+                                    arrows: arrows
+                                })
+                            }
+
+                        }
+                    }
+
+                })
+                console.log(JSON.stringify(distinctProps, null, 2))
+
+                if (visjsGraph.data && visjsGraph.data.nodes) {
+                    visjsGraph.data.nodes.update(visjsData.nodes)
+                    visjsGraph.data.edges.update(visjsData.edges)
+                } else {
+                    Lineage_classes.drawNewGraph(visjsData)
+                }
             })
 
         }
@@ -1317,15 +1530,16 @@ var Lineage_classes = (function () {
             if (!node)
                 return;
             graphContext.clickOptions = event
-            var html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawChildren();\"> draw children</span>" +
+            var html = "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawChildren();\"> draw children</span>" +
                 "<span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawParents();\"> draw parents</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawSimilars();\"> draw similars</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.hideChildren();\">hide children</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showNodeInfos();\">show node infos</span>"
-                + "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showProperties();\">show Properties</span>"
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showNodeInfos();\">show node infos</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showProperties();\">show Properties</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">graph node neighborhood</span>"
 
 
-            if (node.id.indexOf("_cluster") > 0) {
+            if (node.id && node.id.indexOf("_cluster") > 0) {
                 var html = ""
                 if (node.data.cluster.length <= Lineage_classes.maxClusterOpeningLength)
                     html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> open cluster</span>"
@@ -1427,7 +1641,11 @@ var Lineage_classes = (function () {
                                 visjsData.nodes.push({
                                     id: item["broader" + i].value,
                                     label: item["broader" + i + "Label"].value,
-                                    data: {source: nodeData.source, label: item["broader" + i + "Label"].value, id: item["broader" + i].value},
+                                    data: {
+                                        source: nodeData.source,
+                                        label: item["broader" + i + "Label"].value,
+                                        id: item["broader" + i].value
+                                    },
                                     shape: defaultShape,
                                     color: color,
                                     size: defaultShapeSize
@@ -1743,6 +1961,22 @@ var Lineage_classes = (function () {
             showNodeInfos: function () {
                 MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
             },
+
+            graphNodeNeighborhood: function (filter) {
+                Lineage_classes.graphNodeNeighborhood(self.currentGraphNode.data, filter)
+            },
+
+            graphNodeNeighborhoodUI: function () {
+                var html = " <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhood('incoming');\">incoming</span>"
+                html += " <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhood('outcoming');\">outcoming</span>"
+                html += " <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhood('ranges');\">ranges</span>"
+
+                $("#graphPopupDiv").html(html)
+                setTimeout(function () {
+                    $("#graphPopupDiv").css("display", "flex")
+                }, 100)
+
+            },
             showProperties: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
                 Lineage_classes.drawObjectProperties([self.currentGraphNode.id], descendantsAlso)
@@ -1818,13 +2052,13 @@ Lineage_properties = (function () {
     self.init = function () {
         self.graphInited = false
         self.currentSource = MainController.currentSource
-        self.getPropertiesjsTreeData(self.currentSource, null, null, function (err, jsTreeData) {
+       /* self.getPropertiesjsTreeData(self.currentSource, null, null, function (err, jsTreeData) {
             if (err)
                 return MainController.UI.message(err)
             var options = {selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true}
             options.contextMenu = self.jstreeContextMenu()
             common.jstree.loadJsTree("Lineage_propertiesTree", jsTreeData, options);
-        })
+        })*/
 
     }
     self.showPropInfos = function (event, obj) {
@@ -1871,6 +2105,7 @@ Lineage_properties = (function () {
                 }
 
             }
+
             if (!Lineage_classes.currentSource || Config.sources[Lineage_classes.currentSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
@@ -1885,7 +2120,7 @@ Lineage_properties = (function () {
                     label: "delete property",
                     action: function (e) {// pb avec source
 
-                        Lineage_common.jstree.deleteNode(self.currentTreeNode,"Lineage_propertiesTree")
+                        Lineage_common.jstree.deleteNode(self.currentTreeNode, "Lineage_propertiesTree")
 
                     }
 
@@ -1951,7 +2186,10 @@ Lineage_properties = (function () {
                     if (item.subProperty) {
                         if (allSubProperties.indexOf(item.subProperty.value) < 0) {
 
-                            self.properties[item.property.value].subProperties.push({id: item.subProperty.value, label: item.subPropertyLabel.value})
+                            self.properties[item.property.value].subProperties.push({
+                                id: item.subProperty.value,
+                                label: item.subPropertyLabel.value
+                            })
                             allSubProperties.push(item.subProperty.value)
                         }
                     }
@@ -1966,7 +2204,12 @@ Lineage_properties = (function () {
                             parent: "#",
                             id: key,
                             text: self.properties[key].label,
-                            data: {type :"http://www.w3.org/2002/07/owl#ObjectProperty", id: key, label: self.properties[key].label, source: source}
+                            data: {
+                                type: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                                id: key,
+                                label: self.properties[key].label,
+                                source: source
+                            }
                         })
                     }
                     if (true) {
@@ -1975,7 +2218,13 @@ Lineage_properties = (function () {
                                 parent: key,
                                 id: item.id,
                                 text: item.label,
-                                data: {type:"http://www.w3.org/2002/07/owl#ObjectProperty",id: item.id, label: item.label, source: source, parent: self.properties[key]}
+                                data: {
+                                    type: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                                    id: item.id,
+                                    label: item.label,
+                                    source: source,
+                                    parent: self.properties[key]
+                                }
                             })
 
                         })
@@ -1995,15 +2244,16 @@ Lineage_properties = (function () {
             source = property.data.source
             propId = property.id
         }
+        Sparql_OWL.getObjectProperties(Lineage_classes.currentSource, null, {propIds:[propId]}, function (err, result) {
 
-
-        OwlSchema.initSourceSchema(source, function (err, schema) {
+      /*  OwlSchema.initSourceSchema(source, function (err, schema) {
             if (err)
                 return MainController.UI.message(err);
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
             var options = {mandatoryDomain: 1}
 
-            Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, {mandatoryDomain: 0}, function (err, result) {
+            Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, {mandatoryDomain: 0}, function (err, result) {*/
+
                 if (err)
                     return MainController.UI.message(err);
                 var visjsData = {nodes: [], edges: []}
@@ -2232,7 +2482,7 @@ Lineage_properties = (function () {
                 /*  var html = JSON.stringify(self.properties[propertyId], null, 2)
                   $("#LineageProperties_propertyInfosDiv").html(html);*/
             })
-        })
+      //  })
     }
     self.graphActions = {
 
@@ -2381,12 +2631,12 @@ Lineage_types = (function () {
 })()
 
 
-Lineage_common=(function(){
+Lineage_common = (function () {
 
-    var self={}
+    var self = {}
     self.copyNodeToClipboard = function (nodeData) {
-        common.copyTextToClipboard(JSON.stringify(nodeData),function(err,result){
-            if(err)
+        common.copyTextToClipboard(JSON.stringify(nodeData), function (err, result) {
+            if (err)
                 return MainController.UI.message(err);
             MainController.UI.message(result);
         })
@@ -2394,25 +2644,25 @@ Lineage_common=(function(){
     }
 
 
-    self.deleteNode=function(node,jstreeId){
-        if(node.children && node.children.length>0)
+    self.deleteNode = function (node, jstreeId) {
+        if (node.children && node.children.length > 0)
             return alert("cannot delete node with children")
-        if(confirm("delete node "+node.data.label)){
+        if (confirm("delete node " + node.data.label)) {
 
-            Sparql_generic.deleteTriples (Lineage_classes.currentSource, node.data.id, null, null, function(err, result){
-                if(err)
+            Sparql_generic.deleteTriples(Lineage_classes.currentSource, node.data.id, null, null, function (err, result) {
+                if (err)
                     MainController.UI.message(err)
-                MainController.UI.message("node " +node.data.label+ " deleted")
-                $("#"+jstreeId).jstree(true).delete_node(node.id)
+                MainController.UI.message("node " + node.data.label + " deleted")
+                $("#" + jstreeId).jstree(true).delete_node(node.id)
             })
         }
     }
 
 
     self.pasteNodeFromClipboard = function (parentNode) {
-      //  console.log(JSON.stringify(parentNode.data))
+        //  console.log(JSON.stringify(parentNode.data))
         common.pasteTextFromClipboard(function (text) {
-         //   console.log(text)
+            //   console.log(text)
 
 
             try {
@@ -2420,10 +2670,10 @@ Lineage_common=(function(){
                 var triples = [];
                 var treeDiv
 
-                if(nodeData.id==parentNode.data.id)
+                if (nodeData.id == parentNode.data.id)
                     return alert("Cannot paste node inside its parent")
-                if(parentNode.data.type=="http://www.w3.org/2002/07/owl#Class" && nodeData.type=="http://www.w3.org/2002/07/owl#Class") {
-                    treeDiv="LineagejsTreeDiv"
+                if (parentNode.data.type == "http://www.w3.org/2002/07/owl#Class" && nodeData.type == "http://www.w3.org/2002/07/owl#Class") {
+                    treeDiv = "LineagejsTreeDiv"
                     triples.push({
                         subject: nodeData.id,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -2442,9 +2692,8 @@ Lineage_common=(function(){
                         object: parentNode.data.id,
                         valueType: "uri"
                     })
-                }
-              else  if(parentNode.data.type=="http://www.w3.org/2002/07/owl#ObjectProperty" && nodeData.type=="http://www.w3.org/2002/07/owl#ObjectProperty") {
-                  treeDiv="Lineage_propertiesTree"
+                } else if (parentNode.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty" && nodeData.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                    treeDiv = "Lineage_propertiesTree"
                     triples.push({
                         subject: nodeData.id,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
@@ -2465,11 +2714,11 @@ Lineage_common=(function(){
                     })
 
 
-                }else{
-                  return alert (" paste from clipboard not allowed")
+                } else {
+                    return alert(" paste from clipboard not allowed")
                 }
 
-              var message=""
+                var message = ""
                 if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
                     Sparql_generic.insertTriples(parentNode.data.source, triples, function (err, result) {
                         if (err)

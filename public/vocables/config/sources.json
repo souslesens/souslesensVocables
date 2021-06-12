@@ -387,7 +387,10 @@
     "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
     "schemaType": "OWL",
     "schema": null,
-    "color": "#bcbd22"
+    "color": "#bcbd22",
+    "options": {
+      "graphPropertiesFilterRegex": "http://data.posccaesar.org/dm/.*"
+    }
   },
   "CFIHOS-ISO": {
     "graphUri": "",

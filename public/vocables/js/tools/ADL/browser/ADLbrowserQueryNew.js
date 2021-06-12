@@ -40,13 +40,14 @@ var ADLbrowserQuery = (function () {
                 var ok = false;
                 self.currentQueryDialogPredicates = []
 
-
+                self.currentMatchingFilterNode = null;
                 predicates.forEach(function (item) {
                     item.predicateLabel = self.model[item.predicate].label
+
                     if (firstClass) {
                         self.currentQueryDialogPredicates.push(item)
                     } else {
-                        self.currentMatchingFilterNode = null;
+
                         ADLbrowserQuery.queryFilterNodes.forEach(function (filter, index) {
                             var previousClass = filter.class
                             if (item.object == previousClass) {
@@ -351,7 +352,8 @@ var ADLbrowserQuery = (function () {
                         if (nodeData.count == 0)
                             return
 
-                        ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
+                      //  ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
+                        ADLbrowserQuery.queryFilterNodes.push( nodeData);
                         var filterId = nodeData.id;
 
                         var html = "<div class='ADLbrowser_filterDiv' id='" + filterId + "'>" +
@@ -643,9 +645,7 @@ var ADLbrowserQuery = (function () {
                 else {
                     self.currentNode = obj
                     if (obj.data.type == "count") {
-
                         self.graphActions.showGraphPopupMenu(self.currentNode, point)
-
                     } else //class
                     {
 
@@ -751,16 +751,36 @@ var ADLbrowserQuery = (function () {
             // join classes (anonym predicate)
             var message = null
 
-            var varName2 = varName;
-            queryFilterNodes.forEach(function (filterNodeData, index) {
-                if (!filterNodeData)
-                    return
-                if (!queryFilterNodesMap[options.predicate])
-                    ;
 
-                var predicates = [];
+            if (true) {
+                var predicateStr = "";
+                queryFilterNodes.forEach(function (filterNodeData, index) {
+                    // add currentFilter to query
+                    if (options.predicate && self.currentMatchingFilterNode.varName && filterNodeData.varName == self.currentMatchingFilterNode.varName) {
+                        if (index>0) {// when count (predicate comes from dialog
+                            predicateStr = " <" + options.predicate.predicate + "> "
+                            if (true || options.predicate.inverse)
+                                predicateStr += "|^" + predicateStr
 
-                if (true) {
+                        }
+                        where += "" + varName + predicateStr +  self.currentMatchingFilterNode + ". "
+
+                    }
+
+
+                })
+            }
+            if (false) {
+                var varName2 = varName;
+                queryFilterNodes.forEach(function (filterNodeData, index) {
+                    if (!filterNodeData)
+                        return
+                    if (!queryFilterNodesMap[options.predicate])
+                        ;
+
+                    var predicates = [];
+
+
                     if (index == 0) {
                         if (!varName2) {
                             var filter2 = filterNodeData.filter;
@@ -787,27 +807,22 @@ var ADLbrowserQuery = (function () {
                         if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
                             predicateStr += "|^" + predicateStr
                     }
-                }
-                if (false) {
-
-                    self.currentMatchingFilterNode
 
 
-                }
+                    where += "" + varName2 + predicateStr + previousVarName + ". "
+                    if (!options.count) {
+                        where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
+                        where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
+                        where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
+                        where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
 
-                where += "" + varName2 + predicateStr + previousVarName + ". "
-                if (!options.count) {
-                    where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
-                    where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
-                    where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
-                    where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
-
-                }
-                var filter2 = filterNodeData.filter;
-                where += filter2
+                    }
+                    var filter2 = filterNodeData.filter;
+                    where += filter2
 
 
-            })
+                })
+            }
 
             if (message)
                 return callback(message)

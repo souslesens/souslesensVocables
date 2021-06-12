@@ -216,7 +216,7 @@ var Sparql_common = (function () {
 
     self.getLabelFromId = function (id) {
 
-        if (OwlSchema.currentSourceSchema.labelsMap[id])
+        if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id])
             return OwlSchema.currentSourceSchema.labelsMap[id];
 
         var p = id.lastIndexOf("#")

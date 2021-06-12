@@ -157,7 +157,7 @@ var SourceBrowser = (function () {
         }
         if (MainController.currentTool == "lineage" || MainController.currentTool == "ADLmappings") {
             items.graphNode = {
-                label: "graph Node",
+                label: "graph Node lineage",
                 action: function (e) {// pb avec source
 
                     Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
@@ -174,7 +174,40 @@ var SourceBrowser = (function () {
                 }
 
             }
+            items.graphNodeNeighborhood = {
+                label: "graph node neighborhood ",
+                "action": false,
+                "submenu": {
+                    graphNodeNeighborhood_incoming: {
+                        label: "incoming",
+                        action: function () {
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data,'incoming')
+
+                        }
+                    },
+                    graphNodeNeighborhood_outcoming: {
+                        label: "outcoming",
+                        action: function () {
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data,'outcoming')
+
+                        }
+                    },
+                    graphNodeNeighborhood_ranges: {
+                        label: "ranges",
+                        action: function () {
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data,'ranges')
+
+                        }
+                    },
+
+                }
+
+            }
             if (Lineage_classes.currentSource && Config.sources[Lineage_classes.currentSource].editable) {
+
+
+
+
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (e) {// pb avec source

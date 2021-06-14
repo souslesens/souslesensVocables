@@ -840,10 +840,17 @@
 
     "schema": null,
     "color": "#bcbd22"
+  },
+
+  "NPD-DATA": {
+    "graphUri": "http://sws.ifi.uio.no/data/npd-v2/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
+    "schemaType": "INDIVIDUAL",
+    "schema": null,
+    "color": "#e377c2"
   }
-
-
-
-
-
 }

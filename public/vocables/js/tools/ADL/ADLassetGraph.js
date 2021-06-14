@@ -599,9 +599,10 @@ var ADLassetGraph = (function () {
 
             // query triples
             function (callbackSeries) {
+            var fromStr=Sparql_common.getFromStr(sourceLabel)
                 var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "SELECT distinct ?subType ?prop ?objType ?subTypeLabel ?propLabel ?objTypeLabel from <http://data.total.com/resource/one-model/eccenca/valves/>  WHERE {\n" +
+                    "SELECT distinct ?subType ?prop ?objType ?subTypeLabel ?propLabel ?objTypeLabel  "+fromStr+"  WHERE {\n" +
                     "  ?sub ?prop ?obj.\n" +
                     "  ?sub rdf:type ?subType.\n" +
                     "  ?obj rdf:type ?objType.\n" +
@@ -640,8 +641,10 @@ var ADLassetGraph = (function () {
 
             //get model
             function (callbackSeries) {
+            var slices=common.sliceArray(ids,30)
                 var model = {}
 
+                async.eachSeries(slices, function(ids, callbackEach){
                 var filterStr = Sparql_common.setFilter("id", ids);
                 var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -651,7 +654,7 @@ var ADLassetGraph = (function () {
                 var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                     if (err) {
-                        return callbackSeries(err)
+                        return callbackEach(err)
                     }
                     result.results.bindings.forEach(function (item) {
                         var label
@@ -661,16 +664,22 @@ var ADLassetGraph = (function () {
                             label = item.idLabel.value
 
                         model[item.id.value] = {label: label}
+
                     })
-                    ids.forEach(function(id){
-                        if(! model[id])
-                            model[id]={label:Sparql_common.getLabelFromId(id)}
+                    callbackEach()
+                })
+
+                },function(err) {
+                    ids.forEach(function (id) {
+                        if (!model[id])
+                            model[id] = {label: Sparql_common.getLabelFromId(id)}
                     })
 
                     assetGlobalModel.model = model
 
 
                     callbackSeries()
+
 
                 })
 

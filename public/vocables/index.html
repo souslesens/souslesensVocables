@@ -258,8 +258,13 @@
         .messageDiv {
             font-weight: normal;
             font-size: 12px;
-            color: #6e2500;
-        / / max-width: 1200 px;
+            //color: #6e2500;
+            color: white;
+            background-color: #00a37f;
+            padding:2px;
+            margin:2px;
+
+        // max-width: 1200 px;
 
         }
 
@@ -337,6 +342,7 @@
         </table>
 
     </div>
+    <button onclick="ADLassetGraph.getAssetGlobalModelFromTriples()">test</button>
     <button style="justify-content: right" id="showBlenderButton" style="display: none" onclick="Blender.onLoaded()">Blender</button>
     <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
     <button onclick="MainController.UI.copyCurrentQuery()">cpQy</button>

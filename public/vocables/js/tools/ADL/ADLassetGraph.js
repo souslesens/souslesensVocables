@@ -15,7 +15,9 @@ var ADLassetGraph = (function () {
         var classes = {}
         var mappingsData
         async.series([
+
             function (callbackSeries) {
+
                 ADLassetGraph.getBuiltMappingsStats(assetLabel, function (err, result) {
                     if (err)
                         return callbackSeries(err)
@@ -27,6 +29,7 @@ var ADLassetGraph = (function () {
 
             //load mappings
             function (callbackSeries) {
+
                 $.ajax({
                     type: "POST",
                     url: Config.serverUrl,
@@ -43,6 +46,8 @@ var ADLassetGraph = (function () {
                     }
                 })
             },
+
+
             //draw graph
             function (callbackSeries) {
                 var relationalKeys = {}
@@ -308,6 +313,8 @@ var ADLassetGraph = (function () {
 
 
     self.drawAssetTablesMappingsGraph = function (assetLabel) {
+
+
         self.getAssetGlobalMappings(assetLabel, function (err, result) {
             if (err)
                 return MainController.UI.message(err);
@@ -343,11 +350,15 @@ var ADLassetGraph = (function () {
     }
 
     self.drawClassesAndPropertiesGraph = function (source, graphDiv, options, callback) {
+
+
         if (!source)
             source = ADLmappingData.currentSource
         if (!source) {
             return alert("select a source")
         }
+
+        var hasMappings = Config.sources[source].dataSource
         if (!options)
             options = {}
 
@@ -373,6 +384,9 @@ var ADLassetGraph = (function () {
                 },
                 //get classes from mappings
                 function (callbackSeries) {
+                  if(!hasMappings){
+                      return callbackSeries();
+                  }
 
                     ADLassetGraph.getAssetGlobalMappings(source, function (err, result) {
                         self.model = result.model;
@@ -406,6 +420,20 @@ var ADLassetGraph = (function () {
                         return callbackSeries();
                     })
                 },
+
+            function (callbackSeries) {
+                if(hasMappings){
+                    return callbackSeries();
+                }
+                ADLassetGraph.getAssetGlobalModelFromTriples(source,function(err, result){
+                    if(err)
+                        return callbackSeries(err)
+
+                })
+
+
+            },
+
                 function (callbackSeries) {
 
 
@@ -554,6 +582,101 @@ var ADLassetGraph = (function () {
 
 
     }
+
+    self.getAssetGlobalModelFromTriples = function (sourceLabel, callback) {
+
+
+        var assetGlobalModel = {
+            "predicates": {},
+            "model": {}
+
+        }
+        var ids = []
+        async.series([
+
+
+            // query triples
+            function (callbackSeries) {
+                var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "SELECT distinct ?subType ?prop ?objType ?subTypeLabel ?propLabel ?objTypeLabel from <http://data.total.com/resource/one-model/eccenca/valves/>  WHERE {\n" +
+                    "  ?sub ?prop ?obj.\n" +
+                    "  ?sub rdf:type ?subType.\n" +
+                    "  ?obj rdf:type ?objType.\n" +
+                    "  optional {?subType rdfs:label ?subTypeLabel}\n" +
+                    "   optional {?prop rdfs:label ?propLabel}\n" +
+                    "   optional {?objType rdfs:label ?objTypeLabel}\n" +
+                    "} "
+
+
+                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+
+                    var predicates = {}
+
+                    result.results.bindings.forEach(function (item) {
+                        ids.push(item.subType.value)
+                        ids.push(item.prop.value)
+                        ids.push(item.objType.value)
+                        if (!predicates[item.prop.value])
+                            predicates[item.prop.value] = {}
+
+                        if (!predicates[item.prop.value][item.subType.value])
+                            predicates[item.prop.value][item.subType.value] = []
+                        if (predicates[item.prop.value][item.subType.value].indexOf(item.objType.value) < 0)
+                            predicates[item.prop.value][item.subType.value].push(item.objType.value)
+                    })
+
+                    assetGlobalModel.predicates = predicates
+                    callbackSeries()
+                })
+            },
+
+            //get model
+            function (callbackSeries) {
+                var model = {}
+
+                var filterStr = Sparql_common.setFilter("id", ids);
+                var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "SELECT distinct ?id ?idLabel where { ?id rdfs:label ?idLabel.  " + filterStr + "}"
+
+
+                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                    if (err) {
+                        return callbackSeries(err)
+                    }
+                    result.results.bindings.forEach(function (item) {
+                        var label
+                        if (!item.idLabel)
+                            label = Sparql_common.getLabelFromId(item.id.value)
+                        else
+                            label = item.idLabel.value
+
+                        model[item.id.value] = {label: label}
+                    })
+
+                    assetGlobalModel.model = model
+                    callbackSeries()
+
+                })
+
+
+            }
+
+
+        ], function (err) {
+            return callback(err, assetGlobalModel)
+        })
+
+
+    }
+
 
     self.zoomOnTable = function (nodeData) {
         var visjsId = nodeData.id + ".id"

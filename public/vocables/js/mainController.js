@@ -223,7 +223,7 @@ var MainController = (function () {
         },
         showNodeInfos: function (sourceLabel, nodeId, divId, callback) {
 
-            Sparql_generic.getNodeInfos(sourceLabel, nodeId, null, function (err, result) {
+            Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels:true}, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }

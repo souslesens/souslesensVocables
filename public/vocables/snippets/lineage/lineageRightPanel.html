@@ -52,11 +52,14 @@
                 <button id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>Search</button>
             </div>
             <div>
-                <input type='checkbox' checked='checked' id='LineageProperties_allExactMatchSearchCBX'>Exact Match
+                <input type='checkbox'  id='LineageProperties_allExactMatchSearchCBX'>Exact Match
 
-                <input type='checkbox' id='LineageProperties_searchInAllSources'>All sources
+            <!--    <input type='checkbox' id='LineageProperties_searchInAllSources'>All sources--->
             </div>
-            <button onclick='Lineage_properties.drawGraph()'>draw</button>
+        <!--    <button onclick='Lineage_properties.drawRangeAndDomainsGraph()'>draw ranges and domains</button>
+
+            <button onclick='Lineage_properties.drawPredicateTriples()'>draw predicate triples</button>-->
+
             <div class="jstree" id="Lineage_propertiesTree"></div>
             <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
 

@@ -32,8 +32,8 @@ var Sparql_schema = (function () {
 
         query += " }order by ?classLabel ?childClassLabel limit " + self.queryLimit
 
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
@@ -59,8 +59,8 @@ var Sparql_schema = (function () {
 
             "} limit " + self.queryLimit
 
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
@@ -81,8 +81,8 @@ var Sparql_schema = (function () {
             "{ ?annotation rdf:type <http://www.w3.org/2002/07/owl#AnnotationProperty>. OPTIONAL{?annotation rdfs:label ?annotationLabel} } " +
             "limit " + self.queryLimit
 
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
@@ -109,8 +109,8 @@ var Sparql_schema = (function () {
             "    optional {?range rdfs:label ?rangeLabel}" +
 
             "}"
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
@@ -131,7 +131,12 @@ var Sparql_schema = (function () {
             options = {}
         var filterStr
         if (words) {
-            filterStr = "FILTER ( regex(str(?property),'" + words + "','i') ||regex(str(?subProperty),'" + words + "','i') || regex(?propertyLabel,'" + words + "','i')  || regex(?subPropertyLabel,'" + words + "','i') )"
+            if (options.exactMatch)
+                filterStr = "FILTER ( regex(str(?property),'^" + words + "$','i') || regex(?propertyLabel,'^" + words + "$','i') )"
+
+            else
+                filterStr = "FILTER ( regex(str(?property),'" + words + "','i') || regex(?propertyLabel,'" + words + "','i') )"
+            // filterStr = "FILTER ( regex(str(?property),'" + words + "','i') ||regex(str(?subProperty),'" + words + "','i') || regex(?propertyLabel,'" + words + "','i')  || regex(?subPropertyLabel,'" + words + "','i') )"
 
         } else
             filterStr = Sparql_common.setFilter("property", propertyIds)
@@ -161,10 +166,21 @@ var Sparql_schema = (function () {
                 filterStr +
                 "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
                 "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
-                "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } order by ?propertyLabel limit " + self.queryLimit
+                "} order by ?propertyLabel limit " + self.queryLimit
+
+            /* query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                 "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                 " PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+                 " select distinct *  " + fromStr + " WHERE  {" +
+                 "    ?property rdf:type owl:ObjectProperty OPTIONAL" +
+                 "{?property rdfs:label ?propertyLabel.}" +
+                 filterStr +
+                 "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
+                 "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
+                 "  OPTIONAL {?subProperty rdfs:subPropertyOf ?property. {?subProperty rdfs:label ?subPropertyLabel.}} } order by ?propertyLabel limit " + self.queryLimit*/
         }
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
@@ -197,8 +213,8 @@ var Sparql_schema = (function () {
                "   }" +*/
             " order by ?propertyLabel limit " + self.queryLimit
 
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
@@ -230,8 +246,8 @@ var Sparql_schema = (function () {
             "  }" +
             "}limit " + self.queryLimit
 
-        if(schema.sparql_url=="_default")
-            schema.sparql_url=Config.default_sparql_url
+        if (schema.sparql_url == "_default")
+            schema.sparql_url = Config.default_sparql_url
         var url = schema.sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
             if (err) {
@@ -305,8 +321,8 @@ var Sparql_schema = (function () {
                     "  }" +
 
                     "}limit "+self.queryLimit */
-            if(schema.sparql_url=="_default")
-                schema.sparql_url=Config.default_sparql_url
+            if (schema.sparql_url == "_default")
+                schema.sparql_url = Config.default_sparql_url
             var url = schema.sparql_url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: schema.source}, function (err, result) {
                 if (err)

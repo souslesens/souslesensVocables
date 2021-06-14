@@ -318,7 +318,7 @@ var ADLmappings = (function () {
 
 
         self.displayPropertiesTree = function (treeDivId) {
-            Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, function (err, jsTreeData) {
+            Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, {},function (err, jsTreeData) {
                 if (err)
                     return MainController.UI.message(err)
 

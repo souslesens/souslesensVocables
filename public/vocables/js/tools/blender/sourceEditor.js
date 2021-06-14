@@ -442,17 +442,21 @@ var SourceEditor = (function () {
         }
 
         self.showNodeInfos = function (divId, defaultLang, nodeId, data) {
-
+var valueLabelsMap={}
             var bindings = []
             var propertiesMap = {label: "", id: "", properties: {}};
             data.forEach(function (item) {
                 var propName = item.prop.value
-                var p = propName.lastIndexOf("#")
-                if (p == -1)
-                    var p = propName.lastIndexOf("/")
-                if (p > -1)
-                    var propName = propName.substring(p + 1)
+                if(item.propLabel){
+                    propName=item.propLabel.value
+                }else{
+                    propName=Sparql_common.getLabelFromId(item.prop.value)
+                }
+
                 var value = item.value.value;
+                if(item.valueLabel){
+                    valueLabelsMap[value]=item.valueLabel.value
+                }
                 /*   if (item.valueLabel)
                        value = item.valueLabel.value;*/
 
@@ -466,6 +470,7 @@ var SourceEditor = (function () {
                 } else {
                     if (!propertiesMap.properties[propName].value)
                         propertiesMap.properties[propName].value = [];
+
                     propertiesMap.properties[propName].value.push(value);
                 }
 
@@ -507,8 +512,12 @@ var SourceEditor = (function () {
                     str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + "</td>"
                     var valuesStr = ""
                     values.forEach(function (value, index) {
-                        if (value.indexOf("http") == 0)
-                            value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                        if (value.indexOf("http") == 0) {
+                            if(valueLabelsMap[value])
+                            value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                            else
+                                value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                        }
                         if (index > 0)
                             valuesStr += "<br>"
                         valuesStr += value
@@ -532,8 +541,12 @@ var SourceEditor = (function () {
                         propNameSelect += "<option " + selected + ">" + lang + "</option> ";
                         var valuesStr = ""
                         values.forEach(function (value, index) {
-                            if (value.indexOf("http") == 0)
+                            if (value.indexOf("http") == 0) {
+                                if(valueLabelsMap[value])
+                                    value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                else
                                 value += "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                            }
                             if (index > 0)
                                 valuesStr += "<br>"
                             valuesStr += value

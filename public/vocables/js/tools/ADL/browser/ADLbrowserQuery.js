@@ -617,7 +617,9 @@ var ADLbrowserQuery = (function () {
                         self.graphActions.removeFilter(filterData.id)
 
                     }
-                    visjsGraph.data.nodes.remove(ADLbrowserGraph.zeroCountIds)
+                    if( visjsGraph.data &&  visjsGraph.data.nodes) {
+                        visjsGraph.data.nodes.remove(ADLbrowserGraph.zeroCountIds)
+                    }
                     ADLbrowserGraph.zeroCountIds = []
                 }, 500)
 

@@ -384,9 +384,9 @@ var ADLassetGraph = (function () {
                 },
                 //get classes from mappings
                 function (callbackSeries) {
-                  if(!hasMappings){
-                      return callbackSeries();
-                  }
+                    if (!hasMappings) {
+                        return callbackSeries();
+                    }
 
                     ADLassetGraph.getAssetGlobalMappings(source, function (err, result) {
                         self.model = result.model;
@@ -421,18 +421,20 @@ var ADLassetGraph = (function () {
                     })
                 },
 
-            function (callbackSeries) {
-                if(hasMappings){
-                    return callbackSeries();
-                }
-                ADLassetGraph.getAssetGlobalModelFromTriples(source,function(err, result){
-                    if(err)
-                        return callbackSeries(err)
+                function (callbackSeries) {
+                    if (hasMappings) {
+                        return callbackSeries();
+                    }
+                    ADLassetGraph.getAssetGlobalModelFromTriples(source, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        self.classes = result.classes;
+                        self.model = result.model
+                        return callbackSeries()
+                    })
 
-                })
 
-
-            },
+                },
 
                 function (callbackSeries) {
 
@@ -587,7 +589,7 @@ var ADLassetGraph = (function () {
 
 
         var assetGlobalModel = {
-            "predicates": {},
+            "classes": {},
             "model": {}
 
         }
@@ -616,22 +618,22 @@ var ADLassetGraph = (function () {
                         return callbackSeries(err)
                     }
 
-                    var predicates = {}
+                    var classes = {}
 
                     result.results.bindings.forEach(function (item) {
                         ids.push(item.subType.value)
                         ids.push(item.prop.value)
                         ids.push(item.objType.value)
-                        if (!predicates[item.prop.value])
-                            predicates[item.prop.value] = {}
+                        if (!classes[item.subType.value])
+                            classes[item.subType.value] = {}
 
-                        if (!predicates[item.prop.value][item.subType.value])
-                            predicates[item.prop.value][item.subType.value] = []
-                        if (predicates[item.prop.value][item.subType.value].indexOf(item.objType.value) < 0)
-                            predicates[item.prop.value][item.subType.value].push(item.objType.value)
+                        if (!classes[item.subType.value][item.prop.value])
+                            classes[item.subType.value][item.prop.value] = []
+                        if (classes[item.subType.value][item.prop.value].indexOf(item.objType.value) < 0)
+                            classes[item.subType.value][item.prop.value].push(item.objType.value)
                     })
 
-                    assetGlobalModel.predicates = predicates
+                    assetGlobalModel.classes = classes
                     callbackSeries()
                 })
             },
@@ -660,8 +662,14 @@ var ADLassetGraph = (function () {
 
                         model[item.id.value] = {label: label}
                     })
+                    ids.forEach(function(id){
+                        if(! model[id])
+                            model[id]={label:Sparql_common.getLabelFromId(id)}
+                    })
 
                     assetGlobalModel.model = model
+
+
                     callbackSeries()
 
                 })
@@ -671,6 +679,9 @@ var ADLassetGraph = (function () {
 
 
         ], function (err) {
+           /* for(var id in  assetGlobalModel.classes){
+                assetGlobalModel.classes[id]={"http://www.w3.org/2000/01/rdf-schema#label":["xsd:string"]}
+            }*/
             return callback(err, assetGlobalModel)
         })
 

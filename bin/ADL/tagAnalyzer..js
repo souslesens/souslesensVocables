@@ -32,7 +32,7 @@ var TagAnalyzer = {
     processTags: function (callback) {
         var systemCodesMap = {};
         var subSystemCodesMap = {};
-
+        var tags=[]
         var tagCodesMap = {}
         async.series(
             [
@@ -57,8 +57,8 @@ var TagAnalyzer = {
                 },
                 //load tagCodes
                 function (callbackSeries) {
-                    var query = "select * from dbo. ONE_codification"
-                    SQLserverConnector.getData("MIE", query, function (err, result) {
+                    var query = "select  TagNumber,FunctionalClassID  from  ADL_tblTag "
+                    SQLserverConnector.getData("clov", query, function (err, result) {
                         if (err)
                             return callback(err)
                         result.forEach(function (item) {
@@ -78,20 +78,46 @@ var TagAnalyzer = {
                         return callbackSeries()
                     }
                     var str = "" + fs.readFileSync("D:\\NLP\\ontologies\\MIE\\distinctTags.txt")
-                    var tags = str.split(",")
+                     tags = str.split(",")
+                    return callbackSeries()
+
+                },
+
+
+                //load tags
+                function (callbackSeries) {
+                    if (false) {
+                        return callbackSeries()
+                    }
+                    var query = "select  TagNumber,FunctionalClassID from ADL_tblTag"
+                    SQLserverConnector.getData("clov", query, function (err, result) {
+                        if (err)
+                            return callback(err)
+                        result.forEach(function (item) {
+                            tags.push({number:item.TagNumber,functionalClass:item.FunctionalClassID})
+                        })
+
+                        return callbackSeries()
+                    })
+
+
+                },
+                function (callbackSeries) {
+
                     var patterns = {}
                     var output = []
                     var regexEquipment_501 = /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g
 
 
-                    tags.forEach(function (tag, regexEquipment_501) {
-                        var obj = TagAnalyzer.parseTag(tag);
+                    tags.forEach(function (tag) {
+                        var obj = TagAnalyzer.parseTag(tag.number,regexEquipment_501);
+                        obj.functionalClass=tag.functionalClass
                         if (obj)
                             output.push(obj)
                     })
 
 
-                    var x = output
+
                     var keys = Object.keys(output[0])
                     var str = ""
                     keys.forEach(function (key, index) {
@@ -106,7 +132,7 @@ var TagAnalyzer = {
 
                     output.forEach(function (item, index0) {
                         if (!item["system"])
-                            return str += "NA\t" + item.tag + "\n"
+                            return str +=  item.tag + "\n"
                         keys.forEach(function (key, index) {
 
 
@@ -134,9 +160,9 @@ var TagAnalyzer = {
 
                         var functionalClassCode = item["equipmentType"]
                         var functionalClassName = ""
-                        var functionalClass = tagCodesMap[functionalClassCode]
-                        if (functionalClass)
-                            functionalClassName = functionalClass.functionalClass_Name
+                        var functionalClassName =item.functionalClass// tagCodesMap[functionalClassCode]
+                     /*   if (functionalClass)
+                            functionalClassName = functionalClass.functionalClass_Name*/
 
                         str += functionalClassName + "\t"
 
@@ -144,25 +170,15 @@ var TagAnalyzer = {
                         str += "\n"
 
                     })
-                    fs.writeFileSync("D:\\NLP\\ontologies\\MIE\\parseTags.txt", str)
+                    fs.writeFileSync("D:\\NLP\\ontologies\\MIE\\parseTagsClov.txt", str)
 
-                    //    var x=str;
-                    /*   var pattern = TagAnalyzer.analyzeTag(tag)
-                       if (!patterns[pattern])
-                           patterns[pattern] = []
 
-                       patterns[pattern].push(tag)
-
-                   })
-                   for (var key in patterns) {
-                       console.log(key)
-                   }*/
 
                     return callbackSeries()
                 },
-                function (callbackSeries) {
-                    var str = "" + fs.readFileSync("D:\\NLP\\ontologies\\MIE\\distinctTags.txt")
-                    var tags = str.split(",")
+
+   /*             function (callbackSeries) {
+return callbackSeries()
                     var patterns = {}
                     var output = []
 
@@ -191,7 +207,7 @@ var TagAnalyzer = {
 
                     })
                     fs.writeFileSync("D:\\NLP\\ontologies\\MIE\\parseTagsB.txt", str)
-                }
+                }*/
 
 
             ], function (err) {
@@ -254,85 +270,226 @@ var TagAnalyzer = {
             ["TOTAL-T0000000014", "XX-NN-AA(A)(A)-NNNN(A)-AA(X)(X)(X)", "Electrical & instrumentation cables tag structure"],
             ["TOTAL-T0000000015", "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA(X)(X)(X)", "Tubing"]]
 
-    ,tagFormatsToRegex:function(){
-        var formats=[]
-        TagAnalyzer.clovFormats.forEach(function(item){
+    , tagFormatsToRegex: function () {
+        var formats = []
+        TagAnalyzer.clovFormats.forEach(function (item) {
             formats.push({
-                name:item[2],
-                id:item[0],
+                name: item[2],
+                id: item[0],
                 value: item[1]
             })
 
-            })
+        })
         var regexEquipment_501 = /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g
-       var x= formats
-       var formatRegexmap={}
-        formats.forEach(function(item){
-            var regexStr=""
-            var array=item.value.split("-")
-            var okLetters=["A","N","X"]
-            var optionalLetters={};
-            var mandatoryLetters={}
-            array.forEach(function(str,index){
+        var x = formats
+        var formatRegexmap = {}
+        formats.forEach(function (item) {
+            var regexStr = ""
+            var array = item.value.split("-")
+            var okLetters = ["A", "N", "X"]
+            var contents = []
+
+            array.forEach(function (str, index) {
+                var isOptional = false
 
 
+                var content = []
+
+                str = str.replace(/ /g, "")
+                for (var i = 0; i < str.length; i++) {
+
+                    var letter = str.charAt(i);
+                    if (letter == "(") {
+                        isOptional = true
+                        continue;
+                    } else if (letter == ")") {
+                        continue;
+                    }
 
 
-                    for (var i=0;i<str.length;i++) {
-                        var letter = str.charAt(i);
-                        if (letter == "(") {
-                            var letter2 = str.charAt(i + 1);
-                            if (!optionalLetters[letter2])
-                                optionalLetters[letter2] = 0
-                            optionalLetters[letter2] += 1
+                    if (i == 0) {
+                        content.push({letter: letter, optional: isOptional, count: 1})
+                    } else if (letter != str.charAt(i - 1) || content[content.length - 1].optional != isOptional) {
+                        content.push({letter: letter, optional: isOptional, count: 1})
+                    } else {
+                        content[content.length - 1].count += 1
+                    }
+                }
 
-                        } else {
-                            if (okLetters.indexOf(letter) > -1)
-                                if (!mandatoryLetters[letter])
-                                    mandatoryLetters[letter] = 0
-                            mandatoryLetters[letter] += 1
+                var x = content;
+                contents.push(content)
+
+
+                regexStr += "-"
+
+
+            })
+
+            var x = contents
+
+            var map = {
+                X: "[\\w\\d]",
+                A: "\\w",
+                N: "\\d"
+            }
+            var regexStr = ""
+            contents.forEach(function (content, index) {
+                if (index > 0)
+                    regexStr += "-"
+                regexStr += "(?<group" + index + ">"
+                content.forEach(function (item) {
+                    var cardinality = "{"
+                    if (item.optional)
+                        cardinality += "0,"
+                    cardinality += item.count
+                    cardinality += "}"
+                    var exp = map[item.letter]
+                    regexStr += exp + cardinality
+                })
+                regexStr += ")"
+
+            })
+
+            regexStr += ""
+
+
+            formatRegexmap[regexStr] = item
+        })
+        var xx = formatRegexmap
+    }
+    , ClovRegexps: {
+        "501":/^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g
+
+    },
+    ClovRegexpsXX: {
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})": {
+            "name": "Electrical equipment related to other main equipment",
+            "id": "TOTAL-T0000000004",
+            "value": "XX-NN-AA(A)(A)-NNNN(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{4})-(?<group3>\\d{4}\\w{0,1})": {
+            "name": "Piping equipments (SP items) tagging specific requirements",
+            "id": "TOTAL-T0000000002",
+            "value": "XX-NN-AAAA-NNNN(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{1}\\w{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})": {
+            "name": "Switchgears and MCC compartments",
+            "id": "TOTAL-T0000000003",
+            "value": "XX-NN-AA(A)(A)-NNNN(A)-A(A)(N)(N)(N)(N)(N)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>[\\w\\d]{4})-(?<group3>\\d{4}\\w{0,1})": {
+            "name": "Telecom equipments tagging specific requirements",
+            "id": "TOTAL-T0000000005",
+            "value": "XX-NN-XXXX-NNNN(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})": {
+            "name": "Field instruments & instrumented functions tag structure",
+            "id": "TOTAL-T0000000006",
+            "value": "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{1}[\\w\\d]{1}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})": {
+            "name": "Electrical consumer controls",
+            "id": "TOTAL-T0000000007",
+            "value": "XX-NN-AA(A)(A)-NNNN(A)-AX(X)(X)(X)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2})": {
+            "name": "Hardwired links between ICSS sub-systems",
+            "id": "TOTAL-T0000000008",
+            "value": "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})-(?<group3>\\w{2}\\w{0,1})-(?<group4>\\d{3})-(?<group5>\\w{1}\\d{2}\\w{0,1}[\\w\\d]{0,1})-(?<group6>\\w{0,1}\\w{0,1})": {
+            "name": "Piping tag structure",
+            "id": "TOTAL-T0000000009",
+            "value": "XX-NN-N(N)(N)(N)N-AA(A)-NNN-ANN(A)(X)-(A)(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})-(?<group3>\\w{2}\\w{0,1})-(?<group4>\\d{3})-(?<group5>\\w{2}\\d{2})": {
+            "name": "Piping supports",
+            "id": "TOTAL-T0000000010",
+            "value": "XX-NN-N(N)(N)(N)N-AA(A)-NNN-AANN"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\d{2})-(?<group3>\\w{3})-(?<group4>\\d{4})": {
+            "name": "Ducting tag structure",
+            "id": "TOTAL-T0000000011",
+            "value": "XX-NN-AANN-AAA-NNNN"
+        },
+        "(?<group0>[\\w\\d]{2}[\\w\\d]{0,1}[\\w\\d]{0,1})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\w{0,2}\\w{0,1})-(?<group3>\\d{0,1}\\d{0,1}\\d{0,2}\\w{0,1})-(?<group4>\\w{0,1}\\w{0,1})": {
+            "name": "Pipeline tag structure",
+            "id": "TOTAL-T0000000012",
+            "value": "XX(X)(X)-NN-N(N)(N)(N)NAA(A)-(N)(N)NN(A)-(A)(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2})-(?<group3>\\d{4}\\w{0,1})": {
+            "name": "Manual valves",
+            "id": "TOTAL-T0000000013",
+            "value": "XX-NN-AA-NNNN(A)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})": {
+            "name": "Electrical & instrumentation cables tag structure",
+            "id": "TOTAL-T0000000014",
+            "value": "XX-NN-AA(A)(A)-NNNN(A)-AA(X)(X)(X)"
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})": {
+            "name": "Tubing",
+            "id": "TOTAL-T0000000015",
+            "value": "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA(X)(X)(X)"
+
+        }
+    }
+
+    , parseClovTags: function () {
+        var tags = {}
+
+        async.series(
+            [
+
+
+                //load tags
+                function (callbackSeries) {
+                    var query = "select  TOP (1000) TagNumber from ADL_tblTag"
+                    SQLserverConnector.getData("clov", query, function (err, result) {
+                        if (err)
+                            return callback(err)
+                        result.forEach(function (item) {
+                            tags[item.TagNumber] = {}
+                        })
+
+                        return callbackSeries()
+                    })
+
+
+                },
+                //parse tags
+                function (callbackSeries) {
+
+                    for (var key in TagAnalyzer.ClovRegexps) {
+                        var regex = new RegExp(TagAnalyzer.ClovRegexps[key])
+                        for (var tag in tags) {
+                            var array = regex.exec(tag)
+                            if (array && array.length > 0) {
+                                var x = 3
+                            }
+
                         }
 
                     }
 
-                        for(var key in mandatoryLetters) {
-                            var map = {
-                                X: "[\\w\\d]",
-                                A: "\\w",
-                                N: "\\d"
-                            }
-                            var cardinality = "" + mandatoryLetters[key]
-                            if (optionalLetters[key]) {
-                                cardinality += "," + (mandatoryLetters[key] + optionalLetters[key])
-                            }
 
-
-                            var exp = map[key]
-                            regexStr += "(?<group" + index + ">" + exp + "{" + cardinality + "})"
-                        }
-
-
-                        regexStr+="-"
-
-
-                    
+                }
+            ], function (err) {
 
             })
 
 
-
-
-            formatRegexmap[regexStr]=item
-        })
-        var xx=formatRegexmap
     }
 
 
 }
+
 
 module.exports = TagAnalyzer
 
 //TagAnalyzer.deconcat()
 //TagAnalyzer.processTags("5FY1043")
 
-TagAnalyzer.tagFormatsToRegex()
+//TagAnalyzer.parseClovTags()
+
+TagAnalyzer.processTags()

@@ -18,17 +18,23 @@ var ADLmappingData = (function () {
 
     }
 
-
+    /**
+     *
+     * dgdgdfhfgh
+     * fghfghfh
+     *
+     *
+     */
     self.loadADL_SQLModel = function () {
 
         //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
         ADLmappings.clearMappings()
-
+        if (source == "")
+            return alert("select a ADL database")
         var source = $("#ADLmappings_DatabaseSelect").val();
         self.currentSource = source
         self.currentADLdataSource = Config.sources[source].dataSource;
-        if (source == "")
-            return alert("select a ADL database")
+
 
         $.ajax({
             type: "POST",

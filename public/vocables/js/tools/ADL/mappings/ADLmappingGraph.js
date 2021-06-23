@@ -93,7 +93,8 @@ var ADLmappingGraph = (function () {
                     MainController.UI.hidePopup("graphPopupDiv")
 
                 html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertySubject();\"> is property subject</span>" +
-                    "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertyObject();\"> is property object</span>"
+                    "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertyObject();\"> is property object</span>"+
+                "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.setLabelAssociation();\"> is label</span>"
             }
             $("#graphPopupDiv").html(html);
             MainController.UI.showPopup(point, "graphPopupDiv")
@@ -110,6 +111,14 @@ var ADLmappingGraph = (function () {
                 subject: self.currentNode
             }
 
+        },
+        setLabelAssociation:function(){
+            if(!self.currentAssociation.subject)
+                return alert("select a subject first")
+            self.currentAssociation.object = self.currentNode;
+            var x=self.currentAssociation
+            var property={data:{id:"http://www.w3.org/2000/01/rdf-schema#label", label:"rdfs:label"}}
+            self.graphActions.setAssociation(property, self.currentAssociation)
         },
 
         isPropertyObject: function () {

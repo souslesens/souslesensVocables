@@ -658,8 +658,8 @@ var ADLmappings = (function () {
         self.saveMappings = function () {
             var mappingName=ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable || ADLmappingData.currentADLtable.data.label
 
-
-            mappingName = ADLmappingData.currentADLdataSource.dbName + "_" +  mappingName
+            mappingName = ADLmappingData.currentSource + "_" +  mappingName
+         //   mappingName = ADLmappingData.currentADLdataSource.dbName + "_" +  mappingName
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
             if (comment === null)

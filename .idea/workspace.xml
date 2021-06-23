@@ -5,9 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/graph/graphMLexport.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/util..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/SPARQL_paths.js" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingGraph.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,10 +94,7 @@
     </key>
   </component>
   <component name="RunManager" selected="Node.js.bin\www">
-    <configuration name="ADLbrowserGraph.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser">
-      <method v="2" />
-    </configuration>
-    <configuration name="ADLcontroller..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" working-dir="$PROJECT_DIR$/bin/ADL">
+    <configuration name="ADLassetGraph.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/ADL">
       <method v="2" />
     </configuration>
     <configuration name="codification..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/codification..js" working-dir="$PROJECT_DIR$/bin/ADL">
@@ -98,13 +106,16 @@
     <configuration name="tagAnalyzer..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
+    <configuration name="util..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/util..js" working-dir="$PROJECT_DIR$/bin">
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.util..js" />
         <item itemvalue="Node.js.tagAnalyzer..js" />
+        <item itemvalue="Node.js.ADLassetGraph.js" />
         <item itemvalue="Node.js.dataController..js" />
         <item itemvalue="Node.js.codification..js" />
-        <item itemvalue="Node.js.ADLbrowserGraph.js" />
-        <item itemvalue="Node.js.ADLcontroller..js" />
       </list>
     </recent_temporary>
   </component>
@@ -196,7 +207,9 @@
       <workItem from="1622539032616" duration="24374000" />
       <workItem from="1623093347169" duration="3982000" />
       <workItem from="1623393694727" duration="12649000" />
-      <workItem from="1623484078505" duration="50235000" />
+      <workItem from="1623484078505" duration="52802000" />
+      <workItem from="1623754114218" duration="36472000" />
+      <workItem from="1623996026458" duration="49735000" />
     </task>
     <servers />
   </component>
@@ -235,12 +248,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
-          <line>124</line>
+          <line>130</line>
           <option name="timeStamp" value="307" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
-          <line>77</line>
+          <line>83</line>
           <option name="timeStamp" value="308" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -250,7 +263,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>235</line>
+          <line>251</line>
           <option name="timeStamp" value="337" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -259,27 +272,29 @@
           <option name="timeStamp" value="371" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>176</line>
-          <option name="timeStamp" value="376" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js</url>
           <line>2178</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="377" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>326</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="379" />
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
+          <line>694</line>
+          <option name="timeStamp" value="393" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>693</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="393" />
+          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
+          <line>357</line>
+          <option name="timeStamp" value="405" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
+          <line>467</line>
+          <option name="timeStamp" value="418" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
+          <line>661</line>
+          <option name="timeStamp" value="455" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

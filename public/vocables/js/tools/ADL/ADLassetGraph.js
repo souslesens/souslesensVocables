@@ -599,13 +599,14 @@ var ADLassetGraph = (function () {
 
             // query triples
             function (callbackSeries) {
-            var fromStr=Sparql_common.getFromStr(sourceLabel)
+                var fromStr = Sparql_common.getFromStr(sourceLabel)
                 var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "SELECT distinct ?subType ?prop ?objType ?subTypeLabel ?propLabel ?objTypeLabel  "+fromStr+"  WHERE {\n" +
+                    "SELECT distinct ?subType ?prop ?objType ?subTypeLabel ?propLabel ?objTypeLabel  " + fromStr + "  WHERE {\n" +
                     "  ?sub ?prop ?obj.\n" +
                     "  ?sub rdf:type ?subType.\n" +
                     "  ?obj rdf:type ?objType.\n" +
+                    "  filter( ?objType!=rdfs:Class)\n" +
                     "  optional {?subType rdfs:label ?subTypeLabel}\n" +
                     "   optional {?prop rdfs:label ?propLabel}\n" +
                     "   optional {?objType rdfs:label ?objTypeLabel}\n" +
@@ -641,35 +642,35 @@ var ADLassetGraph = (function () {
 
             //get model
             function (callbackSeries) {
-            var slices=common.sliceArray(ids,30)
+                var slices = common.sliceArray(ids, 30)
                 var model = {}
 
-                async.eachSeries(slices, function(ids, callbackEach){
-                var filterStr = Sparql_common.setFilter("id", ids);
-                var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                    "SELECT distinct ?id ?idLabel where { ?id rdfs:label ?idLabel.  " + filterStr + "}"
+                async.eachSeries(slices, function (ids, callbackEach) {
+                    var filterStr = Sparql_common.setFilter("id", ids);
+                    var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "SELECT distinct ?id ?idLabel where { ?id rdfs:label ?idLabel.  " + filterStr + " }"
 
 
-                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
-                    if (err) {
-                        return callbackEach(err)
-                    }
-                    result.results.bindings.forEach(function (item) {
-                        var label
-                        if (!item.idLabel)
-                            label = Sparql_common.getLabelFromId(item.id.value)
-                        else
-                            label = item.idLabel.value
+                    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                        if (err) {
+                            return callbackEach(err)
+                        }
+                        result.results.bindings.forEach(function (item) {
+                            var label
+                            if (!item.idLabel)
+                                label = Sparql_common.getLabelFromId(item.id.value)
+                            else
+                                label = item.idLabel.value
 
-                        model[item.id.value] = {label: label}
+                            model[item.id.value] = {label: label}
 
+                        })
+                        callbackEach()
                     })
-                    callbackEach()
-                })
 
-                },function(err) {
+                }, function (err) {
                     ids.forEach(function (id) {
                         if (!model[id])
                             model[id] = {label: Sparql_common.getLabelFromId(id)}
@@ -688,9 +689,9 @@ var ADLassetGraph = (function () {
 
 
         ], function (err) {
-           /* for(var id in  assetGlobalModel.classes){
-                assetGlobalModel.classes[id]={"http://www.w3.org/2000/01/rdf-schema#label":["xsd:string"]}
-            }*/
+            /* for(var id in  assetGlobalModel.classes){
+                 assetGlobalModel.classes[id]={"http://www.w3.org/2000/01/rdf-schema#label":["xsd:string"]}
+             }*/
             return callback(err, assetGlobalModel)
         })
 

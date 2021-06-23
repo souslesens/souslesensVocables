@@ -191,7 +191,7 @@ var visjsGraph = (function () {
             })
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
-                    if (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag)
+                    if (false || ( !params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
                         return;
                     var nodeId = params.nodes[0]
                     //   var nodes = self.data.nodes.getIds();
@@ -240,6 +240,7 @@ var visjsGraph = (function () {
         var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
             "export <button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>" +
             "<button onclick='visjsGraph.toSVG()'>SVG img</button>" +
+            "<button onclick='visjsGraph.toGraphMl()'>toGraphMl</button>" +
             "<button onclick='visjsGraph.exportGraph()'>copy Graph</button>" +
             "<button onclick='visjsGraph.saveGraph()'>save Graph</button>" +
             "Load<select id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>"+
@@ -284,6 +285,7 @@ var visjsGraph = (function () {
                 sortMethod: "hubsize",
                 // sortMethod:"directed",
             }
+            shakeTowards:true
             self.currentContext.simulationTimeOut = 10000
 
 
@@ -294,7 +296,9 @@ var visjsGraph = (function () {
                 sortMethod: "hubsize",
                 //  sortMethod:"directed",
                 levelSeparation: 200,
-                parentCentralization: true
+             //   parentCentralization: true,
+              //  shakeTowards:true
+
 
                 //   nodeSpacing:25,
 
@@ -696,6 +700,19 @@ var visjsGraph = (function () {
 
 
     }
+    self.toGraphMl=function(){
+        var visjsData= {
+            nodes:visjsGraph.data.nodes.get(),
+            edges:visjsGraph.data.edges.get(),
+        }
+
+        var xmlStr=GraphMlExport.VisjsDataToGraphMl(visjsData)
+        common.copyTextToClipboard(xmlStr)
+
+
+    }
+
+
 
     self.saveGraph = function () {
         if (!self.currentContext)
@@ -812,6 +829,8 @@ var visjsGraph = (function () {
 
     }
     self.listSavedGraphs = function () {
+        if(!Config || !Config.serverUrl)
+            return
         var payload = {
             listDirFiles: 1,
             dir: "graphs"

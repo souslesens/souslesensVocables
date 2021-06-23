@@ -316,8 +316,73 @@ var util = {
         })
         return pagesJson;
     }
+,
+    getFilesInDirRecursively: function (dirPath,options, callback) {
+        var path=require('path')
+        var dirsArray = []
+        var dirFilesMap = {}
+        var message=""
+        if(!options)
+            options={}
+        var rootDirName = path.basename(dirPath)
+
+        function recurse(parent) {
+            parent = path.normalize(parent);
+            if (!fs.existsSync(parent))
+                return ("dir doesnt not exist :" + parent)
+            if (parent.charAt(parent.length - 1) != path.sep)
+                parent += path.sep;
+
+
+            var files = fs.readdirSync(parent);
+            for (var i = 0; i < files.length; i++) {
+                var fileName = parent + files[i];
+                var stats = fs.statSync(fileName);
+                var infos = {lastModified: stats.mtimeMs};//fileInfos.getDirInfos(dir);
+
+                if (stats.isDirectory()) {
+                    dirFilesMap[fileName + "\\"] = [];
+                    dirsArray.push({type: "dir", name: files[i], parent: parent})
+                    recurse(fileName)
+                } else {
+                    var p = fileName.lastIndexOf(".");
+                    if (p < 0)
+                        continue;
+                    var extension = fileName.substring(p + 1).toLowerCase();
+                    if (options.acceptedExtensions && acceptedExtensions.indexOf(extension) < 0) {
+                       message+=("!!!!!!  refusedExtension " + fileName);
+                        continue;
+                    }
+                    if (options.maxDocSize &&  stats.size > maxDocSize) {
+                        message+=("!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ");
+                        continue;
+                    }
+                    if (!dirFilesMap[parent])
+                        dirFilesMap[parent] = []
+                    dirFilesMap[parent].push({type: "file", parent: parent, name: files[i], infos: infos})
+                    // dirsArray.push({type: "file", parent: parent, name: files[i], infos: infos})
+
+                }
+
+
+            }
+
+        }
+
+
+        recurse(dirPath, dirPath);
+        var x = dirsArray;
+        var y = dirFilesMap
+
+
+
+        return callback (null, dirFilesMap)
+
+    }
 
 
 }
 
 module.exports = util;
+
+

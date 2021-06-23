@@ -305,6 +305,8 @@
     "schema": null,
     "color": "#bcbd22"
   },
+
+
   "ISO_15926-part-13": {
     "graphUri": ["http://standards.iso.org/iso/15926/part13/","http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/"],
     "sparql_server": {
@@ -342,6 +344,29 @@
   },
   "ISO_14224": {
     "graphUri": "http://standards.iso.org/iso/14224/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+  "IOGP_ISO_14224_merged": {
+    "graphUri": ["http://data.total.com/resource/one-model/iogp_iso14224/","http://standards.iso.org/iso/14224/"],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "IOGP_ISO_14224": {
+    "graphUri": ["http://data.total.com/resource/one-model/iogp_iso14224/"],
     "sparql_server": {
       "url": "_default"
     },
@@ -715,6 +740,29 @@
     "color": "#bcbd22"
   },
 
+  "CLOV": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/clov/0.2/"
+    ],
+
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "clov",
+      "table_schema": "dbo"
+    },
+
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
   "MDM_2.3_AFTWIN_Old": {
     "graphUri":  [
       "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/"
@@ -830,6 +878,21 @@
   "ECCENCA-VALVES": {
     "graphUri":  [
       "http://data.total.com/resource/one-model/eccenca/valves/"
+    ],
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "schemaType": "INDIVIDUAL",
+
+    "schema": null,
+    "color": "#bcbd22"
+  },
+
+  "ECCENCA-VALVES-2": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/eccenca/valves/0.2/"
     ],
 
     "sparql_server": {

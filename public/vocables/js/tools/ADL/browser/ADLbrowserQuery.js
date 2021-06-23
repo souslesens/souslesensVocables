@@ -935,10 +935,16 @@ var ADLbrowserQuery = (function () {
                 })
 
                 var jstreeData = []
+                var label;
+
                 for (var type in types) {
+                    if(self.model[type])
+                        label=self.model[type].label
+                    else
+                        label=Sparql_common.getLabelFromId(type)
                     jstreeData.push({
                         id: type,
-                        text: self.model[type].label,
+                        text: label,
                         parent: source
                     })
                     types[type].forEach(function (item) {

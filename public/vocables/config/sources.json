@@ -7,6 +7,7 @@
     "label": "skos",
     "isOntology": false,
     "allSubclasses": true,
+    "schemaType": "SKOS",
     "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
     "newObject": {
       "treeChildrenClasses": {
@@ -290,10 +291,7 @@
     "schema": null,
     "color": "#e377c2"
   },
-  "_comment": "**************************************************************ontologies***************************************",
-  "_comment": "**************************************************************ontologies***************************************",
-  "_comment": "**************************************************************ontologies ONE MODEL ***************************************",
-  "_comment": "**************************************************************ontologies ONE MODEL  ***************************************",
+
   "ISO_15926-part-14": {
     "graphUri": "http://standards.iso.org/iso/15926/part14/",
     "sparql_server": {
@@ -376,8 +374,22 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "_comment": "**************************************************************ontologies autres***************************************",
-  "_comment": "**************************************************************ontologies autres***************************************",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   "NPD": {
     "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/> from <http://sws.ifi.uio.no/data/npd-v2/",
     "sparql_server": {
@@ -400,8 +412,10 @@
     "schema": null,
     "color": "#bcbd22"
   },
-  "_comment": "**************************************************************ontologies  ISO CFIHOS***************************************",
-  "_comment": "**************************************************************ontologies  ISO CFIHOS***************************************",
+
+
+
+
   "ISO_15926-PCA": {
     "graphUri": "",
     "sparql_server": {
@@ -489,11 +503,18 @@
     "color": "#bcbd22"
   },
 
-
-
-
-
-
+  "FMEA": {
+    "editable": false,
+    "graphUri": ["http://data.total.com/resource/one-model/fmea/valves/0.1/"],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf<http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL,INDIVIDUAL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
 
 
   "ONE-MODEL": {
@@ -551,8 +572,6 @@
 
 
 
-
-  "_comment": "**************************************************************Obsolete***************************************", "_comment": "**************************************************************Obsolete***************************************",
   "CFIHOS": {
     "graphUri": "",
     "sparql_server": {
@@ -575,8 +594,6 @@
 
 
 
-
-  "_comment": "**************************************************************assets***************************************",
 
 
 
@@ -672,7 +689,7 @@
 
   "MDM_2.3_AFTWIN": {
     "graphUri":  [
-      "http://data.total.com/resource/one-model/assets/aftwin-uk/0.4/"
+      "http://data.total.com/resource/one-model/assets/aftwin-uk/0.5/"
     ],
 
 
@@ -893,10 +910,14 @@
   "ECCENCA-VALVES-2": {
     "graphUri":  [
       "http://data.total.com/resource/one-model/eccenca/valves/0.2/"
+
     ],
 
     "sparql_server": {
-      "url": "_default"
+      "urlXX": "_default",
+      "url": "https://totquantum.eccenca.dev/dataplatform/proxy/default/sparql?query=",
+      "method": "GET",
+      "headers": {"bearer": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5UmhXQ01QbjZnaXBNRHBzWkVxcm5SVk9wNjhfVTN6SzZmYzVrQlFRV0lZIn0"}
     },
     "controller": "Sparql_INDIVIDUALS",
     "schemaType": "INDIVIDUAL",
@@ -915,5 +936,25 @@
     "schemaType": "INDIVIDUAL",
     "schema": null,
     "color": "#e377c2"
+  },
+
+
+  "DataDomains": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/assets/data-domains/0.1/"
+    ],
+
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "datadomains"
+    },
+    "schema": null,
+    "color": "#bcbd22"
   }
 }

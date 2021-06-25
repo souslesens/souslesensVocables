@@ -297,7 +297,8 @@ var ADLbrowser = (function () {
             loadAdlsList: function () {
                 var jstreeData = []
                 for (var source in Config.sources) {
-                    if (Config.sources[source].schemaType == "INDIVIDUAL")
+                    console.log(Config.sources[source].schemaType)
+                    if (Config.sources[source].schemaType.indexOf("INDIVIDUAL")>-1)
                         jstreeData.push({
                             id: source,
                             text: source,

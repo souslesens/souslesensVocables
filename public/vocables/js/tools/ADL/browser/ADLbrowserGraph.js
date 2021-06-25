@@ -10,7 +10,7 @@ var ADLbrowserGraph = (function () {
                 return;
 
             var html =
-                "<span class=\"popupMenuItem\" style='font-weight: bold;color:"+ADLbrowserQuery.model[node.data.type].color+"'> " + ADLbrowserQuery.model[node.data.type].label + "</span>" +
+                "<span class=\"popupMenuItem\" style='font-weight: bold;color:" + ADLbrowserQuery.model[node.data.type].color + "'> " + ADLbrowserQuery.model[node.data.type].label + "</span>" +
                 "    <span class=\"popupMenuItem\" style='font-weight: bold'> " + node.label + "</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.showgraphNodeNeighborhood();\"> node infos</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.selectNode()\">selectNode</span>" +
@@ -162,6 +162,7 @@ var ADLbrowserGraph = (function () {
                 keys[key] = {color: color}
             })
 
+
             data.data.forEach(function (item) {
                 var previousId = null
                 for (var key in keys) {
@@ -195,20 +196,56 @@ var ADLbrowserGraph = (function () {
 
                         })
                     }
-                    if (previousId) {
-                        var edgeId = previousId + "_" + id
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: previousId,
-                                to: id,
+                    ADLbrowserQuery.queryFilterNodes.forEach(function (filter) {
+
+                        var edgeNode;
+                        var edgeId
+                        if (filter.predicate && filter.predicate.object == type) {
+                            var target = item[filter.varName.substring(1)]
+                            if (target  &&  target.value!=id) {
+                                target = target.value
 
 
-                            })
+                                edgeId = id + "_" + target
+                                edgeNode = {
+                                    id: edgeId,
+                                    from: id,
+                                    to: target,
+                                }
+                            }
+                        } else if (filter.predicate && filter.predicate.subject == type) {
+                            var target = item[filter.varName.substring(1)]
+                            if (target &&  target.value!=id) {
+                                target = target.value
+                                edgeId = target + "_" + id
+
+                                edgeNode = {
+                                    id: edgeId,
+                                    from: target,
+                                    to: id
+                                }
+                            }
                         }
-                    }
-                    previousId = id
+                        if (edgeNode && !existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            visjsData.edges.push(edgeNode)
+
+                        }
+                        /*   if (previousId) {
+                       var edgeId = previousId + "_" + id
+                       if (!existingNodes[edgeId]) {
+                           existingNodes[edgeId] = 1
+                           visjsData.edges.push({
+                               id: edgeId,
+                               from: previousId,
+                               to: id,
+
+
+                           })
+
+                   }}
+                   previousId = id*/
+                    })
                 }
             })
 
@@ -316,7 +353,7 @@ var ADLbrowserGraph = (function () {
                                 source: ADLbrowser.currentSource,
                                 id: objId,
                                 label: item.objLabel.value,
-                                source:ADLbrowser.currentSource
+                                source: ADLbrowser.currentSource
                             },
                             size: self.defaultNodeSize,
 
@@ -440,7 +477,7 @@ var ADLbrowserGraph = (function () {
                             id: id,
                             label: item.objLabel.value,
                             type: object,
-                            source:ADLbrowser.currentSource
+                            source: ADLbrowser.currentSource
 
                         }
                         if (!existingClasses[object])

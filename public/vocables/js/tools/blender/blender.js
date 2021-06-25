@@ -114,7 +114,7 @@ var Blender = (function () {
 
                     function (callbackSeries) {
                         if (Blender.currentSource)
-                            if(Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType=="SKOS") {
+                            if(Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType.indexOf("SKOS")>-1) {
                                 self.showFilteredTaxonomyTree(function (err, result) {
                                     callbackSeries(err);
                                 })
@@ -490,7 +490,7 @@ var Blender = (function () {
                 }
 
 
-                if (Config.sources[nodeData.source].schemaType == "OWL") {
+                if (Config.sources[nodeData.source].schemaType.indexOf("SKOS")>-1) {
 
                     var broaderPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
                     execMoveQuery(nodeData.id, broaderPredicate, oldParentData.id, newParentData.id, function (err, result) {
@@ -672,7 +672,7 @@ var Blender = (function () {
                         var additionalTriplesNt = []
 
 
-                        if (Config.sources[self.currentSource].schemaType == "SKOS") {
+                        if (Config.sources[self.currentSource].schemaType.indexOf("SKOS")>-1){
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#exactMatch> <" + oldId + ">.")
                         } else if (Config.sources[self.currentSource].schemaType == "OWL") {
@@ -983,16 +983,17 @@ var Blender = (function () {
 
             ,
            getSourceDefaultRdfType:function(){
-                if(Config.sources[ self.currentSource].schemaType=="SKOS")
+                if(Config.sources[ self.currentSource].schemaType.indexOf("SKOS")>-1)
                     return "concept";
-               if(Config.sources[ self.currentSource].schemaType=="OWL") {
+               if(Config.sources[ self.currentSource].schemaType.indexOf("OWL")>-1) {
                    return "class";
                }
                return null;
 
            },
             editNode: function (type) {
-                var type=self.nodeEdition.getSourceDefaultRdfType();
+               /* if(!type)
+                type=self.nodeEdition.getSourceDefaultRdfType();*/
 
                 if (!type)
                     alert(" no type")

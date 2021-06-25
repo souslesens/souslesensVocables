@@ -742,6 +742,8 @@ var ADLbrowserQuery = (function () {
             }
 
             var queryFilterNodesMap = {}
+
+
             queryFilterNodes.forEach(function (filter) {
                 if (filter.predicate)
                     queryFilterNodesMap[filter.predicate.predicate] = filter.predicate

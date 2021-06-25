@@ -330,7 +330,7 @@ var common = (function () {
         self.getAllsourcesWithType = function (type) {
             var sources = [];
             Object.keys(Config.sources).sort().forEach(function (item) {
-                if (!type || Config.sources[item].schemaType == type)
+                if (!type || Config.sources[item].schemaType.indexOf(type)>-1)
                     sources.push(item)
             })
             return sources;

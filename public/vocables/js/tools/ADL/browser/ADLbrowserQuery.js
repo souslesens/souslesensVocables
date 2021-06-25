@@ -337,6 +337,7 @@ var ADLbrowserQuery = (function () {
                     logicalMode: logicalMode,
                     varName: varName,
                     count: 1,
+                    classId:field,
                     predicate: self.currentQueryDialogPredicates[predicateIndex]
                 }
                 self.executeQuery(self.currentNode, options, function (err, queryResult) {
@@ -743,70 +744,95 @@ var ADLbrowserQuery = (function () {
 
             }
 
-            var queryFilterNodesMap = {}
-            queryFilterNodes.forEach(function (filter) {
-                if (filter.predicate)
-                    queryFilterNodesMap[filter.predicate.predicate] = filter.predicate
-            })
 
 
             // join classes (anonym predicate)
             var message = null
+            var filterSubType
+            var filterObjType
 
             var varName2 = varName;
+
+            console.log(varName2+"--------------------")
+
+
+
+
+           /* if (index == 0 && options.predicate) {// when count (predicate comes from dialog
+                filterSubType=options.predicate.subject
+                filterObjType=options.predicate.object
+                predicateStr = " <" + options.predicate.predicate + "> "
+                if (true || options.predicate.inverse)
+                    predicateStr += "|^" + predicateStr
+            } else {
+                var previouPredicate = queryFilterNodes[index - 1].predicate
+                filterSubType=queryFilterNodes[index - 1].predicate.subject
+                filterObjType=queryFilterNodes[index - 1].predicate.object
+                predicateStr = " <" + previouPredicate.predicate + "> "
+                if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
+                    predicateStr += "|^" + predicateStr
+            }*/
+
+            if(  options.predicate) {// links new filter predicate to a previous varName matching
+                var   predicateStr = " <" + options.predicate.predicate + "> "
+                predicateStr= predicateStr+ "|^" + predicateStr
+                    var previousVarName=null;
+                    if (queryFilterNodes.length == 1) {// the first query has no predicate
+                        previousVarName = queryFilterNodes[0].varName
+                        predicateStr=" " + varName2 + predicateStr + previousVarName + ". "
+                        queryFilterNodes[0].filter+=predicateStr
+                        self.currentNode.filter+=predicateStr;
+                    } else {
+                        queryFilterNodes.forEach(function (filterNodeData, index2) {
+                            if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
+                                previousVarName = filterNodeData.varName
+                                predicateStr=" " + varName2 + predicateStr + previousVarName + ". "
+                                filterNodeData.filter+=predicateStr
+                                self.currentNode.filter+=predicateStr;
+                            }
+                        })
+                    }
+                }
+
+
+
+
+            //build query with all previous filters and varnames
+
             queryFilterNodes.forEach(function (filterNodeData, index) {
                 if (!filterNodeData)
                     return
-                if (!queryFilterNodesMap[options.predicate])
-                    ;
 
-                var predicates = [];
 
-                if (true) {
-                    if (index == 0) {
-                        if (!varName2) {
-                            var filter2 = filterNodeData.filter;
-                            where += filter2
-                            return;
+                    /*    if (index == 0) {
+                            if (!varName2) {
+                                var filter2 = filterNodeData.filter;
+                                where += filter2
+                                return;
+                            }
+                            previousVarName = queryFilterNodes[index].varName
+                        } else {
+                            previousVarName = queryFilterNodes[index - 1].varName
+                            varName2 = queryFilterNodes[index].varName
                         }
-                        previousVarName = queryFilterNodes[index].varName
-                    } else {
-                        previousVarName = queryFilterNodes[index - 1].varName
-                        varName2 = queryFilterNodes[index].varName
-                    }
-
-                    var subjectOb = self.varNamesMap[previousVarName];
-                    var objectId = self.varNamesMap[varName2].id
-
-                    var predicateStr
-                    if (index == 0 && options.predicate) {// when count (predicate comes from dialog
-                        predicateStr = " <" + options.predicate.predicate + "> "
-                        if (true || options.predicate.inverse)
-                            predicateStr += "|^" + predicateStr
-                    } else {
-                        var previouPredicate = queryFilterNodes[index - 1].predicate
-                        predicateStr = " <" + previouPredicate.predicate + "> "
-                        if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
-                            predicateStr += "|^" + predicateStr
-                    }
-                }
-                if (false) {
-
-                    self.currentMatchingFilterNode
+                        where += "" + varName2 + predicateStr + previousVarName + ". "*/
 
 
-                }
 
-                where += "" + varName2 + predicateStr + previousVarName + ". "
-                if (!options.count) {
+
+
+                where += filterNodeData.filter
+
+
+                varName2 =filterNodeData.varName
+                if ( !options.count) {
                     where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
-                    where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
-                    where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
+                  //  where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
+                  //  where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
                     where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
 
                 }
-                var filter2 = filterNodeData.filter;
-                where += filter2
+
 
 
             })

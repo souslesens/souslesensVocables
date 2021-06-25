@@ -10,7 +10,9 @@ var ADLmappingData = (function () {
         var adls = []
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
-            if (sourceObj.schemaType == "INDIVIDUAL" && sourceObj.dataSource && sourceObj.dataSource.dbName) {
+            if(!sourceObj.schemaType)
+                console.log(key)
+            if (sourceObj.schemaType.indexOf("INDIVIDUAL")>-1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
                 adls.push({id: key, label: key})
             }
         }

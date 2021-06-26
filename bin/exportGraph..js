@@ -108,4 +108,8 @@ var graphUri = "http://souslesens.org/data/total/ep/";
 var filePath = "D:\\NLP\\rdfs\\mediawiki.nt"
 
 
+var graphUri = "http://data.total.com/resource/one-model/iogp_iso14224/";
+var filePath = "D:\\NLP\\rdfs\\IOGP-14224.nt"
+
+
 exportGraph.execute(serverUrl, graphUri, filePath)

@@ -13,6 +13,12 @@ var common = (function () {
 
         self.jstree={
             loadJsTree : function (jstreeDiv, jstreeData, options, callback) {
+                var jstreeData2=[];
+                jstreeData.forEach(function(item){
+                    if( item.parent!=item.id)
+                        jstreeData2.push(item)
+                })
+                jstreeData=jstreeData2
 
 
                 if (!options)

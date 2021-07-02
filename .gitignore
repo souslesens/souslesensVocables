@@ -103,7 +103,6 @@ dist
 # TernJS port file
 .tern-port
 public/vocables/images/descriptionXX.png
-config/users/users.json
-config/users/users.json
+
 *.json
 

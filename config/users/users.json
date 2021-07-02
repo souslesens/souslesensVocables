@@ -63,10 +63,10 @@
     ]
   },
   "LOGILAB": {
-    "login": "skosBlender",
+    "login": "LOGILAB",
     "password": "ONE-sense!rDf",
     "groups": [
-      "reader_owl"
+      "admin"
     ]
   },
   "R.DAIAN": {
@@ -78,6 +78,13 @@
   },
   "D.SIMON": {
     "login": "D.SIMON",
+    "password": "ONE-sense!rDf",
+    "groups": [
+      "reader_owl"
+    ]
+  },
+  "V.LAMBERT": {
+    "login": "V.LAMBERT",
     "password": "ONE-sense!rDf",
     "groups": [
       "reader_owl"

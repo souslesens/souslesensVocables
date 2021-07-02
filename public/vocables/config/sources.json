@@ -914,13 +914,28 @@
     ],
 
     "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "schemaType": "INDIVIDUAL",
+
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ECCENCA-VALVES-2REMOTE": {
+    "graphUri":  [
+      "http://data.total.com/resource/one-model/eccenca/valves/0.2/"
+
+    ],
+
+    "sparql_server": {
       "urlXX": "_default",
       "url": "https://totquantum.eccenca.dev/dataplatform/proxy/default/sparql?query=",
       "method": "GET",
       "headers": {"bearer": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5UmhXQ01QbjZnaXBNRHBzWkVxcm5SVk9wNjhfVTN6SzZmYzVrQlFRV0lZIn0"}
     },
     "controller": "Sparql_INDIVIDUALS",
-    "schemaType": "INDIVIDUAL",
+    "schemaType": "INDIVIDUALXX",
 
     "schema": null,
     "color": "#bcbd22"

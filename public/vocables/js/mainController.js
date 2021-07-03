@@ -272,8 +272,9 @@ var MainController = (function () {
 
         setCredits: function () {
 
-            var html = "<div><span class='topTitle'>SousLeSens Vocables</span><br>" +
-                "  <img src=\"images/description.png\"></div>"
+            var html = "<div>"+
+                "  <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" +
+                "</div>"
             $("#graphDiv").html(html)
 
 

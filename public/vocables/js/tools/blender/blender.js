@@ -807,7 +807,7 @@ var Blender = (function () {
                                             }
                                         })
                                         setTimeout(function () {
-                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId, parentJstreeId: parentJstreeId}, function (err, result) {
+                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId}, function (err, result) {
                                                 newParentId = result;
                                             }, 500)
                                         })

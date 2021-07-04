@@ -280,6 +280,13 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
         })
     }
+        if (req.body.annotateDocumentsTree) {
+            var DirContentAnnotator=require("../bin/annotator/dirContentAnnotator.")
+            DirContentAnnotator.parseDocumentsDir(req.body.rootDirPath,req.body.name,JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
 
     if (req.body.writeUserLog) {
         var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;

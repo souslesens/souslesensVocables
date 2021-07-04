@@ -201,6 +201,7 @@ var Sparql_SKOS = (function () {
             if (!options) {
                 options = {depth: 0}
             }
+
             options.source = sourceLabel
             setVariables(sourceLabel);
 
@@ -209,8 +210,10 @@ var Sparql_SKOS = (function () {
             query += prefixesStr;
             query += " select distinct * " + fromStr + "  WHERE {{"
 
+            if(true || options.searchAltLabels)
+                prefLabelPredicate+="|skos:altLabel"
             query += "?concept " + prefLabelPredicate + " ?conceptLabel. ";
-            if (lang && !options.noLang)
+            if (lang && lang!="" &&  !options.noLang)
                 query += "filter( lang(?conceptLabel)=\"" + lang + "\")"
             query += filterStr;
             query += "OPTIONAL{?concept rdf:type ?type.}"

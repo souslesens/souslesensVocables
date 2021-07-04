@@ -139,6 +139,8 @@ var Sparql_generic = (function () {
 
 
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+            if(!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller)
+                return callback(null,[])
             $("#waitImg").css("display", "block");
             if (!options) {
                 options = {depth: 0}

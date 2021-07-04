@@ -165,7 +165,7 @@
     "graphUri": "http://www.eionet.europa.eu/gemet/",
     "schemaType": "SKOS",
     "predicates": {
-      "lang": "en",
+      "lang": "",
       "prefLabel": "rdfs:label|skos:prefLabel",
       "broaderPredicate": "^skos:member|skos:broader",
       "topConceptFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",

@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@futpib/tika-server-client": "0.0.5",
     "@triply/yasgui": "^4.1.1",
     "async": "^3.2.0",
     "base64-stream": "^1.0.0",
@@ -49,7 +50,7 @@
     "streams": "^0.1.0",
     "superagent": "^5.3.1",
     "superagent-proxy": "^2.1.0",
-    "tika-server-client": "0.0.3",
+    "tika-server": "^1.2.11",
     "util": "^0.12.1",
     "winston": "^3.3.3",
     "xlsx": "^0.14.3",

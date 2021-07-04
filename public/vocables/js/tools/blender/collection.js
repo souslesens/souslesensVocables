@@ -93,7 +93,7 @@ var Collection = (function () {
             menuItems.deleteNode = {
                 label: "Delete node",
                 action: function (obj, sss, cc) {
-                    Blender.menuActions.jstree.deleteNode("collection");
+                    Blender.menuActions.deleteNode("collection");
                 },
 
 

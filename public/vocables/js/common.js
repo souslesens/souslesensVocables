@@ -124,8 +124,8 @@ var common = (function () {
                     }
                 }).
                 on("delete_node.jstree", function (node, parent) {
-                    if (options.onjstree.deleteNodeFn) {
-                        options.onjstree.deleteNodeFn(node, parent)
+                    if (options.deleteNodeFn) {
+                        options.deleteNodeFn(node, parent)
                         self.jstree.setTreeAppearance()
                     }
                 })
@@ -172,9 +172,10 @@ var common = (function () {
                     var parentNode = parentNodeId;
 
                     if (node.parent)
-                        parentNode = node.parent
-                    if (parentNode.indexOf("D101001101") > -1)
-                        var x = 3
+                        parentNode = node.parent;
+                    if(!parentNode)
+                        return;
+
                     $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
                         $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
 

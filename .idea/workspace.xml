@@ -7,17 +7,7 @@
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotatorLive..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotatorLive..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/spacyConfig.txt" beforeDir="false" afterPath="$PROJECT_DIR$/bin/spacyConfig.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/users/users.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/users/users.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -105,16 +95,16 @@
     <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/exportGraph..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="util..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/util..js" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="sparql_generic.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" working-dir="$PROJECT_DIR$/public/vocables/js/sparqlProxies">
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Node.js.dirContentAnnotator..js" />
+        <item itemvalue="Node.js.sparql_generic.js" />
         <item itemvalue="Node.js.definitions.js" />
         <item itemvalue="Node.js.exportGraph..js" />
         <item itemvalue="Node.js.PIbuilder..js" />
-        <item itemvalue="Node.js.util..js" />
       </list>
     </recent_temporary>
   </component>
@@ -213,7 +203,7 @@
       <workItem from="1625129374007" duration="10198000" />
       <workItem from="1625202132680" duration="11601000" />
       <workItem from="1625384573631" duration="7765000" />
-      <workItem from="1625410711012" duration="7036000" />
+      <workItem from="1625410711012" duration="20335000" />
     </task>
     <servers />
   </component>
@@ -357,6 +347,18 @@
           <line>50</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="531" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>353</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="556" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>402</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="558" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

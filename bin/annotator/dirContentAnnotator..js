@@ -17,7 +17,7 @@ var maxDocSize = 20 * 1000 * 1000;
 var tikaServerUrl = '127.0.0.1:41000'
 var spacyServerUrl = "http://51.178.39.209:8000/pos"
 
-var parsedDocumentsHomeDir="C:\\Users\\claud\\Downloads\\"
+var parsedDocumentsHomeDir = "C:\\Users\\claud\\Downloads\\"
 var Inflector = require('inflected');
 var tikaServer = null
 var tikaserverStarted = false
@@ -36,7 +36,7 @@ var DirContentAnnotator = {
         ;(async () => {
 
             tikaServer.on("debug", (msg) => {
-                console.log(`DEBUG: ${msg}`)
+                //  console.log(`DEBUG: ${msg}`)
 
             })
             await tikaServer.start()
@@ -233,12 +233,14 @@ var DirContentAnnotator = {
                                     files[index].nouns = []
                                     result.data.forEach(function (sentence) {
                                         sentence.tags.forEach(function (item) {
-                                            if (item.tag.indexOf("NN") > -1) {//item.tag.indexOf("NN")>-1) {
-                                                var noun = Inflector.singularize(item.text.toLowerCase());
-                                                if (!files[index].nouns.indexOf(noun)<0)
-                                                    files[index].nouns.push(noun);
+                                            if (item.text.length > 2)
+                                                if (item.tag.indexOf("NN") > -1) {//item.tag.indexOf("NN")>-1) {
+                                                    var noun = Inflector.singularize(item.text.toLowerCase());
+                                                    if (files[index].nouns.indexOf(noun) < 0)
 
-                                            }
+                                                        files[index].nouns.push(noun);
+
+                                                }
                                         })
                                     })
                                     callbackEach()
@@ -259,8 +261,8 @@ var DirContentAnnotator = {
                 if (err)
                     DirContentAnnotator.socket.message(err);
                 else {
-                    var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name+".json")
-                    storePath=parsedDocumentsHomeDir + name+".json"
+                    var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + ".json")
+                    storePath = parsedDocumentsHomeDir + name + ".json"
                     fs.writeFileSync(storePath, JSON.stringify(files, null, 2))
                 }
 
@@ -268,107 +270,195 @@ var DirContentAnnotator = {
         )
     }
 
-    , annotateParsedDocuments:function(name,sources){
-        var parsedDocumentsFilePath=parsedDocumentsHomeDir+name+".json"
-        var str=""+fs.readFileSync(parsedDocumentsFilePath)
-        var data=JSON.parse(str);
-        async.eachSeries(data,function(item,callbackEach){
-            var regexStr = "("
-            textNouns.forEach(function (noun, index) {
-                if (index > 0)
-                    regexStr += "|";
-                regexStr += "^" + noun+ "$";
-            })
-            regexStr += ")"
+    , annotateParsedDocuments: function (name, sources, options, callback) {
+        var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".json"
+        var str = "" + fs.readFileSync(parsedDocumentsFilePath)
+        var data = JSON.parse(str);
+
+        var conceptsMap = {}
+
+        async.eachSeries(data, function (fileObj, callbackEachDocument) {
+            if (!conceptsMap[fileObj.path])
+                conceptsMap[fileObj.path] = {subjects: fileObj.subjects, sources: {}}
+
+            var nounSlices = util.sliceArray(fileObj.nouns, 50);
+            async.eachSeries(nounSlices, function (nounSlice, callbackEachNounSlice) {
+                var nounsMap = {}
+                var regexStr = "("
+                nounSlice.forEach(function (noun, index) {
 
 
-            var filter = "  regex(?prefLabel, \"" + regexStr + "\", \"i\")";
-
-            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                "SELECT * " +
-                "FROM <" + source.graphUri + "> " +
-                "WHERE {" +
-                "?id skos:prefLabel|skos:altLabel ?prefLabel ."
-            if(source.predicates && source.predicates.lang)
-                query+= "FILTER (lang(?prefLabel) = '" + source.predicates.lang + "')"
-
-            query+= " filter " + filter + "} limit 10000";
+                    if (index > 0)
+                        regexStr += "|";
+                    if (true || options.exactMatch)
+                        regexStr += "^" + noun + "$";
+                    else
+                        regexStr += noun;
+                })
+                regexStr += ")"
 
 
-            var url = source.sparql_server.url;
-            var queryOptions ="";// "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
+                var filter = "  regex(?label, \"" + regexStr + "\", \"i\")";
 
-            var params = {query: query}
-            var headers = {
-                "Accept": "application/sparql-results+json",
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            httpProxy.post(url, headers, params, function (err, result) {
-                if (err) {
-                    return callbackEachNounsSlice(err);
-                }
-                var bindings = [];
-                var ids = [];
-                if (result.results.bindings.length > 0) {
-                    result.results.bindings.forEach(function (item) {
+                async.eachSeries(sources, function (source, callbackEachSource) {
+                        conceptsMap[fileObj.path].sources[source.name] = []
+                        var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                            "SELECT * " +
+                            "FROM <" + source.graphUri + "> " +
+                            "WHERE {" +
+                            "?id skos:prefLabel|skos:altLabel ?label ."
+                        if (source.predicates && source.predicates.lang)
+                            query += "FILTER (lang(?label) = '" + source.predicates.lang + "')"
+
+                        query += " filter " + filter + "} limit 10000";
+
+
+                        var url = source.sparql_server.url;
+                        var queryOptions = "";// "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
+
+                        var params = {query: query}
+                        var headers = {
+                            "Accept": "application/sparql-results+json",
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                        httpProxy.post(url, headers, params, function (err, result) {
+                            if (err) {
+                                return callbackEachSource(err);
+                            }
+                            var bindings = [];
+                            var ids = [];
+
+                            result.results.bindings.forEach(function (item) {
+                                conceptsMap[fileObj.path].sources[source.name].push({
+                                    label: item.label.value,
+                                    id: item.id.value
+                                })
+                            })
+                            callbackEachSource()
+                        })
+
+
+                    }
+                    , function (err) {
+                        callbackEachNounSlice()
                     })
-                }
+            }, function (err) {
+                return callbackEachDocument()
             })
-
-        },function(err){
-
+        }, function (err) {
+            if (err)
+                return DirContentAnnotator.socket.message(err);
+            else {
+                var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + "_Concepts.json")
+                storePath = parsedDocumentsHomeDir + name + "_Concepts.json"
+                fs.writeFileSync(storePath, JSON.stringify(conceptsMap, null, 2))
+            }
         })
-
-
-
 
 
     }
 
+    , getConceptsSubjectsTree: function (corpusName) {
+
+        var storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.json"
+        var str = "" + fs.readFileSync(storePath)
+        var data = JSON.parse(str);
+
+        var conceptsTree = {}
+        var parents = {}
+        for (var key in data) {
+            var fileObj = data[key]
+
+            fileObj.subjects.forEach(function (subject, index) {
+                var parent;
+                if (index == 0)
+                    parent = corpusName
+                else
+                    parent = fileObj.subjects[index - 1]
+                if (!parents[parent])
+                    parents[parent] = []
+                if (subject!="" && parents[parent].indexOf(subject) < 0)
+                    parents[parent].push(subject)
+
+            })
+
+
+        }
+        function recurse(node){
+            var children=parents[node.text]
+            if(children) {
+                children.forEach(function (child) {
+                    var childObj={text: child, children: [],files:[]}
+                    node.children.push(childObj)
+                    recurse(childObj)
+                })
+            }
+
+        }
+        var rootNode={text:corpusName,children:[],files:[]}
+        recurse(rootNode)
+        var x=rootNode
+
+
+        var x = parents;
+
+
+    }
 
 }
 
+
 module.exports = DirContentAnnotator;
-if (false
-) {
+if (false) {
 
     DirContentAnnotator.getDirContent("D:\\NLP\\ontologies")
 }
 if (false) {
-    var filePath = "D:\\NLP\\ontologies\\incose_ISO_TC67_MBSE_JCL.docx"
-    var filePath = "D:\\Total\\2020\\JeanCharles\\Proposition  de prestation Total EP Quantum-next-gen 1.pptx"
-    DirContentAnnotator.getDocTextFromTika(filePath)
+    DirContentAnnotator.parseDocumentsDir("D:\\Total\\2020\\_testAnnotator", "test", function (err, result) {
 
-
+    });
 }
-if (true) {
-    var options = [
+
+
+var sources = {
+    "Total-CTG":
         {
+            name: "Total-CTG",
+            "editable": false,
             "controller": "Sparql_SKOS",
             "sparql_server": {
-                "url": "http://vps-c46025b8.vps.ovh.net:8890/sparql/"
+                "url": "http://51.178.139.80:8890/sparql"
             },
-            "graphUri": "http://skos.um.es/unesco6/",
+            "graphUri": "http://data.total.com/resource/thesaurus/ctg2/",
             "schemaType": "SKOS",
             "predicates": {
-                "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.filter( NOT EXISTS{?topConcept skos:broader ?x})",
+                "broaderPredicate": "skos:broader|^skos:hasTopConcept",
                 "lang": "en"
             },
-            "color": "#98df8a"
+
+            "color": "#9edae5"
         }
-
-    ]
-
-    if (true) {
-        DirContentAnnotator.parseDocumentsDir("D:\\Total\\2020\\_testAnnotator", "test", function (err, result) {
-
-        });
-    }
-
-    //  DirContentAnnotator.startTikaServer()
-    if (false) {
-        DirContentAnnotator.getDocTextContent("D:\\Total\\2020\\_testAnnotator\\sujet1\\sujet1-1\\sujet1-1-1\\test.docx", function (err, result) {
-            var x = result
-        })
-    }
 }
+
+
+if (false) {
+    DirContentAnnotator.annotateParsedDocuments("test", [sources["Total-CTG"]], {}, function (err, result) {
+
+    });
+}
+
+
+if (true) {
+    DirContentAnnotator.getConceptsSubjectsTree("test", function (err, result) {
+
+    });
+}
+
+
+//  DirContentAnnotator.startTikaServer()
+if (false) {
+    DirContentAnnotator.getDocTextContent("D:\\Total\\2020\\_testAnnotator\\sujet1\\sujet1-1\\sujet1-1-1\\test.docx", function (err, result) {
+        var x = result
+    })
+}
+

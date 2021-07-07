@@ -21,6 +21,7 @@ var OneModelManager = require('../other/oneModel/OneModelManager.');
 var ADLcontroller = require('../bin/ADL/ADLcontroller.')
 var DataController=require('../bin/dataController.')
 var ADLbuilder = require("../bin/ADL/ADLbuilder.")
+var DirContentAnnotator=require("../bin/annotator/dirContentAnnotator.")
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
@@ -281,12 +282,20 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         })
     }
         if (req.body.annotateDocumentsTree) {
-            var DirContentAnnotator=require("../bin/annotator/dirContentAnnotator.")
+
             DirContentAnnotator.parseDocumentsDir(req.body.rootDirPath,req.body.name,JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result)
 
             })
         }
+        if (req.body.getConceptsSubjectsTree) {
+
+            DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+
 
     if (req.body.writeUserLog) {
         var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;

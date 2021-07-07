@@ -459,6 +459,7 @@ var SourceBrowser = (function () {
     }
 
     self.getFilteredNodesJstreeData = function (sourceLabel, options, callback) {
+        self.currentFoundIds=[]
         if (!options.term)
             options.term = $("#GenericTools_searchTermInput").val()
 
@@ -535,7 +536,7 @@ var SourceBrowser = (function () {
                     existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
                     var id = item.concept.value;
-
+self.currentFoundIds.push(id)
 
                     jstreeData.push({
                         id: jstreeId,
@@ -585,6 +586,14 @@ var SourceBrowser = (function () {
                 alert(err)
             }
         })
+
+    }
+
+    self.exportSearchResult=function(){
+        if(!self.currentFoundIds || self.currentFoundIds.length==0)
+            return;
+        var query=""
+        var idsStr=Sparql_common.setFilter("id",self.currentFoundIds)
 
     }
     return self;

@@ -180,7 +180,7 @@ var DirContentAnnotator = {
         var files = []
         for (var dir in dirFilesMap) {
             var subjects = dir.substring(dir.indexOf(rootDirName)).split("\\")
-            //    subjects=subjects.splice(subjects.length,1)
+            subjects.splice(subjects.length-1,1)//remove empty string at end
 
             dirFilesMap[dir].forEach(function (file) {
                 files.push({path: file.parent + file.name, infos: file.infos, subjects: subjects})
@@ -358,7 +358,7 @@ var DirContentAnnotator = {
 
     }
 
-    , getConceptsSubjectsTree: function (corpusName) {
+    , getConceptsSubjectsTree: function (corpusName, callback) {
 
         var storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.json"
         var str = "" + fs.readFileSync(storePath)
@@ -366,6 +366,7 @@ var DirContentAnnotator = {
 
         var conceptsTree = {}
         var parents = {}
+      var subjectsMap={}
         for (var key in data) {
             var fileObj = data[key]
 
@@ -377,31 +378,51 @@ var DirContentAnnotator = {
                     parent = fileObj.subjects[index - 1]
                 if (!parents[parent])
                     parents[parent] = []
-                if (subject!="" && parents[parent].indexOf(subject) < 0)
-                    parents[parent].push(subject)
+                if (subject != "") {
+                    if (parents[parent].indexOf(subject) < 0)
+                        parents[parent].push(subject)
+
+
+                // for the last subject attach file and nouns
+                if (index == fileObj.subjects.length - 1) {
+                    if (!subjectsMap[subject])
+                        subjectsMap[subject] = {files: []}
+                    var fileName=path.basename(key)
+                    subjectsMap[subject].files.push({filePath: key, fileName:fileName,sources: fileObj.sources})
+                }
+            }
 
             })
 
-
         }
+
+
         function recurse(node){
             var children=parents[node.text]
             if(children) {
                 children.forEach(function (child) {
-                    var childObj={text: child, children: [],files:[]}
+                    var childObj={text: child, children: [],data:{}}
+                    if(subjectsMap[child])
+                        childObj.data=subjectsMap[child]
                     node.children.push(childObj)
                     recurse(childObj)
                 })
             }
 
         }
-        var rootNode={text:corpusName,children:[],files:[]}
+        var rootNode={text:corpusName,children:[],sources:subjectsMap[corpusName]}
         recurse(rootNode)
         var x=rootNode
 
+        if(callback){
+            return callback(null,rootNode)
+        }else {
 
-        var x = parents;
 
+            var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.json")
+            storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.json"
+            fs.writeFileSync(storePath, JSON.stringify(rootNode, null, 2))
+        }
 
     }
 
@@ -448,7 +469,7 @@ if (false) {
 }
 
 
-if (true) {
+if (false) {
     DirContentAnnotator.getConceptsSubjectsTree("test", function (err, result) {
 
     });

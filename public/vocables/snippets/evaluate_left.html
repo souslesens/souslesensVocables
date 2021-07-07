@@ -22,7 +22,8 @@
 
 
     <div style='max-width: 400px;'>
-       <span class="evaluate_title"> Wiki Categories</span><br>
+       <span class="evaluate_title"> Corpus available</span><br>
+        <select id="evaluate_corpusSelect" onchange="Evaluate.loadCorpusSubjectTree($(this).val())"></select>
         <div id="evaluate_treeDiv" style="height:400px;overflow: auto"></div>
 
 

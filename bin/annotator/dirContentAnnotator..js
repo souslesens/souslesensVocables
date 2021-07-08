@@ -414,14 +414,29 @@ var DirContentAnnotator = {
         recurse(rootNode)
         var x=rootNode
 
+
+
+        var jstreeData=[];
+        function recurseJstree(node){
+
+            node.children.forEach(function(child){
+                jstreeData.push({text:child.text,id:child.text,data:child.data,parent:node.text})
+                recurseJstree(child)
+            })
+        }
+        jstreeData.push({text:rootNode.text,id:rootNode.text,data:rootNode.data,parent:"#"})
+        recurseJstree(rootNode)
+
+
+
         if(callback){
-            return callback(null,rootNode)
+            return callback(null,jstreeData)
         }else {
 
 
             var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.json")
             storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.json"
-            fs.writeFileSync(storePath, JSON.stringify(rootNode, null, 2))
+            fs.writeFileSync(storePath, JSON.stringify(jstreeData, null, 2))
         }
 
     }
@@ -469,7 +484,7 @@ if (false) {
 }
 
 
-if (false) {
+if (true) {
     DirContentAnnotator.getConceptsSubjectsTree("test", function (err, result) {
 
     });

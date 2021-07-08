@@ -36,7 +36,7 @@ var Evaluate = (function () {
             });
 
             common.fillSelectOptions("evaluate_sourceSelect", self.selectedSources, true)
-          self.initCorpusList();
+            self.initCorpusList();
 
 
         }, 200)
@@ -45,13 +45,13 @@ var Evaluate = (function () {
     }
 
 
-    self.initCorpusList=function(){
-        var corpusList=["test"]
-        common.fillSelectOptions("evaluate_corpusSelect",corpusList, true)
+    self.initCorpusList = function () {
+        var corpusList = ["test"]
+        common.fillSelectOptions("evaluate_corpusSelect", corpusList, true)
 
 
     }
-    self.loadCorpusSubjectTree=function(corpusName){
+    self.loadCorpusSubjectTree = function (corpusName) {
 
         var payload = {
             getConceptsSubjectsTree: 1,
@@ -73,10 +73,10 @@ var Evaluate = (function () {
     }
 
 
-
     self.onTreeClickNode = function (evt, obj) {
         $("#messageDiv").html("");
         self.currentTreeNode = obj.node
+        self.getSubjectGraphData(obj.node)
 
 
     }
@@ -87,7 +87,46 @@ var Evaluate = (function () {
         }
     }
 
-    return self
+
+    self.getSubjectGraphData = function (jstreeNode) {
+        var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id)
+        var concepts = [];
+
+        var sources = {}
+        descendants.forEach(function (node) {
+            if( !node.data.files)
+                return;
+            node.data.files.forEach(function (file) {
+                for (var source in file.sources) {
+                    if (!sources[source])
+                        sources[source] = []
+                    file.sources[source].forEach(function (concept) {
+                        sources[source].push(concept.id)
+                    })
 
 
-})()
+                }
+            })
+
+
+        })
+        var data= {}
+        async.eachSeries(Object.keys(sources), function(source,callbackEach){
+
+            var sourceIds= sources[source]
+
+            Sparql_generic.getNodeParents(source,null,sourceIds,5,{},function(err,result){
+                data[source]=result
+
+            })
+
+        },function(err){
+
+        })
+    }
+
+        return self
+
+
+    }
+)()

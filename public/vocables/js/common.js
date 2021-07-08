@@ -235,7 +235,7 @@ var common = (function () {
                         })
                     }
                 }
-
+                recurse(nodeId);
 
                 return nodes
             },

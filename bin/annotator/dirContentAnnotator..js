@@ -180,7 +180,7 @@ var DirContentAnnotator = {
         var files = []
         for (var dir in dirFilesMap) {
             var subjects = dir.substring(dir.indexOf(rootDirName)).split("\\")
-            subjects.splice(subjects.length-1,1)//remove empty string at end
+            subjects.splice(subjects.length - 1, 1)//remove empty string at end
 
             dirFilesMap[dir].forEach(function (file) {
                 files.push({path: file.parent + file.name, infos: file.infos, subjects: subjects})
@@ -261,6 +261,8 @@ var DirContentAnnotator = {
                 if (err)
                     DirContentAnnotator.socket.message(err);
                 else {
+                    if(callback)
+                        return callback(null,files)
                     var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + ".json")
                     storePath = parsedDocumentsHomeDir + name + ".json"
                     fs.writeFileSync(storePath, JSON.stringify(files, null, 2))
@@ -270,10 +272,10 @@ var DirContentAnnotator = {
         )
     }
 
-    , annotateParsedDocuments: function (name, sources, options, callback) {
-        var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".json"
+    , annotateParsedDocuments: function (data, sources,corpusName, options, callback) {
+      /*  var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".json"
         var str = "" + fs.readFileSync(parsedDocumentsFilePath)
-        var data = JSON.parse(str);
+        var data = JSON.parse(str);*/
 
         var conceptsMap = {}
 
@@ -349,6 +351,7 @@ var DirContentAnnotator = {
             if (err)
                 return DirContentAnnotator.socket.message(err);
             else {
+
                 var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + "_Concepts.json")
                 storePath = parsedDocumentsHomeDir + name + "_Concepts.json"
                 fs.writeFileSync(storePath, JSON.stringify(conceptsMap, null, 2))
@@ -366,7 +369,7 @@ var DirContentAnnotator = {
 
         var conceptsTree = {}
         var parents = {}
-      var subjectsMap={}
+        var subjectsMap = {}
         for (var key in data) {
             var fileObj = data[key]
 
@@ -383,61 +386,98 @@ var DirContentAnnotator = {
                         parents[parent].push(subject)
 
 
-                // for the last subject attach file and nouns
-                if (index == fileObj.subjects.length - 1) {
-                    if (!subjectsMap[subject])
-                        subjectsMap[subject] = {files: []}
-                    var fileName=path.basename(key)
-                    subjectsMap[subject].files.push({filePath: key, fileName:fileName,sources: fileObj.sources})
+                    // for the last subject attach file and nouns
+                    if (index == fileObj.subjects.length - 1) {
+                        if (!subjectsMap[subject])
+                            subjectsMap[subject] = {files: []}
+                        var fileName = path.basename(key)
+                        subjectsMap[subject].files.push({filePath: key, fileName: fileName, sources: fileObj.sources})
+                    }
                 }
-            }
 
             })
 
         }
 
 
-        function recurse(node){
-            var children=parents[node.text]
-            if(children) {
+        function recurse(node) {
+            var children = parents[node.text]
+            if (children) {
                 children.forEach(function (child) {
-                    var childObj={text: child, children: [],data:{}}
-                    if(subjectsMap[child])
-                        childObj.data=subjectsMap[child]
+                    var childObj = {text: child, children: [], data: {}}
+                    if (subjectsMap[child])
+                        childObj.data = subjectsMap[child]
                     node.children.push(childObj)
                     recurse(childObj)
                 })
             }
 
         }
-        var rootNode={text:corpusName,children:[],sources:subjectsMap[corpusName]}
+
+        var rootNode = {text: corpusName, children: [], sources: subjectsMap[corpusName]}
         recurse(rootNode)
-        var x=rootNode
+        var x = rootNode
 
 
+        var jstreeData = [];
 
-        var jstreeData=[];
-        function recurseJstree(node){
+        function recurseJstree(node) {
 
-            node.children.forEach(function(child){
-                jstreeData.push({text:child.text,id:child.text,data:child.data,parent:node.text})
+            node.children.forEach(function (child) {
+                jstreeData.push({text: child.text, id: child.text, data: child.data, parent: node.text})
                 recurseJstree(child)
             })
         }
-        jstreeData.push({text:rootNode.text,id:rootNode.text,data:rootNode.data,parent:"#"})
+
+        jstreeData.push({text: rootNode.text, id: rootNode.text, data: rootNode.data, parent: "#"})
         recurseJstree(rootNode)
 
 
-
-        if(callback){
-            return callback(null,jstreeData)
-        }else {
+        if (callback) {
+            return callback(null, jstreeData)
+        } else {
 
 
             var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.json")
             storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.json"
             fs.writeFileSync(storePath, JSON.stringify(jstreeData, null, 2))
         }
+
+    }
+
+
+    , annotateAndStoreCorpus: function (corpusDirPath, sources,corpusName,options, callback) {
+        var files = []
+        async.series([
+            //parse documentsDir recursively
+
+            function (callbackSeries) {
+
+                DirContentAnnotator.getDirContent(corpusDirPath, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                    files=result;
+                        callbackSeries()
+                    }
+                )
+
+            },
+            function (callbackSeries) {
+
+                    DirContentAnnotator.annotateParsedDocuments(files, sources,corpusName,{}, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        files=result;
+                        callbackSeries()
+                    }
+                )
+
+            }
+
+
+
+        ])
+
 
     }
 
@@ -484,7 +524,7 @@ if (false) {
 }
 
 
-if (true) {
+if (false) {
     DirContentAnnotator.getConceptsSubjectsTree("test", function (err, result) {
 
     });

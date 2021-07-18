@@ -1,0 +1,60 @@
+<style>
+    .annotate_container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-content: center;
+        flex-wrap: wrap;
+        align-items: baseline;
+    }
+    .annotate_div{
+        margin: 5px;
+        padding: 5px;
+        border: solid saddlebrown 1px;
+        border-radius: 3px;
+        width:90%;
+        display: flex;
+        justify-content: space-between;
+
+
+    }
+    .annotate-input{
+        width:550px
+    }.annotate_infosError{
+         colo:red
+     }
+    .annotate_infosOK{
+        color:blue
+    }
+    .annotate_infosServer{
+        color:#aaa
+    }
+
+</style>
+Annotate new Corpus
+
+<div class="annotate_container">
+
+
+
+    <div  class="annotate_div">
+        Corpus directory Path <input  class="annotate-DirInput" style='font-weight: bold;width: 300px' id="annotate_corpusPathInput">
+    </div>
+    <div  class="annotate_div">
+        Corpus name<input  class="annotate-DirInput" style='font-weight: bold;width: 100px' id="annotate_corpusNameInput">
+    </div>
+
+
+    <div class="annotate_div">
+        <div  id="annotate_messageDiv" style="width: 100%;min-height: 100px"></div>
+    </div>
+
+    <div>
+        <button onclick="Evaluate.execAnnotate()">Annotate</button>
+        <button onclick="Evaluate.cancelAnnotate()">Cancel</button>
+    </div>
+    <div id="annotate_infosDiv"></div>
+    <div class="annotate_div">
+        ressources to evaluate <div  class=treeDiv" id="annotate_resourcesTreeDiv"></div>
+    </div>
+</div>

@@ -281,13 +281,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
         })
     }
-        if (req.body.annotateDocumentsTree) {
 
-            DirContentAnnotator.parseDocumentsDir(req.body.rootDirPath,req.body.name,JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
         if (req.body.getConceptsSubjectsTree) {
 
             DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
@@ -295,6 +289,15 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
             })
         }
+
+        if (req.body.getConceptsSubjectsTree) {
+
+            DirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, JSON.parse(req.body.sources),req.body.corpusName,JSON.parse(req.body.options),function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        }
+
 
 
     if (req.body.writeUserLog) {

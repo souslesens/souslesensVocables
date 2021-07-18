@@ -22,8 +22,13 @@
 
 
     <div style='max-width: 400px;'>
-       <span class="evaluate_title"> Corpus available</span><br>
+        <div>
+
+
+       <span class="evaluate_title"> Annotated Corpus</span><br>
         <select id="evaluate_corpusSelect" onchange="Evaluate.loadCorpusSubjectTree($(this).val())"></select>
+            <button onclick="Evaluate.showNewCorpusDialog()">new Evaluation</button>
+        </div>
         <div id="evaluate_treeDiv" style="height:400px;overflow: auto"></div>
 
 

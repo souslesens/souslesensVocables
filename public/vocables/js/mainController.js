@@ -70,6 +70,18 @@ var MainController = (function () {
 
     }
 
+    self.initControllers=function(){
+        Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
+            if (!Config.sources[sourceLabel].controllerName) {
+                Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
+                Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
+            }
+            else{
+                Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName)
+            }
+        })
+    }
+
     self.UI = {
 
         configureUI:function(){
@@ -86,10 +98,7 @@ var MainController = (function () {
                 treeData.push({id: item, text: item, parent: "#"})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
-                if (!Config.sources[sourceLabel].controllerName) {
-                    Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
-                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
-                }
+              self.initControllers()
 
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;

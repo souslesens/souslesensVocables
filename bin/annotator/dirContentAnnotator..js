@@ -6,6 +6,7 @@ var tika = new TikaClient('http://localhost:41000');
 const TikaServer = require("tika-server")
 var util = require("../util.")
 var httpProxy = require('../httpProxy.')
+var socket = require('../../routes/socket.js');
 var async = require('async')
 //var annotatorLive = require('../annotatorLive.')
 
@@ -17,7 +18,7 @@ var maxDocSize = 20 * 1000 * 1000;
 var tikaServerUrl = '127.0.0.1:41000'
 var spacyServerUrl = "http://51.178.39.209:8000/pos"
 
-var parsedDocumentsHomeDir = "C:\\Users\\claud\\Downloads\\"
+var parsedDocumentsHomeDir = "D:\\NLP\\annotatedCorpus\\"
 var Inflector = require('inflected');
 var tikaServer = null
 var tikaserverStarted = false
@@ -26,6 +27,7 @@ var DirContentAnnotator = {
 
     socket: {
         message: function (text) {
+          socket.message("annotate",text)
             console.log(text)
         }
     },
@@ -243,6 +245,7 @@ var DirContentAnnotator = {
                                                 }
                                         })
                                     })
+                                    DirContentAnnotator.socket.message( files[index].nouns.length+"nouns extracted  from : "+file.path);
                                     callbackEach()
 
                                 })
@@ -261,8 +264,8 @@ var DirContentAnnotator = {
                 if (err)
                     DirContentAnnotator.socket.message(err);
                 else {
-                    if(callback)
-                        return callback(null,files)
+                    if (callback)
+                        return callback(null, files)
                     var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + ".json")
                     storePath = parsedDocumentsHomeDir + name + ".json"
                     fs.writeFileSync(storePath, JSON.stringify(files, null, 2))
@@ -272,10 +275,10 @@ var DirContentAnnotator = {
         )
     }
 
-    , annotateParsedDocuments: function (data, sources,corpusName, options, callback) {
-      /*  var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".json"
-        var str = "" + fs.readFileSync(parsedDocumentsFilePath)
-        var data = JSON.parse(str);*/
+    , annotateParsedDocuments: function (data, sources, corpusName, options, callback) {
+        /*  var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".json"
+          var str = "" + fs.readFileSync(parsedDocumentsFilePath)
+          var data = JSON.parse(str);*/
 
         var conceptsMap = {}
 
@@ -283,27 +286,37 @@ var DirContentAnnotator = {
             if (!conceptsMap[fileObj.path])
                 conceptsMap[fileObj.path] = {subjects: fileObj.subjects, sources: {}}
 
+            var allWords = []
+            var matchingWords = []
+            fileObj.nouns.forEach(function (noun) {
+                allWords.push(noun.toLowerCase())
+            })
             var nounSlices = util.sliceArray(fileObj.nouns, 50);
-            async.eachSeries(nounSlices, function (nounSlice, callbackEachNounSlice) {
-                var nounsMap = {}
-                var regexStr = "("
-                nounSlice.forEach(function (noun, index) {
+            async.eachSeries(sources, function (source, callbackEachSource) {
+                DirContentAnnotator.socket.message( "annotating "+fileObj.path +" on source "+source.name);
+                async.eachSeries(nounSlices, function (nounSlice, callbackEachNounSlice) {
+
+                        // var allnouns=[]
+                        var regexStr = "("
+                        nounSlice.forEach(function (noun, index) {
+
+                            noun = noun.replace(/[\x00-\x2F]/, "")
+                            noun = util.formatStringForTriple(noun)
+
+                            if (index > 0)
+                                regexStr += "|";
+                            if (true || options.exactMatch)
+                                regexStr += "^" + noun + "$";
+                            else
+                                regexStr += noun;
+                        })
+                        regexStr += ")"
 
 
-                    if (index > 0)
-                        regexStr += "|";
-                    if (true || options.exactMatch)
-                        regexStr += "^" + noun + "$";
-                    else
-                        regexStr += noun;
-                })
-                regexStr += ")"
+                        var filter = "  regex(?label, \"" + regexStr + "\", \"i\")";
 
-
-                var filter = "  regex(?label, \"" + regexStr + "\", \"i\")";
-
-                async.eachSeries(sources, function (source, callbackEachSource) {
-                        conceptsMap[fileObj.path].sources[source.name] = []
+                        //  async.eachSeries(sources, function (source, callbackEachSource) {
+                        conceptsMap[fileObj.path].sources[source.name] = {entities: [], missingNouns: []}
                         var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                             "SELECT * " +
                             "FROM <" + source.graphUri + "> " +
@@ -323,38 +336,58 @@ var DirContentAnnotator = {
                             "Accept": "application/sparql-results+json",
                             "Content-Type": "application/x-www-form-urlencoded"
                         }
+
                         httpProxy.post(url, headers, params, function (err, result) {
                             if (err) {
-                                return callbackEachSource(err);
-                            }
-                            var bindings = [];
-                            var ids = [];
 
-                            result.results.bindings.forEach(function (item) {
-                                conceptsMap[fileObj.path].sources[source.name].push({
-                                    label: item.label.value,
-                                    id: item.id.value
+                                return  callbackEachNounSlice(err) ;
+                            } else {
+                                var bindings = [];
+                                var ids = [];
+
+
+                                result.results.bindings.forEach(function (item) {
+                                    matchingWords.push(item.label.value.toLowerCase())
+
+                                    conceptsMap[fileObj.path].sources[source.name].entities.push({
+                                        label: item.label.value,
+                                        id: item.id.value
+                                    })
                                 })
-                            })
-                            callbackEachSource()
+                                     callbackEachNounSlice()
+                               // callbackEachSource()
+                            }
                         })
 
 
                     }
                     , function (err) {
-                        callbackEachNounSlice()
+                      //  callbackEachNounSlice()
+                        var missingNouns = allWords.filter(x => !matchingWords.includes(x));
+                        conceptsMap[fileObj.path].sources[source.name].missingNouns = missingNouns
+                        DirContentAnnotator.socket.message( " ---" + conceptsMap[fileObj.path].sources[source.name].entities.length+" entities matched / "+allWords.length+"nouns");
+
+                        DirContentAnnotator.socket.message( " ---" + conceptsMap[fileObj.path].sources[source.name].missingNouns.length +" missing nouns" );
+
+                        callbackEachSource(err);
                     })
             }, function (err) {
+                //feed orphans
+
+
                 return callbackEachDocument()
             })
         }, function (err) {
-            if (err)
-                return DirContentAnnotator.socket.message(err);
-            else {
+            if (err) {
+                DirContentAnnotator.socket.message(err);
+                return callback(err)
+            } else {
+                DirContentAnnotator.socket.message( "saving corpus "+corpusName );
 
-                var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + "_Concepts.json")
-                storePath = parsedDocumentsHomeDir + name + "_Concepts.json"
+                var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_Concepts.json")
+                storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.json"
                 fs.writeFileSync(storePath, JSON.stringify(conceptsMap, null, 2))
+                return callback();
             }
         })
 
@@ -446,28 +479,29 @@ var DirContentAnnotator = {
     }
 
 
-    , annotateAndStoreCorpus: function (corpusDirPath, sources,corpusName,options, callback) {
+    , annotateAndStoreCorpus: function (corpusDirPath, sources, corpusName, options, callback) {
         var files = []
         async.series([
             //parse documentsDir recursively
 
             function (callbackSeries) {
-
-                DirContentAnnotator.getDirContent(corpusDirPath, function (err, result) {
+                DirContentAnnotator.socket.message("parsing files in directory "+corpusDirPath);
+                DirContentAnnotator.parseDocumentsDir(corpusDirPath, corpusName, options, function (err, result) {
                         if (err)
                             return callbackSeries(err)
-                    files=result;
+                        files = result;
                         callbackSeries()
                     }
                 )
 
             },
-            function (callbackSeries) {
 
-                    DirContentAnnotator.annotateParsedDocuments(files, sources,corpusName,{}, function (err, result) {
+            function (callbackSeries) {
+                DirContentAnnotator.socket.message("annotating files");
+                DirContentAnnotator.annotateParsedDocuments(files, sources, corpusName, {}, function (err, result) {
                         if (err)
                             return callbackSeries(err)
-                        files=result;
+                        files = result;
                         callbackSeries()
                     }
                 )
@@ -475,8 +509,22 @@ var DirContentAnnotator = {
             }
 
 
+        ], function (err) {
+            callback(err, corpusName)
+        })
 
-        ])
+
+    }
+    ,
+    getAnnotatedCorpusList: function (group, callback) {
+
+        var files = fs.readdirSync(parsedDocumentsHomeDir)
+        var names = []
+        files.forEach(function (item) {
+            names.push(item.replace("_Concepts.json", ""))
+        })
+
+        return callback(null, names)
 
 
     }
@@ -536,5 +584,9 @@ if (false) {
     DirContentAnnotator.getDocTextContent("D:\\Total\\2020\\_testAnnotator\\sujet1\\sujet1-1\\sujet1-1-1\\test.docx", function (err, result) {
         var x = result
     })
+}
+
+if (false) {
+    DirContentAnnotator.getAnnotatedCorpusList()
 }
 

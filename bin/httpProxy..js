@@ -76,11 +76,16 @@ var httpProxy = {
                     body = body.trim()
                     if (body.indexOf("{") < 0)
                         return callback(body);//error
-                    try {
+
+                   var err=null;
+                   try {
                         var obj = JSON.parse(body);
-                        return callback(null, obj)
+
                     } catch (e) {
-                        callback(body)
+                       err=e
+                    }
+                    finally {
+                        return callback(err, obj)
                     }
                 } else {
                     return callback(null, body)

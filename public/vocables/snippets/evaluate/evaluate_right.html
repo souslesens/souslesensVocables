@@ -1,4 +1,15 @@
+<style>
+    .evaluate_missingWord{
+        margin: 4px;
+        padding:2px;
+        font-style: normal;
+        font-size: 14px;
+         border-radius: 4px;
+        background-color: #ddd;
 
+    }
+
+</style>
 
 <div id="Evaluate_tabs">
 
@@ -14,9 +25,9 @@
     </div>
 
     <div id="ADLquery_tabs_missingTerms">
-        <span class="evaluate_title"> Search Missing words in source</span>
-        <select id="evaluate_sourceSelect" onchange="Evaluate.getWikipageMissingWords()"></select>
-        <div id="evaluate_missingWordsDiv" style="min-height: 400px;overflow: auto"></div>
+     <!--   <span class="evaluate_title"> Search Missing words in source</span>
+        <select id="evaluate_sourceSelect" onchange="Evaluate.getWikipageMissingWords()"></select>-->
+        <div id="evaluate_missingWordsDiv" style="width:100%;height: 400px;overflow: auto"></div>
 
         <textarea type="text" style="width:300px" id="evaluate_copiedWords"></textarea>
     </div>

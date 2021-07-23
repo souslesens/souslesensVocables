@@ -22,7 +22,7 @@ var httpProxy = {
     useProxy:function(){
         var domainWithProxy="main.glb.corp.local"
         console.log(httpProxy.host)
-       if(httpProxy.proxyUrl && httpProxy.host.indexOf(domainWithProxy)>-1)
+       if(httpProxy.proxyUrl && httpProxy.host && httpProxy.host.indexOf(domainWithProxy)>-1)
            return true;
        return false
     },

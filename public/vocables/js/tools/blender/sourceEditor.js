@@ -495,7 +495,8 @@ var valueLabelsMap={}
                 if (defaultProps.indexOf(key) < 0)
                     defaultProps.push(key)
             }
-            var str = "<table class='infosTable'>"
+            var str = "<div style='max-height:800px;overflow: auto'>" +
+                "<table class='infosTable'>"
             str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
             str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
 
@@ -504,7 +505,7 @@ var valueLabelsMap={}
                 if (!propertiesMap.properties[key])
                     return;
 
-                str += "<tr >"
+                str += "<tr class='infos_table'>"
 
 
                 if (propertiesMap.properties[key].value) {
@@ -571,7 +572,7 @@ var valueLabelsMap={}
                 }
 
             })
-            str += "</table>"
+            str += "</table></div>"
 
 
             $("#" + divId).html(str)

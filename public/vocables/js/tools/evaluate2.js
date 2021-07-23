@@ -323,6 +323,8 @@ var Evaluate = (function () {
 
 
     }
+
+
     self.showMissingWords = function (jstreeNode) {
         var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id)
 

@@ -81,12 +81,12 @@ var Config = (function () {
 
     self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-    self.tools["SPARQL"] = {
+  /*  self.tools["SPARQL"] = {
         label: "SPARQL endpoint",
         multiSources: 0,
         controller: SPARQL_endpoint,
         toolDescriptionImg: null
-    }
+    }*/
 
     self.tools["ADLmappings"] = {
         label: "ADLmappings",

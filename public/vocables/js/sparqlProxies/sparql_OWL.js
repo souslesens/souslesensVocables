@@ -32,6 +32,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
+
             fromStr = Sparql_common.getFromGraphStr(self.graphUri)
 
             if (Config.sources[sourceLabel].topClass)
@@ -50,14 +51,17 @@ var Sparql_OWL = (function () {
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
             var url = self.sparql_url + "?format=json&query=";
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {type: "http://www.w3.org/2002/07/owl#Class"})
-                return callback(null, result.results.bindings);
-            })
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                    if (err) {
+                        return callback(err)
+                    }
+                    result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {type: "http://www.w3.org/2002/07/owl#Class"})
+                    return callback(null, result.results.bindings);
+                })
         }
 
 
@@ -132,6 +136,9 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
@@ -174,7 +181,9 @@ var Sparql_OWL = (function () {
             query += " limit " + limit
 
             var url = self.sparql_url + "?format=json&query=";
-
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -253,6 +262,9 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
             var method = Config.sources[sourceLabel].server_method;
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
@@ -297,6 +309,9 @@ var Sparql_OWL = (function () {
             query += " limit " + limit
 
             var url = self.sparql_url + "?format=json&query=";
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
 
 
@@ -348,6 +363,9 @@ var Sparql_OWL = (function () {
 
 
                 var url = self.sparql_url + "?format=json&query=";
+                self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+                if (self.no_params)
+                    url = self.sparql_url
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
 
 
@@ -413,7 +431,7 @@ var Sparql_OWL = (function () {
             var filterStr = "";
             if (ids)
                 filterStr = Sparql_common.setFilter("domain", ids);
-            if(options.propIds)
+            if (options.propIds)
                 filterStr = Sparql_common.setFilter("prop", options.propIds);
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -448,6 +466,9 @@ var Sparql_OWL = (function () {
 
 
             var url = self.sparql_url + "?format=json&query=";
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
 
 

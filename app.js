@@ -6,13 +6,14 @@ var logger = require('morgan');
 var bodyParser = require('body-parser');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var httpProxy=require("./bin/httpProxy.")
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
+httpProxy.app=app;
 
 var jsonParser       = bodyParser.json({limit:1024*1024*20, type:'application/json'});
 var urlencodedParser = bodyParser.urlencoded({ extended:true,limit:1024*1024*20,type:'application/x-www-form-urlencoded' })

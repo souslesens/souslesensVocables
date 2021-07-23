@@ -32,78 +32,7 @@
     },
     "color": "#9edae5"
   },
-  "ONE-TAXONOMY_TEST_1": {
-    "editable": true,
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-1/",
-    "schemaType": "SKOS",
-    "predicates": {
-    },
-    "color": "#9edae5"
-  },
-  "ONE-TAXONOMY_TEST_2": {
-    "editable": true,
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-2/",
-    "schemaType": "SKOS",
-    "predicates": {
-    },
-    "color": "#9edae5"
-  },
-  "ONE-TAXONOMY_TEST_3": {
-    "editable": true,
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-3/",
-    "schemaType": "SKOS",
-    "predicates": {
-    },
-    "color": "#9edae5"
-  },
-  "ONE-TAXONOMY_TEST_4": {
-    "editable": true,
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-4/",
-    "schemaType": "SKOS",
-    "predicates": {
-    },
-    "color": "#9edae5"
-  },
-  "ONE-TAXONOMY_TEST_5": {
-    "editable": true,
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-5/",
-    "schemaType": "SKOS",
-    "predicates": {
-    },
-    "color": "#9edae5"
-  },
-  "ONE-TAXONOMY_TEST_6": {
-    "editable": true,
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "graphUri": "http://souslesens/thesaurus/ONE-TAXONOMY-TEST-6/",
-    "schemaType": "SKOS",
-    "predicates": {
-    },
-    "color": "#9edae5"
-  },
+
 
   "Total-CTG": {
     "editable": false,
@@ -493,11 +422,15 @@
   "DEXPI": {
     "editable": false,
     "graphUri": "http://sandbox.dexpi.org/informationmodel/",
+    "graphUriNew": "",
     "sparql_server": {
-      "url": "_default"
+      "url": "_default",
+      "urlNew": "https://endpoint.dexpi.org/information_model",
+      "no_params": true
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?topConcept rdfs:subClassOf <http://sandbox.dexpi.org/informationmodel/TechnicalItem>",
+    "topClassFilterNew": "?topConcept <http://sandbox.dexpi.org/meta/subClassOf> <http://sandbox.dexpi.org/informationmodel/TechnicalItem>",
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"

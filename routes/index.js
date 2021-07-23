@@ -239,6 +239,8 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         })
     }
     if (req.body.httpProxy) {
+        httpProxy.host=req.headers.host
+
         if (req.body.POST) {
             var body = JSON.parse(req.body.body)
             httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
@@ -253,6 +255,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
                     options = req.body.options
 
             }
+            options.host=req.headers.host
             httpProxy.get(req.body.url, options, function (err, result) {
                 processResponse(response, err, result)
             })

@@ -238,9 +238,9 @@ var DirContentAnnotator = {
                                             if (item.text.length > 2)
                                                 if (item.tag.indexOf("NN") > -1) {//item.tag.indexOf("NN")>-1) {
                                                     var noun = Inflector.singularize(item.text.toLowerCase());
-                                                    if (files[index].nouns.indexOf(noun) < 0)
-
+                                                    if (files[index].nouns.indexOf(noun) < 0) {
                                                         files[index].nouns.push(noun);
+                                                    }
 
                                                 }
                                         })

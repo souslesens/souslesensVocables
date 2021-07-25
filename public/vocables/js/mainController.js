@@ -16,8 +16,32 @@ var MainController = (function () {
     self.currentSource = null;
 
     self.loadSources = function (callback) {
-
-        $.getJSON("config/sources.json", function (json) {
+        var payload = {
+            getSources: 1,
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+                for(var source in data){
+                    if(data[source].sparql_server && data[source].sparql_server.url=="_default"){
+                        data[source].sparql_server.url=Config.default_sparql_url
+                    }
+                }
+                Config.sources=data ;
+                if(callback)
+                    return callback()
+            },
+            error: function (err) {
+                alert( "cannot load profiles")
+                console.log(err);
+                if(callback)
+                    return callback()
+            }
+        })
+     /*   $.getJSON("config/sources.json", function (json) {
             Config.sources = json;
            for(var sourceLabel in Config.sources){
                 if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
@@ -26,9 +50,35 @@ var MainController = (function () {
             if (callback)
                 return callback()
 
-        });
+        });*/
+    }
+    self.loadProfiles = function (callback) {
+
+        var payload = {
+            getProfiles: 1,
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+               Config.profiles=data ;
+                if(callback)
+                    return callback()
+            },
+            error: function (err) {
+                alert( "cannot load profiles")
+                console.log(err);
+                if(callback)
+                    return callback()
+            }
+        })
 
     }
+
+
+
 
 
     self.writeUserLog = function (user, tool, source) {
@@ -57,15 +107,17 @@ var MainController = (function () {
         if(!authentication.currentUser)
             return alert(" no user identified")
         var groups=authentication.currentUser.groupes
-
-        Config.currentProfile=Config.profiles["reader_all"]
+        MainController.loadSources(function(err,result){
+        MainController.loadProfiles(function(err,result){
+      //  Config.currentProfile=Config.profiles["reader_all"]
         groups.forEach(function(group){
             if(Config.profiles[group])
                 return  Config.currentProfile=Config.profiles[group]
         })
         MainController.UI.configureUI();
         MainController.UI.showToolsList("toolsTreeDiv")
-        MainController.loadSources()
+        })
+    })
 
 
     }

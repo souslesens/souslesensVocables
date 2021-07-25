@@ -455,6 +455,7 @@ var valueLabelsMap={}
 
                 var value = item.value.value;
                 if(item.valueLabel){
+                    if(!item["xml:lang"])
                     valueLabelsMap[value]=item.valueLabel.value
                 }
                 /*   if (item.valueLabel)

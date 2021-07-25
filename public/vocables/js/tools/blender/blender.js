@@ -32,6 +32,25 @@ var Blender = (function () {
             if (!MainController.currentTool)
                 $("#graphDiv").html("")
             setTimeout(function () {
+
+                var payload = {
+                    getBlenderSources: 1,
+                }
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: payload,
+                    dataType: "json",
+                    success: function (data, textStatus, jqXHR) {
+                        Config.profiles=data ;
+
+                    },
+                    error: function (err) {
+                        alert( "cannot load blender Sources")
+                        console.log(err);
+
+                    }
+                })
                     var editableSources = [];
                     for (var key in Config.sources) {
 
@@ -1315,6 +1334,15 @@ var Blender = (function () {
                 })
 
 
+
+
+
+        }
+
+        self.createNewResource=function(){
+            var resourceName=prompt("new resource name")
+            if(!resourceName || resourceName=="")
+                return;
 
 
 

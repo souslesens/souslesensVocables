@@ -17,7 +17,7 @@ var logger = require("./logger..js");
 var async = require("async");
 var saltRounds = 10;
 var authentication = {
-    superAdministrator: "JosWres17",
+
 
 
     authentify: function (login, password, callback) {
@@ -40,6 +40,8 @@ var authentication = {
 
 
     },
+
+
 
     loginInDB: function (login, password, callback) {
         if (login == authentication.superAdministrator) {

@@ -15,7 +15,7 @@ var Sparql_SKOS = (function () {
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
             setVariables(sourceLabel);
-            var query = "";
+            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
             query += prefixesStr
             query += " select distinct ?topConcept ?topConceptLabel " + fromStr + "  WHERE {"
             query += topConceptFilter;
@@ -282,8 +282,12 @@ var Sparql_SKOS = (function () {
                 filter += Sparql_common.getUriFilter("prop", options.propertyFilter);
             }
 
-            var query = " select distinct * " + fromStr + "  WHERE {" +
-                " ?id ?prop ?value. " + filter + "} limit 10000";
+            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                " select distinct * " + fromStr + "  WHERE {" +
+                " ?id ?prop ?value. "
+            if ( options.getValuesLabels)
+                query += "  Optional {?value skos:prefLabel ?valueLabel filter(lang(?valueLabel)='en')} Optional {?prop skos:prefLabel ?propLabel } "
+                query+= filter + "} limit 10000";
 
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {

@@ -21,7 +21,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
     self.loginMode = "json";
 
- self.loginMode = "none";
+self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}
@@ -81,12 +81,12 @@ var Config = (function () {
 
     self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-  /*  self.tools["SPARQL"] = {
+   self.tools["SPARQL"] = {
         label: "SPARQL endpoint",
         multiSources: 0,
         controller: SPARQL_endpoint,
         toolDescriptionImg: null
-    }*/
+    }
 
     self.tools["ADLmappings"] = {
         label: "ADLmappings",
@@ -98,10 +98,11 @@ var Config = (function () {
     self.tools["ADLbrowser"] = {label: "ADLbrowser", multiSources: 0, controller: ADLbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
+ //   self.currentProfile = self.profiles["admin"]
 
 
 
-    self.profiles = {
+   /* self.profiles = {
         admin: {
             allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUALS"],
             allowedSources: "ALL",
@@ -158,10 +159,9 @@ var Config = (function () {
             forbiddenTools: [],
             blender: {contextMenuActionStartLevel: 3}
         }
-    }
+    }*/
 
 
-    self.currentProfile = self.profiles["admin"]
 
 
     return self;

@@ -89,7 +89,7 @@ var Evaluate = (function () {
                 options: JSON.stringify({})
 
             }
-
+            $("#annotate_waitImg").css("display", "block");
             $.ajax({
                 type: "POST",
                 url: Config.serverUrl,
@@ -99,11 +99,12 @@ var Evaluate = (function () {
                 success: function (result, textStatus, jqXHR) {
                     MainController.initControllers()
                     $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
-
+                    $("#annotate_waitImg").css("display", "none");
                     self.initCorpusList();
 
                 }, error(err) {
                     MainController.initControllers()
+                    $("#annotate_waitImg").css("display", "none");
                     $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosError'>" + err.responseText + "</span><br>")
                 }
             })
@@ -188,6 +189,7 @@ var Evaluate = (function () {
 
 
         self.getSubjectGraphData = function (jstreeNode, callback) {
+            MainController.UI.message("processing data")
             var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id)
             var concepts = [];
             var ancestorsDepth = 3;
@@ -216,8 +218,10 @@ var Evaluate = (function () {
             var existingNode = {}
             var offsetY = -leftPanelWidth
             var offsetYlength = 30
+            var nounColor="#0bf1f1"
             async.eachSeries(Object.keys(sources), function (source, callbackSource) {
                 MainController.initControllers()
+                var sourceConcepts = sources[source]
 
                 var color = Lineage_classes.getSourceColor(source, "palette")
                 visjsData.nodes.push({
@@ -231,21 +235,23 @@ var Evaluate = (function () {
                     data: {type: "graph", source: source}
                 })
 
-                var sourceConcepts = sources[source]
+                if(sourceConcepts.length==0)
+                    return callbackSource()
+
                 var conceptsSlices = common.sliceArray(sourceConcepts);
                 async.eachSeries(conceptsSlices, function (concepts, callbackSlice) {
                     Sparql_generic.getNodeParents(source, null, concepts, ancestorsDepth, null, function (err, result) {
                         if (err)
                             return callbackSlice(err)
                         result.forEach(function (item) {
-                            var conceptId = item.concept.value
+                            var conceptId = item.conceptLabel.value
                             if (!existingNode[conceptId]) {
                                 existingNode[conceptId] = 1
                                 visjsData.nodes.push({
                                     id: conceptId,
                                     label: item.conceptLabel.value,
                                     shape: "box",
-                                    color: color,
+                                    color: nounColor,
                                     fixed: {x: true, y: true},
                                     x: -500,
                                     y: offsetY,
@@ -277,6 +283,7 @@ var Evaluate = (function () {
                                             visjsData.edges.push({
                                                 id: edgeId,
                                                 from: conceptId,
+                                                color:color,
                                                 to: broaderId,
                                                 arrows: "to"
                                             })
@@ -291,6 +298,7 @@ var Evaluate = (function () {
                                             visjsData.edges.push({
                                                 id: edgeId,
                                                 from: previousBroaderId,
+                                                color:color,
                                                 to: broaderId,
                                                 arrows: "to"
                                             })
@@ -326,13 +334,18 @@ var Evaluate = (function () {
 
 
                 }, function (err) {
+
                     callbackSource(err)
                 })
 
 
             }, function (err) {
-                visjsGraph.draw("Evaluate_graphDiv", visjsData, {onclickFn: Evaluate.onGraphNodeClick})
-                $("#waitImg").css("display", "none");
+                MainController.UI.message("Drawing graph ("+visjsData.nodes.length+" nodes)")
+                visjsGraph.draw("Evaluate_graphDiv", visjsData, {onclickFn: Evaluate.onGraphNodeClick},function (){
+                    $("#waitImg").css("display", "none");
+                    MainController.UI.message("")
+                })
+
                 if (callback)
                     return callback(null)
             })
@@ -346,18 +359,24 @@ var Evaluate = (function () {
 
             var sources = {}
             var missingNouns = []
+            var selectedSources=$("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
+
+
+
             descendants.forEach(function (node) {
                 if (!node.data.files)
                     return;
 
                 node.data.files.forEach(function (file) {
                     for (var source in file.sources) {
-                        if (!sources[source])
-                            sources[source] = []
-                        file.sources[source].missingNouns.forEach(function (noun) {
-                            sources[source].push(noun)
+                        if (selectedSources.indexOf(source) > -1) {
+                            if (!sources[source])
+                                sources[source] = []
+                            file.sources[source].missingNouns.forEach(function (noun) {
+                                sources[source].push(noun)
 
-                        })
+                            })
+                        }
                     }
                 })
 
@@ -430,6 +449,10 @@ var Evaluate = (function () {
                 var x = self.currentTreeNode
 
             }
+        }
+
+        self.serverMessage=function(data){
+            $("#annotate_messageDiv").prepend(data)
         }
 
 

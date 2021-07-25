@@ -4,6 +4,9 @@ docker run --restart always -p 8000:8000 neelkamath/spacy-server:2-en_core_web_s
 curl http://localhost:8000/pos -H 'Content-Type: application/json' -d '{"text": "My name is John Doe. I grew up in California."}'
 
 
+docker run --restart always mcr.microsoft.com/mssql/server
+
+
 
 
 nginx

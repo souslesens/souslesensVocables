@@ -505,7 +505,7 @@
 
 
 
-  "CFIHOS": {
+  "CFIHOS_READI-REMOTE": {
     "graphUri": "",
     "sparql_server": {
       "url": "https://demo-irm-dnvgl.northeurope.cloudapp.azure.com/readidemo/sparql/readi-Z018",
@@ -517,7 +517,7 @@
     },
     "controller": "Sparql_OWL",
     "topClassFilter": "?x rdfs:subClassOf ?topConcept filter(regex(str(?topConcept),'iso','i')) filter(not exists{?topConcept rdfs:subClassOf ?z})",
-    "schemaType": "OWLXXXX",
+    "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
   },

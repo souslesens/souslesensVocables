@@ -11,14 +11,14 @@
 var common = (function () {
         var self = {};
 
-        self.jstree={
-            loadJsTree : function (jstreeDiv, jstreeData, options, callback) {
-                var jstreeData2=[];
-                jstreeData.forEach(function(item){
-                    if( item.parent!=item.id)
+        self.jstree = {
+            loadJsTree: function (jstreeDiv, jstreeData, options, callback) {
+                var jstreeData2 = [];
+                jstreeData.forEach(function (item) {
+                    if (item.parent != item.id)
                         jstreeData2.push(item)
                 })
-                jstreeData=jstreeData2
+                jstreeData = jstreeData2
 
 
                 if (!options)
@@ -69,8 +69,8 @@ var common = (function () {
                     'dnd': options.dnd,
                     "search": options.searchPlugin,
                     "checkbox": {
-                        tie_selection : false,
-                        whole_node : false
+                        tie_selection: false,
+                        whole_node: false
                     },
                     types: options.types,
 
@@ -99,16 +99,14 @@ var common = (function () {
                         options.onOpenNodeFn(evt, obj);
                     }
 
-                }).
-                on("check_node.jstree", function (evt, obj) {
+                }).on("check_node.jstree", function (evt, obj) {
 
                     if (options.onCheckNodeFn) {
                         options.onCheckNodeFn(evt, obj);
                     }
 
 
-                }).
-                on("uncheck_node.jstree", function (evt, obj) {
+                }).on("uncheck_node.jstree", function (evt, obj) {
 
 
                     if (options.onUncheckNodeFn) {
@@ -116,14 +114,12 @@ var common = (function () {
                     }
 
 
-                }).
-                on("create_node.jstree", function (parent, node, position) {
+                }).on("create_node.jstree", function (parent, node, position) {
                     if (options.onCreateNodeFn) {
                         options.onCreateNodeFn(parent, node, position)
                         self.jstree.setTreeAppearance()
                     }
-                }).
-                on("delete_node.jstree", function (node, parent) {
+                }).on("delete_node.jstree", function (node, parent) {
                     if (options.deleteNodeFn) {
                         options.deleteNodeFn(node, parent)
                         self.jstree.setTreeAppearance()
@@ -162,7 +158,7 @@ var common = (function () {
 
 
             },
-            addNodesToJstree :function (jstreeDiv, parentNodeId, jstreeData, options) {
+            addNodesToJstree: function (jstreeDiv, parentNodeId, jstreeData, options) {
                 if (!options)
                     options = {}
                 var position = "first"
@@ -173,7 +169,7 @@ var common = (function () {
 
                     if (node.parent)
                         parentNode = node.parent;
-                    if(!parentNode)
+                    if (!parentNode)
                         return;
 
                     $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
@@ -190,7 +186,7 @@ var common = (function () {
                 }, 500)
             },
 
-            deleteNode : function (jstreeDiv, nodeId) {
+            deleteNode: function (jstreeDiv, nodeId) {
                 $("#" + jstreeDiv).jstree(true).delete_node(nodeId)
                 self.jstree.setTreeAppearance()
             },
@@ -210,12 +206,12 @@ var common = (function () {
 
             },
 
-            getjsTreeNodeObj : function (jstreeDiv, id) {
+            getjsTreeNodeObj: function (jstreeDiv, id) {
                 return $('#' + jstreeDiv).jstree(true).get_node(id);
 
             },
 
-            getNodeDescendants :function (jstreeDiv, nodeId, depth) {
+            getNodeDescendants: function (jstreeDiv, nodeId, depth) {
                 var nodes = [];
                 var nodeIdsMap = {};
                 var currentLevel = 0
@@ -240,11 +236,11 @@ var common = (function () {
                 return nodes
             },
 
-            setTreeParentDivDimensions : function (jstreeDiv) {
+            setTreeParentDivDimensions: function (jstreeDiv) {
 //$("#"+jstreeDiv).addClass("jstreeParent")
                 var p = $("#" + jstreeDiv).position()
-                if(p.top>200)//in case jstreeDiv in inactive tab
-                    p.top=200
+                if (p.top > 200)//in case jstreeDiv in inactive tab
+                    p.top = 200
                 var h = $(window).height() - p.top - 50
                 var w;
                 if (p.left < 600)
@@ -262,22 +258,27 @@ var common = (function () {
             },
 
 
-
-
-           setTreeAppearance : function () {
+            setTreeAppearance: function () {
                 $(".jstree-themeicon").css("display", "none")
                 $(".jstree-anchor").css("line-height", "18px")
                 $(".jstree-anchor").css("height", "18px")
                 $(".jstree-anchor").css("font-size", "14px")
 
             },
-            onAllTreeCbxChange : function (allCBX, jstreeDiv) {
+            onAllTreeCbxChange: function (allCBX, jstreeDiv) {
                 var checked = $(allCBX).prop("checked")
                 if (checked) {
                     $("#" + jstreeDiv).jstree(true).check_all()
                 } else {
                     $("#" + jstreeDiv).jstree(true).uncheck_all()
                 }
+            }
+            ,
+            checkAll: function (jstreeDiv) {
+                $("#" + jstreeDiv).jstree().check_all()
+            },
+            openNode: function (jstreeDiv,nodeId) {
+                $("#" + jstreeDiv).jstree().open_node(nodeId)
             }
         }
 
@@ -331,13 +332,10 @@ var common = (function () {
         }
 
 
-
-
-
         self.getAllsourcesWithType = function (type) {
             var sources = [];
             Object.keys(Config.sources).sort().forEach(function (item) {
-                if (!type || Config.sources[item].schemaType.indexOf(type)>-1)
+                if (!type || Config.sources[item].schemaType.indexOf(type) > -1)
                     sources.push(item)
             })
             return sources;
@@ -550,8 +548,8 @@ var common = (function () {
         }
 
 
-        self.deconcatSQLTableColumn = function (str,removeSchema) {
-            if(str.indexOf(":")>-1)
+        self.deconcatSQLTableColumn = function (str, removeSchema) {
+            if (str.indexOf(":") > -1)
                 return null;
             var array = str.split(".")
             if (array.length < 2)
@@ -559,10 +557,10 @@ var common = (function () {
             if (array.length == 2) {
                 return {table: array[0], column: array[1]}
             } else if (array.length == 3) {
-                if(!removeSchema)
-                return {table: array[0] + "." + array[1], column: array[2]}
+                if (!removeSchema)
+                    return {table: array[0] + "." + array[1], column: array[2]}
                 else
-                    return {table:  array[1], column: array[2]}
+                    return {table: array[1], column: array[2]}
             } else
                 return null;
 

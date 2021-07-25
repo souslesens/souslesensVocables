@@ -5,7 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportGraph..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportGraph..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/sources.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/sources.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_right.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_right.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,9 +60,9 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/snippets/evaluate" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -66,11 +72,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\evaluate" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools" />
       <recent name="D:\webstorm\souslesensVocables\data\graphs" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL\browser" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL\data" />
-      <recent name="D:\webstorm\souslesensVocables\bin" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\annotate" />
@@ -80,7 +86,7 @@
       <recent name="D:\webstorm\souslesensVocables\public\vocables\images" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.bin\www">
+  <component name="RunManager" selected="Node.js.exportGraph..js">
     <configuration name="PIbuilder..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" working-dir="$PROJECT_DIR$/bin/ADL/tools">
       <method v="2" />
     </configuration>
@@ -98,10 +104,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.exportGraph..js" />
         <item itemvalue="Node.js.dirContentAnnotator..js" />
         <item itemvalue="Node.js.sparql_generic.js" />
         <item itemvalue="Node.js.definitions.js" />
-        <item itemvalue="Node.js.exportGraph..js" />
         <item itemvalue="Node.js.PIbuilder..js" />
       </list>
     </recent_temporary>
@@ -204,7 +210,7 @@
       <workItem from="1625410711012" duration="30181000" />
       <workItem from="1625724886283" duration="44292000" />
       <workItem from="1626851390539" duration="25310000" />
-      <workItem from="1627019552294" duration="318000" />
+      <workItem from="1627019552294" duration="18196000" />
     </task>
     <servers />
   </component>
@@ -348,13 +354,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js</url>
-          <line>150</line>
+          <line>153</line>
           <option name="timeStamp" value="572" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
-          <line>143</line>
-          <option name="timeStamp" value="630" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>

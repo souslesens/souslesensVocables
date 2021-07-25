@@ -111,5 +111,20 @@ var filePath = "D:\\NLP\\rdfs\\mediawiki.nt"
 var graphUri = "http://data.total.com/resource/one-model/iogp_iso14224/";
 var filePath = "D:\\NLP\\rdfs\\IOGP-14224.nt"
 
+var graphUri ="http://souslesens.org/vocabulary/iec/";
+var filePath = "D:\\NLP\\rdfs\\IEC.nt"
+
+var graphUri ="http://sandbox.dexpi.org/informationmodel/";
+var filePath = "D:\\NLP\\rdfs\\DEXPI.nt"
+
+var graphUri ="http://standards.iso.org/iso/14224/";
+var filePath = "D:\\NLP\\rdfs\\14224.nt"
+
+var graphUri ="http://data.total.com/resource/one-model/iogp_iso14224/";
+var filePath = "D:\\NLP\\rdfs\\14224_merged.nt"
+
+var graphUri ="http://data.total.com/resource/one-model/iogp_iso14224/";
+var filePath = "D:\\NLP\\rdfs\\14224_merged.nt"
+
 
 exportGraph.execute(serverUrl, graphUri, filePath)

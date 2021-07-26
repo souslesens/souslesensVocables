@@ -53,7 +53,9 @@
     "password": "thes_X32!",
     "groups": [
       "blender_skos"
-    ]
+    ],
+
+    
   },
   "ECCENCA": {
     "login": "ECCENCA",

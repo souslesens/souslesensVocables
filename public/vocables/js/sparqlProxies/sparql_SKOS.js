@@ -164,7 +164,7 @@ var Sparql_SKOS = (function () {
                 "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                 "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
                 " select  distinct * " + fromStr + "   WHERE { " +
-                " ?subject ?predicate ?object. " + filterStr+
+                " ?subject ?predicate ?object. " + filterStr +
                 "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})"
 
             if (!collection || collection == "") {
@@ -210,10 +210,10 @@ var Sparql_SKOS = (function () {
             query += prefixesStr;
             query += " select distinct * " + fromStr + "  WHERE {{"
 
-            if(true || options.searchAltLabels)
-                prefLabelPredicate+="|skos:altLabel"
+            if (true || options.searchAltLabels)
+                prefLabelPredicate += "|skos:altLabel"
             query += "?concept " + prefLabelPredicate + " ?conceptLabel. ";
-            if (lang && lang!="" &&  !options.noLang)
+            if (lang && lang != "" && !options.noLang)
                 query += "filter( lang(?conceptLabel)=\"" + lang + "\")"
             query += filterStr;
             query += "OPTIONAL{?concept rdf:type ?type.}"
@@ -285,9 +285,9 @@ var Sparql_SKOS = (function () {
             var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                 " select distinct * " + fromStr + "  WHERE {" +
                 " ?id ?prop ?value. "
-            if ( options.getValuesLabels)
+            if (options.getValuesLabels)
                 query += "  Optional {?value skos:prefLabel ?valueLabel filter(lang(?valueLabel)='en')} Optional {?prop skos:prefLabel ?propLabel } "
-                query+= filter + "} limit 10000";
+            query += filter + "} limit 10000";
 
 
             Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {
@@ -607,15 +607,46 @@ var Sparql_SKOS = (function () {
          */
 
 
-
-
-        self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
+      /*  self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
             if (!options) {
                 options = {}
             }
             var newTriplesSets = [];
             var newTriples = [];
+
             var setSize = 100
+
+            if (toGraphUri.charAt(toGraphUri.length - 1) != "/")
+                toGraphUri += "/"
+            var targetSchemaType = Config.sources[fromSourceLabel].schemaType;
+            var urisMap = {}
+
+            function getTargetUri(sourceUri) {
+                var targetUri = urisMap[sourceUri]
+                if (!targetUri) {
+
+                    if (!options.keepOriginalUris) {
+                        var targetUri = " <" + toGraphUri + common.getRandomHexaId(10) + ">"
+                        urisMap[sourceUri] = targetUri
+                        if (options.addExactMatchPredicate) {
+                            var exactMatchPredicate
+                            if (targetSchemaType == "SKOS")
+                                exactMatchPredicate = "http://www.w3.org/2004/02/skos/core#exactMatch";
+                            else
+                                exactMatchPredicate = "http://www.w3.org/2000/01/rdf-schema#sameAs";
+                           var  triple = targetUri + " <" + exactMatchPredicate + "> <" + sourceUri + "> ."
+                            newTriples.push(triple)
+                        }
+
+
+                    } else {
+                        urisMap[sourceUri] = targetUri = "<" + sourceUri + ">"
+                    }
+                }
+                return targetUri;
+            }
+
+
             async.series([
 
                 // get sources nodes properties
@@ -624,27 +655,26 @@ var Sparql_SKOS = (function () {
                         if (err)
                             return callbackSeries(err);
                         var subject, prop, object;
-                        var valueStr = ""
+                        var valueStr = "";
+
                         result.forEach(function (item) {
 
                             if (options.setSubjectFn)
                                 options.setSubjectFn(item)
-
                             if (options.setPredicateFn)
                                 options.setPredicateFn(item)
-
 
                             if (options.setObjectFn)
                                 options.setObjectFn(item)
 
-                            subject = item.id.value
+                            subject = getTargetUri(item.id.value)
                             prop = item.prop.value
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
 
-                                if (item.value.type == "uri")
-                                    valueStr = "<" + item.value.value + ">"
-                                else {
+                                if (item.value.type == "uri") {
+                                    var valueStr = getTargetUri(item.value.value)
+                                } else {
                                     var langStr = "";
                                     if (item.value["xml:lang"])
                                         langStr = "@" + item.value["xml:lang"]
@@ -705,7 +735,7 @@ var Sparql_SKOS = (function () {
 
             })
 
-        }
+        }*/
 
         self.setBindingsOptionalProperties = function (bindings, _field, options) {
             if (!options)

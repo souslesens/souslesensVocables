@@ -11,7 +11,9 @@
  */
 
 var jsonFileStorage = require('./jsonFileStorage')
-var path=require('path')
+var SourceManager = require("./sourceManager.")
+var path = require('path')
+var async = require("async")
 
 var configs = {};
 var configManager = {
@@ -34,14 +36,47 @@ var configManager = {
             callback(err, sources)
         })
     },
-    addBlenderSource: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../config/blenderSource.json")
-        jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
-            callback(err, sources)
+    createNewResource: function (sourceName, graphUri,targetSparqlServerUrl,  options,callback) {
+        async.series([
+
+            // create and initiate graph triples
+            function (callbackSeries) {
+
+                SourceManager.createNewSkosSourceGraph(sourceName, graphUri,targetSparqlServerUrl,options,function (err, result) {
+                    return callbackSeries()
+                })
+            },
+            function (callbackSeries) {
+                var sourcesPath = path.join(__dirname, "../config/blenderSources.json")
+                jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+                    if (err)
+                        return callback(err)
+                    if (options.type == "SKOS") {
+                        sources[sourceName] = {
+                            "editable": true,
+                            "controller": "Sparql_SKOS",
+                            "sparql_server": {
+                                "url": "_default"
+                            },
+                            "graphUri": graphUri,
+                            "schemaType": "SKOS",
+                            "predicates": {},
+                            "color": "#9edae3"
+                        }
+                    } else {
+
+                    }
+                    jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+
+                        callbackSeries(err)
+
+                    })
+                })
+
+            }], function (err) {
+            callback(err,"done")
         })
     }
-
-
 
 
 }

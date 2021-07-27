@@ -64,7 +64,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
 
         if (req.body.getSources) {
-            configManager.getProfiles({},function (err, result) {
+            configManager.getSources({},function (err, result) {
                 processResponse(response, err, result)
             })
         }
@@ -73,8 +73,9 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
                 processResponse(response, err, result)
             })
         }
-        if (req.body.addBlenderSource) {
-            configManager.addBlenderSource({},function (err, result) {
+        if (req.body.createNewResource) {
+
+            configManager.createNewResource(req.body.sourceName,req.body.graphUri,req.body.targetSparqlServerUrl,JSON.parse(req.body.options),function (err, result) {
                 processResponse(response, err, result)
             })
         }

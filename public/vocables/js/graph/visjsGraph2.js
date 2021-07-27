@@ -27,7 +27,7 @@ var visjsGraph = (function () {
     self.defaultNodeSize = 7;
     self.showNodesLabelMinScale = 0.5
     self.currentContext;
-
+    self.drawingDone=false;
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500
 
@@ -40,6 +40,7 @@ var visjsGraph = (function () {
 
     }
     self.draw = function (divId, visjsData, _options, callback) {
+        self.drawingDone=false;
         self.currentContext = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
@@ -111,6 +112,9 @@ var visjsGraph = (function () {
             }
         }, self.simulationTimeOut)
 
+        self.network.on("afterDrawing",function(params){
+            self.drawingDone=true;
+        });
 
         self.network.on("oncontext", function (params) {
 
@@ -272,7 +276,15 @@ var visjsGraph = (function () {
         }, 500)
 
         if (callback)
-            return callback()
+            var intervalIncrement=0;
+           var interval=setInterval(function(){
+                if(self.drawingDone || intervalIncrement>100){
+                    clearInterval(interval);
+                    return callback();
+                }
+                intervalIncrement+=1
+            },300)
+
 
     }
     self.setLayout = function (layout) {

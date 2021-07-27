@@ -444,7 +444,7 @@ var Sparql_generic = (function () {
          */
 
 
-        self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
+        self.copyNodesOld = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
             if (!options) {
                 options = {}
             }
@@ -537,6 +537,138 @@ var Sparql_generic = (function () {
                             "  }"
 
                         var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
+                            return callbackEach(err);
+                        })
+                    }, function (err) {
+                        callbackSeries(err)
+                    })
+                }
+
+            ], function (err) {
+                return callback(err, newTriples.length)
+
+            })
+
+        }
+        self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
+            if (!options) {
+                options = {}
+            }
+            var newTriplesSets = [];
+            var newTriples = [];
+
+            var setSize = 100
+
+            if (toGraphUri.charAt(toGraphUri.length - 1) != "/")
+                toGraphUri += "/"
+            var targetSchemaType = Config.sources[fromSourceLabel].schemaType;
+            var urisMap = {}
+
+            function getTargetUri(sourceUri) {
+                var targetUri = urisMap[sourceUri]
+                if (!targetUri) {
+
+                    if (!options.keepOriginalUris) {
+                        var targetUri = " <" + toGraphUri + common.getRandomHexaId(10) + ">"
+                        urisMap[sourceUri] = targetUri
+                        if (options.addExactMatchPredicate) {
+                            var exactMatchPredicate
+                            if (targetSchemaType == "SKOS")
+                                exactMatchPredicate = "http://www.w3.org/2004/02/skos/core#exactMatch";
+                            else
+                                exactMatchPredicate = "http://www.w3.org/2000/01/rdf-schema#sameAs";
+                            var  triple = targetUri + " <" + exactMatchPredicate + "> <" + sourceUri + "> ."
+                            newTriples.push(triple)
+                        }
+
+
+                    } else {
+                        urisMap[sourceUri] = targetUri = "<" + sourceUri + ">"
+                    }
+                }
+                return targetUri;
+            }
+
+
+
+            async.series([
+
+                // get sources nodes properties
+                function (callbackSeries) {
+                    self.getNodeInfos(fromSourceLabel, sourceIds, null, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        var subject, prop, object;
+                        var valueStr = "";
+
+                        result.forEach(function (item) {
+
+                            if (options.setSubjectFn)
+                                options.setSubjectFn(item)
+                            if (options.setPredicateFn)
+                                options.setPredicateFn(item)
+
+                            if (options.setObjectFn)
+                                options.setObjectFn(item)
+
+                            subject = getTargetUri(item.id.value)
+                            prop = item.prop.value
+                            if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
+
+
+                                if (item.value.type == "uri") {
+                                    var valueStr = getTargetUri(item.value.value)
+                                } else {
+                                    var langStr = "";
+                                    if (item.value["xml:lang"])
+                                        langStr = "@" + item.value["xml:lang"]
+                                    valueStr = "'" + Sparql_common.formatStringForTriple(item.value.value) + "'" + langStr
+                                }
+
+
+                                var triple = "<" + subject + "> <" + prop + "> " + valueStr + "."
+                                newTriples.push(triple)
+
+
+                                if (newTriples.length >= setSize) {
+                                    newTriplesSets.push(newTriples)
+                                    newTriples = []
+                                }
+                            }
+
+                        })
+                        newTriplesSets.push(newTriples)
+                        return callbackSeries()
+                    })
+
+
+                },
+                // add additionalTriplesNt
+                function (callbackSeries) {
+                    if (options.additionalTriplesNt) {
+                        options.additionalTriplesNt.forEach(function (triple) {
+                            if (newTriples.indexOf(triple) < 0)
+                                newTriples.push(triple)
+                        })
+
+                    }
+                    return callbackSeries();
+                },
+                //write new triples
+                function (callbackSeries) {
+                    async.eachSeries(newTriplesSets, function (newTriples, callbackEach) {
+                        var insertTriplesStr = "";
+                        newTriples.forEach(function (item) {
+                            insertTriplesStr += item
+                        })
+                        var query = " WITH GRAPH  <" + toGraphUri + ">  " +
+                            "INSERT DATA" +
+                            "  {" +
+                            insertTriplesStr +
+                            "  }"
+
+                        url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
                             return callbackEach(err);
                         })

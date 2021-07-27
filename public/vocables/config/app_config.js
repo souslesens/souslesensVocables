@@ -19,6 +19,8 @@ var Config = (function () {
 //    self.default_sparql_url="http://opeppa-updtlb03.main.glb.corp.local:8890/sparql"
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
+
+    self.defaultNewUriRoot="http://souslesens.org/resource/"
     self.loginMode = "json";
 
 self.loginMode = "none";

@@ -14,12 +14,13 @@ var Blender = (function () {
         var isLoaded = false
         self.modifiedNodes = []
         self.tempGraph;
-
+        self.availableSources = []
         self.currentSource;
         self.currentTab = 0;
         self.backupSource = false// using  a clone of source graph
         self.displayMode = "leftPanel"
-        self.onLoaded = function () {
+
+        self.onLoaded = function (callback) {
 
             MainController.UI.message("");
 
@@ -33,48 +34,56 @@ var Blender = (function () {
                 $("#graphDiv").html("")
             setTimeout(function () {
 
-                var payload = {
-                    getBlenderSources: 1,
-                }
-                $.ajax({
-                    type: "POST",
-                    url: Config.serverUrl,
-                    data: payload,
-                    dataType: "json",
-                    success: function (data, textStatus, jqXHR) {
-                        Config.profiles=data ;
-
-                    },
-                    error: function (err) {
-                        alert( "cannot load blender Sources")
-                        console.log(err);
-
+                    var payload = {
+                        getBlenderSources: 1,
                     }
-                })
-                    var editableSources = [];
-                    for (var key in Config.sources) {
+                    $.ajax({
+                        type: "POST",
+                        url: Config.serverUrl,
+                        data: payload,
+                        dataType: "json",
+                        success: function (data, textStatus, jqXHR) {
+                            for (var key in data) {
+                                Config.sources[key] = data[key]
+                            }
 
-                        if (!Config.sources[key].controllerName) {
-                            Config.sources[key].controllerName = "" + Config.sources[key].controller
-                            Config.sources[key].controller = eval(Config.sources[key].controller)
+                            self.availableSources = [];
+                            for (var key in Config.sources) {
+
+                                if (!Config.sources[key].controllerName) {
+                                    Config.sources[key].controllerName = "" + Config.sources[key].controller
+                                    Config.sources[key].controller = eval(Config.sources[key].controller)
+                                }
+                                if (Config.sources[key].sparql_server.url == "_default")
+                                    Config.sources[key].sparql_server.url = Config.default_sparql_url
+                                if (Config.sources[key].editable)
+                                    self.availableSources.push(key)
+                            }
+
+                            common.fillSelectOptions("Blender_SourcesSelect", self.availableSources.sort(), true)
+                            $("#Blender_PopupEditDiv").dialog({
+                                autoOpen: false,
+                                height: 600,
+                                width: 600,
+                                modal: true,
+                            });
+                            $("#Blender_tabs").tabs({
+                                activate: function (event, ui) {
+                                    self.currentTab = $("#Blender_tabs").tabs('option', 'active')
+                                }
+
+                            })
+                            if (callback)
+                                return callback();
+
+                        },
+                        error: function (err) {
+                            alert("cannot load blender Sources")
+                            console.log(err);
+
                         }
-                        if (Config.sources[key].editable)
-                            editableSources.push(key)
-                    }
-
-                    common.fillSelectOptions("Blender_SourcesSelect", editableSources.sort(), true)
-                    $("#Blender_PopupEditDiv").dialog({
-                        autoOpen: false,
-                        height: 600,
-                        width: 600,
-                        modal: true,
-                    });
-                    $("#Blender_tabs").tabs({
-                        activate: function (event, ui) {
-                            self.currentTab = $("#Blender_tabs").tabs('option', 'active')
-                        }
-
                     })
+
 
                     //   $("#Blender_searchDiv").load("snippets/searchAll.html")
                     //   SourceBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
@@ -133,14 +142,14 @@ var Blender = (function () {
 
                     function (callbackSeries) {
                         if (Blender.currentSource)
-                            if(Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType.indexOf("SKOS")>-1) {
+                            if (Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) {
                                 self.showFilteredTaxonomyTree(function (err, result) {
                                     callbackSeries(err);
                                 })
-                            }else{
-                           self.showTopConcepts(null, function (err, result) {
-                                callbackSeries(err);
-                            })
+                            } else {
+                                self.showTopConcepts(null, function (err, result) {
+                                    callbackSeries(err);
+                                })
 
                             }
 
@@ -254,7 +263,14 @@ var Blender = (function () {
                 if (currentNodeLevel < allowedLevels)
                     return false;
                 console.log(operation)
-                Blender.currentDNDoperation = {operation: operation, node: node, parent: parent, position: position, more, more}
+                Blender.currentDNDoperation = {
+                    operation: operation,
+                    node: node,
+                    parent: parent,
+                    position: position,
+                    more,
+                    more
+                }
 
                 return true;
             },
@@ -301,7 +317,7 @@ var Blender = (function () {
 
         self.getJstreeConceptsContextMenu = function () {
             var menuItems = {}
-            $(".vakata-context jstree-contextmenu").css("z-index","6")
+            $(".vakata-context jstree-contextmenu").css("z-index", "6")
 
 
             if (!self.currentTreeNode || !self.currentTreeNode.data)
@@ -347,7 +363,7 @@ var Blender = (function () {
                 return menuItems;
             } else {
                 var clipboard = Clipboard.getContent()
-                if(clipboard.length==0) {
+                if (clipboard.length == 0) {
                     menuItems.toCollection = {
                         label: "<span class='blender_assignCollection'>to Collection</span>",
                         action: function (e) {// pb avec source
@@ -369,7 +385,7 @@ var Blender = (function () {
                             pasteNode: {
                                 label: "<span class='blender_pasteNode'>node</span>",
                                 action: function () {
-                                    self.menuActions.pasteClipboardNodeOnly();
+                                    self.menuActions.pasteClipboardNodes(null,1);
                                 }
                             },
                             /*   pasteProperties: {
@@ -383,7 +399,7 @@ var Blender = (function () {
                             pasteDescendants: {
                                 label: "<span class='blender_pasteNode'>descendants</span>",
                                 action: function (obj, sss, cc) {
-                                    self.menuActions.pasteClipboardNodeDescendants()
+                                    self.menuActions.pasteClipboardNodes(null,null);
                                     ;
                                 },
                             },
@@ -486,7 +502,12 @@ var Blender = (function () {
                         if (err) {
                             return callback(err)
                         }
-                        var triple = {subject: subject, predicate: broaderPredicate, object: newParentId, valueType: "uri"}
+                        var triple = {
+                            subject: subject,
+                            predicate: broaderPredicate,
+                            object: newParentId,
+                            valueType: "uri"
+                        }
                         Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
                             if (err) {
                                 callback(err)
@@ -509,7 +530,7 @@ var Blender = (function () {
                 }
 
 
-                if (Config.sources[nodeData.source].schemaType.indexOf("SKOS")>-1) {
+                if (Config.sources[nodeData.source].schemaType.indexOf("SKOS") > -1) {
 
                     var broaderPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
                     execMoveQuery(nodeData.id, broaderPredicate, oldParentData.id, newParentData.id, function (err, result) {
@@ -522,7 +543,12 @@ var Blender = (function () {
                             if (err) {
                                 return processCallBack(err, result)
                             }
-                            var triple = {subject: newParentData.id, predicate: broaderPredicate, object: nodeData.id, valueType: "uri"}
+                            var triple = {
+                                subject: newParentData.id,
+                                predicate: broaderPredicate,
+                                object: nodeData.id,
+                                valueType: "uri"
+                            }
                             Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
                                 if (err) {
                                     callback(err)
@@ -546,7 +572,7 @@ var Blender = (function () {
             },
 
 
-           deleteNode: function (type) {
+            deleteNode: function (type) {
                 if (!type)
                     alert(" no type")
 
@@ -646,8 +672,79 @@ var Blender = (function () {
                 }
             },
 
+            pasteClipboardNodes: function (fromDataArray, depth, options, callback) {
+                if (!fromDataArray)
+                    fromDataArray = Clipboard.getContent();
+                if (!fromDataArray)
+                    return;
+                if (!options) {
+                    options = {}
+                }
+                var oldId
+                var newId
+                var label
+
+                var toParentNode
+                if (options.newParentId)
+                    toParentNode = options.newParentId;
+                else
+                    toParentNode = self.currentTreeNode.data;
+
+
+                async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
+                    var sourceNodesId= {}
+                    async.series([
+                        function (callbackSeries) {
+
+                            Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (err, result) {
+                                result.forEach(function(item){
+                                    if(!sourceNodesId[item.id.value]){
+                                        sourceNodesId[item.id.value]=1;
+                                    }
+                                    for (var i = 1; i < 5; i++) {
+                                        var broader = item["broader" + i]
+                                        if (broader ) {
+                                            if (!sourceNodesId[broader]) {
+                                                sourceNodesId[broader] = 1;
+                                            }
+                                        }}
+                                })
+                                callbackSeries();
+                            })
+                        },
+                        function (callbackSeries) {
+                        var toGraphUri=Config.sources[toParentNode.source].graphUri
+                            var fromIds=Object.keys(sourceNodesId);
+                        options={
+                            keepOriginalUris:false,
+                            addExactMatchPredicate:true,
+                           
+                            
+                        }
+
+
+
+                        Sparql_generic.copyNodes(fromNodeData.source,toGraphUri,fromIds,options,function(err, result){
+
+                        })
+
+                        }
+
+
+                    ], function (err) {
+                        return callbackEach()
+
+                    })
+                }, function (err) {
+                    return callback
+
+                })
+
+
+            },
 
             pasteClipboardNodeOnly: function (dataArray, options, callback) {
+                return self.menuActions.pasteClipboardNode (dataArray,1, options, callback)
                 if (!dataArray)
                     dataArray = Clipboard.getContent();
                 if (!dataArray)
@@ -691,7 +788,7 @@ var Blender = (function () {
                         var additionalTriplesNt = []
 
 
-                        if (Config.sources[self.currentSource].schemaType.indexOf("SKOS")>-1){
+                        if (Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) {
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
                             additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#exactMatch> <" + oldId + ">.")
                         } else if (Config.sources[self.currentSource].schemaType == "OWL") {
@@ -960,7 +1057,13 @@ var Blender = (function () {
             createConceptFromWord: function () {
                 var data = Clipboard.getContent()[0];
 
-                var initData = {"http://www.w3.org/2004/02/skos/core#prefLabel": [{"xml:lang": SourceEditor.prefLang, value: data.text, type: "literal"}]}
+                var initData = {
+                    "http://www.w3.org/2004/02/skos/core#prefLabel": [{
+                        "xml:lang": SourceEditor.prefLang,
+                        value: data.text,
+                        type: "literal"
+                    }]
+                }
                 self.nodeEdition.createChildNode(initData, "concept")
                 Clipboard.clear()
             }
@@ -1001,18 +1104,18 @@ var Blender = (function () {
 
 
             ,
-           getSourceDefaultRdfType:function(){
-                if(Config.sources[ self.currentSource].schemaType.indexOf("SKOS")>-1)
+            getSourceDefaultRdfType: function () {
+                if (Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1)
                     return "concept";
-               if(Config.sources[ self.currentSource].schemaType.indexOf("OWL")>-1) {
-                   return "class";
-               }
-               return null;
+                if (Config.sources[self.currentSource].schemaType.indexOf("OWL") > -1) {
+                    return "class";
+                }
+                return null;
 
-           },
+            },
             editNode: function (type) {
-               /* if(!type)
-                type=self.nodeEdition.getSourceDefaultRdfType();*/
+                /* if(!type)
+                 type=self.nodeEdition.getSourceDefaultRdfType();*/
 
                 if (!type)
                     alert(" no type")
@@ -1064,10 +1167,19 @@ var Blender = (function () {
                     treeDivId = 'Blender_conceptTreeDiv';
                     type = "http://www.w3.org/2004/02/skos/core#Concept"
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#ConceptScheme")
-                        initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
+                        initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [{
+                            value: self.currentTreeNode.data.id,
+                            type: "uri"
+                        }]
                     if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#Concept")
-                        initData["http://www.w3.org/2004/02/skos/core#broader"] = [{value: self.currentTreeNode.data.id, type: "uri"}]
-                    initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [{value: "http://www.w3.org/2004/02/skos/core#Concept", type: "uri"}]
+                        initData["http://www.w3.org/2004/02/skos/core#broader"] = [{
+                            value: self.currentTreeNode.data.id,
+                            type: "uri"
+                        }]
+                    initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [{
+                        value: "http://www.w3.org/2004/02/skos/core#Concept",
+                        type: "uri"
+                    }]
 
                 } else if (type == "collection") {
                     parentNode = Collection.currentTreeNode;
@@ -1076,7 +1188,10 @@ var Blender = (function () {
                     mandatoryProps = ["http://www.w3.org/2004/02/skos/core#prefLabel"]
                     childClass = "http://www.w3.org/2004/02/skos/core#Collection";
                     treeDivId = 'Blender_collectionTreeDiv';
-                    initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [{value: "http://www.w3.org/2004/02/skos/core#Collection", type: "uri"}]
+                    initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [{
+                        value: "http://www.w3.org/2004/02/skos/core#Collection",
+                        type: "uri"
+                    }]
                 }
 
                 mandatoryProps.forEach(function (item) {
@@ -1151,7 +1266,12 @@ var Blender = (function () {
                             id: editingObject.about,
                             text: editingObject.nodeLabel,
                             parent: parentNode,
-                            data: {type: editingObject.type, source: self.currentSource, id: editingObject.about, label: editingObject.nodeLabel}
+                            data: {
+                                type: editingObject.type,
+                                source: self.currentSource,
+                                id: editingObject.about,
+                                label: editingObject.nodeLabel
+                            }
                         }]
 
 
@@ -1203,73 +1323,71 @@ var Blender = (function () {
                     return (MainController.UI.message(err))
                 }
 
-                    var predicates=[]
-                    var subjects={}
-                    result.forEach(function(item){
-                        if(!subjects[item.subject.value])
-                            subjects[item.subject.value]={}
-                        var value=item.object.value;
-                        if(item.object["xml:lang"])
-                            value=value+"@"+item.object["xml:lang"]
-                        if( !subjects[item.subject.value][item.predicate.value])
-                            subjects[item.subject.value][item.predicate.value]=[]
-                        subjects[item.subject.value][item.predicate.value].push(value)
+                var predicates = []
+                var subjects = {}
+                result.forEach(function (item) {
+                    if (!subjects[item.subject.value])
+                        subjects[item.subject.value] = {}
+                    var value = item.object.value;
+                    if (item.object["xml:lang"])
+                        value = value + "@" + item.object["xml:lang"]
+                    if (!subjects[item.subject.value][item.predicate.value])
+                        subjects[item.subject.value][item.predicate.value] = []
+                    subjects[item.subject.value][item.predicate.value].push(value)
 
-                        if(predicates.indexOf(item.predicate.value)<0)
-                            predicates.push(item.predicate.value)
+                    if (predicates.indexOf(item.predicate.value) < 0)
+                        predicates.push(item.predicate.value)
 
 
-                    })
-                    var line=0;
-                    var str=""
-                    var sep="\t"
+                })
+                var line = 0;
+                var str = ""
+                var sep = "\t"
 
-                    predicates.splice(0,0,"uri")
-                    predicates.forEach(function(predicate, predicateIndex) {
+                predicates.splice(0, 0, "uri")
+                predicates.forEach(function (predicate, predicateIndex) {
+
+                    if (predicateIndex > 0)
+                        str += sep
+                    str += predicate;
+                })
+                str += "\n"
+
+                for (var key in subjects) {
+                    str += key
+                    predicates.forEach(function (predicate, predicateIndex) {
 
                         if (predicateIndex > 0)
                             str += sep
-                        str += predicate;
-                    })
-                    str+="\n"
 
-                    for( var key in subjects){
-                        str+=key
-                        predicates.forEach(function(predicate, predicateIndex) {
-
-                        if (predicateIndex >0)
-                            str += sep
-
-                    var object=subjects[key][predicate]
-                            if(object) {
-                                var valueStr=""
-                                object.forEach(function(value,valueIndex) {
-                                    if(valueIndex>0)
-                                        valueStr+="|"
-                                if(subjects[value])
-                                    valueStr+= value+"@"+subjects[value]["http://www.w3.org/2004/02/skos/core#prefLabel"]
-                                    else
-                                    valueStr+=value
+                        var object = subjects[key][predicate]
+                        if (object) {
+                            var valueStr = ""
+                            object.forEach(function (value, valueIndex) {
+                                if (valueIndex > 0)
+                                    valueStr += "|"
+                                if (subjects[value])
+                                    valueStr += value + "@" + subjects[value]["http://www.w3.org/2004/02/skos/core#prefLabel"]
+                                else
+                                    valueStr += value
 
 
                             })
-                                str += valueStr
-                            }
-                            else
-                                str+=""
+                            str += valueStr
+                        } else
+                            str += ""
 
-                        })
-                        str+="\n"
+                    })
+                    str += "\n"
 
-                    }
+                }
 
-                var result = common.copyTextToClipboard(str,function(err,result){
-                    if(err)
+                var result = common.copyTextToClipboard(str, function (err, result) {
+                    if (err)
                         return MainController.UI.message(err);
                     MainController.UI.message(result);
-                    alert( "filtered taxonomy CSV copied in clipboard")
+                    alert("filtered taxonomy CSV copied in clipboard")
                 })
-
 
 
             })
@@ -1281,7 +1399,7 @@ var Blender = (function () {
 
             Sparql_generic.getCollectionNodes(self.currentSource, collection, {filter: {predicates: ["skos:prefLabel", "skos:broader"]}}, function (err, result) {
                 if (err) {
-                    if(callback)
+                    if (callback)
                         return callback(err)
                     return (MainController.UI.message(err))
                 }
@@ -1324,28 +1442,94 @@ var Blender = (function () {
                     })
                 }
 
-                 //   console.log(JSON.stringify(jstreeData, null, 2))
-                    var jsTreeOptions = self.getConceptJstreeOptions(false)
-                    jsTreeOptions.openAll = true;
-                    common.jstree.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)
+                //   console.log(JSON.stringify(jstreeData, null, 2))
+                var jsTreeOptions = self.getConceptJstreeOptions(false)
+                jsTreeOptions.openAll = true;
+                common.jstree.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)
                 $("#Blender_tabs").tabs("option", "active", 0);
-                if(callback)
+                if (callback)
                     callback();
-                })
-
-
-
+            })
 
 
         }
 
-        self.createNewResource=function(){
-            var resourceName=prompt("new resource name")
-            if(!resourceName || resourceName=="")
-                return;
+        self.newSource = {
+
+            setSourceUriPrefixValue: function () {
+                var oldUri = $("#blenderNewSource_resourceGraphUriInput").val();
+                // if(oldUri=="")
+                var name = $("#blenderNewSource_resourceNameInput").val();
+                name = Sparql_common.formatStringForTriple(name, true)
+                var uri = Config.defaultNewUriRoot + name + "/"
+
+                $("#blenderNewSource_resourceGraphUriInput").val(uri);
+
+            },
+            cancelNewResourceDialog: function () {
+                $("#mainDialogDiv").dialog("close");
+            }
+
+            , showCreateSourceDialog: function () {
+                $("#mainDialogDiv").load("snippets/blender/newSourceDialog.html");
+                $("#mainDialogDiv").dialog("open");
+
+                setTimeout(function () {
+                    common.fillSelectOptions("blenderNewSource_referenceSourceSelect", self.availableSources.sort(), true)
+
+                }, 200)
 
 
+            }
 
+            , createNewResource: function () {
+                var graphUri = $("#blenderNewSource_resourceGraphUriInput").val();
+                var referenceSource = $("#blenderNewSource_referenceSourceSelect").val();
+                var keepOriginalUris = $("#blenderNewSource_keepOriginalUrisCBX").prop("checked");
+                if (!referenceSource || referenceSource == "")
+                    return alert("select a reference graph")
+                var name = $("#blenderNewSource_resourceNameInput").val();
+                if (graphUri == "" || name == "")
+                    return alert("set resource name and graph URI");
+
+                delete Config.sources[referenceSource].controller
+
+                var options = {
+                    referenceSource: Config.sources[referenceSource],
+                    keepOriginalUris: keepOriginalUris,
+                    type: "SKOS",
+                    lang: "en",
+                    addExactMatchPredicate: true,
+                }
+                var payload = {
+                    createNewResource: 1,
+                    sourceName: name,
+                    graphUri: graphUri,
+                    targetSparqlServerUrl: Config.default_sparql_url,
+                    options: JSON.stringify(options),
+                }
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: payload,
+                    dataType: "json",
+                    success: function (data, textStatus, jqXHR) {
+                        self.onLoaded(function (err) {
+                            self.onSourceSelect(name)
+                            $("#Blender_SourcesSelect").val(name)
+
+                        })
+
+                    },
+                    error: function (err) {
+                        alert("cannot create source")
+                        console.log(err);
+
+                    }
+                })
+
+
+            }
         }
 
         return self;

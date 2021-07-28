@@ -142,6 +142,8 @@ var MainController = (function () {
             else
                 $("#showBlenderButton").css("display","block")
         },
+
+
         showSources: function (treeDiv, withCBX) {
             var treeData = [];
             var distinctNodes = {}

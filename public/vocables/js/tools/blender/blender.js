@@ -34,6 +34,14 @@ var Blender = (function () {
                 $("#graphDiv").html("")
             setTimeout(function () {
 
+
+                    var displayCreateDeleteResourceDiv = "none";
+                    if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+                        displayCreateDeleteResourceDiv = "block"
+                    }
+                    $("#Blender_createDeleteResourceDiv").css("display", displayCreateDeleteResourceDiv)
+
+
                     var payload = {
                         getBlenderSources: 1,
                     }
@@ -95,7 +103,7 @@ var Blender = (function () {
         }
 
 
-        self.onSourceSelect = function (source) {
+        self.onSourceSelect = function (source, callback) {
 
             $("#Blender_conceptTreeDiv").html("");
             self.currentTreeNode = null;
@@ -176,6 +184,8 @@ var Blender = (function () {
                     }
                 ],
                 function (err) {
+                    if (callback)
+                        callback(err)
                     if (err)
                         return MainController.UI.message(err);
                 })
@@ -385,7 +395,7 @@ var Blender = (function () {
                             pasteNode: {
                                 label: "<span class='blender_pasteNode'>node</span>",
                                 action: function () {
-                                    self.menuActions.pasteClipboardNodes(null,1);
+                                    self.menuActions.pasteClipboardNodes(null, 1);
                                 }
                             },
                             /*   pasteProperties: {
@@ -399,7 +409,7 @@ var Blender = (function () {
                             pasteDescendants: {
                                 label: "<span class='blender_pasteNode'>descendants</span>",
                                 action: function (obj, sss, cc) {
-                                    self.menuActions.pasteClipboardNodes(null,null);
+                                    self.menuActions.pasteClipboardNodes(null, null);
                                     ;
                                 },
                             },
@@ -690,43 +700,52 @@ var Blender = (function () {
                 else
                     toParentNode = self.currentTreeNode.data;
 
+                var depth = Config.Blender.pasteDescendantsMaxDepth
+                if (options.pasteDescendantsDepth)
+                    depth = options.pasteDescendantsDepth;
 
                 async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
-                    var sourceNodesId= {}
+                    var sourceNodesId = {}
                     async.series([
                         function (callbackSeries) {
-
+                            if (depth > 0)
+                                MainController.UI.message("searching node and its children")
                             Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (err, result) {
-                                result.forEach(function(item){
-                                    if(!sourceNodesId[item.id.value]){
-                                        sourceNodesId[item.id.value]=1;
+                                result.forEach(function (item) {
+                                    if (!sourceNodesId[item.concept.value]) {
+                                        sourceNodesId[item.concept.value] = 1;
                                     }
-                                    for (var i = 1; i < 5; i++) {
-                                        var broader = item["broader" + i]
-                                        if (broader ) {
-                                            if (!sourceNodesId[broader]) {
-                                                sourceNodesId[broader] = 1;
+                                    for (var i = 1; i < depth; i++) {
+                                        var child = item["child" + i]
+                                        if (child) {
+                                            if (!sourceNodesId[child.value]) {
+                                                sourceNodesId[child.value] = 1;
                                             }
-                                        }}
+                                        }
+                                    }
                                 })
                                 callbackSeries();
                             })
                         },
                         function (callbackSeries) {
-                        var toGraphUri=Config.sources[toParentNode.source].graphUri
-                            var fromIds=Object.keys(sourceNodesId);
-                        options={
-                            keepOriginalUris:false,
-                            addExactMatchPredicate:true,
-                           
-                            
-                        }
+                            var toGraphUri = Config.sources[toParentNode.source].graphUri
+                            var fromIds = Object.keys(sourceNodesId);
+                            options = {
+                                keepOriginalUris: false,
+                                addExactMatchPredicate: true,
+                                parentNodeId: toParentNode.id,
+                                prefLang: "en",
 
 
+                            }
 
-                        Sparql_generic.copyNodes(fromNodeData.source,toGraphUri,fromIds,options,function(err, result){
+                            MainController.UI.message("copying " + fromIds.length + " nodes from source " + fromNodeData.source + " in source " + toParentNode.source)
+                            Sparql_generic.copyNodes(fromNodeData.source, toGraphUri, fromIds, options, function (err, result) {
 
-                        })
+                                self.onSourceSelect(toParentNode.source,function(err, result){
+                                    $("#Blender_conceptTreeDiv").jstree().open_node(toParentNode.id)
+                                })
+                            })
 
                         }
 
@@ -744,7 +763,7 @@ var Blender = (function () {
             },
 
             pasteClipboardNodeOnly: function (dataArray, options, callback) {
-                return self.menuActions.pasteClipboardNode (dataArray,1, options, callback)
+                return self.menuActions.pasteClipboardNode(dataArray, 1, options, callback)
                 if (!dataArray)
                     dataArray = Clipboard.getContent();
                 if (!dataArray)
@@ -1404,6 +1423,7 @@ var Blender = (function () {
                     return (MainController.UI.message(err))
                 }
                 var jstreeData = []
+                var source = Config.sources[self.currentSource]
 
                 var dataMap = {}
                 result.forEach(function (item) {
@@ -1413,7 +1433,13 @@ var Blender = (function () {
                         dataMap[item.subject.value].broader = item.object.value
                     }
                     if (item.predicate.value.indexOf("#prefLabel") > -1) {
-                        dataMap[item.subject.value].prefLabel = item.object.value
+                        if (source.predicates && source.predicates.lang) {
+                            if (item.object["xml:lang"] == source.predicates.lang) {
+                                dataMap[item.subject.value].prefLabel = item.object.value
+                            }
+
+                        } else
+                            dataMap[item.subject.value].prefLabel = item.object.value
                     }
                 })
                 var orphanBroaders = []
@@ -1454,7 +1480,8 @@ var Blender = (function () {
 
         }
 
-        self.newSource = {
+        self.sourcesManager = {
+
 
             setSourceUriPrefixValue: function () {
                 var oldUri = $("#blenderNewSource_resourceGraphUriInput").val();
@@ -1486,6 +1513,10 @@ var Blender = (function () {
                 var graphUri = $("#blenderNewSource_resourceGraphUriInput").val();
                 var referenceSource = $("#blenderNewSource_referenceSourceSelect").val();
                 var keepOriginalUris = $("#blenderNewSource_keepOriginalUrisCBX").prop("checked");
+
+                var lang = $("#blenderNewSource_defaultLangInput").prop("checked");
+                if (!lang || lang == "")
+                    lang = null;
                 if (!referenceSource || referenceSource == "")
                     return alert("select a reference graph")
                 var name = $("#blenderNewSource_resourceNameInput").val();
@@ -1498,9 +1529,10 @@ var Blender = (function () {
                     referenceSource: Config.sources[referenceSource],
                     keepOriginalUris: keepOriginalUris,
                     type: "SKOS",
-                    lang: "en",
+                    lang: lang,
                     addExactMatchPredicate: true,
                 }
+
                 var payload = {
                     createNewResource: 1,
                     sourceName: name,
@@ -1528,6 +1560,28 @@ var Blender = (function () {
                     }
                 })
 
+
+            }
+            , deleteSource: function () {
+                var source = $("#Blender_SourcesSelect").val()
+                if (!source || source == "")
+                    return alert("select a source");
+                var sourceObj = Config.sources[source];
+                if (sourceObj.protected)
+                    return alert("source " + source + " is protected and cannot be removed")
+
+                if (confirm("delete this source !!!")) {
+
+                    Sparql_generic.deleteGraph(source, function (err, result) {
+                        if (err)
+                            alert(err)
+                        self.onLoaded(function (err) {
+
+                        })
+                        return MainController.UI.message("source deleted")
+
+                    })
+                }
 
             }
         }

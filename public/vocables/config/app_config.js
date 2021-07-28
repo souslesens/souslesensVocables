@@ -33,7 +33,11 @@ self.loginMode = "none";
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 8
-    self.Blender = {openTaxonomyTreeOnLoad: 1}
+    self.Blender = {
+        openTaxonomyTreeOnLoad: 1,
+    pasteDescendantsMaxDepth:2,
+        prefLang:"en"
+    }
 
     self.ADL = {
         RDLsource: "RDL-QUANTUM-MIN",

@@ -39,12 +39,18 @@ blenderNewSource new Corpus
 
 
     <div  class="blenderNewSource_div">
-        resource name<input  onblur="Blender.newSource.setSourceUriPrefixValue()" style='font-weight: bold;width: 100px' id="blenderNewSource_resourceNameInput"
+        resource name<input  onblur="Blender.sourcesManager.setSourceUriPrefixValue()" style='font-weight: bold;width: 100px' id="blenderNewSource_resourceNameInput"
                            value="">
     </div>
     <div  class="blenderNewSource_div">
         Graph URI <input   style='font-weight: bold;width: 300px' id="blenderNewSource_resourceGraphUriInput"
                               value="">
+
+    </div>
+    <div  class="blenderNewSource_div">
+        default language <input   style='font-weight: bold;width: 300px' id="blenderNewSource_defaultLangInput"
+                           value="en">
+
     </div>
 
     <div  class="blenderNewSource_div">
@@ -56,8 +62,8 @@ blenderNewSource new Corpus
     <div>
         <td><img src="./images/waitAnimated.gif" id="blenderNewSource_waitImg" style="display: none;width: 15px; text-align: justify">
 
-            <button onclick="Blender.newSource.createNewResource()"> create resource</button>
-            <button onclick="Evaluate.newSource.cancelNewResourceDialog()">Cancel</button>
+            <button onclick="Blender.sourcesManager.createNewResource()"> create resource</button>
+            <button onclick="Evaluate.sourcesManager.cancelNewResourceDialog()">Cancel</button>
     </div>
 
 </div>

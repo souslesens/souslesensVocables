@@ -58,9 +58,10 @@ var configManager = {
                             "sparql_server": {
                                 "url": "_default"
                             },
+
                             "graphUri": graphUri,
                             "schemaType": "SKOS",
-                            "predicates": {},
+                            "predicates": {"lang":options.lang},
                             "color": "#9edae3"
                         }
                     } else {

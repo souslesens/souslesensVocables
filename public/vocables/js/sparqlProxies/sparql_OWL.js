@@ -227,7 +227,7 @@ var Sparql_OWL = (function () {
 
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  ?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
+                    query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "}."
                     if (options.skipRestrictions) {
                         query += " filter ( NOT EXISTS {?broader" + (i) + " rdf:type owl:Restriction}) "
                     }

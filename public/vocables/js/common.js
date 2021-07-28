@@ -425,7 +425,7 @@ var common = (function () {
 
         }
 
-        self.getItemLabel = function (item, varName) {
+        self.getItemLabel = function (item, varName,lang) {
 
             if (item[varName + "Label"])
                 return item[varName + "Label"].value

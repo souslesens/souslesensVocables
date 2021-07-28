@@ -413,7 +413,8 @@ var Sparql_generic = (function () {
 
 
             var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}"
-            url = Config.sources[sourceLabel].serverUrl + "?format=json&query=";
+
+            url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
                 return callback(err);
             })
@@ -581,6 +582,16 @@ var Sparql_generic = (function () {
                             var  triple = targetUri + " <" + exactMatchPredicate + "> <" + sourceUri + "> ."
                             newTriples.push(triple)
                         }
+                        if(options.parentNodeId){
+                            var parentPredicate
+                            if (targetSchemaType == "SKOS")
+                                parentPredicate = "http://www.w3.org/2004/02/skos/core#broader";
+                            else
+                                parentPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                            var  triple = targetUri + " <" + parentPredicate + "> <" + options.parentNodeId + "> ."
+                            newTriples.push(triple)
+
+                        }
 
 
                     } else {
@@ -614,6 +625,8 @@ var Sparql_generic = (function () {
 
                             subject = getTargetUri(item.id.value)
                             prop = item.prop.value
+                            if( options.excludedProperties && options.excludedProperties.indexOf(prop)>-1)
+                                return;
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
 
@@ -627,7 +640,7 @@ var Sparql_generic = (function () {
                                 }
 
 
-                                var triple = "<" + subject + "> <" + prop + "> " + valueStr + "."
+                                var triple = "" + subject + " <" + prop + "> " + valueStr + "."
                                 newTriples.push(triple)
 
 

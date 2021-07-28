@@ -167,6 +167,8 @@ var Sparql_SKOS = (function () {
                 " ?subject ?predicate ?object. " + filterStr +
                 "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})"
 
+
+
             if (!collection || collection == "") {
 
                 query += "}";
@@ -576,7 +578,7 @@ var Sparql_SKOS = (function () {
 
 
             var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}"
-            url = Config.sources[sourceLabel].serverUrl + "?format=json&query=";
+            url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
                 return callback(err);
             })

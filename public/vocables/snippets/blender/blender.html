@@ -65,9 +65,12 @@
         <button onclick="Blender.nodeEdition.createSchemeOrCollection('Collection')">New Collection</button>
         <button onclick="Blender.copyGraph()">Save source</button>
     </div>
-    <div style="margin:5px;">
+  <div>
         Select Resource <select onchange="Blender.onSourceSelect($(this).val())" id="Blender_SourcesSelect"></select>
-        <button onclick="Blender.newSource.showCreateSourceDialog()">New resource...</button>
+  </div>
+    <div id='Blender_createDeleteResourceDiv' style="margin:5px;">
+        <button onclick="Blender.sourcesManager.showCreateSourceDialog()">New resource...</button>
+        <button onclick="Blender.sourcesManager.deleteSource()">Delete resource</button>
     </div>
     <div id="Blender_currentFilterContainerDiv" style="background-color: beige;padding: 2px">
         <div id="Blender_currentFilterDiv" style="background-color: beige;padding: 2px">

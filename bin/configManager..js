@@ -36,13 +36,13 @@ var configManager = {
             callback(err, sources)
         })
     },
-    createNewResource: function (sourceName, graphUri,targetSparqlServerUrl,  options,callback) {
+    createNewResource: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         async.series([
 
             // create and initiate graph triples
             function (callbackSeries) {
 
-                SourceManager.createNewSkosSourceGraph(sourceName, graphUri,targetSparqlServerUrl,options,function (err, result) {
+                SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
                     return callbackSeries()
                 })
             },
@@ -61,7 +61,7 @@ var configManager = {
 
                             "graphUri": graphUri,
                             "schemaType": "SKOS",
-                            "predicates": {"lang":options.lang},
+                            "predicates": {"lang": options.lang},
                             "color": "#9edae3"
                         }
                     } else {
@@ -75,7 +75,36 @@ var configManager = {
                 })
 
             }], function (err) {
-            callback(err,"done")
+            callback(err, "done")
+        })
+    }
+
+    , deleteResource: function (sourceName, graphUri, targetSparqlServerUrl, callback) {
+        async.series([
+
+            // create and initiate graph triples
+            function (callbackSeries) {
+
+                SourceManager.deleteSourceGraph(graphUri, targetSparqlServerUrl, function (err, result) {
+                    return callbackSeries(err, result)
+                })
+            },
+            function (callbackSeries) {
+                var sourcesPath = path.join(__dirname, "../config/blenderSources.json")
+                jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+                    if (err)
+                        return callback(err)
+                    delete sources[sourceName];
+
+                    jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+
+                        callbackSeries(err)
+
+                    })
+                })
+
+            }], function (err) {
+            callback(err, "done")
         })
     }
 

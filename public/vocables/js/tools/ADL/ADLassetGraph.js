@@ -642,7 +642,7 @@ var ADLassetGraph = (function () {
 
             //get model
             function (callbackSeries) {
-                var slices = common.sliceArray(ids, 30)
+                var slices = common.array.slice(ids, 30)
                 var model = {}
 
                 async.eachSeries(slices, function (ids, callbackEach) {

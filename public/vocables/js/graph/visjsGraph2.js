@@ -275,15 +275,16 @@ var visjsGraph = (function () {
             self.listSavedGraphs()
         }, 500)
 
-        if (callback)
-            var intervalIncrement=0;
-           var interval=setInterval(function(){
-                if(self.drawingDone || intervalIncrement>100){
+        if (callback) {
+            var intervalIncrement = 0;
+            var interval = setInterval(function () {
+                if (self.drawingDone || intervalIncrement > 100) {
                     clearInterval(interval);
                     return callback();
                 }
-                intervalIncrement+=1
-            },300)
+                intervalIncrement += 1
+            }, 300)
+        }
 
 
     }

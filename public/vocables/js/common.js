@@ -158,6 +158,10 @@ var common = (function () {
 
 
             },
+            clear: function (jstreeDiv) {
+                $("#" + jstreeDiv).jstree("destroy").empty();
+            },
+
             addNodesToJstree: function (jstreeDiv, parentNodeId, jstreeData, options) {
                 if (!options)
                     options = {}
@@ -277,7 +281,7 @@ var common = (function () {
             checkAll: function (jstreeDiv) {
                 $("#" + jstreeDiv).jstree().check_all()
             },
-            openNode: function (jstreeDiv,nodeId) {
+            openNode: function (jstreeDiv, nodeId) {
                 $("#" + jstreeDiv).jstree().open_node(nodeId)
             }
         }
@@ -342,22 +346,87 @@ var common = (function () {
         }
 
 
-        self.sliceArray = function (array, sliceSize) {
-            var slices = [];
-            var slice = []
-            array.forEach(function (item) {
-                if (slice.length >= sliceSize) {
-                    slices.push(slice);
-                    slice = [];
-                }
-                slice.push(item)
-            })
-            slices.push(slice);
-            return slices;
+        self.array= {
+            slice: function (array, sliceSize) {
+                var slices = [];
+                var slice = []
+                array.forEach(function (item) {
+                    if (slice.length >= sliceSize) {
+                        slices.push(slice);
+                        slice = [];
+                    }
+                    slice.push(item)
+                })
+                slices.push(slice);
+                return slices;
 
 
+            },
+
+            distinctValues: function (array, key) {
+                var distinctValues={};
+                var array2 = []
+                var value="";
+                array.forEach(function (item) {
+                    if (!key) {
+                        value = item
+                    } else {
+                        value = item[key]
+                        if(value && value.value)
+                            value=value.value
+
+                    }
+                    if (!distinctValues[value]) {
+                        distinctValues[value] = 1
+                        array2.push(item)
+                    }
+                })
+                return array2;
+
+
+            },
+
+            sort: function (array, key,order) {
+                var x=order=="desc"?-1:1
+                array.sort(function(a,b){
+                    var valueA
+                    var valueB
+                    if(!key) {
+                        valueA = a
+                        valueB = b
+                    }
+                    else{
+                        valueA=a[key]
+                        if(valueA && valueA.value)
+                            valueA=valueA.value
+                        valueB=b[key]
+                        if(valueB && valueB.value)
+                            valueB=valueB.value
+                    }
+                  if(valueA>valueB)
+                      return x
+                    if(valueA<valueB)
+                        return -x
+                    return 0;
+
+
+                })
+                return array;
+            }
         }
 
+        self.sortObjectArray = function (array, field, options) {
+            array.sort(function (a, b) {
+                var aValue = (a[field] ? a[field] : "")
+                var bValue = (b[field] ? b[field] : "")
+                if (aValue > bValue)
+                    return 1
+                if (aValue < bValue)
+                    return -1
+                return 0;
+            })
+            return array
+        }
 
         self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
             addedArray.forEach(function (addedItem) {
@@ -425,7 +494,7 @@ var common = (function () {
 
         }
 
-        self.getItemLabel = function (item, varName,lang) {
+        self.getItemLabel = function (item, varName, lang) {
 
             if (item[varName + "Label"])
                 return item[varName + "Label"].value

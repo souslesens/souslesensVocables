@@ -32,10 +32,10 @@ self.loginMode = "none";
     self.preferredSchemaType = "OWL"
     self.queryLimit = 10000;
     self.searchLimit = 500;
-    self.searchDepth = 8
+    self.searchDepth = 6
     self.Blender = {
-        openTaxonomyTreeOnLoad: 1,
-    pasteDescendantsMaxDepth:2,
+        openTaxonomyTreeOnLoad: 3,
+    pasteDescendantsMaxDepth:6,
         prefLang:"en"
     }
 

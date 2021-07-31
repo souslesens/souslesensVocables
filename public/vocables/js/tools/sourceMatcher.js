@@ -190,7 +190,7 @@ var SourceMatcher = (function () {
                             return callbackSeries();
 
 
-                        var sourceConceptsSlices = common.sliceArray(allSourceConcepts, sliceSize)
+                        var sourceConceptsSlices = common.array.slice(allSourceConcepts, sliceSize)
                         async.eachSeries(sourceConceptsSlices, function (sourceConcepts, callbackEach) {
                             sourceConceptsProcessed = sourceConcepts.length
                             var words = []
@@ -267,7 +267,7 @@ var SourceMatcher = (function () {
                         if (conceptIds.length == 0)
                             return callbackSeries();
 
-                        var conceptIdsSlices = common.sliceArray(conceptIds, sliceSize);
+                        var conceptIdsSlices = common.array.slice(conceptIds, sliceSize);
                         async.eachSeries(conceptIdsSlices, function (conceptIds, callbackSeriesSourceBroaders) {
                             Sparql_generic.getNodeParents(toSourceId, null, conceptIds, maxDescendantsDepth, null, function (err, result) {
                                 if (err) {

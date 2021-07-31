@@ -381,9 +381,9 @@ var ADLadvancedMapping = (function () {
 
                 var valuesSlices = []
                 if (fuzzyMatching) {
-                    valuesSlices = common.sliceArray(Object.keys(fuzzyValues), sliceSize)
+                    valuesSlices = common.array.slice(Object.keys(fuzzyValues), sliceSize)
                 } else {
-                    valuesSlices = common.sliceArray(exactValues, sliceSize)
+                    valuesSlices = common.array.slice(exactValues, sliceSize)
                 }
                 var total = 0
                 async.eachSeries(valuesSlices, function (values, callbackEach) {

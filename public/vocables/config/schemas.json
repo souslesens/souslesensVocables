@@ -22,12 +22,12 @@
       ]
     }
   },
-  "OWLXX": {
+  "OWL": {
     "sparql_url": "_default",
     "graphUri":"http://data.total.com/resource/one-model/rdfsOwlSimplified/",
-    "label": "NPD",
+    "label": "OWL",
     "isOntology":true,
-    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+    "newSourceTopClass": "http://www.w3.org/2002/07/owl#Class",
     "newObject": {
       "treeChildrenClasses": {
       },

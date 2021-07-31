@@ -194,7 +194,7 @@ var Collection = (function () {
         $("#Blender_currentFilterDiv").append(html)
 
         if(Config.Blender.openTaxonomyTreeOnLoad){
-            Blender.showFilteredTaxonomyTree()
+            Blender.showFilteredTaxonomyTree(-1)
 
         }
         else {
@@ -228,7 +228,7 @@ var Collection = (function () {
         $(".blender_collectionFilter").remove();
         if (Blender.currentSource)
             if(Config.Blender.openTaxonomyTreeOnLoad)
-            Blender.showFilteredTaxonomyTree()
+            Blender.showFilteredTaxonomyTree(-1)
         else {
                 Blender.showTopConcepts()
             }

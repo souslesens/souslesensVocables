@@ -18,8 +18,60 @@
 var Sparql_generic = (function () {
         var self = {};
         self.slicesSize = 25;
+        sourcesVariables = {}
 
 
+
+        self.getSourceVariables = function (sourceLabel) {
+
+
+            source = Config.sources[sourceLabel]
+            if (!sourcesVariables[sourceLabel]) {
+                var defaultPredicates;
+                if(source.schemaType=="SKOS"){
+                    defaultPredicates=Sparql_SKOS.defaultPredicates;
+
+                }
+
+                var source = ""
+                var graphUri = ""
+                var predicates = ""
+                var prefixesStr = ""
+                var fromStr = "";
+                var topConceptFilter = ""
+                var broaderPredicate = ""
+                var prefLabelPredicate = ""
+                var limit = "";
+                var url = ""
+
+                var obj = {}
+                var source = Config.sources[sourceLabel]
+                obj.graphUri = source.graphUri;
+                predicates = defaultPredicates;
+                if (source.predicates)
+                   predicates = source.predicates
+
+               var  prefixes = predicates.prefixes || defaultPredicates.prefixes
+                obj.prefixesStr=""
+                prefixes.forEach(function (item) {
+                    obj.prefixesStr += "PREFIX " + item + " "
+                })
+                obj.fromStr = Sparql_common.getFromGraphStr(obj.graphUri)
+                obj.topConceptFilter = predicates.topConceptFilter || defaultPredicates.topConceptFilter;
+                obj.broaderPredicate = predicates.broaderPredicate || defaultPredicates.broaderPredicate;
+                obj.narrowerPredicate = predicates.narrowerPredicate || defaultPredicates.narrowerPredicate;
+                obj.prefLabelPredicate = predicates.prefLabel || defaultPredicates.prefLabel;
+                obj.lang = predicates.lang;
+                obj.limit = predicates.limit || defaultPredicates.limit;
+                obj.optionalDepth = predicates.optionalDepth || defaultPredicates.optionalDepth;
+                obj.url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                obj.queryOptions=""
+                sourcesVariables[sourceLabel] = obj
+
+
+            }
+            return sourcesVariables[sourceLabel]
+        }
         /**********************************************************************************************************************************/
         /**********************************************************************************************************************************/
 
@@ -110,12 +162,12 @@ var Sparql_generic = (function () {
                 if (!Array.isArray(ids))
                     ids = [ids];
                 fitlerType = "ids"
-                slices = common.sliceArray(ids, self.slicesSize)
+                slices = common.array.slice(ids, self.slicesSize)
             }
             if (words && !Array.isArray(words)) {
                 words = [words]
                 fitlerType = "words"
-                slices = common.sliceArray(words, self.slicesSize)
+                slices = common.array.slice(words, self.slicesSize)
             }
 
             var bulkResult = [];
@@ -139,8 +191,8 @@ var Sparql_generic = (function () {
 
 
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
-            if(!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller)
-                return callback(null,[])
+            if (!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller)
+                return callback(null, [])
             $("#waitImg").css("display", "block");
             if (!options) {
                 options = {depth: 0}
@@ -153,13 +205,13 @@ var Sparql_generic = (function () {
                 if (!Array.isArray(ids))
                     ids = [ids];
                 fitlerType = "ids"
-                slices = common.sliceArray(ids, self.slicesSize)
+                slices = common.array.slice(ids, self.slicesSize)
             }
             if (words) {
                 if (!Array.isArray(words))
                     words = [words]
                 fitlerType = "words"
-                slices = common.sliceArray(words, self.slicesSize)
+                slices = common.array.slice(words, self.slicesSize)
             }
 
             var bulkResult = [];
@@ -191,21 +243,21 @@ var Sparql_generic = (function () {
                 })
                 return;
             }
-            setVariables(sourceLabel);
+           var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
             var query = "";
-            query += prefixesStr;
-            query += " select distinct * " + fromStr + "  WHERE {"
-            query += "  ?concept " + broaderPredicate + "* ?broader." +
+            query += sourceVariables.prefixesStr;
+            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
+            query += "  ?concept " + sourceVariables.broaderPredicate + "* ?broader." +
                 "filter (?concept=<" + id + ">) " +
-                "?broader " + prefLabelPredicate + " ?broaderLabel." +
+                "?broader " + sourceVariables.prefLabelPredicate + " ?broaderLabel." +
                 "?broader rdf:type ?type."
             if (false && lang)
                 query += "filter( lang(?broaderLabel)=\"" + lang + "\")"
             query += "  }";
-            query += "limit " + limit + " ";
+            query += "limit " + sourceVariables.limit + " ";
 
-
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
+            var url = sourceVariables.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -215,21 +267,22 @@ var Sparql_generic = (function () {
         }
 
         self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
-            setVariables(sourceLabel);
+
+            var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
             var query = "";
-            query += prefixesStr;
-            query += " select distinct * " + fromStr + "  WHERE {"
-            query += "  ?concept ^" + broaderPredicate + "*|" + narrowerPredicate + "* ?narrower." +
+            query += sourceVariables.prefixesStr;
+            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
+            query += "  ?concept ^" + sourceVariables.broaderPredicate + "*|" + sourceVariables.narrowerPredicate + "* ?narrower." +
                 "filter (?concept=<" + id + ">) " +
-                "?narrower " + prefLabelPredicate + " ?narrowerLabel." +
+                "?narrower " + sourceVariables.prefLabelPredicate + " ?narrowerLabel." +
                 "?narrower rdf:type ?type."
-            if (false && lang)
+            if (false && sourceVariables.lang)
                 query += "filter( lang(?narrowerLabel)=\"" + lang + "\")"
             query += "  }";
-            query += "limit " + limit + " ";
+            query += "limit " + sourceVariables.limit + " ";
 
-
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
+            var url = sourceVariables.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -239,21 +292,20 @@ var Sparql_generic = (function () {
         }
 
         self.getNodeLabel = function (sourceLabel, id, callback) {
-            setVariables(sourceLabel);
-
+            var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
             var query = "";
-            query += prefixesStr;
-            query += " select distinct * " + fromStr + "  WHERE {" +
+            query += sourceVariables.prefixesStr;
+            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {" +
                 "?concept   rdf:type   ?type." +
-                "?concept " + prefLabelPredicate + " ?conceptLabel." +
+                "?concept " + sourceVariables.prefLabelPredicate + " ?conceptLabel." +
                 "filter (?concept=<" + id + ">) "
             if (lang)
                 query += "filter( lang(?conceptLabel)=\"" + lang + "\")"
 
-            query += "}limit " + limit + " ";
+            query += "}limit " + sourceVariables.limit + " ";
 
 
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)
                 }
@@ -263,9 +315,9 @@ var Sparql_generic = (function () {
 
 
         self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
-            setVariables(sourceLabel);
+            var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
             var sliceSize = 2000;
-            var slices = common.sliceArray(subjectIds, sliceSize);
+            var slices = common.array.slice(subjectIds, sliceSize);
             var triples = [];
             async.eachSeries(slices, function (slice, callbackEach) {
                 var filterStr = "(";
@@ -276,9 +328,9 @@ var Sparql_generic = (function () {
                 })
                 filterStr += ")"
 
-                var query = " select    distinct * " + fromStr + "  WHERE {" +
+                var query = " select    distinct * " + sourceVariables.fromStr + "  WHERE {" +
                     "?subject ?prop ?value. FILTER (?subject in" + filterStr + ")} limit " + sliceSize + 1;
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, {source: sourceLabel}, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -403,7 +455,7 @@ var Sparql_generic = (function () {
 
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query,"", {source: sourceLabel}, function (err, result) {
                 return callback(err);
             })
         }
@@ -429,129 +481,7 @@ var Sparql_generic = (function () {
             })
 
         }
-        /**
-         *
-         *
-         * @param fromSourceLabel
-         * @param toGraphUri
-         * @param sourceIds
-         * @param options :
-            * setSubjectFn : function to transform target subjects
-         * setPredicateFn : function to transform target predicates
-         * setObjectFn : function to transform target objects
-         * properties :  optional properties to copy
-         *
-         * @param callback
-         */
 
-
-        self.copyNodesOld = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
-            if (!options) {
-                options = {}
-            }
-            var newTriplesSets = [];
-            var newTriples = [];
-            var setSize = 100
-            async.series([
-
-                // get sources nodes properties
-                function (callbackSeries) {
-                    self.getNodeInfos(fromSourceLabel, sourceIds, null, function (err, result) {
-                        if (err)
-                            return callbackSeries(err);
-                        var subject, prop, object;
-                        var valueStr = ""
-                        result.forEach(function (item) {
-
-                            if (options.setSubjectFn)
-                                options.setSubjectFn(item)
-
-                            if (options.setPredicateFn)
-                                options.setPredicateFn(item)
-
-
-                            if (options.setObjectFn)
-                                options.setObjectFn(item)
-
-                            subject = item.id.value
-                            if (options.subjectNewUri)
-                                subject = options.subjectNewUri
-
-
-                            prop = item.prop.value
-
-                            if (options.skipPredicates && options.skipPredicates.indexOf(prop) > -1) {
-                                return
-
-                            }
-
-                            if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
-
-
-                                if (item.value.type == "uri")
-                                    valueStr = "<" + item.value.value + ">"
-                                else {
-                                    var langStr = "";
-                                    if (item.value["xml:lang"])
-                                        langStr = "@" + item.value["xml:lang"]
-                                    valueStr = "'" + Sparql_common.formatStringForTriple(item.value.value) + "'" + langStr
-                                }
-                                var triple = "<" + subject + "> <" + prop + "> " + valueStr + "."
-                                newTriples.push(triple)
-
-
-                                if (newTriples.length >= setSize) {
-                                    newTriplesSets.push(newTriples)
-                                    newTriples = []
-                                }
-                            }
-
-                        })
-                        newTriplesSets.push(newTriples)
-                        return callbackSeries()
-                    })
-
-
-                },
-                // add additionalTriplesNt
-                function (callbackSeries) {
-                    if (options.additionalTriplesNt) {
-                        options.additionalTriplesNt.forEach(function (triple) {
-                            if (newTriples.indexOf(triple) < 0)
-                                newTriples.push(triple)
-                        })
-
-                    }
-                    return callbackSeries();
-                },
-                //write new triples
-                function (callbackSeries) {
-                    async.eachSeries(newTriplesSets, function (newTriples, callbackEach) {
-                        var insertTriplesStr = "";
-                        newTriples.forEach(function (item) {
-                            insertTriplesStr += item
-                        })
-                        var query = " WITH GRAPH  <" + toGraphUri + ">  " +
-                            "INSERT DATA" +
-                            "  {" +
-                            insertTriplesStr +
-                            "  }"
-
-                        var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-                        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
-                            return callbackEach(err);
-                        })
-                    }, function (err) {
-                        callbackSeries(err)
-                    })
-                }
-
-            ], function (err) {
-                return callback(err, newTriples.length)
-
-            })
-
-        }
         self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
             if (!options) {
                 options = {}
@@ -579,16 +509,16 @@ var Sparql_generic = (function () {
                                 exactMatchPredicate = "http://www.w3.org/2004/02/skos/core#exactMatch";
                             else
                                 exactMatchPredicate = "http://www.w3.org/2000/01/rdf-schema#sameAs";
-                            var  triple = targetUri + " <" + exactMatchPredicate + "> <" + sourceUri + "> ."
+                            var triple = targetUri + " <" + exactMatchPredicate + "> <" + sourceUri + "> ."
                             newTriples.push(triple)
                         }
-                        if(options.parentNodeId){
+                        if (options.setParentNode && options.setParentNode.sourceUri == sourceUri) {
                             var parentPredicate
                             if (targetSchemaType == "SKOS")
                                 parentPredicate = "http://www.w3.org/2004/02/skos/core#broader";
                             else
                                 parentPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
-                            var  triple = targetUri + " <" + parentPredicate + "> <" + options.parentNodeId + "> ."
+                            var triple = targetUri + " <" + parentPredicate + "> <" + options.setParentNode.targetUri + "> ."
                             newTriples.push(triple)
 
                         }
@@ -600,7 +530,6 @@ var Sparql_generic = (function () {
                 }
                 return targetUri;
             }
-
 
 
             async.series([
@@ -625,7 +554,7 @@ var Sparql_generic = (function () {
 
                             subject = getTargetUri(item.id.value)
                             prop = item.prop.value
-                            if( options.excludedProperties && options.excludedProperties.indexOf(prop)>-1)
+                            if (options.excludedProperties && options.excludedProperties.indexOf(prop) > -1)
                                 return;
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
@@ -695,6 +624,19 @@ var Sparql_generic = (function () {
 
             })
 
+        }
+
+        self.sortBindings = function (bindings, field, options) {
+            bindings.sort(function (a, b) {
+                var aValue = (a[field] ? a[field].value : "")
+                var bValue = (b[field] ? b[field].value : "")
+                if (aValue > bValue)
+                    return 1
+                if (aValue < bValue)
+                    return -1
+                return 0;
+            })
+            return bindings
         }
 
         self.setBindingsOptionalProperties = function (bindings, _fields, options) {

@@ -160,7 +160,26 @@ var SourceManager = {
         })
     },
 
+    deleteSourceGraph: function ( graphUri, sparqlServerUrl,  callback) {
+       var query = "CLEAR GRAPH <" + graphUri + "> ";
 
+
+        var body = {
+            url: sparqlServerUrl,
+            params: {query: query},
+            headers: {
+                "Accept": "application/sparql-results+json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        }
+        if (sparqlServerUrl.charAt(sparqlServerUrl.length - 1) != "/")
+            sparqlServerUrl += "/"
+        sparqlServerUrl += "format=json&query="
+        httpProxy.post(sparqlServerUrl, body.headers, body.params, function (err, result) {
+            callback(err, "graph deleted");
+
+        })
+    }
 
 
 }

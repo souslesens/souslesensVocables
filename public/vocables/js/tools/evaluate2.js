@@ -238,7 +238,7 @@ var Evaluate = (function () {
                 if(sourceConcepts.length==0)
                     return callbackSource()
 
-                var conceptsSlices = common.sliceArray(sourceConcepts);
+                var conceptsSlices = common.array.slice(sourceConcepts);
                 async.eachSeries(conceptsSlices, function (concepts, callbackSlice) {
                     Sparql_generic.getNodeParents(source, null, concepts, ancestorsDepth, null, function (err, result) {
                         if (err)

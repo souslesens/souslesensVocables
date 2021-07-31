@@ -403,11 +403,7 @@ var MainController = (function () {
 
     self.test = function () {
 
-        /*    self.loadSources(function () {
-                MainController.currentSource = "NPD"
-                SourceBrowser.currentTreeNode = {data: {id: "http://sws.ifi.uio.no/vocab/npd-v2#Wellbore"}}
-                ADLquery.showProperties()
-            })*/
+
 
     }
 

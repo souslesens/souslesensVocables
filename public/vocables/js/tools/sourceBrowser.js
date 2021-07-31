@@ -273,7 +273,9 @@ var SourceBrowser = (function () {
         if (node.children.length > 0)
             if (!options.ctrlKey)
                 return;
-
+          var  depth =1
+        if (!options.depth)
+            depth=options.depth;
         options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, 1, options, function (err, result) {
             if (err) {
@@ -397,19 +399,22 @@ var SourceBrowser = (function () {
                 limit: Config.searchLimit,
             }
             SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err)
+                if (err) {
+                    MainController.UI.message(err.responseText)
+                    var text = "<span class='searched_conceptSource'>" + sourceLabel +" Error !!!"+ "</span>"
+                    jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
+                }else {
 
-                var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
-                jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
-                result.forEach(function (item) {
-                    if (!uniqueIds[item.id]) {
-                        uniqueIds[item.id] = 1
-                        jstreeData.push(item)
+                    var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
+                    jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
+                    result.forEach(function (item) {
+                        if (!uniqueIds[item.id]) {
+                            uniqueIds[item.id] = 1
+                            jstreeData.push(item)
 
-                    }
-                })
-
+                        }
+                    })
+                }
                 callbackEach();
             })
 
@@ -470,8 +475,10 @@ var SourceBrowser = (function () {
             sourceLabel = MainController.currentSource
         var depth = Config.searchDepth
         Sparql_generic.getNodeParents(sourceLabel, options.term, options.ids, depth, options, function (err, result) {
-            if (err)
-                return MainController.UI.message(err)
+            if (err) {
+                MainController.UI.message(err)
+                return callback(err);
+            }
 
             var existingNodes = {};
             var jstreeData = []

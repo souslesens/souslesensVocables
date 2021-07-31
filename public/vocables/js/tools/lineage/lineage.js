@@ -601,7 +601,7 @@ var Lineage_classes = (function () {
 
 
                     }
-                    slices = common.sliceArray(words, Sparql_generic.slicesSize);
+                    slices = common.array.slice(words, Sparql_generic.slicesSize);
 
                     return callbackSeries()
                 },
@@ -620,7 +620,7 @@ var Lineage_classes = (function () {
 
                     }
 
-                    var idsSlices = common.sliceArray(ids, Sparql_generic.slicesSize);
+                    var idsSlices = common.array.slice(ids, Sparql_generic.slicesSize);
                     var similarIds = []
                     async.eachSeries(idsSlices, function (ids, callbackEachSlice) {
                         var filter = Sparql_common.setFilter("similar", ids, null)
@@ -647,7 +647,7 @@ var Lineage_classes = (function () {
                         })
                     }, function (err) {
 
-                        slices = common.sliceArray(similarIds, Sparql_generic.slicesSize);
+                        slices = common.array.slice(similarIds, Sparql_generic.slicesSize);
                         return callbackSeries(err);
                     })
 
@@ -1780,7 +1780,7 @@ var Lineage_classes = (function () {
                 sourceIds.push(node.id)//.replace("vocab#",""));
             }
 
-            var wordSlices = common.sliceArray(words, Sparql_generic.slicesSize);
+            var wordSlices = common.array.slice(words, Sparql_generic.slicesSize);
 
             async.eachSeries(sources, function (source, callbackEachSource) {
 

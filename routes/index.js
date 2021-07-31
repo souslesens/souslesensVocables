@@ -79,6 +79,15 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
                 processResponse(response, err, result)
             })
         }
+        if (req.body.deleteResource) {
+
+            configManager.deleteResource(req.body.sourceName,req.body.graphUri,req.body.sparqlServerUrl,function (err, result) {
+                processResponse(response, err, result)
+            })
+        }
+
+
+
         if (req.body.httpProxy) {
             httpProxy.host = req.headers.host
 

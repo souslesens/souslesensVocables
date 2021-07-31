@@ -57,15 +57,15 @@ var Blender = (function () {
 
                             self.availableSources = [];
                             for (var key in Config.sources) {
-
-                                if (!Config.sources[key].controllerName) {
-                                    Config.sources[key].controllerName = "" + Config.sources[key].controller
-                                    Config.sources[key].controller = eval(Config.sources[key].controller)
-                                }
-                                if (Config.sources[key].sparql_server.url == "_default")
-                                    Config.sources[key].sparql_server.url = Config.default_sparql_url
-                                if (Config.sources[key].editable)
+                                if (Config.sources[key].editable) {
                                     self.availableSources.push(key)
+                                    if (!Config.sources[key].controllerName) {
+                                        Config.sources[key].controllerName = "" + Config.sources[key].controller
+                                        Config.sources[key].controller = eval(Config.sources[key].controller)
+                                    }
+                                    if (Config.sources[key].sparql_server.url == "_default")
+                                        Config.sources[key].sparql_server.url = Config.default_sparql_url
+                                }
                             }
 
                             common.fillSelectOptions("Blender_SourcesSelect", self.availableSources.sort(), true)
@@ -151,7 +151,7 @@ var Blender = (function () {
                     function (callbackSeries) {
                         if (Blender.currentSource)
                             if (Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) {
-                                self.showFilteredTaxonomyTree(function (err, result) {
+                                self.showFilteredTaxonomyTree(Config.Blender.openTaxonomyTreeOnLoad,function (err, result) {
                                     callbackSeries(err);
                                 })
                             } else {
@@ -336,24 +336,7 @@ var Blender = (function () {
             var currentNodeLevel = self.currentTreeNode.parents.length
             var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
 
-            /*   if (self.currentTreeNode.data.type == "externalReferenceTopConcept") {
-                   return ExternalReferences.getJstreeConceptsContextMenu(self.currentTreeNode)
 
-               }
-
-
-               if (self.currentTreeNode.data.type == "externalReference") {
-
-                   menuItems.showExternalReferenceNodeInfos = {
-
-                       label: "view node properties",
-                       action: function (obj, sss, cc) {
-                           ExternalReferences.showExternalReferenceNodeInfos()
-                       }
-                   }
-
-                   return menuItems;
-               }*/
 
             if (currentNodeLevel < allowedLevels) {
                 menuItems.forbidden = {
@@ -395,7 +378,7 @@ var Blender = (function () {
                             pasteNode: {
                                 label: "<span class='blender_pasteNode'>node</span>",
                                 action: function () {
-                                    self.menuActions.pasteClipboardNodes(null, 1);
+                                    self.menuActions.pasteClipboardNodes(null, 0);
                                 }
                             },
                             /*   pasteProperties: {
@@ -409,7 +392,7 @@ var Blender = (function () {
                             pasteDescendants: {
                                 label: "<span class='blender_pasteNode'>descendants</span>",
                                 action: function (obj, sss, cc) {
-                                    self.menuActions.pasteClipboardNodes(null, null);
+                                    self.menuActions.pasteClipboardNodes(null, Config.Blender.pasteDescendantsMaxDepth);
                                     ;
                                 },
                             },
@@ -598,7 +581,7 @@ var Blender = (function () {
                 var str = ""
                 if (node.children.length > 0)
                     str = " and all its descendants"
-                if (true || confirm("delete node " + node.data.label + str)) {
+                if (confirm("delete node " + node.data.label + str)) {
 
                     var nodeIdsToDelete = [node.data.id]
                     async.series([
@@ -700,9 +683,9 @@ var Blender = (function () {
                 else
                     toParentNode = self.currentTreeNode.data;
 
-                var depth = Config.Blender.pasteDescendantsMaxDepth
-                if (options.pasteDescendantsDepth)
-                    depth = options.pasteDescendantsDepth;
+
+                    if (options.pasteDescendantsDepth)
+                        depth = options.pasteDescendantsDepth;
 
                 async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
                     var sourceNodesId = {}
@@ -711,6 +694,7 @@ var Blender = (function () {
                             if (depth > 0)
                                 MainController.UI.message("searching node and its children")
                             Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (err, result) {
+                                sourceNodesId[fromNodeData.id]=1
                                 result.forEach(function (item) {
                                     if (!sourceNodesId[item.concept.value]) {
                                         sourceNodesId[item.concept.value] = 1;
@@ -724,6 +708,7 @@ var Blender = (function () {
                                         }
                                     }
                                 })
+
                                 callbackSeries();
                             })
                         },
@@ -733,7 +718,10 @@ var Blender = (function () {
                             options = {
                                 keepOriginalUris: false,
                                 addExactMatchPredicate: true,
-                                parentNodeId: toParentNode.id,
+                                setParentNode:{
+                                    targetUri:toParentNode.id,
+                                    sourceUri:fromNodeData.id
+                                } ,
                                 prefLang: "en",
 
 
@@ -741,10 +729,14 @@ var Blender = (function () {
 
                             MainController.UI.message("copying " + fromIds.length + " nodes from source " + fromNodeData.source + " in source " + toParentNode.source)
                             Sparql_generic.copyNodes(fromNodeData.source, toGraphUri, fromIds, options, function (err, result) {
-
-                                self.onSourceSelect(toParentNode.source,function(err, result){
+                                if(err)
+                                    return alert(err)
+                                var parentJstreeNode=$("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
+                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source,parentJstreeNode, {});
+                            /*    self.onSourceSelect(toParentNode.source, function (err, result) {
                                     $("#Blender_conceptTreeDiv").jstree().open_node(toParentNode.id)
-                                })
+                                })*/
+
                             })
 
                         }
@@ -760,214 +752,8 @@ var Blender = (function () {
                 })
 
 
-            },
-
-            pasteClipboardNodeOnly: function (dataArray, options, callback) {
-                return self.menuActions.pasteClipboardNode(dataArray, 1, options, callback)
-                if (!dataArray)
-                    dataArray = Clipboard.getContent();
-                if (!dataArray)
-                    return;
-                if (!options) {
-                    options = {}
-                }
-                var oldId
-                var newId
-                var label
-
-                var parentNodeId
-                if (options.newParentId)
-                    parentNodeId = options.newParentId;
-                else
-                    parentNodeId = self.currentTreeNode.data.id
-                async.eachSeries(dataArray, function (data, callbackEach) {
-
-
-                    if (data.type == "node") {// cf clipboard and annotator
-                        var fromSource = data.source;
-                        var toGraphUri = Config.sources[self.currentSource].graphUri
-                        oldId = data.id;
-                        newId = common.getNewUri(self.currentSource)
-                        label = data.label;
-                        var existingNodes = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv")
-                        var ok = true
-                        var previousId;
-                        existingNodes.forEach(function (item) {
-                            if (item.data.label.toLowerCase() == data.label.toLowerCase()) {
-                                previousId = item.data.id
-                                ok = false;
-                            }
-                        })
-                        if (!ok) {
-                            alert("node " + data.label + " already exists")
-                            if (callback)
-                                return callback(null, previousId)
-                        }
-
-                        var additionalTriplesNt = []
-
-
-                        if (Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) {
-                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#broader> <" + parentNodeId + ">.")
-                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#exactMatch> <" + oldId + ">.")
-                        } else if (Config.sources[self.currentSource].schemaType == "OWL") {
-                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + parentNodeId + ">.")
-                            additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2002/07/owl#sameAs> <" + oldId + ">.")
-                        } else
-                            return alert("no schema")
-
-                        //if source and target have different schma type we only copy minimum info else we copy all node triplets
-
-                        if (Config.sources[self.currentSource].schemaType != Config.sources[fromSource].schemaType) {
-                            if (Config.sources[self.currentSource].schemaType == "SKOS") {
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2004/02/skos/core#prefLabel> '" + data.label + "'@en.")
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.")
-                            } else if (Config.sources[self.currentSource].schemaType == "OWL") {
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2000/01/rdf-schema#Class>.")
-                                additionalTriplesNt.push("<" + newId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + data.label + "'@en.")
-                            }
-                            Sparql_generic.insertTriples(self.currentSource, additionalTriplesNt, function (err, result) {
-                                if (!err)
-                                    $("#waitImg").css("display", "none");
-                                MainController.UI.message(result + "new triples inserted")
-                                callbackEach(err, newId)
-
-                            })
-                        } else {
-                            var options = {
-                                skipPredicates: ["http://www.w3.org/2004/02/skos/core#broader", "http://www.w3.org/2004/02/skos/core#narrower"],
-                                additionalTriplesNt: additionalTriplesNt,
-                                subjectNewUri: newId
-                            }
-
-                            Sparql_generic.copyNodes(fromSource, toGraphUri, oldId, options, function (err, result) {
-                                if (!err)
-                                    $("#waitImg").css("display", "none");
-                                MainController.UI.message(result + "new triples inserted")
-                                callbackEach(err, newId)
-
-                            })
-                        }
-                    }
-                }, function (err) {
-                    $("#waitImg").css("display", "none");
-                    if (err)
-                        return MainController.UI.message(err);
-
-                    if (options.newParentId)
-                        ;
-                    else {
-                        var parentJstreeId = self.currentTreeNode.id
-
-                        var jstreeData = [
-                            {
-                                id: newId,
-                                text: label,
-                                parent: parentJstreeId,
-                                data: {
-                                    type: "http://www.w3.org/2004/02/skos/core#Concept",
-                                    source: self.currentSource,
-                                    id: newId,
-                                    label: label
-                                }
-                            }
-                        ]
-                        common.jstree.addNodesToJstree("Blender_conceptTreeDiv", parentJstreeId, jstreeData)
-                    }
-
-                    if (!callback)
-                        Clipboard.clear();
-                    else
-                        return callback(null, newId)
-
-                })
-
-
             }
 
-            ,
-
-
-            pasteClipboardNodeDescendants: function (callback) {
-                var dataArray = Clipboard.getContent();
-                if (!dataArray)
-                    return;
-                var totalNodesCount = 0
-
-                async.eachSeries(dataArray, function (data, callbackEach) {
-
-                        self.menuActions.pasteClipboardNodeOnly(null, null, function (err, newId) {
-
-                            Clipboard.clear();
-
-                            var existingNodeIds = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv", true)
-                            var fromSource = data.source;
-                            var toGraphUri = Config.sources[self.currentSource].graphUri
-                            var id = data.id;
-                            var label = data.label;
-                            var childrenIds = [id]
-                            var currentDepth = 1;
-                            var newParentId = newId
-
-                            var copiedNodes = {}
-                            async.whilst(
-                                function test(cb) {
-                                    return childrenIds.length > 0
-                                },
-
-                                function (callbackWhilst) {//iterate
-
-                                    Sparql_generic.getNodeChildren(fromSource, null, childrenIds, 1, null, function (err, result) {
-                                        if (err)
-                                            return MainController.UI.message(err);
-                                        childrenIds = []
-                                        if (result.length == 0)
-                                            return callbackWhilst();
-                                        totalNodesCount += result.length
-                                        var items = {}
-                                        var dataArray = []
-                                        result.forEach(function (item) {
-                                            var childId = item["child" + currentDepth].value
-                                            if (!copiedNodes[childId]) {
-                                                copiedNodes[childId] = 1
-                                                var childLabel = item["child" + currentDepth + "Label"].value
-                                                dataArray.push({
-                                                    type: "node",
-                                                    id: childId,
-                                                    label: childLabel,
-                                                    newParentId: newParentId,
-                                                    source: fromSource,
-                                                    data: null
-                                                })
-                                            }
-                                        })
-                                        setTimeout(function () {
-                                            self.menuActions.pasteClipboardNodeOnly(dataArray, {newParentId: newParentId}, function (err, result) {
-                                                newParentId = result;
-                                            }, 500)
-                                        })
-
-                                        callbackWhilst();
-
-                                    })
-
-
-                                }
-                                , function (err) {
-                                    if (err)
-                                        callbackEach(err);
-                                    callbackEach();
-                                })
-                        })
-                    }, function (err) {
-                        if (err)
-                            return MainController.UI.message(err)
-                        return MainController.UI.message("copied " + totalNodesCount + " nodes")
-                    }
-                )
-
-
-            }
 
 
             ,
@@ -1141,13 +927,19 @@ var Blender = (function () {
 
 
                 if (type == "concept") {
+                    var conceptType
 
-                    var skosType = "http://www.w3.org/2004/02/skos/core#Concept"
+                    if( Config.sources[self.currentSource].schemaType=="SKOS")
+                        conceptType = "http://www.w3.org/2004/02/skos/core#Concept"
+                    else if( Config.sources[self.currentSource].schemaType=="OWL")
+                        conceptType = "http://www.w3.org/2002/07/owl#Class"
+                    else
+                        return alert (" no supported schemaType "+Config.sources[self.currentSource].schemaType)
                     if (self.displayMode == "centralPanelDiv") {
-                        SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
+                        SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, self.currentTreeNode.data.id, conceptType, false)
                     } else {
                         self.nodeEdition.openDialog()
-                        SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, self.currentTreeNode.data.id, skosType, false)
+                        SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, self.currentTreeNode.data.id, conceptType, false)
                     }
 
                 } else if (type == "collection") {
@@ -1411,12 +1203,12 @@ var Blender = (function () {
 
             })
         }
-        self.showFilteredTaxonomyTree = function (callback) {
+        self.showFilteredTaxonomyTree = function (options,callback) {
 
 
             var collection = Collection.currentCollectionFilter
 
-            Sparql_generic.getCollectionNodes(self.currentSource, collection, {filter: {predicates: ["skos:prefLabel", "skos:broader"]}}, function (err, result) {
+            Sparql_generic.getCollectionNodes(self.currentSource, collection, {depth: options.depth,filter: {predicates: ["skos:prefLabel", "skos:broader"]}}, function (err, result) {
                 if (err) {
                     if (callback)
                         return callback(err)
@@ -1434,7 +1226,7 @@ var Blender = (function () {
                     }
                     if (item.predicate.value.indexOf("#prefLabel") > -1) {
                         if (source.predicates && source.predicates.lang) {
-                            if (item.object["xml:lang"] == source.predicates.lang) {
+                            if (!item.object["xml:lang"] || item.object["xml:lang"] == source.predicates.lang || item.object["xml:lang"] == "null") {
                                 dataMap[item.subject.value].prefLabel = item.object.value
                             }
 
@@ -1514,14 +1306,18 @@ var Blender = (function () {
                 var referenceSource = $("#blenderNewSource_referenceSourceSelect").val();
                 var keepOriginalUris = $("#blenderNewSource_keepOriginalUrisCBX").prop("checked");
 
-                var lang = $("#blenderNewSource_defaultLangInput").prop("checked");
+                var lang = $("#blenderNewSource_defaultLangInput").val();
                 if (!lang || lang == "")
                     lang = null;
                 if (!referenceSource || referenceSource == "")
                     return alert("select a reference graph")
                 var name = $("#blenderNewSource_resourceNameInput").val();
+
                 if (graphUri == "" || name == "")
                     return alert("set resource name and graph URI");
+
+                if(Config.sources[name])
+                    return alert("this source name is already used")
 
                 delete Config.sources[referenceSource].controller
 
@@ -1570,17 +1366,34 @@ var Blender = (function () {
                 if (sourceObj.protected)
                     return alert("source " + source + " is protected and cannot be removed")
 
-                if (confirm("delete this source !!!")) {
+                if (confirm("delete  resource " + source + " ?")) {
+                    if (confirm("Do you really want to delete resource " + source + " ?")) {
+                        var payload = {
+                            deleteResource: 1,
+                            sourceName: source,
+                            graphUri: sourceObj.graphUri,
+                            sparqlServerUrl: Config.default_sparql_url,
 
-                    Sparql_generic.deleteGraph(source, function (err, result) {
-                        if (err)
-                            alert(err)
-                        self.onLoaded(function (err) {
+                        }
+                        $.ajax({
+                            type: "POST",
+                            url: Config.serverUrl,
+                            data: payload,
+                            dataType: "json",
+                            success: function (data, textStatus, jqXHR) {
+                                $('#Blender_SourcesSelect option[value="' + source + '"]').remove();
 
+                                common.jstree.clear("Blender_conceptTreeDiv")
+
+                            },
+                            error: function (err) {
+                                alert("cannot delete source")
+                                console.log(err);
+
+                            }
                         })
-                        return MainController.UI.message("source deleted")
 
-                    })
+                    }
                 }
 
             }

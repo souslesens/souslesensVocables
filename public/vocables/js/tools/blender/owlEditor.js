@@ -1,74 +1,21 @@
 var OwlEditor = (function () {
     var self = {}
-
-
-    /*
-
-    @prefix dc: <http://purl.org/dc/elements/1.1/> .
-@prefix grddl: <http://www.w3.org/2003/g/data-view#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix xml: <http://www.w3.org/XML/1998/namespace> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-
-    ###  http://standards.iso.org/iso/15926/part14/concretizes
-lis:concretizes rdf:type owl:ObjectProperty ;
-                rdfs:domain [ rdf:type owl:Class ;
-                              owl:unionOf ( lis:Activity
-                                            lis:Feature
-                                          )
-                            ] ;
-                rdfs:range lis:InformationObject ;
-                lis:relatedEntityISO15926 lis12:InformationObject ;
-                rdfs:comment "Inspired by BFO's \"concretizes\". Note that the ISO 15926-14 definition diverges slightly from that in BFO, mainly in employing Feature where BFO has \"specifically dependent continuant\"." ,
-                             "TODO. Consider splitting this into two relations, one concretizesInFeature and another concretizesInActivity, to avoid a disjunctive domain." ;
-                rdfs:label "concretizes" ;
-                rdfs:seeAlso obo:BFO_0000164 ,
-                             obo:RO_0000059 ;
-                skos:prefLabel "concretizes" .
-
-
-
-###  http://standards.iso.org/iso/15926/part14/System
-lis:System rdf:type owl:Class ;
-           rdfs:subClassOf lis:FunctionalObject ,
-                           [ rdf:type owl:Restriction ;
-                             owl:onProperty lis:hasFunctionalPart ;
-                             owl:someValuesFrom lis:FunctionalObject
-                           ] ;
-           lis:relatedEntityISO15926 lis2:FunctionalPhysicalObject ,
-                                     lis12:FunctionalPhysicalObject ;
-           rdfs:comment "A system is a complex of functional parts working together. Each part contributes to the realisation of the system's function (though not necessarily every part in every performance of the system)." ;
-           rdfs:label "System" ;
-           skos:note "A functional location that does not itself have functional parts is not a system." ;
-           skos:prefLabel "System" .
-
-<owl:Restriction>
-                <owl:onProperty rdf:resource="http://standards.iso.org/iso/15926/part14/hasQuality"/>
-                <owl:someValuesFrom rdf:resource="http://w3id.org/readi/rdl/D101001534"/>
-            </owl:Restriction>
-
-
-
-
-     */
+    
     self.shema = {}
     self.initSchema = function () {
         self.shema = {
             "owl:Class": {
-                ["rdfs:subClassOf"]: ["owl:Class"],
                 ["rdfs:label"]: ["xml:string"],
+                ["rdfs:subClassOf"]: ["owl:Class"],
                 ["rdfs:comment"]: ["xml:string"],
 
 
             },
             "owl:ObjectProperty": {
+                ["rdfs:label"]: ["xml:string"],
                 ["rdfs:range"]: ["owl:Class"],
                 ["rdfs:domain"]: ["owl:Class"],
                 ["rdfs:subPropertyOf"]: ["owl:ObjectProperty"],
-                ["rdfs:label"]: ["xml:string"],
                 ["rdfs:comment"]: ["xml:string"],
 
             },
@@ -76,9 +23,9 @@ lis:System rdf:type owl:Class ;
 
 
             "owl:Restriction": {
+                ["rdfs:label"]: ["xml:string"],
                 "owl:onProperty": ["owl:ObjectProperty"],
                 "owl:someValuesFrom": ["owl:Class"],
-                ["rdfs:label"]: ["xml:string"],
                 ["rdfs:comment"]: ["xml:string"],
 
             },
@@ -280,12 +227,12 @@ lis:System rdf:type owl:Class ;
 
 
                 }
-                inputHtml+="<button onclick=OwlEditor.addProperty('"+rangeInpuId+"')>+</button>"
+                inputHtml+="<button onclick=OwlEditor.onAddPropertyButton('"+rangeInpuId+"')>+</button>"
               //
                 //
                 inputHtml+="</td>"
                 inputHtml += "</tr>"
-                inputHtml+="<tr><td></td><td><div id='OwlEditorItemPropertyDiv_"+rangeInpuId+"'></div></td></tr>"
+                inputHtml+="<tr><td></td><td><div  class='OwlEditorItemPropertyDiv' id='OwlEditorItemPropertyDiv_"+rangeInpuId+"'></div></td></tr>"
                // inputHtml+="<tr><td></td></td><div id='OwlEditorItemPropertyDiv_"+rangeInpuId+"></div></td></tr>"
             })
 
@@ -320,10 +267,16 @@ lis:System rdf:type owl:Class ;
                         if (prefixes[array[0]])
                             value = prefixes[array[0]] + ":" + array[1]
 
+                        var valueLabel="";
+                        if(item.valueLabel)
+                            valueLabel=item.valueLabel.value
+                        else
+                            valueLabel=value
+
                         if (!propsMap[prop]) {
                             propsMap[prop] = []
                         }
-                        propsMap[prop].push(value)
+                        propsMap[prop].push({label:valueLabel,id:value})
 
                     })
 
@@ -332,9 +285,9 @@ lis:System rdf:type owl:Class ;
 
                             rangeInpuId=(type+"_"+prop).replace(/:/g,"-");
                             if( $("#OwlEditorItemPropertyDiv_"+rangeInpuId).length ) {
-                                var id = common.getRandomHexaId(3)
-                                var html = "<div id='" + id + "'> <span>" + item + "</span><button onclick='OwlEditor.deleteRange(\"" + id + "\")'>-</button>"
-                                $("#OwlEditorItemPropertyDiv_" + rangeInpuId).prepend(html)
+
+                                self.addProperty(rangeInpuId, item)
+
                             }
 
 
@@ -352,7 +305,7 @@ lis:System rdf:type owl:Class ;
 
 
     }
-    self.addProperty=function(rangeInpuId){
+    self.onAddPropertyButton=function(rangeInpuId){
 
         var object=$("#"+rangeInpuId).val()
         var element=$("#"+rangeInpuId)
@@ -363,9 +316,23 @@ lis:System rdf:type owl:Class ;
             objectLabel=object
 
 
-var id=common.getRandomHexaId(3)
-        var html="<div id='"+id+"'> <span>"+objectLabel+"</span><button onclick='OwlEditor.deleteRange(\""+id+"\")'>-</button>"
-        $("#OwlEditorItemPropertyDiv_"+rangeInpuId).prepend(html)
+        self.addProperty(rangeInpuId, {id:object, label:objectLabel})
+
+
+
+
+
+    }
+    self.addProperty=function(rangeId,data){
+
+
+        var id=common.getRandomHexaId(5)
+        var html="<div class='OwlEditorItemPropertyValueDiv2' id='"+id+"'>" +
+            " <div class='OwlEditorItemPropertyValueDiv'>"+data.label+"</div>&nbsp;" +
+            "<button onclick='OwlEditor.deleteRange(\""+id+"\")'>-</button>" +
+            "</div>"
+
+        $("#OwlEditorItemPropertyDiv_"+rangeId).prepend(html)
 
 
 

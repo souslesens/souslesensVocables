@@ -544,9 +544,10 @@ var Sparql_OWL = (function () {
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "SELECT * " + fromStr + " WHERE {" +
-                "  ?id rdfs:subClassOf ?node. " + filterStr +
+                "  ?concept rdfs:subClassOf ?node. " + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
+                " OPTIONAL {?concept rdfs:label ?conceptLabel}" +
                 "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
@@ -562,7 +563,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "value"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "concept","value"])
                 return callback(null, result.results.bindings)
 
             })

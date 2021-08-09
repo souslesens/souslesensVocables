@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/owlEditor.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/owlEditor.html" afterDir="false" />
     </list>
@@ -207,7 +208,7 @@
       <workItem from="1625724886283" duration="44292000" />
       <workItem from="1626851390539" duration="25310000" />
       <workItem from="1627019552294" duration="83047000" />
-      <workItem from="1627402710766" duration="87181000" />
+      <workItem from="1627402710766" duration="106983000" />
     </task>
     <servers />
   </component>

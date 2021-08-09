@@ -1,6 +1,11 @@
 
 
 <style>
+
+    #owlEditor_jstreeDiv{
+        height: 700px !important;
+        overflow: auto;
+    }
     .OwlEditorItemPropertyDiv{
         border-radius: 5px;
         border: #372806 1px solid;
@@ -21,7 +26,11 @@
         display: flex;
         flex-direction: row;
     }
-
+    .OwlEditorItemPropertyName {
+        font: 14px Arial, Helvetica, sans-serif ;
+        color: blue;
+        font-weight: bold;
+    }
 
 
 </style>
@@ -29,18 +38,21 @@
 
 Owl sources <select id="owlEditor_SourcesSelect" onchange="OwlEditor.loadSource($(this).val())"></select>
 <div style="display: flex;flex-direction: row">
-    <div style="height: 100%;width: 30%;overflow: auto">
+    <div style="height: 100%;width: 400px;overflow: auto">
         <div id="owlEditor_jstreeDiv" class="jstree">
         </div>
     </div>
 
-    <div style="height: 100%;width: 70%">
+    <div style="height: 100%;width: 60%">
 
-        <div id="owlEditor_propertiesDiv"></div>
+
         <div>
             <button onclick="OwlEditor.newItem()">+</button>
-            <button onclick="OwlEditor.saveProperties()">Save</button>
+            <button onclick="OwlEditor.saveEditingNode()">Save</button>
         </div>
+        <div id="owlEditor_propertiesDiv"></div>
+
+        <div id="owlEditor_otherPropertiesDiv"></div>
     </div>
 
 </div>

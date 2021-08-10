@@ -213,8 +213,9 @@ var OwlSchema = (function () {
                                 return callbackSeries(err)
                             self.setLabelsFromQueryResult(result)
                             result.forEach(function (item) {
-                                self.currentSourceSchema.classes[classId].objectProperties[item.property.value].range = item.range.value
-                                self.currentSourceSchema.classes[classId].objectProperties[item.property.value].domain = item.domain.value
+                                self.currentSourceSchema.classes[classId].objectProperties[item.prop.value].range = item.range.value
+                                if(item.domain)
+                                self.currentSourceSchema.classes[classId].objectProperties[item.prop.value].domain = item.domain.value
 
 
                             })

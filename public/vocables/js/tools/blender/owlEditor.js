@@ -104,7 +104,7 @@ var OwlEditor = (function () {
             }
             //load Object Properties
             , function (callbackSeries) {
-                Sparql_OWL.getObjectProperties(source, null, {}, function (err, result) {
+                Sparql_OWL.getObjectProperties(source, null, {inheritedProperties:1}, function (err, result) {
                     if (err)
                         return callbackSeries(err);
                     self.currentSourceData["owl:ObjectProperty"] = common.array.distinctValues(result, "prop").sort();
@@ -245,7 +245,7 @@ var OwlEditor = (function () {
         if (obj.node.parent != "#") {
             if (true || obj.node.data.type == "owl:Class")
                 self.editingNodeMap={}
-                self.showPropertiesDiv(obj.node.parent, self.currentNode.data.id)
+                self.showPropertiesDiv(obj.node.parent, self.currentNode.data)
 
         }
 
@@ -253,7 +253,7 @@ var OwlEditor = (function () {
     }
 
 
-    self.showPropertiesDiv = function (type, nodeId) {
+    self.showPropertiesDiv = function (type, nodeData) {
         var html = "<table>"
         var rangeHtml = "";
         for (var prop in self.shema[type]) {
@@ -317,8 +317,8 @@ var OwlEditor = (function () {
                 "http://www.w3.org/2004/02/skos/core": "skos"
             }
 
-            if (nodeId) {
-                Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeId, {}, function (err, result) {
+            if (nodeData) {
+                Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeData.id, {}, function (err, result) {
                     var propsMap = {}
                     result.forEach(function (item) {
                         var prop = item.prop.value
@@ -371,7 +371,7 @@ var OwlEditor = (function () {
                     for (var prop in propsMap) {
                         if (prop.indexOf("http") < 0) {
                             //if uri is prefixed
-                            propsMap[prop].forEach(function (item) {
+                            propsMap[prop].forEach(function (editingData) {
 
                                 rangeInpuId = (type + "_" + prop).replace(/:/g, "-");
 
@@ -379,7 +379,7 @@ var OwlEditor = (function () {
                                     if ($("#OwlEditorItemPropertyDiv_" + rangeInpuId).length) {
 
 
-                                        self.addProperty(rangeInpuId, item)
+                                        self.addProperty(rangeInpuId,nodeData, editingData)
 
                                     }
                                 } catch (e) {
@@ -415,23 +415,24 @@ var OwlEditor = (function () {
         var object = $("#" + rangeInpuId).val()
         var element = $("#" + rangeInpuId)
         var objectLabel = ""
-        if (element[0].nodeName == "SELECT")
+        if (element[0].nodeName == "SELECT") {
             objectLabel = $("#" + rangeInpuId + " option:selected").text()
-        else
+            self.addProperty(rangeInpuId, null,{id: object, label: objectLabel,type:"uri"})
+        }
+        else {
             objectLabel = object
-
-
-        self.addProperty(rangeInpuId, {id: object, label: objectLabel})
+            self.addProperty(rangeInpuId, null, { label: objectLabel,type:"literal"})
+        }
 
 
     }
-    self.addProperty = function (rangeId, data) {
+    self.addProperty = function (rangeId,subjectData, objectData) {
 
-        if (!Array.isArray(data))
-            data = [data]
-        data.forEach(function (item) {
+        if (!Array.isArray(objectData))
+            objectData = [objectData]
+        objectData.forEach(function (item) {
             var id = common.getRandomHexaId(5)
-            self.editingNodeMap[id]={data:data,range:rangeId}
+            self.editingNodeMap[id]={subjectData:subjectData,objectData:objectData,range:rangeId}
             var html = "<div class='OwlEditorItemPropertyValueDiv2' id='" + id + "'>" +
                 " <div class='OwlEditorItemPropertyValueDiv'>" + item.label + "</div>&nbsp;" +
                 "<button onclick='OwlEditor.deleteRange(\"" + id + "\")'>-</button>" +
@@ -456,20 +457,55 @@ var OwlEditor = (function () {
 
     self.saveEditingNode=function(){
 
+        var triples=[];
         for(var divId in self.editingNodeMap){
-            var data=self.editingNodeMap[divId].data
+            var objectData=self.editingNodeMap[divId].objectData;
+            var subjectData=self.editingNodeMap[divId].subjectData;
             var array=self.editingNodeMap[divId].range.split("_");
             var type=array[0].replace(/\-/g,":")
 
-            var subType=array[1].replace(/\-/g,":")
 
+            var isNew=false;
+            var predicate=array[1].replace(/\-/g,":")
+            var subjectUri;
+            objectData.forEach(function(item){
+            var objectStr;
+            if(objectData.type=="uri"){
+                objectStr=item.id
+            }else{
+                objectStr="'"+item.label+"'"
+            }
 
+            if(subjectData) {
+                subjectUri = subjectData.id;
 
-            if( type=="")
-            
-            
-            
+            }
+            else {
+                subjectUri = Config.sources[self.currentSourceData.name].graphUri + common.getRandomHexaId();
+                isNew=true;
+            }
+            var triple={
+                subject:subjectUri,
+                predicate:predicate,
+                object:objectStr,
+            }
+
+            triples.push(triple)
+            })
         }
+
+        var x=triples;
+
+        /*
+        WITH <http://example/addresses>
+DELETE { ?person foaf:firstName 'Bill' }
+INSERT { ?person foaf:firstName 'William' }
+WHERE
+  { ?person a foaf:Person .
+    ?person foaf:firstName 'Bill'
+  }
+
+         */
     }
 
 

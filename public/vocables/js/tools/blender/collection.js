@@ -165,8 +165,10 @@ var Collection = (function () {
             })
         })
         Collection.Sparql.setConceptsCollectionMembership(Blender.currentSource, conceptIds, Collection.currentTreeNode.data.id, function (err, result) {
+            $("#waitImg").css("display", "none");
             if (err)
                 return MainController.UI.message(err)
+
 
           //  common.jstree.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
             MainController.UI.message("node " + self.currentCandidateNode.data.label + " assigned to collection " + Collection.currentTreeNode.data.label)
@@ -190,7 +192,7 @@ var Collection = (function () {
         //  self.currentCollectionFilter.push(collection.id)
         self.currentCollectionFilter = collection.data.id;
 
-        var html = ("<div  class='blender_collectionFilter' onclick='Collection.removeTaxonomyFilter()'>" + collection.text + "</div>")
+        var html = ("<div  class='blender_collectionFilter' >" + collection.text + "<button onclick='Collection.removeTaxonomyFilter()'>-</button></div>")
         $("#Blender_currentFilterDiv").append(html)
 
         if(Config.Blender.openTaxonomyTreeOnLoad){
@@ -291,7 +293,7 @@ var Collection = (function () {
                 " select    distinct * " + fromStr + " WHERE {" +
                 "?collection rdf:type  ?collectionType. filter( ?collectionType =skos:Collection). " +
                 "?collection skos:prefLabel ?collectionLabel."
-            if (variables.lang)
+            if (false && variables.lang)
                 query += "filter( lang(?collectionLabel)=\"" + variables.lang + "\")"
             if (!options.all)
                 query += "FILTER (  NOT EXISTS {?child skos:member ?collection})"

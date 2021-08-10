@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sourceManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sourceManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/blender.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/blender.html" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="souslesensVocables" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JS module" />
+        <option value="JavaScript File" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProjectId" id="1kpDSpYwSWEvl91ksN5pNCuGrTJ" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.6" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/config" />
+    <property name="nodejs_interpreter_path" value="node" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="restartRequiresConfirmation" value="false" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2020.3.3\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\config" />
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\evaluate" />
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools" />
+      <recent name="D:\webstorm\souslesensVocables\data\graphs" />
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL\browser" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\config" />
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\annotate" />
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets" />
+      <recent name="D:\webstorm\souslesensVocables\data" />
+      <recent name="D:\webstorm\souslesensVocables\data\parsedDocuments" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Node.js.bin\www">
+    <configuration name="PIbuilder..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" working-dir="$PROJECT_DIR$/bin/ADL/tools">
+      <method v="2" />
+    </configuration>
+    <configuration name="definitions.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/definitions.js" working-dir="$PROJECT_DIR$/bin/ADL">
+      <method v="2" />
+    </configuration>
+    <configuration name="dirContentAnnotator..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" working-dir="$PROJECT_DIR$/bin/annotator">
+      <method v="2" />
+    </configuration>
+    <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/exportGraph..js" working-dir="$PROJECT_DIR$/bin">
+      <method v="2" />
+    </configuration>
+    <configuration name="sparql_generic.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" working-dir="$PROJECT_DIR$/public/vocables/js/sparqlProxies">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Node.js.exportGraph..js" />
+        <item itemvalue="Node.js.dirContentAnnotator..js" />
+        <item itemvalue="Node.js.sparql_generic.js" />
+        <item itemvalue="Node.js.definitions.js" />
+        <item itemvalue="Node.js.PIbuilder..js" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="" />
+      <created>1606388641482</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1606388641482</updated>
+      <workItem from="1606388642624" duration="23277000" />
+      <workItem from="1606585552303" duration="25056000" />
+      <workItem from="1606804265723" duration="78864000" />
+      <workItem from="1607242310122" duration="9380000" />
+      <workItem from="1607275657944" duration="6433000" />
+      <workItem from="1607420435071" duration="48405000" />
+      <workItem from="1607588457022" duration="55435000" />
+      <workItem from="1607846829459" duration="33607000" />
+      <workItem from="1608020326934" duration="7359000" />
+      <workItem from="1608033621034" duration="258000" />
+      <workItem from="1608033899777" duration="21193000" />
+      <workItem from="1608188517427" duration="50134000" />
+      <workItem from="1608448255113" duration="235613000" />
+      <workItem from="1609850999084" duration="38000" />
+      <workItem from="1609851061196" duration="85375000" />
+      <workItem from="1610260629705" duration="16639000" />
+      <workItem from="1610290742772" duration="65843000" />
+      <workItem from="1610612770480" duration="63332000" />
+      <workItem from="1610872673300" duration="101074000" />
+      <workItem from="1611251600415" duration="58829000" />
+      <workItem from="1611501075836" duration="20982000" />
+      <workItem from="1611646950854" duration="7255000" />
+      <workItem from="1611728394067" duration="568000" />
+      <workItem from="1611728994576" duration="10579000" />
+      <workItem from="1611758637943" duration="117488000" />
+      <workItem from="1612449705391" duration="53430000" />
+      <workItem from="1612679557225" duration="72721000" />
+      <workItem from="1613022128638" duration="19976000" />
+      <workItem from="1613111503853" duration="10397000" />
+      <workItem from="1613128702585" duration="37645000" />
+      <workItem from="1613282689958" duration="82688000" />
+      <workItem from="1613722030888" duration="42521000" />
+      <workItem from="1613928485001" duration="38515000" />
+      <workItem from="1614011355100" duration="390000" />
+      <workItem from="1614012116927" duration="58472000" />
+      <workItem from="1614166790836" duration="14401000" />
+      <workItem from="1614235043143" duration="1769000" />
+      <workItem from="1614239044959" duration="162412000" />
+      <workItem from="1614839107857" duration="161000" />
+      <workItem from="1614839275149" duration="51030000" />
+      <workItem from="1615225380681" duration="797000" />
+      <workItem from="1615368199694" duration="880000" />
+      <workItem from="1615453594286" duration="64923000" />
+      <workItem from="1615877061869" duration="54129000" />
+      <workItem from="1616066349257" duration="9717000" />
+      <workItem from="1616133884239" duration="88928000" />
+      <workItem from="1616498709402" duration="464000" />
+      <workItem from="1616499182105" duration="46615000" />
+      <workItem from="1616765206072" duration="48007000" />
+      <workItem from="1617173616754" duration="851000" />
+      <workItem from="1617175346244" duration="10628000" />
+      <workItem from="1617211349497" duration="1228000" />
+      <workItem from="1617262122131" duration="26242000" />
+      <workItem from="1617437550194" duration="23985000" />
+      <workItem from="1617513315962" duration="28256000" />
+      <workItem from="1617640983473" duration="73261000" />
+      <workItem from="1618075066852" duration="41216000" />
+      <workItem from="1618409683603" duration="9980000" />
+      <workItem from="1618461927860" duration="19980000" />
+      <workItem from="1618555451091" duration="95577000" />
+      <workItem from="1619100168042" duration="7334000" />
+      <workItem from="1619260267361" duration="32235000" />
+      <workItem from="1619591144016" duration="90068000" />
+      <workItem from="1619962281242" duration="384000" />
+      <workItem from="1620019723693" duration="103799000" />
+      <workItem from="1620391311238" duration="8915000" />
+      <workItem from="1620626815268" duration="92118000" />
+      <workItem from="1621083998733" duration="12348000" />
+      <workItem from="1621141784361" duration="17467000" />
+      <workItem from="1621233812525" duration="68646000" />
+      <workItem from="1621574187664" duration="70487000" />
+      <workItem from="1621917093081" duration="9575000" />
+      <workItem from="1622009043581" duration="36121000" />
+      <workItem from="1622438234977" duration="16567000" />
+      <workItem from="1622539032616" duration="24374000" />
+      <workItem from="1623093347169" duration="3982000" />
+      <workItem from="1623393694727" duration="12649000" />
+      <workItem from="1623484078505" duration="52802000" />
+      <workItem from="1623754114218" duration="36472000" />
+      <workItem from="1623996026458" duration="81763000" />
+      <workItem from="1624644453086" duration="11520000" />
+      <workItem from="1625129374007" duration="10198000" />
+      <workItem from="1625202132680" duration="11601000" />
+      <workItem from="1625384573631" duration="7765000" />
+      <workItem from="1625410711012" duration="30181000" />
+      <workItem from="1625724886283" duration="44292000" />
+      <workItem from="1626851390539" duration="25310000" />
+      <workItem from="1627019552294" duration="83047000" />
+      <workItem from="1627402710766" duration="117314000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/codification..js</url>
+          <line>203</line>
+          <option name="timeStamp" value="285" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/codification..js</url>
+          <line>148</line>
+          <option name="timeStamp" value="288" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/codification..js</url>
+          <line>196</line>
+          <option name="timeStamp" value="289" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
+          <line>132</line>
+          <option name="timeStamp" value="307" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
+          <line>85</line>
+          <option name="timeStamp" value="308" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
+          <line>22</line>
+          <option name="timeStamp" value="336" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
+          <line>251</line>
+          <option name="timeStamp" value="337" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
+          <line>554</line>
+          <option name="timeStamp" value="371" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js</url>
+          <line>2178</line>
+          <option name="timeStamp" value="377" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
+          <line>694</line>
+          <option name="timeStamp" value="393" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
+          <line>357</line>
+          <option name="timeStamp" value="405" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
+          <line>467</line>
+          <option name="timeStamp" value="418" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
+          <line>661</line>
+          <option name="timeStamp" value="455" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js</url>
+          <line>89</line>
+          <option name="timeStamp" value="459" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js</url>
+          <line>64</line>
+          <option name="timeStamp" value="466" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js</url>
+          <line>63</line>
+          <option name="timeStamp" value="467" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js</url>
+          <line>52</line>
+          <option name="timeStamp" value="468" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/definitions.js</url>
+          <line>2117</line>
+          <option name="timeStamp" value="482" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/node_modules/tika-server-client/src/tika-server-client.js</url>
+          <line>81</line>
+          <option name="timeStamp" value="497" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/node_modules/tika-server-client/src/tika-server-client.js</url>
+          <line>70</line>
+          <option name="timeStamp" value="499" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/node_modules/tika-server-client/src/tika-server-client.js</url>
+          <line>92</line>
+          <option name="timeStamp" value="500" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
+          <line>35</line>
+          <option name="timeStamp" value="529" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
+          <line>140</line>
+          <option name="timeStamp" value="530" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
+          <line>50</line>
+          <option name="timeStamp" value="531" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js</url>
+          <line>154</line>
+          <option name="timeStamp" value="572" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>79</line>
+          <option name="timeStamp" value="643" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>80</line>
+          <option name="timeStamp" value="644" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
+          <line>668</line>
+          <option name="timeStamp" value="735" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

@@ -118,7 +118,7 @@ var Blender = (function () {
 
 
             self.currentSource = source
-            MainController.searchedSource = self.currentSource
+          //  MainController.searchedSource = self.currentSource
 
             async.series([
                     function (callbackSeries) {
@@ -151,7 +151,7 @@ var Blender = (function () {
                     function (callbackSeries) {
                         if (Blender.currentSource)
                             if (Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) {
-                                self.showFilteredTaxonomyTree(Config.Blender.openTaxonomyTreeOnLoad,function (err, result) {
+                                self.showFilteredTaxonomyTree(Config.Blender.openTaxonomyTreeOnLoad, function (err, result) {
                                     callbackSeries(err);
                                 })
                             } else {
@@ -337,7 +337,6 @@ var Blender = (function () {
             var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel
 
 
-
             if (currentNodeLevel < allowedLevels) {
                 menuItems.forbidden = {
                     label: "!...",
@@ -356,7 +355,7 @@ var Blender = (function () {
                 return menuItems;
             } else {
                 var clipboard = Clipboard.getContent()
-                if (clipboard.length == 0) {
+                if (true || clipboard.length == 0) {
                     menuItems.toCollection = {
                         label: "<span class='blender_assignCollection'>to Collection</span>",
                         action: function (e) {// pb avec source
@@ -676,6 +675,7 @@ var Blender = (function () {
                 var oldId
                 var newId
                 var label
+                var cancel = false
 
                 var toParentNode
                 if (options.newParentId)
@@ -684,44 +684,93 @@ var Blender = (function () {
                     toParentNode = self.currentTreeNode.data;
 
 
-                    if (options.pasteDescendantsDepth)
-                        depth = options.pasteDescendantsDepth;
+                if (options.pasteDescendantsDepth)
+                    depth = options.pasteDescendantsDepth;
 
                 async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
                     var sourceNodesId = {}
+                    var sourceNodesLabels = {[fromNodeData.label.toLowerCase()]:fromNodeData.id}
                     async.series([
                         function (callbackSeries) {
                             if (depth > 0)
                                 MainController.UI.message("searching node and its children")
                             Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (err, result) {
-                                sourceNodesId[fromNodeData.id]=1
+                                sourceNodesId[fromNodeData.id] = 1
                                 result.forEach(function (item) {
                                     if (!sourceNodesId[item.concept.value]) {
                                         sourceNodesId[item.concept.value] = 1;
+                                        sourceNodesLabels[item.conceptLabel.value.toLowerCase()] = item.concept.value
                                     }
                                     for (var i = 1; i < depth; i++) {
                                         var child = item["child" + i]
                                         if (child) {
                                             if (!sourceNodesId[child.value]) {
                                                 sourceNodesId[child.value] = 1;
+                                                sourceNodesLabels[item["child" + i + "Label"].value.toLowerCase()] = child.value
                                             }
                                         }
                                     }
                                 })
-
+                                Clipboard.clear()
                                 callbackSeries();
                             })
                         },
+                        //check nodes with same label in target taxonomy
                         function (callbackSeries) {
+                            var fromIds = Object.keys(sourceNodesId);
+                            var filterStr = Sparql_common.setFilter("concept", null, Object.keys(sourceNodesLabels), null, {exactMatch: true})
+                            Sparql_generic.getItems(toParentNode.source, {filter: filterStr}, function (err, result) {
+
+                                if (err)
+                                    return callbackSeries(err);
+                                else if (result.length == 0)
+                                    return callbackSeries();
+                                else {
+                                    var choice = prompt(result.length + " concepts have same label in target resource.type :" +
+                                        " \n C to cancel copy  " +
+                                        " \n S to skip duplicate concepts " +
+                                        " \n D to copy  concepts (including duplicates)  ")
+
+                                    if (choice == "S") {
+                                        result.forEach(function (item) {
+                                            var id = sourceNodesLabels[item.conceptLabel.value.toLowerCase()]
+                                            if (id)
+                                                delete sourceNodesId[id]
+
+                                        })
+                                        if(Object.keys(sourceNodesId).length==0)
+                                            cancel=true;
+                                            MainController.UI.message(Object.keys(sourceNodesId).length+" concepts will be copied")
+                                        return callbackSeries();
+                                    } else if (choice == "D"){
+                                        return callbackSeries();
+                                    }
+                                   else  {
+                                        cancel = true
+                                        MainController.UI.message("Copy concepts cancelled")
+
+                                        return callbackSeries()
+
+                                    }
+                                }
+
+
+                            })
+
+
+                        },
+                        function (callbackSeries) {
+                            if (cancel)
+                                return callbackSeries();
                             var toGraphUri = Config.sources[toParentNode.source].graphUri
                             var fromIds = Object.keys(sourceNodesId);
                             options = {
                                 keepOriginalUris: false,
                                 addExactMatchPredicate: true,
-                                setParentNode:{
-                                    targetUri:toParentNode.id,
-                                    sourceUri:fromNodeData.id
-                                } ,
+                                setParentNode: {
+                                    targetUri: toParentNode.id,
+                                    sourceUri: fromNodeData.id
+                                },
                                 prefLang: "en",
 
 
@@ -729,13 +778,14 @@ var Blender = (function () {
 
                             MainController.UI.message("copying " + fromIds.length + " nodes from source " + fromNodeData.source + " in source " + toParentNode.source)
                             Sparql_generic.copyNodes(fromNodeData.source, toGraphUri, fromIds, options, function (err, result) {
-                                if(err)
-                                    return alert(err)
-                                var parentJstreeNode=$("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
-                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source,parentJstreeNode, {});
-                            /*    self.onSourceSelect(toParentNode.source, function (err, result) {
-                                    $("#Blender_conceptTreeDiv").jstree().open_node(toParentNode.id)
-                                })*/
+                                if (err) {
+                                     alert(err)
+                                    return callbackSeries()
+                                }
+                                var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
+                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {});
+                                return callbackSeries()
+
 
                             })
 
@@ -747,13 +797,19 @@ var Blender = (function () {
 
                     })
                 }, function (err) {
-                    return callback
+                    if(callback)
+                    return callback()
+                    else{
+                        if(!cancel)
+                        MainController.UI.message("nodes copied")
+                        $("#waitImg").css("display","none")
+                    }
+
 
                 })
 
 
             }
-
 
 
             ,
@@ -929,12 +985,12 @@ var Blender = (function () {
                 if (type == "concept") {
                     var conceptType
 
-                    if( Config.sources[self.currentSource].schemaType=="SKOS")
+                    if (Config.sources[self.currentSource].schemaType == "SKOS")
                         conceptType = "http://www.w3.org/2004/02/skos/core#Concept"
-                    else if( Config.sources[self.currentSource].schemaType=="OWL")
+                    else if (Config.sources[self.currentSource].schemaType == "OWL")
                         conceptType = "http://www.w3.org/2002/07/owl#Class"
                     else
-                        return alert (" no supported schemaType "+Config.sources[self.currentSource].schemaType)
+                        return alert(" no supported schemaType " + Config.sources[self.currentSource].schemaType)
                     if (self.displayMode == "centralPanelDiv") {
                         SourceEditor.editNode("Blender_nodeEditionContainerDiv", self.currentSource, self.currentTreeNode.data.id, conceptType, false)
                     } else {
@@ -1203,12 +1259,15 @@ var Blender = (function () {
 
             })
         }
-        self.showFilteredTaxonomyTree = function (options,callback) {
+        self.showFilteredTaxonomyTree = function (options, callback) {
 
 
             var collection = Collection.currentCollectionFilter
 
-            Sparql_generic.getCollectionNodes(self.currentSource, collection, {depth: options.depth,filter: {predicates: ["skos:prefLabel", "skos:broader"]}}, function (err, result) {
+            Sparql_generic.getCollectionNodes(self.currentSource, collection, {
+                depth: options.depth,
+                filter: {predicates: ["skos:prefLabel", "skos:broader"]}
+            }, function (err, result) {
                 if (err) {
                     if (callback)
                         return callback(err)
@@ -1316,7 +1375,7 @@ var Blender = (function () {
                 if (graphUri == "" || name == "")
                     return alert("set resource name and graph URI");
 
-                if(Config.sources[name])
+                if (Config.sources[name])
                     return alert("this source name is already used")
 
                 delete Config.sources[referenceSource].controller

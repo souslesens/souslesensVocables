@@ -25,32 +25,32 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
-                for(var source in data){
-                    if(data[source].sparql_server && data[source].sparql_server.url=="_default"){
-                        data[source].sparql_server.url=Config.default_sparql_url
+                for (var source in data) {
+                    if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
+                        data[source].sparql_server.url = Config.default_sparql_url
                     }
                 }
-                Config.sources=data ;
-                if(callback)
+                Config.sources = data;
+                if (callback)
                     return callback()
             },
             error: function (err) {
-                alert( "cannot load profiles")
+                alert("cannot load profiles")
                 console.log(err);
-                if(callback)
+                if (callback)
                     return callback()
             }
         })
-     /*   $.getJSON("config/sources.json", function (json) {
-            Config.sources = json;
-           for(var sourceLabel in Config.sources){
-                if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-                    Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
-            }
-            if (callback)
-                return callback()
+        /*   $.getJSON("config/sources.json", function (json) {
+               Config.sources = json;
+              for(var sourceLabel in Config.sources){
+                   if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
+                       Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
+               }
+               if (callback)
+                   return callback()
 
-        });*/
+           });*/
     }
     self.loadProfiles = function (callback) {
 
@@ -63,22 +63,19 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
-               Config.profiles=data ;
-                if(callback)
+                Config.profiles = data;
+                if (callback)
                     return callback()
             },
             error: function (err) {
-                alert( "cannot load profiles")
+                alert("cannot load profiles")
                 console.log(err);
-                if(callback)
+                if (callback)
                     return callback()
             }
         })
 
     }
-
-
-
 
 
     self.writeUserLog = function (user, tool, source) {
@@ -102,33 +99,32 @@ var MainController = (function () {
     }
 
 
-    self.onAfterLogin=function(){
+    self.onAfterLogin = function () {
 
-        if(!authentication.currentUser)
+        if (!authentication.currentUser)
             return alert(" no user identified")
-        var groups=authentication.currentUser.groupes
-        MainController.loadSources(function(err,result){
-        MainController.loadProfiles(function(err,result){
-      //  Config.currentProfile=Config.profiles["reader_all"]
-        groups.forEach(function(group){
-            if(Config.profiles[group])
-                return  Config.currentProfile=Config.profiles[group]
+        var groups = authentication.currentUser.groupes
+        MainController.loadSources(function (err, result) {
+            MainController.loadProfiles(function (err, result) {
+                //  Config.currentProfile=Config.profiles["reader_all"]
+                groups.forEach(function (group) {
+                    if (Config.profiles[group])
+                        return Config.currentProfile = Config.profiles[group]
+                })
+                MainController.UI.configureUI();
+                MainController.UI.showToolsList("toolsTreeDiv")
+            })
         })
-        MainController.UI.configureUI();
-        MainController.UI.showToolsList("toolsTreeDiv")
-        })
-    })
 
 
     }
 
-    self.initControllers=function(){
+    self.initControllers = function () {
         Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
             if (!Config.sources[sourceLabel].controllerName) {
                 Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller
                 Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller)
-            }
-            else{
+            } else {
                 Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName)
             }
         })
@@ -136,11 +132,11 @@ var MainController = (function () {
 
     self.UI = {
 
-        configureUI:function(){
-            if(Config.currentProfile.forbiddenTools.indexOf("BLENDER")>-1)
-                $("#showBlenderButton").css("display","none")
+        configureUI: function () {
+            if (Config.currentProfile.forbiddenTools.indexOf("BLENDER") > -1)
+                $("#showBlenderButton").css("display", "none")
             else
-                $("#showBlenderButton").css("display","block")
+                $("#showBlenderButton").css("display", "block")
         },
 
 
@@ -152,11 +148,11 @@ var MainController = (function () {
                 treeData.push({id: item, text: item, parent: "#"})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
-              self.initControllers()
+                self.initControllers()
 
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
-                if ( (Config.currentProfile.allowedSources!="ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0)  ||  Config.currentProfile.forbiddenSources.indexOf(sourceLabel) >-1)
+                if ((Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) || Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1)
                     return;
 
 
@@ -214,7 +210,7 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300)
             var treeData = []
             for (var key in Config.tools) {
-                if (( Config.currentProfile.allowedTools!="ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) ||  Config.currentProfile.forbiddenTools.indexOf(key) >-1)
+                if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1)
                     ;
                 else
                     treeData.push({id: key, text: Config.tools[key].label, parent: "#", data: Config.tools[key]})
@@ -226,13 +222,12 @@ var MainController = (function () {
                 selectTreeNodeFn: function (evt, obj) {
 
 
-
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
                     var controller = Config.tools[self.currentTool].controller
-                   $("#currentSourceTreeDiv").html("")
+                    $("#currentSourceTreeDiv").html("")
 
                     self.UI.updateActionDivLabel();
 
@@ -286,7 +281,7 @@ var MainController = (function () {
         },
         showNodeInfos: function (sourceLabel, nodeId, divId, callback) {
 
-            Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels:true}, function (err, result) {
+            Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true}, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
@@ -308,7 +303,7 @@ var MainController = (function () {
 
         toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display")
-
+            Lineage_classes.currentSource = null;
             if (!open && display == "flex") {//open->close
                 var w2 = $("#graphDiv").width() + rightPanelWidth
                 $("#rightPanelDiv").css("display", "none")
@@ -335,7 +330,7 @@ var MainController = (function () {
 
         setCredits: function () {
 
-            var html = "<div>"+
+            var html = "<div>" +
                 "  <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" +
                 "</div>"
             $("#graphDiv").html(html)
@@ -387,9 +382,10 @@ var MainController = (function () {
             $("#graphDiv").width(w - rightPanelWidth)
             $("#rightPanelToogleButton").css("display", "block")
             $("#rightPanelDiv").width(rightPanelWidth)
-            setTimeout(function() {
-                $("#graphDiv").hide().fadeIn('fast');}
-            ,500)
+            setTimeout(function () {
+                    $("#graphDiv").hide().fadeIn('fast');
+                }
+                , 500)
         },
         showCurrentQuery: function () {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>")
@@ -402,7 +398,6 @@ var MainController = (function () {
     }
 
     self.test = function () {
-
 
 
     }

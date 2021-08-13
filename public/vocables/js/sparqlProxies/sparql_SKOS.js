@@ -130,8 +130,8 @@ var Sparql_SKOS = (function () {
                     "   ?concept skos:prefLabel ?conceptLabel." +
                     "   ?child1 skos:prefLabel ?child1Label." +
                     "   ?child1 rdf:type ?child1Type." +
-                    "}order by ?concept"
-                query += "} limit " + sourceVariables.limit + " ";
+                    " }order by ?concept"
+                query += " limit " + sourceVariables.limit + " ";
             }
 
 
@@ -334,7 +334,7 @@ var Sparql_SKOS = (function () {
                 query += options.filter;
 
 
-            if (options.sourceVariables.lang)
+            if (sourceVariables.lang)
                 query += "filter(lang(?conceptLabel )='" + sourceVariables.lang + "')"
 
             if (options.filterCollections)

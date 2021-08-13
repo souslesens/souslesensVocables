@@ -97,7 +97,7 @@ var OwlEditor = (function () {
                 Sparql_OWL.getItems(source, options, function (err, result) {
                     if (err)
                         return callbackSeries(err);
-                    self.currentSourceData["owl:Class"] = common.array.distinctValues(result, "concept").sort();
+                    self.currentSourceData["owl:Class"] = common.array.sort(common.array.distinctValues(result, "concept"),"conceptLabel");
                     callbackSeries()
                 })
 
@@ -107,7 +107,7 @@ var OwlEditor = (function () {
                 Sparql_OWL.getObjectProperties(source, null, {inheritedProperties:1}, function (err, result) {
                     if (err)
                         return callbackSeries(err);
-                    self.currentSourceData["owl:ObjectProperty"] = common.array.distinctValues(result, "prop").sort();
+                    self.currentSourceData["owl:ObjectProperty"] =  common.array.sort(common.array.distinctValues(result, "prop"),"propLabel");
                     callbackSeries()
                 })
 

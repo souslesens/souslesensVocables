@@ -29,18 +29,21 @@ var OwlSchema = (function () {
     }
 
     self.initSourceSchema = function (sourceLabel, callback) {
+        if (!sourceLabel || !Config.sources[sourceLabel].schemaType) {
+        return callback("invalid source "+sourceLabel)
+        }
 
-        if (self.schemasConfig && self.schemasConfig[sourceLabel]) {
+        if ( self.schemasConfig && self.schemasConfig[sourceLabel]) {
             return callback(null, self.schemasConfig[sourceLabel]);
         }
 
+
+        // only for SKOS by now
         $.getJSON("config/schemas.json", function (json) {
             self.schemasConfig = json;
             var sourceSchema = null;
 
-
-            if (sourceLabel && Config.sources[sourceLabel].schemaType) {
-                sourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
+               sourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
 
                 if (sourceSchema) {
                     sourceSchema.type = Config.sources[sourceLabel].schemaType
@@ -48,10 +51,10 @@ var OwlSchema = (function () {
                         sourceSchema.sparql_url = Config.default_sparql_url
 
                 }
-            }
 
+// for OWL   and not SKOS
             if (!sourceSchema) {
-                console.log(sourceLabel)
+            //    console.log(sourceLabel)
                 if (!Config.sources[sourceLabel])
                     var x = 3
                 sourceSchema = {

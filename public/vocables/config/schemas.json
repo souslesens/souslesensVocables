@@ -22,7 +22,7 @@
       ]
     }
   },
-  "OWL": {
+  "OWLXXX": {
     "sparql_url": "_default",
     "graphUri":"http://data.total.com/resource/one-model/rdfsOwlSimplified/",
     "label": "OWL",

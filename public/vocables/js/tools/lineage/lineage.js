@@ -31,6 +31,7 @@ var Lineage_classes = (function () {
 
         self.onLoaded = function () {
             $("#sourceDivControlPanelDiv").html("")
+            self.currentSource=null;
             MainController.UI.message("");
 
 
@@ -82,7 +83,9 @@ var Lineage_classes = (function () {
         self.onSourceSelect = function (sourceLabel) {
 
 
-            if (sourceLabel) {
+            if (!sourceLabel)
+                return
+                MainController.currentSource=sourceLabel
                 if (!self.currentSource) {
 
                     Lineage_classes.drawTopConcepts(sourceLabel)
@@ -100,8 +103,9 @@ var Lineage_classes = (function () {
 
 
                 propertyColors = {}
-            }
-            self.currentSource = sourceLabel
+
+            self.currentSource = sourceLabel;
+            MainController.currentSource=sourceLabel;
             MainController.currentSource = sourceLabel
             $("#GenericTools_onSearchCurrentSourceInput").css("display", "block")
 
@@ -2652,9 +2656,9 @@ Lineage_properties = (function () {
                         searchedSources.push(sourceLabel)
                 }
             } else {
-                if (!MainController.searchedSource && !MainController.currentSource)
+                if (!MainController.currentSource)
                     return alert("select a source or search in all source")
-                searchedSources.push(MainController.searchedSource || MainController.currentSource)
+                searchedSources.push(MainController.currentSource)
             }
             var jstreeData = []
             var uniqueIds = {}

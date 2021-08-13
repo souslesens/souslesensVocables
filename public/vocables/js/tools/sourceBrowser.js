@@ -376,9 +376,9 @@ var SourceBrowser = (function () {
                 }
             }
         } else {
-            if (!MainController.searchedSource && !MainController.currentSource)
+            if (!MainController.currentSource)
                 return alert("select a source or search in all source")
-            searchedSources.push(MainController.searchedSource || MainController.currentSource)
+            searchedSources.push( MainController.currentSource)
         }
         var jstreeData = []
         var uniqueIds = {}
@@ -545,17 +545,23 @@ var SourceBrowser = (function () {
                     var id = item.concept.value;
 self.currentFoundIds.push(id)
 
-                    jstreeData.push({
-                        id: jstreeId,
-                        text: text,
-                        parent: item["broader1"].jstreeId,
-                        data: {
-                            type: "http://www.w3.org/2002/07/owl#Class",
-                            source: sourceLabel,
-                            id: id,
-                            label: item.conceptLabel.value
-                        }
-                    })
+                    var broader1=item["broader1"]
+                    if(!broader1)
+                        var x=3
+                    else {
+
+                        jstreeData.push({
+                            id: jstreeId,
+                            text: text,
+                            parent: item["broader1"].jstreeId,
+                            data: {
+                                type: "http://www.w3.org/2002/07/owl#Class",
+                                source: sourceLabel,
+                                id: id,
+                                label: item.conceptLabel.value
+                            }
+                        })
+                    }
                 }
             })
 //console.log(JSON.stringify(jstreeData))

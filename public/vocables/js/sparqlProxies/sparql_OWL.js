@@ -499,7 +499,7 @@ var Sparql_OWL = (function () {
 
             query += "OPTIONAL{?prop rdfs:label ?propLabel.}  " +
                 "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
-                " ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " + "OPTIONAL{?domain rdfs:label ?domainLabel.} " +
+                "OPTIONAL { ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " + "OPTIONAL{?domain rdfs:label ?domainLabel.}} " +
                 " OPTIONAL {?subProp rdfs:subPropertyOf ?prop. {?subProp rdfs:label ?subPropLabel.}} " + filterStr
 
                 /* " WHERE { ?domain ?prop ?range ." + filterStr +
@@ -509,7 +509,7 @@ var Sparql_OWL = (function () {
                  " OPTIONAL {?range rdfs:label ?rangeLabel}"+*/
                 + " }"
             var limit = options.limit || Config.queryLimit;
-            query += " limit " + limit
+            query += "  limit " + limit
 
 
             var url = self.sparql_url + "?format=json&query=";

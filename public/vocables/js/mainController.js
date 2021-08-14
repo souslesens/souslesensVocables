@@ -145,7 +145,7 @@ var MainController = (function () {
             var distinctNodes = {}
 
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
-                treeData.push({id: item, text: item, parent: "#"})
+                treeData.push({id: item, text: item, parent: "#",type:item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
                 self.initControllers()
@@ -164,12 +164,13 @@ var MainController = (function () {
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     //  console.log(JSON.stringify(jstreeData,null,2))
-                    treeData.push({id: sourceLabel, text: sourceLabel, parent: Config.sources[sourceLabel].schemaType,})// data: Config.sources[sourceLabel]})
+                    treeData.push({id: sourceLabel, text: sourceLabel,type:Config.sources[sourceLabel].schemaType, parent: Config.sources[sourceLabel].schemaType,})// data: Config.sources[sourceLabel]})
                 }
             })
             common.jstree.loadJsTree(treeDiv, treeData, {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,
+
                 selectTreeNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
@@ -213,7 +214,7 @@ var MainController = (function () {
                 if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1)
                     ;
                 else
-                    treeData.push({id: key, text: Config.tools[key].label, parent: "#", data: Config.tools[key]})
+                    treeData.push({id: key, text: Config.tools[key].label,type:"tool", parent: "#", data: Config.tools[key]})
 
             }
             //})

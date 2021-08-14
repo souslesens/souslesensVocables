@@ -443,6 +443,7 @@ var Sparql_OWL = (function () {
             query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
+            query += "OPTIONAL {?concept rdfs:subClassOf ?superClass. }";
 
             if (options.filter)
                 query += options.filter;

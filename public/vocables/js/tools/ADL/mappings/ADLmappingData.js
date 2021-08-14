@@ -106,6 +106,7 @@ var ADLmappingData = (function () {
                 id: key.toLowerCase().replace(/\./g, "_"),
                 text: label,
                 parent: parent,
+                type:"table",
                 data: nodeData
             })
 

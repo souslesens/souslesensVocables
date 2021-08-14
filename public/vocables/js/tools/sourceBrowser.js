@@ -398,6 +398,8 @@ var SourceBrowser = (function () {
                 exactMatch: exactMatch,
                 limit: Config.searchLimit,
             }
+            var type=Config.sources[sourceLabel].schemaType
+
             SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
                 if (err) {
                     MainController.UI.message(err.responseText)
@@ -406,7 +408,8 @@ var SourceBrowser = (function () {
                 }else {
 
                     var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
-                    jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
+
+                    jstreeData.push({id: sourceLabel, text: text, parent: "#",type:type, data: {source: sourceLabel}})
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1
@@ -433,6 +436,7 @@ var SourceBrowser = (function () {
 
 
             var jstreeOptions = {
+
                 openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
                     SourceBrowser.currentTreeNode = propertiesMap.node;
 
@@ -504,7 +508,11 @@ var SourceBrowser = (function () {
                 item.concept.jstreeId = sourceLabel+"_"+item.concept.value ;
             })
 
-
+            var type=Config.sources[sourceLabel].schemaType
+            if(type=="SKOS")
+                type="concept"
+            else if(type=="OWL")
+                type="class"
             result.forEach(function (item, index) {
 
                 for (var i = 20; i > 0; i--) {
@@ -527,6 +535,7 @@ var SourceBrowser = (function () {
                                 id: jstreeId,
                                 text: label,
                                 parent: parentId,
+                                type:type,
                                 data: {
                                     type: "http://www.w3.org/2002/07/owl#Class",
                                     source: sourceLabel,
@@ -554,6 +563,7 @@ self.currentFoundIds.push(id)
                             id: jstreeId,
                             text: text,
                             parent: item["broader1"].jstreeId,
+                            type:type,
                             data: {
                                 type: "http://www.w3.org/2002/07/owl#Class",
                                 source: sourceLabel,

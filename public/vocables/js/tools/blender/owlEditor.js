@@ -135,20 +135,27 @@ var OwlEditor = (function () {
                     jstreeData.push({
                         text: key,
                         id: key,
+                        type: key,
                         parent: "#",
                         data: {type: key, id: key}
                     })
 
                 }
                 var distinctIds = {}
+                var rootClass="http://www.w3.org/2002/07/owl#Thing"
                 self.currentSourceData["owl:Class"].forEach(function (item) {
                     if (!distinctIds[item.concept.value]) {
                         distinctIds[item.concept.value] = 1
 
+                        var parent= "owl:Class";
+                        if(item.superClass && item.concept.value!=rootClass)
+                            parent=item.superClass.value
+
                         jstreeData.push({
                             text: item.conceptLabel.value,
                             id: item.concept.value,
-                            parent: "owl:Class",
+                            parent:parent,
+                            type: "owl:Class",
                             data: {
                                 type: "owl:Class",
                                 label: item.conceptLabel.value,
@@ -156,7 +163,22 @@ var OwlEditor = (function () {
                             }
                         })
                     }
+
                 })
+                if(!distinctIds[rootClass]){
+                    jstreeData.push({
+                        text: "owl:Thing",
+                        id: rootClass,
+                        parent:"owl:Class",
+                        type: "owl:Class",
+                        data: {
+                            type: "owl:Class",
+                            label: "owl:Thing",
+                            id: rootClass,
+                        }
+                    })
+                }
+
                 self.currentSourceData["owl:ObjectProperty"].forEach(function (item) {
                     if (!distinctIds[item.prop.value]) {
                         distinctIds[item.prop.value] = 1
@@ -168,6 +190,7 @@ var OwlEditor = (function () {
                             text: item.propLabel.value,
                             id: item.prop.value,
                             parent: parent,
+                            type:"owl:ObjectProperty",
                             data: {
                                 type: "owl:ObjectProperty",
                                 label: item.propLabel.value,
@@ -213,6 +236,7 @@ var OwlEditor = (function () {
                             text: label,
                             id: nodeId,
                             parent: "owl:Restriction",
+                            type:"owl:Restriction",
                             data: {
                                 type: "owl:Restriction",
                                 label: label,
@@ -227,7 +251,13 @@ var OwlEditor = (function () {
 
 
                 var options = {selectTreeNodeFn: OwlEditor.onSelectTreeNode}
+
+
+
+
                 common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (err, result) {
+                    if(jstreeData.length<300)
+                        $("#"+jstreeDivId).jstree().open_all()
                     common.jstree.openNodeDescendants(jstreeDivId,"owl:ObjectProperty")
                 })
 
@@ -249,7 +279,7 @@ var OwlEditor = (function () {
         if (obj.node.parent != "#") {
             if (true || obj.node.data.type == "owl:Class")
                 self.editingNodeMap={}
-                self.showPropertiesDiv(obj.node.parent, self.currentNode.data)
+                self.showPropertiesDiv(obj.node.data.type, self.currentNode.data)
 
         }
 
@@ -259,10 +289,14 @@ var OwlEditor = (function () {
 
     self.showPropertiesDiv = function (type, nodeData) {
         var html = "<table>"
+        html += "<tr>"
+        html += "<td><span class='OwlEditorItemSubjectUri'>about : " + nodeData.id + "</span></td>" +
+            "</tr>"
         var rangeHtml = "";
         for (var prop in self.shema[type]) {
             var rangeArray = self.shema[type][prop];
             var inputHtml = "";
+
             var rangeInpuId = (type + "_" + prop).replace(/:/g, "-")
             rangeArray.forEach(function (range) {
                 inputHtml += "<tr>"

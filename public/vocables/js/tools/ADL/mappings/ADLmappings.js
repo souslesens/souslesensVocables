@@ -252,6 +252,7 @@ var ADLmappings = (function () {
                         id: id + common.getRandomHexaId(3),
                         text: id,
                         parent: "http://www.w3.org/2002/07/owl#DatatypeProperty",
+                        type:"owl:ObjectProperty",
                         data: {
                             type: "http://www.w3.org/2002/07/owl#DatatypeProperty",
                             id: id,
@@ -265,6 +266,7 @@ var ADLmappings = (function () {
                     id: "http://www.w3.org/2000/01/rdf-schema#label",
                     text: "rdfs:labelOf",
                     parent: "#",
+                    type:"owl:ObjectProperty",
                     data: {
                         type: "labelOf",
                         id: "http://www.w3.org/2000/01/rdf-schema#label",
@@ -277,6 +279,7 @@ var ADLmappings = (function () {
                     propJstreeData.push({
                         id: id + common.getRandomHexaId(3),
                         text: id,
+                        type:"owl:ObjectProperty",
                         parent: "http://www.w3.org/2000/01/rdf-schema#label",
                         data: {
                             type: "http://www.w3.org/2000/01/rdf-schema#label",
@@ -300,6 +303,7 @@ var ADLmappings = (function () {
                 propJstreeData.push({
                     id: Config.ADL.OneModelSource,
                     text: Config.ADL.OneModelSource,
+                    type:"owl:ObjectProperty",
                     parent: "#"
                 })
                 var optionsClass = {
@@ -337,6 +341,7 @@ var ADLmappings = (function () {
                     id: "http://www.w3.org/2000/01/rdf-schema#",
                     text: "rdfs:label",
                     parent: "#",
+                    type:"owl:ObjectProperty",
                     data: {
                         "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
                         "id": "http://www.w3.org/2000/01/rdf-schema#label",
@@ -349,6 +354,7 @@ var ADLmappings = (function () {
                         id: "http://www.w3.org/2002/07/owl##DatatypeProperty",
                         text: "owl:DatatypeProperty",
                         parent: "#",
+                        type:"owl:ObjectProperty",
                         data: {
                             "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
                             "id": "http://www.w3.org/2002/07/owl##DatatypeProperty",

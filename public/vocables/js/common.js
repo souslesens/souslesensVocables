@@ -12,6 +12,43 @@ var common = (function () {
         var self = {};
 
         self.jstree = {
+            types: {
+                "tool": {
+                    "icon": "../../icons/tool.png",
+
+                },
+                "SKOS": {
+                    "icon": "../../icons/thesaurus.png",
+
+                },
+                "OWL": {
+                    "icon": "../../icons/ontology.png"
+                },
+
+                "class": {
+                    "icon": "../../icons/class.png"
+                }
+                ,
+                "concept": {
+                    "icon": "../../icons/concept.png"
+                },
+                "default": {
+                    "icon": "../../icons/default.png"
+                },
+                "owl:Class": {
+                    "icon": "../../icons/class.png",
+
+                },
+                "owl:ObjectProperty": {
+                    "icon": "../../icons/property.png"
+                },
+                "owl:Restriction": {
+                    "icon": "../../icons/restriction.png"
+                },
+                "owl:table": {
+                    "icon": "../../icons/table.png"
+                }
+            },
             loadJsTree: function (jstreeDiv, jstreeData, options, callback) {
                 var jstreeData2 = [];
                 jstreeData.forEach(function (item) {
@@ -33,16 +70,18 @@ var common = (function () {
                     plugins.push("checkbox")
                 if (options.searchPlugin)
                     plugins.push("search")
-                if (options.types)
-                    plugins.push("types")
+
+
                 if (options.contextMenu) {
                     // $(".jstree-contextmenu").css("z-index",100)
                     plugins.push("contextmenu")
                 }
                 if (options.dnd)
                     plugins.push("dnd")
-                if (options.types)
+                if (true || options.types) {
                     plugins.push("types")
+
+                }
 
 
                 var check_callbackFn = function (op, node, parent, position, more) {
@@ -72,7 +111,7 @@ var common = (function () {
                         tie_selection: false,
                         whole_node: false
                     },
-                    types: options.types,
+                    types: common.jstree.types,
 
                     contextmenu: {items: options.contextMenu}
 
@@ -229,7 +268,7 @@ var common = (function () {
                         nodes.push(node);
 
                         // Attempt to traverse if the node has children
-                        if( node.children) {
+                        if (node.children) {
                             node.children.forEach(function (child) {
                                 recurse(child);
 
@@ -242,8 +281,8 @@ var common = (function () {
                 return nodes
             },
             openNodeDescendants: function (jstreeDiv, nodeId, depth) {
-                var descendants=common.jstree.getNodeDescendants (jstreeDiv, nodeId, depth) ;
-                $("#"+jstreeDiv).jstree().open_node(descendants)
+                var descendants = common.jstree.getNodeDescendants(jstreeDiv, nodeId, depth);
+                $("#" + jstreeDiv).jstree().open_node(descendants)
             },
 
             setTreeParentDivDimensions: function (jstreeDiv) {
@@ -269,6 +308,7 @@ var common = (function () {
 
 
             setTreeAppearance: function () {
+                return;
                 $(".jstree-themeicon").css("display", "none")
                 $(".jstree-anchor").css("line-height", "18px")
                 $(".jstree-anchor").css("height", "18px")
@@ -352,7 +392,7 @@ var common = (function () {
         }
 
 
-        self.array= {
+        self.array = {
             slice: function (array, sliceSize) {
                 var slices = [];
                 var slice = []
@@ -370,16 +410,16 @@ var common = (function () {
             },
 
             distinctValues: function (array, key) {
-                var distinctValues={};
+                var distinctValues = {};
                 var array2 = []
-                var value="";
+                var value = "";
                 array.forEach(function (item) {
                     if (!key) {
                         value = item
                     } else {
                         value = item[key]
-                        if(value && value.value)
-                            value=value.value
+                        if (value && value.value)
+                            value = value.value
 
                     }
                     if (!distinctValues[value]) {
@@ -392,26 +432,25 @@ var common = (function () {
 
             },
 
-            sort: function (array, key,order) {
-                var x=order=="desc"?-1:1
-                array.sort(function(a,b){
+            sort: function (array, key, order) {
+                var x = order == "desc" ? -1 : 1
+                array.sort(function (a, b) {
                     var valueA
                     var valueB
-                    if(!key) {
+                    if (!key) {
                         valueA = a
                         valueB = b
+                    } else {
+                        valueA = a[key]
+                        if (valueA && valueA.value)
+                            valueA = valueA.value
+                        valueB = b[key]
+                        if (valueB && valueB.value)
+                            valueB = valueB.value
                     }
-                    else{
-                        valueA=a[key]
-                        if(valueA && valueA.value)
-                            valueA=valueA.value
-                        valueB=b[key]
-                        if(valueB && valueB.value)
-                            valueB=valueB.value
-                    }
-                  if(valueA>valueB)
-                      return x
-                    if(valueA<valueB)
+                    if (valueA > valueB)
+                        return x
+                    if (valueA < valueB)
                         return -x
                     return 0;
 

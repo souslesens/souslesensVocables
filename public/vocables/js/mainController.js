@@ -230,7 +230,7 @@ var MainController = (function () {
                     $("#currentSourceTreeDiv").html("")
 
                     self.UI.updateActionDivLabel();
-
+                    SourceBrowser.targetDiv="currentSourceTreeDiv"
                     if (Config.tools[self.currentTool].noSource) {
                         MainController.currentSource = null;
                         MainController.UI.onSourceSelect();
@@ -243,6 +243,8 @@ var MainController = (function () {
 
                         }
                     }
+
+                 //   $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
 
 
                     if (controller.onLoaded)
@@ -297,13 +299,15 @@ var MainController = (function () {
 
         },
 
-        message: function (message) {
+        message: function (message,stopWaitImg) {
             $("#messageDiv").html(message)
+            if(stopWaitImg)
+                $("#waitImg").css("display","none")
         },
 
         toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display")
-            Lineage_classes.currentSource = null;
+            Lineage_common.currentSource = null;
             if (!open && display == "flex") {//open->close
                 var w2 = $("#graphDiv").width() + rightPanelWidth
                 $("#rightPanelDiv").css("display", "none")

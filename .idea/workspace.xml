@@ -5,16 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_common.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/schemas.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/schemas.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/owlSchema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +68,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.6" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/config" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/tools/lineage" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -75,11 +78,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\lineage" />
       <recent name="D:\webstorm\souslesensVocables\config" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\evaluate" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools" />
       <recent name="D:\webstorm\souslesensVocables\data\graphs" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\ADL\browser" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\config" />
@@ -216,6 +219,7 @@
       <workItem from="1627019552294" duration="83047000" />
       <workItem from="1627402710766" duration="117314000" />
       <workItem from="1628663424700" duration="14947000" />
+      <workItem from="1628922683806" duration="9569000" />
     </task>
     <servers />
   </component>
@@ -276,11 +280,6 @@
           <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
           <line>554</line>
           <option name="timeStamp" value="371" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage.js</url>
-          <line>2182</line>
-          <option name="timeStamp" value="377" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>

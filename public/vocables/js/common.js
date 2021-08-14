@@ -229,20 +229,26 @@ var common = (function () {
                         nodes.push(node);
 
                         // Attempt to traverse if the node has children
-                        node.children.forEach(function (child) {
-                            recurse(child);
+                        if( node.children) {
+                            node.children.forEach(function (child) {
+                                recurse(child);
 
-                        })
+                            })
+                        }
                     }
                 }
                 recurse(nodeId);
 
                 return nodes
             },
+            openNodeDescendants: function (jstreeDiv, nodeId, depth) {
+                var descendants=common.jstree.getNodeDescendants (jstreeDiv, nodeId, depth) ;
+                $("#"+jstreeDiv).jstree().open_node(descendants)
+            },
 
             setTreeParentDivDimensions: function (jstreeDiv) {
 //$("#"+jstreeDiv).addClass("jstreeParent")
-                var p = $("#" + jstreeDiv).position()
+                var p = $("#" + jstreeDiv).offset();
                 if (p.top > 200)//in case jstreeDiv in inactive tab
                     p.top = 200
                 var h = $(window).height() - p.top - 50
@@ -250,7 +256,7 @@ var common = (function () {
                 if (p.left < 600)
                     w = 380;
                 else
-                    w = 300
+                    w = 340
                 $("#" + jstreeDiv).width(w)
                 $("#" + jstreeDiv).height(h)
                 $("#" + jstreeDiv).css('overflow', 'auto')

@@ -134,7 +134,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
 
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectProperties(Lineage_classes.currentSource, [node.id], null, function (err, result) {
+                    Sparql_OWL.getObjectProperties(Lineage_common.currentSource, [node.id], null, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
 
@@ -144,7 +144,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 },
 
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectRestrictions(Lineage_classes.currentSource, [node.id], null, function (err, result) {
+                    Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, [node.id], null, function (err, result) {
                         if (err)
                             return MainController.UI.message(err)
                         data = result
@@ -469,8 +469,8 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
             query += "} limit " + Config.queryLimit
             //  return;
-            var url = Config.sources[Lineage_classes.currentSource].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: Lineage_classes.currentSource}, function (err, result) {
+            var url = Config.sources[Lineage_common.currentSource].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: Lineage_common.currentSource}, function (err, result) {
                 if (err)
                     callback(err)
                 if (result.length >= Config.queryLimit)

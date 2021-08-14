@@ -203,7 +203,7 @@ var SourceBrowser = (function () {
                 }
 
             }
-            if (Lineage_classes.currentSource && Config.sources[Lineage_classes.currentSource].editable) {
+            if (Lineage_common.currentSource && Config.sources[Lineage_common.currentSource].editable) {
 
 
 
@@ -384,9 +384,9 @@ var SourceBrowser = (function () {
         var uniqueIds = {}
         async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
 
-            setTimeout(function () {
+           // setTimeout(function () {
                 MainController.UI.message("searching in " + sourceLabel)
-            }, 100)
+           // }, 100)
             if (!term)
                 term = $("#GenericTools_searchTermInput").val()
 
@@ -576,15 +576,15 @@ self.currentFoundIds.push(id)
 
     self.uploadOntologyFromOwlFile = function () {
         var graphUri;
-        if (Array.isArray(Config.sources[Lineage_classes.currentSource].graphUri))
-            graphUri = Config.sources[Lineage_classes.currentSource].graphUri[0]
+        if (Array.isArray(Config.sources[Lineage_common.currentSource].graphUri))
+            graphUri = Config.sources[Lineage_common.currentSource].graphUri[0]
         else
-            graphUri = Config.sources[Lineage_classes.currentSource].graphUri
+            graphUri = Config.sources[Lineage_common.currentSource].graphUri
         var payload = {
             uploadOntologyFromOwlFile: 1,
 
             graphUri: graphUri,
-            filePath: Config.sources[Lineage_classes.currentSource].protegeFilePath
+            filePath: Config.sources[Lineage_common.currentSource].protegeFilePath
         }
         $.ajax({
             type: "POST",

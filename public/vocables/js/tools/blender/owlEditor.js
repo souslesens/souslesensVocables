@@ -161,14 +161,18 @@ var OwlEditor = (function () {
                     if (!distinctIds[item.prop.value]) {
                         distinctIds[item.prop.value] = 1
 
+                        var parent="owl:ObjectProperty";
+                        if(item.subProp)
+                            parent=item.subProp.value;
                         jstreeData.push({
                             text: item.propLabel.value,
                             id: item.prop.value,
-                            parent: "owl:ObjectProperty",
+                            parent: parent,
                             data: {
                                 type: "owl:ObjectProperty",
                                 label: item.propLabel.value,
                                 id: item.prop.value,
+                                parent:parent
                             }
                         })
                     }
@@ -224,7 +228,7 @@ var OwlEditor = (function () {
 
                 var options = {selectTreeNodeFn: OwlEditor.onSelectTreeNode}
                 common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (err, result) {
-
+                    common.jstree.openNodeDescendants(jstreeDivId,"owl:ObjectProperty")
                 })
 
                 callbackSeries()

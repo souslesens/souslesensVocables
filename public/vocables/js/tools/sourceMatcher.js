@@ -566,7 +566,7 @@ var SourceMatcher = (function () {
                             " SELECT (count(distinct ?id)  as ?countItems) "
 
                             if (targetGraphURI && targetGraphURI != "")
-                                query += Sparql_common.getFromGraphStr(targetGraphURI)
+                                query += Sparql_common.getFromStr(toSourceId)
 
                             query += " WHERE {" +
                                 "?id skos:prefLabel ?prefLabel ." +
@@ -580,7 +580,7 @@ var SourceMatcher = (function () {
                                 " SELECT (count(distinct ?id)  as ?countItems) "
 
                             if (targetGraphURI && targetGraphURI != "")
-                                query +=Sparql_common.getFromGraphStr(targetGraphURI)
+                                query +=Sparql_common.getFromStr(toSourceId)
 
                             query += " WHERE {" + "?id rdfs:label ?prefLabel .";
                             if (rdfType && rdfType != "")

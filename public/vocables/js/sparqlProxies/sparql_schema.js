@@ -19,7 +19,7 @@ var Sparql_schema = (function () {
     var slicesSize = 25
 
     self.getClasses = function (schema, classIds, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
@@ -47,7 +47,7 @@ var Sparql_schema = (function () {
 
     }
     self.getClassProperties = function (schema, classIds, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -73,7 +73,7 @@ var Sparql_schema = (function () {
 
     }
     self.getObjectAnnotations = function (schema, classIds, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -96,7 +96,7 @@ var Sparql_schema = (function () {
     }
 
     self.getRestrictions = function (schema, options, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
         var query = " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct *" +
             fromStr +
             "where {" +
@@ -124,7 +124,7 @@ var Sparql_schema = (function () {
     }
 
     self.getPropertiesRangeAndDomain = function (schema, propertyIds, words, options, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
 
 
         if (!options)
@@ -195,7 +195,7 @@ var Sparql_schema = (function () {
     }
 
     self.getObjectRangeProperties = function (schema, classId, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
 
         var classIdsFilter = Sparql_common.setFilter("classId", classId)
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
@@ -227,7 +227,7 @@ var Sparql_schema = (function () {
 
     }
     self.getObjectDomainProperties = function (schema, classIds, callback) {
-        var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+        var fromStr = self.getFromGraphStr((schema.graphUri))
         var classIdsFilter = Sparql_common.setFilter("classId", classIds)
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
@@ -268,7 +268,7 @@ var Sparql_schema = (function () {
         async.eachSeries(slices, function (classIds, callbackEach) {
 
 
-            var fromStr = Sparql_common.getFromGraphStr((schema.graphUri))
+            var fromStr = self.getFromGraphStr((schema.graphUri))
             var classIdsFilter = Sparql_common.setFilter("classId", classIds)
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
@@ -342,7 +342,7 @@ var Sparql_schema = (function () {
 
     self.getAllTypes = function (sourceLabel, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri
-        var fromStr = Sparql_common.getFromGraphStr(graphUri)
+        var fromStr =self.getFromGraphStr(graphUri)
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
@@ -362,6 +362,25 @@ var Sparql_schema = (function () {
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "type")
             return callback(null, result.results.bindings)
         })
+
+    }
+    self.getFromGraphStr = function (graphUris, named) {
+        var from=" FROM "
+        if(named)
+            from+=" NAMED"
+
+        if (!graphUris || graphUris == "")
+            return "";
+        if (Array.isArray(graphUris)) {
+            var fromStr = ""
+            graphUris.forEach(function (item) {
+                fromStr += from+"  <" + item + "> "
+
+            })
+            return fromStr;
+        } else {
+            return from+"  <" + graphUris + ">"
+        }
 
     }
 

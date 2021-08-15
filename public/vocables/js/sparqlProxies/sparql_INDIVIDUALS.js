@@ -33,7 +33,7 @@ var Sparql_INDIVIDUALS = (function () {
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-            fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            fromStr= Sparql_common.getFromStr(sourceLabel)
 
 
             if (Config.sources[sourceLabel].topClass)
@@ -81,7 +81,7 @@ var Sparql_INDIVIDUALS = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr= Sparql_common.getFromStr(sourceLabel)
 
 
             var query = "select * " + fromStr +
@@ -113,7 +113,7 @@ var Sparql_INDIVIDUALS = (function () {
                 strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
-            var fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr= Sparql_common.getFromStr(sourceLabel)
             var owlPredicate = "subClassOf";
             if (options.owlType)
                 owlPredicate = options.owlType
@@ -161,7 +161,7 @@ var Sparql_INDIVIDUALS = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            var fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr= Sparql_common.getFromStr(sourceLabel)
 
 
             var query = "";
@@ -254,7 +254,7 @@ var Sparql_INDIVIDUALS = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var  fromStr= Sparql_common.getFromGraphStr(self.graphUri)
+            var  fromStr= Sparql_common.getFromStr(sourceLabel)
 
             var selectStr=" distinct * ";
             var groupByStr=""
@@ -262,7 +262,7 @@ var Sparql_INDIVIDUALS = (function () {
                 selectStr="  ?prop ?rangeType ?domainType  (count(?range) as ?nRanges) (count(?domain) as ?nDomains)  "
                 groupByStr=" GROUP BY  ?prop ?rangeType ?domainType  "
             }
-            var fromStr = Sparql_common.getFromGraphStr((self.graphUri))
+            var fromStr = Sparql_common.getFromStr(sourceLabel)
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
                 "select "+selectStr+"  "+ fromStr+"  WHERE {{" +
                 "   ?domain ?prop ?range. ?domain rdfs:label ?domainLabel.  ?range rdfs:label ?rangeLabel. " +

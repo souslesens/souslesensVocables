@@ -36,6 +36,7 @@ var common = (function () {
                     "icon": "../../icons/default.png"
                 },
                 "owl:Class": {
+                    "li_attr":{style: "color:black"},
                     "icon": "../../icons/class.png",
 
                 },
@@ -47,7 +48,22 @@ var common = (function () {
                 },
                 "owl:table": {
                     "icon": "../../icons/table.png"
-                }
+                },
+                "importedClass": {
+                    "li_attr":{style: "color:#ccc"},
+                    "icon": "../../icons/externalObject.png"
+                },
+                "importedProperty": {
+                    "li_attr":{style: "color:#ccc"},
+                    "icon": "../../icons/externalObject.png"
+                },
+                "importedRestriction": {
+                    "li_attr":{style: "color:#ccc"},
+                    "icon": "../../icons/externalObject.png"
+                },
+
+
+
             },
             loadJsTree: function (jstreeDiv, jstreeData, options, callback) {
                 var jstreeData2 = [];

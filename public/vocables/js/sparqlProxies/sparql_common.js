@@ -157,20 +157,7 @@ var Sparql_common = (function () {
     }
 
 
-    self.getFromStr = function (source) {
-        var fromStr = ""
-        var graphUris = Config.sources[source].graphUri
-        if (!graphUris || graphUris == "")
-            return ""
-        if (!Array.isArray(graphUris))
-            graphUris = [graphUris]
 
-
-        graphUris.forEach(function (graphUri, index) {
-            fromStr += " from <" + graphUri + "> "
-        })
-        return fromStr;
-    }
 
     self.formatString = function (str, forUri) {
         return self.formatStringForTriple(str, forUri);
@@ -230,22 +217,33 @@ var Sparql_common = (function () {
 
     }
 
-    self.getFromGraphStr = function (graphUris) {
+
+
+
+    self.getFromStr = function (source,named) {
+        var from=" FROM "
+        if(named)
+            from+=" NAMED"
+
+        var fromStr = ""
+        var graphUris = Config.sources[source].graphUri
         if (!graphUris || graphUris == "")
-            return "";
-        if (Array.isArray(graphUris)) {
-            var fromStr = ""
-            graphUris.forEach(function (item) {
-                fromStr += " FROM <" + item + "> "
+            return ""
+        if (!Array.isArray(graphUris))
+            graphUris = [graphUris]
 
+        graphUris.forEach(function (graphUri, index) {
+            fromStr += from+"  <" + graphUri + "> "
+        })
+        var imports=Config.sources[source].imports;
+        if(imports){
+            imports.forEach(function(source){
+                var importGraphUri = Config.sources[source].graphUri
+                fromStr += from+"  <" + importGraphUri + "> "
             })
-            return fromStr;
-        } else {
-            return " FROM <" + graphUris + ">"
         }
-
+        return fromStr;
     }
-
 
     return self;
 

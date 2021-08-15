@@ -20,6 +20,24 @@ router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
 });
 
+router.post('/upload', function (req, response) {
+    let sampleFile;
+    let uploadPath;
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No files were uploaded.');
+    }
+    if (req.files.EvaluateToolZipFile) {
+        var zipFile = req.files.EvaluateToolZipFile;
+        DirContentAnnotator.uploadCorpus(zipFile, function (err, result) {
+            processResponse(response, error, result);
+        })
+
+    }
+
+
+});
+
 
 router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         //  console.log(JSON.stringify(req.body,null,2))
@@ -58,34 +76,33 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
 
         if (req.body.getProfiles) {
-            configManager.getProfiles({},function (err, result) {
+            configManager.getProfiles({}, function (err, result) {
                 processResponse(response, err, result)
             })
         }
 
         if (req.body.getSources) {
-            configManager.getSources({},function (err, result) {
+            configManager.getSources({}, function (err, result) {
                 processResponse(response, err, result)
             })
         }
         if (req.body.getBlenderSources) {
-            configManager.getBlenderSources({},function (err, result) {
+            configManager.getBlenderSources({}, function (err, result) {
                 processResponse(response, err, result)
             })
         }
         if (req.body.createNewResource) {
 
-            configManager.createNewResource(req.body.sourceName,req.body.graphUri,req.body.targetSparqlServerUrl,JSON.parse(req.body.options),function (err, result) {
+            configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result)
             })
         }
         if (req.body.deleteResource) {
 
-            configManager.deleteResource(req.body.sourceName,req.body.graphUri,req.body.sparqlServerUrl,function (err, result) {
+            configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
                 processResponse(response, err, result)
             })
         }
-
 
 
         if (req.body.httpProxy) {

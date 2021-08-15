@@ -6,16 +6,28 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_INDIVIDUALS.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/transform.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/transform.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/owlEditor.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/owlEditor.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/annotateDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/annotateDialog.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -217,7 +229,7 @@
       <workItem from="1627019552294" duration="83047000" />
       <workItem from="1627402710766" duration="117314000" />
       <workItem from="1628663424700" duration="14947000" />
-      <workItem from="1628922683806" duration="19744000" />
+      <workItem from="1628922683806" duration="43010000" />
     </task>
     <servers />
   </component>
@@ -376,9 +388,15 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js</url>
-          <line>96</line>
+          <line>100</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="736" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>40</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="750" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

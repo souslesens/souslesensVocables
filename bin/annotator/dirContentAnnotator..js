@@ -18,10 +18,12 @@ var maxDocSize = 20 * 1000 * 1000;
 var tikaServerUrl = '127.0.0.1:41000'
 var spacyServerUrl = "http://51.178.39.209:8000/pos"
 
-var parsedDocumentsHomeDir = "D:\\NLP\\annotatedCorpus\\"
+var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\"
+var uploadDirPath="D:\\temp\\annotator\\corpus\\"
 var Inflector = require('inflected');
 var tikaServer = null
-var tikaserverStarted = false
+var tikaserverStarted = false;
+var unzipper=require('unzipper')
 
 var DirContentAnnotator = {
 
@@ -31,6 +33,31 @@ var DirContentAnnotator = {
             console.log(text)
         }
     },
+
+
+    uploadCorpus:function(zipFile, callback){
+
+        zipFile.mv(uploadDirPath+"temp.zip", function(err) {
+            if (err)
+                return callback(err);
+
+
+
+
+
+                fs.createReadStream(uploadDirPath + "temp.zip")
+                    .pipe(unzipper.Extract({path: uploadDirPath+"\\dir"}));
+
+
+            })
+
+
+
+    },
+
+
+
+
 
 
     startTikaServer: function (filePath, callback) {

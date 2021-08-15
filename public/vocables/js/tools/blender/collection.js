@@ -287,7 +287,7 @@ var Collection = (function () {
             var variables = self.Sparql.getVariables(sourceLabel);
             var fromStr = ""
 
-                fromStr = Sparql_common.getFromGraphStr(variables.graphUri);
+                fromStr = Sparql_common.getFromStr(sourceLabel);
 
             var query = "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
                 " select    distinct * " + fromStr + " WHERE {" +
@@ -373,7 +373,7 @@ var Collection = (function () {
                 options = {}
             var variables = self.Sparql.getVariables(sourceLabel);
             var query = "";
-            var    fromStr = Sparql_common.getFromGraphStr(variables.graphUri);
+            var    fromStr = Sparql_common.getFromStr(sourceLabel);
             query += "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
             query += " select distinct * " + fromStr + "  WHERE {"
             query += "  ?collection   skos:member*  ?narrower." +

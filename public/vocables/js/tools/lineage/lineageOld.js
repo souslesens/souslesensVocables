@@ -1285,7 +1285,7 @@ var Lineage_classes = (function () {
 
             var graphUri = Config.sources[self.currentSource].graphUri;
             var sparql_url = Config.sources[self.currentSource].sparql_server.url;
-            var fromStr = Sparql_common.getFromGraphStr(graphUri)
+            var fromStr = Sparql_common.getFromStr(self.currentSource);
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select * " + fromStr + " where {";
@@ -2303,7 +2303,7 @@ Lineage_properties = (function () {
                 return alert("select a property first")
             var graphUri = Config.sources[Lineage_common.currentSource].graphUri;
             var sparql_url = Config.sources[Lineage_common.currentSource].sparql_server.url;
-            var fromStr = Sparql_common.getFromGraphStr(graphUri)
+            var fromStr = Sparql_common.getFromStr(Lineage_common.currentSource)
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select * " + fromStr + " where {";

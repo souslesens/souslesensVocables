@@ -31,7 +31,7 @@ var Transform = (function () {
             async.series([
                 function (callbackSeries) {
                     var query = "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                        "  select  distinct  " + Sparql_common.getFromGraphStr(graphUri) + " WHERE { " +
+                        "  select  distinct  " + Sparql_common.getFromStr(source) + " WHERE { " +
                         "?subject ?predicate ?object" +
                         "} limit 1000"
 

@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var httpProxy=require("./bin/httpProxy.")
+const fileUpload = require('express-fileupload');
 
 var app = express();
 
@@ -20,6 +21,11 @@ var urlencodedParser = bodyParser.urlencoded({ extended:true,limit:1024*1024*20,
 
 app.use(jsonParser);
 app.use(urlencodedParser);
+
+app.use(fileUpload());
+
+
+
 
 
 app.use(logger('dev'));
@@ -46,5 +52,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
 
 module.exports = app;

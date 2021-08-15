@@ -41,6 +41,16 @@ Annotate new Corpus
         Corpus directory Path <input  class="annotate-DirInput" style='font-weight: bold;width: 300px' id="annotate_corpusPathInput"
     value="D:\\Total\\2020\\_testAnnotator"
     >
+        <form ref='uploadForm'
+              id='uploadForm'
+              action='/upload'
+              method='post'
+              encType="multipart/form-data">
+            <span>upload zipped corpus root directory</span>
+            <input type="file" name="EvaluateToolZipFile" />
+            <input type='submit' value='Upload' />
+        </form>
+        </body>
     </div>
     <div  class="annotate_div">
         Corpus name<input  class="annotate-DirInput" style='font-weight: bold;width: 100px' id="annotate_corpusNameInput"

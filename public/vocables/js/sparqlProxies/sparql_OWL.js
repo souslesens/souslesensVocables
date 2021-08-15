@@ -33,7 +33,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            fromStr = Sparql_common.getFromStr(sourceLabel)
 
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;
@@ -81,7 +81,7 @@ var Sparql_OWL = (function () {
                 strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
-            fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            fromStr = Sparql_common.getFromStr(sourceLabel)
             var owlPredicate = "subClassOf";
             if (options.owlType)
                 owlPredicate = options.owlType
@@ -109,7 +109,7 @@ var Sparql_OWL = (function () {
 
 
             if (options.filterCollections) {
-                var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+                var fromStr = Sparql_common.getFromStr(sourceLabel)
 
 
                 query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
@@ -159,7 +159,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            fromStr = Sparql_common.getFromStr(sourceLabel)
 
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
@@ -205,7 +205,7 @@ var Sparql_OWL = (function () {
                 strFilter = Sparql_common.setFilter("concept", ids, null)
             }
 
-            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromStr(sourceLabel)
 
             var owlPredicate = "subClassOf";
             if (options.owlType)
@@ -276,7 +276,7 @@ var Sparql_OWL = (function () {
             })
         }
 
-        self.getItems = function (sourceLabel, options, callback) {
+        self.getItemsOld = function (sourceLabel, options, callback) {
 
             if (!options) {
                 options = {}
@@ -285,7 +285,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
 
 
             var query = "";
@@ -294,7 +294,10 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
 
-            query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. FILTER (!isBlank(?concept))"
+            query += " select distinct * " + fromStr + "  WHERE {"
+            if( options.selectGraph)
+                query +=" graph ?g"
+                    query += "{ ?concept ?x ?y. FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
 
@@ -303,8 +306,8 @@ var Sparql_OWL = (function () {
             if (options.lang)
                 query += "filter(lang(?conceptLabel )='" + lang + "')"
 
-            query += "  } ";
-            " }"
+            query += "  }} ";
+
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
@@ -431,7 +434,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
 
 
             var query = "";
@@ -440,7 +443,11 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
 
-            query += " select distinct * " + fromStr + "  WHERE { ?concept ?x ?y. FILTER (!isBlank(?concept))"
+            query += " select distinct * " + fromStr + "  WHERE {"
+
+            if( options.selectGraph)
+                query +=" graph ?g "
+            query +="{ ?concept ?x ?y. FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
             query += "OPTIONAL {?concept rdfs:subClassOf ?superClass. }";
@@ -450,8 +457,8 @@ var Sparql_OWL = (function () {
             if (options.lang)
                 query += "filter(lang(?conceptLabel )='" + lang + "')"
 
-            query += "  } ";
-            " }"
+            query += "  }} ";
+
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
@@ -488,19 +495,22 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
 
 
             var query = "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel" + fromStr +
+                "select distinct ?g ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel" + fromStr +
                 " WHERE {"
+            if( options.selectGraph)
+                query +=" graph ?g "
             if (options.inheritedProperties)
-                query += "   ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty "
+                query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty "
+
             else
-                query += "   ?prop rdf:type owl:ObjectProperty "
+                query += "   {?prop rdf:type owl:ObjectProperty "
 
             query += "OPTIONAL{?prop rdfs:label ?propLabel.}  " +
                 "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
@@ -512,7 +522,7 @@ var Sparql_OWL = (function () {
              " OPTIONAL {?domain rdfs:label ?domainLabel}"+
                  " OPTIONAL {?prop rdfs:label ?propLabel}"+
                  " OPTIONAL {?range rdfs:label ?rangeLabel}"+*/
-                + " }"
+                + " }}"
             var limit = options.limit || Config.queryLimit;
             query += "  limit " + limit
 
@@ -542,21 +552,23 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromGraphStr(self.graphUri)
+            var fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "SELECT * " + fromStr + " WHERE {" +
-                "  ?concept rdfs:subClassOf ?node. " + filterStr +
+                "SELECT * " + fromStr + " WHERE {"
+            if( options.selectGraph)
+                query +=" graph ?g "
+            query += "{ ?concept rdfs:subClassOf ?node. " + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
                 " OPTIONAL {?concept rdfs:label ?conceptLabel}" +
                 "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "} "
+                "} }"
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 

@@ -56,7 +56,7 @@ var Sparql_generic = (function () {
                 prefixes.forEach(function (item) {
                     obj.prefixesStr += "PREFIX " + item + " "
                 })
-                obj.fromStr = Sparql_common.getFromGraphStr(obj.graphUri)
+                obj.fromStr = Sparql_common.getFromStr(sourceLabel)
                 obj.topConceptFilter = predicates.topConceptFilter || defaultPredicates.topConceptFilter;
                 obj.broaderPredicate = predicates.broaderPredicate || defaultPredicates.broaderPredicate;
                 obj.narrowerPredicate = predicates.narrowerPredicate || defaultPredicates.narrowerPredicate;

@@ -19,45 +19,139 @@ var tikaServerUrl = '127.0.0.1:41000'
 var spacyServerUrl = "http://51.178.39.209:8000/pos"
 
 var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\"
-var uploadDirPath="D:\\temp\\annotator\\corpus\\"
+var uploadDirPath = "D:\\temp\\annotator\\corpus\\"
 var Inflector = require('inflected');
 var tikaServer = null
 var tikaserverStarted = false;
-var unzipper=require('unzipper')
-
+var unzipper = require('unzipper')
+var MemoryStream = require('memory-stream');
+var json = {}
 var DirContentAnnotator = {
 
     socket: {
         message: function (text) {
-          socket.message("annotate",text)
+            socket.message("annotate", text)
             console.log(text)
         }
     },
 
 
-    uploadCorpus:function(zipFile, callback){
-
-        zipFile.mv(uploadDirPath+"temp.zip", function(err) {
+    uploadCorpus: function (zipFile, callback) {
+        var tempzip = uploadDirPath + "temp.zip";
+        var tempFileName;
+         json = {}
+        zipFile.mv(tempzip, function (err) {
             if (err)
                 return callback(err);
+            var rootFileName = null;
+            fs.createReadStream(tempzip)
+                .pipe(unzipper.Parse())
+                .on('entry', function (entry) {
+                    var fileName = entry.path;
+                    if (!rootFileName)
+                        rootFileName = fileName;
+                    var type = entry.type; // 'Directory' or 'File'
+
+
+                    console.log('[FILE]', fileName, type);
+                    if (type == "File") {
+                        json[fileName] = {}
+                        var array = fileName.split("/")
+
+
+                        tempFileName = uploadDirPath + array[array.length - 1]
+                        var subjects = array.slice(0, array.length - 1,)
+                        json[fileName].subjects = subjects;
+
+
+                        var fileStream = fs.createWriteStream(tempFileName)
+                        entry.on('end', function (xx) {
+                            var size = fs.statSync(tempFileName).size
+                            if (size > 0) {
+                                DirContentAnnotator.getDocTextContentFromFile(tempFileName, function (err, text) {
+                                    var x = text;
+                                    json[fileName].text = text;
+                                    var json = {
+                                        "text": text
+                                    }
+
+                                    httpProxy.post(spacyServerUrl, {'content-type': 'application/json'}, json, function (err, result) {
+                                        if (err) {
+                                            console.log(err)
+                                            return callbackSeries(err);
+                                        }
+                                        json[fileName].nouns = []
+                                        result.data.forEach(function (sentence) {
+                                            sentence.tags.forEach(function (item) {
+                                                if (item.text.length > 2)
+                                                    if (item.tag.indexOf("NN") > -1) {//item.tag.indexOf("NN")>-1) {
+                                                        var noun = Inflector.singularize(item.text.toLowerCase());
+
+                                                        if (json[fileName].nouns.indexOf(noun) < 0) {
+                                                            json[fileName].nouns.push(noun);
+                                                        }
+
+                                                    }
+                                            })
+                                        })
+                                        entry.autodrain();
+                                        fs.unlink(tempFileName)
+                                        DirContentAnnotator.socket.message(files[index].nouns.length + "nouns extracted  from : " + file.path);
 
 
 
 
+                                    })
 
-                fs.createReadStream(uploadDirPath + "temp.zip")
-                    .pipe(unzipper.Extract({path: uploadDirPath+"\\dir"}));
+
+
+                                })
+                            }
+                        })
+
+                        entry.pipe(fileStream);
+
+                    } else {
+                        entry.autodrain();
+                    }
+
+
+                }).on('finish', function (entry) {
+                fs.writeFileSync(uploadDirPath + "data" + ".json", JSON.stringify(json));
+                callback(null, "done");
 
 
             })
 
 
+        })
+
 
     },
+    getDocTextContentFromBuffer: function (stream, callback) {
+        if (!tikaServer) {
+            var initFile = uploadDirPath + "init.txt"
+            DirContentAnnotator.startTikaServer(initFile, function (err, result) {
+                if (err)
+                    return callback(err)
+                var tika = new TikaClient('http://localhost:41000');
 
+                tika.tikaFromStream(stream)
+                    .then(function (text) {
 
+                        console.log(text);
+                        return callback(null, result);
+                    });
+            });
+        } else {
+            tika.tikaFromStream(stream)
+                .then(function (text) {
 
-
+                    //   console.log( text );
+                    return callback(null, text);
+                });
+        }
+    },
 
 
     startTikaServer: function (filePath, callback) {
@@ -100,7 +194,7 @@ var DirContentAnnotator = {
     },
 
 
-    getDocTextContent: function (filePath, callback) {
+    getDocTextContentFromFile: function (filePath, callback) {
 
 
         var fileContent;
@@ -243,7 +337,7 @@ var DirContentAnnotator = {
                     var output = [];
                     async.eachSeries(files, function (file, callbackEach) {
                         DirContentAnnotator.socket.message("extracting text from " + file.path)
-                        DirContentAnnotator.getDocTextContent(file.path, function (err, text) {
+                        DirContentAnnotator.getDocTextContentFromFile(file.path, function (err, text) {
                             index += 1
                             if (err) {
                                 files[index].error = err
@@ -272,7 +366,7 @@ var DirContentAnnotator = {
                                                 }
                                         })
                                     })
-                                    DirContentAnnotator.socket.message( files[index].nouns.length+"nouns extracted  from : "+file.path);
+                                    DirContentAnnotator.socket.message(files[index].nouns.length + "nouns extracted  from : " + file.path);
                                     callbackEach()
 
                                 })
@@ -320,7 +414,7 @@ var DirContentAnnotator = {
             })
             var nounSlices = util.sliceArray(fileObj.nouns, 50);
             async.eachSeries(sources, function (source, callbackEachSource) {
-                DirContentAnnotator.socket.message( "annotating "+fileObj.path +" on source "+source.name);
+                DirContentAnnotator.socket.message("annotating " + fileObj.path + " on source " + source.name);
                 async.eachSeries(nounSlices, function (nounSlice, callbackEachNounSlice) {
 
                         // var allnouns=[]
@@ -367,7 +461,7 @@ var DirContentAnnotator = {
                         httpProxy.post(url, headers, params, function (err, result) {
                             if (err) {
 
-                                return  callbackEachNounSlice(err) ;
+                                return callbackEachNounSlice(err);
                             } else {
                                 var bindings = [];
                                 var ids = [];
@@ -381,20 +475,20 @@ var DirContentAnnotator = {
                                         id: item.id.value
                                     })
                                 })
-                                     callbackEachNounSlice()
-                               // callbackEachSource()
+                                callbackEachNounSlice()
+                                // callbackEachSource()
                             }
                         })
 
 
                     }
                     , function (err) {
-                      //  callbackEachNounSlice()
+                        //  callbackEachNounSlice()
                         var missingNouns = allWords.filter(x => !matchingWords.includes(x));
                         conceptsMap[fileObj.path].sources[source.name].missingNouns = missingNouns
-                        DirContentAnnotator.socket.message( " ---" + conceptsMap[fileObj.path].sources[source.name].entities.length+" entities matched / "+allWords.length+"nouns");
+                        DirContentAnnotator.socket.message(" ---" + conceptsMap[fileObj.path].sources[source.name].entities.length + " entities matched / " + allWords.length + "nouns");
 
-                        DirContentAnnotator.socket.message( " ---" + conceptsMap[fileObj.path].sources[source.name].missingNouns.length +" missing nouns" );
+                        DirContentAnnotator.socket.message(" ---" + conceptsMap[fileObj.path].sources[source.name].missingNouns.length + " missing nouns");
 
                         callbackEachSource(err);
                     })
@@ -409,7 +503,7 @@ var DirContentAnnotator = {
                 DirContentAnnotator.socket.message(err);
                 return callback(err)
             } else {
-                DirContentAnnotator.socket.message( "saving corpus "+corpusName );
+                DirContentAnnotator.socket.message("saving corpus " + corpusName);
 
                 var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_Concepts.json")
                 storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.json"
@@ -512,7 +606,7 @@ var DirContentAnnotator = {
             //parse documentsDir recursively
 
             function (callbackSeries) {
-                DirContentAnnotator.socket.message("parsing files in directory "+corpusDirPath);
+                DirContentAnnotator.socket.message("parsing files in directory " + corpusDirPath);
                 DirContentAnnotator.parseDocumentsDir(corpusDirPath, corpusName, options, function (err, result) {
                         if (err)
                             return callbackSeries(err)
@@ -608,7 +702,7 @@ if (false) {
 
 //  DirContentAnnotator.startTikaServer()
 if (false) {
-    DirContentAnnotator.getDocTextContent("D:\\Total\\2020\\_testAnnotator\\sujet1\\sujet1-1\\sujet1-1-1\\test.docx", function (err, result) {
+    DirContentAnnotator.getDocTextContentFromFile("D:\\Total\\2020\\_testAnnotator\\sujet1\\sujet1-1\\sujet1-1-1\\test.docx", function (err, result) {
         var x = result
     })
 }

@@ -47,7 +47,7 @@ Annotate new Corpus
               method='post'
               encType="multipart/form-data">
             <span>upload zipped corpus root directory</span>
-            <input type="file" name="EvaluateToolZipFile" />
+            <input type="file" id="fileButton" name="EvaluateToolZipFile" />
             <input type='submit' value='Upload' />
         </form>
         </body>
@@ -74,3 +74,30 @@ Annotate new Corpus
         ressources to evaluate <div  class=treeDiv" id="annotate_resourcesTreeDiv"></div>
     </div>
 </div>
+<script>
+
+$("#uploadForm").submit(function(e) {
+    e.preventDefault();
+    var property = document.getElementById('fileButton').files[0];
+    var formData = new FormData($(this)[0]);
+
+    formData.append("file", property);
+
+    $.ajax({
+        method: "POST",
+        url: "/upload",
+        data: formData,
+        cache : false,
+        contentType : false,
+        processData : false,
+        dataType:'json',
+        success: function(testresponse){
+            if(testresponse.success == true){
+                alert(testresponse.messages);
+            } else {
+                alert(testresponse.messages);
+            }
+        }
+    })
+})
+</script>

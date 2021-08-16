@@ -30,7 +30,7 @@ router.post('/upload', function (req, response) {
     if (req.files.EvaluateToolZipFile) {
         var zipFile = req.files.EvaluateToolZipFile;
         DirContentAnnotator.uploadCorpus(zipFile, function (err, result) {
-            processResponse(response, error, result);
+            processResponse(response, err, result);
         })
 
     }

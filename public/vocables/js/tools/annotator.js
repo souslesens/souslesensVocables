@@ -33,6 +33,10 @@ var Annotator = (function () {
         }
 
 
+    self.uploadAndaAnnotate = function () {
+
+
+    }
         self.annotate = function () {
             $("#waitImg").css("display", "block");
             MainController.UI.message("querying Spacy library (can take time...)")

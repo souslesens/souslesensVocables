@@ -5,11 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/export.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/exportToTableDialog.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/clipboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/clipboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/skosConceptEditor.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluate.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluateXX.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/blender.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/blender.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/annotateDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/annotateDialog.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_left.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_left.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -212,7 +228,8 @@
       <workItem from="1627019552294" duration="83047000" />
       <workItem from="1627402710766" duration="117314000" />
       <workItem from="1628663424700" duration="14947000" />
-      <workItem from="1628922683806" duration="56213000" />
+      <workItem from="1628922683806" duration="92515000" />
+      <workItem from="1629283727555" duration="16399000" />
     </task>
     <servers />
   </component>
@@ -234,165 +251,18 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/codification..js</url>
-          <line>203</line>
-          <option name="timeStamp" value="285" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/codification..js</url>
-          <line>148</line>
-          <option name="timeStamp" value="288" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/codification..js</url>
-          <line>196</line>
-          <option name="timeStamp" value="289" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
-          <line>133</line>
-          <option name="timeStamp" value="307" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js</url>
-          <line>85</line>
-          <option name="timeStamp" value="308" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>22</line>
-          <option name="timeStamp" value="336" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>251</line>
-          <option name="timeStamp" value="337" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>554</line>
-          <option name="timeStamp" value="371" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>694</line>
-          <option name="timeStamp" value="393" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>357</line>
-          <option name="timeStamp" value="405" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tagAnalyzer..js</url>
-          <line>467</line>
-          <option name="timeStamp" value="418" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
-          <line>667</line>
-          <option name="timeStamp" value="455" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js</url>
-          <line>89</line>
-          <option name="timeStamp" value="459" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js</url>
-          <line>64</line>
-          <option name="timeStamp" value="466" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js</url>
-          <line>63</line>
-          <option name="timeStamp" value="467" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js</url>
-          <line>52</line>
-          <option name="timeStamp" value="468" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/definitions.js</url>
-          <line>2117</line>
-          <option name="timeStamp" value="482" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/node_modules/tika-server-client/src/tika-server-client.js</url>
-          <line>81</line>
-          <option name="timeStamp" value="497" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/node_modules/tika-server-client/src/tika-server-client.js</url>
-          <line>70</line>
-          <option name="timeStamp" value="499" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/node_modules/tika-server-client/src/tika-server-client.js</url>
-          <line>92</line>
-          <option name="timeStamp" value="500" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
-          <line>35</line>
-          <option name="timeStamp" value="529" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
-          <line>140</line>
-          <option name="timeStamp" value="530" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotatorLive..js</url>
-          <line>50</line>
-          <option name="timeStamp" value="531" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
+        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js</url>
-          <line>154</line>
-          <option name="timeStamp" value="572" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
-          <line>79</line>
-          <option name="timeStamp" value="643" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
-          <line>80</line>
-          <option name="timeStamp" value="644" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>667</line>
-          <option name="timeStamp" value="735" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/owlEditor.js</url>
-          <line>100</line>
+          <line>314</line>
           <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="736" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>148</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="765" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>78</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="799" />
+          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
-      <inline-watch fileUrl="file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" line="55">
-        <watch expression="type" language="JavaScript" />
-      </inline-watch>
+      <configuration name="NodeJSConfigurationType">
+        <watch expression="entries[&quot;0&quot;][&quot;0&quot;][&quot;0&quot;][&quot;0&quot;][&quot;0&quot;]" />
+      </configuration>
     </watches-manager>
   </component>
 </project>

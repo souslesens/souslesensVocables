@@ -57,7 +57,7 @@ var Blender = (function () {
 
                             self.availableSources = [];
                             for (var key in Config.sources) {
-                                if (Config.sources[key].editable) {
+                                if (Config.sources[key].editable && Config.sources[key].schemaType=="SKOS") {
                                     self.availableSources.push(key)
                                     if (!Config.sources[key].controllerName) {
                                         Config.sources[key].controllerName = "" + Config.sources[key].controller
@@ -118,7 +118,7 @@ var Blender = (function () {
 
 
             self.currentSource = source
-          //  MainController.searchedSource = self.currentSource
+            //  MainController.searchedSource = self.currentSource
 
             async.series([
                     function (callbackSeries) {
@@ -440,6 +440,24 @@ var Blender = (function () {
 
 
                 }
+
+                menuItems.copyNode = {
+                    label: "Copy Node",
+                    action: function (obj, sss, cc) {
+                        self.menuActions.copyNode("concept");
+                        ;
+                    },
+                }
+
+                menuItems.cutNode = {
+                    label: "Cut Node",
+                    action: function (obj, sss, cc) {
+                        self.menuActions.cutNode("concept");
+                        ;
+                    },
+                }
+
+
                 menuItems.addChildNodeNode = {
                     label: "Create child",
                     action: function (obj, sss, cc) {
@@ -447,13 +465,8 @@ var Blender = (function () {
                         ;
                     },
                 }
-                /*    menuItems.importChildren = {
-                        label: "Import child nodes",
-                        action: function (obj, sss, cc) {
-                            Import.showImportNodesDialog("concept");
-                            ;
-                        },
-                    }*/
+
+                $("#Blender_conceptTreeDiv").jstree().deselect_node(self.currentTreeNode)
                 return menuItems;
 
             }
@@ -564,23 +577,27 @@ var Blender = (function () {
             },
 
 
-            deleteNode: function (type) {
+            deleteNode: function (type, node,silently) {
                 if (!type)
                     alert(" no type")
 
                 var node;
                 var treeDivId;
+
+
                 if (type == "concept") {
-                    node = self.currentTreeNode
+                    if (!node)
+                        node = self.currentTreeNode
                     treeDivId = "Blender_conceptTreeDiv"
                 } else if (type == "collection") {
-                    node = Collection.currentTreeNode
+                    if (!node)
+                        node = Collection.currentTreeNode
                     treeDivId = "Blender_collectionTreeDiv"
                 }
                 var str = ""
                 if (node.children.length > 0)
                     str = " and all its descendants"
-                if (confirm("delete node " + node.data.label + str)) {
+                if (silently || confirm("delete node " + node.data.label + str)) {
 
                     var nodeIdsToDelete = [node.data.id]
                     async.series([
@@ -664,6 +681,35 @@ var Blender = (function () {
                 }
             },
 
+            cutNode: function (type) {
+
+                Clipboard.copy({
+                        type: "node",
+                        id: self.currentTreeNode.data.id,
+                        label: self.currentTreeNode.data.label,
+                        source: self.currentTreeNode.data.source,
+                        data: self.currentTreeNode.data,
+                        cut: true
+                    },
+                    self.currentTreeNode.id + "_anchor",
+                    event)
+
+            },
+            copyNode: function (type) {
+
+                Clipboard.copy({
+                        type: "node",
+                        id: self.currentTreeNode.data.id,
+                        label: self.currentTreeNode.data.label,
+                        source: self.currentTreeNode.data.source,
+                        data: self.currentTreeNode.data,
+
+                    },
+                    self.currentTreeNode.id + "_anchor",
+                    event)
+
+            },
+
             pasteClipboardNodes: function (fromDataArray, depth, options, callback) {
                 if (!fromDataArray)
                     fromDataArray = Clipboard.getContent();
@@ -689,7 +735,7 @@ var Blender = (function () {
 
                 async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
                     var sourceNodesId = {}
-                    var sourceNodesLabels = {[fromNodeData.label.toLowerCase()]:fromNodeData.id}
+                    var sourceNodesLabels = {[fromNodeData.label.toLowerCase()]: fromNodeData.id}
                     async.series([
                         function (callbackSeries) {
                             if (depth > 0)
@@ -717,6 +763,8 @@ var Blender = (function () {
                         },
                         //check nodes with same label in target taxonomy
                         function (callbackSeries) {
+                            if (fromDataArray[0].cut)
+                                return callbackSeries();
                             var fromIds = Object.keys(sourceNodesId);
                             var filterStr = Sparql_common.setFilter("concept", null, Object.keys(sourceNodesLabels), null, {exactMatch: true})
                             Sparql_generic.getItems(toParentNode.source, {filter: filterStr}, function (err, result) {
@@ -738,14 +786,13 @@ var Blender = (function () {
                                                 delete sourceNodesId[id]
 
                                         })
-                                        if(Object.keys(sourceNodesId).length==0)
-                                            cancel=true;
-                                            MainController.UI.message(Object.keys(sourceNodesId).length+" concepts will be copied")
+                                        if (Object.keys(sourceNodesId).length == 0)
+                                            cancel = true;
+                                        MainController.UI.message(Object.keys(sourceNodesId).length + " concepts will be copied")
                                         return callbackSeries();
-                                    } else if (choice == "D"){
+                                    } else if (choice == "D") {
                                         return callbackSeries();
-                                    }
-                                   else  {
+                                    } else {
                                         cancel = true
                                         MainController.UI.message("Copy concepts cancelled")
 
@@ -779,12 +826,16 @@ var Blender = (function () {
                             MainController.UI.message("copying " + fromIds.length + " nodes from source " + fromNodeData.source + " in source " + toParentNode.source)
                             Sparql_generic.copyNodes(fromNodeData.source, toGraphUri, fromIds, options, function (err, result) {
                                 if (err) {
-                                     alert(err)
+                                    alert(err)
                                     return callbackSeries()
                                 }
                                 var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
                                 SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {});
-                                return callbackSeries()
+                                if (fromDataArray[0].cut) {
+                                    var cutJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(fromNodeData.id)
+                                    self.menuActions.deleteNode("concept",cutJstreeNode,true)
+                                }
+                                callbackSeries()
 
 
                             })
@@ -797,12 +848,12 @@ var Blender = (function () {
 
                     })
                 }, function (err) {
-                    if(callback)
-                    return callback()
-                    else{
-                        if(!cancel)
-                        MainController.UI.message("nodes copied")
-                        $("#waitImg").css("display","none")
+                    if (callback)
+                        return callback()
+                    else {
+                        if (!cancel)
+                            MainController.UI.message("nodes copied")
+                        $("#waitImg").css("display", "none")
                     }
 
 
@@ -1182,8 +1233,14 @@ var Blender = (function () {
         }
 
         self.copyCsv = function () {
+            Export.showExportDatDialog(self.currentSource, {})
+            return
             var collection = Collection.currentCollectionFilter
+
+            return;
             Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
+
+                return
                 if (err) {
                     if (callback)
                         return callback(err)

@@ -50,6 +50,7 @@ if(!data.source)
 
     self.getContent = function () {
         return content;
+
     }
 
 

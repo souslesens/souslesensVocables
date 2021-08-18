@@ -38,6 +38,9 @@ self.loginMode = "none";
     pasteDescendantsMaxDepth:6,
         prefLang:"en"
     }
+    self.evaluate={
+        maxZipFileSize:30000000 //30MO
+    }
 
     self.ADL = {
         RDLsource: "RDL-QUANTUM-MIN",

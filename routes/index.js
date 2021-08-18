@@ -29,7 +29,7 @@ router.post('/upload', function (req, response) {
     }
     if (req.files.EvaluateToolZipFile) {
         var zipFile = req.files.EvaluateToolZipFile;
-        DirContentAnnotator.uploadCorpus(zipFile, function (err, result) {
+        DirContentAnnotator.uploadAndAnnotateCorpus(zipFile,req.body.corpusName,JSON.parse(req.body.sources),JSON.parse(req.body.options) ,function (err, result) {
             processResponse(response, err, result);
         })
 

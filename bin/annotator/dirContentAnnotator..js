@@ -19,13 +19,14 @@ var tikaServerUrl = '127.0.0.1:41000'
 var spacyServerUrl = "http://51.178.39.209:8000/pos"
 
 var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\"
+//var parsedDocumentsHomeDir ="D:\\NLP\\annotatedCorpus\\"
 var uploadDirPath = "D:\\temp\\annotator\\corpus\\"
 var Inflector = require('inflected');
 var tikaServer = null
 var tikaserverStarted = false;
 var unzipper = require('unzipper')
 var MemoryStream = require('memory-stream');
-var json = {}
+var jsonData = {}
 var DirContentAnnotator = {
 
     socket: {
@@ -36,10 +37,13 @@ var DirContentAnnotator = {
     },
 
 
-    uploadCorpus: function (zipFile, callback) {
+    uploadAndAnnotateCorpus: function (zipFile, corpusName, sources, options, callback) {
+        DirContentAnnotator.socket.message("unziping file " + zipFile.name + "(" + (zipFile.size / 1000) + "ko)")
         var tempzip = uploadDirPath + "temp.zip";
-        var tempFileName;
-         json = {}
+        jsonData = {sources: [],files:{}}
+        var entries = []
+        var fileNames = [];
+        var tempFileNames = []
         zipFile.mv(tempzip, function (err) {
             if (err)
                 return callback(err);
@@ -47,87 +51,263 @@ var DirContentAnnotator = {
             fs.createReadStream(tempzip)
                 .pipe(unzipper.Parse())
                 .on('entry', function (entry) {
-                    var fileName = entry.path;
-                    if (!rootFileName)
-                        rootFileName = fileName;
-                    var type = entry.type; // 'Directory' or 'File'
+                        var type = entry.type;
+                        if (type == "File") {
+                            var fileName = entry.path;
+                            var array = fileName.split("/")
+                            var tempFileName = uploadDirPath + array[array.length - 1]
+                            tempFileNames.push(tempFileName)
 
-
-                    console.log('[FILE]', fileName, type);
-                    if (type == "File") {
-                        json[fileName] = {}
-                        var array = fileName.split("/")
-
-
-                        tempFileName = uploadDirPath + array[array.length - 1]
-                        var subjects = array.slice(0, array.length - 1,)
-                        json[fileName].subjects = subjects;
-
-
-                        var fileStream = fs.createWriteStream(tempFileName)
-                        entry.on('end', function (xx) {
-                            var size = fs.statSync(tempFileName).size
-                            if (size > 0) {
-                                DirContentAnnotator.getDocTextContentFromFile(tempFileName, function (err, text) {
-                                    var x = text;
-                                    json[fileName].text = text;
-                                    var json = {
-                                        "text": text
-                                    }
-
-                                    httpProxy.post(spacyServerUrl, {'content-type': 'application/json'}, json, function (err, result) {
-                                        if (err) {
-                                            console.log(err)
-                                            return callbackSeries(err);
-                                        }
-                                        json[fileName].nouns = []
-                                        result.data.forEach(function (sentence) {
-                                            sentence.tags.forEach(function (item) {
-                                                if (item.text.length > 2)
-                                                    if (item.tag.indexOf("NN") > -1) {//item.tag.indexOf("NN")>-1) {
-                                                        var noun = Inflector.singularize(item.text.toLowerCase());
-
-                                                        if (json[fileName].nouns.indexOf(noun) < 0) {
-                                                            json[fileName].nouns.push(noun);
-                                                        }
-
-                                                    }
-                                            })
-                                        })
-                                        entry.autodrain();
-                                        fs.unlink(tempFileName)
-                                        DirContentAnnotator.socket.message(files[index].nouns.length + "nouns extracted  from : " + file.path);
-
-
-
-
-                                    })
-
-
-
-                                })
+                            async function main() {
+                                const content = await entry.buffer();
+                                await fs.writeFileSync(tempFileName, content);
                             }
-                        })
 
-                        entry.pipe(fileStream);
+                            main()
 
-                    } else {
-                        entry.autodrain();
+                            fileNames.push(fileName);
+
+                        } else {
+                            entry.autodrain();
+                        }
+
+
                     }
+                ).on('finish', function () {
+                DirContentAnnotator.processZippedFiles(fileNames, corpusName, sources, options, function (err, result) {
+                    callback(err, result)
+
+                    tempFileNames.push(tempzip)
+                    async.eachSeries(tempFileNames, function (fileName, callbackSeries) {
+                        fs.unlink(fileName, (err) => {
+                            if (err) {
+                                console.error(err)
+
+                            }
+                            callbackSeries()
+
+                        })
+                    })
 
 
-                }).on('finish', function (entry) {
-                fs.writeFileSync(uploadDirPath + "data" + ".json", JSON.stringify(json));
-                callback(null, "done");
-
-
+                })
             })
-
-
         })
 
 
     },
+
+
+    processZippedFiles: function (fileNames, corpusName, sources, options, callback) {
+        var tempFileName;
+
+        var filesCount = 0
+        var filesProcessed = 0;
+        var rootFileName = null;
+
+        async.eachSeries(fileNames, function (fileName, callbackEachSeries) {
+
+            //   var fileName = entry.path;
+            if (!rootFileName)
+                rootFileName = fileName;
+            var array = fileName.split("/")
+            var shortFileName=array[array.length - 1]
+            tempFileName = uploadDirPath + shortFileName
+
+
+            jsonData.files[fileName] = {name: shortFileName}
+
+            var subjects = array.slice(0, array.length - 1)
+            jsonData.files[fileName].subjects = subjects;
+
+            var size = fs.statSync(tempFileName).size;
+            var fileText;
+            if (size > 0) {
+                DirContentAnnotator.socket.message("-------------------- file " + shortFileName + "(" + (size / 1000) + "ko)-------------------");
+                async.series([
+                    function (callbackSeries) {
+                        DirContentAnnotator.socket.message(fileName+"     extracting text");
+                        DirContentAnnotator.getDocTextContentFromFile(tempFileName, function (err, text) {
+                            if (err)
+                                return callbackSeries(err)
+                            fileText = text.replace(/\n/g,"*").trim()
+                            jsonData.files[fileName].text = fileText;
+                            return callbackSeries()
+                        })
+                    }
+                    ,
+                    function (callbackSeries) {
+                        var json = {
+                            "text": fileText
+                        }
+
+                        DirContentAnnotator.socket.message(shortFileName+"     extracting nouns ");
+                        httpProxy.post(spacyServerUrl, {'content-type': 'application/jsonData'}, json, function (err, result) {
+                            if (err) {
+                                console.log(err)
+                                return callbackSeries(err);
+                            }
+
+                            jsonData.files[fileName].nouns = {}
+                            var sentenceOffset=0
+                            result.data.forEach(function (sentence) {
+                                sentence.tags.forEach(function (item) {
+                                    if (item.text.length > 2)
+                                        if (item.tag.indexOf("NN") > -1) {//item.tag.indexOf("NN")>-1) {
+                                            var noun = Inflector.singularize(item.text.toLowerCase());
+
+
+                                            if (!jsonData.files[fileName].nouns[noun]) {
+                                                jsonData.files[fileName].nouns[noun] = {
+                                                    offsets: [],
+
+                                                };
+                                            }
+                                            jsonData.files[fileName].nouns[noun].offsets.push(sentenceOffset+item.char_offset);
+                                            if (jsonData.files[fileName].nouns[noun].offsets.length > 1)
+                                                var x = 3
+
+                                        }
+                                    ;
+                                })
+                                sentenceOffset+=0;//sentence.text.length
+                             //   console.log(sentenceOffset)
+                            })
+                            return callbackSeries();
+                        })
+                    }, function (callbackSeries) {
+
+                        DirContentAnnotator.annotateText(jsonData.files[fileName], sources, corpusName, options, function (err, result) {
+                            filesProcessed++;
+                            console.log(filesProcessed)
+                            //  DirContentAnnotator.socket.message("annotating  " + fileName);
+
+
+                            return callbackSeries();
+                        })
+
+                    }
+
+
+                    //
+                ], function (err) {
+                    if (err)
+                        return callbackEachSeries(err);
+                    callbackEachSeries();
+
+
+                })
+            }
+
+        }, function (err) {
+
+            fs.writeFileSync(parsedDocumentsHomeDir + corpusName + "_concepts.json", JSON.stringify(jsonData, null, 2));
+            // fs.unlink(tempFileName,)
+
+
+            callback(null, "done");
+        })
+    },
+
+
+    annotateText: function (fileObj, sources, corpusName, options, callback) {
+        var allWords = []
+
+
+        for (var noun in fileObj.nouns) {
+            allWords.push(noun)
+        }
+        var nounSlices = util.sliceArray(allWords, 50);
+        async.eachSeries(sources, function (source, callbackEachSource) {
+            if(jsonData.sources.indexOf(source.name)<0)
+            jsonData.sources.push(source.name)
+            DirContentAnnotator.socket.message(fileObj.name+"     annotating  on source " + source.name);
+            var entitiesCount=0
+            async.eachSeries(nounSlices, function (nounSlice, callbackEachNounSlice) {
+
+                // var allnouns=[]
+                var regexStr = "("
+                nounSlice.forEach(function (noun, index) {
+
+                    noun = noun.replace(/[\x00-\x2F]/, "")
+                    noun = util.formatStringForTriple(noun)
+
+                    if (index > 0)
+                        regexStr += "|";
+                    if (true || options.exactMatch)
+                        regexStr += "^" + noun + "$";
+                    else
+                        regexStr += noun;
+                })
+                regexStr += ")"
+
+
+                var filter = "  regex(?label, \"" + regexStr + "\", \"i\")";
+
+                //  async.eachSeries(sources, function (source, callbackEachSource) {
+
+                var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                    "SELECT * " +
+                    "FROM <" + source.graphUri + "> " +
+                    "WHERE {" +
+                    "?id skos:prefLabel|skos:altLabel ?label ."
+                if (source.predicates && source.predicates.lang)
+                    query += "FILTER (lang(?label) = '" + source.predicates.lang + "')"
+
+                query += " filter " + filter + "} limit 10000";
+
+
+                var url = source.sparql_server.url + "?format=json&query=";
+                var queryOptions = "";// "&should-sponge=&format=application%2Fsparql-results%2BjsonData&timeout=20000&debug=off"
+
+                var params = {query: query}
+                var headers = {
+                    /* "Accept": "application/sparql-results+jsonData",
+                     "Content-Type": "application/x-www-form-urlencoded",*/
+                    "Accept": "application/sparql-results+json",
+                    "charset": "UTF-8"
+                }
+
+                httpProxy.post(url, headers, params, function (err, result) {
+                    if (err) {
+                        return callbackEachNounSlice(err);
+                    } else {
+                        var bindings = [];
+                        var ids = [];
+
+                        result.results.bindings.forEach(function (item) {
+                            var word = item.label.value.toLowerCase()
+                            entitiesCount+=1
+                            if (fileObj.nouns[word]) {
+                                if (!fileObj.nouns[word].entities)
+                                    fileObj.nouns[word].entities = {}
+                                if (!fileObj.nouns[word].entities[source.name])
+                                    fileObj.nouns[word].entities[source.name] = []
+                                if (fileObj.nouns[word].entities[source.name].indexOf(item.id.value) < 0)
+                                    fileObj.nouns[word].entities[source.name].push(item.id.value)
+
+                            } else {
+                                var x = 3;
+                            }
+                        })
+
+
+
+                        callbackEachNounSlice()
+                        // callbackEachSource()
+                    }
+                })
+            }, function (err) {
+                DirContentAnnotator.socket.message(fileObj.name+"/"+source.name+ " nouns :"+Object.keys(fileObj.nouns).length+" entities "+    entitiesCount+"");
+                callbackEachSource(err, fileObj)
+            })
+        }, function (err) {
+            callback(err);
+        })
+    }
+
+    ,
+
     getDocTextContentFromBuffer: function (stream, callback) {
         if (!tikaServer) {
             var initFile = uploadDirPath + "init.txt"
@@ -151,7 +331,9 @@ var DirContentAnnotator = {
                     return callback(null, text);
                 });
         }
-    },
+    }
+
+    ,
 
 
     startTikaServer: function (filePath, callback) {
@@ -179,7 +361,8 @@ var DirContentAnnotator = {
             callback(err)
         })
 
-    },
+    }
+    ,
 
     stopTikaServer: function () {
 
@@ -191,7 +374,8 @@ var DirContentAnnotator = {
             console.log(`ERROR: ${err}`)
         })
 
-    },
+    }
+    ,
 
 
     getDocTextContentFromFile: function (filePath, callback) {
@@ -344,11 +528,11 @@ var DirContentAnnotator = {
                                 return callbackEach()
                             } else {
 
-                                var json = {
+                                var jsonData = {
                                     "text": text
                                 }
 
-                                httpProxy.post(spacyServerUrl, {'content-type': 'application/json'}, json, function (err, result) {
+                                httpProxy.post(spacyServerUrl, {'content-type': 'application/jsonData'}, jsonData, function (err, result) {
                                     if (err) {
                                         console.log(err)
                                         return callbackSeries(err);
@@ -387,17 +571,18 @@ var DirContentAnnotator = {
                 else {
                     if (callback)
                         return callback(null, files)
-                    var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + ".json")
-                    storePath = parsedDocumentsHomeDir + name + ".json"
+                    var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + name + ".jsonData")
+                    storePath = parsedDocumentsHomeDir + name + ".jsonData"
                     fs.writeFileSync(storePath, JSON.stringify(files, null, 2))
                 }
 
             }
         )
     }
+    ,
 
-    , annotateParsedDocuments: function (data, sources, corpusName, options, callback) {
-        /*  var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".json"
+    annotateParsedDocuments: function (data, sources, corpusName, options, callback) {
+        /*  var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".jsonData"
           var str = "" + fs.readFileSync(parsedDocumentsFilePath)
           var data = JSON.parse(str);*/
 
@@ -450,11 +635,11 @@ var DirContentAnnotator = {
 
 
                         var url = source.sparql_server.url;
-                        var queryOptions = "";// "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
+                        var queryOptions = "";// "&should-sponge=&format=application%2Fsparql-results%2BjsonData&timeout=20000&debug=off"
 
                         var params = {query: query}
                         var headers = {
-                            "Accept": "application/sparql-results+json",
+                            "Accept": "application/sparql-results+jsonData",
                             "Content-Type": "application/x-www-form-urlencoded"
                         }
 
@@ -505,8 +690,8 @@ var DirContentAnnotator = {
             } else {
                 DirContentAnnotator.socket.message("saving corpus " + corpusName);
 
-                var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_Concepts.json")
-                storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.json"
+                var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_Concepts.jsonData")
+                storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.jsonData"
                 fs.writeFileSync(storePath, JSON.stringify(conceptsMap, null, 2))
                 return callback();
             }
@@ -515,92 +700,9 @@ var DirContentAnnotator = {
 
     }
 
-    , getConceptsSubjectsTree: function (corpusName, callback) {
 
-        var storePath = parsedDocumentsHomeDir + corpusName + "_Concepts.json"
-        var str = "" + fs.readFileSync(storePath)
-        var data = JSON.parse(str);
-
-        var conceptsTree = {}
-        var parents = {}
-        var subjectsMap = {}
-        for (var key in data) {
-            var fileObj = data[key]
-
-            fileObj.subjects.forEach(function (subject, index) {
-                var parent;
-                if (index == 0)
-                    parent = corpusName
-                else
-                    parent = fileObj.subjects[index - 1]
-                if (!parents[parent])
-                    parents[parent] = []
-                if (subject != "") {
-                    if (parents[parent].indexOf(subject) < 0)
-                        parents[parent].push(subject)
-
-
-                    // for the last subject attach file and nouns
-                    if (index == fileObj.subjects.length - 1) {
-                        if (!subjectsMap[subject])
-                            subjectsMap[subject] = {files: []}
-                        var fileName = path.basename(key)
-                        subjectsMap[subject].files.push({filePath: key, fileName: fileName, sources: fileObj.sources})
-                    }
-                }
-
-            })
-
-        }
-
-
-        function recurse(node) {
-            var children = parents[node.text]
-            if (children) {
-                children.forEach(function (child) {
-                    var childObj = {text: child, children: [], data: {}}
-                    if (subjectsMap[child])
-                        childObj.data = subjectsMap[child]
-                    node.children.push(childObj)
-                    recurse(childObj)
-                })
-            }
-
-        }
-
-        var rootNode = {text: corpusName, children: [], sources: subjectsMap[corpusName]}
-        recurse(rootNode)
-        var x = rootNode
-
-
-        var jstreeData = [];
-
-        function recurseJstree(node) {
-
-            node.children.forEach(function (child) {
-                jstreeData.push({text: child.text, id: child.text, data: child.data, parent: node.text})
-                recurseJstree(child)
-            })
-        }
-
-        jstreeData.push({text: rootNode.text, id: rootNode.text, data: rootNode.data, parent: "#"})
-        recurseJstree(rootNode)
-
-
-        if (callback) {
-            return callback(null, jstreeData)
-        } else {
-
-
-            var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.json")
-            storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.json"
-            fs.writeFileSync(storePath, JSON.stringify(jstreeData, null, 2))
-        }
-
-    }
-
-
-    , annotateAndStoreCorpus: function (corpusDirPath, sources, corpusName, options, callback) {
+    ,
+    annotateAndStoreCorpus: function (corpusDirPath, sources, corpusName, options, callback) {
         var files = []
         async.series([
             //parse documentsDir recursively
@@ -642,11 +744,104 @@ var DirContentAnnotator = {
         var files = fs.readdirSync(parsedDocumentsHomeDir)
         var names = []
         files.forEach(function (item) {
-            names.push(item.replace("_Concepts.json", ""))
+            names.push(item.replace("_Concepts.jsonData", ""))
         })
 
         return callback(null, names)
 
+
+    }
+
+    ,
+    getConceptsSubjectsTree: function (corpusName, callback) {
+
+        var storePath = parsedDocumentsHomeDir + corpusName;//+ "_Concepts.jsonData"
+        var str = "" + fs.readFileSync(storePath)
+        var data = JSON.parse(str);
+
+        var conceptsTree = {}
+        var parents = {}
+        var subjectsMap = {}
+        for (var key in data.files) {
+
+                var fileObj = data.files[key]
+
+                fileObj.subjects.forEach(function (subject, index) {
+                    var parent;
+                    if (index == 0)
+                        parent = corpusName
+                    else
+                        parent = fileObj.subjects[index - 1]
+                    if (!parents[parent])
+                        parents[parent] = []
+                    if (subject != "") {
+                        if (parents[parent].indexOf(subject) < 0)
+                            parents[parent].push(subject)
+
+
+                        // for the last subject attach file and nouns
+                        if (index == fileObj.subjects.length - 1) {
+                            if (!subjectsMap[subject])
+                                subjectsMap[subject] = {files: []}
+                            var fileName = path.basename(key);
+
+                            subjectsMap[subject].files.push({
+                                filePath: key,
+                                fileName: fileName,
+                                nouns: fileObj.nouns,
+                                text:fileObj.text
+                            })
+                        }
+                    }
+
+                })
+
+
+        }
+
+
+        function recurse(node) {
+            var children = parents[node.text]
+            if (children) {
+                children.forEach(function (child) {
+                    var childObj = {text: child, children: [], data: {}}
+                    if (subjectsMap[child])
+                        childObj.data = subjectsMap[child]
+                    node.children.push(childObj)
+                    recurse(childObj)
+                })
+            }
+
+        }
+
+        var rootNode = {text: corpusName, children: []}
+        recurse(rootNode)
+        var x = rootNode
+
+
+        var jstreeData = [];
+
+        function recurseJstree(node) {
+
+            node.children.forEach(function (child) {
+                jstreeData.push({text: child.text, id: child.text, data: child.data, parent: node.text})
+                recurseJstree(child)
+            })
+        }
+
+        jstreeData.push({text: rootNode.text, id: rootNode.text, data: rootNode.data, parent: "#"})
+        recurseJstree(rootNode)
+
+
+        if (callback) {
+            return callback(null, {jstreeData:jstreeData,sources:data.sources})
+        } else {
+
+
+            var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.jsonData")
+            storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.jsonData"
+            fs.writeFileSync(storePath, JSON.stringify(jstreeData, null, 2))
+        }
 
     }
 

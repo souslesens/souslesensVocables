@@ -38,19 +38,10 @@ Annotate new Corpus
 
 
     <div  class="annotate_div">
-        Corpus directory Path <input  class="annotate-DirInput" style='font-weight: bold;width: 300px' id="annotate_corpusPathInput"
+ Corpus directory Path <input  class="annotate-DirInput" style='font-weight: bold;width: 300px' id="annotate_corpusPathInput"
     value="D:\\Total\\2020\\_testAnnotator"
     >
-        <form ref='uploadForm'
-              id='uploadForm'
-              action='/upload'
-              method='post'
-              encType="multipart/form-data">
-            <span>upload zipped corpus root directory</span>
-            <input type="file" id="fileButton" name="EvaluateToolZipFile" />
-            <input type='submit' value='Upload' />
-        </form>
-        </body>
+
     </div>
     <div  class="annotate_div">
         Corpus name<input  class="annotate-DirInput" style='font-weight: bold;width: 100px' id="annotate_corpusNameInput"
@@ -65,8 +56,18 @@ Annotate new Corpus
 
     <div>
         <td><img src="./images/waitAnimated.gif" id="annotate_waitImg" style="display: none;width: 15px; text-align: justify">
+            <form ref='uploadForm'
+                  id='uploadForm'
+                  action='/upload'
+                  method='post'
+                  encType="multipart/form-data">
+                <span>upload zipped corpus root directory</span>
+                <input type="file" id="fileButton" name="EvaluateToolZipFile" />
 
-        <button onclick="Evaluate.execAnnotate()">Annotate</button>
+                </body>
+      <!--  <button onclick="Evaluate.execAnnotate()">Annotate</button>-->
+          <input type='submit' value='Upload and Annotate' />
+            </form>
         <button onclick="Evaluate.cancelAnnotate()">Cancel</button>
     </div>
     <div id="annotate_infosDiv"></div>
@@ -78,26 +79,7 @@ Annotate new Corpus
 
 $("#uploadForm").submit(function(e) {
     e.preventDefault();
-    var property = document.getElementById('fileButton').files[0];
-    var formData = new FormData($(this)[0]);
+    Evaluate.execUploadCorpusAndAnnotate()
 
-    formData.append("file", property);
-
-    $.ajax({
-        method: "POST",
-        url: "/upload",
-        data: formData,
-        cache : false,
-        contentType : false,
-        processData : false,
-        dataType:'json',
-        success: function(testresponse){
-            if(testresponse.success == true){
-                alert(testresponse.messages);
-            } else {
-                alert(testresponse.messages);
-            }
-        }
-    })
 })
 </script>

@@ -114,10 +114,10 @@ var httpProxy = {
             options.form = params;
         }
 
-        console.log("POST-URL    "+url)
+       // console.log("POST-URL    "+url)
 
         if(httpProxy.useProxy()){
-            console.log("----------USING PROXY------POST")
+           // console.log("----------USING PROXY------POST")
             options.proxy = httpProxy.proxyUrl
         }
 

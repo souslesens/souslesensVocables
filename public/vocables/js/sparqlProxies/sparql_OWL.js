@@ -587,7 +587,53 @@ var Sparql_OWL = (function () {
         }
 
         self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
-            return callback(null, [])
+            $("#waitImg").css("display", "block");
+
+
+            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+            var filterStr = ""
+            if (options && options.filter) {
+
+                if (options.filter.predicates) {
+                    filterStr = Sparql_common.setFilter("predicate", options.filter.predicates)
+                }
+
+
+            }
+
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+                "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                " select  distinct * " + sourceVariables.fromStr + "   WHERE { " +
+                " ?subject ?predicate ?object. " + filterStr +
+                "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})"
+
+
+            if (!collection || collection == "") {
+
+                query += "}";
+
+            } else {
+
+                query += "   ?collection skos:member* ?acollection. " + Sparql_common.getUriFilter("collection", collection) +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
+                    "   ?collection skos:prefLabel ?collectionLabel." +
+                    "   ?acollection skos:prefLabel ?acollectionLabel." +
+                    "   ?subject skos:prefLabel ?subjectLabel." +"filter(lang(?subjectLabel)='en')"+
+                    "}"
+            }
+
+            query += " limit " + sourceVariables.limit + " ";
+
+            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"])
+                return callback(null, result.results.bindings);
+            })
         }
 
 

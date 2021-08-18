@@ -21,15 +21,14 @@ var Sparql_generic = (function () {
         sourcesVariables = {}
 
 
-
         self.getSourceVariables = function (sourceLabel) {
 
 
             source = Config.sources[sourceLabel]
             if (!sourcesVariables[sourceLabel]) {
                 var defaultPredicates;
-                if(source.schemaType=="SKOS"){
-                    defaultPredicates=Sparql_SKOS.defaultPredicates;
+                if (source.schemaType == "SKOS") {
+                    defaultPredicates = Sparql_SKOS.defaultPredicates;
 
                 }
 
@@ -49,10 +48,10 @@ var Sparql_generic = (function () {
                 obj.graphUri = source.graphUri;
                 predicates = defaultPredicates;
                 if (source.predicates)
-                   predicates = source.predicates
+                    predicates = source.predicates
 
-               var  prefixes = predicates.prefixes || defaultPredicates.prefixes
-                obj.prefixesStr=""
+                var prefixes = predicates.prefixes || defaultPredicates.prefixes
+                obj.prefixesStr = ""
                 prefixes.forEach(function (item) {
                     obj.prefixesStr += "PREFIX " + item + " "
                 })
@@ -65,7 +64,7 @@ var Sparql_generic = (function () {
                 obj.limit = predicates.limit || defaultPredicates.limit;
                 obj.optionalDepth = predicates.optionalDepth || defaultPredicates.optionalDepth;
                 obj.url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-                obj.queryOptions=""
+                obj.queryOptions = ""
                 sourcesVariables[sourceLabel] = obj
 
 
@@ -243,7 +242,7 @@ var Sparql_generic = (function () {
                 })
                 return;
             }
-           var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
+            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
             var query = "";
             query += sourceVariables.prefixesStr;
             query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
@@ -268,7 +267,7 @@ var Sparql_generic = (function () {
 
         self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
 
-            var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
+            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
             var query = "";
             query += sourceVariables.prefixesStr;
             query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
@@ -292,7 +291,7 @@ var Sparql_generic = (function () {
         }
 
         self.getNodeLabel = function (sourceLabel, id, callback) {
-            var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
+            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
             var query = "";
             query += sourceVariables.prefixesStr;
             query += " select distinct * " + sourceVariables.fromStr + "  WHERE {" +
@@ -315,7 +314,7 @@ var Sparql_generic = (function () {
 
 
         self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
-            var sourceVariables=Sparql_generic.getSourceVariables(sourceLabel);
+            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
             var sliceSize = 2000;
             var slices = common.array.slice(subjectIds, sliceSize);
             var triples = [];
@@ -455,7 +454,7 @@ var Sparql_generic = (function () {
 
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query,"", {source: sourceLabel}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 return callback(err);
             })
         }
@@ -481,6 +480,24 @@ var Sparql_generic = (function () {
             })
 
         }
+        self.getDistinctPredicates = function (sourceLabel, options, callback) {
+            $("#waitImg").css("display", "block");
+            if (!options) {
+                options = {}
+            }
+            var fromStr = Sparql_common.getFromStr(sourceLabel)
+            var query = "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "select distinct ?p  ?pLabel" + fromStr + " WHERE {?s ?p ?o. optional{?p ?x ?pLabel. filter(?x in (skos:prefLabel,rdfs:label))}}"
+            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["p"])
+                return callback(null, result.results.bindings)
+            })
+
+        }
+
 
         self.copyNodes = function (fromSourceLabel, toGraphUri, sourceIds, options, callback) {
             if (!options) {
@@ -496,7 +513,7 @@ var Sparql_generic = (function () {
             var targetSchemaType = Config.sources[fromSourceLabel].schemaType;
             var urisMap = {}
 
-            function getTargetUri(sourceUri) {
+            function getTargetUri(sourceUri, sourceItem) {
                 var targetUri = urisMap[sourceUri]
                 if (!targetUri) {
 
@@ -521,6 +538,16 @@ var Sparql_generic = (function () {
                             var triple = targetUri + " <" + parentPredicate + "> <" + options.setParentNode.targetUri + "> ."
                             newTriples.push(triple)
 
+                        }
+                        var newTargetType = null;
+                        if (targetSchemaType == "SKOS") {
+                            newTargetType = "http://www.w3.org/2004/02/skos/core#Concept"
+                        } else if (targetSchemaType == "OWL") {
+                            newTargetType = "http://www.w3.org/2002/07/owl#Class"
+                        }
+                        if (newTargetType) {
+                            var triple = targetUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + newTargetType + "> ."
+                            newTriples.push(triple)
                         }
 
 
@@ -552,15 +579,18 @@ var Sparql_generic = (function () {
                             if (options.setObjectFn)
                                 options.setObjectFn(item)
 
-                            subject = getTargetUri(item.id.value)
+
+                            subject = getTargetUri(item.id.value, item)
                             prop = item.prop.value
                             if (options.excludedProperties && options.excludedProperties.indexOf(prop) > -1)
                                 return;
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
 
-
-                                if (item.value.type == "uri") {
-                                    var valueStr = getTargetUri(item.value.value)
+                                var valueStr = null;
+                                if (item.prop.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                                    valueStr = "<" + item.value.value + ">"
+                                } else if (item.value.type == "uri") {
+                                    valueStr = getTargetUri(item.value.value, item)
                                 } else {
                                     var langStr = "";
                                     if (item.value["xml:lang"])

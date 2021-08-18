@@ -115,24 +115,7 @@ var Sparql_SKOS = (function () {
             query += "limit " + sourceVariables.limit + " ";
 
 
-            if (options.filterCollections) {
 
-                query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                    "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                    " select  distinct * " + sourceVariables.fromStr + "   WHERE { " +
-                    "  ?child1 skos:broader ?concept.   " + filterStr +
-                    "   ?collection skos:member* ?acollection. " + Sparql_common.getUriFilter("collection", options.filterCollections) +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?child1.  " +
-                    "  " +
-                    "   ?collection skos:prefLabel ?collectionLabel." +
-                    "   ?acollection skos:prefLabel ?acollectionLabel." +
-                    "   ?concept skos:prefLabel ?conceptLabel." +
-                    "   ?child1 skos:prefLabel ?child1Label." +
-                    "   ?child1 rdf:type ?child1Type." +
-                    " }order by ?concept"
-                query += " limit " + sourceVariables.limit + " ";
-            }
 
 
             Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
@@ -182,8 +165,7 @@ var Sparql_SKOS = (function () {
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
-                    "   ?subject skos:prefLabel ?subjectLabel." +
-
+                    "   ?subject skos:prefLabel ?subjectLabel." +//"filter(lang(?subjectLabel)='en')"+
                     "}"
             }
 
@@ -195,7 +177,7 @@ var Sparql_SKOS = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"])
                 return callback(null, result.results.bindings);
             })
         }
@@ -214,9 +196,10 @@ var Sparql_SKOS = (function () {
             query += sourceVariables.prefixesStr;
             query += " select distinct * " + sourceVariables.fromStr + "  WHERE {{"
 
-            if (true || options.searchAltLabels)
-                sourceVariables.prefLabelPredicate += "|skos:altLabel"
-            query += "?concept " + sourceVariables.prefLabelPredicate + " ?conceptLabel. ";
+            var labelPredicate= sourceVariables.prefLabelPredicate
+            if ( options.searchAltLabels)
+                labelPredicate= sourceVariables.prefLabelPredicate + "|skos:altLabel"
+            query += "?concept " + labelPredicate + " ?conceptLabel. ";
             if (sourceVariables.lang && sourceVariables.lang != "" && !options.noLang)
                 query += "filter( lang(?conceptLabel)=\"" + sourceVariables.lang + "\")"
             query += filterStr;

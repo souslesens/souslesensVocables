@@ -5,7 +5,7 @@ var Evaluate = (function () {
 
         self.maxGraphConceptLength = 200
         var sourceGraphsUriMap = {}
-
+        self.currentCorpusData
         self.selectedSources = []
         self.categoriesTreeId = "evaluate_treeDiv"
         self.onSourceSelect = function () {
@@ -53,7 +53,10 @@ var Evaluate = (function () {
             $("#mainDialogDiv").load("snippets/evaluate/annotateDialog.html");
             $("#mainDialogDiv").dialog("open");
             setTimeout(function () {
-                MainController.UI.showSources("annotate_resourcesTreeDiv", true)
+                MainController.UI.showSources("annotate_resourcesTreeDiv", true, function () {
+                    $("#annotate_resourcesTreeDiv").jstree(true).open_all()
+                })
+
             }, 200)
 
 
@@ -111,6 +114,98 @@ var Evaluate = (function () {
 
 
         }
+        self.execUploadCorpusAndAnnotate = function () {
+            var sourceNodes = $("#annotate_resourcesTreeDiv").jstree(true).get_checked();
+            var sources = {}
+            sourceNodes.forEach(function (sourceLabel) {
+                if (!Config.sources[sourceLabel].color)
+                    Config.sources[sourceLabel].color = common.palette[Object.keys(sourceLabel).length];
+                var sourceObj = (Config.sources[sourceLabel])
+                delete sourceObj.controller
+                sources[sourceLabel] = sourceObj
+
+
+            })
+            if (Object.keys(sources).length == 0)
+                return alert("select at least one source")
+            var corpusPath = $("#annotate_corpusPathInput").val();
+            if (corpusPath == "")
+                return alert("enter valid Corpus path(visible from server)")
+
+            var corpusName = $("#annotate_corpusNameInput").val();
+            if (corpusName == "")
+                return alert("enter corpus name)")
+
+            var fileObject = document.getElementById('fileButton').files[0];
+            //  var formData = new FormData($(this)[0]);
+            var formData = new FormData(document.getElementById('uploadForm'));
+
+            formData.append("file", fileObject);
+
+
+            formData.append("sources", JSON.stringify(sources));
+            formData.append("corpusName", corpusName);
+            formData.append("options", JSON.stringify({}));
+            if (fileObject.type != "application/x-zip-compressed")
+                return alert("zip files are accepted")
+
+            if (fileObject.size > Config.evaluate.maxZipFileSize)
+                return alert("file too big : " + (fileObject.size / 1000) + "ko, max " + (self.maxZipFileSize / 1000) + "ko")
+            self.serverMessage("Uploading zip file " + fileObject.name)
+            $.ajax({
+                method: "POST",
+                url: "/upload",
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success: function (textResponse) {
+                    MainController.initControllers()
+                    $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
+                    $("#annotate_waitImg").css("display", "none");
+                    self.initCorpusList();
+                    // alert(textResponse.result);
+
+
+                }, error: function (err) {
+                    alert(err.responseText || "error undefined");
+                }
+            })
+        }
+
+        /*
+                    var payload = {
+                        annotateAndStoreCorpus: true,
+                        corpusPath: corpusPath,
+                        sources: JSON.stringify(sources),
+                        corpusName: corpusName,
+                        options: JSON.stringify({})
+
+                    }
+                    $("#annotate_waitImg").css("display", "block");
+                    $.ajax({
+                        type: "POST",
+                        url: Config.serverUrl,
+                        data: payload,
+                        dataType: "json",
+
+                        success: function (result, textStatus, jqXHR) {
+                            MainController.initControllers()
+                            $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
+                            $("#annotate_waitImg").css("display", "none");
+                            self.initCorpusList();
+
+                        }, error(err) {
+                            MainController.initControllers()
+                            $("#annotate_waitImg").css("display", "none");
+                            $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosError'>" + err.responseText + "</span><br>")
+                        }
+                    })
+
+
+                }*/
+
         self.cancelAnnotate = function () {
             $("#mainDialogDiv").dialog("close");
         }
@@ -140,7 +235,8 @@ var Evaluate = (function () {
 
 
         self.loadCorpusSubjectTree = function (corpusName, callback) {
-
+            if (corpusName == "")
+                return;
             var payload = {
                 getConceptsSubjectsTree: 1,
                 corpusName: corpusName,
@@ -151,13 +247,15 @@ var Evaluate = (function () {
                 url: Config.serverUrl,
                 data: payload,
                 dataType: "json",
-                success: function (corpusTreeData, textStatus, jqXHR) {
-                    common.jstree.loadJsTree(self.categoriesTreeId, corpusTreeData, {selectTreeNodeFn: Evaluate.onTreeClickNode},function(err, result){
-                        common.jstree.openNode(self.categoriesTreeId,corpusTreeData[0].id);
+                success: function (data, textStatus, jqXHR) {
+                    self.currentCorpusData=data;
+
+                    common.jstree.loadJsTree(self.categoriesTreeId, data.jstreeData, {selectTreeNodeFn: Evaluate.onTreeClickNode}, function (err, result) {
+                        common.jstree.openNode(self.categoriesTreeId, data.jstreeData[0].id);
                     });
 
 
-                    self.showCorpusSources(corpusTreeData)
+                    self.showCorpusSources(data.sources)
                 }, error(err) {
                     return alert(err.responseText)
 
@@ -180,8 +278,11 @@ var Evaluate = (function () {
         }
         self.onTabActivate = function (e, ui) {
             var divId = ui.newPanel.attr('id');
-            if (divId == "ADLquery_tabs_missingTerms") {
+            if (divId == "Annotate_tabs_missingTerms") {
                 self.showMissingWords()
+            }
+           else if (divId == "Annotate_tabs_underlineEntities") {
+                self.showUnderlinedEntities(self.currentTreeNode)
             }
 
 
@@ -194,23 +295,27 @@ var Evaluate = (function () {
             var concepts = [];
             var ancestorsDepth = 3;
 
-            var selectedSources=$("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
-
+            var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
             var sources = {}
+            selectedSources.forEach(function (source) {
+                sources[source] = []
+            })
+
             descendants.forEach(function (node) {
                 if (!node.data.files)
                     return;
-                node.data.files.forEach(function (file) {
-                    for (var source in file.sources) {
-                        if(selectedSources.indexOf(source)>-1) {
-                            if (!sources[source])
-                                sources[source] = []
-                            file.sources[source].entities.forEach(function (concept) {
-                                sources[source].push(concept.id)
-                            })
+                node.data.files.forEach(function (fileObj) {
+
+                    for (var noun in fileObj.nouns) {
+                        var nounObj = fileObj.nouns[noun]
+
+                        if (nounObj.entities) {
+                            for (var source in nounObj.entities) {
+                                nounObj.entities[source].forEach(function(entity) {
+                                    sources[source].push(entity)
+                                })
+                            }
                         }
-
-
                     }
                 })
             })
@@ -218,7 +323,7 @@ var Evaluate = (function () {
             var existingNode = {}
             var offsetY = -leftPanelWidth
             var offsetYlength = 30
-            var nounColor="#0bf1f1"
+            var nounColor = "#0bf1f1"
             async.eachSeries(Object.keys(sources), function (source, callbackSource) {
                 MainController.initControllers()
                 var sourceConcepts = sources[source]
@@ -235,7 +340,7 @@ var Evaluate = (function () {
                     data: {type: "graph", source: source}
                 })
 
-                if(sourceConcepts.length==0)
+                if (sourceConcepts.length == 0)
                     return callbackSource()
 
                 var conceptsSlices = common.array.slice(sourceConcepts);
@@ -283,7 +388,7 @@ var Evaluate = (function () {
                                             visjsData.edges.push({
                                                 id: edgeId,
                                                 from: conceptId,
-                                                color:color,
+                                                color: color,
                                                 to: broaderId,
                                                 arrows: "to"
                                             })
@@ -298,7 +403,7 @@ var Evaluate = (function () {
                                             visjsData.edges.push({
                                                 id: edgeId,
                                                 from: previousBroaderId,
-                                                color:color,
+                                                color: color,
                                                 to: broaderId,
                                                 arrows: "to"
                                             })
@@ -340,8 +445,8 @@ var Evaluate = (function () {
 
 
             }, function (err) {
-                MainController.UI.message("Drawing graph ("+visjsData.nodes.length+" nodes)")
-                visjsGraph.draw("Evaluate_graphDiv", visjsData, {onclickFn: Evaluate.onGraphNodeClick},function (){
+                MainController.UI.message("Drawing graph (" + visjsData.nodes.length + " nodes)")
+                visjsGraph.draw("Evaluate_graphDiv", visjsData, {onclickFn: Evaluate.onGraphNodeClick}, function () {
                     $("#waitImg").css("display", "none");
                     MainController.UI.message("")
                 })
@@ -359,8 +464,7 @@ var Evaluate = (function () {
 
             var sources = {}
             var missingNouns = []
-            var selectedSources=$("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
-
+            var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
 
 
             descendants.forEach(function (node) {
@@ -394,21 +498,58 @@ var Evaluate = (function () {
 
         }
 
+        self.showUnderlinedEntities=function(jstreeNode){
 
-        self.showCorpusSources = function (corpusTreeData) {
-            var sources = [];
+            MainController.UI.message("processing data")
+            var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id)
+            var concepts = [];
+            var ancestorsDepth = 3;
 
-            corpusTreeData.forEach(function (node) {
-                if( node.data && node.data.files) {
-                    node.data.files.forEach(function (file) {
-                        Object.keys(file.sources).forEach(function (source) {
-                            if (sources.indexOf(source) < 0)
-                                sources.push(source);
-                        })
+            var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
+            var sources = {}
+            selectedSources.forEach(function (source) {
+                sources[source] = []
+            })
+
+            descendants.forEach(function (node) {
+                if (!node.data.files)
+                    return;
+                var outputText;
+                node.data.files.forEach(function (fileObj) {
+var initialText=fileObj.text;
+
+                    var offsets={}
+                    for (var noun in fileObj.nouns) {
+                        var nounObj = fileObj.nouns[noun]
+
+                        if (nounObj.entities) {
+                            nounObj.offsets.forEach(function(offset){
+                                offsets[offset]={entities:nounObj.entities,noun:noun}
+                            })
+
+
+                        }
+                    }
+
+                    var offsetsArray=Object.keys(offsets).sort()
+                     outputText+="<hr>"
+                    var lastOffset=0
+                    offsetsArray.forEach(function(offset){
+                        outputText+=initialText.substring(lastOffset,offset);
+                        outputText+="<a href=''>"+"<span class='underlinedEntity' >"+offsets[offset].noun+"</span>"+"</a>"
+                        lastOffset+=offsets[offset].noun.length
+
 
                     })
-                }
+                })
+                $("#underlineEntities").html(outputText)
             })
+
+        }
+
+
+        self.showCorpusSources = function (sources) {
+
             var jstreeData = []
             sources.forEach(function (source) {
                 jstreeData.push({
@@ -420,7 +561,7 @@ var Evaluate = (function () {
             common.jstree.loadJsTree("Evaluate_rightPanel_sourcesTreeDiv", jstreeData, {
                 withCheckboxes: true,
                 openAll: true
-            },function(err,result){
+            }, function (err, result) {
                 common.jstree.checkAll("Evaluate_rightPanel_sourcesTreeDiv");
             })
         }
@@ -451,8 +592,8 @@ var Evaluate = (function () {
             }
         }
 
-        self.serverMessage=function(data){
-            $("#annotate_messageDiv").prepend(data)
+        self.serverMessage = function (data) {
+            $("#annotate_messageDiv").prepend(data + "<hr>")
         }
 
 

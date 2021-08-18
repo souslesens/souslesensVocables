@@ -1,0 +1,35 @@
+<style>
+    .exportTable_inputDiv{
+        display: flex;
+        flex-direction: column;
+        border-radius: 5px;
+    }
+
+
+
+</style>
+
+
+
+<div style="display: flex;flex-direction: row">
+
+    <div class="exportTable_inputDiv" style="width: 50%" >
+        <div>properties</div>
+        <div id="exportTable_jstreeDiv" class="jstree"></div>
+    </div>
+
+
+
+
+
+
+<div class="exportTable_inputDiv" style="width: 50%" >
+    <select id="exportTable_outputType" >
+        <option>Table</option>
+        <option>Clipboard</option>
+    </select>
+    <button onclick="Export.execExport()">Export</button>
+    <button onclick="Export.cancelExportDialog()">Cancel</button>
+
+</div>
+</div>

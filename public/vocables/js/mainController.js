@@ -140,7 +140,7 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX) {
+        showSources: function (treeDiv, withCBX,callback) {
             var treeData = [];
             var distinctNodes = {}
 
@@ -201,6 +201,8 @@ var MainController = (function () {
                 }
             }, function () {
                 $("#" + treeDiv).jstree(true).open_node(Config.preferredSchemaType);
+                if(callback)
+                    return callback()
 
             })
         },

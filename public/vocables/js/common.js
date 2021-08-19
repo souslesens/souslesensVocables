@@ -249,6 +249,20 @@ var common = (function () {
                 $("#" + jstreeDiv).jstree(true).delete_node(nodeId)
                 self.jstree.setTreeAppearance()
             },
+            deleteBranch:function(jstreeDiv,nodeId,deleteNodeItself){
+               var descendants= self.jstree.getNodeDescendants (jstreeDiv, nodeId,null,true);
+               if(deleteNodeItself){
+                   if(descendants.indexOf(nodeId)<0)
+                       descendants.push(nodeId)
+               }else{
+                   var index = descendants.indexOf(nodeId);
+                   if (index > -1) {
+                       descendants.splice(index, 1);
+                   }
+               }
+                $("#" + jstreeDiv).jstree(true).delete_node(descendants)
+
+            },
             getjsTreeNodes: function (jstreeDiv, IdsOnly, parentNodeId) {
                 if (!parentNodeId)
                     parentNodeId = "#"
@@ -270,17 +284,20 @@ var common = (function () {
 
             },
 
-            getNodeDescendants: function (jstreeDiv, nodeId, depth) {
+            getNodeDescendants: function (jstreeDiv, nodeId, depth,onlyIds) {
                 var nodes = [];
                 var nodeIdsMap = {};
                 var currentLevel = 0
                 var recurse = function (nodeId) {
-                    if ((currentLevel++) > depth)
+                    if (depth && (currentLevel++) > depth)
                         return;
 
                     var node = $('#' + jstreeDiv).jstree(true).get_node(nodeId);
                     if (!nodeIdsMap[nodeId]) {
                         nodeIdsMap[nodeId] = 1
+                        if(onlyIds)
+                            nodes.push(node.id);
+                        else
                         nodes.push(node);
 
                         // Attempt to traverse if the node has children

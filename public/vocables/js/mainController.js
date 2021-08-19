@@ -140,16 +140,17 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX,callback) {
+        showSources: function (treeDiv, withCBX, callback) {
             var treeData = [];
             var distinctNodes = {}
 
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
-                treeData.push({id: item, text: item, parent: "#",type:item})
+                treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
                 self.initControllers()
-
+                if (Config.sources[sourceLabel].isDraft)
+                    return;
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
                     return;
                 if ((Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) || Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1)
@@ -164,7 +165,12 @@ var MainController = (function () {
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     //  console.log(JSON.stringify(jstreeData,null,2))
-                    treeData.push({id: sourceLabel, text: sourceLabel,type:Config.sources[sourceLabel].schemaType, parent: Config.sources[sourceLabel].schemaType,})// data: Config.sources[sourceLabel]})
+                    treeData.push({
+                        id: sourceLabel,
+                        text: sourceLabel,
+                        type: Config.sources[sourceLabel].schemaType,
+                        parent: Config.sources[sourceLabel].schemaType,
+                    })// data: Config.sources[sourceLabel]})
                 }
             })
             common.jstree.loadJsTree(treeDiv, treeData, {
@@ -201,7 +207,7 @@ var MainController = (function () {
                 }
             }, function () {
                 $("#" + treeDiv).jstree(true).open_node(Config.preferredSchemaType);
-                if(callback)
+                if (callback)
                     return callback()
 
             })
@@ -216,7 +222,13 @@ var MainController = (function () {
                 if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1)
                     ;
                 else
-                    treeData.push({id: key, text: Config.tools[key].label,type:"tool", parent: "#", data: Config.tools[key]})
+                    treeData.push({
+                        id: key,
+                        text: Config.tools[key].label,
+                        type: "tool",
+                        parent: "#",
+                        data: Config.tools[key]
+                    })
 
             }
             //})
@@ -227,13 +239,14 @@ var MainController = (function () {
 
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
+                    MainController.initControllers()
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
                     var controller = Config.tools[self.currentTool].controller
                     $("#currentSourceTreeDiv").html("")
 
                     self.UI.updateActionDivLabel();
-                    SourceBrowser.targetDiv="currentSourceTreeDiv"
+                    SourceBrowser.targetDiv = "currentSourceTreeDiv"
                     if (Config.tools[self.currentTool].noSource) {
                         MainController.currentSource = null;
                         MainController.UI.onSourceSelect();
@@ -247,7 +260,7 @@ var MainController = (function () {
                         }
                     }
 
-                 //   $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+                    //   $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
 
 
                     if (controller.onLoaded)
@@ -302,10 +315,10 @@ var MainController = (function () {
 
         },
 
-        message: function (message,stopWaitImg) {
+        message: function (message, stopWaitImg) {
             $("#messageDiv").html(message)
-            if(stopWaitImg)
-                $("#waitImg").css("display","none")
+            if (stopWaitImg)
+                $("#waitImg").css("display", "none")
         },
 
         toogleRightPanel: function (open) {

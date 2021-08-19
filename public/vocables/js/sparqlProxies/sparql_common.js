@@ -237,8 +237,8 @@ var Sparql_common = (function () {
         })
         var imports=Config.sources[source].imports;
         if(imports){
-            imports.forEach(function(source){
-                var importGraphUri = Config.sources[source].graphUri
+            imports.forEach(function(source2){
+                var importGraphUri = Config.sources[source2].graphUri
                 fromStr += from+"  <" + importGraphUri + "> "
             })
         }

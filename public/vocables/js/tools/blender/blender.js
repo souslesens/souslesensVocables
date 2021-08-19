@@ -296,9 +296,10 @@ var Blender = (function () {
                     var source = self.currentTreeNode.data.source || self.currentSource;
                     var type = self.currentTreeNode.data.type
 
-                    var options = {source: source, labelClass: "treeType_" + type}
+                    var options = {source: source, labelClass: "treeType_" + type,reopen:true}
                     if (Collection.currentCollectionFilter)
                         options.filterCollections = Collection.currentCollectionFilter;
+
                     SourceBrowser.openTreeNode("Blender_conceptTreeDiv", source, propertiesMap.node, options);
 
                     if (type == "externalReferenceTopConcept")
@@ -1233,14 +1234,14 @@ var Blender = (function () {
         }
 
         self.copyCsv = function () {
-            Export.showExportDatDialog(self.currentSource, {})
-            return
+          //  Export.showExportDatDialog(self.currentSource, {})
+           // return
             var collection = Collection.currentCollectionFilter
 
-            return;
+
             Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
 
-                return
+
                 if (err) {
                     if (callback)
                         return callback(err)
@@ -1410,7 +1411,12 @@ var Blender = (function () {
                 $("#mainDialogDiv").dialog("open");
 
                 setTimeout(function () {
-                    common.fillSelectOptions("blenderNewSource_referenceSourceSelect", self.availableSources.sort(), true)
+                    var templatSources=[];
+                    self.availableSources.forEach(function(source){
+                        if(Config.sources[source].isBlenderTemplate)
+                            templatSources.push(source)
+                    })
+                    common.fillSelectOptions("blenderNewSource_referenceSourceSelect",templatSources.sort(), true)
 
                 }, 200)
 

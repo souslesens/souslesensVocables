@@ -270,9 +270,12 @@ var SourceBrowser = (function () {
         if (!options)
             options = {}
         var existingNodes = common.jstree.getjsTreeNodes(divId, true)
-        if (node.children.length > 0)
-            if (!options.ctrlKey)
+        if (node.children && node.children.length > 0)
+            if ( !options.reopen)
                 return;
+            else {
+                common.jstree.deleteBranch(divId,node.id)
+            }
           var  depth =1
         if (!options.depth)
             depth=options.depth;
@@ -370,11 +373,21 @@ var SourceBrowser = (function () {
 
         if (searchAllSources) {
             for (var sourceLabel in Config.sources) {
-                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                    if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                        searchedSources.push(sourceLabel)
+
+                if ((Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) || Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1)
+                    ;
+                else {
+                    if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                        if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                            searchedSources.push(sourceLabel)
+                    }
                 }
             }
+
+
+
+
+
         } else {
             if (!MainController.currentSource)
                 return alert("select a source or search in all source")

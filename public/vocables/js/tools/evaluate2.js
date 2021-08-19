@@ -248,7 +248,7 @@ var Evaluate = (function () {
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {
-                    self.currentCorpusData=data;
+                    self.currentCorpusData = data;
 
                     common.jstree.loadJsTree(self.categoriesTreeId, data.jstreeData, {selectTreeNodeFn: Evaluate.onTreeClickNode}, function (err, result) {
                         common.jstree.openNode(self.categoriesTreeId, data.jstreeData[0].id);
@@ -279,9 +279,8 @@ var Evaluate = (function () {
         self.onTabActivate = function (e, ui) {
             var divId = ui.newPanel.attr('id');
             if (divId == "Annotate_tabs_missingTerms") {
-                self.showMissingWords()
-            }
-           else if (divId == "Annotate_tabs_underlineEntities") {
+                self.showMissingWords(self.currentTreeNode)
+            } else if (divId == "Annotate_tabs_underlineEntities") {
                 self.showUnderlinedEntities(self.currentTreeNode)
             }
 
@@ -311,7 +310,7 @@ var Evaluate = (function () {
 
                         if (nounObj.entities) {
                             for (var source in nounObj.entities) {
-                                nounObj.entities[source].forEach(function(entity) {
+                                nounObj.entities[source].forEach(function (entity) {
                                     sources[source].push(entity)
                                 })
                             }
@@ -466,39 +465,44 @@ var Evaluate = (function () {
             var missingNouns = []
             var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked()
 
-
+            var sourceMissingWords = []
             descendants.forEach(function (node) {
                 if (!node.data.files)
                     return;
 
-                node.data.files.forEach(function (file) {
-                    for (var source in file.sources) {
-                        if (selectedSources.indexOf(source) > -1) {
-                            if (!sources[source])
-                                sources[source] = []
-                            file.sources[source].missingNouns.forEach(function (noun) {
-                                sources[source].push(noun)
+                node.data.files.forEach(function (fileObj) {
 
-                            })
+
+                    for (var noun in fileObj.nouns) {
+                        var nounObj = fileObj.nouns[noun]
+
+                        if (!nounObj.entities) {
+                            if (sourceMissingWords.indexOf(noun) < 0)
+                                sourceMissingWords.push(noun)
+
                         }
                     }
+
+
                 })
 
 
             })
             var html = ""
-            for (var source in sources) {
-                html += "<div > "
-                sources[source].forEach(function (noun) {
+
+
+                sourceMissingWords.forEach(function (noun,index) {
                     html += "<span class='evaluate_missingWord'>" + noun + "</span>"
+                    if(index%15==0)
+                        html += "<br>"
                 })
                 html += "<div> "
-            }
+
             $("#evaluate_missingWordsDiv").html(html);
 
         }
 
-        self.showUnderlinedEntities=function(jstreeNode){
+        self.showUnderlinedEntities = function (jstreeNode) {
 
             MainController.UI.message("processing data")
             var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id)
@@ -514,35 +518,40 @@ var Evaluate = (function () {
             descendants.forEach(function (node) {
                 if (!node.data.files)
                     return;
-                var outputText;
-                node.data.files.forEach(function (fileObj) {
-var initialText=fileObj.text;
+                var outputText = "";
+                node.data.files.forEach(function (fileObj, index) {
 
-                    var offsets={}
+                    var initialText = fileObj.text;
+                    var offsetsArray = []
+                    var offsets = {}
                     for (var noun in fileObj.nouns) {
                         var nounObj = fileObj.nouns[noun]
 
                         if (nounObj.entities) {
-                            nounObj.offsets.forEach(function(offset){
-                                offsets[offset]={entities:nounObj.entities,noun:noun}
+                            nounObj.offsets.forEach(function (offset) {
+                                offsets[offset] = {entities: nounObj.entities, noun: noun}
+                                offsetsArray.push(offset)
                             })
 
 
                         }
                     }
 
-                    var offsetsArray=Object.keys(offsets).sort()
-                     outputText+="<hr>"
-                    var lastOffset=0
-                    offsetsArray.forEach(function(offset){
-                        outputText+=initialText.substring(lastOffset,offset);
-                        outputText+="<a href=''>"+"<span class='underlinedEntity' >"+offsets[offset].noun+"</span>"+"</a>"
-                        lastOffset+=offsets[offset].noun.length
+                    offsetsArray = offsetsArray.sort(function (a, b) {
+                        return a - b;
+                    })
+                    outputText += "<hr>"
+                    var lastOffset = 0
+                    offsetsArray.forEach(function (offset) {
+                        outputText += initialText.substring(lastOffset, offset);
+                        outputText += "<a href=''>" + "<span class='underlinedEntity' >" + offsets[offset].noun + "</span>" + "</a>"
+                        lastOffset += offsets[offset].noun.length
 
 
                     })
+                    $("#underlineEntities").append(outputText)
                 })
-                $("#underlineEntities").html(outputText)
+
             })
 
         }
@@ -596,6 +605,21 @@ var initialText=fileObj.text;
             $("#annotate_messageDiv").prepend(data + "<hr>")
         }
 
+
+        self.testUnderline = function () {
+            let selection = window.getSelection();
+            let strongs = document.getElementsByTagName('strong');
+
+            if (selection.rangeCount > 0) {
+                selection.removeAllRanges();
+            }
+
+            for (let i = 0; i < strongs.length; i++) {
+                let range = document.createRange();
+                range.selectNode(strongs[i]);
+                selection.addRange(range);
+            }
+        }
 
         return self
 

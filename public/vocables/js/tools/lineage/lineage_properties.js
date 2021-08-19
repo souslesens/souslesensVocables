@@ -42,16 +42,8 @@ Lineage_properties = (function () {
                     }
 
                 },
-                drawRangesAndDomainsProperty: {
-                    label: "Draw ranges and domains",
-                    action: function (e) {// pb avec source
-                        setTimeout(function () {
-                            self.drawRangeAndDomainsGraph(self.currentTreeNode)
-                        }, 200)
-                    }
 
-                },
-                drawPredicateTriples: {
+              /*  drawPredicateTriples: {
                     label: "Draw predicate triples",
                     action: function (e) {// pb avec source
                         setTimeout(function () {
@@ -59,7 +51,7 @@ Lineage_properties = (function () {
                         }, 200)
                     }
 
-                }
+                }*/
 
             }
             if (MainController.currentTool == "lineage") {
@@ -69,6 +61,15 @@ Lineage_properties = (function () {
 
                         Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
 
+                    }
+
+                }
+                items.drawRangesAndDomainsProperty= {
+                    label: "Draw ranges and domains",
+                        action: function (e) {// pb avec source
+                        setTimeout(function () {
+                            self.drawRangeAndDomainsGraph(self.currentTreeNode)
+                        }, 200)
                     }
 
                 }
@@ -101,7 +102,7 @@ Lineage_properties = (function () {
                         }
 
                     }
-                    items.editProperty = {
+                 /*   items.editProperty = {
                         label: "edit property",
                         action: function (e) {// pb avec source
 
@@ -109,8 +110,11 @@ Lineage_properties = (function () {
 
                         }
 
-                    }
+                    }*/
                 }
+
+
+
             }
 
 

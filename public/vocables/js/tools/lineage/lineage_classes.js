@@ -17,7 +17,7 @@ var Lineage_classes = (function () {
 
         var self = {}
         self.maxClusterOpeningLength = 200
-       
+
         var graphContext = {}
         self.propertyColors = {}
         self.defaultShape = "dot";
@@ -31,7 +31,7 @@ var Lineage_classes = (function () {
 
         self.onLoaded = function () {
             $("#sourceDivControlPanelDiv").html("")
-            Lineage_common.currentSource=null;
+            Lineage_common.currentSource = null;
             MainController.UI.message("");
 
 
@@ -85,27 +85,27 @@ var Lineage_classes = (function () {
 
             if (!sourceLabel)
                 return
-                MainController.currentSource=sourceLabel
-                if (!Lineage_common.currentSource) {
+            MainController.currentSource = sourceLabel
+            if (!Lineage_common.currentSource) {
 
-                    Lineage_classes.drawTopConcepts(sourceLabel)
-                }
-                $("#Lineage_sourceLabelDiv").html(sourceLabel)
-                SourceBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
-                if (Config.sources[sourceLabel].schemaType == "INDIVIDUAL") {
-                    $("#lineage_controlPanel0Div").css("display", "none")
-                    $("#lineage_controlPanel1Div").css("display", "block")
-                    self.initIndividualsPropertiesSelect(sourceLabel)
-                } else {
-                    $("#lineage_controlPanel0Div").css("display", "block")
-                    $("#lineage_controlPanel1Div").css("display", "none")
-                }
+                Lineage_classes.drawTopConcepts(sourceLabel)
+            }
+            $("#Lineage_sourceLabelDiv").html(sourceLabel)
+            SourceBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
+            if (Config.sources[sourceLabel].schemaType == "INDIVIDUAL") {
+                $("#lineage_controlPanel0Div").css("display", "none")
+                $("#lineage_controlPanel1Div").css("display", "block")
+                self.initIndividualsPropertiesSelect(sourceLabel)
+            } else {
+                $("#lineage_controlPanel0Div").css("display", "block")
+                $("#lineage_controlPanel1Div").css("display", "none")
+            }
 
 
-                propertyColors = {}
+            propertyColors = {}
 
             Lineage_common.currentSource = sourceLabel;
-            MainController.currentSource=sourceLabel;
+            MainController.currentSource = sourceLabel;
             MainController.currentSource = sourceLabel
             $("#GenericTools_onSearchCurrentSourceInput").css("display", "block")
 
@@ -1148,13 +1148,13 @@ var Lineage_classes = (function () {
                         })
 
                     }
-                    var edgeId = item.id.value + "_" + item.value.value + "_" + item.prop.value
+                    var edgeId = item.concept.value + "_" + item.value.value + "_" + item.prop.value
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
 
                         visjsData.edges.push({
                             id: edgeId,
-                            from: item.id.value,
+                            from: item.concept.value,
                             to: item.value.value,
                             label: "<i>" + item.propLabel.value + "</i>",
                             data: {propertyId: item.prop.value, source: source},
@@ -1198,10 +1198,10 @@ var Lineage_classes = (function () {
                     if (err) {
                         return MainController.UI.message(err);
                     }
-                   if(result.length==0) {
-                            $("#waitImg").css('display','none')
-                       return MainController.UI.message(" no  data found")
-                   }
+                    if (result.length == 0) {
+                        $("#waitImg").css('display', 'none')
+                        return MainController.UI.message(" no  data found")
+                    }
                     var visjsData = {nodes: [], edges: []}
                     var existingIds = visjsGraph.getExistingIdsMap()
                     var hasProperties = false
@@ -1303,8 +1303,8 @@ var Lineage_classes = (function () {
                 }
 
                 var data = result.results.bindings
-                if(data.length==0) {
-                    $("#waitImg").css('display','none')
+                if (data.length == 0) {
+                    $("#waitImg").css('display', 'none')
                     return MainController.UI.message(" no  data found")
                 }
 
@@ -1542,12 +1542,13 @@ var Lineage_classes = (function () {
             if (!node)
                 return;
             graphContext.clickOptions = event
-            var html = "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawChildren();\"> draw children</span>" +
-                "<span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawParents();\"> draw parents</span>" +
+            var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showNodeInfos();\">show node infos</span>" +
+                "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawChildren();\"> draw children</span>" +
+                "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawParents();\"> draw parents</span>" +
                 "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawSimilars();\"> draw similars</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.hideChildren();\">hide children</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showNodeInfos();\">show node infos</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showProperties();\">show Properties</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showObjectProperties();\">show ObjectProperties</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showRestrictions();\">show Restrictions</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">graph node neighborhood</span>"
 
 
@@ -1989,9 +1990,13 @@ var Lineage_classes = (function () {
                 }, 100)
 
             },
-            showProperties: function () {
+            showObjectProperties: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
                 Lineage_classes.drawObjectProperties([self.currentGraphNode.id], descendantsAlso)
+            },
+            showRestrictions :function() {
+                var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
+                Lineage_classes.drawRestrictions([self.currentGraphNode.id], descendantsAlso)
             }
         }
 

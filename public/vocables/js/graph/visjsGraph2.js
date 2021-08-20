@@ -471,10 +471,11 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv()
-        common.copyTextToClipboard(csv, function (err, result) {
+        common.copyTextToClipboard(csv,  function(err, result) {
+
             if (err)
                 MainController.UI.message(err);
-            MainController.UI.message(result);
+            MainController.UI.message("csv copied in system clipboard");
         })
 
     }

@@ -5,14 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/yasguy/yasqe.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/yasguy/yasr.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/yasguy/yasr.min.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/yasguy/yasr.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/yasguyOutput.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/yasr.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/export.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/export.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/annotateDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/annotateDialog.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/exportToTableDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/exportToTableDialog.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,8 +33,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -62,8 +69,8 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.6" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/tools/lineage" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.10" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/external/yasguy" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -73,24 +80,21 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\external\yasguy" />
+      <recent name="D:\webstorm\souslesensVocables\public" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools\lineage" />
       <recent name="D:\webstorm\souslesensVocables\config" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\evaluate" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools" />
-      <recent name="D:\webstorm\souslesensVocables\data\graphs" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables" />
       <recent name="D:\webstorm\souslesensVocables\config" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\annotate" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets" />
       <recent name="D:\webstorm\souslesensVocables\data" />
-      <recent name="D:\webstorm\souslesensVocables\data\parsedDocuments" />
     </key>
   </component>
   <component name="RunManager" selected="Node.js.bin\www">
-    <configuration name="PIbuilder..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" working-dir="$PROJECT_DIR$/bin/ADL/tools">
-      <method v="2" />
-    </configuration>
     <configuration name="definitions.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/definitions.js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
@@ -100,16 +104,19 @@
     <configuration name="exportGraph..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/exportGraph..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
+    <configuration name="lineage_classes.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/lineage">
+      <method v="2" />
+    </configuration>
     <configuration name="sparql_generic.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" working-dir="$PROJECT_DIR$/public/vocables/js/sparqlProxies">
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.lineage_classes.js" />
         <item itemvalue="Node.js.exportGraph..js" />
         <item itemvalue="Node.js.dirContentAnnotator..js" />
         <item itemvalue="Node.js.sparql_generic.js" />
         <item itemvalue="Node.js.definitions.js" />
-        <item itemvalue="Node.js.PIbuilder..js" />
       </list>
     </recent_temporary>
   </component>
@@ -215,7 +222,7 @@
       <workItem from="1627402710766" duration="117314000" />
       <workItem from="1628663424700" duration="14947000" />
       <workItem from="1628922683806" duration="92515000" />
-      <workItem from="1629283727555" duration="33755000" />
+      <workItem from="1629283727555" duration="53742000" />
     </task>
     <servers />
   </component>

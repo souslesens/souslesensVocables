@@ -613,10 +613,15 @@ var common = (function () {
         self.copyTextToClipboard = function (text, callback) {
             async function copy() {
                 try {
+
                     await navigator.clipboard.writeText(text);
-                    return "graph copied in clipboard"
-                    if (callback)
+                    alert ("graph copied in clipboard")
+                    if (callback) {
+
                         return callback(null, "graph copied in clipboard");
+                    }
+                    return "graph copied in clipboard"
+
                 } catch (err) {
                     MainController.UI.message("graph copy failed")
                     if (callback)

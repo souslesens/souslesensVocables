@@ -227,10 +227,12 @@ var Sparql_OWL = (function () {
 
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
-                    query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "}. OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label."
-                    if (options.skipRestrictions) {
-                        query += " filter ( NOT EXISTS {?broader" + (i) + " rdf:type owl:Restriction}) "
+
+                    query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
+                    if (true || options.skipRestrictions) {
+                        query += " ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction) "
                     }
+                    query+=" OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
 
                 } else {
@@ -240,7 +242,7 @@ var Sparql_OWL = (function () {
 
 
                 }
-                //    query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+
 
 
             }
@@ -548,7 +550,7 @@ var Sparql_OWL = (function () {
                 options = {}
             }
 
-            var filterStr = Sparql_common.setFilter("id", ids);
+            var filterStr = Sparql_common.setFilter("concept", ids);
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 

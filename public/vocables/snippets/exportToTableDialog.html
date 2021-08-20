@@ -1,35 +1,56 @@
 <style>
-    .exportTable_inputDiv{
+    .exportTable_inputDiv {
         display: flex;
         flex-direction: column;
         border-radius: 5px;
     }
 
-
+    #exportTable_jstreeDiv {
+        height: 600px !important;
+    }
 
 </style>
 
 
+<div id="exportTable_tabs">
 
-<div style="display: flex;flex-direction: row">
+    <ul>
+        <li><a href="#exportTable_tabs_params">Graph</a></li>
+        <li><a href="#exportTable_tabs_data">Missing terms</a></li>
 
-    <div class="exportTable_inputDiv" style="width: 50%" >
-        <div>properties</div>
-        <div id="exportTable_jstreeDiv" class="jstree"></div>
+
+    </ul>
+    <div id="exportTable_tabs_params">
+        <div style="display: flex;flex-direction: row">
+
+            <div class="exportTable_inputDiv" style="width: 50%">
+                <div>properties</div>
+                <div id="exportTable_jstreeDiv" class="jstree"></div>
+            </div>
+
+
+            <div style="width: 50%">
+                output<select id="exportTable_outputType">
+                <option>Table</option>
+                <option>Clipboard</option>
+            </select>
+                <br>lang <select id="exportTable_lang" multiple="multiple">
+                <option></option>
+                <option selected="selected">en</option>
+                <option>fr</option>
+                <option>sp</option>
+            </select>
+                <button onclick="Export.execExport()">Export</button>
+                <button onclick="Export.cancelExportDialog()">Cancel</button>
+
+            </div>
+        </div>
     </div>
 
 
+    <div id="exportTable_tabs_data">
+        <table  id="exportTable_dataTableDiv" style="width:1000px;height: 600px">
 
-
-
-
-<div class="exportTable_inputDiv" style="width: 50%" >
-    <select id="exportTable_outputType" >
-        <option>Table</option>
-        <option>Clipboard</option>
-    </select>
-    <button onclick="Export.execExport()">Export</button>
-    <button onclick="Export.cancelExportDialog()">Cancel</button>
-
-</div>
+        </table >
+    </div>
 </div>

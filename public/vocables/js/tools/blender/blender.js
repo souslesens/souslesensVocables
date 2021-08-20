@@ -1234,12 +1234,13 @@ var Blender = (function () {
         }
 
         self.copyCsv = function () {
-          //  Export.showExportDatDialog(self.currentSource, {})
-           // return
+           Export.showExportDatDialog(self.currentSource, "BLENDER",{})
+           return
             var collection = Collection.currentCollectionFilter
 
 
             Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
+
 
 
                 if (err) {

@@ -320,8 +320,9 @@ var ADLbrowserQuery = (function () {
             var filterLabel
             if (dialogFilterStr == "")
                 filterLabel = "all"
-            else
+            else {
                 filterLabel = self.model[property].label + " " + operator + " " + value
+            }
 
             dialogFilterStr += varName + "    rdf:type " + varName + "Type."
             dialogFilterStr += "filter(   " + varName + "Type =<" + field + "> )"
@@ -337,7 +338,7 @@ var ADLbrowserQuery = (function () {
                     logicalMode: logicalMode,
                     varName: varName,
                     count: 1,
-                    classId:field,
+                    classId: field,
                     predicate: self.currentQueryDialogPredicates[predicateIndex]
                 }
                 self.executeQuery(self.currentNode, options, function (err, queryResult) {
@@ -618,7 +619,7 @@ var ADLbrowserQuery = (function () {
                         self.graphActions.removeFilter(filterData.id)
 
                     }
-                    if( visjsGraph.data &&  visjsGraph.data.nodes) {
+                    if (visjsGraph.data && visjsGraph.data.nodes) {
                         visjsGraph.data.nodes.remove(ADLbrowserGraph.zeroCountIds)
                     }
                     ADLbrowserGraph.zeroCountIds = []
@@ -745,7 +746,6 @@ var ADLbrowserQuery = (function () {
             }
 
 
-
             // join classes (anonym predicate)
             var message = null
             var filterSubType
@@ -753,48 +753,44 @@ var ADLbrowserQuery = (function () {
 
             var varName2 = varName;
 
-            console.log(varName2+"--------------------")
+            console.log(varName2 + "--------------------")
 
 
+            /* if (index == 0 && options.predicate) {// when count (predicate comes from dialog
+                 filterSubType=options.predicate.subject
+                 filterObjType=options.predicate.object
+                 predicateStr = " <" + options.predicate.predicate + "> "
+                 if (true || options.predicate.inverse)
+                     predicateStr += "|^" + predicateStr
+             } else {
+                 var previouPredicate = queryFilterNodes[index - 1].predicate
+                 filterSubType=queryFilterNodes[index - 1].predicate.subject
+                 filterObjType=queryFilterNodes[index - 1].predicate.object
+                 predicateStr = " <" + previouPredicate.predicate + "> "
+                 if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
+                     predicateStr += "|^" + predicateStr
+             }*/
 
-
-           /* if (index == 0 && options.predicate) {// when count (predicate comes from dialog
-                filterSubType=options.predicate.subject
-                filterObjType=options.predicate.object
-                predicateStr = " <" + options.predicate.predicate + "> "
-                if (true || options.predicate.inverse)
-                    predicateStr += "|^" + predicateStr
-            } else {
-                var previouPredicate = queryFilterNodes[index - 1].predicate
-                filterSubType=queryFilterNodes[index - 1].predicate.subject
-                filterObjType=queryFilterNodes[index - 1].predicate.object
-                predicateStr = " <" + previouPredicate.predicate + "> "
-                if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
-                    predicateStr += "|^" + predicateStr
-            }*/
-
-            if(  options.predicate) {// links new filter predicate to a previous varName matching
-                var   predicateStr = " <" + options.predicate.predicate + "> "
-                predicateStr= predicateStr+ "|^" + predicateStr
-                    var previousVarName=null;
-                    if (queryFilterNodes.length == 1) {// the first query has no predicate
-                        previousVarName = queryFilterNodes[0].varName
-                        predicateStr=" " + varName2 + predicateStr + previousVarName + ". "
-                        queryFilterNodes[0].filter+=predicateStr
-                        self.currentNode.filter+=predicateStr;
-                    } else {
-                        queryFilterNodes.forEach(function (filterNodeData, index2) {
-                            if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
-                                previousVarName = filterNodeData.varName
-                                predicateStr=" " + varName2 + predicateStr + previousVarName + ". "
-                                filterNodeData.filter+=predicateStr
-                                self.currentNode.filter+=predicateStr;
-                            }
-                        })
-                    }
+            if (options.predicate) {// links new filter predicate to a previous varName matching
+                var predicateStr = " <" + options.predicate.predicate + "> "
+                predicateStr = predicateStr + "|^" + predicateStr
+                var previousVarName = null;
+                if (queryFilterNodes.length == 1) {// the first query has no predicate
+                    previousVarName = queryFilterNodes[0].varName
+                    predicateStr = " " + varName2 + predicateStr + previousVarName + ". "
+                    queryFilterNodes[0].filter += predicateStr
+                    self.currentNode.filter += predicateStr;
+                } else {
+                    queryFilterNodes.forEach(function (filterNodeData, index2) {
+                        if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
+                            previousVarName = filterNodeData.varName
+                            predicateStr = " " + varName2 + predicateStr + previousVarName + ". "
+                            filterNodeData.filter += predicateStr
+                            self.currentNode.filter += predicateStr;
+                        }
+                    })
                 }
-
-
+            }
 
 
             //build query with all previous filters and varnames
@@ -804,35 +800,31 @@ var ADLbrowserQuery = (function () {
                     return
 
 
-                    /*    if (index == 0) {
-                            if (!varName2) {
-                                var filter2 = filterNodeData.filter;
-                                where += filter2
-                                return;
-                            }
-                            previousVarName = queryFilterNodes[index].varName
-                        } else {
-                            previousVarName = queryFilterNodes[index - 1].varName
-                            varName2 = queryFilterNodes[index].varName
+                /*    if (index == 0) {
+                        if (!varName2) {
+                            var filter2 = filterNodeData.filter;
+                            where += filter2
+                            return;
                         }
-                        where += "" + varName2 + predicateStr + previousVarName + ". "*/
-
-
-
+                        previousVarName = queryFilterNodes[index].varName
+                    } else {
+                        previousVarName = queryFilterNodes[index - 1].varName
+                        varName2 = queryFilterNodes[index].varName
+                    }
+                    where += "" + varName2 + predicateStr + previousVarName + ". "*/
 
 
                 where += filterNodeData.filter
 
 
-                varName2 =filterNodeData.varName
-                if ( !options.count) {
+                varName2 = filterNodeData.varName
+                if (!options.count) {
                     where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
-                  //  where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
-                  //  where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
+                    //  where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
+                    //  where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
                     where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
 
                 }
-
 
 
             })
@@ -919,8 +911,76 @@ var ADLbrowserQuery = (function () {
             return ADLassetGraph.drawClassesAndPropertiesGraph(ADLbrowser.currentSource, graphDiv, options, function (err, result) {
                 self.classes = result.classes
                 self.model = result.model
+                self.initClassesTab(result.classes, result.model)
 
             })
+
+
+        }
+        self.initClassesTab = function (classes, model) {
+            $("#ADLbrowser_accordion").accordion("option", {active: 0});
+            var classesArray = Object.keys(classes)
+            classesArray.sort()
+            var distinctNode = {}
+            var jstreeData = []
+            classesArray.forEach(function (classId) {
+                var id1 = common.getRandomHexaId(5)
+                if (!distinctNode[id1]) {
+                    distinctNode[id1] = 1
+                    jstreeData.push({
+                        id: id1,
+                        text: model[classId].label,
+                        parent: "#",
+                        type: "class",
+                        data: {
+                            id: classId,
+                            label: model[classId].label
+                        }
+                    })
+                }
+                for (var predicate in classes[classId]) {
+                    var id2 = common.getRandomHexaId(5)
+                    if (!distinctNode[id2]) {
+                        distinctNode[id2] = 1
+                        jstreeData.push({
+                            id: id2,
+                            text: model[predicate].label,
+                            parent: id1,
+                            type: "owl:ObjectProperty",
+                            data: {
+                                id: predicate,
+                                label: model[predicate].label
+                            }
+                        })
+                    }
+                    classes[classId][predicate].forEach(function (object) {
+                        var id3 = common.getRandomHexaId(5)
+                        if (!distinctNode[id3]) {
+                            distinctNode[id3] = 1
+                            jstreeData.push({
+
+                                id: id3,
+                                text: model[object].label,
+                                parent: id2,
+                                type: "class",
+                                data: {
+                                    id: object,
+                                    label: model[object].label
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+            var options = {
+                selectTreeNodeFn: function (event, obj) {
+                    self.currentNode = obj.node;
+
+                    self.showQueryParamsDialog({x: 300, y: 300})
+                }
+
+            }
+            common.jstree.loadJsTree("ADLbrowser_ClassesDiv", jstreeData, options)
 
 
         }
@@ -964,10 +1024,10 @@ var ADLbrowserQuery = (function () {
                 var label;
 
                 for (var type in types) {
-                    if(self.model[type])
-                        label=self.model[type].label
+                    if (self.model[type])
+                        label = self.model[type].label
                     else
-                        label=Sparql_common.getLabelFromId(type)
+                        label = Sparql_common.getLabelFromId(type)
                     jstreeData.push({
                         id: type,
                         text: label,

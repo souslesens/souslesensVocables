@@ -49,6 +49,7 @@ self.loginMode = "none";
         adlQueryMode: "SPARQL", //or SQL
         queryLimit: 1000,
         maxDistinctValuesForAdvancedMapping: 100000,
+        browserMaxClassesToDrawClassesGraph:15,
         oneModelDictionaryGraphURI:"http://data.total.com/resource/one-model/dictionary/",
         topRdlObjects: {
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {

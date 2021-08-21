@@ -365,7 +365,7 @@ var ADLassetGraph = (function () {
         self.classes = {}
         var visjsData = {nodes: [], edges: []}
 
-
+MainController.UI.message("Processing data")
         async.series([
                 //get adl types Stats
                 function (callbackSeries) {
@@ -438,7 +438,8 @@ var ADLassetGraph = (function () {
 
                 function (callbackSeries) {
 
-
+if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawClassesGraph)
+    return callbackSeries()
                     var existingNodes = {}
                     var newParents = []
                     var topNodeId
@@ -553,29 +554,38 @@ var ADLassetGraph = (function () {
                 if (err)
                     return alert(err)
 
-                if (!graphDiv) {
-                    graphDiv = "ADLmappings_GlobalGraph"
-                    $("#ADLassetGraphDiv").dialog("option", "title", "Asset Classes and properties");
-                    $("#ADLassetGraphDiv").dialog("open")
-                    setTimeout(function () {
+                MainController.UI.message("Drawing model graph")
+                if(true || visjsData.nodes.length<=Config.ADL.browserMaxClassesToDrawClassesGraph) {
 
-                        $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
+                    if (!graphDiv) {
+                        graphDiv = "ADLmappings_GlobalGraph"
+                        $("#ADLassetGraphDiv").dialog("option", "title", "Asset Classes and properties");
+                        $("#ADLassetGraphDiv").dialog("open")
+                        setTimeout(function () {
+
+                            $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
+                            // $("#mainDialogDiv").height()
+                            if (!options)
+                                options = {}
+                            options.keepNodePositionOnDrag = true
+                            visjsGraph.draw(graphDiv, visjsData, options)
+                            visjsGraph.network.fit()
+                        })
+                    } else {
+                        //  $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
                         // $("#mainDialogDiv").height()
                         if (!options)
                             options = {}
-                        options.keepNodePositionOnDrag = true
                         visjsGraph.draw(graphDiv, visjsData, options)
                         visjsGraph.network.fit()
-                    })
-                } else {
-                    //  $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
-                    // $("#mainDialogDiv").height()
-                    if (!options)
-                        options = {}
-                    visjsGraph.draw(graphDiv, visjsData, options)
-                    visjsGraph.network.fit()
 
+                    }
                 }
+                if(!self.model["http://www.w3.org/2000/01/rdf-schema#label"])
+                    self.model["http://www.w3.org/2000/01/rdf-schema#label"]="label"
+
+                MainController.UI.message("",true)
+
                 if (callback)
                     return callback(null, {model: self.model, classes: self.classes})
 

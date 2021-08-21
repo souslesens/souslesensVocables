@@ -241,11 +241,9 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
-            "export <button onclick='visjsGraph.graphCsvToClipBoard()'>CSV</button>" +
-            "<button onclick='visjsGraph.toSVG()'>SVG img</button>" +
-            "<button onclick='visjsGraph.toGraphMl()'>toGraphMl</button>" +
-            "<button onclick='visjsGraph.exportGraph()'>copy Graph</button>" +
+        var htmlPlus = ""
+
+
             "<button onclick='visjsGraph.saveGraph()'>save Graph</button>" +
             "Load<select id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>"+
             "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>addToCurrentGraph"
@@ -253,7 +251,9 @@ var visjsGraph = (function () {
 
         if (true) {
             if (!$("#graphButtons").length) {
-                html += "&nbsp;&nbsp;Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
+
+                var html ="<div  id='graphButtons' style='position: relative; top:0px;left:10px'>" +
+                    "Graph :  &nbsp;&nbsp;Layout <select  onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
                     "<option >standard</option>" +
 
@@ -262,6 +262,10 @@ var visjsGraph = (function () {
                     "</div>" +
 
                     "</select>"
+                html += "export <button onclick='Export.showExportDatDialog()'>Export...</button>"
+
+                if(true)
+                    html+=" | "+htmlPlus
 
                 var parent = $("#" + divId).parent()
 

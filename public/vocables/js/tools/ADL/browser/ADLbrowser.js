@@ -44,6 +44,7 @@ var ADLbrowser = (function () {
             //  self.loadAdlJstree()
             self.jstree.load.loadRdl();
             self.initOneModelDictionary()
+         //   $("#ADLbrowserItemsjsTreeDiv").css("height","400px !important")
 
             SourceBrowser.currentTargetDiv = "ADLbrowserItemsjsTreeDiv"
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL")
@@ -195,7 +196,8 @@ var ADLbrowser = (function () {
     self.showNodeInfos = function (node) {
         if (!node)
             node = self.currentJstreeNode
-        MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+        source = self.currentSource
+        MainController.UI.showNodeInfos(source, node.data.id, "mainDialogDiv")
     }
 
     self.getRdlJstreeData = function (parent, parentType, callback) {
@@ -259,6 +261,7 @@ var ADLbrowser = (function () {
                 $("#ADLbrowser_rdlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_rdlJstreeDiv")
             },
             onSelectNodeAdlList: function (event, data) {
+                self.currentJstreeNode=data.node
                 $("#ADLbrowserItemsjsTreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowserItemsjsTreeDiv")
                 if (data.node.parent != "#") {// after search
                   ADLbrowserQuery.setFilterFromSearchedTerm(data.node)
@@ -276,6 +279,7 @@ var ADLbrowser = (function () {
 
             },
             onSelectNodeOneModel: function (e, obj) {
+                ADLbrowser.currentJstreeNode = obj.node;
                 //   ADLbrowser.currentJstreeNode = obj.node;
                 $("#ADLbrowser_oneModelJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("ADLbrowser_oneModelJstreeDiv")
             }
@@ -302,6 +306,7 @@ var ADLbrowser = (function () {
                         jstreeData.push({
                             id: source,
                             text: source,
+                            type:"class",
                             parent: "#"
                         })
                 }

@@ -31,7 +31,9 @@
     }
 
     .ADLbrowser_tab {
-        height: 600px;
+        height: 700px;
+        width:400px;
+        overflow: hidden;
     }
 
     #ADLbrowserQueryParamsDialog * {
@@ -43,7 +45,7 @@
 <div>
 
 
-    <div id="ADLbrowser_Tabs" style="width:340px;">
+  <!--  <div id="ADLbrowser_Tabs" style="width:340px;">-->
 
         <div class="ADLbrowser_tab" id="ADLbrowser_ItemTab">
             <div style="margin: 5px">
@@ -64,14 +66,15 @@
 
 
             </div>
-            <div id="ADLbrowser_sourceLabelDiv"
-                 style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
-
-            <div class="jstree" id="ADLbrowserItemsjsTreeDiv"></div>
+         <!--   <div id="ADLbrowser_sourceLabelDiv"
+                 style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>-->
+            <div style="overflow: auto" >
+                <div class="jstree" id="ADLbrowserItemsjsTreeDiv" style="height: 300px !important;width:1000px  !important ;" ></div>
+            </div>
 
         </div>
 
-    </div>
+    <!--</div>-->
 </div>
 
 
@@ -103,11 +106,12 @@
 
         <div>
             <!--   <button onclick="ADLbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
-         <!--   <button onclick=" ADLbrowserQuery.listQueryParamsDialogFieldValues() ;$('#ADLbrowserQueryParams_operator').val('=')">
+            <!--   <button onclick=" ADLbrowserQuery.listQueryParamsDialogFieldValues() ;$('#ADLbrowserQueryParams_operator').val('=')">
 
-                LIST </button>-->
+                   LIST </button>-->
             <select id="ADLbrowserQueryParams_valuesSelect"
-                    onchange="ADLbrowserQuery.onQueryParamsListChange()"  onclick="ADLbrowserQuery.onQueryParamsListClick()" style="width: 200px"></select>
+                    onchange="ADLbrowserQuery.onQueryParamsListChange()"
+                    onclick="ADLbrowserQuery.onQueryParamsListClick()" style="width: 200px"></select>
         </div>
         <div>
             predicate<select id="ADLbrowserQueryParams_predicateSelect"></select>

@@ -1233,10 +1233,10 @@ var Blender = (function () {
 
         }
 
-        self.copyCsv = function () {
+        self.export = function () {
            Export.showExportDatDialog(self.currentSource, "BLENDER",{})
            return
-            var collection = Collection.currentCollectionFilter
+         /*   var collection = Collection.currentCollectionFilter
 
 
             Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
@@ -1316,7 +1316,7 @@ var Blender = (function () {
                 })
 
 
-            })
+            })*/
         }
         self.showFilteredTaxonomyTree = function (options, callback) {
 

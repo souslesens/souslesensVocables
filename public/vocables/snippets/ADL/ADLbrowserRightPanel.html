@@ -30,32 +30,37 @@
 </style>
 
 <div>
+    <div>
+
+        <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
+        <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
+        <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
+        <button onclick="ADLbrowserQuery.graphActions.backToModel()">Back to Model</button>
+        <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
+
+
+    </div>
 
 
     <div id="ADLbrowser_accordion" style="width:360px;">
 
-     <!--   <ul>
-            <li><a href="#ADLbrowserTabs_AdlTab">ADL</a></li>
-            <li><a href="#ADLbrowser_GraphTab">Graph</a></li>
-            <li><a href="#ADLbrowser_TableTab">Table</a></li>
+        <!--   <ul>
+               <li><a href="#ADLbrowserTabs_AdlTab">ADL</a></li>
+               <li><a href="#ADLbrowser_GraphTab">Graph</a></li>
+               <li><a href="#ADLbrowser_TableTab">Table</a></li>
 
 
 
-        </ul>-->
+           </ul>-->
+
+        <h3><span class="title">Classes </span></h3>
+        <div id="ADLbrowser_ClassesTab">
+            <div id="ADLbrowser_ClassesDiv" class="jstree"></div>
+        </div>
 
         <h3><span class="title">ADL </span></h3>
         <div id="ADLbrowserTabs_AdlTab" style="width:100%; display: flex;flex-direction: column">
 
-            <div>
-
-                <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
-                <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
-                <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
-                <button onclick="ADLbrowserQuery.graphActions.backToModel()">Back to Model</button>
-                <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
-
-
-            </div>
 
             <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column">
 
@@ -71,10 +76,11 @@
 
         <h3><span class="title">Graph </span></h3>
         <div id="ADLbrowser_GraphTab">
-            expand<select id="ADLbrowserGraph_expandSelect" onchange="ADLbrowserGraph.expandGraph($(this).val())"></select><br>
-<div>
+            expand<select id="ADLbrowserGraph_expandSelect"
+                          onchange="ADLbrowserGraph.expandGraph($(this).val())"></select><br>
+            <div>
 
-</div>
+            </div>
             <div id="ADLbrowserGraph_nodesJstree" class="jstree" style="width: 300px;height: 400px">
 
             </div>
@@ -82,13 +88,13 @@
 
         </div>
 
+
+
+
         <h3><span class="title">Table </span></h3>
         <div id="ADLbrowser_TableTab">
 
         </div>
-
-
-
 
 
     </div>
@@ -105,14 +111,14 @@
 
         $("#ADLbrowser_accordion").accordion()
         $("#ADLbrowser_accordion").accordion("option", {active: 0});
-        $("#ADLbrowser_accordion").on("accordionbeforeactivate",function( event, ui ) {
-            if(!ADLmappings.checkMappingEditionSave())
+        $("#ADLbrowser_accordion").on("accordionbeforeactivate", function (event, ui) {
+            if (!ADLmappings.checkMappingEditionSave())
                 return false;
         })
         $("#ADLbrowser_accordion").on("accordionactivate", function (event, ui) {
 
 
-            if ( ui.newPanel[0].id == "ADLbrowser_GraphTab") {
+            if (ui.newPanel[0].id == "ADLbrowser_GraphTab") {
                 ADLbrowserGraph.initGraphTab()
 
             }

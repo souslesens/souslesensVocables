@@ -15,8 +15,8 @@
 <div id="exportTable_tabs">
 
     <ul>
-        <li><a href="#exportTable_tabs_params">Graph</a></li>
-        <li><a href="#exportTable_tabs_data">Missing terms</a></li>
+        <li><a href="#exportTable_tabs_params">Parameters</a></li>
+        <li><a href="#exportTable_tabs_data">Table</a></li>
 
 
     </ul>
@@ -34,12 +34,13 @@
                 <option>Table</option>
                 <option>Clipboard</option>
             </select>
-                <br>lang <select id="exportTable_lang" multiple="multiple">
+                lang <select id="exportTable_lang" multiple="multiple">
                 <option></option>
                 <option selected="selected">en</option>
                 <option>fr</option>
                 <option>sp</option>
             </select>
+                <br>
                 <button onclick="Export.execExport()">Export</button>
                 <button onclick="Export.cancelExportDialog()">Cancel</button>
 
@@ -49,7 +50,7 @@
 
 
     <div id="exportTable_tabs_data">
-        <table  id="exportTable_dataTableDiv" style="width:1000px;height: 600px">
+       <!-- <table  id="exportTable_dataTableDiv" style="width:800px;height: 600px">-->
 
         </table >
     </div>

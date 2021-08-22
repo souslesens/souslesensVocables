@@ -27,7 +27,8 @@ var Lineage_classes = (function () {
         self.defaultEdgeArrowType = "triangle"
         self.defaultEdgeColor = "#aaa"
         self.restrictionColor = "orange"
-        self.maxChildrenDrawn = 15
+        self.maxChildrenDrawn = 30;
+        self.soucesLevelMap={}
 
         self.onLoaded = function () {
             $("#sourceDivControlPanelDiv").html("")
@@ -182,7 +183,8 @@ var Lineage_classes = (function () {
                 return;
             if (source == "QUANTUM_MODEL")
                 self.QuantumModelMapping = true
-            Lineage_common.currentSource = source
+            Lineage_common.currentSource = source;
+            self.soucesLevelMap[source]={children:0}
 
             self.registerSource(source)
 
@@ -206,14 +208,14 @@ var Lineage_classes = (function () {
                 $("#Lineage_levelDepthSpan").html("level :" + expandedLevels[source].length)
                 var color = self.getSourceColor(source)
                 var shape = Lineage_classes.defaultShape
-                var visjsData = GraphController.toVisjsData(null, result, null, "#", "topConcept",
+                var visjsData = GraphController.toVisjsData(null, result, null, "topConcept", "#",
                     {
-                        from: {
+                        to: {
                             shape: "box",
                             color: color,
                             size: Lineage_classes.defaultShapeSize
                         },
-                        to: {
+                        from: {
                             shape: shape,
                             color: color,
                             size: Lineage_classes.defaultShapeSize
@@ -228,7 +230,7 @@ var Lineage_classes = (function () {
                                 scaleFactor: 0.5
                             },
                         },
-                    })
+                    },0)
 
 
                 self.drawNewGraph(visjsData)
@@ -292,6 +294,7 @@ var Lineage_classes = (function () {
                 else
                     return alert("select a source")
             }
+            self.soucesLevelMap[source].children+=1
             if (nodeIds) {
                 /// parentIds = nodeIds
                 //    parentIds=common.getAllDescendants("",nodeIds)
@@ -362,7 +365,7 @@ var Lineage_classes = (function () {
                                 size: Lineage_classes.defaultShapeSize,
                                 value: map[key].length,
                                 color: color,
-                                data: {cluster: map[key], source: source, parent: key}
+                                data: {cluster: map[key],id: key + "_cluster",label:"CLUSTER : "+ map[key].length + "children", source: source, parent: key,varName:key + "_cluster",graphLevel:self.soucesLevelMap[source].children}
                             })
                         }
                         var edgeId = key + "_" + key + "_cluster"
@@ -370,11 +373,11 @@ var Lineage_classes = (function () {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
                                 id: edgeId,
-                                from: key,
-                                to: key + "_cluster",
+                                to: key,
+                                from: key + "_cluster",
                                 color: Lineage_classes.defaultEdgeColor,
                                 arrows: {
-                                    to: {
+                                    from: {
                                         enabled: true,
                                         type: Lineage_classes.defaultEdgeArrowType,
                                         scaleFactor: 0.5,
@@ -389,7 +392,7 @@ var Lineage_classes = (function () {
                     } else {
                         var existingIds = visjsGraph.getExistingIdsMap()
                         var visjsData2 = {nodes: [], edges: []}
-
+                        var varName="child"
                         map[key].forEach(function (item) {
 
                             var nodeSource = source;
@@ -412,7 +415,8 @@ var Lineage_classes = (function () {
 
 
                             }
-                            var data = {id: item.child1.value, label: item.child1Label.value, source: nodeSource}
+
+                            var data = {id: item.child1.value, label: item.child1Label.value, source: nodeSource,varName:varName,graphLevel:self.soucesLevelMap[source].children}
                             expandedLevel.push(item.child1.value)
 
 
@@ -434,11 +438,11 @@ var Lineage_classes = (function () {
                                 existingIds[edgeId] = 1
                                 visjsData2.edges.push({
                                     id: edgeId,
-                                    from: item.concept.value,
-                                    to: item.child1.value,
+                                    to: item.concept.value,
+                                    from: item.child1.value,
                                     color: Lineage_classes.defaultEdgeColor,
                                     arrows: {
-                                        from: {
+                                        to: {
                                             enabled: true,
                                             type: Lineage_classes.defaultEdgeArrowType,
                                             scaleFactor: 0.5
@@ -543,7 +547,9 @@ var Lineage_classes = (function () {
                     color: color
                 },
                 data: {source: clusterNode.data.source}
-            })
+            }
+            ,clusterNode.data.graphLevel
+            )
 
             visjsGraph.data.nodes.add(visjsData.nodes)
             visjsGraph.data.edges.add(visjsData.edges)
@@ -687,7 +693,8 @@ var Lineage_classes = (function () {
                                     similars.push({
                                         id: item.concept.value,
                                         label: item.conceptLabel.value,
-                                        source: source
+                                        source: source,
+                                        varName:"similar in "+source
                                     });
                                     ids.push(item.concept.value)
                                 })
@@ -722,6 +729,7 @@ var Lineage_classes = (function () {
                         var newEdges = []
                         if (true) {
                             similars.forEach(function (item) {
+
                                     if (!existingNodes[item.id]) {
                                         existingNodes[item.id] = 1
                                         var color = self.getSourceColor(item.source)
@@ -1480,7 +1488,7 @@ var Lineage_classes = (function () {
                                     visjsData.nodes.push({
                                         id: source,
                                         label: source,
-                                        data: {},
+                                        data: {id:source,label:source,type:source,varName:"source "+source},
                                         shape: "box",
                                         color: self.getSourceColor(source)
                                     })

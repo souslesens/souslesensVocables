@@ -183,58 +183,151 @@ var Export = (function () {
     self.execExport_Graph = function () {
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
-
-        var nodesMap={}
-        nodes.forEach(function(node){
-            if( !nodesMap[node.id]){
-                nodesMap[node.id]={data:node.data, targets:[]}
-
+// set nodesMap
+        var nodesMap = {};
+        var varNames={}
+        nodes.forEach(function (node,index) {
+            if (!nodesMap[node.id]) {
+                nodesMap[node.id] = {data: node.data, parent: "#", parents: []}
+                if(!varNames[node.data.varName]){
+                    varNames[node.data.varName]=[]
+                }
+                varNames[node.data.varName].push(index)
             }
         })
+//set each node parent
+        //   var treeMap={};
+        edges.forEach(function (edge) {
 
-
-        edges.forEach(function(edge){
-
-            nodesMap[edge.from].targets.push(edge.to)
-
+            // nodesMap[edge.from].targets.push(nodesMap[edge.to].data)
+            if (edge.from == "http://w3id.org/readi/rdl/Z101013679")
+                var x = 3
+            nodesMap[edge.from].parent = edge.to
 
 
         })
 
+        //set ancestors array
+        function recurse(childNodeId, ancestor) {
+            if (ancestor == "#")
+                return
+            if (childNodeId == "http://w3id.org/readi/rdl/Z101013679")
+                var x = 3
+            if (nodesMap[childNodeId].parents.length > 5)
+                var x = 3
+            nodesMap[childNodeId].parents.splice(0, 0, ancestor)
+            if (true || ancestor != "#") {
+                recurse(childNodeId, nodesMap[ancestor].parent)
 
 
-        function getNodeStr(node) {
-            if (node)
-                var str = node.id + sep + node.label;
-            if (dataFields && node.data) {
-                sep + dataFields.forEach(function (field) {
-                    str += node.data[field]
-                })
             }
 
-            return str;
+
         }
 
-        nodes.forEach(function (node) {
-            nodesMap[node.id] = node
-            if (edges.length == 0) {
-                csvStr += getNodeStr(node) + "\n"
+        for (var nodeId in nodesMap) {
+            if (nodeId == "http://w3id.org/readi/rdl/Z101013679")
+                var x = 3
+            recurse(nodeId, nodesMap[nodeId].parent)
+        }
+
+
+        var maxDepth = 0
+        var index=0
+        for (var nodeId in nodesMap) {
+            var item = nodesMap[nodeId]
+            maxDepth = Math.max(maxDepth, item.parents.length)
+        }
+
+
+        var dataSet = []// for children varnames
+        var dataSet0 = [] //for others varNames
+        for (var nodeId in nodesMap) {
+
+            var item = nodesMap[nodeId];
+
+            //process columns for subclasses
+            if (item.data.varName == "child") {
+                var line = []
+                for (var i = 0; i < maxDepth; i++) {
+
+                    if (i < item.parents.length) {
+                        if (true || item.parents[i] != "#") {
+                            var parentNode = nodesMap[item.parents[i]]
+                            if (parentNode && parentNode.data) {
+                                line.push(parentNode.data.label);
+
+                            }
+                        }
+                    } else {
+                        ;//  line.push("");
+                    }
+
+                }
+                line.push(item.data.label)
+                dataSet.push(line)
+            }
+
+            // other varNames (not child)
+            else{
+                var line = []
+                for(var varName in varNames){
+                   if(item.data.varName==varName)// && varNames[varName].indexOf(index)==0)
+                       line.push(item.data.label)
+                       else
+                           line.push("")
+                   }
+
+                dataSet0.push(line)
+
+            }
+            index+=1
+        }
+
+
+
+        var x=dataSet0
+
+        // suppress incomplet lines (doublons)
+        dataSet = dataSet.reverse();
+        var dataSet2 = []
+        var linesStr = ""
+        dataSet.forEach(function (line) {
+            var lineStr = ""
+            line.forEach(function (item) {
+                lineStr += item
+            })
+            if (linesStr.indexOf(lineStr) < 0) {
+                linesStr += lineStr
+
+                var voidItems=[]
+               for(var i=line.length;i<=maxDepth;i++){
+                   voidItems.push("")
+               }
+
+              line=line.concat(voidItems)
+                dataSet2.push(line)
             }
         })
-        edges.sort(function (a, b) {
-            if (a.from > b.from)
-                return 1;
-            if (a.from < b.from)
-                return -1;
-            return 0;
-        })
-        edges.forEach(function (edge) {
-            var edgeLabel = "->";
-            if (edge.label)
-                edgeLabel = edge.label;
-            csvStr += getNodeStr(nodesMap[edge.from]) + sep + edgeLabel + sep + getNodeStr(nodesMap[edge.to]) + "\n"
 
-        })
+
+        var cols = []
+
+
+        if(dataSet2.length>0){
+            for (var i = 0; i <= maxDepth; i++) {
+                cols.push({title: "child_" + i})
+            }
+            self.showDataTable(cols, dataSet2)
+
+        }else{
+            for( var varName in varNames){
+                cols.push({title:varName})
+            }
+
+            self.showDataTable(cols, dataSet0)
+        }
+
 
 
     }

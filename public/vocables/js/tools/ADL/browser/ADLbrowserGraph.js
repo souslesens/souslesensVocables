@@ -191,7 +191,8 @@ var ADLbrowserGraph = (function () {
                                 source: ADLbrowser.currentSource,
 
                                 id: id,
-                                label: label
+                                label: label,
+                                varName:key
                             }
 
                         })
@@ -209,8 +210,10 @@ var ADLbrowserGraph = (function () {
                                 edgeId = id + "_" + target
                                 edgeNode = {
                                     id: edgeId,
-                                    from: id,
-                                    to: target,
+                                    to: id,
+                                    from: target,
+                                    property:filter.predicate
+
                                 }
                             }
                         } else if (filter.predicate && filter.predicate.subject == type) {
@@ -222,7 +225,8 @@ var ADLbrowserGraph = (function () {
                                 edgeNode = {
                                     id: edgeId,
                                     from: target,
-                                    to: id
+                                    to: id,
+                                    property:filter.predicate
                                 }
                             }
                         }
@@ -353,7 +357,8 @@ var ADLbrowserGraph = (function () {
                                 source: ADLbrowser.currentSource,
                                 id: objId,
                                 label: item.objLabel.value,
-                                source: ADLbrowser.currentSource
+                                source: ADLbrowser.currentSource,
+                                varName: item.objType.value,
                             },
                             size: self.defaultNodeSize,
 
@@ -366,6 +371,7 @@ var ADLbrowserGraph = (function () {
                             id: edgeId,
                             from: self.currentGraphNode.data.id,
                             to: objId,
+                            property:predicate
 
 
                         })

@@ -15,7 +15,7 @@ var GraphController = (function () {
     defaultNodeShape = "dot"
 
 
-    self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions) {
+    self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions, fromLevel) {
         self.defaultNodeColor = visjsGraph.globalOptions.nodes.color || self.defaultNodeColor
         self.defaultNodeShape = visjsGraph.globalOptions.nodes.coshapelor || defaultNodeShape
 
@@ -63,7 +63,7 @@ var GraphController = (function () {
                     ;
                 } else {
                     if (!item[fromVar])
-                        return ;//console.log(JSON.stringify(item));
+                        return;//console.log(JSON.stringify(item));
                     fromId = item[fromVar].value
                     fromLabel = item[fromVar + "Label"].value;
                 }
@@ -78,19 +78,31 @@ var GraphController = (function () {
                         size: visjOptions.to.size || 5,
                         color: visjOptions.from.color || self.defaultNodeColor
                     }
+                    node.data = {}
                     if (visjOptions.data)
-                        node.data = visjOptions.data
+                        node.data =  JSON.parse(JSON.stringify(visjOptions.data));
+                    node.data.id = fromId;
+                    node.data.label = fromLabel;
+                    node.data.varName = fromVar;
+                    node.data.graphLevel = fromLevel
                     visjsData.nodes.push(node)
                 }
             }
 
-            if (toVar && item[toVar]) {
-                var toId = item[toVar].value || "#";
+            if (toVar && (item[toVar] ||toVar=="#") ) {
+                var toId
                 var toLabel
-                if (!item[toVar + "Label"])
-                    toLabel = toId
-                else
-                    toLabel = item[toVar + "Label"].value;
+                if (toVar == "#") {
+                    toId = "#"
+                    toLabel = visjOptions.rootLabel || "#"
+                } else {
+                    toId = item[toVar].value || "#";
+
+                    if (!item[toVar + "Label"])
+                        toLabel = toId
+                    else
+                        toLabel = item[toVar + "Label"].value;
+                }
 
                 if (!existingIds[toId]) {
                     existingIds[toId] = 1;
@@ -102,8 +114,13 @@ var GraphController = (function () {
                         size: visjOptions.to.size || 5,
                         color: visjOptions.to.color || self.defaultNodeColor
                     }
+                    node.data = {}
                     if (visjOptions.data)
-                        node.data = visjOptions.data
+                        node.data = JSON.parse(JSON.stringify(visjOptions.data));
+                    node.data.id = toId;
+                    node.data.label = toLabel;
+                    node.data.varName = toVar;
+                    node.data.graphLevel = fromLevel + 1
                     visjsData.nodes.push(node);
                 }
 

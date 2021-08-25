@@ -6,7 +6,8 @@
 
 It has functionalites to :
 * read :  visualize, navigate and  export
-* edit :  create , modify, aggregate 
+* edit :  create , modify, aggregate
+ 
 both  on  SKOS or OWL resources
 
 It is also able annotate textual corpus with registered lexical registered.

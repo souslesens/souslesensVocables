@@ -10,6 +10,6 @@ It has functionalites to :
  
 both  on  SKOS or OWL resources
 
-It is also able annotate textual corpus with registered lexical registered.
+Annotate tool allows annotate textual corpus with several registered lexical resources and identify missing terms
 
  

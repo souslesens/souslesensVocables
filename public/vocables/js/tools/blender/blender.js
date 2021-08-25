@@ -744,37 +744,45 @@ var Blender = (function () {
                     depth = options.pasteDescendantsDepth;
 
 
-                if(fromDataArray[0].data.source=="_annotate_missing_word"){
-                    var word=fromDataArray[0].data.label
-                    var triples=""
-                    var targetSourceObj=Config.sources[toParentNode.source]
-                    var uri="<"+targetSourceObj.graphUri+common.getRandomHexaId(10)+">"
-                    triples+=uri+" <http://www.w3.org/2004/02/skos/core#broader> <"+toParentNode.id+"> .\n";
-                    triples+=uri+" <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.\n"
-                    triples+=uri+"  <http://www.w3.org/2004/02/skos/core#prefLabel> '"+word+"'@en .\n";
-                    var query = " WITH GRAPH  <" + targetSourceObj.graphUri + ">  INSERT DATA {" +triples +"  }"
+                if (fromDataArray[0].data.source == "_annotate_missing_word") {
+                    var word = fromDataArray[0].data.label
+                    var pasteType = fromDataArray[0].data.pasteType
+
+                    var targetSourceObj = Config.sources[toParentNode.source]
+                    var uri = "<" + targetSourceObj.graphUri + common.getRandomHexaId(10) + ">"
+                    var triples = ""
+                    if (pasteType == "concept") {
+                        triples += uri + " <http://www.w3.org/2004/02/skos/core#broader> <" + toParentNode.id + "> .\n";
+                        triples += uri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.\n"
+                        triples += uri + "  <http://www.w3.org/2004/02/skos/core#prefLabel> '" + word + "'@en .\n";
+                    } else if (pasteType == "altLabel") {
+                        var altLabelLang = fromDataArray[0].data.altLabelLang
+                        triples += "<" + toParentNode.id + "> <http://www.w3.org/2004/02/skos/core#altLabel>  '" + word + "'@" + altLabelLang + " .\n";
+                    }
+                    var query = " WITH GRAPH  <" + targetSourceObj.graphUri + ">  INSERT DATA {" + triples + "  }"
                     var url = Config.sources[toParentNode.source].sparql_server.url + "?format=json&query=";
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: toParentNode.source}, function (err, result) {
-                       if(err){
-                           return MainController.UI.message(err)
-                       }
-                        MainController.UI.message("node "+word+" created")
-                        var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
-                        SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen:true});
+                        if (err) {
+                            return MainController.UI.message(err)
+                        }
+                        MainController.UI.message("node " + word + " created")
+                        var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id);
+                        if(pasteType == "concept")
+                        SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen: true});
+                        else if(pasteType == "altLabel")
+                            Blender.nodeEdition.editNode("concept")
 
 
                     })
 
-
+                    return;
                 }
-
 
 
                 async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
                     var sourceNodesId = {}
                     var sourceNodesLabels = {[fromNodeData.label.toLowerCase()]: fromNodeData.id}
                     async.series([
-
 
 
                         function (callbackSeries) {
@@ -879,7 +887,7 @@ var Blender = (function () {
                                     return callbackSeries()
                                 }
                                 var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
-                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen:true});
+                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen: true});
                                 if (fromDataArray[0].cut) {
                                     var cutJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(fromNodeData.id)
                                     self.menuActions.deleteNode("concept", cutJstreeNode, true)

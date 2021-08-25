@@ -5,44 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/public/icons/collection.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/activity.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/aspect.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/c.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/class.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/class2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/concept.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/default.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/importedClass.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/object.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/ontology.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/property.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/restriction.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/souslesensIcon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/table.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/thesaurus.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/icons/tool.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/configManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sourceManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sourceManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/clipboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/clipboard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/export.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/export.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/treeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/treeController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/blender/blender.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/blender/blender.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/exportToTableDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/exportToTableDialog.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -246,7 +212,7 @@
       <workItem from="1628663424700" duration="14947000" />
       <workItem from="1628922683806" duration="92515000" />
       <workItem from="1629283727555" duration="110992000" />
-      <workItem from="1629706156758" duration="37490000" />
+      <workItem from="1629706156758" duration="45971000" />
     </task>
     <servers />
   </component>
@@ -270,7 +236,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js</url>
-          <line>313</line>
+          <line>320</line>
           <option name="timeStamp" value="29" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -297,7 +263,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>1373</line>
+          <line>1378</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="44" />
         </line-breakpoint>
@@ -309,7 +275,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>1371</line>
+          <line>1376</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="46" />
         </line-breakpoint>

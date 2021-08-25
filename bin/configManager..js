@@ -43,7 +43,7 @@ var configManager = {
             function (callbackSeries) {
 
                 SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
-                    return callbackSeries()
+                    return callbackSeries(err,result)
                 })
             },
             function (callbackSeries) {

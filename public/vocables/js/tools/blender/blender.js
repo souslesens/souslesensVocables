@@ -57,7 +57,7 @@ var Blender = (function () {
 
                             self.availableSources = [];
                             for (var key in Config.sources) {
-                                if (Config.sources[key].editable && Config.sources[key].schemaType=="SKOS") {
+                                if (Config.sources[key].editable && Config.sources[key].schemaType == "SKOS") {
                                     self.availableSources.push(key)
                                     if (!Config.sources[key].controllerName) {
                                         Config.sources[key].controllerName = "" + Config.sources[key].controller
@@ -169,7 +169,8 @@ var Blender = (function () {
                             jsTreeOptions.contextMenu = Collection.getJstreeContextMenu()
                             jsTreeOptions.selectTreeNodeFn = Collection.selectTreeNodeFn;
                             jsTreeOptions.source = source
-                            jsTreeOptions.dnd = Blender.dnd
+                            jsTreeOptions.dnd = Blender.dnd;
+                            jsTreeOptions.type = "collection"
                             TreeController.drawOrUpdateTree("Blender_collectionTreeDiv", result, "#", "collection", jsTreeOptions, function () {
                                 var firstNodeId = $("#Blender_collectionTreeDiv").jstree(true).get_node("#").children[0];
                                 var firstNode = $("#Blender_collectionTreeDiv").jstree(true).get_node(firstNodeId);
@@ -296,7 +297,7 @@ var Blender = (function () {
                     var source = self.currentTreeNode.data.source || self.currentSource;
                     var type = self.currentTreeNode.data.type
 
-                    var options = {source: source, labelClass: "treeType_" + type,reopen:true}
+                    var options = {source: source, labelClass: "treeType_" + type, reopen: true,}
                     if (Collection.currentCollectionFilter)
                         options.filterCollections = Collection.currentCollectionFilter;
 
@@ -312,7 +313,8 @@ var Blender = (function () {
                             type: "node",
                             id: self.currentTreeNode.data.id,
                             label: self.currentTreeNode.text,
-                            source: self.currentSource
+                            source: self.currentSource,
+                            type: "concept"
                         }, self.currentTreeNode.data.id + "_anchor", propertiesMap.event)
                     }
 
@@ -466,6 +468,13 @@ var Blender = (function () {
                         ;
                     },
                 }
+                /*     menuItems.openBranch = {
+                         label: "Open Branch, depth :3",
+                         action: function (obj, sss, cc) {
+                             SourceBrowser.openTreeNode("Blender_conceptTreeDiv", self.currentSource, self.currentTreeNode, {depth:3,reopen:true});
+                             ;
+                         },
+                     }*/
 
                 $("#Blender_conceptTreeDiv").jstree().deselect_node(self.currentTreeNode)
                 return menuItems;
@@ -578,7 +587,7 @@ var Blender = (function () {
             },
 
 
-            deleteNode: function (type, node,silently) {
+            deleteNode: function (type, node, silently) {
                 if (!type)
                     alert(" no type")
 
@@ -734,10 +743,40 @@ var Blender = (function () {
                 if (options.pasteDescendantsDepth)
                     depth = options.pasteDescendantsDepth;
 
+
+                if(fromDataArray[0].data.source=="_annotate_missing_word"){
+                    var word=fromDataArray[0].data.label
+                    var triples=""
+                    var targetSourceObj=Config.sources[toParentNode.source]
+                    var uri="<"+targetSourceObj.graphUri+common.getRandomHexaId(10)+">"
+                    triples+=uri+" <http://www.w3.org/2004/02/skos/core#broader> <"+toParentNode.id+"> .\n";
+                    triples+=uri+" <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.\n"
+                    triples+=uri+"  <http://www.w3.org/2004/02/skos/core#prefLabel> '"+word+"'@en .\n";
+                    var query = " WITH GRAPH  <" + targetSourceObj.graphUri + ">  INSERT DATA {" +triples +"  }"
+                    var url = Config.sources[toParentNode.source].sparql_server.url + "?format=json&query=";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: toParentNode.source}, function (err, result) {
+                       if(err){
+                           return MainController.UI.message(err)
+                       }
+                        MainController.UI.message("node "+word+" created")
+                        var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
+                        SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen:true});
+
+
+                    })
+
+
+                }
+
+
+
                 async.eachSeries(fromDataArray, function (fromNodeData, callbackEach) {
                     var sourceNodesId = {}
                     var sourceNodesLabels = {[fromNodeData.label.toLowerCase()]: fromNodeData.id}
                     async.series([
+
+
+
                         function (callbackSeries) {
                             if (depth > 0)
                                 MainController.UI.message("searching node and its children")
@@ -782,9 +821,18 @@ var Blender = (function () {
 
                                     if (choice == "S") {
                                         result.forEach(function (item) {
-                                            var id = sourceNodesLabels[item.conceptLabel.value.toLowerCase()]
-                                            if (id)
-                                                delete sourceNodesId[id]
+                                            var targetLabel = sourceNodesLabels[item.conceptLabel.value.toLowerCase()]
+                                            if (targetLabel && targetLabel && targetLabel != toParentNode.label.toLowerCase()) {
+
+                                                delete sourceNodesId[item.concept.value]
+                                            } else {
+                                                if (targetLabel) {
+                                                    var message = "Cannot copy nodes containing label similar to new parent node label"
+                                                    alert(message)
+                                                    return callback(message);
+                                                }
+                                            }
+
 
                                         })
                                         if (Object.keys(sourceNodesId).length == 0)
@@ -831,10 +879,10 @@ var Blender = (function () {
                                     return callbackSeries()
                                 }
                                 var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id)
-                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {});
+                                SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen:true});
                                 if (fromDataArray[0].cut) {
                                     var cutJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(fromNodeData.id)
-                                    self.menuActions.deleteNode("concept",cutJstreeNode,true)
+                                    self.menuActions.deleteNode("concept", cutJstreeNode, true)
                                 }
                                 callbackSeries()
 
@@ -1234,89 +1282,89 @@ var Blender = (function () {
         }
 
         self.export = function () {
-           Export.showExportDatDialog(self.currentSource, "BLENDER",{})
-           return
-         /*   var collection = Collection.currentCollectionFilter
+            Export.showExportDatDialog(self.currentSource, "BLENDER", {})
+            return
+            /*   var collection = Collection.currentCollectionFilter
 
 
-            Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
+               Sparql_generic.getCollectionNodes(self.currentSource, collection, {}, function (err, result) {
 
 
 
-                if (err) {
-                    if (callback)
-                        return callback(err)
-                    return (MainController.UI.message(err))
-                }
+                   if (err) {
+                       if (callback)
+                           return callback(err)
+                       return (MainController.UI.message(err))
+                   }
 
-                var predicates = []
-                var subjects = {}
-                result.forEach(function (item) {
-                    if (!subjects[item.subject.value])
-                        subjects[item.subject.value] = {}
-                    var value = item.object.value;
-                    if (item.object["xml:lang"])
-                        value = value + "@" + item.object["xml:lang"]
-                    if (!subjects[item.subject.value][item.predicate.value])
-                        subjects[item.subject.value][item.predicate.value] = []
-                    subjects[item.subject.value][item.predicate.value].push(value)
+                   var predicates = []
+                   var subjects = {}
+                   result.forEach(function (item) {
+                       if (!subjects[item.subject.value])
+                           subjects[item.subject.value] = {}
+                       var value = item.object.value;
+                       if (item.object["xml:lang"])
+                           value = value + "@" + item.object["xml:lang"]
+                       if (!subjects[item.subject.value][item.predicate.value])
+                           subjects[item.subject.value][item.predicate.value] = []
+                       subjects[item.subject.value][item.predicate.value].push(value)
 
-                    if (predicates.indexOf(item.predicate.value) < 0)
-                        predicates.push(item.predicate.value)
-
-
-                })
-                var line = 0;
-                var str = ""
-                var sep = "\t"
-
-                predicates.splice(0, 0, "uri")
-                predicates.forEach(function (predicate, predicateIndex) {
-
-                    if (predicateIndex > 0)
-                        str += sep
-                    str += predicate;
-                })
-                str += "\n"
-
-                for (var key in subjects) {
-                    str += key
-                    predicates.forEach(function (predicate, predicateIndex) {
-
-                        if (predicateIndex > 0)
-                            str += sep
-
-                        var object = subjects[key][predicate]
-                        if (object) {
-                            var valueStr = ""
-                            object.forEach(function (value, valueIndex) {
-                                if (valueIndex > 0)
-                                    valueStr += "|"
-                                if (subjects[value])
-                                    valueStr += value + "@" + subjects[value]["http://www.w3.org/2004/02/skos/core#prefLabel"]
-                                else
-                                    valueStr += value
+                       if (predicates.indexOf(item.predicate.value) < 0)
+                           predicates.push(item.predicate.value)
 
 
-                            })
-                            str += valueStr
-                        } else
-                            str += ""
+                   })
+                   var line = 0;
+                   var str = ""
+                   var sep = "\t"
 
-                    })
-                    str += "\n"
+                   predicates.splice(0, 0, "uri")
+                   predicates.forEach(function (predicate, predicateIndex) {
 
-                }
+                       if (predicateIndex > 0)
+                           str += sep
+                       str += predicate;
+                   })
+                   str += "\n"
 
-                var result = common.copyTextToClipboard(str, function (err, result) {
-                    if (err)
-                        return MainController.UI.message(err);
-                    MainController.UI.message(result);
-                    alert("filtered taxonomy CSV copied in clipboard")
-                })
+                   for (var key in subjects) {
+                       str += key
+                       predicates.forEach(function (predicate, predicateIndex) {
+
+                           if (predicateIndex > 0)
+                               str += sep
+
+                           var object = subjects[key][predicate]
+                           if (object) {
+                               var valueStr = ""
+                               object.forEach(function (value, valueIndex) {
+                                   if (valueIndex > 0)
+                                       valueStr += "|"
+                                   if (subjects[value])
+                                       valueStr += value + "@" + subjects[value]["http://www.w3.org/2004/02/skos/core#prefLabel"]
+                                   else
+                                       valueStr += value
 
 
-            })*/
+                               })
+                               str += valueStr
+                           } else
+                               str += ""
+
+                       })
+                       str += "\n"
+
+                   }
+
+                   var result = common.copyTextToClipboard(str, function (err, result) {
+                       if (err)
+                           return MainController.UI.message(err);
+                       MainController.UI.message(result);
+                       alert("filtered taxonomy CSV copied in clipboard")
+                   })
+
+
+               })*/
         }
         self.showFilteredTaxonomyTree = function (options, callback) {
 
@@ -1374,14 +1422,18 @@ var Blender = (function () {
                         id: id,
                         text: item.prefLabel || "X",
                         parent: parent,
-                        data: {source: self.currentSource, id: id, label: item.prefLabel}
+                        type: "concept",
+                        data: {source: self.currentSource, id: id, label: item.prefLabel, type: "concept"}
                     })
                 }
 
                 //   console.log(JSON.stringify(jstreeData, null, 2))
                 var jsTreeOptions = self.getConceptJstreeOptions(false)
                 jsTreeOptions.openAll = true;
-                common.jstree.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions)
+                common.jstree.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions, function () {
+                    if (jstreeData.length < 5000)
+                        $("#Blender_conceptTreeDiv").jstree().open_all()
+                })
                 $("#Blender_tabs").tabs("option", "active", 0);
                 if (callback)
                     callback();
@@ -1412,12 +1464,12 @@ var Blender = (function () {
                 $("#mainDialogDiv").dialog("open");
 
                 setTimeout(function () {
-                    var templatSources=[];
-                    self.availableSources.forEach(function(source){
-                        if(Config.sources[source].isBlenderTemplate)
+                    var templatSources = [];
+                    self.availableSources.forEach(function (source) {
+                        if (Config.sources[source].isBlenderTemplate)
                             templatSources.push(source)
                     })
-                    common.fillSelectOptions("blenderNewSource_referenceSourceSelect",templatSources.sort(), true)
+                    common.fillSelectOptions("blenderNewSource_referenceSourceSelect", templatSources.sort(), true)
 
                 }, 200)
 

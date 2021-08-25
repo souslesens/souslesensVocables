@@ -364,13 +364,21 @@ var ADLbrowserGraph = (function () {
 
                         })
                     }
-                    var edgeId = self.currentGraphNode.data.id + "_" + objId;
+                    var from=objId
+                    var to=self.currentGraphNode.data.id;
+                 if (inverse == "true"){
+                     var from=self.currentGraphNode.data.id;
+                     var to=objId
+
+                 }
+                    var edgeId = from + "_" + to;
+
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
                         visjsData.edges.push({
                             id: edgeId,
-                            from: self.currentGraphNode.data.id,
-                            to: objId,
+                            from: from,
+                            to: to,
                             property:predicate
 
 

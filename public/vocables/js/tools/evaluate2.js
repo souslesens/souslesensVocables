@@ -336,7 +336,7 @@ var Evaluate = (function () {
                     fixed: {x: true},
                     x: 500,
                     y: offsetY,
-                    data: {type: "graph", source: source}
+                    data: {type: "graph", source: source, varName: "source"}
                 })
 
                 if (sourceConcepts.length == 0)
@@ -359,7 +359,13 @@ var Evaluate = (function () {
                                     fixed: {x: true, y: true},
                                     x: -500,
                                     y: offsetY,
-                                    data: {type: "leafConcept", source: source}
+                                    data: {
+                                        type: "leafConcept",
+                                        source: source,
+                                        varName: "concept",
+                                        id: conceptId,
+                                        label: item.conceptLabel.value,
+                                    }
                                 })
                                 offsetY += offsetYlength
                             }
@@ -377,7 +383,12 @@ var Evaluate = (function () {
                                             label: broaderLabel,
                                             shape: "box",
                                             color: color,
-                                            data: {type: "broaderConcept", source: source}
+                                            data: {
+                                                type: "broaderConcept", source: source,
+                                                varName: "broader" + i,
+                                                id: broaderId,
+                                                label: broaderLabel,
+                                            }
                                         })
                                     }
                                     if (i == 1) {
@@ -459,7 +470,7 @@ var Evaluate = (function () {
 
 
         self.showMissingWords = function (jstreeNode) {
-            var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id)
+            var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id)
 
             var sources = {}
             var missingNouns = []
@@ -488,17 +499,69 @@ var Evaluate = (function () {
 
 
             })
-            var html = ""
+            var html = ""//<div style='flex-wrap;width:500px'>"
 
-
-                sourceMissingWords.forEach(function (noun,index) {
-                    html += "<span class='evaluate_missingWord'>" + noun + "</span>"
-                    if(index%15==0)
-                        html += "<br>"
-                })
-                html += "<div> "
+            sourceMissingWords.sort()
+            sourceMissingWords.forEach(function (noun, index) {
+                html += "<div class='evaluate_missingWord'>" + noun + "</div>"
+                /*if(index%15==0)
+                    html += "<br>"*/
+            })
+            html += "<div> "
 
             $("#evaluate_missingWordsDiv").html(html);
+            setTimeout(function () {
+                $(".evaluate_missingWord").bind("click", Evaluate.onMissingWordClick)
+            }, 200)
+
+        }
+        self.onMissingWordClick = function (event) {
+            var word = event.currentTarget.innerText
+            var html = "<b>" + word + "</b>&nbsp;" +
+                "<button onclick='Evaluate.copyWordToClipboard(\""+word+"\")'>Copy as Concept</button>" +
+                "<br><ul>"
+            var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId,self.currentTreeNode.id)
+
+            descendants.forEach(function (node) {
+                if (!node.data.files)
+                    return;
+
+                node.data.files.forEach(function (fileObj) {
+
+                    var nounObj = fileObj.nouns[word];
+                    if (nounObj) {
+                      var str='<li>'+fileObj.fileName + ' : ' + nounObj.offsets.length + ' occurences</li>'
+                        if(html.indexOf(str)<0)
+                            html+=str
+                    }
+                })
+
+
+            })
+            $("#Annotate_missingWordInfosDiv").html(html)
+
+
+
+        }
+        self.copyWordToClipboard=function(word){
+            var id="_annotate_missing_word_"+common.getRandomHexaId(5)
+            var data={
+
+                "type": "node",
+                "id":id ,
+                "label": word,
+                "data": {
+                    "type": "http://www.w3.org/2004/02/skos/core#Concept",
+                    "source": "_annotate_missing_word",
+                    "id":id ,
+                    "label": word,
+
+            }
+
+            }
+            Clipboard.copy(data,null,{})
+            $( ".evaluate_missingWord:contains('"+word+"')" ).css( "background-color", "#a2afc8" );
+
 
         }
 
@@ -518,9 +581,10 @@ var Evaluate = (function () {
             descendants.forEach(function (node) {
                 if (!node.data.files)
                     return;
-                var outputText = "";
-                node.data.files.forEach(function (fileObj, index) {
 
+                node.data.files.forEach(function (fileObj, index) {
+                    $("#underlineEntities").append("<br><b>----------------"+fileObj.filePath+"-----------------</b><br>")
+                    var outputText = "";
                     var initialText = fileObj.text;
                     var offsetsArray = []
                     var offsets = {}
@@ -543,9 +607,10 @@ var Evaluate = (function () {
                     outputText += "<hr>"
                     var lastOffset = 0
                     offsetsArray.forEach(function (offset) {
-                        outputText += initialText.substring(lastOffset, offset);
-                        outputText += "<a href=''>" + "<span class='underlinedEntity' >" + offsets[offset].noun + "</span>" + "</a>"
-                        lastOffset += offsets[offset].noun.length
+                        var chunk= initialText.substring(lastOffset, offset);
+                        outputText +=chunk
+                       outputText += "<a href=''>" + "<span class='underlinedEntity' >" + offsets[offset].noun + "</span>" + "</a>"
+                        lastOffset +=offsets[offset].noun.length
 
 
                     })

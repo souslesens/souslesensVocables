@@ -13,37 +13,63 @@ var Export = (function () {
         $("#mainDialogDiv").load("snippets/exportToTableDialog.html")
         $("#mainDialogDiv").dialog("open")
         setTimeout(function () {
-                $("#exportTable_tabs").tabs({});
+            $("#exportTable_tabs").tabs({});
 
-                if (self.context == "BLENDER") {
-                    var jstreeData = [];
-                    Sparql_generic.getDistinctPredicates(source, {}, function (err, result) {
-                        result.forEach(function (item) {
-                            jstreeData.push({
-                                id: item.p.value,
-                                text: item.pLabel.value,
-                                parent: "#"
-                            })
+            if (self.context == "BLENDER") {
+                var jstreeData = [];
+                Sparql_generic.getDistinctPredicates(source, {}, function (err, result) {
+                    result.forEach(function (item) {
+                        jstreeData.push({
+                            id: item.p.value,
+                            text: item.pLabel.value,
+                            parent: "#"
                         })
-                        var options = {withCheckboxes: true};
-                        common.jstree.loadJsTree("exportTable_jstreeDiv", jstreeData, options, function (err, result) {
+                    })
+                    var options = {withCheckboxes: true};
 
-                            if (Config.sources[source].schemaType == "SKOS") {
-                                var ids = ["http://www.w3.org/2004/02/skos/core#broader", "http://www.w3.org/2004/02/skos/core#narrower"]
-                                $("#exportTable_jstreeDiv").jstree().check_node(ids)
+                    common.jstree.loadJsTree("exportTable_jstreeDiv", jstreeData, options, function (err, result) {
 
-                            }
-                        });
+                        if (Config.sources[source].schemaType == "SKOS") {
+                            var ids = ["http://www.w3.org/2004/02/skos/core#broader",
+                                "http://www.w3.org/2004/02/skos/core#narrower",
+                                "http://www.w3.org/2004/02/skos/core#prefLabel",
+                                "http://www.w3.org/2004/02/skos/core#altLabel",
+                            ]
+                            $("#exportTable_jstreeDiv").jstree().check_node(ids)
 
+                        }
+                    });
+                })
+
+                var options = {withCheckboxes: true};
+                Sparql_SKOS.getSourceLangsList(self.currentSource, function (err, result) {
+                    if (err)
+                        return MainController.UI.message(err)
+                    var jstreeData = []
+
+                    result.forEach(function (lang) {
+                        if(lang!="")
+                        jstreeData.push({
+
+                            id: lang, text: lang, parent: "#"
+                        })
                     })
 
-                } else if (self.context == "GRAPH") {
+                    common.jstree.loadJsTree("exportTable_lang_jstreeDiv", jstreeData, options, function (err, result) {
+                     $("#exportTable_lang_jstreeDiv").jstree().check_node("en")
+
+                    })
+                })
+
+            }else if (self.context == "GRAPH") {
                 } else if (self.context == "SEARCH") {
                 } else if (self.context == "TREE") {
                 }
 
-            },
-            200)
+            }
+        ,
+            200
+        )
 
     }
 
@@ -57,7 +83,8 @@ var Export = (function () {
 
         if (self.context == "BLENDER") {
             var selectedProperties = $("#exportTable_jstreeDiv").jstree().get_checked();
-            var langs = $("#exportTable_lang").val();
+            // var langs = $("#exportTable_lang").val();
+            var langs = $("#exportTable_lang_jstreeDiv").jstree().get_checked();
             var propertiesMap = {}
             selectedProperties.forEach(function (nodeId) {
                 var node = $("#exportTable_jstreeDiv").jstree().get_node(nodeId)
@@ -84,7 +111,7 @@ var Export = (function () {
         var query = ""
 
 
-        options = {}
+      var  options = {}
 
         var filterSubjectLangsStr = "";
         var filterObjectLangsStr = "";
@@ -185,14 +212,17 @@ var Export = (function () {
         var edges = visjsGraph.data.edges.get();
 // set nodesMap
         var nodesMap = {};
-        var varNames={}
-        nodes.forEach(function (node,index) {
+        var varNames = {};
+        var tableType = "varNames";
+        nodes.forEach(function (node, index) {
             if (!nodesMap[node.id]) {
-                nodesMap[node.id] = {data: node.data, parent: "#", parents: []}
-                if(!varNames[node.data.varName]){
-                    varNames[node.data.varName]=[]
+                nodesMap[node.id] = {data: node.data, parent: "#", parents: [], parentVarValues: {}}
+                if (tableType &&  node.data.varName && node.data.varName.indexOf("child") > -1)
+                    tableType = "hierarchical"
+                if (!varNames[node.data.varName]) {
+                    varNames[node.data.varName] = {}
                 }
-                varNames[node.data.varName].push(index)
+
             }
         })
 //set each node parent
@@ -226,36 +256,69 @@ var Export = (function () {
         }
 
         for (var nodeId in nodesMap) {
-            if (nodeId == "http://w3id.org/readi/rdl/Z101013679")
-                var x = 3
             recurse(nodeId, nodesMap[nodeId].parent)
         }
 
 
+        //set maxDepth
         var maxDepth = 0
-        var index=0
+        var index = 0
         for (var nodeId in nodesMap) {
             var item = nodesMap[nodeId]
             maxDepth = Math.max(maxDepth, item.parents.length)
         }
 
 
-        var dataSet = []// for children varnames
         var dataSet0 = [] //for others varNames
+
+
+        for (var nodeId in nodesMap) {
+
+            var node = nodesMap[nodeId]
+
+            for (var varName in varNames) {
+                if (!node.parentVarValues[varName])
+                    node.parentVarValues[varName] = ""
+            }
+            for (var varName in varNames) {
+                if (node.data.varName == varName)
+                    node.parentVarValues[varName] = node.data.label
+            }
+            node.parents.forEach(function (parentId, index) {
+                var parentVarName = nodesMap[parentId].data.varName
+                for (var varName in varNames) {
+                    if (parentVarName == varName) {
+                        node.parentVarValues[varName] = nodesMap[parentId].data.label
+                    }
+                }
+            })
+
+
+        }
+
+
+//build dataset
+        var dataSet = []// for children varnames
+
         for (var nodeId in nodesMap) {
 
             var item = nodesMap[nodeId];
 
+
+            var line = []
             //process columns for subclasses
-            if (item.data.varName == "child") {
-                var line = []
+            if (tableType == "hierarchical") {
+
                 for (var i = 0; i < maxDepth; i++) {
 
                     if (i < item.parents.length) {
                         if (true || item.parents[i] != "#") {
                             var parentNode = nodesMap[item.parents[i]]
                             if (parentNode && parentNode.data) {
-                                line.push(parentNode.data.label);
+                                var value = parentNode.data.label
+                                /*  if (item.data.varName != "child")
+                                      value = item.data.varName + ":" + value*/
+                                line.push(value);
 
                             }
                         }
@@ -269,65 +332,59 @@ var Export = (function () {
             }
 
             // other varNames (not child)
-            else{
-                var line = []
-                for(var varName in varNames){
-                   if(item.data.varName==varName)// && varNames[varName].indexOf(index)==0)
-                       line.push(item.data.label)
-                       else
-                           line.push("")
-                   }
+            if (tableType == "varNames") {
+                var node = nodesMap[nodeId]
+                line = []
+                for (var key in node.parentVarValues) {
+                    line.push(node.parentVarValues[key])
 
-                dataSet0.push(line)
+                }
+                dataSet.push(line)
 
             }
-            index+=1
+            index += 1
         }
 
 
+// suppress incomplet lines (doublons)
+        if (tableType == "hierarchical") {
+            dataSet = dataSet.reverse();
+            var dataSet2 = []
+            var linesStr = ""
+            dataSet.forEach(function (line) {
+                var lineStr = ""
+                line.forEach(function (item) {
+                    lineStr += item
+                })
+                if (linesStr.indexOf(lineStr) < 0) {
+                    linesStr += lineStr
 
-        var x=dataSet0
+                    var voidItems = []
+                    for (var i = line.length; i <= maxDepth; i++) {
+                        voidItems.push("")
+                    }
 
-        // suppress incomplet lines (doublons)
-        dataSet = dataSet.reverse();
-        var dataSet2 = []
-        var linesStr = ""
-        dataSet.forEach(function (line) {
-            var lineStr = ""
-            line.forEach(function (item) {
-                lineStr += item
+                    line = line.concat(voidItems)
+                    dataSet2.push(line)
+                }
             })
-            if (linesStr.indexOf(lineStr) < 0) {
-                linesStr += lineStr
 
-                var voidItems=[]
-               for(var i=line.length;i<=maxDepth;i++){
-                   voidItems.push("")
-               }
-
-              line=line.concat(voidItems)
-                dataSet2.push(line)
-            }
-        })
-
-
-        var cols = []
-
-
-        if(dataSet2.length>0){
+            var cols = []
             for (var i = 0; i <= maxDepth; i++) {
                 cols.push({title: "child_" + i})
             }
             self.showDataTable(cols, dataSet2)
 
-        }else{
-            for( var varName in varNames){
-                cols.push({title:varName})
-            }
-
-            self.showDataTable(cols, dataSet0)
         }
 
+        if (tableType == "varNames") {
+            var cols = []
+            for (var varName in varNames) {
+                cols.push({title: varName})
+            }
+
+            self.showDataTable(cols, dataSet)
+        }
 
 
     }
@@ -368,4 +425,5 @@ var Export = (function () {
     return self;
 
 
-})()
+})
+()

@@ -23,10 +23,10 @@ var SourceManager = {
                     " PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
                     " PREFIX  elements:<http://purl.org/dc/elements/1.1/> " +
                     " select distinct *  FROM <" + referenceSource.graphUri + ">  WHERE" +
-                    " {{?concept skos:prefLabel|skos:altLabel ?conceptLabel.    OPTIONAL{?concept rdf:type ?type.}  " +
-                    "?concept skos:broader ?broader1.?broader1 skos:prefLabel|skos:altLabel ?broader1Label.?broader1 rdf:type ?type." +
+                    " {{?concept skos:prefLabel ?conceptLabel.    OPTIONAL{?concept rdf:type ?type.}  " +
+                    "?concept skos:broader ?broader1.?broader1 skos:prefLabel ?broader1Label.?broader1 rdf:type ?type." +
                     "" +
-                    "?broader1 skos:broader ?broader2.?broader2 skos:prefLabel|skos:altLabel ?broader2Label.?broader2 rdf:type ?type." +
+                    "?broader1 skos:broader ?broader2.?broader2 skos:prefLabel ?broader2Label.?broader2 rdf:type ?type." +
                     "filter (?broader2Label='Thing'@en)" +
                     "}}limit 5000"
 

@@ -158,18 +158,34 @@ var Sparql_SKOS = (function () {
             if (!collection || collection == "") {
 
                 query += "}";
-
+                query += " limit " + sourceVariables.limit + " ";
             } else {
 
-                query += "   ?collection skos:member* ?acollection. " + Sparql_common.getUriFilter("collection", collection) +
+                query=" PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+                    " select  distinct *  "+sourceVariables.fromStr+"   WHERE { " +
+                    " ?subject ?predicate ?object.  FILTER ( ?predicate in( skos:prefLabel,skos:broader) )" +
+                    "  ?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection}) " +
+                    "  ?collection skos:member* ?acollection. " +
+                   Sparql_common.getUriFilter("collection", collection) +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member ?subject0. " +
+                    " ?subject (^skos:broader+|skos:broader?) ?subject0." +
+                    "   ?collection skos:prefLabel ?collectionLabel. " +
+                    "  ?acollection skos:prefLabel ?acollectionLabel. " +
+                    "  ?subject skos:prefLabel ?subjectLabel." +
+                    "filter( lang(?subjectLabel)='en')" +
+                    "} limit 10000"
+            /*    query += "   ?collection skos:member* ?acollection. " + Sparql_common.getUriFilter("collection", collection) +
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
                     "   ?subject skos:prefLabel ?subjectLabel." +//"filter(lang(?subjectLabel)='en')"+
+
+
                     "}"
+                     query += " limit " + sourceVariables.limit + " ";*/
             }
 
-            query += " limit " + sourceVariables.limit + " ";
 
             Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
 
@@ -622,6 +638,26 @@ var Sparql_SKOS = (function () {
             return bindings;
 
 
+        }
+
+        self.getSourceLangsList=function(sourceLabel, callback){
+            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+            var query=" PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
+                " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                " PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
+                "  select  distinct ?language "+sourceVariables.fromStr+"   WHERE" +
+                " { ?p skos:prefLabel ?o.   BIND( LANG(?o) AS ?language). } limit 1000"
+
+            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
+                if(err)
+                return callback(err);
+                var langs=[]
+                result.results.bindings.forEach(function(item){
+                    langs.push(item.language.value)
+                })
+                return callback(null,langs)
+            })
         }
 
 

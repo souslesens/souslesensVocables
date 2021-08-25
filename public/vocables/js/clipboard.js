@@ -15,7 +15,7 @@ var Clipboard = (function () {
     self.copy = function (data, element, event) {
 
 
-if(!data.source)
+if(false && !data.source)
     return console.log("copied data has no source property "+data.label)
 
         data.tool = MainController.currentTool

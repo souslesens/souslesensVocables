@@ -925,16 +925,21 @@ var ADLbrowserQuery = (function () {
             var jstreeData = []
             classesArray.forEach(function (classId) {
                 var id1 = common.getRandomHexaId(5)
+                var label;
+                if(model[classId])
+                    label= model[classId].label;
+                else
+                    label=Sparql_common.getLabelFromId(classId)
                 if (!distinctNode[id1]) {
                     distinctNode[id1] = 1
                     jstreeData.push({
                         id: id1,
-                        text: model[classId].label,
+                        text: label,
                         parent: "#",
                         type: "class",
                         data: {
                             id: classId,
-                            label: model[classId].label
+                            label: label
                         }
                     })
                 }

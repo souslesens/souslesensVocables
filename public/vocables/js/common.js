@@ -14,55 +14,56 @@ var common = (function () {
         self.jstree = {
             types: {
                 "tool": {
-                    "icon": "../../icons/tool.png",
+                    "icon": "../icons/tool.png",
 
                 },
                 "SKOS": {
-                    "icon": "../../icons/thesaurus.png",
+                    "icon": "../icons/thesaurus.png",
 
                 },
                 "OWL": {
-                    "icon": "../../icons/ontology.png"
+                    "icon": "../icons/ontology.png"
                 },
 
                 "class": {
-                    "icon": "../../icons/class.png"
+                    "icon": "../icons/class.png"
                 }
                 ,
                 "concept": {
-                    "icon": "../../icons/concept.png"
+                    "icon": "../icons/concept.png"
+                },
+                "collection": {
+                    "icon": "../icons/collection.png"
                 },
                 "default": {
-                    "icon": "../../icons/default.png"
+                    "icon": "../icons/default.png"
                 },
                 "owl:Class": {
                     "li_attr":{style: "color:black"},
-                    "icon": "../../icons/class.png",
+                    "icon": "../icons/class.png",
 
                 },
                 "owl:ObjectProperty": {
-                    "icon": "../../icons/property.png"
+                    "icon": "../icons/property.png"
                 },
                 "owl:Restriction": {
-                    "icon": "../../icons/restriction.png"
+                    "icon": "../icons/restriction.png"
                 },
                 "owl:table": {
-                    "icon": "../../icons/table.png"
+                    "icon": "../icons/table.png"
                 },
                 "importedClass": {
                     "li_attr":{style: "color:#ccc"},
-                    "icon": "../../icons/externalObject.png"
+                    "icon": "../icons/externalObject.png"
                 },
                 "importedProperty": {
                     "li_attr":{style: "color:#ccc"},
-                    "icon": "../../icons/externalObject.png"
+                    "icon": "../icons/externalObject.png"
                 },
                 "importedRestriction": {
                     "li_attr":{style: "color:#ccc"},
-                    "icon": "../../icons/externalObject.png"
+                    "icon": "../icons/externalObject.png"
                 },
-
-
 
             },
             loadJsTree: function (jstreeDiv, jstreeData, options, callback) {

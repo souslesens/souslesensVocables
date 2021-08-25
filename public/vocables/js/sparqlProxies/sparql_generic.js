@@ -640,7 +640,7 @@ var Sparql_generic = (function () {
                             insertTriplesStr +
                             "  }"
 
-                        url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
+                       var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
                             return callbackEach(err);
                         })

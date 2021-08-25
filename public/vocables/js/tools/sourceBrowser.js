@@ -276,11 +276,11 @@ var SourceBrowser = (function () {
             else {
                 common.jstree.deleteBranch(divId,node.id)
             }
-          var  depth =1
-        if (!options.depth)
-            depth=options.depth;
+          var  descendantsDepth =1
+        if (options.depth)
+            descendantsDepth=options.depth;
         options.filterCollections = Collection.currentCollectionFilter
-        Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, 1, options, function (err, result) {
+        Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }

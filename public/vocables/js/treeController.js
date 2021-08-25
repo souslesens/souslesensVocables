@@ -30,7 +30,7 @@ var TreeController = (function () {
             var type = typeObj.value;
             var cssType = type.substring(type.lastIndexOf("#") + 1)
 
-            type = jsTreeOptions.type || type
+          var  jstreeType = jsTreeOptions.type || null
             if (childNodeVar && item[childNodeVar]) {
                 var childNodeId = item[childNodeVar].value;
 
@@ -43,15 +43,15 @@ var TreeController = (function () {
                         var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
                     }
 
-                           var child = {
-                            parent: parentNodeId,
-                            id: childNodeId + "_" + common.getRandomHexaId(4),
-                            text: label,
-                            data: {type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId}
+                    var child = {
+                        parent: parentNodeId,
+                        id: childNodeId + "_" + common.getRandomHexaId(4),
+                        text: label,
+                        type: jstreeType,
+                        data: {type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId,}
 
-                        }
-                        jstreeData.push(child);
-
+                    }
+                    jstreeData.push(child);
 
 
                 }
@@ -129,10 +129,6 @@ var TreeController = (function () {
         //  alert ("csv  is copied on clipboard")
 
     }*/
-
-
-
-
 
 
     return self;

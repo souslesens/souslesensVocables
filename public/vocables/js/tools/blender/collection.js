@@ -40,6 +40,7 @@ var Collection = (function () {
 
 
             }
+
         }
         else{
             if (self.currentCandidateNode) {
@@ -142,7 +143,7 @@ var Collection = (function () {
             if (err) {
                 return MainController.UI.message(err);
             }
-           var options={source:node.data.source}
+           var options={source:node.data.source,type:"collection"}
             TreeController.drawOrUpdateTree(divId, result, node.id, "child1",options)
 
         })

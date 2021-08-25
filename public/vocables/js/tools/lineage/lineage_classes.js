@@ -1066,7 +1066,12 @@ var Lineage_classes = (function () {
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: color,
-                            data: {source: source}
+                            data: {
+                                source: source,
+                                id: item.range.value,
+                                label: item.rangeLabel.value,
+                                varName:"range"
+                            }
                         })
 
                     }
@@ -1152,7 +1157,11 @@ var Lineage_classes = (function () {
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: color,
-                            data: {source: source}
+                            data: {source: source,
+                                id: item.value.value,
+                                label: item.valueLabel.value,
+                                varName:"value"
+                            }
                         })
 
                     }

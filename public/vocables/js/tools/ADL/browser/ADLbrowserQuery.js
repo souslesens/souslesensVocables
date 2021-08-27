@@ -197,12 +197,22 @@ var ADLbrowserQuery = (function () {
 
 
             }
+            if (properties.length == 0) {
+                properties.push({
+                    propertyLabel: "label",
+                    property: "http://www.w3.org/2000/01/rdf-schema#label"
+                })
 
-            var withBlankOption = false;
-            if (properties.length > 1)
-                withBlankOption = true;
-            $("#ADLbrowserQueryParams_type").html(node.data.label)
-            common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
+             /*   Sparql_OWL.getItems(ADLbrowser.currentSource, {
+                    filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
+                }, function (err, result) {
+                })*/
+            }
+                var withBlankOption = false;
+                if (properties.length > 1)
+                    withBlankOption = true;
+                $("#ADLbrowserQueryParams_type").html(node.data.label)
+                common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
 
         }
 
@@ -926,10 +936,10 @@ var ADLbrowserQuery = (function () {
             classesArray.forEach(function (classId) {
                 var id1 = common.getRandomHexaId(5)
                 var label;
-                if(model[classId])
-                    label= model[classId].label;
+                if (model[classId])
+                    label = model[classId].label;
                 else
-                    label=Sparql_common.getLabelFromId(classId)
+                    label = Sparql_common.getLabelFromId(classId)
                 if (!distinctNode[id1]) {
                     distinctNode[id1] = 1
                     jstreeData.push({

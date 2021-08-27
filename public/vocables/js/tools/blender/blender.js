@@ -1488,11 +1488,12 @@ var Blender = (function () {
                 var graphUri = $("#blenderNewSource_resourceGraphUriInput").val();
                 var referenceSource = $("#blenderNewSource_referenceSourceSelect").val();
                 var keepOriginalUris = $("#blenderNewSource_keepOriginalUrisCBX").prop("checked");
+                var type=$("#blenderNewSource_typeSelect").val();
 
                 var lang = $("#blenderNewSource_defaultLangInput").val();
                 if (!lang || lang == "")
                     lang = null;
-                if (!referenceSource || referenceSource == "")
+                if (type=="SKOS" && !referenceSource || referenceSource == "")
                     return alert("select a reference graph")
                 var name = $("#blenderNewSource_resourceNameInput").val();
 
@@ -1507,7 +1508,7 @@ var Blender = (function () {
                 var options = {
                     referenceSource: Config.sources[referenceSource],
                     keepOriginalUris: keepOriginalUris,
-                    type: "SKOS",
+                    type: type,
                     lang: lang,
                     addExactMatchPredicate: true,
                 }

@@ -157,26 +157,34 @@ var Export = (function () {
             cols.push({title: "subjectLabel"})
             for (var prop in propertiesMap) {
                 cols.push({title: propertiesMap[prop] + " Uri"})
-                cols.push({title: propertiesMap[prop] + " Label"})
+               cols.push({title: propertiesMap[prop] + " Label"})
+               // cols.push({title: propertiesMap[prop] + " lang"})
                 colsMap[prop] = []
             }
 
 
             data.forEach(function (item, indexRow) {
                 for (var prop in propertiesMap) {
-                    if (item.property.value == prop) {
+                    var itemLang = item.objectLabel["xml:lang"];
+                    if (itemLang && langs.indexOf(itemLang) > -1) {
+                        if (item.property.value == prop) {
+
+
+                            colsMap[prop].push({
+                                row: indexRow,
+                                object: item.object.value,
+                                objectLabel: item.objectLabel.value + "@" + item.objectLabel["xml:lang"] || "",
+                                //  objectLabelLang:item.objectLabel["xml:lang"] || " "
+
+                            })
+                        } else {
+                        }
                         colsMap[prop].push({
                             row: indexRow,
-                            object: item.object.value,
-                            objectLabel: item.objectLabel.value
+                            object: "",
+                            objectLabel: ""
                         })
-                    } else {
                     }
-                    colsMap[prop].push({
-                        row: indexRow,
-                        object: "",
-                        objectLabel: ""
-                    })
                 }
 
             })
@@ -186,12 +194,13 @@ var Export = (function () {
             data.forEach(function (item, indexRow) {
                 var line = []
                 line.push(item.subject.value);
-                line.push(item.subjectLabel.value);
+                line.push(item.subjectLabel.value)+"@"+item.subjectLabel["xml:lang"] || "";
                 for (var prop in propertiesMap) {
                     colsMap[prop].forEach(function (item2) {
                         if (item2.row == indexRow) {
                             line.push(item2.object);
-                            line.push(item2.objectLabel);
+                          line.push(item2.objectLabel);
+                          //  line.push(item2.objectLabelLang);
                         }
                     })
                 }

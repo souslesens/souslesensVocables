@@ -15,6 +15,7 @@ var DataController = require('../bin/dataController.')
 var ADLbuilder = require("../bin/ADL/ADLbuilder.")
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.")
 var configManager = require("../bin/configManager.")
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.render('index', {title: 'Express'});
@@ -29,7 +30,7 @@ router.post('/upload', function (req, response) {
     }
     if (req.files.EvaluateToolZipFile) {
         var zipFile = req.files.EvaluateToolZipFile;
-        DirContentAnnotator.uploadAndAnnotateCorpus(zipFile,req.body.corpusName,JSON.parse(req.body.sources),JSON.parse(req.body.options) ,function (err, result) {
+        DirContentAnnotator.uploadAndAnnotateCorpus(zipFile, req.body.corpusName, JSON.parse(req.body.sources), JSON.parse(req.body.options), function (err, result) {
             processResponse(response, err, result);
         })
 
@@ -102,6 +103,14 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
             configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
                 processResponse(response, err, result)
             })
+        }
+
+
+        if (req.body.ADLmappingDictionary) {
+            if (req.body.load)
+                configManager.getDictionary(req.body.load, function (err, result) {
+                    processResponse(response, err, result)
+                })
         }
 
 

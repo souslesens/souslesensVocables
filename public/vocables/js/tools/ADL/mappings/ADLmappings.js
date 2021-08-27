@@ -41,20 +41,20 @@ var ADLmappings = (function () {
         self.onLoaded = function () {
             self.init()
             MainController.UI.openRightPanel()
-
+            ADLadvancedMapping.loadDictionaries()
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
-              //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
-            "<button onclick='ADLassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  "+
-                "  <button onclick=\"ADLassetGraph.drawClassesAndPropertiesGraph()\">Classes Graph</button>"+
+                //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
+                "<button onclick='ADLassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  " +
+                "  <button onclick=\"ADLassetGraph.drawClassesAndPropertiesGraph()\">Classes Graph</button>" +
                 "<button id='ADLmappings_buildTriplesButton' onclick='ADLbuild.initDialog()'>Build Triples</button>  "
 
 
-         //   "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
+                //   "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
             );
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
             $("#accordion").accordion("option", {active: 2});
-           //
+            //
 
             //  MainController.UI.toogleRightPanel(true)
             $("#graphDiv").html("")
@@ -70,14 +70,14 @@ var ADLmappings = (function () {
 
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
-                if(authentication.currentUser.groupes.indexOf("reader")>-1){
-                    $("#ADLmappings_saveMappingsButton").prop("disabled",true)
-                    $("#ADLmappings_buildTriplesButton").prop("disabled",true)
+                if (authentication.currentUser.groupes.indexOf("reader") > -1) {
+                    $("#ADLmappings_saveMappingsButton").prop("disabled", true)
+                    $("#ADLmappings_buildTriplesButton").prop("disabled", true)
 
                 }
 
 
-                    ADLmappings.displayOneModelTree()
+                ADLmappings.displayOneModelTree()
 
                 self.displayLiteralsTree()
                 //   self.displayPropertiesTree("ADLmappingPropertiesTree")
@@ -94,11 +94,11 @@ var ADLmappings = (function () {
                     height: 900,
                     width: 1100,
                     modal: false,
-                    close: function( event, ui ) {
-                        ADLmappings.isShowingAssetGraph=false
+                    close: function (event, ui) {
+                        ADLmappings.isShowingAssetGraph = false
                     },
-                    open: function( event, ui ) {
-                        ADLmappings.isShowingAssetGraph=true
+                    open: function (event, ui) {
+                        ADLmappings.isShowingAssetGraph = true
                     }
 
                 })
@@ -112,7 +112,7 @@ var ADLmappings = (function () {
             MainController.writeUserLog(authentication.currentUser, "ADLmappings", source)
             self.clearMappings()
             visjsGraph.clearGraph()
-         //   visjsGraph.data.nodes()
+            //   visjsGraph.data.nodes()
             //  MainController.UI.toogleRightPanel(true)
 
             OwlSchema.currentADLdataSourceSchema = null;
@@ -129,8 +129,6 @@ var ADLmappings = (function () {
         self.selectTreeNodeFn = function (event, propertiesMap) {
 
 
-
-
             if (!self.selectedOntologyNodes)
                 self.selectedOntologyNodes = {}
             self.selectedOntologyNodes[propertiesMap.node.data.id] = propertiesMap.node;
@@ -139,7 +137,7 @@ var ADLmappings = (function () {
 
             self.currentJstreeNode.jstreeDiv = event.currentTarget.id
             if (ADLmappingData.currentColumn) {
-                ADLmappings.isModifyingMapping=true;
+                ADLmappings.isModifyingMapping = true;
                 if (ADLadvancedMapping.addingValueManuallyToNode) {
                     ADLadvancedMapping.addValueManuallyFromOntology(ADLadvancedMapping.addingValueManuallyToNode, propertiesMap.node)
                 } else if (ADLadvancedMapping.assignConditionalTypeOn)
@@ -184,7 +182,7 @@ var ADLmappings = (function () {
 
                     }
                 }
-                if (treeDiv!="ADLmappings_OneModelTree") {
+                if (treeDiv != "ADLmappings_OneModelTree") {
                     items.copyNodeToClipboard = {
                         label: "copy toClipboard",
                         action: function (e) {// pb avec source
@@ -196,7 +194,7 @@ var ADLmappings = (function () {
                     }
                 }
 
-                if (treeDiv=="ADLmappings_OneModelTree") {
+                if (treeDiv == "ADLmappings_OneModelTree") {
                     items.pasteNodeFromClipboard = {
                         label: "paste from Clipboard",
                         action: function (e) {// pb avec source
@@ -252,7 +250,7 @@ var ADLmappings = (function () {
                         id: id + common.getRandomHexaId(3),
                         text: id,
                         parent: "http://www.w3.org/2002/07/owl#DatatypeProperty",
-                        type:"owl:ObjectProperty",
+                        type: "owl:ObjectProperty",
                         data: {
                             type: "http://www.w3.org/2002/07/owl#DatatypeProperty",
                             id: id,
@@ -266,7 +264,7 @@ var ADLmappings = (function () {
                     id: "http://www.w3.org/2000/01/rdf-schema#label",
                     text: "rdfs:labelOf",
                     parent: "#",
-                    type:"owl:ObjectProperty",
+                    type: "owl:ObjectProperty",
                     data: {
                         type: "labelOf",
                         id: "http://www.w3.org/2000/01/rdf-schema#label",
@@ -279,7 +277,7 @@ var ADLmappings = (function () {
                     propJstreeData.push({
                         id: id + common.getRandomHexaId(3),
                         text: id,
-                        type:"owl:ObjectProperty",
+                        type: "owl:ObjectProperty",
                         parent: "http://www.w3.org/2000/01/rdf-schema#label",
                         data: {
                             type: "http://www.w3.org/2000/01/rdf-schema#label",
@@ -303,7 +301,7 @@ var ADLmappings = (function () {
                 propJstreeData.push({
                     id: Config.ADL.OneModelSource,
                     text: Config.ADL.OneModelSource,
-                    type:"owl:ObjectProperty",
+                    type: "owl:ObjectProperty",
                     parent: "#"
                 })
                 var optionsClass = {
@@ -322,11 +320,9 @@ var ADLmappings = (function () {
 
 
         self.displayPropertiesTree = function (treeDivId) {
-            Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, {},function (err, jsTreeData) {
+            Lineage_properties.getPropertiesjsTreeData(Config.ADL.OneModelSource, null, null, {}, function (err, jsTreeData) {
                 if (err)
                     return MainController.UI.message(err)
-
-
 
 
                 jsTreeData.forEach(function (item) {
@@ -336,12 +332,11 @@ var ADLmappings = (function () {
                 jsTreeData.push({id: Config.ADL.OneModelSource, text: Config.ADL.OneModelSource, parent: "#"})
 
 
-
-                var jsTreeData2=[{
+                var jsTreeData2 = [{
                     id: "http://www.w3.org/2000/01/rdf-schema#",
                     text: "rdfs:label",
                     parent: "#",
-                    type:"owl:ObjectProperty",
+                    type: "owl:ObjectProperty",
                     data: {
                         "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
                         "id": "http://www.w3.org/2000/01/rdf-schema#label",
@@ -354,7 +349,7 @@ var ADLmappings = (function () {
                         id: "http://www.w3.org/2002/07/owl##DatatypeProperty",
                         text: "owl:DatatypeProperty",
                         parent: "#",
-                        type:"owl:ObjectProperty",
+                        type: "owl:ObjectProperty",
                         data: {
                             "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
                             "id": "http://www.w3.org/2002/07/owl##DatatypeProperty",
@@ -365,13 +360,10 @@ var ADLmappings = (function () {
                     }
 
 
-
                 ]
 
 
-
-                jsTreeData=jsTreeData2.concat(jsTreeData)
-
+                jsTreeData = jsTreeData2.concat(jsTreeData)
 
 
                 var options = {
@@ -410,7 +402,7 @@ var ADLmappings = (function () {
                 types: types,
             }
             var color = self.sourceTypeColors[node.jstreeDiv]
-            ADLmappingGraph.drawNode(column, color,node.position)
+            ADLmappingGraph.drawNode(column, color, node.position)
 
             ADLmappingData.currentColumn = null;
             $(".dataSample_type").removeClass("datasample_type_selected")
@@ -429,16 +421,15 @@ var ADLmappings = (function () {
         }
 
 
-        self.checkMappingEditionSave=function(){
+        self.checkMappingEditionSave = function () {
 
-            if(ADLmappings.isModifyingMapping) {
+            if (ADLmappings.isModifyingMapping) {
                 if (confirm("continue without saving current mapping  ?")) {
-                    ADLmappings.isModifyingMapping=false
+                    ADLmappings.isModifyingMapping = false
                     return true
                 }
                 return false;
-            }
-            else{
+            } else {
                 return true
             }
 
@@ -470,7 +461,7 @@ var ADLmappings = (function () {
                         "http://www.w3.org/2002/07/owl#DatatypeProperty": "owl:DatatypeProperty"
                     }
                     var associations = []
-                    self.currentMappingData=data.data
+                    self.currentMappingData = data.data
                     data.mappings.forEach(function (item) {
 
                         if (item.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
@@ -513,9 +504,9 @@ var ADLmappings = (function () {
                                 node.jstreeDiv = "ADLmappingsjsOtherOntologiesTreeDiv"
 
 
-                        if(data.graph && data.graph[item.subject]){
-                            node.position=data.graph[item.subject]
-                        }
+                            if (data.graph && data.graph[item.subject]) {
+                                node.position = data.graph[item.subject]
+                            }
 
                             self.AssignOntologyTypeToColumn(item.subject, node)
                         }
@@ -662,16 +653,16 @@ var ADLmappings = (function () {
 
         }
         self.saveMappings = function () {
-            var mappingName=ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable || ADLmappingData.currentADLtable.data.label
+            var mappingName = ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable || ADLmappingData.currentADLtable.data.label
 
-            mappingName = ADLmappingData.currentSource + "_" +  mappingName
-         //   mappingName = ADLmappingData.currentADLdataSource.dbName + "_" +  mappingName
+            mappingName = ADLmappingData.currentSource + "_" + mappingName
+            //   mappingName = ADLmappingData.currentADLdataSource.dbName + "_" +  mappingName
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")
             if (comment === null)
                 return
 
-            self.isModifyingMapping=false;
+            self.isModifyingMapping = false;
 
             var payload = {
                 ADL_SaveMappings: true,
@@ -696,7 +687,7 @@ var ADLmappings = (function () {
         }
         self.generateMappings = function () {
 
-            var data = {mappings: [], model: {},graph:{}}
+            var data = {mappings: [], model: {}, graph: {}}
             for (var key in self.currentMappedColumns) {
                 var obj = self.currentMappedColumns[key]
                 var objObj = ""
@@ -722,7 +713,7 @@ var ADLmappings = (function () {
                     data.model[item.type_id] = {parents: item.type_parents, label: item.type_label}
                 })
 
-               data.graph= visjsGraph.getNodesPosition()
+                data.graph = visjsGraph.getNodesPosition()
 
 
             }
@@ -739,7 +730,7 @@ var ADLmappings = (function () {
 
                 data.model[key] = ADLmappingGraph.mappedProperties.model[key]
             }
-            if(true || !self.currentMappingData) {
+            if (true || !self.currentMappingData) {
                 self.currentMappingData = {}
 
                 data.data = {
@@ -751,8 +742,8 @@ var ADLmappings = (function () {
                     data.data.sql = ADLmappingData.currentADLtable.data.sql
                     data.data.adlTable = ADLmappingData.currentADLtable.data.adlTable
                 }
-            }else{
-                data.data=self.currentMappingData
+            } else {
+                data.data = self.currentMappingData
             }
 
 
@@ -776,8 +767,8 @@ var ADLmappings = (function () {
         self.showNodeInfos = function (node) {
             if (!node)
                 node = self.currentJstreeNode
-            if(Array.isArray(node.data)){
-                node.data=node.data[0];
+            if (Array.isArray(node.data)) {
+                node.data = node.data[0];
             }
             MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
         }

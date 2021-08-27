@@ -20,11 +20,20 @@ var httpProxy = {
 
     proxyUrl:"http://10.16.152.65:8080",
     host:null,
-    useProxy:function(){
-        var domainWithProxy="main.glb.corp.local"
+    useProxy:function(useIt) {
+
+        // Pas besoin actuellement sur DATALAB !!!!!!!
+        if (false && !useIt) {
+            console.log("NOT USING PROXY!!!!!!!!!!!!!!!!!")
+            return false
+        }
+        var domainWithProxy = "XXXmain.glb.corp.local"
         console.log(httpProxy.host)
-       if(httpProxy.proxyUrl && httpProxy.host && httpProxy.host.indexOf(domainWithProxy)>-1)
-           return true;
+        if (httpProxy.proxyUrl && httpProxy.host && httpProxy.host.indexOf(domainWithProxy) > -1) {
+
+            console.log("USING PROXY!!!!!!!!!!!!!!!!!")
+        return true;
+    }
        return false
     },
 
@@ -41,7 +50,9 @@ var httpProxy = {
         console.log("GET-URL    "+url)
         var request = superagent.get(url)
 
-        if(httpProxy.useProxy()){
+
+
+       if(httpProxy.useProxy(options.useProxy )){
             console.log("----------USING PROXY------GET")
             request.proxy(httpProxy.proxyUrl)
         }
@@ -116,7 +127,7 @@ var httpProxy = {
 
        // console.log("POST-URL    "+url)
 
-        if(httpProxy.useProxy()){
+        if( httpProxy.useProxy(params.useProxy)){
            // console.log("----------USING PROXY------POST")
             options.proxy = httpProxy.proxyUrl
         }

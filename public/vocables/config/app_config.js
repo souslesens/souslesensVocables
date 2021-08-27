@@ -21,7 +21,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
 
     self.defaultNewUriRoot="http://souslesens.org/resource/"
-   // self.loginMode = "json";
+   self.loginMode = "json";
 
 self.loginMode = "none";
 

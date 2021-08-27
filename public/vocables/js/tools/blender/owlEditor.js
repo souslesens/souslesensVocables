@@ -86,219 +86,228 @@ var OwlEditor = (function () {
 
     }
 
+
     self.loadSource = function (source) {
         if (source == "")
             return
-        var graphUri=Config.sources[source].graphUri
-        if(Array.isArray(graphUri))
-            graphUri=graphUri[0]
-        self.currentSourceData = {name: source,graphUri:graphUri, "owl:Class": [], "owl:ObjectProperty": [], "owl:Restriction": []};
-        var imports=
-        async.series([
-            //load Classes
-            function (callbackSeries) {
-                var options = {filter: "?concept rdf:type owl:Class",selectGraph:1}
-                Sparql_OWL.getItems(source, options, function (err, result) {
-                    if (err)
-                        return callbackSeries(err);
-                    self.currentSourceData["owl:Class"] = common.array.sort(common.array.distinctValues(result, "concept"), "conceptLabel");
-                    callbackSeries()
-                })
-
-            }
-            //load Object Properties
-            , function (callbackSeries) {
-                Sparql_OWL.getObjectProperties(source, null, {selectGraph:1}, function (err, result) {
-                    if (err)
-                        return callbackSeries(err);
-                    self.currentSourceData["owl:ObjectProperty"] = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
-                    callbackSeries()
-                })
-
-
-            }
-
-            //load restrictions
-            ,
-            function (callbackSeries) {
-                Sparql_OWL.getObjectRestrictions(source, null, {selectGraph:1}, function (err, result) {
-                    if (err)
-                        return callbackSeries(err);
-                    self.currentSourceData["owl:Restriction"] = result;
-                    callbackSeries()
-
-                })
-            }
-
-            //draw tree
-            , function (callbackSeries) {
-                var jstreeDivId = "owlEditor_jstreeDiv"
-                self.initSchema()
-                var jstreeData = [];
-                for (var key in self.shema) {
-                    jstreeData.push({
-                        text: key,
-                        id: key,
-                        type: key,
-                        parent: "#",
-                        data: {type: key, id: key}
+        var graphUri = Config.sources[source].graphUri
+        if (Array.isArray(graphUri))
+            graphUri = graphUri[0]
+        self.currentSourceData = {
+            name: source,
+            graphUri: graphUri,
+            "owl:Class": [],
+            "owl:ObjectProperty": [],
+            "owl:Restriction": []
+        };
+        var imports =
+            async.series([
+                //load Classes
+                function (callbackSeries) {
+                    var options = {filter: "?concept rdf:type owl:Class", selectGraph: 1}
+                    Sparql_OWL.getItems(source, options, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        self.currentSourceData["owl:Class"] = common.array.sort(common.array.distinctValues(result, "concept"), "conceptLabel");
+                        callbackSeries()
                     })
 
                 }
-                var distinctIds = {}
-                var rootClass = "http://www.w3.org/2002/07/owl#Thing"
-                self.currentSourceData["owl:Class"].forEach(function (item) {
-                    if (!distinctIds[item.concept.value]) {
-                        distinctIds[item.concept.value] = 1
+                //load Object Properties
+                , function (callbackSeries) {
+                    Sparql_OWL.getObjectProperties(source, null, {selectGraph: 1}, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        self.currentSourceData["owl:ObjectProperty"] = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
+                        callbackSeries()
+                    })
 
-                        var type ="owl:Class";
-                        if(item.g.value!=self.currentSourceData.graphUri)
-                            type ="importedClass";
 
-                        var parent = "owl:Class";
-                        if (item.superClass && item.concept.value != rootClass)
-                            parent = item.superClass.value
+                }
 
+                //load restrictions
+                ,
+                function (callbackSeries) {
+                    Sparql_OWL.getObjectRestrictions(source, null, {selectGraph: 1}, function (err, result) {
+                        if (err)
+                            return callbackSeries(err);
+                        self.currentSourceData["owl:Restriction"] = result;
+                        callbackSeries()
+
+                    })
+                }
+
+                //draw tree
+                , function (callbackSeries) {
+                    var jstreeDivId = "owlEditor_jstreeDiv"
+                    self.initSchema()
+                    var jstreeData = [];
+                    for (var key in self.shema) {
                         jstreeData.push({
-                            text: item.conceptLabel.value,
-                            id: item.concept.value,
-                            parent: parent,
-                            type:type,
-                            data: {
-                                type: type,
-                                label: item.conceptLabel.value,
+                            text: key,
+                            id: key,
+                            type: key,
+                            parent: "#",
+                            data: {type: key, id: key}
+                        })
+
+                    }
+                    var distinctIds = {}
+                    var rootClass = "http://www.w3.org/2002/07/owl#Thing"
+                    self.currentSourceData["owl:Class"].forEach(function (item) {
+                        if (!distinctIds[item.concept.value]) {
+                            distinctIds[item.concept.value] = 1
+
+                            var type = "owl:Class";
+                            if (item.g && item.g.value != self.currentSourceData.graphUri)
+                                type = "importedClass";
+
+                            var parent = "owl:Class";
+                            if (item.superClass && item.concept.value != rootClass)
+                                parent = item.superClass.value
+                            var graphUri = null;
+                            if (item.g)
+                                graphUri = item.g.value
+                            jstreeData.push({
+                                text: item.conceptLabel.value,
                                 id: item.concept.value,
-                                graphUri:item.g.value
+                                parent: parent,
+                                type: type,
+                                data: {
+                                    type: type,
+                                    label: item.conceptLabel.value,
+                                    id: item.concept.value,
+                                    graphUri: graphUri
+                                }
+                            })
+                        }
+
+                    })
+                    if (!distinctIds[rootClass]) {
+                        jstreeData.push({
+                            text: "owl:Thing",
+                            id: rootClass,
+                            parent: "owl:Class",
+                            type: "importedClass",
+                            data: {
+                                type: "importedClass",
+                                label: "owl:Thing",
+                                id: rootClass,
                             }
                         })
                     }
 
-                })
-                if (!distinctIds[rootClass]) {
-                    jstreeData.push({
-                        text: "owl:Thing",
-                        id: rootClass,
-                        parent: "owl:Class",
-                        type: "importedClass",
-                        data: {
-                            type: "importedClass",
-                            label: "owl:Thing",
-                            id: rootClass,
+                    self.currentSourceData["owl:ObjectProperty"].forEach(function (item) {
+                        if (!distinctIds[item.prop.value]) {
+                            distinctIds[item.prop.value] = 1
+
+
+                            var type = "owl:ObjectProperty";
+                            if (item.g && item.g.value != self.currentSourceData.graphUri)
+                                type = "importedProperty";
+
+
+                            var parent = "owl:ObjectProperty";
+                            if (item.subProp)
+                                parent = item.subProp.value;
+                            jstreeData.push({
+                                text: item.propLabel.value,
+                                id: item.prop.value,
+                                parent: parent,
+                                type: type,
+                                data: {
+                                    type: type,
+                                    label: item.propLabel.value,
+                                    id: item.prop.value,
+                                    parent: parent
+                                }
+                            })
                         }
                     })
-                }
 
-                self.currentSourceData["owl:ObjectProperty"].forEach(function (item) {
-                    if (!distinctIds[item.prop.value]) {
-                        distinctIds[item.prop.value] = 1
+                    var distinctRestrictionNodes = {}
+                    self.currentSourceData["owl:Restriction"].forEach(function (item) {
+                        var type = "owl:Restriction";
+                        if (item.g && item.g.value != self.currentSourceData.graphUri)
+                            type = "importedRestriction";
 
-
-                        var type ="owl:ObjectProperty";
-                        if(item.g.value!=self.currentSourceData.graphUri)
-                            type ="importedProperty";
-
-
-                        var parent = "owl:ObjectProperty";
-                        if (item.subProp)
-                            parent = item.subProp.value;
-                        jstreeData.push({
-                            text: item.propLabel.value,
-                            id: item.prop.value,
-                            parent: parent,
-                            type: type,
-                            data: {
-                                type: type,
-                                label: item.propLabel.value,
-                                id: item.prop.value,
-                                parent: parent
+                        if (!distinctRestrictionNodes[item.node.value])
+                            distinctRestrictionNodes[item.node.value] = {
+                                prop: item.prop.value,
+                                propLabel: item.propLabel.value,
+                                subClasses: {},
+                                values: {},
+                                type: type
                             }
-                        })
-                    }
-                })
+                        if (!distinctRestrictionNodes[item.node.value].subClasses[item.concept.value])
+                            distinctRestrictionNodes[item.node.value].subClasses[item.concept.value] = {
+                                id: item.concept.value,
+                                label: item.conceptLabel.value
+                            }
+                        if (!distinctRestrictionNodes[item.node.value].values[item.value.value])
+                            distinctRestrictionNodes[item.node.value].values[item.value.value] = {
+                                id: item.value.value,
+                                label: item.valueLabel.value
+                            }
 
-                var distinctRestrictionNodes = {}
-                self.currentSourceData["owl:Restriction"].forEach(function (item) {
-                    var type ="owl:Restriction";
-                    if(item.g.value!=self.currentSourceData.graphUri)
-                        type ="importedRestriction";
+                    })
 
-                    if (!distinctRestrictionNodes[item.node.value])
-                        distinctRestrictionNodes[item.node.value] = {
-                            prop: item.prop.value,
-                            propLabel: item.propLabel.value,
-                            subClasses: {},
-                            values: {},
-                            type:type
-                        }
-                    if (!distinctRestrictionNodes[item.node.value].subClasses[item.concept.value])
-                        distinctRestrictionNodes[item.node.value].subClasses[item.concept.value] = {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value
-                        }
-                    if (!distinctRestrictionNodes[item.node.value].values[item.value.value])
-                        distinctRestrictionNodes[item.node.value].values[item.value.value] = {
-                            id: item.value.value,
-                            label: item.valueLabel.value
-                        }
-
-                })
-
-                for (var nodeId in distinctRestrictionNodes) {
-                    var restriction = distinctRestrictionNodes[nodeId];
-                    var label = nodeId + " " + restriction.propLabel;
+                    for (var nodeId in distinctRestrictionNodes) {
+                        var restriction = distinctRestrictionNodes[nodeId];
+                        var label = nodeId + " " + restriction.propLabel;
 
 
-                    if (!distinctIds[nodeId]) {
-                        distinctIds[nodeId] = 1
+                        if (!distinctIds[nodeId]) {
+                            distinctIds[nodeId] = 1
 
 
-                        jstreeData.push({
-                            text: label,
-                            id: nodeId,
-                            parent: "owl:Restriction",
-                            type:restriction.type,
-                            data: {
-                                type:restriction.type,
-                                label: label,
+                            jstreeData.push({
+                                text: label,
                                 id: nodeId,
-                                values: restriction.values,
-                                subClasses: restriction.subClasses
+                                parent: "owl:Restriction",
+                                type: restriction.type,
+                                data: {
+                                    type: restriction.type,
+                                    label: label,
+                                    id: nodeId,
+                                    values: restriction.values,
+                                    subClasses: restriction.subClasses
 
-                            }
-                        })
+                                }
+                            })
+                        }
                     }
+
+
+                    var options = {selectTreeNodeFn: OwlEditor.onSelectTreeNode}
+
+
+                    common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (err, result) {
+                        if (jstreeData.length < 300)
+                            $("#" + jstreeDivId).jstree().open_all()
+                        common.jstree.openNodeDescendants(jstreeDivId, "owl:ObjectProperty")
+                    })
+
+                    callbackSeries()
                 }
 
 
-                var options = {selectTreeNodeFn: OwlEditor.onSelectTreeNode}
+            ], function (err) {
 
 
-                common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (err, result) {
-                    if (jstreeData.length < 300)
-                        $("#" + jstreeDivId).jstree().open_all()
-                    common.jstree.openNodeDescendants(jstreeDivId, "owl:ObjectProperty")
-                })
-
-                callbackSeries()
-            }
-
-
-        ], function (err) {
-
-
-        })
+            })
 
 
     }
 
 
     self.onSelectTreeNode = function (event, obj) {
-        if(obj.node.data.type.indexOf("imported")==0) {
-           var html="<div class='OwlEditorItemSubjectUri'> " + obj.node.data.label+" imported (not editable)"+ "</div><div id='owlEditor_ImportedObjInfosDiv'></div>"
+        if (obj.node.data.type.indexOf("imported") == 0) {
+            var html = "<div class='OwlEditorItemSubjectUri'> " + obj.node.data.label + " imported (not editable)" + "</div><div id='owlEditor_ImportedObjInfosDiv'></div>"
             $("#owlEditor_propertiesDiv").html(html);
-           Sparql_generic.getNodeInfos(self.currentSourceData.name,obj.node.data.id,{},function(err,result){
-               SourceEditor.showNodeInfos ("owlEditor_ImportedObjInfosDiv", null, obj.node.data.id, result)
-           })
+            Sparql_generic.getNodeInfos(self.currentSourceData.name, obj.node.data.id, {}, function (err, result) {
+                SourceEditor.showNodeInfos("owlEditor_ImportedObjInfosDiv", null, obj.node.data.id, result)
+            })
             return;
         }
         self.currentNode = obj.node;
@@ -319,10 +328,10 @@ var OwlEditor = (function () {
         var html = "<table>"
         html += "<tr>"
 
-        var subject="New  "+type+" ";
-        if( nodeData)
-           subject= "About : "+nodeData.label+"    "+nodeData.id
-        html += "<td><span class='OwlEditorItemSubjectUri'> " + subject+ "</span></td>" +
+        var subject = "New  " + type + " ";
+        if (nodeData)
+            subject = "About : " + nodeData.label + "    " + nodeData.id
+        html += "<td><span class='OwlEditorItemSubjectUri'> " + subject + "</span></td>" +
             "</tr>"
         var rangeHtml = "";
         for (var prop in self.shema[type]) {
@@ -338,9 +347,9 @@ var OwlEditor = (function () {
                 inputHtml += "<tr>"
                 inputHtml += "<td><div>"
                 if (range == "xml:string") {
-                    inputHtml += "<input id='" + rangeInpuId + "' value=''>"
+                    inputHtml += "<input  class='newPropertyInput' id='" + rangeInpuId + "' value=''>"
                 } else {
-                    inputHtml += "<select id='" + rangeInpuId + "' >"
+                    inputHtml += "<select class='newPropertyInput' id='" + rangeInpuId + "' >"
                     inputHtml += "<option></option>"
 
 
@@ -352,6 +361,7 @@ var OwlEditor = (function () {
 
 
                     })
+                    inputHtml += "<option value='" + "http://www.w3.org/2002/07/owl#Thing" + "'>" + "Thing" + "</option>"
 
 
                     inputHtml += "</select>"
@@ -385,6 +395,14 @@ var OwlEditor = (function () {
                 "http://www.w3.org/2000/01/rdf-schema": "rdfs",
                 "http://www.w3.org/2004/02/skos/core": "skos"
             }
+            if(self.currentNode.data.isNew && $("#owl-Class_rdfs-subClassOf").length){
+
+                $("#owl-Class_rdfs-subClassOf").val(self.currentNode.data.parent)
+            }
+            $(".newPropertyInput").bind("blur", function (event) {
+                self.onAddPropertyButton($(this).attr("id"))
+
+            })
 
             if (nodeData) {
                 Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeData.id, {}, function (err, result) {
@@ -525,15 +543,20 @@ var OwlEditor = (function () {
 
     }
     self.newItem = function () {
-        if( !self.currentNode )
-            return alert ("Select a type")
-        var type = self.currentNode.data.type
-        self.showPropertiesDiv(type)
+        if (!self.currentNode)
+            return alert("Select a type")
+        var type = self.currentNode.data.type;
+        var newId = Config.sources[self.currentSourceData.name].graphUri + common.getRandomHexaId(10)
+        var parent = self.currentNode.data.id
+        self.currentNode = {data: {id: newId, type: type, parent: parent, isNew: true}}
+
+        self.showPropertiesDiv(type, self.currentNode)
     }
 
     self.saveEditingNode = function () {
 
         var triples = [];
+        var newNodeLabel=""
         for (var divId in self.editingNodeMap) {
             var objectData = self.editingNodeMap[divId].objectData;
             var subjectData = self.editingNodeMap[divId].subjectData;
@@ -541,8 +564,10 @@ var OwlEditor = (function () {
             var type = array[0].replace(/\-/g, ":")
 
 
-            var isNew = false;
+
+
             var predicate = array[1].replace(/\-/g, ":")
+
             var subjectUri;
             objectData.forEach(function (item) {
                 var objectStr;
@@ -555,9 +580,6 @@ var OwlEditor = (function () {
                 if (subjectData) {
                     subjectUri = subjectData.id;
 
-                } else {
-                    subjectUri = Config.sources[self.currentSourceData.name].graphUri + common.getRandomHexaId();
-                    isNew = true;
                 }
                 var triple = {
                     subject: subjectUri,
@@ -565,6 +587,8 @@ var OwlEditor = (function () {
                     object: objectStr,
 
                 }
+                if(predicate=="rdfs:label")
+                    newNodeLabel=item.id
 
                 triples.push(triple)
             })
@@ -592,36 +616,56 @@ var OwlEditor = (function () {
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
-        query += "    WITH <" + graphUri + ">" +
-            " DELETE { <" + self.currentNode.data.id + "> ?p ?o. } " +
-            " INSERT { "
+        query += "    WITH <" + graphUri + ">"
+        if (!self.currentNode.data.isNew) {
+            query += " DELETE { <" + self.currentNode.data.id + "> ?p ?o. } "
+        }
+        query += " INSERT { "
 
-        triples.forEach(function (item,index) {
-            if(index==0){
-                query += "<"+subjectData.id+"> rdf:type "+subjectData.type+".\n"
+        triples.forEach(function (item, index) {
+            if (index == 0) {
+                query += "<" + subjectData.id + "> rdf:type " + subjectData.type + ".\n"
             }
             query += tripleToStr(item);
 
 
         })
-        self.readOnlyPredicates.forEach(function (item) {
-            var triple = {
-                subject: self.currentNode.data.id,
-                predicate: "<" + item.prop.value + ">",
-                object: item.value.value
-            }
-            query += tripleToStr(triple);
-        })
+        if (self.readOnlyPredicates) {
+            self.readOnlyPredicates.forEach(function (item) {
+                var triple = {
+                    subject: self.currentNode.data.id,
+                    predicate: "<" + item.prop.value + ">",
+                    object: item.value.value
+                }
+                query += tripleToStr(triple);
+            })
+        }
 
         query += " }"
 
 
-        return
         Sparql_proxy.querySPARQL_GET_proxy(Config.sources[self.currentSourceData.name].sparql_server.url, query, "", {source: self.currentSourceData.name}, function (err, result) {
 
             if (err)
                 return $("#owlEditor_messageDiv").html(err)
-            return $("#owlEditor_messageDiv").html(" data saved")
+
+            $("#owlEditor_messageDiv").html(" data saved")
+            if (self.currentNode.data.isNew) {
+                var jstreeData = {
+                    id: subjectData.id,
+                    label: newNodeLabel,
+                    parent: subjectData.parent,
+                    data: {
+                        id: subjectData.id,
+                        label:newNodeLabel,
+                        type: subjectData.type
+                    }
+                }
+            }
+            common.jstree.addNodesToJstree("owlEditor_jstreeDiv", subjectData.parent, jstreeData)
+
+
+            return
         })
     }
 

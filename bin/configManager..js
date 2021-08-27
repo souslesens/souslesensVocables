@@ -17,7 +17,13 @@ var async = require("async")
 
 var configs = {};
 var configManager = {
+    getDictionary: function (dictionary, callback) {
 
+        var dictionaryPath = path.join(__dirname, "../config/dictionaries/"+dictionary)
+        jsonFileStorage.retrieve(path.resolve(dictionaryPath), function (err, profiles) {
+            callback(err, profiles)
+        })
+    },
     getProfiles: function (options, callback) {
         var profilesPath = path.join(__dirname, "../config/profiles.json")
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
@@ -41,10 +47,14 @@ var configManager = {
 
             // create and initiate graph triples
             function (callbackSeries) {
+                if (options.type == "SKOS")
 
-                SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
-                    return callbackSeries(err,result)
-                })
+                    SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
+                        return callbackSeries(err, result)
+                    })
+                else if (options.type == "OWL")
+                    return callbackSeries(null)
+
             },
             function (callbackSeries) {
                 var sourcesPath = path.join(__dirname, "../config/blenderSources.json")
@@ -64,9 +74,21 @@ var configManager = {
                             "predicates": {"lang": options.lang},
                             "color": "#9edae3"
                         }
-                    } else {
+                    } else if (options.type == "OWL") {
+                        sources[sourceName] = {
+                            "editable": true,
+                            "controller": "Sparql_OWL",
+                            "sparql_server": {
+                                "url": "_default"
+                            },
 
+                            "graphUri": graphUri,
+                            "schemaType": "OWL"
+
+                        }
                     }
+
+
                     jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
 
                         callbackSeries(err)

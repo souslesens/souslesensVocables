@@ -3,7 +3,9 @@ var async = require("async")
 var util = require("./util.")
 var SourceManager = {
 
+    createNewOwlSourceGraph: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
 
+    },
     createNewSkosSourceGraph: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         var type = options.type;
         var lang = options.lang;

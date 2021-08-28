@@ -450,7 +450,7 @@ var ADLmappingData = (function () {
                 })
             })
 
-            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data: types})
+            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data: types},true)
 
             $("#ADLmappings_AdvancedMappingDialogDiv").dialog("close")
 

@@ -143,7 +143,7 @@ var ADLmappings = (function () {
                 } else if (ADLadvancedMapping.assignConditionalTypeOn)
                     return ADLmappingData.assignConditionalType(propertiesMap.node)
                 else
-                    self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node)
+                    self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node,true)
             } else if (TextAnnotator.isAnnotatingText)
                 TextAnnotator.setAnnotation(propertiesMap.node)
         }
@@ -382,7 +382,7 @@ var ADLmappings = (function () {
         }
 
 
-        self.AssignOntologyTypeToColumn = function (column, node) {
+        self.AssignOntologyTypeToColumn = function (column, node,useDictionary) {
             ADLmappingData.setDataSampleColumntype(column, node)
 
 
@@ -404,8 +404,19 @@ var ADLmappings = (function () {
             var color = self.sourceTypeColors[node.jstreeDiv]
             ADLmappingGraph.drawNode(column, color, node.position)
 
-            ADLmappingData.currentColumn = null;
-            $(".dataSample_type").removeClass("datasample_type_selected")
+
+
+
+            //show dictionary for this column
+            if(useDictionary && ADLadvancedMapping.dictionary[node.data[0].id]){
+                ADLadvancedMapping.showAdvancedMappingDialog(node.data[0].id, ADLmappingData.currentColumn)
+            }else{
+                ADLmappingData.currentColumn = null;
+                $(".dataSample_type").removeClass("datasample_type_selected")
+            }
+
+
+
         }
 
         self.unAssignOntologyTypeToColumn = function (column, node) {
@@ -508,7 +519,7 @@ var ADLmappings = (function () {
                                 node.position = data.graph[item.subject]
                             }
 
-                            self.AssignOntologyTypeToColumn(item.subject, node)
+                            self.AssignOntologyTypeToColumn(item.subject, node,false)
                         }
 
                         //association

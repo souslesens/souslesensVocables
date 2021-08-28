@@ -1,6 +1,7 @@
 var ADLadvancedMapping = (function () {
 
         var self = {}
+        self.dictionary = {}
         ADLmappingData.currentColumnDistinctValues = [];
 
 
@@ -19,7 +20,13 @@ var ADLadvancedMapping = (function () {
 
                 success: function (data, textStatus, jqXHR) {
 
-                    self.dictionary=data;
+                    self.dictionary = {}
+                    for (var classId in data) {
+                        self.dictionary[classId] = {}
+                        for (var value in data[classId]) {
+                            self.dictionary[classId][value.toLowerCase()] = data[classId][value]
+                        }
+                    }
 
                 }, error: function () {
 
@@ -27,7 +34,8 @@ var ADLadvancedMapping = (function () {
             })
         }
 
-        self.showAdvancedMappingDialog = function () {
+        self.showAdvancedMappingDialog = function (columnClassId) {
+
             self.assignConditionalTypeOn = true;
             self.mappedValues = {}
             var obj = common.deconcatSQLTableColumn(ADLmappingData.currentColumn)
@@ -66,6 +74,7 @@ var ADLadvancedMapping = (function () {
                     setTimeout(function () {
                         $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
                         common.fillSelectOptions("ADLmapping_distinctColumnValuesSelect", data, null, column, column)
+                        self.setDictionaryMappings(columnClassId, ADLmappingData.currentColumnDistinctValues)
                     }, 200)
                 }
                 , error: function (err) {
@@ -75,6 +84,33 @@ var ADLadvancedMapping = (function () {
                 }
             })
         }
+
+        self.setDictionaryMappings = function (columnClassId, columnValues) {
+
+            var columnDictionary = self.dictionary[columnClassId];
+            if (!columnDictionary)
+                return alert("no dictionary exists for class " + columnClassId)
+
+            columnValues.forEach(function (value) {
+                var value2 = value.toLowerCase()
+                var cssClass = null;
+                if (columnDictionary[value2]) {
+                    columnDictionary[value2].forEach(function (entity) {
+
+                        if (entity.isReferenceValue)
+                            cssClass = "ADLmapping_distinctColumnValuesSelect_referenceValue"
+                        else
+                            cssClass = "ADLmapping_distinctColumnValuesSelect_candidateValues"
+                    })
+                    if (cssClass)
+                        $("#ADLmapping_distinctColumnValuesSelect option[value='" + value + "']").addClass(cssClass);
+                }
+
+            })
+
+
+        }
+
 
         self.runAutomaticMapping = function () {
 

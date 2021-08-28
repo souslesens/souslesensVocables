@@ -86,10 +86,14 @@ var ADLadvancedMapping = (function () {
         }
 
         self.setDictionaryMappings = function (columnClassId, columnValues) {
-
+            self.currentColumnClassId = columnClassId
             var columnDictionary = self.dictionary[columnClassId];
             if (!columnDictionary)
                 return alert("no dictionary exists for class " + columnClassId)
+
+            ADLmappingData.currentColumn = null;
+
+            $(".dataSample_type").removeClass("datasample_type_selected")
 
             columnValues.forEach(function (value) {
                 var value2 = value.toLowerCase()
@@ -109,6 +113,13 @@ var ADLadvancedMapping = (function () {
             })
 
 
+        }
+
+
+        self.editDictionaryValues = function (columnValue) {
+            var entities = self.dictionary[self.currentColumnClassId][columnValue.toLowerCase()]
+            var html = JSON.stringify(entities, null, 2)
+            $("#ADLadvancedMapping_manualMappingContainerDiv").html(html)
         }
 
 

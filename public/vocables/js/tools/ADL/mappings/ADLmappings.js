@@ -410,8 +410,8 @@ var ADLmappings = (function () {
 
 
             //show dictionary for this column
-            if(useDictionary && ADLadvancedMapping.dictionary[node.data[0].id]){
-                ADLadvancedMapping.showAdvancedMappingDialog(node.data[0].id, ADLmappingData.currentColumn)
+            if(useDictionary && ADLadvancedMapping.dictionaries[node.data[0].dictionary]){
+                ADLadvancedMapping.showAdvancedMappingDialog(node.data[0].dictionary,node.data[0].id, ADLmappingData.currentColumn)
             }else{
                 ADLmappingData.currentColumn = null;
                 $(".dataSample_type").removeClass("datasample_type_selected")

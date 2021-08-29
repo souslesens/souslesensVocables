@@ -1,7 +1,7 @@
 var ADLadvancedMapping = (function () {
 
         var self = {}
-        self.dictionary = {}
+        self.dictionaries= {}
         ADLmappingData.currentColumnDistinctValues = [];
         self.currentdictionaryEntryEntities = {};
 
@@ -26,7 +26,7 @@ var ADLadvancedMapping = (function () {
                     dataType: "json",
 
                     success: function (data, textStatus, jqXHR) {
-                        self.dictionaries[dicName]={}
+                        self.dictionaries[dicName]= {matches:{}}
 
                         dictionaryJsTreeData.push({
                             id: dicName,
@@ -37,7 +37,7 @@ var ADLadvancedMapping = (function () {
 
 
                         for (var classId in data) {
-                            self.dictionaries[dicName][classId] = {}
+                            self.dictionaries[dicName][classId] = {matches:{}}
 
                             dictionaryJsTreeData.push({
                                 id: classId,
@@ -48,14 +48,15 @@ var ADLadvancedMapping = (function () {
                                     type: "owl:Class",
                                     id: classId,
                                     label: data[classId].label,
-                                    source: Config.ADL.OneModelSource
+                                    source: Config.ADL.OneModelSource,
+                                    dictionary: dicName,
                                 }
                             })
 
 
 
-                            for (var value in data[classId]) {
-                                self.dictionaries[dicName][classId][value.toLowerCase()] = data[classId][value]
+                            for (var value in data[classId].matches) {
+                                self.dictionaries[dicName][classId].matches[value.toLowerCase()] = data[classId].matches[value]
                             }
 
                         }
@@ -99,7 +100,7 @@ var ADLadvancedMapping = (function () {
 
         }
 
-        self.showAdvancedMappingDialog = function (columnClassId) {
+        self.showAdvancedMappingDialog = function (dictionary,columnClassId) {
 
             self.assignConditionalTypeOn = true;
             self.mappedValues = {}
@@ -139,7 +140,7 @@ var ADLadvancedMapping = (function () {
                     setTimeout(function () {
                         $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
                         common.fillSelectOptions("ADLmapping_distinctColumnValuesSelect", data, null, column, column)
-                        self.setDictionaryMappings(columnClassId, ADLmappingData.currentColumnDistinctValues)
+                        self.setDictionaryMappings(dictionary,columnClassId, ADLmappingData.currentColumnDistinctValues)
                     }, 200)
                 }
                 , error: function (err) {
@@ -150,9 +151,9 @@ var ADLadvancedMapping = (function () {
             })
         }
 
-        self.setDictionaryMappings = function (columnClassId, columnValues) {
-            self.currentColumnClassId = columnClassId
-            var columnDictionary = self.dictionary[columnClassId];
+        self.setDictionaryMappings = function (dictionary,columnClassId, columnValues) {
+            self.currentColumnClass = {id:columnClassId,dictionary:dictionary}
+            var columnDictionary = self.dictionaries[dictionary][columnClassId];
             if (!columnDictionary)
                 return alert("no dictionary exists for class " + columnClassId)
 
@@ -163,8 +164,8 @@ var ADLadvancedMapping = (function () {
             columnValues.forEach(function (value) {
                 var value2 = value.toLowerCase()
                 var cssClass = null;
-                if (columnDictionary[value2]) {
-                    columnDictionary[value2].forEach(function (entity) {
+                if (columnDictionary.matches[value2]) {
+                    columnDictionary.matches[value2].forEach(function (entity) {
 
                         if (entity.isReferenceValue)
                             cssClass = "ADLmapping_distinctColumnValuesSelect_referenceValue"
@@ -182,15 +183,15 @@ var ADLadvancedMapping = (function () {
 
 
         self.editDictionaryValues = function (columnValue) {
-            var entities = self.dictionary[self.currentColumnClassId][columnValue.toLowerCase()]
+            var entities = self.dictionaries[self.currentColumnClass.dictionary][self.currentColumnClass.id].matches[columnValue.toLowerCase()]
            /* var html = JSON.stringify(entities, null, 2)
           */
             self.currentdictionaryEntryEntities
             var html=""
             entities.forEach(function(entity){
                 var id="dictionary"+common.getRandomHexaId(5)
-                self.currentdictionaryEntryEntities[id]=entity
-                html+="<div class='ADLmapping_candidateEntity' onclick='ADLadvancedMapping.showEntityInfos(\""+id+"\")'>"+entity.term+"<button onclick='ADLadvancedMapping.setAsMatchCandidate(\""+id+"\")'>Match</button></div>"
+                self.currentdictionaryEntryEntities[id]={dictionary:self.currentColumnClass.dictionary,classId:self.currentColumnClass.id,entity:entity}
+                html+="<div class='ADLmapping_candidateEntity' >"+entity.term+"<button onclick='ADLadvancedMapping.showEntityInfos(\""+id+"\")'>infos</button><button onclick='ADLadvancedMapping.setAsMatchCandidate(\""+id+"\")'>Select</button></div>"
             })
             $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
         }
@@ -200,8 +201,8 @@ var ADLadvancedMapping = (function () {
 
         }
         self.showEntityInfos=function(id){
-            var source="READI"
-            MainController.UI.showNodeInfos(source, id, "mainDialogDiv")
+           var obj= self.currentdictionaryEntryEntities[id]
+            MainController.UI.showNodeInfos(obj.dictionary, obj.entity.id, "mainDialogDiv")
         }
 
 

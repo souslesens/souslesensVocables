@@ -44,7 +44,7 @@ self.loginMode = "none";
 
     self.ADL = {
         dictionaries:{
-            "READI":{fileName:"dictionary_READI.json"}
+            "CFIHOS_READI":{fileName:"dictionary_READI.json"}
         },
         RDLsource: "RDL-QUANTUM-MIN",
         OneModelSource: "ONE-MODEL",

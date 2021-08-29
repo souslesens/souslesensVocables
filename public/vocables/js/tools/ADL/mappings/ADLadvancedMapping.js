@@ -3,35 +3,100 @@ var ADLadvancedMapping = (function () {
         var self = {}
         self.dictionary = {}
         ADLmappingData.currentColumnDistinctValues = [];
+        self.currentdictionaryEntryEntities = {};
 
 
         self.loadDictionaries = function () {
-            var payload = {
-                ADLmappingDictionary: 1,
-                load: "dictionary_READI.json"
-            }
+           self.dictionaries= {}
+            var dicNames=Object.keys(Config.ADL.dictionaries)
+            dictionaryJsTreeData=[]
 
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
 
-                dataType: "json",
-
-                success: function (data, textStatus, jqXHR) {
-
-                    self.dictionary = {}
-                    for (var classId in data) {
-                        self.dictionary[classId] = {}
-                        for (var value in data[classId]) {
-                            self.dictionary[classId][value.toLowerCase()] = data[classId][value]
-                        }
-                    }
-
-                }, error: function () {
-
+            async.eachSeries(dicNames,function(dicName,callbackEach){
+                var payload = {
+                    ADLmappingDictionary: 1,
+                    load: Config.ADL.dictionaries[dicName].fileName
                 }
+
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: payload,
+
+                    dataType: "json",
+
+                    success: function (data, textStatus, jqXHR) {
+                        self.dictionaries[dicName]={}
+
+                        dictionaryJsTreeData.push({
+                            id: dicName,
+                            text: dicName,
+                            type: "dictionary",
+                            parent: "#"
+                        })
+
+
+                        for (var classId in data) {
+                            self.dictionaries[dicName][classId] = {}
+
+                            dictionaryJsTreeData.push({
+                                id: classId,
+                                text: data[classId].label,
+                                type: "owl:Class",
+                                parent: dicName,
+                                data: {
+                                    type: "owl:Class",
+                                    id: classId,
+                                    label: data[classId].label,
+                                    source: Config.ADL.OneModelSource
+                                }
+                            })
+
+
+
+                            for (var value in data[classId]) {
+                                self.dictionaries[dicName][classId][value.toLowerCase()] = data[classId][value]
+                            }
+
+                        }
+                        callbackEach()
+                    }, error: function () {
+                             return callbackEach(err)
+                    }
+                })
+            },function(err){
+                if(err){
+                    return MainController.UI.message(err)
+                }
+                var optionsClass = {
+                    selectTreeNodeFn: ADLmappings.selectTreeNodeFn,
+                    openAll: true,
+                    searchPlugin: {
+                        "case_insensitive": true,
+                        "fuzzy": false,
+                        "show_only_matches": true
+                    },
+
+                    contextMenu: ADLmappings.contextMenuFn("ADLmappings_OneModelTree")
+                }
+                common.jstree.loadJsTree("ADLmappings_OneModelTree", dictionaryJsTreeData, optionsClass)
+
             })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
         self.showAdvancedMappingDialog = function (columnClassId) {
@@ -104,7 +169,7 @@ var ADLadvancedMapping = (function () {
                         if (entity.isReferenceValue)
                             cssClass = "ADLmapping_distinctColumnValuesSelect_referenceValue"
                         else
-                            cssClass = "ADLmapping_distinctColumnValuesSelect_candidateValues"
+                            cssClass = "ADLmapping_distinctColumnValuesSelect_hasCandidateValues"
                     })
                     if (cssClass)
                         $("#ADLmapping_distinctColumnValuesSelect option[value='" + value + "']").addClass(cssClass);
@@ -118,8 +183,25 @@ var ADLadvancedMapping = (function () {
 
         self.editDictionaryValues = function (columnValue) {
             var entities = self.dictionary[self.currentColumnClassId][columnValue.toLowerCase()]
-            var html = JSON.stringify(entities, null, 2)
-            $("#ADLadvancedMapping_manualMappingContainerDiv").html(html)
+           /* var html = JSON.stringify(entities, null, 2)
+          */
+            self.currentdictionaryEntryEntities
+            var html=""
+            entities.forEach(function(entity){
+                var id="dictionary"+common.getRandomHexaId(5)
+                self.currentdictionaryEntryEntities[id]=entity
+                html+="<div class='ADLmapping_candidateEntity' onclick='ADLadvancedMapping.showEntityInfos(\""+id+"\")'>"+entity.term+"<button onclick='ADLadvancedMapping.setAsMatchCandidate(\""+id+"\")'>Match</button></div>"
+            })
+            $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
+        }
+
+
+        self.setAsMatchCandidate=function(id){
+
+        }
+        self.showEntityInfos=function(id){
+            var source="READI"
+            MainController.UI.showNodeInfos(source, id, "mainDialogDiv")
         }
 
 

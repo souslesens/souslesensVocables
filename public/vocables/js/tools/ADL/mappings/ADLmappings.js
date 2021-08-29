@@ -136,11 +136,11 @@ var ADLmappings = (function () {
 
 
             self.currentJstreeNode.jstreeDiv = event.currentTarget.id
-            if (ADLmappingData.currentColumn) {
+            if (true || ADLmappingData.currentColumn) {
                 ADLmappings.isModifyingMapping = true;
                 if (ADLadvancedMapping.addingValueManuallyToNode) {
                     ADLadvancedMapping.addValueManuallyFromOntology(ADLadvancedMapping.addingValueManuallyToNode, propertiesMap.node)
-                } else if (ADLadvancedMapping.assignConditionalTypeOn)
+                } else if (false && ADLadvancedMapping.assignConditionalTypeOn)
                     return ADLmappingData.assignConditionalType(propertiesMap.node)
                 else
                     self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node,true)
@@ -312,8 +312,10 @@ var ADLmappings = (function () {
                         "fuzzy": false,
                         "show_only_matches": true
                     },
+
                     contextMenu: self.contextMenuFn("ADLmappings_OneModelTree")
                 }
+                if( false)
                 common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
             })
         }

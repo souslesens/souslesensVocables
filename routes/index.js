@@ -43,7 +43,7 @@ router.post('/upload', function (req, response) {
 router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         //  console.log(JSON.stringify(req.body,null,2))
 
-        if (req.body.executeQuery) {
+        /*if (req.body.executeQuery) {
             var queryObj = JSON.parse(req.body.executeQuery);
             var indexesStr = "";
             if (req.body.indexes) {
@@ -67,8 +67,14 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
             });
 
-        }
+        }*/
 
+
+        if (req.body.elasticSearch) {
+            elasticRestProxy.executePostQuery(req.body.url,JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
+                processResponse(response, err, result)
+            })
+        }
 
         if (req.body.tryLoginJSON) {
             authentication.authentify(req.body.login, req.body.password, function (err, result) {

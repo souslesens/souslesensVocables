@@ -12,15 +12,37 @@
 const request = require('request');
 
 
-const elasticUrl = "http://localhost:9200/";
+//const elasticUrl = "http://localhost:9200/";
+//const elasticUrl = "http://92.222.116.179:7201/";
+var  elasticUrl = "http://51.178.39.209:2009/";
+var elasticUrl = "http://164.132.194.227:2009/";
+
+
 const debug = true;
 var elasticRestProxy = {
     elasticUrl: elasticUrl,
 
-    executePostQuery: function (url, query, callback) {
+    executePostQuery: function (url, query,indexes, callback) {
 
         if (url.toLowerCase().trim().indexOf("http") < 0)
-            url = elasticUrl + url;
+
+
+
+        var indexesStr="";
+        if (Array.isArray(indexes)) {
+            indexes.forEach(function (index, p) {
+                if (p > 0)
+                    indexesStr += ","
+                indexesStr += index;
+            })
+        } else
+            indexesStr = indexes
+        if(indexesStr!="")
+            indexesStr+="/"
+
+        url = elasticUrl +indexesStr+ url;
+
+
         var options = {
             method: 'POST',
             json: query,
@@ -29,6 +51,8 @@ var elasticRestProxy = {
             },
             url: url
         };
+
+
         if (false && debug)
             console.log(JSON.stringify(query, null, 2));
         request(options, function (error, response, body) {
@@ -91,12 +115,12 @@ var elasticRestProxy = {
         if (Buffer.isBuffer(responseBody))
             try {
 
-        body = JSON.parse(responseBody.toString());
-    }
-    catch(e){
-        return callback(e+" : "+responseBody.toString())
+                body = JSON.parse(responseBody.toString());
+            }
+            catch(e){
+                return callback(e+" : "+responseBody.toString())
 
-    }
+            }
         else
             body = responseBody;
         var errors = [];

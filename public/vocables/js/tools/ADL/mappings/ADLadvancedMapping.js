@@ -5,8 +5,42 @@ var ADLadvancedMapping = (function () {
         ADLmappingData.currentColumnDistinctValues = [];
         self.currentdictionaryEntryEntities = {};
 
-
         self.loadDictionaries = function () {
+            var column = "*";
+            var table = "[onemodel].[dbo].[all_dictionary]"
+            var sqlQuery = " select distinct " + column + " from " + table ;//+ " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
+
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: {
+                    ADLquery: 1,
+                    getData: 1,
+                    dataSource: JSON.stringify({dbName:"onemodel",type:"sql.sqlserver"}),
+                    sqlQuery: sqlQuery
+                },
+                dataType: "json",
+
+                success: function (data, textStatus, jqXHR) {
+
+                    if (data.length >= Config.ADL.maxDistinctValuesForAdvancedMapping)
+                        return alert(" too many distinct values :" + data.length)
+
+                    ADLmappingData.currentColumnDistinctValues = [];
+                    var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
+
+                    data.forEach(function (item) {
+                        if (item[colName])
+                            ADLmappingData.currentColumnDistinctValues.push(item[colName])
+                    })
+
+                }, function(err) {
+                }
+            })
+        }
+
+
+        self.loadDictionariesOld = function () {
             self.dictionaries = {}
             var dicNames = Object.keys(Config.ADL.dictionaries)
             dictionaryJsTreeData = []
@@ -194,15 +228,15 @@ var ADLadvancedMapping = (function () {
             if (entities) {
                 displayEntities(entities)
             } else {
-                var expression =columnValue;// columnValue.replace(/ /g, "/")
-                ElasticSearchProxy.analyzeQuestion(expression, {operator:"OR"},function (err, clause) {
+                var expression = columnValue;// columnValue.replace(/ /g, "/")
+                ElasticSearchProxy.analyzeQuestion(expression, {operator: "OR"}, function (err, clause) {
 
 
-                    var query= {
+                    var query = {
                         "query": {
                             "bool": {
                                 "must": [
-                                   clause
+                                    clause
                                 ]
                             }
                         },
@@ -214,14 +248,14 @@ var ADLadvancedMapping = (function () {
                             ]
                         },
                     }
-                        ElasticSearchProxy.queryElastic(query, ["onemodel"], function (err, result) {
-                            if(err)
-                                return alert(err)
-                            entities = []
-                            result.hits.hits.forEach(function(hit){
-                                var entity={id:hit._source.subject,term:hit._source.label}
-                                entities.push(entity)
-                            })
+                    ElasticSearchProxy.queryElastic(query, ["onemodel"], function (err, result) {
+                        if (err)
+                            return alert(err)
+                        entities = []
+                        result.hits.hits.forEach(function (hit) {
+                            var entity = {id: hit._source.subject, term: hit._source.label}
+                            entities.push(entity)
+                        })
 
                         displayEntities(entities)
                     })

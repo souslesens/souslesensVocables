@@ -565,19 +565,25 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
 
                             $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
                             // $("#mainDialogDiv").height()
-                            if (!options)
-                                options = {}
-                            options.keepNodePositionOnDrag = true
-                            visjsGraph.draw(graphDiv, visjsData, options)
-                            visjsGraph.network.fit()
+
+                            if( visjsData.nodes.length<Config.ADL.browserMaxClassesToDrawClassesGraph) {
+                                if (!options)
+                                    options = {}
+                                options.keepNodePositionOnDrag = true
+                                visjsGraph.draw(graphDiv, visjsData, options)
+                                visjsGraph.network.fit()
+                            }
                         })
                     } else {
                         //  $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
                         // $("#mainDialogDiv").height()
-                        if (!options)
-                            options = {}
-                        visjsGraph.draw(graphDiv, visjsData, options)
-                        visjsGraph.network.fit()
+                        if( visjsData.nodes.length<Config.ADL.browserMaxClassesToDrawClassesGraph) {
+                            if (!options)
+                                options = {}
+
+                            visjsGraph.draw(graphDiv, visjsData, options)
+                            visjsGraph.network.fit()
+                        }
 
                     }
                 }

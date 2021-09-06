@@ -954,37 +954,41 @@ var ADLbrowserQuery = (function () {
                     })
                 }
                 for (var predicate in classes[classId]) {
-                    var id2 = common.getRandomHexaId(5)
-                    if (!distinctNode[id2]) {
-                        distinctNode[id2] = 1
-                        jstreeData.push({
-                            id: id2,
-                            text: model[predicate].label,
-                            parent: id1,
-                            type: "owl:ObjectProperty",
-                            data: {
-                                id: predicate,
-                                label: model[predicate].label
-                            }
-                        })
-                    }
-                    classes[classId][predicate].forEach(function (object) {
-                        var id3 = common.getRandomHexaId(5)
-                        if (!distinctNode[id3]) {
-                            distinctNode[id3] = 1
+                    if (!model[predicate])
+                        var x = predicate
+                    else {
+                        var id2 = common.getRandomHexaId(5)
+                        if (!distinctNode[id2]) {
+                            distinctNode[id2] = 1
                             jstreeData.push({
-
-                                id: id3,
-                                text: model[object].label,
-                                parent: id2,
-                                type: "class",
+                                id: id2,
+                                text: model[predicate].label,
+                                parent: id1,
+                                type: "owl:ObjectProperty",
                                 data: {
-                                    id: object,
-                                    label: model[object].label
+                                    id: predicate,
+                                    label: model[predicate].label
                                 }
                             })
                         }
-                    })
+                        classes[classId][predicate].forEach(function (object) {
+                            var id3 = common.getRandomHexaId(5)
+                            if (!distinctNode[id3]) {
+                                distinctNode[id3] = 1
+                                jstreeData.push({
+
+                                    id: id3,
+                                    text: model[object].label,
+                                    parent: id2,
+                                    type: "class",
+                                    data: {
+                                        id: object,
+                                        label: model[object].label
+                                    }
+                                })
+                            }
+                        })
+                    }
                 }
             })
             var options = {

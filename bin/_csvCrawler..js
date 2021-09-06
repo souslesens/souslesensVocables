@@ -1,10 +1,10 @@
 const async = require("async");
 const util = require("./util.");
-const socket = require('../../routes/socket.js');
+const socket = require('../routes/socket.js');
 const request = require('request');
 const fs = require('fs');
 const csv = require('csv-parser')
-const common=require('./common.')
+const common=require('./util.')
 
 var csvCrawler = {
 
@@ -91,7 +91,7 @@ var csvCrawler = {
                             return callbackEach(error)
 
                         }
-                        const elasticRestProxy = require('../elasticRestProxy..js')
+                        const elasticRestProxy = require('./elasticRestProxy..js')
                         elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
                             if (err)
                                 return callbackEach(err);
@@ -161,6 +161,8 @@ var csvCrawler = {
     },
 
     readCsv: function (connector, lines, callback) {
+        if(!fs.exists(connector.filePath))
+            return callback("file does not exists :"+connector.filePath)
       util.getCsvFileSeparator(connector.filePath, function (separator) {
       //  var separator="\t"
             var headers = [];

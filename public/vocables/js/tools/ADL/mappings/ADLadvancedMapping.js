@@ -6,6 +6,9 @@ var ADLadvancedMapping = (function () {
         self.currentdictionaryEntryEntities = {};
         self.matchCandidates = {}
 
+        var sourceColors = {}
+
+
         self.loadDictionaries = function () {
             var column = "*";
             var table = "[onemodel].[dbo].[reference_dictionary]"
@@ -165,6 +168,11 @@ var ADLadvancedMapping = (function () {
                 }
             })
         }
+        self.getSourceColor=function(source) {
+            if (!sourceColors[source])
+                sourceColors[source] = Config.ADL.palette[Object.keys(sourceColors).length]
+            return sourceColors[source]
+        }
 
         self.setDictionaryMappings = function (dictionary, columnClassId, columnValues) {
             self.currentColumnClass = {id: columnClassId}
@@ -173,23 +181,8 @@ var ADLadvancedMapping = (function () {
                 return alert("no dictionary exists for class " + columnClassId)
 
             ADLmappingData.currentColumn = null;
-            var palette = [
 
-                '#1f77b4',
-                '#9467bd',
-                '#2ca02c',
 
-                '#8c564b',
-                '#aec7e8',
-                '#98df8a',]
-
-            var sourceColors = {}
-
-            function getSourceColor(source) {
-                if (!sourceColors[source])
-                    sourceColors[source] = palette[Object.keys(sourceColors).length]
-                return sourceColors[source]
-            }
 
             $(".dataSample_type").removeClass("datasample_type_selected")
             self.currentColumnValueDivIds = {}
@@ -202,7 +195,7 @@ var ADLadvancedMapping = (function () {
                 if (termObj) {
                     cssClass = "ADLmapping_columnValues_referenceValue"
                     for (var source in termObj) {
-                        sourcesHtml += "&nbsp;<span class='ADLmapping_distinctColumnValueSource' style='background-color:" + getSourceColor(source) + "'>" + source + "</span>";
+                        sourcesHtml += "&nbsp;<span class='ADLmapping_distinctColumnValueSource' style='background-color:" + self.getSourceColor(source) + "'>" + source + "</span>";
                     }
                 } else
                     cssClass = "ADLmapping_columnValues_hasCandidateValues"
@@ -271,12 +264,12 @@ var ADLadvancedMapping = (function () {
                 columnValueDivId = self.currentColumnValueDivId;
             else
                 self.currentColumnValueDivId = columnValueDivId;
-
+            var columnValue = self.currentColumnValueDivIds[columnValueDivId].value
             $("#ADLadvancedMapping_editingColumnValue").html(columnValue)
 
             $(".ADLmapping_columnValue").removeClass("ADLmapping_columnValueSelected")
             $("#" + columnValueDivId).addClass("ADLmapping_columnValueSelected")
-            var columnValue = self.currentColumnValueDivIds[columnValueDivId].value
+
 
             function displayEntities(entities) {
                 var html = ""
@@ -290,7 +283,9 @@ var ADLadvancedMapping = (function () {
                         classId: self.currentColumnClass.id,
                         entity: entity
                     }*/
-                        html += "<div class='ADLmapping_candidateEntity'  id='" + id + "'>" + entity.term +
+                        html += "<div class='ADLmapping_candidateEntity'  id='" + id + "'>" +
+                            "<span style='background-color: "+self.getSourceColor(entity.index)+"' class='ADLmapping_entitySource'>"+entity.index+"</span>"+
+                            entity.term +
                             "<div>" +
                             "<button onclick='ADLadvancedMapping.showEntityInfos(\"" + id + "\")'>infos</button>" +
                             "<button onclick='ADLadvancedMapping.setAsMatchCandidate(\"" + id + "\")'>Select</button></div>" +
@@ -364,12 +359,12 @@ var ADLadvancedMapping = (function () {
                         ]
                     },
                 }
-                ElasticSearchProxy.queryElastic(query, ["onemodel"], function (err, result) {
+                ElasticSearchProxy.queryElastic(query, ["readi","pca","cfihos"], function (err, result) {
                     if (err)
                         return alert(err)
                     entities = []
                     result.hits.hits.forEach(function (hit) {
-                        var entity = {id: hit._source.subject, term: hit._source.label}
+                        var entity = {index:hit._index,id: hit._source.subject, term: hit._source.label}
                         entities.push(entity)
                     })
 
@@ -402,7 +397,8 @@ var ADLadvancedMapping = (function () {
         }
         self.showEntityInfos = function (id) {
             var obj = self.currentdictionaryEntryEntities[id]
-            MainController.UI.showNodeInfos(obj.source, obj.id, "mainDialogDiv")
+            var source=Config.ADL. elasticIndexSourceMap[obj.index]
+            MainController.UI.showNodeInfos(source, obj.id, "mainDialogDiv")
         }
 
 

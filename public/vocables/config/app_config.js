@@ -46,6 +46,24 @@ self.loginMode = "none";
         dictionaries:{
             "CFIHOS_READI":{fileName:"dictionary_READI.json"}
         },
+
+        elasticIndexSourceMap:{
+            "cfihos":"CFIHOS-ISO",
+            "pca":"ISO_15926-PCA",
+            "readi":"CFIHOS_READI"
+        },
+        palette :[
+            '#1f77b4',
+            '#9467bd',
+            '#2ca02c',
+
+            '#8c564b',
+            '#aec7e8',
+            '#98df8a']
+        ,
+
+
+
         RDLsource: "RDL-QUANTUM-MIN",
         OneModelSource: "ONE-MODEL",
         mappingAlternativeSource: "CFIHOS_READI",

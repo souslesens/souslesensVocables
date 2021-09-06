@@ -461,7 +461,7 @@ var ADLmappingData = (function () {
     }
     self.assignConditionalType = function (ontologyNode) {
 
-        var conditionValue = $("#ADLmapping_distinctColumnValuesSelect").val();
+        var conditionValue = $("#ADLmapping_columnValues").val();
         if (conditionValue && conditionValue != "") {
             var data = conditionValue + "|" + ontologyNode.data.id
             var id = "condition_" + common.getRandomHexaId(3)

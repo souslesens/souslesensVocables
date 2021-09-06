@@ -87,6 +87,9 @@ var ADLmappings = (function () {
                     height: 800,
                     width: 1000,
                     modal: false,
+                    beforeClose:function(ui,event){
+                        return ADLadvancedMapping.beforeCloseDialog()
+                    }
                 });
 
                 $("#ADLassetGraphDiv").dialog({

@@ -15,13 +15,13 @@
         font-weight: normal;
     }
 
-    .ADLmapping_distinctColumnValuesSelect{
+    .ADLmapping_columnValues{
         background-color: #ee8577;
     }
-    .ADLmapping_distinctColumnValuesSelect_referenceValue{
+    .ADLmapping_columnValues_referenceValue{
         background-color: #77ee77;
     }
-    .ADLmapping_distinctColumnValuesSelect_candidateValues{
+    .ADLmapping_columnValues_candidateValues{
         background-color: #eeb477;
     }
 </style>
@@ -40,8 +40,8 @@
 
     <div id="ADLMappingAdvancedMappings_manualMapping" style="display:flex;flex-direction:row;width:100%">
         <div>
-            <select size="10" onclick="ADLadvancedMapping.editDictionaryValues($(this).val())" class="ADLmapping_distinctColumnValuesSelect" style="max-width: 250px;height: 650px;overflow: auto"
-                    id="ADLmapping_distinctColumnValuesSelect"></select>
+            <select size="10" onclick="ADLadvancedMapping.editDictionaryValues($(this).val())" class="ADLmapping_columnValues" style="max-width: 250px;height: 650px;overflow: auto"
+                    id="ADLmapping_columnValues"></select>
         </div>
         <div>
             <i> create mapping by selecting a value on left list and then on right panel</i>

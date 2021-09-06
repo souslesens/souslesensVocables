@@ -15,17 +15,19 @@
         font-weight: normal;
     }
 
-    .ADLmapping_distinctColumnValuesSelect{
+    .ADLmapping_columnValues{
         background-color: #ee8577;
     }
-    .ADLmapping_distinctColumnValuesSelect_referenceValue{
+    .ADLmapping_columnValues_referenceValue{
         background-color: #77ee77;
     }
-    .ADLmapping_distinctColumnValuesSelect_hasCandidateValues{
+    .ADLmapping_columnValues_hasCandidateValues{
         background-color: #eeb477;
     }
-    .ADLmapping_distinctColumnValuesSelect_isCandidateValues{
-        background-color: #77e0ee;
+
+    .ADLmapping_columnValueSelected{
+        background-color: #ddd;
+
     }
     .ADLmapping_candidateEntity{
         margin: 3px;
@@ -44,6 +46,10 @@
         margin: 1px;
         padding:1px;
     }
+    .ADLmapping_columnValues_isCandidate{
+        background-color: #77e0ee;
+
+    }
 </style>
 
 
@@ -60,16 +66,25 @@
 
     <div id="ADLMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%">
         <div>
-            <select size="10" onclick="ADLadvancedMapping.editDictionaryValues($(this).val())" class="ADLmapping_distinctColumnValuesSelect" style="max-width: 400px;height: 650px;overflow: auto"
-                    id="ADLmapping_distinctColumnValuesSelect"></select>
+           <!-- <select size="10" onclick="ADLadvancedMapping.editDictionaryValues($(this).val())" class="ADLmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
+                    id="ADLmapping_columnValues"></select>-->
+           Sort <select id="ADLmapping_distinctColumnSortSelect" onchange="ADLadvancedMapping.sortColumnValues()"></select>
+            <div id="ADLmapping_distinctColumnValuesContainer" style="display:flex;flex-direction: column;max-height: 600px;overflow: auto"></div>
         </div>
         <div>
-            <i> create mapping by selecting a value on left list and then on right panel</i>
+            <div id="ADLadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
+            <i> found candidate mapppings :</i>
+            <select onchange="ADLadvancedMapping.editDictionaryValues()" id="ADLadvancedMapping_queryTypeSelect">
+            <option value="machAnyWord"> match any word</option>
+                <option value="moreLikeThis"> more like this</option>
+                <option value="exactMatch"> exact match</option>
+
+        </select>
             <div id="ADLadvancedMapping_dictionaryMappingContainerDiv"
-                 style="display:flex;flex-direction: column;width: 500px;min-height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
+                 style="display:flex;flex-direction: column;width: 500px;height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
          
          
-            <button onclick="ADLadvancedMapping.validateMapping()"> Save in dictionary</button>
+            <button onclick="ADLadvancedMapping.validateMapping()"> Validate Candidate mappings</button>
           
             <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>
         </div>

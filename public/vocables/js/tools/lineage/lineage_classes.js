@@ -294,7 +294,7 @@ var Lineage_classes = (function () {
                 else
                     return alert("select a source")
             }
-            self.soucesLevelMap[source].children+=1
+           // self.soucesLevelMap[source].children+=1
             if (nodeIds) {
                 /// parentIds = nodeIds
                 //    parentIds=common.getAllDescendants("",nodeIds)
@@ -365,7 +365,7 @@ var Lineage_classes = (function () {
                                 size: Lineage_classes.defaultShapeSize,
                                 value: map[key].length,
                                 color: color,
-                                data: {cluster: map[key],id: key + "_cluster",label:"CLUSTER : "+ map[key].length + "children", source: source, parent: key,varName:key + "_cluster",graphLevel:self.soucesLevelMap[source].children}
+                                data: {cluster: map[key],id: key + "_cluster",label:"CLUSTER : "+ map[key].length + "children", source: source, parent: key,varName:key + "_cluster"}//graphLevel:self.soucesLevelMap[source].children}
                             })
                         }
                         var edgeId = key + "_" + key + "_cluster"

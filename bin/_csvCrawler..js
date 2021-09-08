@@ -161,7 +161,7 @@ var csvCrawler = {
     },
 
     readCsv: function (connector, lines, callback) {
-        if(!fs.exists(connector.filePath))
+        if(!fs.existsSync(connector.filePath))
             return callback("file does not exists :"+connector.filePath)
       util.getCsvFileSeparator(connector.filePath, function (separator) {
       //  var separator="\t"

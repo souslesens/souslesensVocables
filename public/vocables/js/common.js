@@ -735,6 +735,26 @@ var common = (function () {
 
         },
 
+
+            self.dateToSQlserverString = function (date) {
+                var str = ""
+                var dateArray= date.toLocaleString("en-US").split(' ')
+                if (date instanceof Date && isFinite(date)) {
+                    var month = "" + (date.getMonth() + 1);
+                    if(month.length==1)
+                        month="0"+month
+                    var day = "" + date.getDate();
+                    if(day.length==1)
+                        day="0"+day
+                    var time=""+date.getTime()
+                    str = date.getFullYear() + "" + month + "" + day+" "+dateArray[1]+" "+dateArray[2];
+                }
+                else
+                    str = "";
+                return str
+            }
+
+
             self.isNumber = function (n) {
                 return !isNaN(parseFloat(n)) && isFinite(n);
             }

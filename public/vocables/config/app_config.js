@@ -69,7 +69,7 @@ self.loginMode = "none";
         mappingAlternativeSource: "CFIHOS_READI",
         adlQueryMode: "SPARQL", //or SQL
         queryLimit: 1000,
-        maxDistinctValuesForAdvancedMapping: 10000,
+        maxDistinctValuesForAdvancedMapping: 200000,
         browserMaxClassesToDrawClassesGraph:15,
         oneModelDictionaryGraphURI:"http://data.total.com/resource/one-model/dictionary/",
         topRdlObjects: {

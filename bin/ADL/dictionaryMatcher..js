@@ -5,7 +5,7 @@ var fs = require('fs')
 var async = require('async')
 var dictionaryMatcher = {
 
-    getSimilars: function (filePath, index, fileField, indexLabelField, indexIdField) {
+    getSimilars: function (filePath, index, fileField, indexLabelField, indexIdField, callback) {
         var elasticServerUrl = "http://vps254642.ovh.net:2009/"
         var data = []
         var matchesMap = {}
@@ -63,9 +63,9 @@ var dictionaryMatcher = {
                                 "must": [
                                     {
                                         "query_string": {
-                                            "query": "\"" + line[fileField] + "\"",
+                                            "query": "\"_" + line[fileField] + "_\"",
                                             "default_field": "attachment.content",
-                                            "default_operator": "AND",
+                                            "default_operator": "O",
                                             "phrase_slop": "1"
                                         }
                                     }
@@ -73,6 +73,27 @@ var dictionaryMatcher = {
                             }
                         }
                     },
+
+
+//for tags
+                    query={
+                        "query": {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "query_string": {
+                                            "query": " "+line[fileField]+" ",
+
+                                            "default_operator": "OR"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+
+
+
                         /*    query={
                                 "query": {
                                     "match": {
@@ -92,7 +113,7 @@ var dictionaryMatcher = {
                                     }
                                 }
                             }*/
-                        elasticRestProxy.executePostQuery(index + "/_search", query, function (err, result) {
+                        elasticRestProxy.executePostQuery("_search", query, index, function (err, result) {
                             if (err)
                                 return callbackEach(err)
                             if (result.error)
@@ -127,25 +148,26 @@ var dictionaryMatcher = {
             }
 
         ], function (err) {
-            fs.writeFileSync(filePath + "_orphans.json", JSON.stringify(orphans, null, 2))
-            fs.writeFileSync(filePath + "_matches.json", JSON.stringify(matchesMap, null, 2))
-
+            fs.writeFileSync(filePath + "_" + index + "_orphans.json", JSON.stringify(orphans, null, 2))
+            fs.writeFileSync(filePath + "_" + index + "_matches.json", JSON.stringify(matchesMap, null, 2))
+            if (callback)
+                return callback(null, matchesMap)
         })
 
 
     }
 
-    , merge: function (files, dir) {
+    , merge: function (files, index, dir) {
         var str = "";
         var strOrphans = "";
-        var bigMatchesMap={}
+        var bigMatchesMap = {}
         var sep = "\t"
         var indexFile = 0
         for (var file in files) {
             var fileObj = files[file]
-            var matches = JSON.parse(fs.readFileSync(dir + file + "_matches.json"))
-            bigMatchesMap[fileObj.id]=matches
-            var orphans = JSON.parse(fs.readFileSync(dir + file + "_orphans.json"))
+            var matches = JSON.parse(fs.readFileSync(dir + file + "_" + index + "_matches.json"))
+            bigMatchesMap[fileObj.id] = matches
+            var orphans = JSON.parse(fs.readFileSync(dir + file + "_" + index + "_orphans.json"))
             var indexMatch = 0
             for (var match in matches) {
                 var id = (indexFile * 100000) + (indexMatch++)
@@ -160,16 +182,15 @@ var dictionaryMatcher = {
             var strbase2 = fileObj.label + sep + fileObj.id
             orphans.forEach(function (orphan) {
 
-                    strOrphans += strbase2 + sep + orphan.iD + sep + orphan.name + "\n"
+                strOrphans += strbase2 + sep + orphan.iD + sep + orphan.name + "\n"
 
             })
         }
 
 
-        fs.writeFileSync(dir + "QuantumReadiDictionary.csv", str)
-        fs.writeFileSync(dir + "QuantumReadiDictionary_orphans.csv", strOrphans)
-        fs.writeFileSync(dir + "Dictionary_READI.json",JSON.stringify(bigMatchesMap,null,2))
-
+        fs.writeFileSync(dir + "QuantumReadiDictionary_" + index + ".csv", str)
+        fs.writeFileSync(dir + "QuantumReadiDictionary_" + index + "orphans.csv", strOrphans)
+        fs.writeFileSync(dir + "Dictionary_" + index + ".json", JSON.stringify(bigMatchesMap, null, 2))
 
 
     }
@@ -195,22 +216,39 @@ if (false) {
 
 
 //dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\readiLabel.csv", "bomaftwin","label","equipmentDescription","materialNumber ")
+if (true) {
+
+
+    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv", "tepdk_tags", "assetTagCode", "Functional_Location_code", "tagName", function (err, result) {
+
+        var str = ""
+        for (var code in result) {
+            result[code].forEach(function (tag) {
+                str += tag.id + "\t" + code + "\n"
+            })
+
+        }
+        fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str)
+
+
+    })
+}
 
 if (false) {
     var file = "bomaftwinequip2.csv"
     var file = "Quantum_physicalClasses.txt"
-    var file = "Quantum_discipline.txt"
-    var file = "Quantum_attribute.txt"
-    var file = "Quantum_attributePickListValue.txt"
-    var file = "Quantum_attributePickListValueGrouping.txt"
-    var file = "Quantum_documentType.txt"
-    var file = "Quantum_functionalClasses.txt"
-    var file = "Quantum_UOM.txt"
-    var file = "Quantum_UOMdimension.txt"
+    // var file = "Quantum_discipline.txt"
+    //  var file = "Quantum_attribute.txt"
+//    var file = "Quantum_attributePickListValue.txt"
+    //  var file = "Quantum_attributePickListValueGrouping.txt"
+    //  var file = "Quantum_documentType.txt"
+    //  var file = "Quantum_functionalClasses.txt"
+    // var file = "Quantum_UOM.txt"
+    //  var file = "Quantum_UOMdimension.txt"
 
-    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\" + file, "onemodel", "name", "label", "subject")
+    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\" + file, "pca", "name", "label", "subject")
 }
-if (true) {
+if (false) {
     var files = {
         "Quantum_functionalClasses.txt": {id: "http://w3id.org/readi/rdl/D101001053", label: "Artefact"}
         ,
@@ -235,10 +273,13 @@ if (true) {
         ,
         "Quantum_UOM.txt": {id: "http://w3id.org/readi/rdl/D101001519", label: "CFIHOS unit of measure"}
         ,
-        "Quantum_UOMdimension.txt": {id: "http://w3id.org/readi/rdl/CFIHOS-50000112", label: "http://data.15926.org/dm/PropertyQuantification"}
+        "Quantum_UOMdimension.txt": {
+            id: "http://w3id.org/readi/rdl/CFIHOS-50000112",
+            label: "http://data.15926.org/dm/PropertyQuantification"
+        }
     }
 
     var dir = "D:\\NLP\\ontologies\\dictionaries\\"
-    dictionaryMatcher.merge(files, dir)
+    dictionaryMatcher.merge(files, "pca", dir)
 
 }

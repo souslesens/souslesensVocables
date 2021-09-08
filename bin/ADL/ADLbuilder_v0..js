@@ -271,7 +271,11 @@ var ADLbuilder = {
                 function (callbackSeries) {
                     if (!options.replaceGraph)
                         return callbackSeries();
-
+                    /*   var queryDeleteGraph = "with <" + ADLgraphUri + ">" +
+                           "delete {" +
+                           "  ?sub ?pred ?obj ." +
+                           "} " +
+                           "where { ?sub ?pred ?obj .}"*/
                     socket.message("ADLbuild", "clearing Graph")
                     var queryDeleteGraph = " CLEAR GRAPH <" + ADLgraphUri + ">"
                     var params = {query: queryDeleteGraph}

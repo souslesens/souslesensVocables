@@ -455,7 +455,9 @@ var ADLmappings = (function () {
         self.loadMappings = function (name) {
 
             if (!name)
-                name = self.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
+                name = ADLmappingData.currentSource + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
+            //    name = ADLmappingData.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
+
             var payload = {ADL_GetMappings: name}
 
             $.ajax({

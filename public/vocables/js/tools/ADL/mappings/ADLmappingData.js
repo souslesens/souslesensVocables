@@ -131,7 +131,7 @@ var ADLmappingData = (function () {
                 self.showSampleData(obj.node)
                 setTimeout(function () {
                     var name = self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
-                    ADLmappings.loadMappings(self.currentADLdataSource.dbName + "_" + name)
+                    ADLmappings.loadMappings(self.currentSource + "_" + name)
                 }, 500)
 
             },
@@ -263,7 +263,7 @@ var ADLmappingData = (function () {
     self.showSampleData = function (node) {
         ADLmappings.isModifyingMapping = false;
         var SampleSizelimit = 30;
-        var dbName = node.data.source;
+
         var table = node.data.adlTable || node.data.label
 
 
@@ -371,6 +371,7 @@ var ADLmappingData = (function () {
             var sqlQuery = " select * from " + table + " limit " + SampleSizelimit;
             if (self.currentADLdataSource.type == "sql.sqlserver")
                 sqlQuery = " select top " + SampleSizelimit + " * from " + table;
+
 
             $.ajax({
                 type: "POST",

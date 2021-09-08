@@ -41,7 +41,7 @@ var ADLmappings = (function () {
         self.onLoaded = function () {
             self.init()
             MainController.UI.openRightPanel()
-            ADLadvancedMapping.loadDictionaries()
+            ADLadvancedMapping.loadSuperClasses()
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
                 //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
                 "<button onclick='ADLassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  " +
@@ -134,6 +134,7 @@ var ADLmappings = (function () {
 
             if (!self.selectedOntologyNodes)
                 self.selectedOntologyNodes = {}
+
             self.selectedOntologyNodes[propertiesMap.node.data.id] = propertiesMap.node;
             self.currentJstreeNode = propertiesMap.node;
 
@@ -414,7 +415,7 @@ var ADLmappings = (function () {
 
             //show dictionary for this column
          //   if(useDictionary && ADLadvancedMapping.dictionaries[node.data[0].dictionary]){
-            if(useDictionary && ADLadvancedMapping.referenceDictionary[node.data[0].id]){
+            if(useDictionary){
                 ADLadvancedMapping.showAdvancedMappingDialog(node.data[0].dictionary,node.data[0].id, ADLmappingData.currentColumn)
             }else{
                 ADLmappingData.currentColumn = null;

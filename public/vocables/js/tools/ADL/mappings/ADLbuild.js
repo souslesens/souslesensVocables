@@ -51,13 +51,11 @@ var ADLbuild = (function () {
             return alert("Select mapped tables")
         var tables = []
         self.checked_tables.forEach(function (table) {
-            tables.push(ADLmappingData.currentADLdataSource.dbName + "_" + table.replace(/_/,"."))
+            tables.push(ADLmappingData.currentSource + "_" + table.replace(/_/,"."))
         })
 
         var sparqlServerUrl = $("#ADLbuild_sparqlServerUrl").val()
         var adlGraphUri = $("#ADLbuild_adlGraphUri").val()
-        var rdlGraphUri = $("#ADLbuild_rdlGraphUri").val()
-        var oneModelGraphUri = $("#ADLbuild_oneModelGraphUri").val()
         var replaceGraph = $("#ADLbuild_replaceGraph").prop("checked")
 
 
@@ -75,9 +73,8 @@ var ADLbuild = (function () {
             mappingFileNames: JSON.stringify(tables),
             sparqlServerUrl: sparqlServerUrl,
             adlGraphUri: adlGraphUri,
-            rdlGraphUri: rdlGraphUri,
-            oneModelGraphUri: oneModelGraphUri,
-            replaceGraph: replaceGraph
+            replaceGraph: replaceGraph,
+            dataSource:JSON.stringify(Config.sources[ADLmappingData.currentSource].dataSource)
         }
 
         $.ajax({

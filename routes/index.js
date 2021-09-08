@@ -240,7 +240,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
 
             var mappingFileNames = JSON.parse(req.body.mappingFileNames)
-            ADLbuilder.buidlADL(mappingFileNames, req.body.sparqlServerUrl, req.body.adlGraphUri, req.body.rdlGraphUri, req.body.oneModelGraphUri, JSON.parse(req.body.replaceGraph), function (err, result) {
+            ADLbuilder.buidlADL(mappingFileNames, req.body.sparqlServerUrl, req.body.adlGraphUri,  JSON.parse(req.body.replaceGraph), JSON.parse(req.body.dataSource), function (err, result) {
                 processResponse(response, err, result)
 
             })

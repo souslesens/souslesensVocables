@@ -8,10 +8,9 @@ var ADLadvancedMapping = (function () {
 
         var sourceColors = {}
 
-
-        self.loadDictionaries = function () {
+        self.loadSuperClasses = function () {
             var column = "*";
-            var table = "[onemodel].[dbo].[reference_dictionary]"
+            var table = "[onemodel].[dbo].[superClasses]"
             var sqlQuery = " select distinct " + column + " from " + table;//+ " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
 
             $.ajax({
@@ -28,76 +27,54 @@ var ADLadvancedMapping = (function () {
                 success: function (data, textStatus, jqXHR) {
 
                     self.referenceDictionary = {}
+
+                    var topTypesMap = {
+                        "REFERENCE": "ONE-MODEL-superClasses",
+                        "NO-SUBCLASSES": "ONE-MODEL-informationObjects",
+                        "ARDL-SPECIFIC": "ONE-MODEL-ARDL-specific",
+
+                    }
+
+                    var typesMap = {}
                     data.forEach(function (item, index) {
 
-                        if (!self.referenceDictionary[item.superClassUri])
+                        if (!typesMap[item.type]) {
+                            typesMap[item.type] = []
+                        }
+                        typesMap[item.type].push(item)
+
+                    })
+
+                    var dictionaryJsTreeData = []
+                    for (var type in typesMap) {
+                        var dicName = topTypesMap[type]
+                        dictionaryJsTreeData.push({
+                            id: type,
+                            text: dicName,
+                            type: "OWL",
+                            parent: "#"
+                        })
+                        typesMap[type].forEach(function (item) {
                             self.referenceDictionary[item.superClassUri] = {
                                 uri: item.superClassUri,
                                 label: item.superClassLabel,
                                 terms: {},
-                                status: item.status
+                                type: type
                             }
-                        if (item.term) {
-                            if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()])
-                                self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {}
-                            if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
-                                self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source] = item
-                            // self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]=item
-                        }
-                        if (item.status != "REFERENCE" && item.status != "CANDIDATE") {
-                            self.referenceDictionary[item.superClassUri].noSubClasses = true
-                        }
-                    })
 
-
-                    var dictionaryJsTreeData = []
-                    var dicName = "ONE-MODEL-superClasses"
-                    dictionaryJsTreeData.push({
-                        id: dicName,
-                        text: dicName,
-                        type: "dictionary",
-                        parent: "#"
-                    })
-                    var dicName2 = "ONE-MODEL-informationObjects"
-                    dictionaryJsTreeData.push({
-                        id: dicName2,
-                        text: dicName2,
-                        type: "dictionary",
-                        parent: "#"
-                    })
-                    var dicName3 = "ONE-MODEL-ARDL-specific"
-                    dictionaryJsTreeData.push({
-                        id: dicName3,
-                        text: dicName3,
-                        type: "dictionary",
-                        parent: "#"
-                    })
-
-
-                    var parentsStatusMap = {
-                        "REFERENCE": dicName,
-                        "NO-SUBCLASSES": dicName2,
-                        "ARDL-SPECIFIC": dicName3,
-
-                    }
-
-
-                    for (var superClassUri in self.referenceDictionary) {
-                        var parent = parentsStatusMap[self.referenceDictionary[superClassUri].status]
-                        dictionaryJsTreeData.push({
-                            id: superClassUri,
-                            text: self.referenceDictionary[superClassUri].label,
-                            type: "owl:Class",
-                            parent: parent,
-                            data: {
-                                type: "owl:Class",
-                                id: superClassUri,
-                                label: self.referenceDictionary[superClassUri].label,
-                                source: Config.ADL.OneModelSource,
-                                dictionary: dicName,
-                            }
+                            dictionaryJsTreeData.push({
+                                id: item.superClassUri,
+                                text: item.superClassLabel,
+                                type: "class",
+                                parent: type,
+                                data:{
+                                    id: item.superClassUri,
+                                    label: item.superClassLabel,
+                                }
+                            })
                         })
                     }
+
 
                     var optionsClass = {
                         selectTreeNodeFn: ADLmappings.selectTreeNodeFn,
@@ -118,20 +95,19 @@ var ADLadvancedMapping = (function () {
                 }
             })
         }
+        self.loadReferenceDictionary = function (superClassId,forceReload,callback) {
+
+            if(!self.referenceDictionary || !self.referenceDictionary[superClassId])
+                return alert("no dictionary for superClass "+superClassId)
+            var terms= self.referenceDictionary[superClassId].terms;
+            if(!forceReload && Object.keys(terms).length>0)
+               return self.referenceDictionary[superClassId]
 
 
-        self.showAdvancedMappingDialog = function (dictionary, columnClassId) {
-
-            if (self.referenceDictionary[columnClassId].noSubClasses)
-                return;
-            self.matchCandidates = {}
-            self.assignConditionalTypeOn = true;
-            self.mappedValues = {}
-            var obj = common.deconcatSQLTableColumn(ADLmappingData.currentColumn)
-            var column = obj.column;
-            var table = "[" + ADLmappingData.currentADLdataSource.dbName + "]." + obj.table;
-
-            var sqlQuery = " select count( distinct " + column + ") as count from " + table;
+            var column = "*";
+            var table = "[onemodel].[dbo].[reference_dictionary]"
+            var where=" where superClassUri='"+superClassId+"'"
+            var sqlQuery = " select distinct " + column + " from " + table+where;//+ " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
 
             $.ajax({
                 type: "POST",
@@ -139,66 +115,125 @@ var ADLadvancedMapping = (function () {
                 data: {
                     ADLquery: 1,
                     getData: 1,
-                    dataSource: JSON.stringify(ADLmappingData.currentADLdataSource),
+                    dataSource: JSON.stringify({dbName: "onemodel", type: "sql.sqlserver"}),
                     sqlQuery: sqlQuery
                 },
                 dataType: "json",
 
                 success: function (data, textStatus, jqXHR) {
-                    var count = data[0].count
-                    if (count > Config.ADL.maxDistinctValuesForAdvancedMapping)
-                        return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.ADL.maxDistinctValuesForAdvancedMapping)
-
-                    var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
-                    if (ADLmappingData.currentADLdataSource.type == "sql.sqlserver")
-                        sqlQuery = " select  distinct top(10000) " + column + " from " + table;
-                    $.ajax({
-                        type: "POST",
-                        url: Config.serverUrl,
-                        data: {
-                            ADLquery: 1,
-                            getData: 1,
-                            dataSource: JSON.stringify(ADLmappingData.currentADLdataSource),
-                            sqlQuery: sqlQuery
-                        },
-                        dataType: "json",
-
-                        success: function (data, textStatus, jqXHR) {
-
-                            if (data.length >= Config.ADL.maxDistinctValuesForAdvancedMapping)
-                                return alert(" too many distinct values :" + data.length)
-
-                            ADLmappingData.currentColumnDistinctValues = [];
-                            var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
-
-                            data.forEach(function (item) {
-                                if (item[colName])
-                                    ADLmappingData.currentColumnDistinctValues.push(item[colName])
-                            })
 
 
-                            $("#ADLmappings_AdvancedMappingDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
-                            $("#ADLmappings_AdvancedMappingDialogDiv").dialog("open")
+                    data.forEach(function (item, index) {
 
-                            setTimeout(function () {
-                                $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
-                                //    $("#ADLmappings_AdvancedMappingDialogDiv .ui-dialog-titlebar").css ("display","none")
-                                //   common.fillSelectOptions("ADLmapping_columnValues", data, null, column, column)
-                                self.setDictionaryMappings(dictionary, columnClassId, ADLmappingData.currentColumnDistinctValues)
-                            }, 200)
+
+                        if (item.term) {
+                            if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()])
+                                self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {}
+                            if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
+                                self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source] = item
+                            // self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]=item
                         }
-                        , error: function (err) {
-                            alert(err.responseText)
-                            MainController.UI.message(err.responseText)
-
+                        if (item.status != "REFERENCE" && item.status != "CANDIDATE") {
+                            self.referenceDictionary[item.superClassUri].noSubClasses = true
                         }
                     })
-                }
-                , error: function (err) {
-                    alert(err.responseText)
-                    MainController.UI.message(err.responseText)
+                    callback()
 
+
+
+
+                }, function(err) {
+                    if (err)
+                        return callback(err)
                 }
+            })
+        }
+
+
+
+        self.showAdvancedMappingDialog = function (dictionary, columnClassId) {
+
+            if (self.referenceDictionary[columnClassId].noSubClasses)
+                return;
+            ADLadvancedMapping.loadReferenceDictionary( columnClassId,true,function(err,result) {
+                if( err)
+                    alert(err)
+                self.matchCandidates = {}
+                self.assignConditionalTypeOn = true;
+                self.mappedValues = {}
+                var obj = common.deconcatSQLTableColumn(ADLmappingData.currentColumn)
+                var column = obj.column;
+                var table = "[" + ADLmappingData.currentADLdataSource.dbName + "]." + obj.table;
+
+                var sqlQuery = " select count( distinct " + column + ") as count from " + table ;
+
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: {
+                        ADLquery: 1,
+                        getData: 1,
+                        dataSource: JSON.stringify(ADLmappingData.currentADLdataSource),
+                        sqlQuery: sqlQuery
+                    },
+                    dataType: "json",
+
+                    success: function (data, textStatus, jqXHR) {
+                        var count = data[0].count
+                        if (count > Config.ADL.maxDistinctValuesForAdvancedMapping)
+                            return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.ADL.maxDistinctValuesForAdvancedMapping)
+
+                        var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
+                        if (ADLmappingData.currentADLdataSource.type == "sql.sqlserver")
+                            sqlQuery = " select  distinct top(10000) " + column + " from " + table;
+                        $.ajax({
+                            type: "POST",
+                            url: Config.serverUrl,
+                            data: {
+                                ADLquery: 1,
+                                getData: 1,
+                                dataSource: JSON.stringify(ADLmappingData.currentADLdataSource),
+                                sqlQuery: sqlQuery
+                            },
+                            dataType: "json",
+
+                            success: function (data, textStatus, jqXHR) {
+
+                                if (data.length >= Config.ADL.maxDistinctValuesForAdvancedMapping)
+                                    return alert(" too many distinct values :" + data.length)
+
+                                ADLmappingData.currentColumnDistinctValues = [];
+                                var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
+
+                                data.forEach(function (item) {
+                                    if (item[colName])
+                                        ADLmappingData.currentColumnDistinctValues.push(item[colName])
+                                })
+
+
+                                $("#ADLmappings_AdvancedMappingDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
+                                $("#ADLmappings_AdvancedMappingDialogDiv").dialog("open")
+
+                                setTimeout(function () {
+                                    $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
+                                    //    $("#ADLmappings_AdvancedMappingDialogDiv .ui-dialog-titlebar").css ("display","none")
+                                    //   common.fillSelectOptions("ADLmapping_columnValues", data, null, column, column)
+                                    self.setDictionaryMappings(dictionary, columnClassId, ADLmappingData.currentColumnDistinctValues)
+                                }, 200)
+                            }
+                            , error: function (err) {
+                                alert(err.responseText)
+                                MainController.UI.message(err.responseText)
+
+                            }
+                        })
+                    }
+                    , error: function (err) {
+                        alert(err.responseText)
+                        MainController.UI.message(err.responseText)
+
+                    }
+                })
             })
         }
         self.getSourceColor = function (source) {

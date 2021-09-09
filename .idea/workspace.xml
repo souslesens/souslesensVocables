@@ -6,7 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,7 +217,7 @@
       <workItem from="1629283727555" duration="110992000" />
       <workItem from="1629706156758" duration="87548000" />
       <workItem from="1630220227362" duration="107422000" />
-      <workItem from="1631151782290" duration="2187000" />
+      <workItem from="1631151782290" duration="19720000" />
     </task>
     <servers />
   </component>
@@ -343,22 +348,6 @@
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>258</line>
           <option name="timeStamp" value="98" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>454</line>
-          <option name="timeStamp" value="121" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>233</line>
-          <option name="timeStamp" value="122" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
-          <line>492</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="128" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

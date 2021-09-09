@@ -105,7 +105,7 @@ var ADLbuilder = {
                             triples.push({
                                 subject: uri,
                                 predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                                object: ARDLdictionary[subjectValue]
+                                object: "'" + util.formatStringForTriple(ARDLdictionary[subjectValue]) + "'"
                             })
                             existingUrisMap[subjectValue] = uri
                         } else {
@@ -126,7 +126,7 @@ var ADLbuilder = {
                             triples.push({
                                 subject: obj.classUri,
                                 predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                                object: obj.classLabel
+                                object: "'" + util.formatStringForTriple(obj.classLabel) + "'"
                             })
                             existingUrisMap[subjectValue] = obj.classUri
                         }
@@ -182,46 +182,40 @@ var ADLbuilder = {
                     } else {
                         objectValue = item[mapping.object]
                     }
-                    if(!objectValue)
+                    if (!objectValue)
                         return;
-                    if ( objectValue.trim)
+                    if (objectValue.trim)
                         objectValue = objectValue.trim()
 
 
+                    if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                        if (util.isInt(objectValue)) {
+                            objectSuffix = "^^xsd:integer"
+                            objectValue = "'" + objectValue + "'" + objectSuffix;
+                        } else if (util.isFloat(objectValue)) {
+                            objectSuffix = "^^xsd:float"
+                            objectValue = "'" + objectValue + "'" + objectSuffix;
+                        }
 
-                if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
-                    if (util.isInt(objectValue)) {
-                        objectSuffix = "^^xsd:integer"
-                        objectValue = "'" + objectValue + "'" + objectSuffix;
-                    } else if (util.isFloat(objectValue)) {
-                        objectSuffix = "^^xsd:float"
-                        objectValue = "'" + objectValue + "'" + objectSuffix;
+                        triples.push({
+                            subject: subjectUri,
+                            predicate: mapping.object,
+                            object: "'" + util.formatStringForTriple(objectValue) + "'"
+                        })
+                    } else {//item[object] is object
+
+                        var objectUri = existingUrisMap[objectValue];
+                        if (!objectUri)
+                            return rejectedItems.push(item)
+
+                        triples.push({
+                            subject: subjectUri,
+                            predicate: mapping.predicate,
+                            object: objectUri
+                        })
+
+
                     }
-
-                    triples.push({
-                        subject: subjectUri,
-                        predicate: mapping.object,
-                        object: "'" + util.formatStringForTriple(objectValue) + "'"
-                    })
-                }else{//item[object] is object
-
-                    var objectUri=existingUrisMap[objectValue];
-                    if(!objectUri)
-                        return rejectedItems.push(item)
-
-                    triples.push({
-                        subject: subjectUri,
-                        predicate: mapping.predicate,
-                        object: objectUri
-                    })
-
-
-
-
-                }
-
-
-
 
 
                 }
@@ -241,7 +235,7 @@ var ADLbuilder = {
         if (!options)
             options = {}
         options.sparqlServerUrl += "?timeout=600000&debug=on"
-        var sqlParams = {fetchSize: 500}
+        var sqlParams = {fetchSize: 2000}
         var existingUrisMap = {}
         var mappingSheets = []
         var dataArray = [];
@@ -306,19 +300,39 @@ var ADLbuilder = {
 
                 // load reference dictionary
                 function (callbackSeries) {
+
                     socket.message("ADLbuild", "loading ONE MODEL reference dictionary ")
 
 
-                    var sqlQuery = "select term,superClassUri,superClassLabel,classLabel,classUri from reference_dictionary "
+                    var sqlQuery = "select term,superClassUri,superClassLabel,classLabel,classUri,source from reference_dictionary "
                     SQLserverConnector.getData("onemodel", sqlQuery, function (err, result) {
                         if (err)
                             return callbackSeries(err)
+
+                        // set uniqueItems with source priority
+                        var sources = ["pca", "cfihos", "readi"]
+                        result.sort(function (a, b) {
+                            var aIndex = sources.indexOf(a.source)
+                            var bIndex = sources.indexOf(b.source)
+                            if (aIndex < bIndex)
+                                return 1;
+                            if (bIndex < aIndex)
+                                return -1;
+                            return 0;
+                        })
+
                         result.forEach(function (item) {
                             if (!oneModelReferenceDictionary[item.superClassUri])
                                 oneModelReferenceDictionary[item.superClassUri] = {}
-                            oneModelReferenceDictionary[item.superClassUri][item.term] = {
-                                classUri: item.classUri,
-                                classLabel: item.classLabel
+                            if (!oneModelReferenceDictionary[item.superClassUri][item.term]) {
+                                oneModelReferenceDictionary[item.superClassUri][item.term] = {
+                                    classUri: item.classUri,
+                                    classLabel: item.classLabel,
+                                    source: item.source
+                                }
+
+                            } else {
+                                var x = item.source
                             }
 
 
@@ -486,10 +500,11 @@ var ADLbuilder = {
                     }
 
 
-                    var sqlQuery = "select distinct " + selectStr + " from  " + sqlTable + " ";
+                    var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName+"."+sqlTable + " ";
                     if (dbConnection.type == "sql.sqlserver") {
-                        sqlQuery += " ORDER BY " + selectStr + " "
-                        SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
+                        //sqlQuery += " ORDER BY " + selectStr + " "
+                        SQLserverConnector.getFetchedData (dbConnection.dbName, sqlQuery, processor,sqlParams.fetchSize, uniqueTriples,function (err, result)  {
+                      //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
                             if (err)
                                 return callbackSeries(err);
 

@@ -94,7 +94,7 @@ var ADLSqlConnector = {
 
         }
         query+=" limit 1000"
-        console.log(query)
+     //   console.log(query)
         mysql.exec(ADLSqlConnector.connection,query,function(err, result){
           return callback(err,result);
 

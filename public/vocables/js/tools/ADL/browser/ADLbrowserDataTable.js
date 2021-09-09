@@ -39,12 +39,20 @@ var keys={}
                 data: dataSet,
                 columns: cols,
                 // async: false,
-                "pageLength": 15,
+                "pageLength": 10,
                 dom: 'Bfrtip',
-                buttons: [
+                /*buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
+                ]*/
+                buttons: [
+                    {
+                        extend: 'csvHtml5',
+                        text: 'Export CSV',
+                        fieldBoundary: '',
+                        fieldSeparator: ';'
+                    },
+                    'copy'
                 ]
-
 
             })
                 , 500

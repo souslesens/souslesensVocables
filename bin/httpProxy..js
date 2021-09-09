@@ -28,10 +28,10 @@ var httpProxy = {
             return false
         }
         var domainWithProxy = "XXXmain.glb.corp.local"
-        console.log(httpProxy.host)
+       // console.log(httpProxy.host)
         if (httpProxy.proxyUrl && httpProxy.host && httpProxy.host.indexOf(domainWithProxy) > -1) {
 
-            console.log("USING PROXY!!!!!!!!!!!!!!!!!")
+         //   console.log("USING PROXY!!!!!!!!!!!!!!!!!")
         return true;
     }
        return false
@@ -47,13 +47,13 @@ var httpProxy = {
             var x = 3
         }
 
-        console.log("GET-URL    "+url)
+
         var request = superagent.get(url)
 
 
 
        if(httpProxy.useProxy(options.useProxy )){
-            console.log("----------USING PROXY------GET")
+         //   console.log("----------USING PROXY------GET")
             request.proxy(httpProxy.proxyUrl)
         }
 
@@ -79,7 +79,7 @@ var httpProxy = {
         var request = superagent.get(url).type('form')
 
         if(false && httpProxy.useProxy()){
-            console.log("----------USING PROXY------GET")
+         //   console.log("----------USING PROXY------GET")
             request.proxy(httpProxy.proxyUrl)
         }
 
@@ -91,7 +91,7 @@ var httpProxy = {
         request.end((err, res) => {
             if (err) {
                 // console.log("HTTP_PROXY_GET_ERROR"+JSON.stringify(err, null, 2))
-                console.log("HTTP_PROXY_GET_ERROR"+err)
+             //   console.log("HTTP_PROXY_GET_ERROR"+err)
                 return callback(err);
             }
             if (res.text)

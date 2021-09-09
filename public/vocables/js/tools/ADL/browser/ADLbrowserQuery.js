@@ -38,6 +38,7 @@ var ADLbrowserQuery = (function () {
             if (!firstClass) {
                 var predicates = self.getClassesPredicates(self.currentNode.data.id, true)
                 var ok = false;
+                //  var ok = true;
                 self.currentQueryDialogPredicates = []
 
 
@@ -60,7 +61,7 @@ var ADLbrowserQuery = (function () {
                     }
                 })
                 if (!ok)
-                    return alert("class have to be contiguous in the graph")
+                    ;//  return alert("class have to be contiguous in the graph")
             }
 
             self.currentQueryDialogField = self.currentNode.data.id
@@ -187,32 +188,33 @@ var ADLbrowserQuery = (function () {
         self.showNodeProperties = function (node) {
             var properties = []
             for (var predicate in self.classes[node.data.id]) {
-                var label = predicate;
-                if (self.model[predicate])
-                    label = self.model[predicate].label
-                properties.push({
-                    propertyLabel: label,
-                    property: predicate
-                })
-
+                if (predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                    var label = predicate;
+                    if (self.model[predicate])
+                        label = self.model[predicate].label
+                    properties.push({
+                        propertyLabel: label,
+                        property: predicate
+                    })
+                }
 
             }
-            if (properties.length == 0) {
+            if (true || properties.length == 0) {
                 properties.push({
                     propertyLabel: "label",
                     property: "http://www.w3.org/2000/01/rdf-schema#label"
                 })
 
-             /*   Sparql_OWL.getItems(ADLbrowser.currentSource, {
-                    filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
-                }, function (err, result) {
-                })*/
+                /*   Sparql_OWL.getItems(ADLbrowser.currentSource, {
+                       filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
+                   }, function (err, result) {
+                   })*/
             }
-                var withBlankOption = false;
-                if (properties.length > 1)
-                    withBlankOption = true;
-                $("#ADLbrowserQueryParams_type").html(node.data.label)
-                common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
+            var withBlankOption = false;
+            if (properties.length > 1)
+                withBlankOption = true;
+            $("#ADLbrowserQueryParams_type").html(node.data.label)
+            common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
 
         }
 
@@ -585,7 +587,7 @@ var ADLbrowserQuery = (function () {
                             self.ALDmodelGraph.edges = visjsGraph.data.edges.get()
                             self.ALDmodelGraph.params = visjsGraph.currentContext
                         }
-
+                        MainController.UI.message("drawing Graph...",true )
                         ADLbrowserGraph.drawGraph("graphDiv", queryResult, {
                             addToGraph: addToGraph,
                             selectVars: selectVars
@@ -594,6 +596,7 @@ var ADLbrowserQuery = (function () {
 
                     }
                     if (output == "table") {
+                        MainController.UI.message("drawing Table..." ,true)
                         ADLbrowserDataTable.showQueryResult(queryResult, {selectVars: selectVars})
 
                     }
@@ -740,6 +743,8 @@ var ADLbrowserQuery = (function () {
         }
 
         self.executeQuery = function (node, options, callback) {
+
+            var fetchLength = 5000
             var queryFilterNodes = ADLbrowserQuery.queryFilterNodes;
             var dialogFilterStr = "";
             var where = ""
@@ -876,28 +881,44 @@ var ADLbrowserQuery = (function () {
             query += fromStr +
                 "WHERE {"
 
-            query += where + " }  limit 20000"
+            query += where + " }  limit " + fetchLength
 
 
-            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+            var offset = 0
+            var length = 1
+            var allResults = []
+
+            var maxOffset = 50000
             MainController.UI.message("searching...")
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
-                // $("#waitImg").css("display", "none");
-                if (err) {
-                    return callback(err)
+            async.whilst(
+                function (callbackTest) {//test
+                    if(offset >= maxOffset)
+                        alert( "query results truncated : larger than "+ maxOffset+" maximum authorized ")
+                    return length > 0 && offset < maxOffset;
                 }
-                /*    result.results.bindings.forEach(function (item) {
-                        for (var key in item) {
-                            if (key != "count")
-                                if (!item[key + "Label"])
-                                    item[key + "Label"] = {value: Sparql_common.getLabelFromId(item[key].value)}
-
+                ,
+                function iter(callbackWhilst) {
+                    var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+                    var query2 = query+" OFFSET " + offset;
+                    offset+=fetchLength
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
+                        if (err) {
+                            return callbackWhilst(err)
                         }
-                    })*/
-                var data = result.results.bindings;
+                        length = result.results.bindings.length
+                        if (options.count)
+                            length = 0
+                        allResults = allResults.concat(result.results.bindings);
+                        MainController.UI.message("searching..." + allResults.length)
+                        callbackWhilst();
+                    })
+                }, function (err) {
+                    if (err)
+                        return callback(err)
 
-                callback(null, {data: data, filter: dialogFilterStr})
-            })
+                    return callback(null, {data: allResults, filter: dialogFilterStr})
+
+                })
 
 
         }

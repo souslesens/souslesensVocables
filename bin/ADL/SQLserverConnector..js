@@ -1,10 +1,10 @@
 const sql = require('mssql')
-const async=require('async')
+const async = require('async')
 const config = {
-   user: 'sa',
-  password: 'Fa1#majeur',
- //   user: 'ECCENCA',
- //    password: 'ONE-sense!rDf',
+    user: 'sa',
+    password: 'Fa1#majeur',
+    //   user: 'ECCENCA',
+    //    password: 'ONE-sense!rDf',
     server: '51.178.39.209',
     database: 'rdlquantum',
 }
@@ -42,7 +42,7 @@ var SQLserverConnector = {
 
 
     test: function () {
-config.database="MDM_2.3_AFTWIN"
+        config.database = "MDM_2.3_AFTWIN"
         sql.connect(config, err => {
             if (err)
                 return console.log(err)// ... error checks
@@ -59,36 +59,88 @@ config.database="MDM_2.3_AFTWIN"
     },
 
     getData: function (dbName, query, callback) {
-        config.database=dbName
+        config.database = dbName
         sql.connect(config, err => {
             if (err)
                 return console.log(err)// ... error checks
 
             // Query
 //console.log(query)
-            new sql.Request().query( "use ["+dbName+"];"+query, (err, result) => {
+            new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
                 if (err)
-                  return callback(err)
+                    return callback(err)
 
-                return callback(null,  result.recordset)
+                return callback(null, result.recordset)
             })
         })
     },
-/*
+
+    getFetchedData: function (dbName, query, processorFn,fetchSize,uniqueTriples,callback) {
+        var data=[]
+        config.database = dbName
+        sql.connect(config, err => {
+            // ... error checks
+
+            const request = new sql.Request()
+            request.stream = true // You can set streaming differently for each request
+            request.query(query) // or request.execute(procedure)
+
+            request.on('recordset', columns => {
+
+                // Emitted once for each recordset in a query
+            })
+
+            request.on('row', row => {
+                data.push(row)
+
+                if (data.length >= fetchSize) {
+                    request.pause();
+                    processorFn(data, uniqueTriples, function (err, resultProcessor){
+                       data=[]
+                        request.resume();
+                   })
+                }
+
+                // Emitted for each row in a recordset
+            })
+
+            request.on('rowsaffected', rowCount => {
+                // Emitted for each `INSERT`, `UPDATE` or `DELETE` statement
+                // Requires NOCOUNT to be OFF (default)
+            })
+
+            request.on('error', err => {
+                callback(err);
+            })
+
+            request.on('done', result => {
+                callback(null,data)
+                // Always emitted as the last one
+            })
+        })
+
+    },
+    /*
 
 
-SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
 
 
- */
+
+
+
+
+    SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
+
+
+     */
 
     getADLmodel: function (dbName, callback) {
 
-        config.database=dbName
-        var query = "use ["+dbName+"]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
+        config.database = dbName
+        var query = "use [" + dbName + "]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
             "FROM INFORMATION_SCHEMA.COLUMNS"
-   //   query +=" where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
-        query +="  order by TABLE_SCHEMA,TABLE_NAME "
+        //   query +=" where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
+        query += "  order by TABLE_SCHEMA,TABLE_NAME "
 
         sql.connect(config, err => {
             if (err)
@@ -102,9 +154,9 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
 
                 var model = {}
                 result.recordset.forEach(function (item) {
-                    var tableLabel=item.TABLE_SCHEMA+"."+item.TABLE_NAME
-                 /*   if(dbName=="MDM_2.3_AFTWIN")
-                        tableLabel="dbo."+item.TABLE_NAME*/
+                    var tableLabel = item.TABLE_SCHEMA + "." + item.TABLE_NAME
+                    /*   if(dbName=="MDM_2.3_AFTWIN")
+                           tableLabel="dbo."+item.TABLE_NAME*/
                     if (!model[tableLabel]) {
                         model[tableLabel] = []
                     }
@@ -119,44 +171,43 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
 
     },
 
-    processFetchedData:function(connection,query,fetchSize,startOffset,maxOffset, processor,uniqueTriples,callback){
+    processFetchedDataXXX: function (connection, query, fetchSize, startOffset, maxOffset, processor, uniqueTriples, callback) {
 
         var offset = startOffset
         var length = 1
         var allResults = []
-        if(!maxOffset)
-            maxOffset=10000000
+        if (!maxOffset)
+            maxOffset = 10000000
         async.whilst(
             function test(cb) {
-                return cb(null, length > 0 && offset<maxOffset);
+                return cb(null, length > 0 && offset < maxOffset);
             },
             function iter(callbackWhilst) {
 
 
                 //  query=query+" offset "+(""+offset);
 
-                var query2 = query+" OFFSET "+offset+" ROWS FETCH NEXT "+fetchSize+" ROWS ONLY"
+                var query2 = query + " OFFSET " + offset + " ROWS FETCH NEXT " + fetchSize + " ROWS ONLY"
                 offset += fetchSize;
-                console.log("processed lines: "+offset)
-                SQLserverConnector.connection=connection;
-                SQLserverConnector.getData(connection.dbName,query2,function (err, result) {
+                console.log("processed lines: " + offset)
+                SQLserverConnector.connection = connection;
+                SQLserverConnector.getData(connection.dbName, query2, function (err, result) {
                     if (err) {
-                        console.log("error "+err)
+                        console.log("error " + err)
                         console.log(query2)
                         return callbackWhilst(err);
                     }
                     length = result.length
-                    if(processor) {
-                        processor(result,uniqueTriples, function (err, resultProcessor) {
-                            if (err)  {
+                    if (processor) {
+                        processor(result, uniqueTriples, function (err, resultProcessor) {
+                            if (err) {
 
                                 return callbackWhilst(err);
                             }
                             return callbackWhilst();
                         })
-                    }
-                    else{
-                        allResults=allResults.concat(result);
+                    } else {
+                        allResults = allResults.concat(result);
                         return callbackWhilst();
                     }
 
@@ -170,9 +221,6 @@ SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA FROM INFORMATION_SCHEMA.COLUMNS where
 
             }
         )
-
-
-
 
 
     },

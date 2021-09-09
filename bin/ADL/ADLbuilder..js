@@ -51,194 +51,197 @@ var ADLbuilder = {
         var oneModelReferenceDictionary = options.oneModelReferenceDictionary;
         var oneModelSuperClasses = options.oneModelSuperClasses;
 
-        function getUriFromValue(classUri, value) {
-            var classType = oneModelSuperClasses[classUri];
-            if (classType == "ARDL-SPECIFIC") {
-                var uri = ADLgraphUri + value;
-                if (ARDLdictionary[value]) {
-                    triples.push({
-                        subject: uri,
-                        predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                        object: ARDLdictionary[value]
-                    })
-                }
-                return uri;
 
-            } else if (classType == "REFERENCE") {
-                var obj = oneModelReferenceDictionary[classUri][value]
-                if (!obj)
-                    return null;
-                triples.push({
-                    subject: obj.classUri,
-                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                    object: obj.classLabel
-                })
-                return obj.classUri;
-
-
-            } else if (classType == "NO-SUBCLASSES") {
-               var uri= existingUrisMap[value]
-                if(!uri) {
-                    uri = ADLgraphUri + util.getRandomHexaId(options.generateIds)
-                    existingUrisMap[value] = uri
-                    triples.push({
-                        subject: uri,
-                        predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                        object: "'" + util.formatStringForTriple(value) + "'"
-                    })
-                }
-                return uri;
-
+        function getItemSubjectValue(mapping, item) {
+            var item2 = {}
+            for (var key in item) {
+                item2[key.toLowerCase()] = item[key]
             }
-            else{
-
+            item = item2
+            var subjectValue = item[mapping.subject]
+            if (!subjectValue)
                 return null;
-            }
-
-
-
+            if (subjectValue.trim)
+                subjectValue = subjectValue.trim()
+            return subjectValue;
         }
+
+//decode mappings
+        mappings.forEach(function (mapping, indexMapping) {
+
+
+            var obj = util.deconcatSQLTableColumn(mapping.subject)
+            if (obj && obj.column)
+                mapping.subject = obj.column
+            var obj = util.deconcatSQLTableColumn(mapping.object)
+            if (obj && obj.column)
+                mapping.object = obj.column
+
+        })
+
+
+///process type and label
+        var rejectedItems = []
+        var triples = []
+        data.forEach(function (item, indexItem) {
+            mappings.forEach(function (mapping, indexMapping) {
+
+                if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+
+                    var subjectValue = getItemSubjectValue(mapping, item)
+                    if (!subjectValue)
+                        return;
+                    var objectClass = mapping.object
+
+                    var classType = oneModelSuperClasses[objectClass];
+                    if (classType == "ARDL-SPECIFIC") {
+                        var uri = ADLgraphUri + subjectValue;
+                        if (ARDLdictionary[subjectValue]) {
+                            triples.push({
+                                subject: uri,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                object: objectClass
+                            })
+                            triples.push({
+                                subject: uri,
+                                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                                object: ARDLdictionary[subjectValue]
+                            })
+                            existingUrisMap[subjectValue] = uri
+                        } else {
+                            rejectedItems.push(item)
+                        }
+                    } else if (classType == "REFERENCE") {
+                        var obj = oneModelReferenceDictionary[objectClass][subjectValue]
+                        if (!obj) {
+                            rejectedItems.push(item)
+
+                        } else {
+
+                            triples.push({
+                                subject: obj.classUri,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                object: objectClass
+                            })
+                            triples.push({
+                                subject: obj.classUri,
+                                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                                object: obj.classLabel
+                            })
+                            existingUrisMap[subjectValue] = obj.classUri
+                        }
+
+
+                    } else if (classType == "NO-SUBCLASSES") {
+                        var uri = existingUrisMap[subjectValue]
+                        if (!uri) {
+                            uri = ADLgraphUri + util.getRandomHexaId(options.generateIds)
+                            existingUrisMap[subjectValue] = uri
+                            triples.push({
+                                subject: uri,
+                                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                object: objectClass
+                            })
+                            triples.push({
+                                subject: uri,
+                                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                                object: "'" + util.formatStringForTriple(subjectValue) + "'"
+                            })
+                        }
+
+
+                    }
+                }
+            })
+
+
+        })
+
+        //process ObjectProperties
 
         data.forEach(function (item, indexItem) {
             mappings.forEach(function (mapping, indexMapping) {
 
+                    if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                        return;
 
-                if (indexItem == 0) {
-                    var obj = util.deconcatSQLTableColumn(mapping.subject)
-                    if (obj && obj.column)
-                        mapping.subject = obj.column
-                    var obj = util.deconcatSQLTableColumn(mapping.object)
-                    if (obj && obj.column)
-                        mapping.object = obj.column
+                    var subjectValue = item[mapping.subject]
+                    if (!subjectValue)
+                        return;
+
+                    var subjectUri = existingUrisMap[subjectValue]
+                    if (!subjectUri)
+                        return;
+                    var objectValue = null;
+                    if (mapping.object instanceof Object) {
+                        var p;
+                        if ((p = mapping.object.indexOf("^^xsd:")) > -1) {
+                            objectValue = "'" + item[mapping.object.substring(0, p)] + "'" + mapping.object.substring(p)
+                        }
+
+                    } else {
+                        objectValue = item[mapping.object]
+                    }
+                    if(!objectValue)
+                        return;
+                    if ( objectValue.trim)
+                        objectValue = objectValue.trim()
+
+
+
+                if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
+                    if (util.isInt(objectValue)) {
+                        objectSuffix = "^^xsd:integer"
+                        objectValue = "'" + objectValue + "'" + objectSuffix;
+                    } else if (util.isFloat(objectValue)) {
+                        objectSuffix = "^^xsd:float"
+                        objectValue = "'" + objectValue + "'" + objectSuffix;
+                    }
+
+                    triples.push({
+                        subject: subjectUri,
+                        predicate: mapping.object,
+                        object: "'" + util.formatStringForTriple(objectValue) + "'"
+                    })
+                }else{//item[object] is object
+
+                    var objectUri=existingUrisMap[objectValue];
+                    if(!objectUri)
+                        return rejectedItems.push(item)
+
+                    triples.push({
+                        subject: subjectUri,
+                        predicate: mapping.predicate,
+                        object: objectUri
+                    })
+
+
+
+
                 }
-                var item2 = {}
-                for (var key in item) {
-                    item2[key.toLowerCase()] = item[key]
+
+
+
+
+
                 }
-                item = item2
-
-                var subjectValue = item[mapping.subject]
-
-                if (!subjectValue)
-                    return;
-                if (subjectValue.trim)
-                    subjectValue = subjectValue.trim()
-
-               if(mapping.predicate== "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"){
-                  var typeUri= getUriFromValue(mapping.object, subjectValue)
-                   existingUrisMap[subjectValue]=typeUri
-                   return
-               }else {
-
-
-                   var objectValue;
-                   var objectRawValue;
-                   var objectSuffix = ""
-                   var p;
-
-
-                   if (mapping.object instanceof Object) {
-                       var value = item[mapping.object.column]
-                       if (!value || value.trim() == "")
-                           return
-
-
-                   } else if ((p = mapping.object.indexOf("^^xsd:")) > -1) {
-                       objectRawValue = "'" + item[mapping.object.substring(0, p)] + "'" + mapping.object.substring(p)
-
-
-                   } else {
-                       objectRawValue = item[mapping.object]
-
-                   }
-
-
-                   if (objectRawValue && objectRawValue.trim)
-                       objectRawValue = objectValue.trim()
-
-
-                   if (objectRawValue) {
-                  //     var objectValue = getUriFromValue("xxx", objectValue)
-  /*                     objectValue=existingUrisMap[objectRawValue]
-if(!objectValue)
-    return;*/
-                       triples.push({
-                           subject: subjectUri,
-                           predicate: mapping.predicate,
-                           object: "'" + objectValue + "'"
-                       })
-                   } else if (mapping.object.indexOf && mapping.object.indexOf("http") == 0) {
-
-                       triples.push({subject: subjectUri, predicate: mapping.predicate, object: mapping.object})
-
-
-                   } else {
-
-                       if (!objectRawValue)
-                           return;
-                       if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
-                           if (util.isInt(objectRawValue)) {
-                               objectSuffix = "^^xsd:integer"
-                               objectValue = "'" + objectRawValue + "'" + objectSuffix;
-                           } else if (util.isFloat(objectRawValue)) {
-                               objectSuffix = "^^xsd:float"
-                               objectValue = "'" + objectRawValue + "'" + objectSuffix;
-                           }else
-                               objectValue= objectRawValue
-
-                           triples.push({
-                               subject: subjectUri,
-                               predicate: mapping.object,
-                               object: "'" + util.formatStringForTriple(objectValue) + "'"
-                           })
-
-                       } else {
-                           if (mapping.predicate == "http://www.w3.org/2000/01/rdf-schema#label") {
-                               objectValue = "'" + util.formatStringForTriple(objectRawValue) + "'"
-
-                           } else {
-                               if (existingUrisMap && existingUrisMap[objectRawValue]) {
-                                   objectValue = existingUrisMap[objectRawValue];
-                               }
-                               if (!objectValue && options.generateIds) {
-                                   var newUri = false
-                                   if (!existingUrisMap[objectRawValue]) {
-                                       existingUrisMap[objectRawValue] = ADLgraphUri + util.getRandomHexaId(options.generateIds)
-                                       triples.push({
-                                           subject: existingUrisMap[objectRawValue],
-                                           predicate: originalADLproperty,
-                                           object: "'" + objectValue + "'"
-                                       })
-
-                                       newUri = true
-                                   }
-                                   objectValue = existingUrisMap[objectRawValue]
-
-                               }
-                           }
-                           triples.push({subject: subjectUri, predicate: mapping.predicate, object: objectValue})
-                       }
-
-                   }
-               }
-
-                if (!subjectUri || subjectUri == "undefined")
-                    x = 3
-            })
+            )
         })
+
 
         //  console.log("missing TOTAL subject IDs " + JSON.stringify(missingTotalSubjects));
         //  console.log("missing TOTAL objects IDs " + JSON.stringify(missingTotalObjects));
         callback(null, {triples: triples, urisMap: options.existingUrisMap})
 
 
-    },
+    }
+    ,
 
     generateAdlSqlTriples: function (mappingFilePath, ADLgraphUri, options, callback) {
         if (!options)
             options = {}
         options.sparqlServerUrl += "?timeout=600000&debug=on"
-        var sqlParams = {fetchSize: 5000}
+        var sqlParams = {fetchSize: 500}
         var existingUrisMap = {}
         var mappingSheets = []
         var dataArray = [];
@@ -535,7 +538,8 @@ if(!objectValue)
     }
 
 
-    , getExistingLabelUriMap: function (serverUrl, graphUri, type, callbackX) {
+    ,
+    getExistingLabelUriMap: function (serverUrl, graphUri, type, callbackX) {
 
         var fetchLimit = 5000
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -589,7 +593,8 @@ if(!objectValue)
 
             })
 
-    },
+    }
+    ,
 
 
     buidlADL: function (mappingFileNames, sparqlServerUrl, graphUri, replaceGraph, dataSource, callback) {
@@ -646,7 +651,8 @@ if(!objectValue)
 module.exports = ADLbuilder;
 
 
-if (false) {
+if (false
+) {
 
 
     if (false) {// AFtwin UK

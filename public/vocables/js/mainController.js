@@ -377,6 +377,8 @@ var MainController = (function () {
             $("#" + popupDiv).css("display", "flex")
         },
         hidePopup: function (popupDiv) {
+            if(self.UI.blockHidePopup)
+                return self.UI.blockHidePopup=false;//one shot
             if (!popupDiv)
                 popupDiv = "popupDiv"
             $("#" + popupDiv).css("display", "none")

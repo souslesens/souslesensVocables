@@ -39,7 +39,7 @@ var common = (function () {
                     "icon": "../icons/default.png"
                 },
                 "owl:Class": {
-                    "li_attr":{style: "color:black"},
+                    "li_attr": {style: "color:black"},
                     "icon": "../icons/class.png",
 
                 },
@@ -53,15 +53,15 @@ var common = (function () {
                     "icon": "../icons/table.png"
                 },
                 "importedClass": {
-                    "li_attr":{style: "color:#ccc"},
+                    "li_attr": {style: "color:#ccc"},
                     "icon": "../icons/externalObject.png"
                 },
                 "importedProperty": {
-                    "li_attr":{style: "color:#ccc"},
+                    "li_attr": {style: "color:#ccc"},
                     "icon": "../icons/externalObject.png"
                 },
                 "importedRestriction": {
-                    "li_attr":{style: "color:#ccc"},
+                    "li_attr": {style: "color:#ccc"},
                     "icon": "../icons/externalObject.png"
                 },
 
@@ -250,17 +250,17 @@ var common = (function () {
                 $("#" + jstreeDiv).jstree(true).delete_node(nodeId)
                 self.jstree.setTreeAppearance()
             },
-            deleteBranch:function(jstreeDiv,nodeId,deleteNodeItself){
-               var descendants= self.jstree.getNodeDescendants (jstreeDiv, nodeId,null,true);
-               if(deleteNodeItself){
-                   if(descendants.indexOf(nodeId)<0)
-                       descendants.push(nodeId)
-               }else{
-                   var index = descendants.indexOf(nodeId);
-                   if (index > -1) {
-                       descendants.splice(index, 1);
-                   }
-               }
+            deleteBranch: function (jstreeDiv, nodeId, deleteNodeItself) {
+                var descendants = self.jstree.getNodeDescendants(jstreeDiv, nodeId, null, true);
+                if (deleteNodeItself) {
+                    if (descendants.indexOf(nodeId) < 0)
+                        descendants.push(nodeId)
+                } else {
+                    var index = descendants.indexOf(nodeId);
+                    if (index > -1) {
+                        descendants.splice(index, 1);
+                    }
+                }
                 $("#" + jstreeDiv).jstree(true).delete_node(descendants)
 
             },
@@ -285,7 +285,7 @@ var common = (function () {
 
             },
 
-            getNodeDescendants: function (jstreeDiv, nodeId, depth,onlyIds) {
+            getNodeDescendants: function (jstreeDiv, nodeId, depth, onlyIds) {
                 var nodes = [];
                 var nodeIdsMap = {};
                 var currentLevel = 0
@@ -296,10 +296,10 @@ var common = (function () {
                     var node = $('#' + jstreeDiv).jstree(true).get_node(nodeId);
                     if (!nodeIdsMap[nodeId]) {
                         nodeIdsMap[nodeId] = 1
-                        if(onlyIds)
+                        if (onlyIds)
                             nodes.push(node.id);
                         else
-                        nodes.push(node);
+                            nodes.push(node);
 
                         // Attempt to traverse if the node has children
                         if (node.children) {
@@ -491,6 +491,12 @@ var common = (function () {
 
                 })
                 return array;
+            },
+
+            moveItem: function (arr, fromIndex, toIndex) {
+                var element = arr[fromIndex];
+                arr.splice(fromIndex, 1);
+                arr.splice(toIndex, 0, element);
             }
         }
 
@@ -616,7 +622,7 @@ var common = (function () {
                 try {
 
                     await navigator.clipboard.writeText(text);
-                    alert ("graph copied in clipboard")
+                    alert("graph copied in clipboard")
                     if (callback) {
 
                         return callback(null, "graph copied in clipboard");
@@ -738,26 +744,25 @@ var common = (function () {
 
             self.dateToSQlserverString = function (date) {
                 var str = ""
-                var dateArray= date.toLocaleString("en-US").split(' ')
+                var dateArray = date.toLocaleString("en-US").split(' ')
                 if (date instanceof Date && isFinite(date)) {
                     var month = "" + (date.getMonth() + 1);
-                    if(month.length==1)
-                        month="0"+month
+                    if (month.length == 1)
+                        month = "0" + month
                     var day = "" + date.getDate();
-                    if(day.length==1)
-                        day="0"+day
-                    var time=""+date.getTime()
-                    str = date.getFullYear() + "" + month + "" + day+" "+dateArray[1]+" "+dateArray[2];
-                }
-                else
+                    if (day.length == 1)
+                        day = "0" + day
+                    var time = "" + date.getTime()
+                    str = date.getFullYear() + "" + month + "" + day + " " + dateArray[1] + " " + dateArray[2];
+                } else
                     str = "";
                 return str
             }
 
 
-            self.isNumber = function (n) {
-                return !isNaN(parseFloat(n)) && isFinite(n);
-            }
+        self.isNumber = function (n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
         self.isInt = function (value) {
             return /-?[0-9]+/.test("" + value);
 

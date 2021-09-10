@@ -41,7 +41,7 @@ var ADLmappings = (function () {
         self.onLoaded = function () {
             self.init()
             MainController.UI.openRightPanel()
-            ADLadvancedMapping.loadSuperClasses()
+
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
                 //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
                 "<button onclick='ADLassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  " +
@@ -67,7 +67,7 @@ var ADLmappings = (function () {
 
                 //  $("#ADLmappings_OneModelTab").html("")
 
-
+                ADLadvancedMapping.loadSuperClasses()
                 self.currentModelSource = Config.ADL.OneModelSource;
                 ADLmappingData.initAdlsList()
                 if (authentication.currentUser.groupes.indexOf("reader") > -1) {

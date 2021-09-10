@@ -15,91 +15,115 @@
         font-weight: normal;
     }
 
-    .ADLmapping_columnValues{
+    .ADLmapping_columnValues {
         background-color: #ee8577;
     }
-    .ADLmapping_columnValues_referenceValue{
+
+    .ADLmapping_columnValues_referenceValue {
         background-color: #77ee77;
     }
-    .ADLmapping_columnValues_hasCandidateValues{
+
+    .ADLmapping_columnValues_hasCandidateValues {
         background-color: #eeb477;
     }
 
-    .ADLmapping_columnValueSelected{
+    .ADLmapping_columnValueSelected {
         background-color: #ddd;
 
     }
-    .ADLmapping_candidateEntity{
+
+    .ADLmapping_candidateEntity {
         margin: 3px;
-        padding:3px;
+        padding: 3px;
         justify-content: space-between;
         display: flex;
         border-radius: 3px;
         border: #6e2500 solid 1px;
         background-color: #ddd;
-        ADLmapping_candidateEntity
 
     }
 
-    .ADLmapping_distinctColumnValueSource{
+    .ADLmapping_distinctColumnValueSource {
         border-radius: 2px;
         border: #6e2500 solid 1px;
         margin: 1px;
-        padding:1px;
-        width :40px;
+        padding: 1px;
+        width: 40px;
     }
-    .ADLmapping_entitySource{
+
+    .ADLmapping_entitySource {
         border-radius: 2px;
         border: #6e2500 solid 1px;
         margin: 1px;
-        padding:1px;
-        width :40px;
+        padding: 1px;
+        width: 40px;
     }
-    .ADLmapping_columnValues_isCandidate{
+
+    .ADLmapping_columnValues_isCandidate {
         background-color: #77e0ee;
 
+    }
+
+    .ADLadvancedMapping_searchInput {
+        border: #6e2500 solid 2px;
+        width: 300px
     }
 </style>
 
 
-<div style="width: 100%">Advanded Mapping : distinct values in column&nbsp;&nbsp;<b><span id="ADLmappingData_column"> </span></b>
+<div style="width: 100%">Advanded Mapping : distinct values in column&nbsp;&nbsp;<b><span
+        id="ADLmappingData_column"> </span></b>
     &nbsp;&nbsp;&nbsp;<span class="messageDiv" id="ADLMappingAdvancedMappings_messageSpan"></span>
 
 </div>
 <div id="ADLMappingAdvancedMappings_tabs" style="width:100%;">
     <ul>
         <li><a href="#ADLMappingAdvancedMappings_dictionaryMapping">Dictionary Mappings</a></li>
-     <!--   <li><a href="#ADLMappingAdvancedMappings_automaticMapping">Automatic</a></li>-->
+        <!--   <li><a href="#ADLMappingAdvancedMappings_automaticMapping">Automatic</a></li>-->
 
     </ul>
 
     <div id="ADLMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%">
         <div>
-           <!-- <select size="10" onclick="ADLadvancedMapping.editDictionaryValues($(this).val())" class="ADLmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
-                    id="ADLmapping_columnValues"></select>-->
-           Sort <select id="ADLmapping_distinctColumnSortSelect" onchange="ADLadvancedMapping.sortColumnValues()"></select>
-            <div id="ADLmapping_distinctColumnValuesContainer" style="display:flex;flex-direction: column;max-height: 600px;overflow: auto"></div>
+            <!-- <select size="10" onclick="ADLadvancedMapping.editCandidateValues($(this).val())" class="ADLmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
+                     id="ADLmapping_columnValues"></select>-->
+            Sort <select id="ADLmapping_distinctColumnSortSelect"
+                         onchange="ADLadvancedMapping.sortColumnValues()"></select>
+            <div id="ADLmapping_distinctColumnValuesContainer"
+                 style="display:flex;flex-direction: column;max-height: 600px;overflow: auto"></div>
         </div>
         <div>
             <div id="ADLadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
-            <i> found candidate mapppings :</i>
-            <select onchange="ADLadvancedMapping.editDictionaryValues()" id="ADLadvancedMapping_queryTypeSelect">
-            <option value="machAnyWord"> match any word</option>
+
+            search<input class="ADLadvancedMapping_searchInput" id="ADLadvancedMapping_searchInput"
+                   onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchEntities($(this).val())">
+            source <select id="ADLadvancedMapping_filterCandidateMappingsSelect"
+                           onchange="ADLadvancedMapping.editCandidateValues()"> </select>
+            <br><i>  mode:</i>
+            <select onchange="ADLadvancedMapping.editCandidateValues()" id="ADLadvancedMapping_queryTypeSelect">
+                <option value="machAnyWord"> match any word</option>
                 <option value="moreLikeThis"> more like this</option>
                 <option value="exactMatch"> exact match</option>
 
-        </select>
+            </select>
+            sort<select onchange="ADLadvancedMapping.editCandidateValues()"
+                    id="ADLadvancedMapping_sortCandidateMappingsSelect">
+                <option value="alphabetic"> search score</option>
+                <option value="alphabetic"> alphabetic</option>
+            </select>
+
+
             <div id="ADLadvancedMapping_dictionaryMappingContainerDiv"
                  style="display:flex;flex-direction: column;width: 500px;height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
-         
-         
+
+
             <button onclick="ADLadvancedMapping.validateMapping()"> Validate Candidate mappings</button>
-          
+
             <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>
         </div>
     </div>
 
-   
+
 </div>
 
 

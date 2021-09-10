@@ -25,78 +25,95 @@
 
 
     }
+    .ADLbrowser_mainPalette{
+
+        width:80px;
+        display: flex;
+        flex-direction: column;
+
+
+    }
+    .ADLbrowser_mainPalette button{
+        border: #6e2500 solid 2px;
+        border-radius: 3px;
+
+        margin: 2px;
+    }
+    #ADLbrowser_ClassesTab,#ADLbrowserTabs_AdlTab,#ADLbrowser_GraphTab,#ADLbrowser_TableTab{
+        margin-left: 0px !important;
+    }
 
 
 </style>
 
 <div>
-    <div>
+    <div style="display: flex;flex-direction: row">
+        <div class="ADLbrowser_mainPalette">
 
-        <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
-        <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
-        <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
-        <button onclick="ADLbrowserQuery.graphActions.backToModel()">Back to Model</button>
-        <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
+            <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
+            <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
+            <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
+            <button onclick="ADLbrowserQuery.graphActions.backToModel()">Back to Model</button>
+            <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
 
-
-    </div>
-
-
-    <div id="ADLbrowser_accordion" style="width:360px;">
-
-        <!--   <ul>
-               <li><a href="#ADLbrowserTabs_AdlTab">ADL</a></li>
-               <li><a href="#ADLbrowser_GraphTab">Graph</a></li>
-               <li><a href="#ADLbrowser_TableTab">Table</a></li>
-
-
-
-           </ul>-->
-
-        <h3><span class="title">Classes </span></h3>
-        <div id="ADLbrowser_ClassesTab">
-            <div id="ADLbrowser_ClassesDiv" class="jstree"></div>
-        </div>
-
-        <h3><span class="title">ADL </span></h3>
-        <div id="ADLbrowserTabs_AdlTab" style="width:100%; display: flex;flex-direction: column">
-
-
-            <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column">
-
-
-                <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
-
-            </div>
-            <!--   <div  id="ADLbrowser_adlJstreeActionDiv">
-                   <button onclick="ADLbrowserQuery.graphActions.addIndividualsFilter()">add filter</button>-->
-            <button onclick="ADLbrowserQuery.graphActions.clearIndividualsFilter()">clear</button>
 
         </div>
 
-        <h3><span class="title">Graph </span></h3>
-        <div id="ADLbrowser_GraphTab">
-            expand<select id="ADLbrowserGraph_expandSelect"
-                          onchange="ADLbrowserGraph.expandGraph($(this).val())"></select><br>
-            <div>
 
+        <div id="ADLbrowser_accordion" style="width:360px;">
+
+            <!--   <ul>
+                   <li><a href="#ADLbrowserTabs_AdlTab">ADL</a></li>
+                   <li><a href="#ADLbrowser_GraphTab">Graph</a></li>
+                   <li><a href="#ADLbrowser_TableTab">Table</a></li>
+
+
+
+               </ul>-->
+
+            <h3><span class="title">Classes </span></h3>
+            <div id="ADLbrowser_ClassesTab">
+                <div id="ADLbrowser_ClassesDiv" class="jstree"></div>
             </div>
-            <div id="ADLbrowserGraph_nodesJstree" class="jstree" style="width: 300px;height: 400px">
+
+            <h3><span class="title">ADL </span></h3>
+            <div id="ADLbrowserTabs_AdlTab" style="width:100%; display: flex;flex-direction: column">
+
+
+                <div id="ADLbrowser_filterDiv" style="width:100%; display: flex;flex-direction: column">
+
+
+                    <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
+
+                </div>
+                <!--   <div  id="ADLbrowser_adlJstreeActionDiv">
+                       <button onclick="ADLbrowserQuery.graphActions.addIndividualsFilter()">add filter</button>-->
+                <button onclick="ADLbrowserQuery.graphActions.clearIndividualsFilter()">clear</button>
 
             </div>
 
+            <h3><span class="title">Graph </span></h3>
+            <div id="ADLbrowser_GraphTab">
+                expand<select id="ADLbrowserGraph_expandSelect"
+                              onchange="ADLbrowserGraph.expandGraph($(this).val())"></select><br>
+                <div>
+
+                </div>
+                <div id="ADLbrowserGraph_nodesJstree" class="jstree" style="width: 300px;height: 400px">
+
+                </div>
+
+
+            </div>
+
+
+            <h3><span class="title">Table </span></h3>
+            <div id="ADLbrowser_TableTab">
+
+            </div>
+
 
         </div>
-
-
-
-
-        <h3><span class="title">Table </span></h3>
-        <div id="ADLbrowser_TableTab">
-
-        </div>
-
-
     </div>
 </div>
 

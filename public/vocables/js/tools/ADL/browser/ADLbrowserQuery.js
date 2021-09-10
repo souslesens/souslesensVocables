@@ -30,13 +30,14 @@ var ADLbrowserQuery = (function () {
             $("#ADLbrowserQueryParamsDialog").css("display", "none")
         }
 
-        self.showQueryParamsDialog = function (position) {
-
+        self.showQueryParamsDialog = function (position, node) {
+            if (!node)
+                node = self.currentNode;
 
             var firstClass = ADLbrowserQuery.queryFilterNodes.length == 0
             self.currentQueryDialogPredicates = []
             if (!firstClass) {
-                var predicates = self.getClassesPredicates(self.currentNode.data.id, true)
+                var predicates = self.getClassesPredicates(node.data.id, true)
                 var ok = false;
                 //  var ok = true;
                 self.currentQueryDialogPredicates = []
@@ -64,8 +65,8 @@ var ADLbrowserQuery = (function () {
                     ;//  return alert("class have to be contiguous in the graph")
             }
 
-            self.currentQueryDialogField = self.currentNode.data.id
-            self.showNodeProperties(self.currentNode);
+            self.currentQueryDialogField = node.data.id
+            self.showNodeProperties(node);
             $("#ADLbrowserQueryParams_typeSelect").css("display", "none")
 
 
@@ -81,11 +82,11 @@ var ADLbrowserQuery = (function () {
 
                 var emptyOptions = self.currentQueryDialogPredicates.length > 1
                 common.fillSelectOptions("ADLbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", 'predicate')
-                if (self.currentNode.data.searchedLabel) {
+                if (node.data.searchedLabel) {
                     var array = [{label: " rdfs:label", id: "http://www.w3.org/2000/01/rdf-schema#label"}]
                     common.fillSelectOptions("ADLbrowserQueryParams_property", array, false, "label", "id")
 
-                    $("#ADLbrowserQueryParams_value").val(self.currentNode.data.searchedLabel)
+                    $("#ADLbrowserQueryParams_value").val(node.data.searchedLabel)
                 }
 
 
@@ -342,8 +343,10 @@ var ADLbrowserQuery = (function () {
             if (dialogFilterStr.indexOf("Label") < 0)
                 dialogFilterStr += "optional {" + varName + " rdfs:label " + varName + "Label} "
 
-
-            if (self.queryMode == "count") {
+            if (self.queryMode == "expandGraphNode") {
+                ADLbrowserGraph.expandNode( dialogFilterStr)
+            }
+            else if (self.queryMode == "count") {
                 var options = {
                     filter: dialogFilterStr,
                     filterLabel: filterLabel,
@@ -587,7 +590,7 @@ var ADLbrowserQuery = (function () {
                             self.ALDmodelGraph.edges = visjsGraph.data.edges.get()
                             self.ALDmodelGraph.params = visjsGraph.currentContext
                         }
-                        MainController.UI.message("drawing Graph...",true )
+                        MainController.UI.message("drawing Graph...", true)
                         ADLbrowserGraph.drawGraph("graphDiv", queryResult, {
                             addToGraph: addToGraph,
                             selectVars: selectVars
@@ -596,7 +599,7 @@ var ADLbrowserQuery = (function () {
 
                     }
                     if (output == "table") {
-                        MainController.UI.message("drawing Table..." ,true)
+                        MainController.UI.message("drawing Table...", true)
                         ADLbrowserDataTable.showQueryResult(queryResult, {selectVars: selectVars})
 
                     }
@@ -665,7 +668,7 @@ var ADLbrowserQuery = (function () {
 
                     } else //class
                     {
-
+                        self.queryMode = "count"
                         ADLbrowserQuery.showQueryParamsDialog(point)
                     }
                 }
@@ -892,15 +895,15 @@ var ADLbrowserQuery = (function () {
             MainController.UI.message("searching...")
             async.whilst(
                 function (callbackTest) {//test
-                    if(offset >= maxOffset)
-                        alert( "query results truncated : larger than "+ maxOffset+" maximum authorized ")
+                    if (offset >= maxOffset)
+                        alert("query results truncated : larger than " + maxOffset + " maximum authorized ")
                     return length > 0 && offset < maxOffset;
                 }
                 ,
                 function iter(callbackWhilst) {
                     var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-                    var query2 = query+" OFFSET " + offset;
-                    offset+=fetchLength
+                    var query2 = query + " OFFSET " + offset;
+                    offset += fetchLength
                     Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
                         if (err) {
                             return callbackWhilst(err)

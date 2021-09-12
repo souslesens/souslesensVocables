@@ -94,7 +94,9 @@ var ADLmappingGraph = (function () {
 
                 html = "    <span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertySubject();\"> is property subject</span>" +
                     "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.isPropertyObject();\"> is property object</span>"+
-                "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.setLabelAssociation();\"> is label</span>"
+                "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.setLabelAssociation();\"> is label</span>"+
+                "<span class=\"popupMenuItem\" onclick=\"ADLmappingGraph.graphActions.removeMapping();\"> remove Mapping</span>"
+
             }
             $("#graphPopupDiv").html(html);
             MainController.UI.showPopup(point, "graphPopupDiv")
@@ -119,6 +121,11 @@ var ADLmappingGraph = (function () {
             var x=self.currentAssociation
             var property={data:{id:"http://www.w3.org/2000/01/rdf-schema#label", label:"rdfs:label"}}
             self.graphActions.setAssociation(property, self.currentAssociation)
+        },
+        removeMapping:function(){
+            var columnId=self.currentNode.data.columnId;
+            ADLmappings.unAssignOntologyTypeToColumn(columnId)
+
         },
 
         isPropertyObject: function () {

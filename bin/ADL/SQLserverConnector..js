@@ -78,6 +78,7 @@ var SQLserverConnector = {
     getFetchedData: function (dbName, query, processorFn,fetchSize,uniqueTriples,callback) {
         var data=[]
         config.database = dbName
+        var fetchedCount=0
         sql.connect(config, err => {
             // ... error checks
 
@@ -95,7 +96,8 @@ var SQLserverConnector = {
 
                 if (data.length >= fetchSize) {
                     request.pause();
-                    processorFn(data, uniqueTriples, function (err, resultProcessor){
+                    fetchedCount+=data.length
+                    processorFn(data, uniqueTriples,fetchedCount, function (err, resultProcessor){
                        data=[]
                         request.resume();
                    })

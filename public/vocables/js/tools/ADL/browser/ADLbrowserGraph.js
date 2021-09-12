@@ -1,396 +1,418 @@
 var ADLbrowserGraph = (function () {
 
 
-    var self = {}
-    self.defaultNodeSize = 7;
-    self.zeroCountIds = []
-    self.setGraphPopupMenus = function (node, event) {
+        var self = {}
+        self.defaultNodeSize = 7;
+        self.zeroCountIds = []
+        self.setGraphPopupMenus = function (node, event) {
 
-        if (!node || !node.data)
-            return;
+            if (!node || !node.data)
+                return;
 
-        var html =
-            "<span class=\"popupMenuItem\" style='font-weight: bold;color:" + ADLbrowserQuery.model[node.data.type].color + "'> " + ADLbrowserQuery.model[node.data.type].label + "</span>" +
-            "    <span class=\"popupMenuItem\" style='font-weight: bold'> " + node.label + "</span>" +
-            "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.showgraphNodeNeighborhood();\"> node infos</span>" +
-            "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.selectNode()\">selectNode</span>" +
-            "    <span  class=\"popupMenuItem\"onclick=\"ADLbrowserGraph.collapseNode();\">collapse </span>" +
-            " expand :<br><select size='4' id='ADLbrowser_graphMenuPredicateSelect' onchange='ADLbrowserGraph.showExpandNodeFilterDiv($(this).val())'></select>" +
-            "<div id='ADLbrowser_expandNodeFilterDiv'></div>"
+            var html =
+                "<span class=\"popupMenuItem\" style='font-weight: bold;color:" + ADLbrowserQuery.model[node.data.type].color + "'> " + ADLbrowserQuery.model[node.data.type].label + "</span>" +
+                "    <span class=\"popupMenuItem\" style='font-weight: bold'> " + node.label + "</span>" +
+                "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.showgraphNodeNeighborhood();\"> node infos</span>" +
+                "    <span class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.selectNode()\">selectNode</span>" +
+                "    <span  class=\"popupMenuItem\" onclick=\"ADLbrowserGraph.collapseNode();\">collapse </span>" +
+                "<div   id='ADLbrowser_customGraphPopupMenuDiv'></div>"
 
-
-
-        $("#graphPopupDiv").html(html)
-
-        setTimeout(function () {
-            self.setGraphPopupMenuAllowedExpandsSelect();
-
-        }, 500)
-    },
+            html += " expand :<br><select size='4' id='ADLbrowser_graphMenuPredicateSelect' onchange='ADLbrowserGraph.showExpandNodeFilterDiv($(this).val())'></select>" +
+                "<div id='ADLbrowser_expandNodeFilterDiv'></div>"
 
 
-        self.setGraphPopupMenuAllowedExpandsSelect = function () {
+            $("#graphPopupDiv").html(html)
 
-            var classId = self.currentGraphNode.data.type;
-            var retainedPredicates = ADLbrowserQuery.getClassesPredicates(classId)
-            var array = []
-            retainedPredicates.forEach(function (item) {
-                array.push({
-                    id: item.predicate + "|" + item.object + "|" + item.inverse,
-                    label: "" + (item.inverse ? "^" : "") + ADLbrowserQuery.model[item.predicate].label + " : " + ADLbrowserQuery.model[item.object].label
+            setTimeout(function () {
+                ADLbrowserCustom.setAdditionalGraphPopupMenuDiv  ()
+                self.setGraphPopupMenuAllowedExpandsSelect();
+
+            }, 500)
+        },
+
+
+            self.setGraphPopupMenuAllowedExpandsSelect = function () {
+
+                var classId = self.currentGraphNode.data.type;
+                var retainedPredicates = ADLbrowserQuery.getClassesPredicates(classId)
+                var array = []
+                retainedPredicates.forEach(function (item) {
+                    array.push({
+                        id: item.predicate + "|" + item.object + "|" + item.inverse,
+                        label: "" + (item.inverse ? "^" : "") + ADLbrowserQuery.model[item.predicate].label + " : " + ADLbrowserQuery.model[item.object].label
+                    })
+
+
                 })
 
+                common.fillSelectOptions("ADLbrowser_graphMenuPredicateSelect", array, false, "label", "id")
 
-            })
-
-            common.fillSelectOptions("ADLbrowser_graphMenuPredicateSelect", array, false, "label", "id")
-
-
-        }
-    self.showgraphNodeNeighborhood = function () {
-        ADLbrowser.showNodeInfos(self.currentGraphNode)
-    }
-
-    self.clearGraph = function () {
-        ADLbrowser.jstree.load.loadAdl();
-        visjsGraph.clearGraph()
-        ADLbrowser.queryTypesArray = []
-    },
-        self.collapseNode = function () {
-            visjsGraph.collapseNode(ADLbrowser.currentJstreeNode.id)
-
-        },
-        self.selectNode = function () {
-            ADLbrowser.currentGraphNodeSelection = self.currentGraphNode
-            $("#ADLbrowser_selectionDiv").html(self.currentGraphNode.data.label)
-            //    ADLbrowser.query.showQueryParamsDialog(ADLbrowserGraph.lastRightClickPosition,self.currentGraphNode);
-
-        },
-        self.cancelGraphNodeSelection = function () {
-            ADLbrowser.currentGraphNodeSelection = null
-            $("#ADLbrowser_selectionDiv").html("ALL NODES")
-            //   ADLbrowser.jstree.load.loadAdl();
-        }
-        ,
-
-        self.addCountNodeToModelGraph = function (node, data, options, callback) {
-
-
-            var nodeId = options.varName.substring(1) + "_filter"
-            var count = data.data[0].count.value
-            if (count == "0")
-                self.zeroCountIds.push(nodeId)
-
-            var visjsData = {nodes: [], edges: []}
-
-
-            var color = "#adc"
-            if (ADLbrowserQuery.currentNode)
-                var color = Lineage_classes.getPropertyColor(ADLbrowserQuery.currentNode.id)
-
-            visjsGraph.data.nodes.remove(nodeId)
-            var nodeData = {
-                type: "count",
-                class: node.id,
-                count: count,
-                filter: options.filter,
-                filterLabel: options.filterLabel,
-                varName: options.varName,
-                color: color,
-                id: nodeId,
-                predicate: options.predicate
 
             }
-            //   var color = "#ffe0aa"
-
-
-            visjsData.nodes.push({
-                id: nodeId,
-                label: count,
-                shape: "circle",
-                font: "18 arial black",
-                color: color,
-                borderWidth: 3,
-                data: nodeData,
-                //   fixed:{y:true},
-                //   y:-300
-
-            })
-            var edgeId = node.id + "_countEdge"
-            visjsGraph.data.edges.remove(edgeId)
-            visjsData.edges.push({
-                id: edgeId,
-                from: node.id,
-                to: nodeId,
-                label: options.filterLabel,
-                font: {color: color},
-                length: 5,
-                width: 10
-
-
-            })
-
-            visjsGraph.data.nodes.add(visjsData.nodes)
-            visjsGraph.data.edges.add(visjsData.edges)
-
-
-            visjsGraph.data.nodes.update({
-                id: ADLbrowserQuery.currentNode.id,
-                color: color
-            })
-
-            return callback(null, nodeData)
-
+        self.showgraphNodeNeighborhood = function () {
+            ADLbrowser.showNodeInfos(self.currentGraphNode)
         }
 
+        self.clearGraph = function () {
+            ADLbrowser.jstree.load.loadAdl();
+            visjsGraph.clearGraph()
+            ADLbrowser.queryTypesArray = []
+        },
+            self.collapseNode = function () {
+                visjsGraph.collapseNode(ADLbrowser.currentJstreeNode.id)
 
-    self.drawGraph = function (graphDiv, data, options, callback) {
+            },
+            self.selectNode = function () {
+                ADLbrowser.currentGraphNodeSelection = self.currentGraphNode
+                $("#ADLbrowser_selectionDiv").html(self.currentGraphNode.data.label)
+                //    ADLbrowser.query.showQueryParamsDialog(ADLbrowserGraph.lastRightClickPosition,self.currentGraphNode);
 
-        var source = ADLbrowser.currentSource
+            },
+            self.cancelGraphNodeSelection = function () {
+                ADLbrowser.currentGraphNodeSelection = null
+                $("#ADLbrowser_selectionDiv").html("ALL NODES")
+                //   ADLbrowser.jstree.load.loadAdl();
+            }
+            ,
 
-        var existingNodes = {}
-        if (self.currentGraph) {
-            if (options.addToGraph)
-                existingNodes = self.restoreCurrentGraph()
-        } else
-            self.currentGraph = null;
-
-        MainController.UI.message("drawing " + data.length + "nodes...")
-        var visjsData = {nodes: [], edges: []}
-        var keys = {}
-        options.selectVars.forEach(function (varName) {
-            var color = ADLbrowserQuery.varNamesMap[varName].color
-            var key = varName.substring(1)
-            keys[key] = {color: color}
-        })
-
-
-        data.data.forEach(function (item) {
-            var previousId = null
-            for (var key in keys) {
+            self.addCountNodeToModelGraph = function (node, data, options, callback) {
 
 
-                var label = "";
-                var type = ""
-                if (item[key + "Label"])
-                    label = item[key + "Label"].value;
-                if (item[key + "Type"])
-                    type = item[key + "Type"].value;
-                var id = item[key].value;
+                var nodeId = options.varName.substring(1) + "_filter"
+                var count = data.data[0].count.value
+                if (count == "0")
+                    self.zeroCountIds.push(nodeId)
+
+                var visjsData = {nodes: [], edges: []}
 
 
-                if (!existingNodes[id]) {
-                    existingNodes[id] = 1
-                    var color = keys[key].color
-                    visjsData.nodes.push({
-                        id: id,
-                        label: label,
-                        shape: "dot",
-                        color: color,
-                        size: self.defaultNodeSize,
-                        data: {
-                            type: type,
-                            source: ADLbrowser.currentSource,
+                var color = "#adc"
+                if (ADLbrowserQuery.currentNode)
+                    var color = Lineage_classes.getPropertyColor(ADLbrowserQuery.currentNode.id)
 
+                visjsGraph.data.nodes.remove(nodeId)
+                var nodeData = {
+                    type: "count",
+                    class: node.id,
+                    count: count,
+                    filter: options.filter,
+                    filterLabel: options.filterLabel,
+                    varName: options.varName,
+                    color: color,
+                    id: nodeId,
+                    predicate: options.predicate
+
+                }
+                //   var color = "#ffe0aa"
+
+
+                visjsData.nodes.push({
+                    id: nodeId,
+                    label: count,
+                    shape: "circle",
+                    font: "18 arial black",
+                    color: color,
+                    borderWidth: 3,
+                    data: nodeData,
+                    //   fixed:{y:true},
+                    //   y:-300
+
+                })
+                var edgeId = node.id + "_countEdge"
+                visjsGraph.data.edges.remove(edgeId)
+                visjsData.edges.push({
+                    id: edgeId,
+                    from: node.id,
+                    to: nodeId,
+                    label: options.filterLabel,
+                    font: {color: color},
+                    length: 5,
+                    width: 10
+
+
+                })
+
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+
+
+                visjsGraph.data.nodes.update({
+                    id: ADLbrowserQuery.currentNode.id,
+                    color: color
+                })
+
+                return callback(null, nodeData)
+
+            }
+
+
+        self.drawGraph = function (graphDiv, data, options, callback) {
+
+            var source = ADLbrowser.currentSource
+
+            var existingNodes = {}
+            if (self.currentGraph) {
+                if (options.addToGraph)
+                    existingNodes = self.restoreCurrentGraph()
+            } else
+                self.currentGraph = null;
+
+            MainController.UI.message("drawing " + data.length + "nodes...")
+            var visjsData = {nodes: [], edges: []}
+            var keys = {}
+            options.selectVars.forEach(function (varName) {
+                var color = ADLbrowserQuery.varNamesMap[varName].color
+                var key = varName.substring(1)
+                keys[key] = {color: color}
+            })
+
+
+            data.data.forEach(function (item) {
+                var previousId = null
+                var itemIds = []
+                var edgeNode;
+                var edgeId
+                for (var key in keys) {
+                    edgeNode = null;
+
+                    var label = "";
+                    var type = ""
+                    if (item[key + "Label"])
+                        label = item[key + "Label"].value;
+                    if (item[key + "Type"])
+                        type = item[key + "Type"].value;
+                    var id = item[key].value;
+
+                    itemIds.push(id)
+                    if (!existingNodes[id]) {
+                        existingNodes[id] = 1
+
+                        var color = keys[key].color
+                        visjsData.nodes.push({
                             id: id,
                             label: label,
-                            varName: key
+                            shape: "dot",
+                            color: color,
+                            size: self.defaultNodeSize,
+                            data: {
+                                type: type,
+                                source: ADLbrowser.currentSource,
+
+                                id: id,
+                                label: label,
+                                varName: key
+                            }
+
+                        })
+                    }
+                    ADLbrowserQuery.queryFilterNodes.forEach(function (filter) {
+
+
+                        if (filter.predicate && filter.predicate.object == type) {
+                            var target = item[filter.varName.substring(1)]
+                            if (target && target.value != id) {
+                                target = target.value
+
+
+                                edgeId = id + "_" + target
+                                edgeNode = {
+                                    id: edgeId,
+                                    to: id,
+                                    from: target,
+                                    property: filter.predicate
+
+                                }
+                            }
+                        } else if (filter.predicate && filter.predicate.subject == type) {
+                            var target = item[filter.varName.substring(1)]
+                            if (target && target.value != id) {
+                                target = target.value
+                                edgeId = target + "_" + id
+
+                                edgeNode = {
+                                    id: edgeId,
+                                    from: target,
+                                    to: id,
+                                    property: filter.predicate
+                                }
+                            }
                         }
 
+                        if (edgeNode && !existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            visjsData.edges.push(edgeNode)
+                        }
+
+                        /*   if (previousId) {
+                       var edgeId = previousId + "_" + id
+                       if (!existingNodes[edgeId]) {
+                           existingNodes[edgeId] = 1
+                           visjsData.edges.push({
+                               id: edgeId,
+                               from: previousId,
+                               to: id,
+
+
+                           })
+
+                   }}
+                   previousId = id*/
                     })
                 }
-                ADLbrowserQuery.queryFilterNodes.forEach(function (filter) {
-
-                    var edgeNode;
-                    var edgeId
-                    if (filter.predicate && filter.predicate.object == type) {
-                        var target = item[filter.varName.substring(1)]
-                        if (target && target.value != id) {
-                            target = target.value
-
-
-                            edgeId = id + "_" + target
-                            edgeNode = {
-                                id: edgeId,
-                                to: id,
-                                from: target,
-                                property: filter.predicate
+                if (!edgeNode) {// transitive query
+                    itemIds.forEach(function (id, index) {
+                        if (index > 0) {
+                            var edgeId = (itemIds[index - 1]) + "_" + id
+                            if (!existingNodes[edgeId]) {
+                                var edgeNode2 = {
+                                    id: edgeId,
+                                    from: (itemIds[index - 1]),
+                                    to: id,
+                                    property: "transitive",
+                                    arrows: {}
+                                }
+                                visjsData.edges.push(edgeNode2)
 
                             }
                         }
-                    } else if (filter.predicate && filter.predicate.subject == type) {
-                        var target = item[filter.varName.substring(1)]
-                        if (target && target.value != id) {
-                            target = target.value
-                            edgeId = target + "_" + id
-
-                            edgeNode = {
-                                id: edgeId,
-                                from: target,
-                                to: id,
-                                property: filter.predicate
-                            }
-                        }
-                    }
-                    if (edgeNode && !existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1
-                        visjsData.edges.push(edgeNode)
-
-                    }
-                    /*   if (previousId) {
-                   var edgeId = previousId + "_" + id
-                   if (!existingNodes[edgeId]) {
-                       existingNodes[edgeId] = 1
-                       visjsData.edges.push({
-                           id: edgeId,
-                           from: previousId,
-                           to: id,
-
-
-                       })
-
-               }}
-               previousId = id*/
-                })
-            }
-        })
-
-
-        MainController.UI.message("drawing...")
-
-        if (self.currentGraph && options.addToGraph) {
-            visjsGraph.data.nodes.add(visjsData.nodes)
-            visjsGraph.data.edges.add(visjsData.edges)
-            visjsGraph.redraw()
-            visjsGraph.network.fit()
-            self.storeGraph()
-
-        } else {
-            var visjsOptions = {
-                onclickFn: function (node, point, event) {
-                    if(!node)
-                        return MainController.UI.hidePopup()
-                    ADLbrowser.currentJstreeNode = node
-                    if (event.ctrlKey)
-                        ;
-
-
-                },
-                onRightClickFn: function (node, point, event) {
-                    if (!node || node.length == 0)
-                        return;
-                    ADLbrowser.currentJstreeNode = node
-
-                    MainController.UI.showPopup(point, "graphPopupDiv")
-                    ADLbrowserGraph.currentGraphNode = node;
-                    ADLbrowserGraph.setGraphPopupMenus(node, event)
-                    point.x += leftPanelWidth
-                    ADLbrowserGraph.lastRightClickPosition = point
-
-
-                }, edges: {
-                    smooth: {
-                        type: "cubicBezier",
-                        forceDirection: "horizontal",
-
-                        roundness: 0.4,
-                    },
-                    arrows: {to: true}
-                },
-                keepNodePositionOnDrag: true
-
-            }
-            visjsGraph.draw(graphDiv, visjsData, visjsOptions)
-            self.storeGraph()
-            $("#ADLbrowser_accordion").accordion("option", {active: 1});
-            self.dataTree.setGraphNodesTree()
-        }
-        if (callback)
-            callback()
-    }
-
-
-    self.showExpandNodeFilterDiv = function (predicateStr) {
-        MainController.UI.blockHidePopup=true;
-        // to not close popup (see hidePopupDiv in index.html)
-        if (predicateStr == "")
-            return
-        var array = predicateStr.split("|")
-        var targetClass = array[1]
-        self.currentExpandingNode = {
-
-            "data": {
-                "id": targetClass,
-                "type": "subject",
-                "label": ADLbrowserQuery.model[targetClass].label,
-
-                "predicate": array[0],
-                "objectClass": array[1],
-                "inverse": array[2]
-            }
-
-        }
-
-
-        var predicate = self.currentExpandingNode.data.predicate
-        var objectClass = self.currentExpandingNode.data.objectClass
-        var inverse = self.currentExpandingNode.data.inverse
-        var fromStr = Sparql_common.getFromStr(ADLbrowser.currentSource)
-
-        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-            "Select  distinct * " + fromStr + " where {"
-        if (inverse == "false")
-            query += " <" + self.currentGraphNode.data.id + "> <" + predicate + "> ?obj .?obj rdf:type ?objType."// filter (?objType=<" + objectClass + ">)"
-        else
-            query += " ?obj <" + predicate + "> <" + self.currentGraphNode.data.id + "> .?obj rdf:type ?objType. "//filter (?objType=<" + objectClass + ">)"
-        query += " optional {?obj rdfs:label ?objLabel}  " +
-
-            "} ORDER by ?objLabel LIMIT " + Config.ADL.queryLimit
-
-
-
-        var url = Config.sources[ADLbrowser.currentSource].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: ADLbrowser.currentSource}, function (err, result) {
-            if (err)
-                return MainController.UI.message(err);
-            if (result.results.bindings.length > Config.ADL.queryLimit)
-                return alert("Too many values found : > " + result.results.bindings.length)
-
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "obj")
-
-            ADLbrowserQuery.queryMode = "expandGraphNode"
-            //ADLbrowserQuery.showQueryParamsDialog({x:300,y:300}, self.currentExpandingNode)
-
-
-
-           var targetNodes = []
-            self.currentExpandingNode.targeNodes = {}
-            result.results.bindings.forEach(function (item) {
-                self.currentExpandingNode.targeNodes[item.obj.value] = item
-                targetNodes.push({id: item.obj.value, label: item.objLabel.value})
+                    })
+                }
             })
-            var html = "<button onclick='ADLbrowserGraph.expandNode(\"all\")'>all</button> "+
-                "&nbsp;or filter <select id='ADLbrowserGraph_filterTargetNodesSelect' onclick='ADLbrowserGraph.expandNode($(this).val())'></select>"
-            $("#ADLbrowser_expandNodeFilterDiv").html(html)
-
-            $("#ADLbrowser_expandNodeFilterDiv").html(html)
-            MainController.UI.blockHidePopup=true;
-            setTimeout(function(){
-                common.fillSelectOptions("ADLbrowserGraph_filterTargetNodesSelect",targetNodes,true,"label","id")
 
 
+            MainController.UI.message("drawing...")
 
-            },200)
-        })
-    }
+            if (self.currentGraph && options.addToGraph) {
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+                visjsGraph.redraw()
+                visjsGraph.network.fit()
+                self.storeGraph()
+
+            } else {
+                var visjsOptions = {
+                    onclickFn: function (node, point, event) {
+                        if (!node)
+                            return MainController.UI.hidePopup("graphPopupDiv")
+                        ADLbrowser.currentJstreeNode = node
+                        if (event.ctrlKey)
+                            ;
+
+
+                    },
+                    onRightClickFn: function (node, point, event) {
+                        if (!node || node.length == 0)
+                            return;
+                        ADLbrowser.currentJstreeNode = node
+
+                        MainController.UI.showPopup(point, "graphPopupDiv")
+                        ADLbrowserGraph.currentGraphNode = node;
+                        ADLbrowserGraph.setGraphPopupMenus(node, event)
+                        point.x += leftPanelWidth
+                        ADLbrowserGraph.lastRightClickPosition = point
+
+
+                    }, edges: {
+                        smooth: {
+                            type: "cubicBezier",
+                            forceDirection: "horizontal",
+
+                            roundness: 0.4,
+                        },
+                        arrows: {to: true}
+                    },
+                    keepNodePositionOnDrag: true
+
+                }
+                visjsGraph.draw(graphDiv, visjsData, visjsOptions)
+                self.storeGraph()
+                $("#ADLbrowser_accordion").accordion("option", {active: 1});
+                self.dataTree.setGraphNodesTree()
+            }
+            if (callback)
+                callback()
+        }
+
+
+        self.showExpandNodeFilterDiv = function (predicateStr) {
+            MainController.UI.blockHidePopup = true;
+            // to not close popup (see hidePopupDiv in index.html)
+            if (predicateStr == "")
+                return
+            var array = predicateStr.split("|")
+            var targetClass = array[1]
+            self.currentExpandingNode = {
+
+                "data": {
+                    "id": targetClass,
+                    "type": "subject",
+                    "label": ADLbrowserQuery.model[targetClass].label,
+
+                    "predicate": array[0],
+                    "objectClass": array[1],
+                    "inverse": array[2]
+                }
+
+            }
+
+
+            var predicate = self.currentExpandingNode.data.predicate
+            var objectClass = self.currentExpandingNode.data.objectClass
+            var inverse = self.currentExpandingNode.data.inverse
+            var fromStr = Sparql_common.getFromStr(ADLbrowser.currentSource)
+
+            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+                "Select  distinct * " + fromStr + " where {"
+            if (inverse == "false")
+                query += " <" + self.currentGraphNode.data.id + "> <" + predicate + "> ?obj .?obj rdf:type ?objType."// filter (?objType=<" + objectClass + ">)"
+            else
+                query += " ?obj <" + predicate + "> <" + self.currentGraphNode.data.id + "> .?obj rdf:type ?objType. "//filter (?objType=<" + objectClass + ">)"
+            query += " optional {?obj rdfs:label ?objLabel}  " +
+
+                "} ORDER by ?objLabel LIMIT " + Config.ADL.queryLimit
+
+
+            var url = Config.sources[ADLbrowser.currentSource].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: ADLbrowser.currentSource}, function (err, result) {
+                if (err)
+                    return MainController.UI.message(err);
+                if (result.results.bindings.length > Config.ADL.queryLimit)
+                    return alert("Too many values found : > " + result.results.bindings.length)
+
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "obj")
+
+                ADLbrowserQuery.queryMode = "expandGraphNode"
+                //ADLbrowserQuery.showQueryParamsDialog({x:300,y:300}, self.currentExpandingNode)
+
+
+                var targetNodes = []
+                self.currentExpandingNode.targeNodes = {}
+                result.results.bindings.forEach(function (item) {
+                    self.currentExpandingNode.targeNodes[item.obj.value] = item
+                    targetNodes.push({id: item.obj.value, label: item.objLabel.value})
+                })
+                var html = "<button onclick='ADLbrowserGraph.expandNode(\"all\")'>all</button> " +
+                    "&nbsp;or filter <select id='ADLbrowserGraph_filterTargetNodesSelect' onchange='ADLbrowserGraph.expandNode($(this).val())'></select>"
+                $("#ADLbrowser_expandNodeFilterDiv").html(html)
+
+                $("#ADLbrowser_expandNodeFilterDiv").html(html)
+                MainController.UI.blockHidePopup = true;
+                setTimeout(function () {
+                    common.fillSelectOptions("ADLbrowserGraph_filterTargetNodesSelect", targetNodes, true, "label", "id")
+
+
+                }, 200)
+            })
+        }
 
 
         self.expandNode = function (selectedNodeId) {
-        if(!selectedNodeId)
-            selectedNodeId=$("#ADLbrowserGraph_filterTargetNodesSelect").val()
-            var data= []
-            for(var id in  self.currentExpandingNode.targeNodes){
-                if(selectedNodeId=="all" || selectedNodeId==id )
+            MainController.UI.blockHidePopup = false;
+            if (!selectedNodeId)
+                selectedNodeId = $("#ADLbrowserGraph_filterTargetNodesSelect").val()
+            var data = []
+            for (var id in self.currentExpandingNode.targeNodes) {
+                if (selectedNodeId == "all" || selectedNodeId == id)
                     data.push(self.currentExpandingNode.targeNodes[id])
             }
 
@@ -398,7 +420,7 @@ var ADLbrowserGraph = (function () {
             var existingNodes = visjsGraph.getExistingIdsMap()
 
 
-           data.forEach(function (item) {
+            data.forEach(function (item) {
                 var objId = item.obj.value;
                 if (!existingNodes[objId]) {
                     var color = "#ade"

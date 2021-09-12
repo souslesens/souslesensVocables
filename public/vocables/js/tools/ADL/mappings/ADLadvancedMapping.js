@@ -12,74 +12,74 @@ var ADLadvancedMapping = (function () {
             var column = "*";
             var table = "[onemodel].[dbo].[superClasses]"
             var sqlQuery = " select distinct " + column + " from " + table;//+ " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
-            self.executeSqlserverQuery(sqlQuery,{dbName: "onemodel", type: "sql.sqlserver"},function(err, data){
-                if(err) {
+            self.executeSqlserverQuery(sqlQuery, {dbName: "onemodel", type: "sql.sqlserver"}, function (err, data) {
+                if (err) {
                     alert(err.responseText)
                     return MainController.UI.message(err.responseText)
                 }
 
-                    self.referenceDictionary = {}
+                self.referenceDictionary = {}
 
-                    var topTypesMap = {
-                        "REFERENCE": "ONE-MODEL-superClasses",
-                        "NO-SUBCLASSES": "ONE-MODEL-informationObjects",
-                        "ARDL-SPECIFIC": "ONE-MODEL-ARDL-specific",
+                var topTypesMap = {
+                    "REFERENCE": "ONE-MODEL-superClasses",
+                    "NO-SUBCLASSES": "ONE-MODEL-informationObjects",
+                    "ARDL-SPECIFIC": "ONE-MODEL-ARDL-specific",
 
+                }
+
+                var typesMap = {}
+                data.forEach(function (item, index) {
+
+                    if (!typesMap[item.type]) {
+                        typesMap[item.type] = []
                     }
+                    typesMap[item.type].push(item)
 
-                    var typesMap = {}
-                    data.forEach(function (item, index) {
+                })
 
-                        if (!typesMap[item.type]) {
-                            typesMap[item.type] = []
-                        }
-                        typesMap[item.type].push(item)
-
+                var dictionaryJsTreeData = []
+                for (var type in typesMap) {
+                    var dicName = topTypesMap[type]
+                    dictionaryJsTreeData.push({
+                        id: type,
+                        text: dicName,
+                        type: "OWL",
+                        parent: "#"
                     })
+                    typesMap[type].forEach(function (item) {
+                        self.referenceDictionary[item.superClassUri] = {
+                            uri: item.superClassUri,
+                            label: item.superClassLabel,
+                            terms: {},
+                            type: type
+                        }
 
-                    var dictionaryJsTreeData = []
-                    for (var type in typesMap) {
-                        var dicName = topTypesMap[type]
                         dictionaryJsTreeData.push({
-                            id: type,
-                            text: dicName,
-                            type: "OWL",
-                            parent: "#"
-                        })
-                        typesMap[type].forEach(function (item) {
-                            self.referenceDictionary[item.superClassUri] = {
-                                uri: item.superClassUri,
-                                label: item.superClassLabel,
-                                terms: {},
-                                type: type
-                            }
-
-                            dictionaryJsTreeData.push({
+                            id: item.superClassUri,
+                            text: item.superClassLabel,
+                            type: "class",
+                            parent: type,
+                            data: {
                                 id: item.superClassUri,
-                                text: item.superClassLabel,
-                                type: "class",
-                                parent: type,
-                                data: {
-                                    id: item.superClassUri,
-                                    label: item.superClassLabel,
-                                }
-                            })
+                                label: item.superClassLabel,
+                            }
                         })
-                    }
+                    })
+                }
 
 
-                    var optionsClass = {
-                        selectTreeNodeFn: ADLmappings.selectTreeNodeFn,
-                        openAll: true,
-                        searchPlugin: {
-                            "case_insensitive": true,
-                            "fuzzy": false,
-                            "show_only_matches": true
-                        },
+                var optionsClass = {
+                    selectTreeNodeFn: ADLmappings.selectTreeNodeFn,
+                    openAll: true,
+                    searchPlugin: {
+                        "case_insensitive": true,
+                        "fuzzy": false,
+                        "show_only_matches": true
+                    },
 
-                        contextMenu: ADLmappings.contextMenuFn("ADLmappings_OneModelTree")
-                    }
-                    common.jstree.loadJsTree("ADLmappings_OneModelTree", dictionaryJsTreeData, optionsClass)
+                    contextMenu: ADLmappings.contextMenuFn("ADLmappings_OneModelTree")
+                }
+                common.jstree.loadJsTree("ADLmappings_OneModelTree", dictionaryJsTreeData, optionsClass)
 
 
             })
@@ -97,29 +97,28 @@ var ADLadvancedMapping = (function () {
             var table = "[onemodel].[dbo].[reference_dictionary]"
             var where = " where superClassUri='" + superClassId + "'"
             var sqlQuery = " select distinct " + column + " from " + table + where;//+ " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
-            self.executeSqlserverQuery(sqlQuery,{dbName: "onemodel", type: "sql.sqlserver"},function(err, data){
-                if(err) {
+            self.executeSqlserverQuery(sqlQuery, {dbName: "onemodel", type: "sql.sqlserver"}, function (err, data) {
+                if (err) {
                     alert(err.responseText)
                     return MainController.UI.message(err.responseText)
 
                 }
 
-                    data.forEach(function (item, index) {
+                data.forEach(function (item, index) {
 
 
-                        if (item.term) {
-                            if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()])
-                                self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {}
-                            if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
-                                self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source] = item
-                            // self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]=item
-                        }
-                        if (item.status != "REFERENCE" && item.status != "CANDIDATE") {
-                            self.referenceDictionary[item.superClassUri].noSubClasses = true
-                        }
-                    })
-                    callback()
-
+                    if (item.term) {
+                        if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()])
+                            self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {}
+                        if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
+                            self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source] = item
+                        // self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]=item
+                    }
+                    if (item.type != "REFERENCE" && item.type != "CANDIDATE") {
+                        self.referenceDictionary[item.superClassUri].noSubClasses = true
+                    }
+                })
+                callback()
 
 
             })
@@ -127,9 +126,12 @@ var ADLadvancedMapping = (function () {
 
 
         self.showAdvancedMappingDialog = function (dictionary, columnClassId) {
-
-            if (self.referenceDictionary[columnClassId].noSubClasses)
+            $("#waitImg").css("display","block")
+            MainController.UI.message("Loading distinct values for column "+ ADLmappingData.currentColumn)
+            var type = self.referenceDictionary[columnClassId].type
+            if (type != "REFERENCE" && type != "CANDIDATE") {
                 return;
+            }
             ADLadvancedMapping.loadReferenceDictionary(columnClassId, true, function (err, result) {
                 if (err)
                     alert(err)
@@ -141,48 +143,49 @@ var ADLadvancedMapping = (function () {
                 var table = "[" + ADLmappingData.currentADLdataSource.dbName + "]." + obj.table;
 
                 var sqlQuery = " select count( distinct " + column + ") as count from " + table;
-                self.executeSqlserverQuery(sqlQuery,ADLmappingData.currentADLdataSource,function(err, data){
-                    if(err) {
+                self.executeSqlserverQuery(sqlQuery, ADLmappingData.currentADLdataSource, function (err, data) {
+                    if (err) {
                         alert(err.responseText)
-                        return  MainController.UI.message(err.responseText)
+                        return MainController.UI.message(err.responseText)
                     }
 
-                        var count = data[0].count
-                        if (count > Config.ADL.maxDistinctValuesForAdvancedMapping)
-                            return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.ADL.maxDistinctValuesForAdvancedMapping)
+                    var count = data[0].count
+                    if (count > Config.ADL.maxDistinctValuesForAdvancedMapping)
+                        return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.ADL.maxDistinctValuesForAdvancedMapping)
 
-                        var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
-                        if (ADLmappingData.currentADLdataSource.type == "sql.sqlserver")
-                            sqlQuery = " select  distinct top(10000) " + column + " from " + table;
+                    var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
+                    if (ADLmappingData.currentADLdataSource.type == "sql.sqlserver")
+                        sqlQuery = " select  distinct top(10000) " + column + " from " + table;
 
-                            self.executeSqlserverQuery(sqlQuery,ADLmappingData.currentADLdataSource,function(err, data){
-                                if(err) {
-                                    alert(err.responseText)
-                                  return  MainController.UI.message(err.responseText)
-                                }
+                    self.executeSqlserverQuery(sqlQuery, ADLmappingData.currentADLdataSource, function (err, data) {
+                        if (err) {
+                            alert(err.responseText)
+                            return MainController.UI.message(err.responseText)
+                        }
 
-                                if (data.length >= Config.ADL.maxDistinctValuesForAdvancedMapping)
-                                    return alert(" too many distinct values :" + data.length)
+                        if (data.length >= Config.ADL.maxDistinctValuesForAdvancedMapping)
+                            return alert(" too many distinct values :" + data.length)
 
-                                ADLmappingData.currentColumnDistinctValues = [];
-                                var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
+                        ADLmappingData.currentColumnDistinctValues = [];
+                        var colName = common.deconcatSQLTableColumn(ADLmappingData.currentColumn).column
 
-                                data.forEach(function (item) {
-                                    if (item[colName])
-                                        ADLmappingData.currentColumnDistinctValues.push(item[colName])
-                                })
-
-
-                                $("#ADLmappings_AdvancedMappingDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
-                                $("#ADLmappings_AdvancedMappingDialogDiv").dialog("open")
-
-                                setTimeout(function () {
-                                    $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
-                                    self.setDictionaryMappings(dictionary, columnClassId, ADLmappingData.currentColumnDistinctValues)
-                                }, 200)
-
-
+                        data.forEach(function (item) {
+                            if (item[colName])
+                                ADLmappingData.currentColumnDistinctValues.push(item[colName])
                         })
+
+
+                        $("#ADLmappings_AdvancedMappingDialogDiv").load("snippets/ADL/ADLmappingAdvancedMappingDialog.html");
+                        $("#ADLmappings_AdvancedMappingDialogDiv").dialog("open")
+
+                        setTimeout(function () {
+                            MainController.UI.message("",true)
+                            $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
+                            self.setDictionaryMappings(dictionary, columnClassId, ADLmappingData.currentColumnDistinctValues)
+                        }, 200)
+
+
+                    })
 
 
                 })
@@ -214,26 +217,34 @@ var ADLadvancedMapping = (function () {
                 var termObj = superClassDictionary.terms[value2];
                 var sourcesHtml = ""
 
+                var id = "columnValue" + common.getRandomHexaId(5)
                 if (termObj) {
                     var isCandidate = false
+                    self.currentColumnValueDivIds[id] = {value: value, sources: []}
                     cssClass = "ADLmapping_columnValues_referenceValue"
                     for (var source in termObj) {
-                        if (termObj[source].status == "CANDIDATE")
-                            isCandidate = true;
-                        sourcesHtml += "&nbsp;<span class='ADLmapping_distinctColumnValueSource' style='background-color:" + self.getSourceColor(source) + "'>" + source + "</span>";
-                    }
-                    if (isCandidate)
-                        cssClass = "ADLmapping_columnValues_isCandidate"
-                } else
-                    cssClass = "ADLmapping_columnValues_hasCandidateValues"
+                        self.currentColumnValueDivIds[id].sources.push(source)
+                        if (termObj[source].status == "CANDIDATE") {
+                            cssClass = "ADLmapping_columnValues_isCandidate"
+                            self.currentColumnValueDivIds[id].isCandidate = true;
+                           }else {
 
-                var id = "columnValue" + common.getRandomHexaId(5)
-                self.currentColumnValueDivIds[id] = {value: value, sources: []}
+                            if (source && distinctSources.indexOf(source) < 0)
+                                distinctSources.push(source)
+                            sourcesHtml += "&nbsp;<span class='ADLmapping_distinctColumnValueSource' style='background-color:" + self.getSourceColor(source) + "'>" + source + "</span>";
+
+                        }
+                    }
+
+
+                } else {
+                    cssClass = "ADLmapping_columnValues_hasCandidateValues"
+                }
+
+
                 if (cssClass && cssClass != "") {
                     $("#ADLmapping_columnValues option[value='" + value + "']").addClass(cssClass);
-                    self.currentColumnValueDivIds[id].sources.push(source)
-                    if (source && distinctSources.indexOf(source) < 0)
-                        distinctSources.push(source)
+
                 }
 
                 var html = "<div onclick='ADLadvancedMapping.editCandidateValues(\"" + id + "\")' id='" + id + "' class='ADLmapping_columnValue " + cssClass + "'>" + value + sourcesHtml + "</div>";
@@ -241,7 +252,7 @@ var ADLadvancedMapping = (function () {
 
 
             })
-distinctSources  = [ "readi","cfihos","pca"]
+            distinctSources = ["readi", "cfihos", "pca"]
             var candidateEntities = distinctSources
             candidateEntities.splice(0, 0, "all")
             common.fillSelectOptions("ADLadvancedMapping_filterCandidateMappingsSelect", candidateEntities, false)
@@ -271,46 +282,49 @@ distinctSources  = [ "readi","cfihos","pca"]
 
         }
 
-        self.sortColumnValues = function () {
-            var sortType = $("#ADLmapping_distinctColumnSortSelect").val()
-            var divList = $(".ADLmapping_columnValue");
+        self.sortColumnValues= function (sortType) {
+          if(!sortType)
+           sortType = $("#ADLmapping_distinctColumnSortSelect").val()
+            var sortMap = {};
+            for (var key in self.currentColumnValueDivIds) {
+                var item = self.currentColumnValueDivIds[key]
+                if(sortType.indexOf("_search_"==0)){
+                    var word=sortType.substring(8)
+                    if( item.value.toLowerCase().indexOf(word.toLowerCase())>-1)
+                        sortMap["_A_" + item.value] = key;
+                    else
+                        sortMap["_Z_" + item.value] = key
 
-            divList.sort(function (a, b) {
-                var aData = self.currentColumnValueDivIds[$(a).attr("id")]
-                var bData = self.currentColumnValueDivIds[$(b).attr("id")]
-                if (sortType == "alphabetic") {
-                    if (aData.value > bData.value)
-                        return 1;
-                    if (aData.value < bData.value)
-                        return -1;
-                    return 0;
+                } else if (sortType == "alphabetic") {
+                    sortMap[item.value] = key
+
                 } else if (sortType == "candidates") {
-                    var a = aData.isCandidate
-                    var b = bData.isCandidate
-                    if (a && !b)
-                        return -1;
-                    if (b && !a)
-                        return 1;
-                    return 0;
+                    if (item.isCandidate)
+                        sortMap["_A_" + item.value] = key
+                    else
+                        sortMap["_Z_" + item.value] = key
                 } else {
-
-                    var a = aData.sources.indexOf(sortType)
-                    var b = bData.sources.indexOf(sortType)
-                    if (!aData.sources)
-                        var x = 3
-                    return b - a;
-                    if (a >= 0 && b < 0)
-                        return -1;
-                    if (b >= 0 && a < 0)
-                        return -1;
-                    return 0;
+                    if (item.sources.indexOf(sortType) > -1)
+                        sortMap["_A_" + item.value] = key
+                    else
+                        sortMap["_Z_" + item.value] = key
                 }
-                //  return $(a).data("listing-price")-$(b).data("listing-price")
-            });
-            $("#ADLmapping_distinctColumnValuesContainer").html(divList);
+            }
 
+            var sortArray = Object.keys(sortMap);
+            sortArray.sort()
+            var html = ""
+            sortArray.forEach(function (item) {
+                var divId = sortMap[item]
+                var x = $("#" + divId)
+                html += $("#" + divId)[0].outerHTML
+            })
+            $("#ADLmapping_distinctColumnValuesContainer").html(html);
 
         }
+
+
+
 
         self.sortCandidateMappings = function (index) {
             var divList = $(".ADLmapping_candidateEntity");
@@ -343,6 +357,10 @@ distinctSources  = [ "readi","cfihos","pca"]
             self.editCandidateValues(null, text)
         }
 
+        self.searchColumn=function(word){
+            self.sortColumnValues("_search_"+word)
+        }
+
 
         self.editCandidateValues = function (columnValueDivId, searchedText) {
             if (!columnValueDivId)
@@ -355,7 +373,7 @@ distinctSources  = [ "readi","cfihos","pca"]
 
             $("#ADLadvancedMapping_editingColumnValue").html(columnValue)
             if (!searchedText)
-                $("#ADLadvancedMapping_searchInput").val(columnValue)
+                $("#ADLadvancedMapping_searchEntitiesInput").val(columnValue)
 
 
             $(".ADLmapping_columnValue").removeClass("ADLmapping_columnValueSelected")
@@ -381,10 +399,10 @@ distinctSources  = [ "readi","cfihos","pca"]
                     html += "<br><table>"
 
                     keys.forEach(function (key) {
-                        var value=""+entity[source][key]
-                        if(value.indexOf("http://")==0)
-                            value="<a href='"+value+"'>"+value+"</a>"
-                        html += "<tr><td>" + key + "</td><td>" + value+ "</td></tr>"
+                        var value = "" + entity[source][key]
+                        if (value.indexOf("http://") == 0)
+                            value = "<a href='" + value + "'>" + value + "</a>"
+                        html += "<tr><td>" + key + "</td><td>" + value + "</td></tr>"
                     })
                     html += "</table>" +
                         "<br>"
@@ -585,11 +603,11 @@ distinctSources  = [ "readi","cfihos","pca"]
             }
 
 
-            self.executeSqlserverQuery(sql,ADLmappingData.currentADLdataSource,function(err, result){
-                if(err)
+            self.executeSqlserverQuery(sql, ADLmappingData.currentADLdataSource, function (err, result) {
+                if (err)
                     return alert(err.toString())
-               self.matchCandidates={}
-                return  alert("Candidates mapping are registered")
+                self.matchCandidates = {}
+                return alert("Candidates mapping are registered")
 
             })
 
@@ -601,8 +619,8 @@ distinctSources  = [ "readi","cfihos","pca"]
             if (!confirm("Confirm delete entry from reference dictionary"))
                 return;
             var sql = " delete from [onemodel].[dbo].[reference_dictionary] where id='" + refDictId + "'";
-            self.executeSqlserverQuery(sql,ADLmappingData.currentADLdataSource,function(err, result){
-                if(err)
+            self.executeSqlserverQuery(sql, ADLmappingData.currentADLdataSource, function (err, result) {
+                if (err)
                     return alert(err.toString())
                 return MainController.UI.message(" reference dictionary modified")
 
@@ -611,15 +629,15 @@ distinctSources  = [ "readi","cfihos","pca"]
         }
         self.validateCandidateInReferenceDictionary = function (refDictId) {
             var sql = " update  [onemodel].[dbo].[reference_dictionary] set status='REFERENCE' where id='" + refDictId + "'";
-            self.executeSqlserverQuery(sql,ADLmappingData.currentADLdataSource,function(err, result){
-                if(err)
+            self.executeSqlserverQuery(sql, ADLmappingData.currentADLdataSource, function (err, result) {
+                if (err)
                     return alert(err.toString())
                 return MainController.UI.message(" reference dictionary modified")
 
             })
         }
 
-        self.executeSqlserverQuery=function(sql,datasource,callback){
+        self.executeSqlserverQuery = function (sql, datasource, callback) {
             $.ajax({
                 type: "POST",
                 url: Config.serverUrl,
@@ -632,7 +650,7 @@ distinctSources  = [ "readi","cfihos","pca"]
                 dataType: "json",
 
                 success: function (data, textStatus, jqXHR) {
-                   callback(null,data)
+                    callback(null, data)
                 }
                 , error: function (err) {
                     callback(err)
@@ -804,82 +822,81 @@ distinctSources  = [ "readi","cfihos","pca"]
 
 
             var quantumRDLsource = Config.sources["ASSETS-QUANTUM-RDL"].dataSource
-            self.executeSqlserverQuery(sqlQuery,function(err, data){
-                if(err) {
+            self.executeSqlserverQuery(sqlQuery, function (err, data) {
+                if (err) {
                     alert(err.responseText)
-                    return  MainController.UI.message(err.responseText)
+                    return MainController.UI.message(err.responseText)
                 }
 
-                    var jstreeData = [];
+                var jstreeData = [];
 
-                    var existingNodes = []
-                    if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
-                        existingNodes = common.jstree.getjsTreeNodes("advancedMappings_pickListMappingTree", true, "#")
+                var existingNodes = []
+                if ($("#advancedMappings_pickListMappingTree").jstree(true)) {
+                    existingNodes = common.jstree.getjsTreeNodes("advancedMappings_pickListMappingTree", true, "#")
+                }
+
+
+                for (var key in self.mappedValues) {
+
+                    if (existingNodes.indexOf(key) < 0) {
+                        existingNodes.push(key)
+                        jstreeData.push({
+                            id: key,
+                            text: key,
+                            parent: "#"
+                        })
                     }
+                }
 
 
-                    for (var key in self.mappedValues) {
-
-                        if (existingNodes.indexOf(key) < 0) {
-                            existingNodes.push(key)
-                            jstreeData.push({
-                                id: key,
-                                text: key,
-                                parent: "#"
-                            })
-                        }
-                    }
-
-
-                    data.forEach(function (item) {
-                        if (existingNodes.indexOf(item.picklistId) < 0) {
-                            existingNodes.push(item.picklistId)
-                            self.mappedValues[item.picklistValue].push({
-                                source: "quantumRDL",
-                                picklistId: item.picklistId,
-                                picklistGroupId: item.picklistGroupId,
-                                picklistGroupName: item.picklistGroupName,
-                                originCode: item.originCode,
-                                originName: item.originName,
-                            })
-                        }
-
-                    })
-
-                    for (var key in self.mappedValues) {
-                        self.mappedValues[key].forEach(function (item) {
-                            var text = item.source + " " + item.picklistId + " " + item.picklistGroupName + " " + item.originName
-                            jstreeData.push({
-                                id: item.picklistId,
-                                text: text,
-                                parent: key,
-                                data: item
-                            })
-
+                data.forEach(function (item) {
+                    if (existingNodes.indexOf(item.picklistId) < 0) {
+                        existingNodes.push(item.picklistId)
+                        self.mappedValues[item.picklistValue].push({
+                            source: "quantumRDL",
+                            picklistId: item.picklistId,
+                            picklistGroupId: item.picklistGroupId,
+                            picklistGroupName: item.picklistGroupName,
+                            originCode: item.originCode,
+                            originName: item.originName,
                         })
                     }
 
+                })
 
-                    if ($("#advancedMappings_pickListMappingTree").jstree(true))
-                        common.jstree.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
-                    else {
-                        var options = {
-                            openAll: true,
-                            withCheckboxes: true,
-                            contextMenu: ADLadvancedMapping.contextMenuFn(),
-                            selectTreeNodeFn: function (event, obj) {
-                                ADLadvancedMapping.currentTreeNode = obj.node
-                            }
+                for (var key in self.mappedValues) {
+                    self.mappedValues[key].forEach(function (item) {
+                        var text = item.source + " " + item.picklistId + " " + item.picklistGroupName + " " + item.originName
+                        jstreeData.push({
+                            id: item.picklistId,
+                            text: text,
+                            parent: key,
+                            data: item
+                        })
+
+                    })
+                }
+
+
+                if ($("#advancedMappings_pickListMappingTree").jstree(true))
+                    common.jstree.addNodesToJstree("advancedMappings_pickListMappingTree", "#", jstreeData);
+                else {
+                    var options = {
+                        openAll: true,
+                        withCheckboxes: true,
+                        contextMenu: ADLadvancedMapping.contextMenuFn(),
+                        selectTreeNodeFn: function (event, obj) {
+                            ADLadvancedMapping.currentTreeNode = obj.node
                         }
-                        common.jstree.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
-
                     }
+                    common.jstree.loadJsTree("advancedMappings_pickListMappingTree", jstreeData, options)
+
+                }
 
 
-                    setTimeout(function () {
-                        $("#advancedMappings_pickListMappingTree").jstree().check_node(nodeIds)
-                    }, 500)
-
+                setTimeout(function () {
+                    $("#advancedMappings_pickListMappingTree").jstree().check_node(nodeIds)
+                }, 500)
 
 
             })

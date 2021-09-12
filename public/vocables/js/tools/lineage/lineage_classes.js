@@ -1139,7 +1139,7 @@ var Lineage_classes = (function () {
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 var color = self.getSourceColor(source)
-                console.log(JSON.stringify(result, null, 2))
+              //  console.log(JSON.stringify(result, null, 2))
                 result.forEach(function (item) {
 
                     if (!item.value) {

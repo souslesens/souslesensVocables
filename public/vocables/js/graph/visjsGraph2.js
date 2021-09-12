@@ -197,7 +197,9 @@ var visjsGraph = (function () {
                 if (params.nodes.length == 1) {
                     if (false || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
                         return;
+
                     var nodeId = params.nodes[0]
+                    self.lastMovedNode=nodeId
                     //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
                     var fixed = true;
@@ -291,13 +293,26 @@ var visjsGraph = (function () {
     }
     self.setLayout = function (layout) {
         if (layout == "hierarchical vertical") {
+            if(false && self.lastMovedNode) {
+                var newNodes = []
+                self.data.nodes.getIds().forEach(function (nodeId) {
+                    var fixed = false
+                    if (nodeId ==self.lastMovedNode)
+                        fixed=true;
+                    newNodes.push({id:nodeId,x:{fixed:fixed},y:{fixed:fixed}})
+                        })
+                self.data.nodes.update(newNodes)
+            }
+
+
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
                 //   levelSeparation: 50,
                 //   nodeSpacing: 50,
                 //  levelSeparation: 200,
-                sortMethod: "hubsize",
-                // sortMethod:"directed",
+              sortMethod: "hubsize",
+              //  sortMethod:"directed",
+             //   shakeTowards:"roots"
             }
             shakeTowards:true
             self.currentContext.simulationTimeOut = 10000
@@ -307,7 +322,9 @@ var visjsGraph = (function () {
         } else if (layout == "hierarchical horizontal") {
             self.currentContext.options.layoutHierarchical = {
                 direction: "LR",
-                sortMethod: "hubsize",
+               sortMethod: "hubsize",
+              //  sortMethod:"directed",
+            //    shakeTowards:"roots",
                 //  sortMethod:"directed",
                 levelSeparation: 200,
                 //   parentCentralization: true,

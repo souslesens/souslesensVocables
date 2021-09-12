@@ -64,7 +64,7 @@
 
     }
 
-    .ADLadvancedMapping_searchInput {
+    .ADLadvancedMapping_searchEntitiesInput {
         border: #6e2500 solid 2px;
         width: 300px
     }
@@ -89,13 +89,15 @@
                      id="ADLmapping_columnValues"></select>-->
             Sort <select id="ADLmapping_distinctColumnSortSelect"
                          onchange="ADLadvancedMapping.sortColumnValues()"></select>
+           Search <input id="ADLadvancedMapping_searchColumnInput"
+                   onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchColumn($(this).val())">>
             <div id="ADLmapping_distinctColumnValuesContainer"
                  style="display:flex;flex-direction: column;max-height: 600px;overflow: auto"></div>
         </div>
         <div>
             <div id="ADLadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
 
-            search<input class="ADLadvancedMapping_searchInput" id="ADLadvancedMapping_searchInput"
+            search<input class="ADLadvancedMapping_searchEntitiesInput" id="ADLadvancedMapping_searchEntitiesInput"
                    onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchEntities($(this).val())">
             source <select id="ADLadvancedMapping_filterCandidateMappingsSelect"
                            onchange="ADLadvancedMapping.editCandidateValues()"> </select>

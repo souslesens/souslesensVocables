@@ -368,11 +368,14 @@ var ADLbrowserQuery = (function () {
                         if (nodeData.count == 0)
                             return
 
+                        var checkedStr="";
+                        if(nodeData.count<20)
+                            checkedStr=" checked='checked' "
                         ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
                         var filterId = nodeData.id;
 
                         var html = "<div class='ADLbrowser_filterDiv' id='" + filterId + "'>" +
-                            "<input type='checkbox'  checked='checked' class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
+                            "<input type='checkbox'  "+checkedStr+"class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
                             "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
                             "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
                             "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
@@ -580,7 +583,8 @@ var ADLbrowserQuery = (function () {
 
                 }
                 self.executeQuery(null, options, function (err, queryResult) {
-
+                    if(queryResult.length==0)
+                    return MainController.UI.message("No results",true)
                     if (output == "graph") {
 
 
@@ -865,6 +869,8 @@ var ADLbrowserQuery = (function () {
                     where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))"
                 }
             }
+            if( where=="")
+                return MainController.UI.message("Wrong query : no where clasues",true)
 
             var fromStr = Sparql_common.getFromStr(source)
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "

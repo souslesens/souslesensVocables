@@ -67,7 +67,7 @@ var ADLbuild = (function () {
         if (adlGraphUri.indexOf("...") > -1) {
             return alert("enter a valid graph URI")
         }
-
+        self.serverMessageCount=0;
         var payload = {
             buildADL: true,
             mappingFileNames: JSON.stringify(tables),
@@ -96,7 +96,20 @@ var ADLbuild = (function () {
 
     }
     self.serverMessage=function(message){
-        $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosServer'>"+message+"</span><br>")
+
+        if(message.indexOf("tableSize_")==0)
+            self.tableSize=parseInt(message.substring(message.indexOf("_")+1))
+        self.t0=new Date()
+
+
+
+
+        self.serverMessageCount+=1
+        if(self.serverMessageCount%100==0)
+            $("#ADLbuild_infosDiv").html("")
+        var duration=new Date()-self.t0
+
+        $("#ADLbuild_infosDiv").prepend("<span class='ADLbuild_infosServer'>"+message+"  in  "+(duration*1000)+" sec. total records :"+(self.tableSize || "")+"</span><br>")
     }
 
     self.cancelBuild = function () {

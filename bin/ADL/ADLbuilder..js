@@ -26,6 +26,8 @@ var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId
 var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri"
 var totalRdlADLgraphUri = "http://data.total.com/resource/one-model/quantum-rdl/"
 
+var triplesFetchtLength=1000;
+
 
 var ADLbuilder = {
 
@@ -107,6 +109,7 @@ var ADLbuilder = {
                                 predicate: "http://www.w3.org/2000/01/rdf-schema#label",
                                 object: "'" + util.formatStringForTriple(ARDLdictionary[subjectValue]) + "'"
                             })
+
                             existingUrisMap[subjectValue] = uri
                         } else {
                             rejectedItems.push(item)
@@ -146,6 +149,11 @@ var ADLbuilder = {
                                 subject: uri,
                                 predicate: "http://www.w3.org/2000/01/rdf-schema#label",
                                 object: "'" + util.formatStringForTriple(subjectValue) + "'"
+                            })
+                            triples.push({
+                                subject: uri,
+                                predicate: originalADLproperty,
+                                object: "'" + subjectValue + "'"
                             })
                         }
 
@@ -418,7 +426,7 @@ var ADLbuilder = {
                 function (callbackSeries) {
 
 
-                    var processor = function (data, uniqueTriples, callbackProcessor) {
+                    var processor = function (data, uniqueTriples,fetchedCount, callbackProcessor) {
 
 
                         options.existingUrisMap = existingUrisMap;
@@ -437,7 +445,7 @@ var ADLbuilder = {
 
                             // create new  triples in graph
 
-                            var slicedTriples = util.sliceArray(result.triples, 1000)
+                            var slicedTriples = util.sliceArray(result.triples, triplesFetchtLength)
 
                             async.eachSeries(slicedTriples, function (triples, callbackEach) {
                                 //    return callbackEach();
@@ -471,7 +479,7 @@ var ADLbuilder = {
                                         socket.message(err)
                                         return callbackEach(err);
                                     }
-                                    socket.message("ADLbuild", "triples created: " + totalTriples)
+                                    socket.message("ADLbuild", "rows processed :"+fetchedCount+"  triples created: " + totalTriples)
                                     totalTriples += triples.length
                                     return callbackEach(null)
                                 })
@@ -500,8 +508,18 @@ var ADLbuilder = {
                     }
 
 
+                        if (dbConnection.type == "sql.sqlserver") {
+
+                            var sqlQuery = "select count(*) as count from  " + dbConnection.dbName+"."+sqlTable + " ";
+                            SQLserverConnector.getData(dbConnection.dbName, sqlQuery,function(err, result){
+                                if(err) {
+                                    console.log(err)
+                                    return callback(err)
+                                }
+                                socket.message("ADLbuild", "tableSize_"+result[0].count)
+
                     var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName+"."+sqlTable + " ";
-                    if (dbConnection.type == "sql.sqlserver") {
+
                         //sqlQuery += " ORDER BY " + selectStr + " "
                         SQLserverConnector.getFetchedData (dbConnection.dbName, sqlQuery, processor,sqlParams.fetchSize, uniqueTriples,function (err, result)  {
                       //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
@@ -511,6 +529,7 @@ var ADLbuilder = {
                             callbackSeries()
 
                         })
+                    })
                     } else {
                         sqlConnector.processFetchedData(sqlParams.database, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
                             if (err)
@@ -556,7 +575,7 @@ var ADLbuilder = {
     ,
     getExistingLabelUriMap: function (serverUrl, graphUri, type, callbackX) {
 
-        var fetchLimit = 5000
+        var fetchLimit = 10000
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -586,6 +605,7 @@ var ADLbuilder = {
                 }
                 httpProxy.post(body.url, body.headers, body.params, function (err, result) {
                     if (err) {
+                        console.log(query2)
                         socket.message("ADLbuild", err)
                         return callbackWhilst(err);
                     }

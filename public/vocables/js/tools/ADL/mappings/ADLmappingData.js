@@ -10,9 +10,9 @@ var ADLmappingData = (function () {
         var adls = []
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
-            if(!sourceObj.schemaType)
+            if (!sourceObj.schemaType)
                 console.log(key)
-            if (sourceObj.schemaType.indexOf("INDIVIDUAL")>-1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
+            if (sourceObj.schemaType.indexOf("INDIVIDUAL") > -1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
                 adls.push({id: key, label: key})
             }
         }
@@ -106,7 +106,7 @@ var ADLmappingData = (function () {
                 id: key.toLowerCase().replace(/\./g, "_"),
                 text: label,
                 parent: parent,
-                type:"table",
+                type: "table",
                 data: nodeData
             })
 
@@ -118,7 +118,6 @@ var ADLmappingData = (function () {
                 if (!ADLmappings.checkMappingEditionSave())
                     return
 
-
                 if (ADLmappings.isShowingAssetGraph) {
                     return ADLassetGraph.zoomOnTable(obj.node.data)
 
@@ -127,12 +126,10 @@ var ADLmappingData = (function () {
                 self.currentADLtable = obj.node
                 ADLmappings.clearMappings()
 
-
-                self.showSampleData(obj.node)
-                setTimeout(function () {
+                self.showSampleData(obj.node,function(){
                     var name = self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
                     ADLmappings.loadMappings(self.currentSource + "_" + name)
-                }, 500)
+                })
 
             },
             withCheckboxes: true,
@@ -260,7 +257,7 @@ var ADLmappingData = (function () {
         common.jstree.addNodesToJstree("ADLmappings_dataModelTree", self.currentADLtable.id, [node])
 
     }
-    self.showSampleData = function (node) {
+    self.showSampleData = function (node,callback) {
         ADLmappings.isModifyingMapping = false;
         var SampleSizelimit = 30;
 
@@ -320,7 +317,10 @@ var ADLmappingData = (function () {
             })
 
             $("#ADLmappings_dataSampleDiv").html(str)
+
             setTimeout(function () {
+                if(callback)
+                     callback()
 
                 /*   $(".dataSample_type").contextmenu(function (event) {*/
                 $(".dataSample_type").bind("dblclick", function (event) {
@@ -386,9 +386,11 @@ var ADLmappingData = (function () {
 
                 success: function (data, textStatus, jqXHR) {
 
-                    self.sampleData[table] = data,
-                        displaySampleData(self.sampleData[table])
+                        self.sampleData[table] = data,
+                            displaySampleData(self.sampleData[table])
+
                 }
+
                 , error: function (err) {
 
 
@@ -451,7 +453,7 @@ var ADLmappingData = (function () {
                 })
             })
 
-            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data: types},true)
+            ADLmappings.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, {data: types}, true)
 
             $("#ADLmappings_AdvancedMappingDialogDiv").dialog("close")
 

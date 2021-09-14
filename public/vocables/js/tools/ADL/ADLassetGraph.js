@@ -304,7 +304,8 @@ var ADLassetGraph = (function () {
             result.results.bindings.forEach(function (item) {
                 buildClasses[item.type.value] = {
                     count: item.count.value,
-                    color: Lineage_classes.getPropertyColor(item.type.value)
+                    //   color: Lineage_classes.getPropertyColor(item.type.value)
+                    color: ADLbrowserCustom.superClassesMap[item.type.value].color
                 }
             })
             callback(null, buildClasses)
@@ -365,7 +366,7 @@ var ADLassetGraph = (function () {
         self.classes = {}
         var visjsData = {nodes: [], edges: []}
 
-MainController.UI.message("Processing data")
+        MainController.UI.message("Processing data")
         async.series([
                 //get adl types Stats
                 function (callbackSeries) {
@@ -389,13 +390,15 @@ MainController.UI.message("Processing data")
                     }
 
                     ADLassetGraph.getAssetGlobalMappings(source, function (err, result) {
+                        ADLbrowserCustom.initsuperClassesPalette()
                         self.model = result.model;
                         for (var predicate in result.predicates) {
                             if (predicate.indexOf("REQ") > -1)
                                 var x = 0;
                             for (var subject in result.predicates[predicate]) {
                                 if (!self.buildClasses[subject]) {
-                                    var color = Lineage_classes.getPropertyColor(subject)
+                                    //var color = Lineage_classes.getPropertyColor(subject)
+                                    var color = ADLbrowserCustom.superClassesMap[subject].color
                                     self.buildClasses[subject] = {
                                         count: 0,
                                         color: color
@@ -438,8 +441,8 @@ MainController.UI.message("Processing data")
 
                 function (callbackSeries) {
 
-if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawClassesGraph)
-    return callbackSeries()
+                    if (false && Object.keys(self.classes).length > Config.ADL.browserMaxClassesToDrawClassesGraph)
+                        return callbackSeries()
                     var existingNodes = {}
                     var newParents = []
                     var topNodeId
@@ -464,10 +467,17 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
                                     color = "#ffe0aa"
                                 }
 
+                                var imageUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[subject].group + ".png"
                                 var obj = {
                                     id: subject,
                                     label: label,
-                                    shape: shape,
+                                    // shape: shape,
+                                    image: imageUrl,
+                                   // size:25,
+                                    imagePadding:3,
+                                    shape: "circularImage",
+                                    font: {bold: true, size: 18, color: color},
+                                    fixed:true,
                                     color: color,
 
                                     data: {
@@ -502,8 +512,15 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
                                             id: edgeId,
                                             from: subject,
                                             to: object,
+                                            font: {bold: false,ital:1 ,size: 12, color: "#aaa"},
                                             label: predicateLabel,
-                                            arrows: {to: true}
+                                            arrows: {to: true},
+                                         /*   smooth: {
+                                                type: "cubicBezier",
+                                                forceDirection: "vertical",
+
+                                                roundness: 0.4,
+                                            }*/
 
 
                                         })
@@ -524,11 +541,17 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
                                             shape = "star"
                                             color = "#ffe0aa"
                                         }
+                                        var imageUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[object].group + ".png"
                                         visjsData.nodes.push({
                                             id: object,
                                             label: label,
-                                            shape: shape,
+                                            //  shape: shape,
+                                            imagePadding:3,
                                             color: color,
+                                            image: imageUrl,
+                                            fixed:true,
+                                            shape: "circularImage",
+                                            font: {bold: true, size: 18, color: color},
                                             data: {
                                                 id: object,
                                                 type: "subject",
@@ -555,7 +578,20 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
                     return alert(err)
 
                 MainController.UI.message("Drawing model graph")
-                if(true || visjsData.nodes.length<=Config.ADL.browserMaxClassesToDrawClassesGraph) {
+                if (true || visjsData.nodes.length <= Config.ADL.browserMaxClassesToDrawClassesGraph) {
+
+                    if (!options)
+                        options = {}
+                    options.keepNodePositionOnDrag = true
+                    options.layoutHierarchical = {
+                        direction: "UD",
+                        //   levelSeparation: 50,
+                     nodeSpacing: 150,
+                        levelSeparation: 100,
+                        sortMethod: "hubsize",
+                        //  sortMethod:"directed",
+                        //   shakeTowards:"roots"
+                    }
 
                     if (!graphDiv) {
                         graphDiv = "ADLmappings_GlobalGraph"
@@ -566,10 +602,8 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
                             $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
                             // $("#mainDialogDiv").height()
 
-                            if( visjsData.nodes.length<Config.ADL.browserMaxClassesToDrawClassesGraph) {
-                                if (!options)
-                                    options = {}
-                                options.keepNodePositionOnDrag = true
+                            if (visjsData.nodes.length < Config.ADL.browserMaxClassesToDrawClassesGraph) {
+
                                 visjsGraph.draw(graphDiv, visjsData, options)
                                 visjsGraph.network.fit()
                             }
@@ -577,9 +611,8 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
                     } else {
                         //  $("#ADLassetGraphDiv").html("<div id='ADLmappings_GlobalGraph' style='width:100%;height:90%'></div>")
                         // $("#mainDialogDiv").height()
-                        if( visjsData.nodes.length<Config.ADL.browserMaxClassesToDrawClassesGraph) {
-                            if (!options)
-                                options = {}
+                        if (visjsData.nodes.length < Config.ADL.browserMaxClassesToDrawClassesGraph) {
+
 
                             visjsGraph.draw(graphDiv, visjsData, options)
                             visjsGraph.network.fit()
@@ -587,10 +620,10 @@ if(false && Object.keys(self.classes).length>Config.ADL.browserMaxClassesToDrawC
 
                     }
                 }
-                if(!self.model["http://www.w3.org/2000/01/rdf-schema#label"])
-                    self.model["http://www.w3.org/2000/01/rdf-schema#label"]="label"
+                if (!self.model["http://www.w3.org/2000/01/rdf-schema#label"])
+                    self.model["http://www.w3.org/2000/01/rdf-schema#label"] = {label:"label"}
 
-                MainController.UI.message("",true)
+                MainController.UI.message("", true)
 
                 if (callback)
                     return callback(null, {model: self.model, classes: self.classes})

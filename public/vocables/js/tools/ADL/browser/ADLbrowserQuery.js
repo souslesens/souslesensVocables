@@ -366,7 +366,8 @@ var ADLbrowserQuery = (function () {
                             return MainController.UI.message(err)
 
                         if (nodeData.count == 0)
-                            return
+                            return  MainController.UI.message("Nod data found ",true)
+
 
                         var checkedStr="";
                         if(nodeData.count<20)
@@ -374,11 +375,15 @@ var ADLbrowserQuery = (function () {
                         ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
                         var filterId = nodeData.id;
 
-                        var html = "<div class='ADLbrowser_filterDiv' id='" + filterId + "'>" +
-                            "<input type='checkbox'  "+checkedStr+"class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
+                        var iconUrl= ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group + ".png";
+                        var superClassLabel=ADLbrowserQuery.model[nodeData.class].label
+                        var html = "<div class='ADLbrowser_filterDiv' style='color:"+nodeData.color+"' id='" + filterId + "'>" +
+
+                            "<input  type='checkbox'  "+checkedStr+"class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
                             "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
                             "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
-                            "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
+                            "<img src='"+iconUrl+"' width='25'/>"+
+                            "<span style='font-weight:bold;color:" + "black" + "'>" + superClassLabel + " : " + filterLabel + " : " + nodeData.count
                         "</div>"
 
                         $("#ADLbrowser_filterDiv").prepend(html)
@@ -972,11 +977,12 @@ var ADLbrowserQuery = (function () {
                     label = Sparql_common.getLabelFromId(classId)
                 if (!distinctNode[id1]) {
                     distinctNode[id1] = 1
+                    var jstreeType=ADLbrowserCustom.superClassesMap[classId].group
                     jstreeData.push({
                         id: id1,
                         text: label,
                         parent: "#",
-                        type: "class",
+                        type: jstreeType,
                         data: {
                             id: classId,
                             label: label
@@ -1005,12 +1011,13 @@ var ADLbrowserQuery = (function () {
                             var id3 = common.getRandomHexaId(5)
                             if (!distinctNode[id3]) {
                                 distinctNode[id3] = 1
+                                var jstreeType=ADLbrowserCustom.superClassesMap[object].group
                                 jstreeData.push({
 
                                     id: id3,
                                     text: model[object].label,
                                     parent: id2,
-                                    type: "class",
+                                    type: jstreeType,
                                     data: {
                                         id: object,
                                         label: model[object].label

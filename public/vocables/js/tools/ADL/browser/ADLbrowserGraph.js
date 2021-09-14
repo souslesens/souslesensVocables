@@ -2,7 +2,7 @@ var ADLbrowserGraph = (function () {
 
 
         var self = {}
-        self.defaultNodeSize = 7;
+        self.defaultNodeSize = 14;
         self.zeroCountIds = []
         self.setGraphPopupMenus = function (node, event) {
 
@@ -24,7 +24,7 @@ var ADLbrowserGraph = (function () {
             $("#graphPopupDiv").html(html)
 
             setTimeout(function () {
-                ADLbrowserCustom.setAdditionalGraphPopupMenuDiv  ()
+                ADLbrowserCustom.setAdditionalGraphPopupMenuDiv()
                 self.setGraphPopupMenuAllowedExpandsSelect();
 
             }, 500)
@@ -78,17 +78,41 @@ var ADLbrowserGraph = (function () {
             self.addCountNodeToModelGraph = function (node, data, options, callback) {
 
 
+                var visJsNode = visjsGraph.data.nodes.get(node.id)
+                var nodePosition = {
+                    x: visJsNode.x,
+                    y: visJsNode.y
+                }
+
                 var nodeId = options.varName.substring(1) + "_filter"
                 var count = data.data[0].count.value
                 if (count == "0")
                     self.zeroCountIds.push(nodeId)
 
+
+                var nodeLabel = node.data.label
+                nodeLabel = node.data.label + " : " + count
+
+                visjsGraph.data.nodes.update({
+                    id: node.id,
+                    label: nodeLabel,
+                    font: {
+                        color: "white",
+                        background: node.color,
+                        margin: 5
+                    }
+                })
+
+
                 var visjsData = {nodes: [], edges: []}
 
 
-                var color = "#adc"
-                if (ADLbrowserQuery.currentNode)
+                var color = "#ddd"
+                if (false && ADLbrowserQuery.currentNode) {
                     var color = Lineage_classes.getPropertyColor(ADLbrowserQuery.currentNode.id)
+                    var color = ADLbrowserQuery.model[nodeId]
+                }
+
 
                 visjsGraph.data.nodes.remove(nodeId)
                 var nodeData = {
@@ -114,8 +138,10 @@ var ADLbrowserGraph = (function () {
                     color: color,
                     borderWidth: 3,
                     data: nodeData,
-                    //   fixed:{y:true},
-                    //   y:-300
+                    /*    fixed:true,
+                       x:nodePosition.x,
+                       y:nodePosition.y -30*/
+
 
                 })
                 var edgeId = node.id + "_countEdge"
@@ -132,14 +158,16 @@ var ADLbrowserGraph = (function () {
 
                 })
 
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
+                if (false) {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
 
 
-                visjsGraph.data.nodes.update({
-                    id: ADLbrowserQuery.currentNode.id,
-                    color: color
-                })
+                    visjsGraph.data.nodes.update({
+                        id: ADLbrowserQuery.currentNode.id,
+                        color: color
+                    })
+                }
 
                 return callback(null, nodeData)
 
@@ -162,8 +190,10 @@ var ADLbrowserGraph = (function () {
             var keys = {}
             options.selectVars.forEach(function (varName) {
                 var color = ADLbrowserQuery.varNamesMap[varName].color
+                var superClassGroup = ADLbrowserCustom.superClassesMap[ADLbrowserQuery.varNamesMap[varName].id].group
+
                 var key = varName.substring(1)
-                keys[key] = {color: color}
+                keys[key] = {color: color, superClassGroup: superClassGroup}
             })
 
 
@@ -188,10 +218,13 @@ var ADLbrowserGraph = (function () {
                         existingNodes[id] = 1
 
                         var color = keys[key].color
+                        var imageType = keys[key].superClassGroup
                         visjsData.nodes.push({
                             id: id,
                             label: label,
-                            shape: "dot",
+                            //   shape: "dot",
+                            image: ADLbrowserCustom.iconsDir + imageType + ".png",
+                            shape: "circularImage",
                             color: color,
                             size: self.defaultNodeSize,
                             data: {
@@ -321,7 +354,7 @@ var ADLbrowserGraph = (function () {
                         },
                         arrows: {to: true}
                     },
-                    keepNodePositionOnDrag: true
+                    keepNodePositionOnDrag: true,
 
                 }
                 visjsGraph.draw(graphDiv, visjsData, visjsOptions)
@@ -424,14 +457,20 @@ var ADLbrowserGraph = (function () {
                 var objId = item.obj.value;
                 if (!existingNodes[objId]) {
                     var color = "#ade"
-                    if (ADLbrowserQuery.model[item.objType.value])
-                        color = ADLbrowserQuery.model[item.objType.value].color
+                  /*  if (ADLbrowserQuery.model[item.objType.value])
+                        color = ADLbrowserQuery.model[item.objType.value].color*/
+
+                    var imageType = ADLbrowserCustom.superClassesMap[item.objType.value].group
+                    color= ADLbrowserCustom.superClassesMap[item.objType.value].color
+
 
                     existingNodes[objId] = 1
                     visjsData.nodes.push({
                         id: objId,
                         label: item.objLabel.value,
-                        shape: "dot",
+                        // shape: "dot",
+                        image: ADLbrowserCustom.iconsDir + imageType + ".png",
+                        shape: "circularImage",
                         color: color,
                         data: {
                             type: item.objType.value,
@@ -441,7 +480,7 @@ var ADLbrowserGraph = (function () {
                             source: ADLbrowser.currentSource,
                             varName: item.objType.value,
                         },
-                        size: self.defaultNodeSize,
+                     size: self.defaultNodeSize,
 
                     })
                 }

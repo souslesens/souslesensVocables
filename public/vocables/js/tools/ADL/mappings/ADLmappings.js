@@ -837,7 +837,7 @@ var ADLmappings = (function () {
 
         self.sourceTypeColors = {
             ADLmappings_LiteralsTree: "#d9bb73",
-            ADLmappings_OneModelTree: "#d0e5a6",
+            ADLmappings_OneModelTree: "#ebefe3",
             ADLmappingsjsOtherOntologiesTreeDiv: "darkseagreen",
             ADLmappingPropertiesTree: "#86d5f8"
         }

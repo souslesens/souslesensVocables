@@ -25,34 +25,39 @@
 
 
     }
-    .ADLbrowser_mainPalette{
 
-        width:80px;
+    .ADLbrowser_mainPalette {
+
+        width: 350px;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
 
 
     }
-    .ADLbrowser_mainPalette button{
+
+    .ADLbrowser_mainPalette button,.ADLbrowserTabs_AdlTabButtons button{
         border: #6e2500 solid 2px;
         border-radius: 3px;
-
         margin: 2px;
+        padding: 2px;
+        margin-top: 10px;
     }
-    #ADLbrowser_ClassesTab,#ADLbrowserTabs_AdlTab,#ADLbrowser_GraphTab,#ADLbrowser_TableTab{
-        margin-left: 0px !important;
+
+    #ADLbrowser_ClassesTab, #ADLbrowserTabs_AdlTab, #ADLbrowser_GraphTab, #ADLbrowser_TableTab {
+   margin-left: 0px !important;
     }
 
 
 </style>
 
 <div>
-    <div style="display: flex;flex-direction: row">
+    <div style="display: flex;flex-direction: column">
         <div class="ADLbrowser_mainPalette">
 
-            <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
-            <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
-            <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
+            <!-- <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
+             <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
+             <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>-->
+            <button onclick="   $('#ADLbrowser_accordion').accordion('option', {active: 1});">Go...</button>
             <button onclick="ADLbrowserQuery.graphActions.backToModel()">Back to Model</button>
             <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
 
@@ -78,9 +83,15 @@
 
             <h3><span class="title">ADL </span></h3>
             <div id="ADLbrowserTabs_AdlTab" style="width:100%; display: flex;flex-direction: column">
+                <div class="ADLbrowserTabs_AdlTabButtons">
+                    <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
+                    <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
+                    <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
+                    <button onclick="ADLbrowserQuery.graphActions.clearIndividualsFilter()">clear</button>
+                </div>
 
-
-                <div id="ADLbrowser_filterDiv" style="width:100%; min-height:300px;display: flex;flex-direction: column">
+                <div id="ADLbrowser_filterDiv"
+                     style="width:100%; min-height:300px;display: flex;flex-direction: column">
 
 
                     <div class="jstree" id="ADLbrowser_adlJstreeDiv"></div>
@@ -88,7 +99,7 @@
                 </div>
                 <!--   <div  id="ADLbrowser_adlJstreeActionDiv">
                        <button onclick="ADLbrowserQuery.graphActions.addIndividualsFilter()">add filter</button>-->
-              <div> <button onclick="ADLbrowserQuery.graphActions.clearIndividualsFilter()">clear</button></div>
+
 
             </div>
 

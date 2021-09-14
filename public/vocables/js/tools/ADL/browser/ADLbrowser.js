@@ -11,11 +11,14 @@ var ADLbrowser = (function () {
     self.defaultNodeSize = 10;
 
     self.getPropertyColor = function (type, palette) {
+
+        return ADLbrowserCustom.superClassesMap(type);
         if (!palette)
             palette = "paletteIntense"
         if (!typeColors[type])
             typeColors[type] = common[palette][Object.keys(typeColors).length]
         return typeColors[type];
+
     }
 
     var shapesPalette = [
@@ -32,7 +35,7 @@ var ADLbrowser = (function () {
     self.onLoaded = function () {
         $("#sourceDivControlPanelDiv").html("")
         MainController.UI.message("");
-
+ADLbrowserCustom.initsuperClassesPalette()
 
         $("#accordion").accordion("option", {active: 2});
         MainController.UI.openRightPanel()
@@ -302,7 +305,8 @@ var ADLbrowser = (function () {
                 var jstreeData = []
                 for (var source in Config.sources) {
                    // console.log(Config.sources[source].schemaType)
-                    if (Config.sources[source].schemaType.indexOf("INDIVIDUAL")>-1)
+                   // if (Config.sources[source].schemaType.indexOf("INDIVIDUAL")>-1)
+                    if (Config.sources[source].schemaType=="INDIVIDUAL")
                         jstreeData.push({
                             id: source,
                             text: source,

@@ -26,7 +26,7 @@ var ADLadvancedMapping = (function () {
                     "ARDL-SPECIFIC": "ONE-MODEL-ARDL-specific",
 
                 }
-
+                ADLbrowserCustom.initsuperClassesPalette()
                 var typesMap = {}
                 data.forEach(function (item, index) {
 
@@ -46,7 +46,9 @@ var ADLadvancedMapping = (function () {
                         type: "OWL",
                         parent: "#"
                     })
+
                     typesMap[type].forEach(function (item) {
+                        var group = ADLbrowserCustom.superClassesMap[item.superClassUri].group
                         self.referenceDictionary[item.superClassUri] = {
                             uri: item.superClassUri,
                             label: item.superClassLabel,
@@ -57,7 +59,7 @@ var ADLadvancedMapping = (function () {
                         dictionaryJsTreeData.push({
                             id: item.superClassUri,
                             text: item.superClassLabel,
-                            type: "class",
+                            type: group,
                             parent: type,
                             data: {
                                 id: item.superClassUri,
@@ -126,8 +128,8 @@ var ADLadvancedMapping = (function () {
 
 
         self.showAdvancedMappingDialog = function (dictionary, columnClassId) {
-            $("#waitImg").css("display","block")
-            MainController.UI.message("Loading distinct values for column "+ ADLmappingData.currentColumn)
+            $("#waitImg").css("display", "block")
+            MainController.UI.message("Loading distinct values for column " + ADLmappingData.currentColumn)
             var type = self.referenceDictionary[columnClassId].type
             if (type != "REFERENCE" && type != "CANDIDATE") {
                 return;
@@ -179,7 +181,7 @@ var ADLadvancedMapping = (function () {
                         $("#ADLmappings_AdvancedMappingDialogDiv").dialog("open")
 
                         setTimeout(function () {
-                            MainController.UI.message("",true)
+                            MainController.UI.message("", true)
                             $("#ADLmappingData_column").html(ADLmappingData.currentColumn)
                             self.setDictionaryMappings(dictionary, columnClassId, ADLmappingData.currentColumnDistinctValues)
                         }, 200)
@@ -210,24 +212,24 @@ var ADLadvancedMapping = (function () {
             self.currentColumnValueDivIds = {}
             var distinctSources = []
             columnValues.forEach(function (value) {
-                if (value == "Pollution suppress eqt (oil spill kit)")
-                    var x = 3
+
                 var value2 = value.toLowerCase();//.replace(/\-/g," ")
                 var cssClass = null;
                 var termObj = superClassDictionary.terms[value2];
                 var sourcesHtml = ""
 
                 var id = "columnValue" + common.getRandomHexaId(5)
+                self.currentColumnValueDivIds[id] = {value: value, sources: []}
                 if (termObj) {
                     var isCandidate = false
-                    self.currentColumnValueDivIds[id] = {value: value, sources: []}
+
                     cssClass = "ADLmapping_columnValues_referenceValue"
                     for (var source in termObj) {
                         self.currentColumnValueDivIds[id].sources.push(source)
                         if (termObj[source].status == "CANDIDATE") {
                             cssClass = "ADLmapping_columnValues_isCandidate"
                             self.currentColumnValueDivIds[id].isCandidate = true;
-                           }else {
+                        } else {
 
                             if (source && distinctSources.indexOf(source) < 0)
                                 distinctSources.push(source)
@@ -282,15 +284,15 @@ var ADLadvancedMapping = (function () {
 
         }
 
-        self.sortColumnValues= function (sortType) {
-          if(!sortType)
-           sortType = $("#ADLmapping_distinctColumnSortSelect").val()
+        self.sortColumnValues = function (sortType) {
+            if (!sortType)
+                sortType = $("#ADLmapping_distinctColumnSortSelect").val()
             var sortMap = {};
             for (var key in self.currentColumnValueDivIds) {
                 var item = self.currentColumnValueDivIds[key]
-                if(sortType.indexOf("_search_"==0)){
-                    var word=sortType.substring(8)
-                    if( item.value.toLowerCase().indexOf(word.toLowerCase())>-1)
+                if (sortType.indexOf("_search_" == 0)) {
+                    var word = sortType.substring(8)
+                    if (item.value.toLowerCase().indexOf(word.toLowerCase()) > -1)
                         sortMap["_A_" + item.value] = key;
                     else
                         sortMap["_Z_" + item.value] = key
@@ -324,8 +326,6 @@ var ADLadvancedMapping = (function () {
         }
 
 
-
-
         self.sortCandidateMappings = function (index) {
             var divList = $(".ADLmapping_candidateEntity");
 
@@ -357,8 +357,8 @@ var ADLadvancedMapping = (function () {
             self.editCandidateValues(null, text)
         }
 
-        self.searchColumn=function(word){
-            self.sortColumnValues("_search_"+word)
+        self.searchColumn = function (word) {
+            self.sortColumnValues("_search_" + word)
         }
 
 
@@ -368,6 +368,7 @@ var ADLadvancedMapping = (function () {
             else
                 self.currentColumnValueDivId = columnValueDivId;
 
+            // var xx= self.currentColumnValueDivIds[columnValueDivId]
             var columnValue = self.currentColumnValueDivIds[columnValueDivId].value
 
 

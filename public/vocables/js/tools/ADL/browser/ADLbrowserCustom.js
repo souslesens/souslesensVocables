@@ -82,7 +82,7 @@ var source="CFIHOS_READI"
                 }
 
 
-                var edgeId = item.concept.value + "_" + item.value.value + "_" + item.prop.value
+              /*  var edgeId = item.concept.value + "_" + item.value.value + "_" + item.prop.value
                 if (!existingNodes[edgeId]) {
                     existingNodes[edgeId] = 1
 
@@ -105,11 +105,11 @@ var source="CFIHOS_READI"
                         dashes: true,
                         color: Lineage_classes.restrictionColor
 
-                    })
+                    })*/
 
 
                     var sourceId=source+"_"+ADLbrowserGraph.currentGraphNode.data.id;
-                    var edgeId =sourceId + "_" + source+"_"+ item.value.value
+                    var edgeId =sourceId + "_" +item.value.value
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
                         visjsData.edges.push({
@@ -136,7 +136,7 @@ var source="CFIHOS_READI"
                     }
 
 
-                }
+              //  }
 
             })
 

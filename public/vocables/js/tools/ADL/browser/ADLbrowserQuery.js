@@ -895,7 +895,7 @@ var ADLbrowserQuery = (function () {
             query += fromStr +
                 "WHERE {"
 
-            query += where + " }  limit " + fetchLength
+            query += where + " } "
 
 
             var offset = 0
@@ -913,7 +913,9 @@ var ADLbrowserQuery = (function () {
                 ,
                 function iter(callbackWhilst) {
                     var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-                    var query2 = query + " OFFSET " + offset;
+                    var query2 = query;
+                    if (!options.count)
+                        query2 = query + " limit " + fetchLength+" OFFSET " + offset;
                     offset += fetchLength
                     Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
                         if (err) {

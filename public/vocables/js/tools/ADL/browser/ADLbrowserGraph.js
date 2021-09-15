@@ -222,9 +222,9 @@ var ADLbrowserGraph = (function () {
                         visjsData.nodes.push({
                             id: id,
                             label: label,
-                            //   shape: "dot",
+                             shape: "dot",
                             image: ADLbrowserCustom.iconsDir + imageType + ".png",
-                            shape: "circularImage",
+                          //  shape: "circularImage",
                             color: color,
                             size: self.defaultNodeSize,
                             data: {
@@ -468,9 +468,9 @@ var ADLbrowserGraph = (function () {
                     visjsData.nodes.push({
                         id: objId,
                         label: item.objLabel.value,
-                        // shape: "dot",
+                        shape: "dot",
                         image: ADLbrowserCustom.iconsDir + imageType + ".png",
-                        shape: "circularImage",
+                      //  shape: "circularImage",
                         color: color,
                         data: {
                             type: item.objType.value,

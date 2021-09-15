@@ -10,13 +10,20 @@ var codeRegex = {
 }
 
 var codeRegex501 = {
-"equipment":/^(?<sector>[\d]{2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})$/
-    "AFtwin":/^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
+    "equipment": /^(?<sector>[\d]{2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})$/,
+    "AFtwin": /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
     "“Equipment”": /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
     "7.2	Switchgears and MCC compartments tag structure (TOTAL-T0000000003)": /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,5})(?<suffix>\w{0,1})-(?<busBar>\w{1,2})(?<column>\d{0,2})(?<row>\d{0,2})$/g,
     "7.3	Lighting and small power equipment tag structure (TOTAL-T0000000018))": /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})-(?<circuitBreaker>\d{2})(?<seqNumber>[\d\w]{0,2})$/g,
     "11.1	Piping tag structure (TOTAL-T0000000009)": /^(?<sector>[\w\d]{2})-(?<pipingSize>\d\d\{0,3}\d)-(?<fluid>\w{2,3})(?<system>\w)(?<subSystem>\d)-(?<seqNum>\d{1,4})-(?<pipingClass>\w\d{2}\w{0,1}\d{0,1})-(?<insulationCode>\w{0.2})$/gm,
     "FL": /([^\/][\d\w]+)\/*([^\/][\d\w]*)\/*([^\/][-\d\w]*)\/*([^\/][-\d\w]*)/g
+}
+
+
+var codeRegExTEPDK = {
+    "general": /^(?<Location>[\w]{4})-(?<Function>\w{1,5})-(?<SeqNumber>\d+)(?<SubSeqIndex>\w)-?(?<Pos>\w{0,1})(?<optional>\w{0,1})$/,
+
+
 }
 
 var decodeFunctionalLocation = function () {
@@ -129,7 +136,7 @@ var processADLtagsBreakDown = function () {
         "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]"
 
 
-    var sql = "SELECT distinct  "+
+    var sql = "SELECT distinct  " +
         "      [parentName]\n" +
         "      ,[childName]\n" +
         "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]"
@@ -138,11 +145,11 @@ var processADLtagsBreakDown = function () {
 
 
     sqlServer.getData(dbName, sql, function (err, result) {
-        var array=[]
-        result.forEach(function(item){
-if(item.childName==item.parentName)
-    item.parentName="XX"
-        array.push({id:item.childName,parentid:item.parentName})
+        var array = []
+        result.forEach(function (item) {
+            if (item.childName == item.parentName)
+                item.parentName = "XX"
+            array.push({id: item.childName, parentid: item.parentName})
         })
 
 
@@ -153,7 +160,7 @@ if(item.childName==item.parentName)
                 mappedElem;
 
             // First map the nodes of the array to an object -> create a hash table.
-            for(var i = 0, len = arr.length; i < len; i++) {
+            for (var i = 0, len = arr.length; i < len; i++) {
                 arrElem = arr[i];
                 mappedArr[arrElem.id] = arrElem;
                 mappedArr[arrElem.id]['children'] = [];
@@ -163,10 +170,10 @@ if(item.childName==item.parentName)
             for (var id in mappedArr) {
                 if (mappedArr.hasOwnProperty(id)) {
                     mappedElem = mappedArr[id];
-                    if(mappedElem['parentid']=="Turbo Expander")
-                        var x=3
+                    if (mappedElem['parentid'] == "Turbo Expander")
+                        var x = 3
                     // If the element is not at the root level, add it to its parent array of children.
-                    if ( mappedArr[mappedElem['parentid']]) {
+                    if (mappedArr[mappedElem['parentid']]) {
                         mappedArr[mappedElem['parentid']]['children'].push(mappedElem);
                     }
                     // If the element is at the root level, add it to first level elements array.
@@ -181,30 +188,26 @@ if(item.childName==item.parentName)
         var tree = unflatten(array);
 
 
-        var tree2={}
+        var tree2 = {}
 
-        function recurse(parentNode,item) {
-            if(!parentNode[item.id])
-                parentNode[item.id]={}
-            item.children.forEach(function(child){
-                recurse(parentNode[item.id],child)
+        function recurse(parentNode, item) {
+            if (!parentNode[item.id])
+                parentNode[item.id] = {}
+            item.children.forEach(function (child) {
+                recurse(parentNode[item.id], child)
             })
 
 
-                }
+        }
 
 
-       tree.forEach(function(item){
-           recurse(tree2,item)
-       })
-        var x=tree2
-
+        tree.forEach(function (item) {
+            recurse(tree2, item)
+        })
+        var x = tree2
 
 
         return
-
-
-
 
 
         fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_FL.json", JSON.stringify(map, null, 2))
@@ -213,8 +216,63 @@ if(item.childName==item.parentName)
     })
 }
 
+var processTEPDKtags = function () {
+    var str="";
+    var count=0
+    var processor = function (data, codesMap, fetchedCount, callback) {
 
-processADLtagsBreakDown()
+        count+=data.length
+        console.log(count)
+        data.forEach(function (item) {
+            for (var key in codeRegExTEPDK) {
+                var regex = codeRegExTEPDK[key]
+                var array = regex.exec(item.TagNumber);
+                if (array) {
+
+                    var functionCode = array.groups["Function"]
+                    if (functionCode && codesMap[functionCode])
+                        str+=key+"\t"+functionCode + "\t" + codesMap[functionCode] + "\t" + item.TagNumber  + "\t" + item.FunctionalClassID + "\t" + item.FunctionalClassLabel + "\t" + item.ServiceDescription+"\n"
+
+                    for (var group in array.groups) {
+                        var x = 3
+                    }
+
+                }
+            }
+
+
+        })
+        callback()
+    }
+    var query = "SELECT  * FROM [TEPDK].[dbo].[functionCode] "
+    sqlServer.getFetchedData("tepdk", query, processor, 1000, null, function (err, result) {
+        var codesMap = {}
+        result.forEach(function (item) {
+            codesMap[item.Code]
+            codesMap[item.Code] = item.Description
+            /*    codesMap[item.function][item.code]=item.label
+            if(!codesMap[item.function]){
+                codesMap[item.function]={}
+                if(!codesMap[item.function][item.code]){
+                    codesMap[item.function][item.code]=item.label
+                }
+            }*/
+        })
+        var query = "SELECT [TagNumber]\n" +
+            "      ,[FunctionalClassID]\n" +
+            "      ,[FunctionalClassLabel]\n" +
+            "      ,[ServiceDescription] FROM [TEPDK].[dbo].[tblTag] "
+        sqlServer.getFetchedData("tepdk", query, processor, 1000, codesMap, function (err, result) {
+fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\tagDescriptor.csv",str)
+
+        })
+    })
+
+
+}
+
+
+//processADLtagsBreakDown()
 //processBreakDown()
 //decodeFunctionalLocation();
 
@@ -232,3 +290,6 @@ var sql2 = "SELECT *\n" +
     "'TOTAL-G0000000143')\n" +
     "\n" +
     "and [rdlquantum].[rdl].[tblAttributePickListValue].PickListValueGroupingID= [rdlquantum].[rdl].[tblAttribute].PickListValueGroupingID"
+
+
+processTEPDKtags()

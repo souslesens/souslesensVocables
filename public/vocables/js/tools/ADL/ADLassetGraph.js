@@ -456,7 +456,7 @@ var ADLassetGraph = (function () {
                                 var countStr = ""
                                 if (self.buildClasses[subject])
                                     countStr = " (" + self.buildClasses[subject].count + ")"
-                                var label = self.model[subject].label + countStr;
+                                var label = self.model[subject].label ;//+ countStr;
                                 var color = options.nodeColor || self.buildClasses[subject].color
                                 if (!options.nodeColor)
                                     self.model[subject].color = color
@@ -532,7 +532,7 @@ var ADLassetGraph = (function () {
                                         var countStr = ""
                                         if (self.buildClasses[subject])
                                             countStr = " (" + self.buildClasses[subject].count + ")"
-                                        label = label + countStr
+                                        label = label ;//+ countStr
                                         var color = options.nodeColor || self.buildClasses[object].color
                                         if (!options.nodeColor)
                                             self.model[object].color = color

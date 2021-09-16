@@ -783,24 +783,13 @@ var ADLbrowserQuery = (function () {
             console.log(varName2 + "--------------------")
 
 
-            /* if (index == 0 && options.predicate) {// when count (predicate comes from dialog
-                 filterSubType=options.predicate.subject
-                 filterObjType=options.predicate.object
-                 predicateStr = " <" + options.predicate.predicate + "> "
-                 if (true || options.predicate.inverse)
-                     predicateStr += "|^" + predicateStr
-             } else {
-                 var previouPredicate = queryFilterNodes[index - 1].predicate
-                 filterSubType=queryFilterNodes[index - 1].predicate.subject
-                 filterObjType=queryFilterNodes[index - 1].predicate.object
-                 predicateStr = " <" + previouPredicate.predicate + "> "
-                 if (true || !previouPredicate.predicate.inverse)//has to inverse predicate becaus it is in previous nodeData
-                     predicateStr += "|^" + predicateStr
-             }*/
+
 
             if (options.predicate) {// links new filter predicate to a previous varName matching
-                var predicateStr = " <" + options.predicate.predicate + "> "
-                predicateStr = predicateStr + "|^" + predicateStr
+                var predicateStr = "<" + options.predicate.predicate + ">"
+                if(options.predicate.inverse)
+                    predicateStr ="^" + predicateStr
+              //  predicateStr = predicateStr + "|^" + predicateStr
                 var previousVarName = null;
                 if (queryFilterNodes.length == 1) {// the first query has no predicate
                     previousVarName = queryFilterNodes[0].varName
@@ -811,7 +800,7 @@ var ADLbrowserQuery = (function () {
                     queryFilterNodes.forEach(function (filterNodeData, index2) {
                         if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
                             previousVarName = filterNodeData.varName
-                            predicateStr = " " + varName2 + predicateStr + previousVarName + ". "
+                            predicateStr = " " + varName2 +" "+ predicateStr +" "+ previousVarName + ". "
                             filterNodeData.filter += predicateStr
                             self.currentNode.filter += predicateStr;
                         }
@@ -937,6 +926,77 @@ var ADLbrowserQuery = (function () {
                 })
 
 
+        }
+
+        self.getPathsBetweenNodes=function(nodeIdStart,nodeIdEnd) {
+            if( !nodeIdStart || !nodeIdEnd) {
+                nodeIdEnd ="http://w3id.org/readi/rdl/D101001519"
+                nodeIdStart= "http://w3id.org/readi/rdl/D101001495"
+            }
+
+            var inverseClassesMap={}
+            function setAllClassesMap(){
+
+                for (var subject in self.classes) {//inverse
+
+                var predicates = self.classes[subject]
+
+                    for (var predicate in predicates) {
+                        if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                            predicates[predicate].forEach(function (object) {
+                                if(!inverseClassesMap[object])
+                                    inverseClassesMap[object]={}
+                                if(! inverseClassesMap[object][predicate])
+                                inverseClassesMap[object][predicate]=[]
+                                inverseClassesMap[object][predicate].push(subject)
+
+                            })
+                        }
+                    }
+                }
+            }
+
+
+            setAllClassesMap()
+            var paths = [];
+            var currentPath = [];
+
+            recurse = function (subject) {;
+            if(paths.length==0) {
+                var predicates = self.classes[subject]
+                if (predicates) {
+                    for (var predicate in predicates) {
+
+                        if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                            predicates[predicate].forEach(function (object) {
+                                currentPath.push(predicate)
+                                if (object == nodeIdEnd) {
+                                    return paths.push(currentPath)
+                                } else
+                                    recurse(object)
+                            })
+                        }
+
+                    }
+                }
+            }
+              /*  var predicates = inverseClassesMap[subject]
+                if (predicates) {
+                    for (var predicate in predicates) {
+                        if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                            predicates[predicate].forEach(function (object) {
+                                currentPath.push(predicate)
+                                if (object == nodeIdEnd) {
+                                    return paths.push(currentPath)
+                                }
+                                    recurse(object)
+                            })
+                        }
+                    }
+                }*/
+
+            }
+            recurse(nodeIdStart)
         }
 
 

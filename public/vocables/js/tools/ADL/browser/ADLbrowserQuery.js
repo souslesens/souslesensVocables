@@ -215,6 +215,7 @@ var ADLbrowserQuery = (function () {
             if (properties.length > 1)
                 withBlankOption = true;
             $("#ADLbrowserQueryParams_type").html(node.data.label)
+            $("#ADLbrowserQueryParams_typeId").html(node.data.id)
             common.fillSelectOptions("ADLbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
 
         }
@@ -344,9 +345,8 @@ var ADLbrowserQuery = (function () {
                 dialogFilterStr += "optional {" + varName + " rdfs:label " + varName + "Label} "
 
             if (self.queryMode == "expandGraphNode") {
-                ADLbrowserGraph.expandNode( dialogFilterStr)
-            }
-            else if (self.queryMode == "count") {
+                ADLbrowserGraph.expandNode(dialogFilterStr)
+            } else if (self.queryMode == "count") {
                 var options = {
                     filter: dialogFilterStr,
                     filterLabel: filterLabel,
@@ -366,23 +366,23 @@ var ADLbrowserQuery = (function () {
                             return MainController.UI.message(err)
 
                         if (nodeData.count == 0)
-                            return  MainController.UI.message("Nod data found ",true)
+                            return MainController.UI.message("Nod data found ", true)
 
 
-                        var checkedStr="";
-                        if(nodeData.count<20)
-                            checkedStr=" checked='checked' "
+                        var checkedStr = "";
+                        if (nodeData.count < 20)
+                            checkedStr = " checked='checked' "
                         ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
                         var filterId = nodeData.id;
 
-                        var iconUrl= ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group + ".png";
-                        var superClassLabel=ADLbrowserQuery.model[nodeData.class].label
-                        var html = "<div class='ADLbrowser_filterDiv' style='color:"+nodeData.color+"' id='" + filterId + "'>" +
+                        var iconUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group + ".png";
+                        var superClassLabel = ADLbrowserQuery.model[nodeData.class].label
+                        var html = "<div class='ADLbrowser_filterDiv' style='color:" + nodeData.color + "' id='" + filterId + "'>" +
 
-                            "<input  type='checkbox'  "+checkedStr+"class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
+                            "<input  type='checkbox'  " + checkedStr + "class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
                             "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
                             "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
-                            "<img src='"+iconUrl+"' width='25'/>"+
+                            "<img src='" + iconUrl + "' width='25'/>" +
                             "<span style='font-weight:bold;color:" + "black" + "'>" + superClassLabel + " : " + filterLabel + " : " + nodeData.count
                         "</div>"
 
@@ -588,8 +588,8 @@ var ADLbrowserQuery = (function () {
 
                 }
                 self.executeQuery(null, options, function (err, queryResult) {
-                    if(queryResult.length==0)
-                    return MainController.UI.message("No results",true)
+                    if (queryResult.length == 0)
+                        return MainController.UI.message("No results", true)
                     if (output == "graph") {
 
 
@@ -783,13 +783,11 @@ var ADLbrowserQuery = (function () {
             console.log(varName2 + "--------------------")
 
 
-
-
             if (options.predicate) {// links new filter predicate to a previous varName matching
                 var predicateStr = "<" + options.predicate.predicate + ">"
-                if(options.predicate.inverse)
-                    predicateStr ="^" + predicateStr
-              //  predicateStr = predicateStr + "|^" + predicateStr
+                if (options.predicate.inverse)
+                    predicateStr = "^" + predicateStr
+                //  predicateStr = predicateStr + "|^" + predicateStr
                 var previousVarName = null;
                 if (queryFilterNodes.length == 1) {// the first query has no predicate
                     previousVarName = queryFilterNodes[0].varName
@@ -800,7 +798,7 @@ var ADLbrowserQuery = (function () {
                     queryFilterNodes.forEach(function (filterNodeData, index2) {
                         if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
                             previousVarName = filterNodeData.varName
-                            predicateStr = " " + varName2 +" "+ predicateStr +" "+ previousVarName + ". "
+                            predicateStr = " " + varName2 + " " + predicateStr + " " + previousVarName + ". "
                             filterNodeData.filter += predicateStr
                             self.currentNode.filter += predicateStr;
                         }
@@ -863,8 +861,8 @@ var ADLbrowserQuery = (function () {
                     where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))"
                 }
             }
-            if( where=="")
-                return MainController.UI.message("Wrong query : no where clasues",true)
+            if (where == "")
+                return MainController.UI.message("Wrong query : no where clasues", true)
 
             var fromStr = Sparql_common.getFromStr(source)
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
@@ -904,7 +902,7 @@ var ADLbrowserQuery = (function () {
                     var url = Config.sources[source].sparql_server.url + "?format=json&query=";
                     var query2 = query;
                     if (!options.count)
-                        query2 = query + " limit " + fetchLength+" OFFSET " + offset;
+                        query2 = query + " limit " + fetchLength + " OFFSET " + offset;
                     offset += fetchLength
                     Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
                         if (err) {
@@ -928,27 +926,34 @@ var ADLbrowserQuery = (function () {
 
         }
 
-        self.getPathsBetweenNodes=function(nodeIdStart,nodeIdEnd) {
-            if( !nodeIdStart || !nodeIdEnd) {
-                nodeIdEnd ="http://w3id.org/readi/rdl/D101001519"
-                nodeIdStart= "http://w3id.org/readi/rdl/D101001495"
+        self.getPathsBetweenNodes = function (fromNodeId, toNodeId) {
+         // fromNodeId = "http://w3id.org/readi/rdl/D101001053"
+        //  toNodeId = "http://w3id.org/readi/rdl/D101001519"
+            toNodeId=  self.queryFilterNodes[0].class
+            fromNodeId=  self.queryFilterNodes[1].class
+            Traversal.traverse(fromNodeId,toNodeId,self.classes)
+            return;
+            if (!nodeIdStart || !nodeIdEnd) {
+
+
             }
 
-            var inverseClassesMap={}
-            function setAllClassesMap(){
+            var inversePredidcatesMap = {}
+
+            function setAllClassesMap() {
 
                 for (var subject in self.classes) {//inverse
 
-                var predicates = self.classes[subject]
+                    var predicates = self.classes[subject]
 
                     for (var predicate in predicates) {
                         if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                             predicates[predicate].forEach(function (object) {
-                                if(!inverseClassesMap[object])
-                                    inverseClassesMap[object]={}
-                                if(! inverseClassesMap[object][predicate])
-                                inverseClassesMap[object][predicate]=[]
-                                inverseClassesMap[object][predicate].push(subject)
+                                if (!inversePredidcatesMap[predicate])
+                                    inversePredidcatesMap[predicate] = {}
+                                if (!inversePredidcatesMap[predicate][subject])
+                                    inversePredidcatesMap[predicate][subject] = []
+                                inversePredidcatesMap[predicate][subject].push(object)
 
                             })
                         }
@@ -961,39 +966,32 @@ var ADLbrowserQuery = (function () {
             var paths = [];
             var currentPath = [];
 
-            recurse = function (subject) {;
-            if(paths.length==0) {
-                var predicates = self.classes[subject]
-                if (predicates) {
-                    for (var predicate in predicates) {
+            recurse = function (subject) {
 
-                        if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                            predicates[predicate].forEach(function (object) {
-                                currentPath.push(predicate)
-                                if (object == nodeIdEnd) {
-                                    return paths.push(currentPath)
-                                } else
-                                    recurse(object)
-                            })
+                if (paths.length == 0) {
+                    var predicates = self.classes[subject]
+                    if (predicates) {
+                        for (var predicate in predicates) {
+
+                            if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                                predicates[predicate].forEach(function (object) {
+                                    currentPath.push(predicate)
+                                    if (object == nodeIdEnd) {
+                                        return paths.push(currentPath)
+                                 }
+                            /*else if (inversePredidcatesMap[predicate][subject]==object) {
+                                        currentPath[currentPath.length - 1] = "^" + predicate
+                                        return paths.push(currentPath)
+
+                                    } */
+                            else
+                                        recurse(object)
+                                })
+                            }
+
                         }
-
                     }
                 }
-            }
-              /*  var predicates = inverseClassesMap[subject]
-                if (predicates) {
-                    for (var predicate in predicates) {
-                        if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                            predicates[predicate].forEach(function (object) {
-                                currentPath.push(predicate)
-                                if (object == nodeIdEnd) {
-                                    return paths.push(currentPath)
-                                }
-                                    recurse(object)
-                            })
-                        }
-                    }
-                }*/
 
             }
             recurse(nodeIdStart)
@@ -1024,6 +1022,7 @@ var ADLbrowserQuery = (function () {
 
 
         }
+
         self.initClassesTab = function (classes, model) {
             $("#ADLbrowser_accordion").accordion("option", {active: 0});
             var classesArray = Object.keys(classes)
@@ -1039,7 +1038,7 @@ var ADLbrowserQuery = (function () {
                     label = Sparql_common.getLabelFromId(classId)
                 if (!distinctNode[id1]) {
                     distinctNode[id1] = 1
-                    var jstreeType=ADLbrowserCustom.superClassesMap[classId].group
+                    var jstreeType = ADLbrowserCustom.superClassesMap[classId].group
                     jstreeData.push({
                         id: id1,
                         text: label,
@@ -1073,7 +1072,7 @@ var ADLbrowserQuery = (function () {
                             var id3 = common.getRandomHexaId(5)
                             if (!distinctNode[id3]) {
                                 distinctNode[id3] = 1
-                                var jstreeType=ADLbrowserCustom.superClassesMap[object].group
+                                var jstreeType = ADLbrowserCustom.superClassesMap[object].group
                                 jstreeData.push({
 
                                     id: id3,
@@ -1095,6 +1094,18 @@ var ADLbrowserQuery = (function () {
                     self.currentNode = obj.node;
 
                     self.showQueryParamsDialog({x: 300, y: 300})
+                },
+                contextMenu: function() {
+                    var items = {}
+                /*    items.nodeInfos = {
+                        label: "node infos",
+                        action: function (e, xx) {// pb avec source
+                            MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+
+
+                        }
+                    }*/
+                    return items;
                 }
 
             }

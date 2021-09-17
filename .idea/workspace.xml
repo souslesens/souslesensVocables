@@ -5,9 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/external/graph.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/traversal.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,9 +61,9 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.16" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bailletArchives/bailletarchives" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.17" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/js/external" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -68,11 +73,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\external" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\icons" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL\tools" />
       <recent name="D:\webstorm\souslesensVocables\config\users" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools" />
-      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
@@ -82,7 +87,7 @@
       <recent name="D:\webstorm\souslesensVocables\config" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.codification..js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="_csvCrawler..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/_csvCrawler..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
@@ -214,6 +219,7 @@
       <workItem from="1629706156758" duration="87548000" />
       <workItem from="1630220227362" duration="107422000" />
       <workItem from="1631151782290" duration="151896000" />
+      <workItem from="1631859089751" duration="14221000" />
     </task>
     <servers />
   </component>
@@ -328,44 +334,43 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>213</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="175" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js</url>
           <line>99</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="194" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js</url>
           <line>43</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="206" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>371</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>385</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="208" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>358</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="209" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
           <line>114</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="220" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
+          <line>83</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="221" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

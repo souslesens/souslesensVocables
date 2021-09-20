@@ -756,7 +756,7 @@ var ADLbrowserQuery = (function () {
 
         self.executeQuery = function (node, options, callback) {
 
-            var fetchLength = 5000
+            var fetchLength = Config.ADL.queryLimit
             var queryFilterNodes = ADLbrowserQuery.queryFilterNodes;
             var dialogFilterStr = "";
             var where = ""
@@ -780,7 +780,7 @@ var ADLbrowserQuery = (function () {
 
             var varName2 = varName;
 
-            console.log(varName2 + "--------------------")
+
 
 
             if (options.predicate) {// links new filter predicate to a previous varName matching
@@ -814,18 +814,7 @@ var ADLbrowserQuery = (function () {
                     return
 
 
-                /*    if (index == 0) {
-                        if (!varName2) {
-                            var filter2 = filterNodeData.filter;
-                            where += filter2
-                            return;
-                        }
-                        previousVarName = queryFilterNodes[index].varName
-                    } else {
-                        previousVarName = queryFilterNodes[index - 1].varName
-                        varName2 = queryFilterNodes[index].varName
-                    }
-                    where += "" + varName2 + predicateStr + previousVarName + ". "*/
+
 
 
                 where += filterNodeData.filter
@@ -926,75 +915,74 @@ var ADLbrowserQuery = (function () {
 
         }
 
-        self.getPathsBetweenNodes = function (fromNodeId, toNodeId) {
-         // fromNodeId = "http://w3id.org/readi/rdl/D101001053"
-        //  toNodeId = "http://w3id.org/readi/rdl/D101001519"
-            toNodeId=  self.queryFilterNodes[0].class
-            fromNodeId=  self.queryFilterNodes[1].class
-            Traversal.traverse(fromNodeId,toNodeId,self.classes)
-            return;
-            if (!nodeIdStart || !nodeIdEnd) {
+        self.getPathsBetweenNodes = function (fromNode, toNode,options) {
+            if(self.queryFilterNodes.length!=2)
+                return alert( "needs 2 nodes selected")
+        if(!options){
+            options={}
+        }
+            var fetchLength = Config.ADL.queryLimit
+
+            fromNode=  self.queryFilterNodes[1]
+            toNode=  self.queryFilterNodes[0]
+            var source = ADLbrowser.currentSource
+            var fromStr = Sparql_common.getFromStr(source)
+           var predicatesPath= Traversal.traverse(fromNode.class,toNode.class,self.classes)
+
+            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+
+                query += "select distinct " + fromNode.varName + " " + fromNode.varName + "Label " + fromNode.varName + "Type "+
+                    toNode.varName + " " + toNode.varName + "Label " + toNode.varName + "Type "
+
+            query += fromStr +
+                "WHERE {"
+
+            query += fromNode.varName+ " "+ predicatesPath + " "+toNode.varName +".\n"
+            query += fromNode.filter+".\n"
+            query += toNode.filter+".\n"
+            query +="}"
 
 
-            }
+            var offset = 0
+            var length = 1
+            var allResults = []
 
-            var inversePredidcatesMap = {}
-
-            function setAllClassesMap() {
-
-                for (var subject in self.classes) {//inverse
-
-                    var predicates = self.classes[subject]
-
-                    for (var predicate in predicates) {
-                        if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                            predicates[predicate].forEach(function (object) {
-                                if (!inversePredidcatesMap[predicate])
-                                    inversePredidcatesMap[predicate] = {}
-                                if (!inversePredidcatesMap[predicate][subject])
-                                    inversePredidcatesMap[predicate][subject] = []
-                                inversePredidcatesMap[predicate][subject].push(object)
-
-                            })
-                        }
-                    }
+            var maxOffset = 50000
+            MainController.UI.message("searching...")
+            async.whilst(
+                function (callbackTest) {//test
+                    if (offset >= maxOffset)
+                        alert("query results truncated : larger than " + maxOffset + " maximum authorized ")
+                    return length > 0 && offset < maxOffset;
                 }
-            }
-
-
-            setAllClassesMap()
-            var paths = [];
-            var currentPath = [];
-
-            recurse = function (subject) {
-
-                if (paths.length == 0) {
-                    var predicates = self.classes[subject]
-                    if (predicates) {
-                        for (var predicate in predicates) {
-
-                            if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                                predicates[predicate].forEach(function (object) {
-                                    currentPath.push(predicate)
-                                    if (object == nodeIdEnd) {
-                                        return paths.push(currentPath)
-                                 }
-                            /*else if (inversePredidcatesMap[predicate][subject]==object) {
-                                        currentPath[currentPath.length - 1] = "^" + predicate
-                                        return paths.push(currentPath)
-
-                                    } */
-                            else
-                                        recurse(object)
-                                })
-                            }
-
+                ,
+                function iter(callbackWhilst) {
+                    var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+                    var query2 = query;
+                    if (!options.count)
+                        query2 = query + " limit " + fetchLength + " OFFSET " + offset;
+                    offset += fetchLength
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
+                        if (err) {
+                            return callbackWhilst(err)
                         }
-                    }
-                }
+                        length = result.results.bindings.length
+                        if (options.count)
+                            length = 0
+                        allResults = allResults.concat(result.results.bindings);
+                        MainController.UI.message("searching..." + allResults.length)
+                        callbackWhilst();
+                    })
+                }, function (err) {
+                    if (err)
+                        return callback(err)
 
-            }
-            recurse(nodeIdStart)
+                    return callback(null, {data: allResults, filter: dialogFilterStr})
+
+                })
+
+
+
         }
 
 

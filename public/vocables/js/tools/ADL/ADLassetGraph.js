@@ -300,12 +300,18 @@ var ADLassetGraph = (function () {
             if (err) {
                 return callback(err)
             }
+
             var buildClasses = {}
             result.results.bindings.forEach(function (item) {
+                var color;
+                if(ADLbrowserCustom.superClassesMap[item.type.value])
+                    color=ADLbrowserCustom.superClassesMap[item.type.value].color
+                else
+                    color= Lineage_classes.getPropertyColor(item.type.value)
+
                 buildClasses[item.type.value] = {
                     count: item.count.value,
-                    //   color: Lineage_classes.getPropertyColor(item.type.value)
-                    color: ADLbrowserCustom.superClassesMap[item.type.value].color
+                    color: color
                 }
             })
             callback(null, buildClasses)

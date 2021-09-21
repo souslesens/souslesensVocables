@@ -1,8 +1,8 @@
-var Traversal = (function () {
+var GraphTraversal = (function () {
 
     var self = {}
 
-    self.traverse = function (fromNodeId, toNodeId, allClassesMap) {
+    self.getShortestPaths = function (fromNodeId, toNodeId, allClassesMap) {
         //   const Graph = require('dijkstra-short-path');
 
         const route = new Graph();
@@ -10,55 +10,55 @@ var Traversal = (function () {
         var directPredicates={}
         var inversePredicates={}
 
+        var objectsMap = {}
+        var routeMap = {}
         for (var subject in allClassesMap) {
             var objectsArray =[]
             var predicates = allClassesMap[subject]
-
+            if(!routeMap[subject]){
+                routeMap[subject]=[]
+            }
 
             for (var predicate in predicates) {
                 if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     predicates[predicate].forEach(function (object) {
-                        objectsArray.push([object, 1])
+                        routeMap[subject].push([object, 1])
+                     //   objectsArray.push([object, 1])
                         directPredicates[object + "_" + subject] = predicate
                         inversePredicates[subject + "_" + object] = predicate
+
                     })
                 }
             }
 
-            route.addNode(subject,  new Map(objectsArray));
+          //  route.addNode(subject,  new Map(objectsArray));
 
         }
 
         //inverse
-        var objectsMap = {}
+
         for (var subject in allClassesMap) {
             var predicates = allClassesMap[subject]
 
             for (var predicate in predicates) {
                 if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     predicates[predicate].forEach(function (object) {
-                        if (!objectsMap[object]) {
-                            objectsMap[object] = []
-                        }
-                        if (objectsMap[object].indexOf(subject) < 0)
-                            objectsMap[object].push(subject)
+                        routeMap[object].push([subject, 1])
 
                     })
                 }
             }
         }
-        for(var object in objectsMap){
-            var subjectArray=[]
-            objectsMap[object].forEach(function(subject){
-                subjectArray.push([subject,1])
-            })
 
-            route.addNode(object,  new Map(subjectArray));
+        //generate route
+        for(var key in routeMap){
+            route.addNode(key,  new Map(routeMap[key]));
+
 
         }
 
 
-        var path = route.path(fromNodeId, toNodeId).path; // return => { cost:5 , path : [ 'A', 'B', 'C', 'D' ]}
+        var path = route.path(fromNodeId, toNodeId).path;
 
         var select = ""
         var where = ""

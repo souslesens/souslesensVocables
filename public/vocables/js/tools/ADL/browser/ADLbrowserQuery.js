@@ -6,6 +6,7 @@ var ADLbrowserQuery = (function () {
         self.model = null
         self.queryMode = "count";
         self.queryFilterNodes = [];
+        self.shortestPathQueriesStack = []
         self.varNamesMap = {}
         var previousVarName = null;
         self.onSelectADLtreeNode = function (event, obj) {
@@ -356,44 +357,73 @@ var ADLbrowserQuery = (function () {
                     classId: field,
                     predicate: self.currentQueryDialogPredicates[predicateIndex]
                 }
-                self.executeQuery(self.currentNode, options, function (err, queryResult) {
-                    if (err)
-                        return alert(err)
-                    ADLbrowserGraph.addCountNodeToModelGraph(self.currentNode, queryResult, options, function (err, nodeData) {
 
+
+                var nodeData = {
+                    type: "count",
+                    class: self.currentNode.data.id,
+                    count: 0,
+                    filter: options.filter,
+                    filterLabel: options.filterLabel,
+                    varName: options.varName,
+                    color: color,
+                    id: self.currentNode.data.id,
+                    predicate: options.predicate
+
+                }
+                ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
+
+                var setFilterCountUI = function () {
+                    //  ADLbrowserGraph.addCountNodeToModelGraph(self.currentNode, nodeData, queryResult, options, function (err, nodeData) {
+                    $('#ADLbrowser_accordion').accordion('option', {active: 1});
+                    var checkedStr = "";
+                    if (nodeData.count < 50)
+                        checkedStr = " checked='checked' "
+                    var filterId = nodeData.id;
+                    var iconUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group + ".png";
+                    var superClassLabel = ADLbrowserQuery.model[nodeData.class].label
+                    var html = "<div class='ADLbrowser_filterDiv' style='color:" + nodeData.color + "' id='" + filterId + "'>" +
+
+                        "<input  type='checkbox'  " + checkedStr + "class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
+                        "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                        "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
+                        "<img src='" + iconUrl + "' width='25'/>" +
+                        "<span style='font-weight:bold;color:" + "black" + "'>" + superClassLabel + " : " + filterLabel + " : " + nodeData.count
+                    "</div>"
+
+                    $("#ADLbrowser_filterDiv").prepend(html)
+                    // })
+                }
+
+                if (self.queryFilterNodes.length < 2) {
+                    self.executeQuery(self.currentNode, options, function (err, queryResult) {
                         $("#waitImg").css("display", "none");
                         if (err)
-                            return MainController.UI.message(err)
-
-                        if (nodeData.count == 0)
-                            return MainController.UI.message("Nod data found ", true)
+                            return alert(err)
 
 
-                        var checkedStr = "";
-                        if (nodeData.count < 20)
-                            checkedStr = " checked='checked' "
-                        ADLbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
-                        var filterId = nodeData.id;
-
-                        var iconUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group + ".png";
-                        var superClassLabel = ADLbrowserQuery.model[nodeData.class].label
-                        var html = "<div class='ADLbrowser_filterDiv' style='color:" + nodeData.color + "' id='" + filterId + "'>" +
-
-                            "<input  type='checkbox'  " + checkedStr + "class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
-                            "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
-                            "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
-                            "<img src='" + iconUrl + "' width='25'/>" +
-                            "<span style='font-weight:bold;color:" + "black" + "'>" + superClassLabel + " : " + filterLabel + " : " + nodeData.count
-                        "</div>"
-
-                        $("#ADLbrowser_filterDiv").prepend(html)
+                        if (queryResult.data.count == 0)
+                            return MainController.UI.message("No data found ", true)
+                        ADLbrowserQuery.queryFilterNodes[0].count = queryResult.data[0].count.value
+                        setFilterCountUI()
 
 
                     })
-                })
+                } else {
+                    ADLbrowserQuery.executeShortestPathQuery(null, null, {count: true}, function (err, queryResult) {
+                        $("#waitImg").css("display", "none");
+                        if (err)
+                            return alert(err)
+                        if (queryResult.count == 0)
+                            return MainController.UI.message("No data found ", true)
+                        ADLbrowserQuery.queryFilterNodes[0].count = queryResult[0].count.value
+                        setFilterCountUI()
+
+                    })
+                }
+
+
             }
-
-
         }
 
 
@@ -587,7 +617,8 @@ var ADLbrowserQuery = (function () {
                     selectVars: selectVars
 
                 }
-                self.executeQuery(null, options, function (err, queryResult) {
+                ADLbrowserQuery.executeShortestPathQuery(null, null, {}, function (err, queryResult) {
+                    // self.executeQuery(null, options, function (err, queryResult) {
                     if (queryResult.length == 0)
                         return MainController.UI.message("No results", true)
                     if (output == "graph") {
@@ -600,7 +631,7 @@ var ADLbrowserQuery = (function () {
                             self.ALDmodelGraph.params = visjsGraph.currentContext
                         }
                         MainController.UI.message("drawing Graph...", true)
-                        ADLbrowserGraph.drawGraph("graphDiv", queryResult, {
+                        ADLbrowserGraph.drawGraph("graphDiv", {data: queryResult}, {
                             addToGraph: addToGraph,
                             selectVars: selectVars
                         })
@@ -609,7 +640,7 @@ var ADLbrowserQuery = (function () {
                     }
                     if (output == "table") {
                         MainController.UI.message("drawing Table...", true)
-                        ADLbrowserDataTable.showQueryResult(queryResult, {selectVars: selectVars})
+                        ADLbrowserDataTable.showQueryResult({data: queryResult}, {selectVars: selectVars})
 
                     }
 
@@ -632,6 +663,7 @@ var ADLbrowserQuery = (function () {
             ,
 
             resetAllFilters: function () {
+
                 ADLbrowserQuery.graphActions.backToModel();
                 setTimeout(function () {
 
@@ -648,6 +680,8 @@ var ADLbrowserQuery = (function () {
                         visjsGraph.data.nodes.remove(ADLbrowserGraph.zeroCountIds)
                     }
                     ADLbrowserGraph.zeroCountIds = []
+                    self.shortestPathQueriesStack = []
+                    MainController.UI.message("", true)
                 }, 500)
 
             }
@@ -781,8 +815,6 @@ var ADLbrowserQuery = (function () {
             var varName2 = varName;
 
 
-
-
             if (options.predicate) {// links new filter predicate to a previous varName matching
                 var predicateStr = "<" + options.predicate.predicate + ">"
                 if (options.predicate.inverse)
@@ -812,9 +844,6 @@ var ADLbrowserQuery = (function () {
             queryFilterNodes.forEach(function (filterNodeData, index) {
                 if (!filterNodeData)
                     return
-
-
-
 
 
                 where += filterNodeData.filter
@@ -915,34 +944,68 @@ var ADLbrowserQuery = (function () {
 
         }
 
-        self.getPathsBetweenNodes = function (fromNode, toNode,options) {
-            if(self.queryFilterNodes.length!=2)
-                return alert( "needs 2 nodes selected")
-        if(!options){
-            options={}
-        }
-            var fetchLength = Config.ADL.queryLimit
+        self.executeShortestPathQuery = function (fromNode, toNode, options, callback) {
+            if (!self.shortestPathQueriesStack)
+                self.shortestPathQueriesStack = []
+            if (self.queryFilterNodes.length < 2)
+                return alert("this query needs at least 2 superClasses ")
+            if (!options) {
+                options = {}
+            }
 
-            fromNode=  self.queryFilterNodes[1]
-            toNode=  self.queryFilterNodes[0]
+            var where = "";
+            self.queryFilterNodes.forEach(function (item, index) {
+                if (index == 0)
+                    return;
+                // fromNode=  self.queryFilterNodes[1]
+                fromNode = self.queryFilterNodes[index - 1]
+                toNode = self.queryFilterNodes[index]
+
+                var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
+
+
+                where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
+                where += fromNode.filter + "\n"
+                where += toNode.filter + "\n"
+            })
+
+
             var source = ADLbrowser.currentSource
             var fromStr = Sparql_common.getFromStr(source)
-           var predicatesPath= Traversal.traverse(fromNode.class,toNode.class,self.classes)
-
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+            if (options.count)
+                query += "SELECT (count(distinct *) as ?count) " + fromStr + "WHERE {" + where
+            else
+                query += "SELECT distinct *  " + fromStr + "WHERE {" + where
 
-                query += "select distinct " + fromNode.varName + " " + fromNode.varName + "Label " + fromNode.varName + "Type "+
-                    toNode.varName + " " + toNode.varName + "Label " + toNode.varName + "Type "
+            //subQueries
+            if (false) {
+                self.shortestPathQueriesStack.forEach(function (item) {
 
-            query += fromStr +
-                "WHERE {"
-
-            query += fromNode.varName+ " "+ predicatesPath + " "+toNode.varName +".\n"
-            query += fromNode.filter+".\n"
-            query += toNode.filter+".\n"
-            query +="}"
+                    query += "\n{ SELECT distinct * WHERE {\n" + item.where + "}\n}\n"
 
 
+                })
+            }
+
+
+            query += "}"
+
+            var isNewVarName = true;
+            self.shortestPathQueriesStack.forEach(function (item) {
+                if (item.toNodeVarName == toNode.varName)
+                    isNewVarName = false;
+            })
+
+            if (isNewVarName) {
+                self.shortestPathQueriesStack.push({
+                    fromNodeVarName: fromNode.varName,
+                    toNodeVarName: toNode.varName,
+                    where: where
+                })
+            }
+
+            var fetchLength = Config.ADL.queryLimit
             var offset = 0
             var length = 1
             var allResults = []
@@ -951,6 +1014,8 @@ var ADLbrowserQuery = (function () {
             MainController.UI.message("searching...")
             async.whilst(
                 function (callbackTest) {//test
+                    if (length != 1 && length < fetchLength)
+                        return false;
                     if (offset >= maxOffset)
                         alert("query results truncated : larger than " + maxOffset + " maximum authorized ")
                     return length > 0 && offset < maxOffset;
@@ -961,26 +1026,25 @@ var ADLbrowserQuery = (function () {
                     var query2 = query;
                     if (!options.count)
                         query2 = query + " limit " + fetchLength + " OFFSET " + offset;
-                    offset += fetchLength
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
-                        if (err) {
-                            return callbackWhilst(err)
-                        }
-                        length = result.results.bindings.length
-                        if (options.count)
-                            length = 0
-                        allResults = allResults.concat(result.results.bindings);
-                        MainController.UI.message("searching..." + allResults.length)
-                        callbackWhilst();
-                    })
+                    offset +=
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
+                            if (err) {
+                                return callbackWhilst(err)
+                            }
+                            length = result.results.bindings.length
+                            if (options.count)
+                                length = 0
+                            allResults = allResults.concat(result.results.bindings);
+                            MainController.UI.message("searching..." + allResults.length)
+                            callbackWhilst();
+                        })
                 }, function (err) {
                     if (err)
                         return callback(err)
 
-                    return callback(null, {data: allResults, filter: dialogFilterStr})
+                    return callback(null, allResults)
 
                 })
-
 
 
         }
@@ -1083,16 +1147,16 @@ var ADLbrowserQuery = (function () {
 
                     self.showQueryParamsDialog({x: 300, y: 300})
                 },
-                contextMenu: function() {
+                contextMenu: function () {
                     var items = {}
-                /*    items.nodeInfos = {
-                        label: "node infos",
-                        action: function (e, xx) {// pb avec source
-                            MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+                    /*    items.nodeInfos = {
+                            label: "node infos",
+                            action: function (e, xx) {// pb avec source
+                                MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
 
 
-                        }
-                    }*/
+                            }
+                        }*/
                     return items;
                 }
 

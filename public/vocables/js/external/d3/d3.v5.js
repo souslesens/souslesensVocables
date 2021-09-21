@@ -11543,7 +11543,7 @@
         // The core of the algorithm. Here, a new subtree is combined with the
         // previous subtrees. Threads are used to traverse the inside and outside
         // contours of the left and right subtree up to the highest common level. The
-        // vertices used for the traversals are vi+, vi-, vo-, and vo+, where the
+        // vertices used for the GraphTraversals are vi+, vi-, vo-, and vo+, where the
         // superscript o means outside and i means inside, the subscript - means left
         // subtree and + means right subtree. For summing up the modifiers along the
         // contour, we use respective variables si+, si-, so-, and so+. Whenever two

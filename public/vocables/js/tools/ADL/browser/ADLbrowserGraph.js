@@ -115,18 +115,7 @@ var ADLbrowserGraph = (function () {
 
 
                 visjsGraph.data.nodes.remove(nodeId)
-                var nodeData = {
-                    type: "count",
-                    class: node.id,
-                    count: count,
-                    filter: options.filter,
-                    filterLabel: options.filterLabel,
-                    varName: options.varName,
-                    color: color,
-                    id: nodeId,
-                    predicate: options.predicate
 
-                }
                 //   var color = "#ffe0aa"
 
 
@@ -158,16 +147,7 @@ var ADLbrowserGraph = (function () {
 
                 })
 
-                if (false) {
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
 
-
-                    visjsGraph.data.nodes.update({
-                        id: ADLbrowserQuery.currentNode.id,
-                        color: color
-                    })
-                }
 
                 return callback(null, nodeData)
 
@@ -248,12 +228,15 @@ var ADLbrowserGraph = (function () {
 
 
                                 edgeId = id + "_" + target
-                                edgeNode = {
-                                    id: edgeId,
-                                    to: id,
-                                    from: target,
-                                    property: filter.predicate
+                                if(!existingNodes[edgeId]) {
+                                    existingNodes[edgeId]=1
+                                    edgeNode = {
+                                        id: edgeId,
+                                        to: id,
+                                        from: target,
+                                        property: filter.predicate
 
+                                    }
                                 }
                             }
                         } else if (filter.predicate && filter.predicate.subject == type) {
@@ -261,14 +244,20 @@ var ADLbrowserGraph = (function () {
                             if (target && target.value != id) {
                                 target = target.value
                                 edgeId = target + "_" + id
-
-                                edgeNode = {
-                                    id: edgeId,
-                                    from: target,
-                                    to: id,
-                                    property: filter.predicate
+                                if(!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    edgeNode = {
+                                        id: edgeId,
+                                        from: target,
+                                        to: id,
+                                        property: filter.predicate
+                                    }
                                 }
                             }
+                        }
+
+                        else if(!filter.predicate){//transitive query(GraphTraversal)
+
                         }
 
                         if (edgeNode && !existingNodes[edgeId]) {
@@ -297,6 +286,7 @@ var ADLbrowserGraph = (function () {
                         if (index > 0) {
                             var edgeId = (itemIds[index - 1]) + "_" + id
                             if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId]=1
                                 var edgeNode2 = {
                                     id: edgeId,
                                     from: (itemIds[index - 1]),

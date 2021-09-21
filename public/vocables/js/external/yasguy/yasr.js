@@ -8495,7 +8495,7 @@ function rgbaStr (rgba) {
 	 *   Only the column in question will be written
 	 * @returns {object} Object with two parameters: `data` the data read, in
 	 *   document order, and `cells` and array of nodes (they can be useful to the
-	 *   caller, so rather than needing a second traversal to get them, just return
+	 *   caller, so rather than needing a second GraphTraversal to get them, just return
 	 *   them from here).
 	 * @memberof DataTable#oApi
 	 */

@@ -20,12 +20,11 @@ var Config = (function () {
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
 
-    self.defaultNewUriRoot="http://souslesens.org/resource/"
-   self.loginMode = "json";
+    self.defaultNewUriRoot = "http://souslesens.org/resource/"
+    self.loginMode = "json";
 
 
-
-self.loginMode = "none";
+    self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}
@@ -37,24 +36,24 @@ self.loginMode = "none";
     self.searchDepth = 6
     self.Blender = {
         openTaxonomyTreeOnLoad: 3,
-    pasteDescendantsMaxDepth:6,
-        prefLang:"en"
+        pasteDescendantsMaxDepth: 6,
+        prefLang: "en"
     }
-    self.evaluate={
-        maxZipFileSize:30000000 //30MO
+    self.evaluate = {
+        maxZipFileSize: 30000000 //30MO
     }
 
     self.ADL = {
-        dictionaries:{
-            "CFIHOS_READI":{fileName:"dictionary_READI.json"}
+        dictionaries: {
+            "CFIHOS_READI": {fileName: "dictionary_READI.json"}
         },
 
-        elasticIndexSourceMap:{
-            "cfihos":"CFIHOS-ISO",
-            "pca":"ISO_15926-PCA",
-            "readi":"CFIHOS_READI"
+        elasticIndexSourceMap: {
+            "cfihos": "CFIHOS-ISO",
+            "pca": "ISO_15926-PCA",
+            "readi": "CFIHOS_READI"
         },
-        palette :[
+        palette: [
             '#1f77b4',
             '#9467bd',
             '#2ca02c',
@@ -65,15 +64,14 @@ self.loginMode = "none";
         ,
 
 
-
         RDLsource: "RDL-QUANTUM-MIN",
         OneModelSource: "ONE-MODEL",
         mappingAlternativeSource: "CFIHOS_READI",
         adlQueryMode: "SPARQL", //or SQL
         queryLimit: 10000,
         maxDistinctValuesForAdvancedMapping: 200000,
-        browserMaxClassesToDrawClassesGraph:15,
-        oneModelDictionaryGraphURI:"http://data.total.com/resource/one-model/dictionary/",
+        browserMaxClassesToDrawClassesGraph: 15,
+        oneModelDictionaryGraphURI: "http://data.total.com/resource/one-model/dictionary/",
         topRdlObjects: {
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
                 label: "Functional Objects",
@@ -93,7 +91,17 @@ self.loginMode = "none";
             }
 
         }
-    }
+    },
+
+        self.Standardizer = {
+            elasticIndexesSourcesMap: {
+                "readi": "CFIHOS_READI",
+                "pca": "ISO_15926-PCA",
+                "cfihos": "CFIHOS-ISO"
+            }
+
+
+        }
 
 
     self.sources = {}
@@ -114,7 +122,7 @@ self.loginMode = "none";
 
     self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-   self.tools["SPARQL"] = {
+    self.tools["SPARQL"] = {
         label: "SPARQL endpoint",
         multiSources: 0,
         controller: SPARQL_endpoint,
@@ -130,71 +138,75 @@ self.loginMode = "none";
 
     self.tools["ADLbrowser"] = {label: "ADLbrowser", multiSources: 0, controller: ADLbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
 
-
- //   self.currentProfile = self.profiles["admin"]
-
-
-
-   /* self.profiles = {
-        admin: {
-            allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUALS"],
-            allowedSources: "ALL",
-            forbiddenSources: ["Dbpedia"],
-            allowedTools: "ALL",
-            forbiddenTools: [],
-            blender: {contextMenuActionStartLevel: 0}
-        },
-        admin_skos: {
-            allowedSourceSchemas: ["SKOS"],
-            allowedSources: "ALL",
-            forbiddenSources: ["Dbpedia"],
-            allowedTools: "ALL",
-            forbiddenTools: ["ADLmappings", "evaluate"],
-            blender: {contextMenuActionStartLevel: 0}
-        },
-        blender_skos: {
-            allowedSourceSchemas: ["SKOS"],
-            allowedSources: "ALL",
-            forbiddenSources: ["Dbpedia"],
-            allowedTools: "ALL",
-            forbiddenTools: ["ADLmappings", "evaluate"],
-            blender: {contextMenuActionStartLevel: 3}
-        },
-        reader_skos: {
-            allowedSourceSchemas: ["SKOS"],
-            allowedSources: "ALL",
-            forbiddenSources: ["Dbpedia"],
-            allowedTools: "ALL",
-            forbiddenTools: ["ADLmappings", "evaluate", "BLENDER"],
-            blender: {contextMenuActionStartLevel: 3}
-        },
-        reader_all: {
-            allowedSourceSchemas: ["SKOS", "OWL"],
-            allowedSources: "ALL",
-            forbiddenSources: ["Dbpedia"],
-            allowedTools: "ALL",
-            forbiddenTools: [ "evaluate", "INDIVIDUALS", "BLENDER"],
-            blender: {contextMenuActionStartLevel: 3}
-        },
-        reader_owl: {
-            allowedSourceSchemas: ["OWL"],
-            allowedSources: "ALL",
-            forbiddenSources: [],
-            allowedTools: ["lineage", "ADLbrowser","ADLmappings","SPARQL"],
-            forbiddenTools: ["evaluate", "INDIVIDUALS", "BLENDER",],
-            blender: {contextMenuActionStartLevel: 3}
-        }
-        , reader_skos_blend: {
-            allowedSourceSchemas: ["SKOS"],
-            allowedSources: ["Total-CTG","GEMET","USGS","TermSciences"],
-            forbiddenSources: [],
-            allowedTools: ["sourceBrowser", "sourceMatcher","ancestors","blender","TAXONOMY"],
-            forbiddenTools: [],
-            blender: {contextMenuActionStartLevel: 3}
-        }
-    }*/
+    self.tools["Standardizer"] = {
+        label: "Standardizer",
+        multiSources: 0,
+        controller: Standardizer,
+        toolDescriptionImg: null
+    }//"images/taxonomy.png"}
 
 
+    //   self.currentProfile = self.profiles["admin"]
+
+
+    /* self.profiles = {
+         admin: {
+             allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUALS"],
+             allowedSources: "ALL",
+             forbiddenSources: ["Dbpedia"],
+             allowedTools: "ALL",
+             forbiddenTools: [],
+             blender: {contextMenuActionStartLevel: 0}
+         },
+         admin_skos: {
+             allowedSourceSchemas: ["SKOS"],
+             allowedSources: "ALL",
+             forbiddenSources: ["Dbpedia"],
+             allowedTools: "ALL",
+             forbiddenTools: ["ADLmappings", "evaluate"],
+             blender: {contextMenuActionStartLevel: 0}
+         },
+         blender_skos: {
+             allowedSourceSchemas: ["SKOS"],
+             allowedSources: "ALL",
+             forbiddenSources: ["Dbpedia"],
+             allowedTools: "ALL",
+             forbiddenTools: ["ADLmappings", "evaluate"],
+             blender: {contextMenuActionStartLevel: 3}
+         },
+         reader_skos: {
+             allowedSourceSchemas: ["SKOS"],
+             allowedSources: "ALL",
+             forbiddenSources: ["Dbpedia"],
+             allowedTools: "ALL",
+             forbiddenTools: ["ADLmappings", "evaluate", "BLENDER"],
+             blender: {contextMenuActionStartLevel: 3}
+         },
+         reader_all: {
+             allowedSourceSchemas: ["SKOS", "OWL"],
+             allowedSources: "ALL",
+             forbiddenSources: ["Dbpedia"],
+             allowedTools: "ALL",
+             forbiddenTools: [ "evaluate", "INDIVIDUALS", "BLENDER"],
+             blender: {contextMenuActionStartLevel: 3}
+         },
+         reader_owl: {
+             allowedSourceSchemas: ["OWL"],
+             allowedSources: "ALL",
+             forbiddenSources: [],
+             allowedTools: ["lineage", "ADLbrowser","ADLmappings","SPARQL"],
+             forbiddenTools: ["evaluate", "INDIVIDUALS", "BLENDER",],
+             blender: {contextMenuActionStartLevel: 3}
+         }
+         , reader_skos_blend: {
+             allowedSourceSchemas: ["SKOS"],
+             allowedSources: ["Total-CTG","GEMET","USGS","TermSciences"],
+             forbiddenSources: [],
+             allowedTools: ["sourceBrowser", "sourceMatcher","ancestors","blender","TAXONOMY"],
+             forbiddenTools: [],
+             blender: {contextMenuActionStartLevel: 3}
+         }
+     }*/
 
 
     return self;

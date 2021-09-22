@@ -12,8 +12,8 @@ var keys={}
             options.selectVars.forEach(function (varName) {
 
                 var key = varName.substring(1)
-                cols.push({title: key})
-                cols.push({title: key+"Label"})
+                cols.push({title: key,"defaultContent": ""})
+                cols.push({title: key+"Label","defaultContent": ""})
                 keys[key] = 1
                 keys[key+"Label"] = 1
             })

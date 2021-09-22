@@ -352,17 +352,13 @@ var ADLadvancedMapping = (function () {
         }
 
 
-        self.searchEntities = function (text) {
-
-            self.editCandidateValues(null, text)
-        }
 
         self.searchColumn = function (word) {
             self.sortColumnValues("_search_" + word)
         }
 
 
-        self.editCandidateValues = function (columnValueDivId, searchedText) {
+        self.editCandidateValues = function (columnValueDivId, searchedText, entity) {
             if (!columnValueDivId)
                 columnValueDivId = self.currentColumnValueDivId;
             else
@@ -380,8 +376,8 @@ var ADLadvancedMapping = (function () {
             $(".ADLmapping_columnValue").removeClass("ADLmapping_columnValueSelected")
             $("#" + columnValueDivId).addClass("ADLmapping_columnValueSelected")
 
-
-            var entity = self.referenceDictionary[self.currentColumnClass.id].terms[columnValue.toLowerCase()]
+            if (!entity)
+                entity = self.referenceDictionary[self.currentColumnClass.id].terms[columnValue.toLowerCase()]
             /* var html = JSON.stringify(entities, null, 2)
            */
             if (entity) {
@@ -419,111 +415,7 @@ var ADLadvancedMapping = (function () {
                 $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
 
             } else {
-                var queryType = $("#ADLadvancedMapping_queryTypeSelect").val()
-                var expression = columnValue;// columnValue.replace(/ /g, "/")
-                if (searchedText)
-                    expression = searchedText
-                /*  ElasticSearchProxy.analyzeQuestion(expression, {operator: "OR"}, function (err, clause) {*/
-
-                var queryObj;
-                if (queryType == "machAnyWord") {
-                    queryObj = {
-                        "bool": {
-                            "must": [
-                                {
-                                    "query_string": {
-                                        "query": expression,
-                                        "default_field": "attachment.content",
-                                        "default_operator": "OR"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                } else if (queryType == "moreLikeThis") {
-                    var queryObj = {
-                        "more_like_this": {
-                            "fields": ["label"],
-                            "like": expression,
-                            "min_term_freq": 1,
-                            "max_query_terms": 12
-                        }
-                    }
-                }
-                if (queryType == "exactMatch") {
-                    queryObj = {
-                        "bool": {
-                            "must": [
-                                {
-                                    "query_string": {
-                                        "query": expression,
-                                        "default_field": "attachment.content",
-                                        "default_operator": "AND"
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-
-
-                var query = {
-                    "query": queryObj,
-                    "from": 0,
-                    "size": 10000,
-                    "_source": {
-                        "excludes": [
-                            "attachment.content"
-                        ]
-                    },
-                }
-                var indexes = ["readi", "pca", "cfihos"]
-                var selectedSource = $("#ADLadvancedMapping_filterCandidateMappingsSelect").val()
-                if (selectedSource != "all")
-                    indexes = [selectedSource]
-
-                ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
-                    if (err)
-                        return alert(err)
-                    var entities = []
-                    result.hits.hits.forEach(function (hit) {
-                        var entity = {
-                            index: hit._index,
-                            id: hit._source.subject,
-                            score: hit._score,
-                            term: hit._source.label
-                        }
-                        entities.push(entity)
-                    })
-                    var sort = $("#ADLadvancedMapping_sortCandidateMappingsSelect").val();
-                    if (sort == "alphabetic") {
-                        entities = common.array.sort(entities, "term")
-
-                    }
-                    var html = ""
-                    if (entities.length == 0)
-                        html = "No similar Match"
-                    else {
-                        entities.forEach(function (entity) {
-                            var id = "dictionary" + common.getRandomHexaId(5)
-                            self.currentdictionaryEntryEntities[id] = entity /*{
-                        dictionary: self.currentColumnClass.dictionary,
-                        classId: self.currentColumnClass.id,
-                        entity: entity
-                    }*/
-                            html += "<div class='ADLmapping_candidateEntity'  id='" + id + "'>" +
-                                "<span style='background-color: " + self.getSourceColor(entity.index) + "' class='ADLmapping_entitySource'>" + entity.index + "</span>" +
-                                entity.term +
-                                "<div>" +
-                                "<button onclick='ADLadvancedMapping.showEntityInfos(\"" + id + "\")'>infos</button>" +
-                                "<button onclick='ADLadvancedMapping.setAsMatchCandidate(\"" + id + "\")'>Select</button></div>" +
-                                "</div>"
-
-                        })
-                    }
-                    $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
-
-                })
+                self.searchEntities(columnValue)
                 // });
 
 
@@ -532,8 +424,118 @@ var ADLadvancedMapping = (function () {
 
         }
 
+        self.searchEntities=function(expression,validateClassFn){
+            var queryType = $("#ADLadvancedMapping_queryTypeSelect").val()
+          /*  var expression = columnValue;// columnValue.replace(/ /g, "/")
+            if (searchedText)
+                expression = searchedText*/
+
+
+            var queryObj;
+            if (queryType == "machAnyWord") {
+                queryObj = {
+                    "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": expression,
+                                    "default_field": "attachment.content",
+                                    "default_operator": "OR"
+                                }
+                            }
+                        ]
+                    }
+                }
+            } else if (queryType == "moreLikeThis") {
+                var queryObj = {
+                    "more_like_this": {
+                        "fields": ["label"],
+                        "like": expression,
+                        "min_term_freq": 1,
+                        "max_query_terms": 12
+                    }
+                }
+            }
+            if (queryType == "exactMatch") {
+                queryObj = {
+                    "bool": {
+                        "must": [
+                            {
+                                "query_string": {
+                                    "query": expression,
+                                    "default_field": "attachment.content",
+                                    "default_operator": "AND"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+
+
+            var query = {
+                "query": queryObj,
+                "from": 0,
+                "size": 10000,
+                "_source": {
+                    "excludes": [
+                        "attachment.content"
+                    ]
+                },
+            }
+            var indexes = ["readi", "pca", "cfihos"]
+            var selectedSource = $("#ADLadvancedMapping_filterCandidateMappingsSelect").val()
+            if (selectedSource != "all")
+                indexes = [selectedSource]
+
+            ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
+                if (err)
+                    return alert(err)
+                var entities = []
+                result.hits.hits.forEach(function (hit) {
+                    var entity = {
+                        index: hit._index,
+                        id: hit._source.subject,
+                        score: hit._score,
+                        term: hit._source.label
+                    }
+                    entities.push(entity)
+                })
+                var sort = $("#ADLadvancedMapping_sortCandidateMappingsSelect").val();
+                if (sort == "alphabetic") {
+                    entities = common.array.sort(entities, "term")
+
+                }
+                var html = ""
+                if (entities.length == 0)
+                    html = "No similar Match"
+                else {
+                    entities.forEach(function (entity) {
+                        var id = "dictionary" + common.getRandomHexaId(5)
+                        self.currentdictionaryEntryEntities[id] = entity
+
+                        html += "<div class='ADLmapping_candidateEntity'  id='" + id + "'>" +
+                            "<span style='background-color: " + self.getSourceColor(entity.index) + "' class='ADLmapping_entitySource'>" + entity.index + "</span>" +
+                            entity.term +
+                            "<div>" +
+                            "<button onclick='ADLadvancedMapping.showEntityInfos(\"" + id + "\")'>infos</button>" +
+                            "<button onclick='ADLadvancedMapping.setAsMatchCandidate(\"" + id + "\")'>Select</button></div>" +
+                            "</div>"
+
+                    })
+                }
+                $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
+
+            })
+        }
+
 
         self.setAsMatchCandidate = function (candidateId) {
+
+            if(self.setAsMatchCandidateExternalFn)
+             ;// return   self.setAsMatchCandidateExternalFn(candidateId)
+
+
             var candidateEntityObj = self.currentdictionaryEntryEntities[candidateId]
             $(".ADLmapping_candidateEntity").removeClass("ADLmapping_columnValues_isCandidate")
             $("#" + candidateId).addClass("ADLmapping_columnValues_isCandidate")

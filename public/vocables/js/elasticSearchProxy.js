@@ -7,8 +7,8 @@ var ElasticSearchProxy = (function () {
                 indexes = context.curentSearchIndexes;
 
 
-            console.log(JSON.stringify(indexes, null, 2))
-            console.log(JSON.stringify(query, null, 2))
+        /*    console.log(JSON.stringify(indexes, null, 2))
+            console.log(JSON.stringify(query, null, 2))*/
 
 
             var strQuery = JSON.stringify(query);

@@ -20,7 +20,7 @@ var ADLbrowserCustom=(function(){
     self.initsuperClassesPalette=function(){
 
         for (var superClass in self.superClassesMap){
-            var group= self.superClassesMap[superClass].group;
+            var group= self.superClassesMap[superClass].group.toLowerCase();
             var color=self.superClassesGroupColors[group]
             self.superClassesMap[superClass].color=color
            common.jstree.types[group]={   "icon": "../icons/custom/OneModel/"+group+".png",}
@@ -152,11 +152,11 @@ var source="CFIHOS_READI"
 
     self.iconsDir="../icons/custom/OneModel/"
     self.superClassesGroupColors={
-        Aspect:"#7fef11",
-        Information:"#B3B005",
-        Location:"#ff6983",
-        Object: '#007DFF',
-        Function: '#FFD900'
+        aspect:"#7fef11",
+        information:"#B3B005",
+        location:"#ff6983",
+       object: '#007DFF',
+        function: '#FFD900'
     }
 
     self.superClassesMap={'http://standards.iso.org/iso/15926/part14/Quality':{group:'Aspect',color:''},

@@ -19,12 +19,18 @@
 
         border: #6e2500 solid 2px;
         background-color: #d7d4f0;
+        width:90%;
         border-radius: 3px;
         margin: 3px;
+        margin-left: -20px;
         padding: 3px;
-
-
+        display: flex;
+        align-items: center;
+        flex-direction: row;
     }
+
+
+
 
     .ADLbrowser_mainPalette {
 
@@ -91,9 +97,12 @@
                       <button onclick="ADLbrowserQuery.graphActions..executeShortestPathQuery('graph',true)">Graph+</button>-->
 
                       <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
-                      <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
+                   <!--   <button onclick="ADLbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>-->
                       <button onclick="ADLbrowserQuery.graphActions.queryFilters('table')">Table</button>
-                    <button onclick="ADLbrowserQuery.graphActions.clearIndividualsFilter()">clear</button>
+                    <button onclick="ADLbrowserQuery.graphActions.resetAllFilters()">Reset</button>
+                  <!--  <button onclick="ADLbrowserQuery.graphActions.clearIndividualsFilter()">???</button>-->
+
+
                 </div>
 
                 <div id="ADLbrowser_filterDiv"

@@ -380,15 +380,17 @@ var ADLbrowserQuery = (function () {
                     if (nodeData.count < 50)
                         checkedStr = " checked='checked' "
                     var filterId = nodeData.id;
-                    var iconUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group + ".png";
-                    var superClassLabel = ADLbrowserQuery.model[nodeData.class].label
-                    var html = "<div class='ADLbrowser_filterDiv' style='color:" + nodeData.color + "' id='" + filterId + "'>" +
+                    var iconUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[nodeData.class].group.toLowerCase() + ".png";
+                    var superClassLabel = ADLbrowserQuery.model[nodeData.class].label;
+                    var divId="filter_"+common.getRandomHexaId(5)
+                    ADLbrowserQuery.queryFilterNodes[0].filterDivId=divId
+                    var html = "<div class='ADLbrowser_filterDiv ' style='color:" + nodeData.color + "' id='" + divId + "'>" +
 
-                        "<input  type='checkbox'  " + checkedStr + "class='ADLbrowser_graphFilterCBX'>G&nbsp;" +
-                        "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                        "<input  type='checkbox'  " + checkedStr + "class='ADLbrowser_graphFilterCBX'>&nbsp;" +
+                      //  "<button title='list content' onclick='ADLbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
                         "<button title='remove filter' onclick='ADLbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
                         "<img src='" + iconUrl + "' width='25'/>" +
-                        "<span style='font-weight:bold;color:" + "black" + "'>" + superClassLabel + " : " + filterLabel + " : " + nodeData.count
+                        "<span style='font-weight:normal;color:" + "black" + "'>" + superClassLabel + " : "+ nodeData.count+"<br><i> "+ filterLabel + "</i></span>"
                     "</div>"
 
                     $("#ADLbrowser_filterDiv").prepend(html)
@@ -402,8 +404,10 @@ var ADLbrowserQuery = (function () {
                             return alert(err)
 
 
-                        if (queryResult.data.count == 0)
+                        if (queryResult.data[0].count.value == "0") {
+                            ADLbrowserQuery.queryFilterNodes.splice(0, 1);
                             return MainController.UI.message("No data found ", true)
+                        }
                         ADLbrowserQuery.queryFilterNodes[0].count = queryResult.data[0].count.value
                         setFilterCountUI()
 
@@ -414,8 +418,10 @@ var ADLbrowserQuery = (function () {
                         $("#waitImg").css("display", "none");
                         if (err)
                             return alert(err)
-                        if (queryResult.count == 0)
+                        if (queryResult[0].count.value == "0") {
+                            ADLbrowserQuery.queryFilterNodes.splice(0, 1);
                             return MainController.UI.message("No data found ", true)
+                        }
                         ADLbrowserQuery.queryFilterNodes[0].count = queryResult[0].count.value
                         setFilterCountUI()
 
@@ -521,7 +527,7 @@ var ADLbrowserQuery = (function () {
         self.getQueryFilter = function (filterId) {
             var obj = null
             self.queryFilterNodes.forEach(function (filterData, index) {
-                if (filterData.id == filterId)
+                if (filterData.filterDivId == filterId)
                     obj = filterData
             })
             return obj;
@@ -653,8 +659,8 @@ var ADLbrowserQuery = (function () {
                 self.queryFilterNodes.forEach(function (filterData, index) {
                     if (filterData.id == id) {
                         self.queryFilterNodes.splice(index, 1);
-                        $("#" + id).remove()
-                        return visjsGraph.data.nodes.remove(id)
+                        $("#" + filterData.filterDivId).remove()
+                     //   return visjsGraph.data.nodes.remove(id)
                     }
 
                 })

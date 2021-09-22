@@ -5,15 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_left.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/external/d3/d3.v5.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/external/d3/d3.v5.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/external/visjs/vis-network.min.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/external/visjs/vis-network.min.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/external/yasguy/yasr.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/external/yasguy/yasr.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/elasticSearchProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/elasticSearchProxy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserCustom.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/traversal.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphTraversal.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -28,8 +32,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="HTML File" />
         <option value="JavaScript File" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -75,11 +79,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\standardizer" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\external" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\icons" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL\tools" />
       <recent name="D:\webstorm\souslesensVocables\config\users" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\tools" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
@@ -224,7 +228,7 @@
       <workItem from="1631859089751" duration="14221000" />
       <workItem from="1632143574060" duration="701000" />
       <workItem from="1632151197370" duration="5527000" />
-      <workItem from="1632202224218" duration="17842000" />
+      <workItem from="1632202224218" duration="44795000" />
     </task>
     <servers />
   </component>
@@ -288,7 +292,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js</url>
-          <line>436</line>
+          <line>440</line>
           <option name="timeStamp" value="47" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -318,13 +322,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
-          <line>365</line>
+          <line>361</line>
           <option name="timeStamp" value="78" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
-          <line>485</line>
-          <option name="timeStamp" value="81" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js</url>
@@ -353,13 +352,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
-          <line>371</line>
+          <line>367</line>
           <option name="timeStamp" value="207" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>398</line>
-          <option name="timeStamp" value="209" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/SQLserverConnector..js</url>
@@ -378,7 +372,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>418</line>
+          <line>424</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="223" />
         </line-breakpoint>

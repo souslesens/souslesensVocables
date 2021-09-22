@@ -404,7 +404,11 @@ var ADLassetGraph = (function () {
                             for (var subject in result.predicates[predicate]) {
                                 if (!self.buildClasses[subject]) {
                                     //var color = Lineage_classes.getPropertyColor(subject)
-                                    var color = ADLbrowserCustom.superClassesMap[subject].color
+                                    var color;
+                                    if(ADLbrowserCustom.superClassesMap[subject])
+                                        color=ADLbrowserCustom.superClassesMap[subject].color
+                                    else
+                                        color= Lineage_classes.getPropertyColor(subject)
                                     self.buildClasses[subject] = {
                                         count: 0,
                                         color: color
@@ -473,7 +477,7 @@ var ADLassetGraph = (function () {
                                     color = "#ffe0aa"
                                 }
 
-                                var imageUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[subject].group + ".png"
+                                var imageUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[subject].group.toLowerCase() + ".png"
                                 var obj = {
                                     id: subject,
                                     label: label,
@@ -547,7 +551,7 @@ var ADLassetGraph = (function () {
                                             shape = "star"
                                             color = "#ffe0aa"
                                         }
-                                        var imageUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[object].group + ".png"
+                                        var imageUrl = ADLbrowserCustom.iconsDir + ADLbrowserCustom.superClassesMap[object].group.toLowerCase() + ".png"
                                         visjsData.nodes.push({
                                             id: object,
                                             label: label,

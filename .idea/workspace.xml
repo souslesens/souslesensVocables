@@ -5,20 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_left.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bin/usersGenerator..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/elasticSearchProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/elasticSearchProxy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserCustom.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_left.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_left.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,8 +25,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -68,8 +61,8 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.17" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../bailletArchives" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.18" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/config/users" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="restartRequiresConfirmation" value="false" />
@@ -79,11 +72,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\config\users" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\standardizer" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js\external" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\icons" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL\tools" />
-      <recent name="D:\webstorm\souslesensVocables\config\users" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
@@ -100,22 +93,22 @@
     <configuration name="codification..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/codification..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
-    <configuration name="common.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/common.js" working-dir="$PROJECT_DIR$/public/vocables/js">
-      <method v="2" />
-    </configuration>
     <configuration name="dictionaryMatcher..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
-    <configuration name="lineage_classes.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/lineage">
+    <configuration name="mainController.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/mainController.js" working-dir="$PROJECT_DIR$/public/vocables/js">
+      <method v="2" />
+    </configuration>
+    <configuration name="usersGenerator..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/usersGenerator..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.mainController.js" />
+        <item itemvalue="Node.js.usersGenerator..js" />
         <item itemvalue="Node.js.codification..js" />
         <item itemvalue="Node.js.dictionaryMatcher..js" />
         <item itemvalue="Node.js._csvCrawler..js" />
-        <item itemvalue="Node.js.common.js" />
-        <item itemvalue="Node.js.lineage_classes.js" />
       </list>
     </recent_temporary>
   </component>
@@ -228,7 +221,8 @@
       <workItem from="1631859089751" duration="14221000" />
       <workItem from="1632143574060" duration="701000" />
       <workItem from="1632151197370" duration="5527000" />
-      <workItem from="1632202224218" duration="44795000" />
+      <workItem from="1632202224218" duration="55485000" />
+      <workItem from="1632399534284" duration="2075000" />
     </task>
     <servers />
   </component>
@@ -373,8 +367,12 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>424</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="223" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js</url>
+          <line>105</line>
+          <option name="timeStamp" value="225" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

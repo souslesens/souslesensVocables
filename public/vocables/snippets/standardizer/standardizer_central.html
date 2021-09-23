@@ -72,16 +72,17 @@ width: 300px
 </style>
 
 
-<div id="ADLMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%">
-    <div>
+<div id="ADLMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%;margin:10px;padding :20px">
+    <div style="margin: 5px;padding :5px">
         <!-- <select size="10" onclick="ADLadvancedMapping.editCandidateValues($(this).val())" class="ADLmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
                  id="ADLmapping_columnValues"></select>-->
-        Sort <select id="ADLmapping_distinctColumnSortSelect"
-                     onchange="ADLadvancedMapping.sortColumnValues()"></select>
+    <!--    Sort <select id="ADLmapping_distinctColumnSortSelect"
+                     onchange="ADLadvancedMapping.sortColumnValues($(this).val())"></select>-->
         Search <input id="ADLadvancedMapping_searchColumnInput"
-                      onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchColumn($(this).val())">>
+                      onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchColumn($(this).val())">
+        <br>
         <div id="ADLmapping_distinctColumnValuesContainer"
-             style="display:flex;flex-direction: column;height: 600px;overflow: auto"></div>
+             style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;overflow: auto"></div>
     </div>
     <div>
         <div id="ADLadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
@@ -105,9 +106,9 @@ width: 300px
 
 
         <div id="ADLadvancedMapping_dictionaryMappingContainerDiv"
-             style="display:flex;flex-direction: column;width: 500px;height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
+             style="display:flex;flex-direction: column;width: 500px;height: 580px;  margin: 10px;  background: beige;overflow: auto"></div>
 
-
+<input type="checkbox" id="Standardizer_exportAncestorsCBX">ancestors
         <button onclick="Standardizer.exportMappings()"> Export mappings</button>
 
         <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>

@@ -240,6 +240,7 @@ var MainController = (function () {
                     self.currentTool = obj.node.id;
                     self.currentSource = null;
                     MainController.initControllers()
+                    MainController.writeUserLog(authentication.currentUser, self.currentTool, "")
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
                     var controller = Config.tools[self.currentTool].controller

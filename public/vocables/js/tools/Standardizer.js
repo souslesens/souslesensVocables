@@ -16,25 +16,30 @@ var Standardizer = (function () {
             var candidateEntities = distinctSources
             candidateEntities.splice(0, 0, "all")
             common.fillSelectOptions("ADLadvancedMapping_filterCandidateMappingsSelect", candidateEntities, false)
+
+
+            var sortList = ["alphabetic","candidates"]
+            distinctSources.forEach(function(source){
+                sortList.push({value:"_search_"+source,text:source})
+            })
+
+
+
+
+            common.fillSelectOptions("ADLmapping_distinctColumnSortSelect", sortList, false,"text","value")
             ADLadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
             self.matchCandidates = {}
         }, 200)
     }
 
 
-    self.standardize = function () {
 
-        var text = $("#Standardizer_wordsTA").val()
-        if (text == "")
-            return alert("Enter text to standardize")
-
-
-        var words = text.split(/[\/n\/r]/)
-
-
-    }
 
     self.getElasticSearchExactMatches = function (words) {
+        $("#waitImg").css("display", "block")
+        MainController.UI.message("Searching exact matches ")
+        ADLadvancedMapping.currentColumnValueDivIds={}
+        $("#ADLmapping_distinctColumnValuesContainer").html("")
         var text = $("#Standardizer_wordsTA").val()
         if (text == "")
             return alert("Enter text to standardize")
@@ -42,14 +47,17 @@ var Standardizer = (function () {
 
         var words = text.split("\n")
         var entitiesMap = {}
+        var count=0
         async.eachSeries(words, function (word, callbackEach) {
-            word=word.toLowerCase()
+                word = word.toLowerCase().trim()
+            if((count++)%10==0)
+                MainController.UI.message("Searching exact matches "+count+"/"+words.length)
                 queryObj = {
                     "bool": {
                         "must": [
                             {
                                 "match": {
-                                    "label":word,
+                                    "label": word,
 
                                 }
                             }
@@ -79,22 +87,22 @@ var Standardizer = (function () {
                             index: hit._index,
                             id: hit._source.subject,
                             score: hit._score,
-                            term: hit._source.label,
-                            status:"exactMatch"
+                            label: hit._source.label,
+                            status: "exactMatch"
                         }
-                        var key = entity.term.toLowerCase();
+                        var key = entity.label.toLowerCase();
                         if (key == word) {
 
-                        if (!entitiesMap[key]) {
-                            entitiesMap[key] = []
-                        }
+                            if (!entitiesMap[key]) {
+                                entitiesMap[key] = []
+                            }
 
-                        if (!entitiesMap[key][entity.index]) {
-                            entitiesMap[key][entity.index] = ""
-                        }
+                            if (!entitiesMap[key][entity.index]) {
+                                entitiesMap[key][entity.index] = ""
+                            }
 
-                        entitiesMap[key][entity.index] = entity
-                    }
+                            entitiesMap[key][entity.index] = entity
+                        }
                     })
                     callbackEach()
                 })
@@ -105,6 +113,7 @@ var Standardizer = (function () {
                 ADLadvancedMapping.currentColumnValueDivIds = {}
                 var distinctSources = []
                 words.forEach(function (word) {
+                    word = word.toLowerCase().trim()
                     var sourcesHtml = ""
                     var id = "columnValue" + common.getRandomHexaId(5)
                     ADLadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
@@ -177,7 +186,7 @@ var Standardizer = (function () {
             }
 
             $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
-
+            MainController.UI.message("",true)
 
         } else {
 
@@ -196,8 +205,9 @@ var Standardizer = (function () {
     self.exportMappings = function () {
         var columns = []
         var sourcesMap = {}
+        var exportAncestors = $("#Standardizer_exportAncestorsCBX").prop("checked")
 
-        for(var term in self.entitiesMap) {
+        for (var term in self.entitiesMap) {
             for (var index in self.entitiesMap[term]) {
                 var item = {
                     target: self.entitiesMap[term][index],
@@ -216,7 +226,7 @@ var Standardizer = (function () {
         for (var columnValueDivId in ADLadvancedMapping.matchCandidates) {
 
             var item = ADLadvancedMapping.matchCandidates[columnValueDivId];
-            item.target.status="similar"
+            item.target.status = "similar"
             var source = Config.Standardizer.elasticIndexesSourcesMap[item.target.index]
             if (!sourcesMap[source])
                 sourcesMap[source] = []
@@ -235,10 +245,15 @@ var Standardizer = (function () {
             })
 
 
+            if (!exportAncestors)
+                return callbackEachSource();
+
             var ids = Object.keys(idsMap)
-            var ancestorsDepth = 3
+            var ancestorsDepth = 4
             var datatableColumns = []
             var dataTableData = []
+            $("#waitImg").css("display", "block")
+            MainController.UI.message("searching, classes ancestors in source "+source)
             Sparql_OWL.getNodeParents(source, null, ids, ancestorsDepth, null, function (err, result) {
                 if (err)
                     return callbackEachSource(err)
@@ -264,12 +279,16 @@ var Standardizer = (function () {
 
 
         }, function (err) {
-
-            var keys = ['term','status', 'index', 'class', 'score', 'superClassUris', 'superClassLabels']
+            MainController.UI.message("building table",)
+            var keys = ['term', 'status', 'index', 'classLabel', 'classId', 'score']
+            if(exportAncestors) {
+                keys.push('superClassUris')
+                keys.push('superClassLabels')
+            }
             var cols = [];
             var dataSet = [];
             keys.forEach(function (key) {
-                cols.push({title: key,"defaultContent": ""})
+                cols.push({title: key, "defaultContent": ""})
             })
 
 
@@ -279,10 +298,13 @@ var Standardizer = (function () {
                 line.push(item.term)
                 line.push(item.target.status)
                 line.push(item.target.index)
+                line.push(item.target.label || item.target.term)
                 line.push(item.target.id)
                 line.push(item.target.score)
-                line.push(item.superClassUris)
-                line.push(item.superClassLabels)
+                if(exportAncestors) {
+                    line.push(item.superClassUris)
+                    line.push(item.superClassLabels)
+                }
                 dataSet.push(line)
 
             }
@@ -292,7 +314,7 @@ var Standardizer = (function () {
 
             $('#mainDialogDiv').html("<table id='dataTableDiv'></table>");
             setTimeout(function () {
-
+                MainController.UI.message("", true)
                 $('#dataTableDiv').DataTable({
                     data: dataSet,
                     columns: cols,

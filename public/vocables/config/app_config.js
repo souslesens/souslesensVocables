@@ -23,7 +23,6 @@ var Config = (function () {
     self.defaultNewUriRoot = "http://souslesens.org/resource/"
     self.loginMode = "json";
 
-
     self.loginMode = "none";
 
     self.appName = "VOCABLES";
@@ -146,67 +145,7 @@ var Config = (function () {
     }//"images/taxonomy.png"}
 
 
-    //   self.currentProfile = self.profiles["admin"]
 
-
-    /* self.profiles = {
-         admin: {
-             allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUALS"],
-             allowedSources: "ALL",
-             forbiddenSources: ["Dbpedia"],
-             allowedTools: "ALL",
-             forbiddenTools: [],
-             blender: {contextMenuActionStartLevel: 0}
-         },
-         admin_skos: {
-             allowedSourceSchemas: ["SKOS"],
-             allowedSources: "ALL",
-             forbiddenSources: ["Dbpedia"],
-             allowedTools: "ALL",
-             forbiddenTools: ["ADLmappings", "evaluate"],
-             blender: {contextMenuActionStartLevel: 0}
-         },
-         blender_skos: {
-             allowedSourceSchemas: ["SKOS"],
-             allowedSources: "ALL",
-             forbiddenSources: ["Dbpedia"],
-             allowedTools: "ALL",
-             forbiddenTools: ["ADLmappings", "evaluate"],
-             blender: {contextMenuActionStartLevel: 3}
-         },
-         reader_skos: {
-             allowedSourceSchemas: ["SKOS"],
-             allowedSources: "ALL",
-             forbiddenSources: ["Dbpedia"],
-             allowedTools: "ALL",
-             forbiddenTools: ["ADLmappings", "evaluate", "BLENDER"],
-             blender: {contextMenuActionStartLevel: 3}
-         },
-         reader_all: {
-             allowedSourceSchemas: ["SKOS", "OWL"],
-             allowedSources: "ALL",
-             forbiddenSources: ["Dbpedia"],
-             allowedTools: "ALL",
-             forbiddenTools: [ "evaluate", "INDIVIDUALS", "BLENDER"],
-             blender: {contextMenuActionStartLevel: 3}
-         },
-         reader_owl: {
-             allowedSourceSchemas: ["OWL"],
-             allowedSources: "ALL",
-             forbiddenSources: [],
-             allowedTools: ["lineage", "ADLbrowser","ADLmappings","SPARQL"],
-             forbiddenTools: ["evaluate", "INDIVIDUALS", "BLENDER",],
-             blender: {contextMenuActionStartLevel: 3}
-         }
-         , reader_skos_blend: {
-             allowedSourceSchemas: ["SKOS"],
-             allowedSources: ["Total-CTG","GEMET","USGS","TermSciences"],
-             forbiddenSources: [],
-             allowedTools: ["sourceBrowser", "sourceMatcher","ancestors","blender","TAXONOMY"],
-             forbiddenTools: [],
-             blender: {contextMenuActionStartLevel: 3}
-         }
-     }*/
 
 
     return self;

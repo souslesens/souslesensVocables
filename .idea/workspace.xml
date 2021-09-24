@@ -5,13 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/bin/usersGenerator..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/profiles.json.default" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/sources.json.default" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_left.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_left.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,7 +218,7 @@
       <workItem from="1632143574060" duration="701000" />
       <workItem from="1632151197370" duration="5527000" />
       <workItem from="1632202224218" duration="55485000" />
-      <workItem from="1632399534284" duration="2075000" />
+      <workItem from="1632399534284" duration="5753000" />
     </task>
     <servers />
   </component>

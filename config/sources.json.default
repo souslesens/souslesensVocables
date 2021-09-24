@@ -1,0 +1,239 @@
+{
+  "GEOSCMIL": {
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://resource.geosciml.org/",
+    "schemaType": "SKOS",
+    "predicates": {
+      "broaderPredicate": "^skos:hasTopConcept|skos:broader",
+      "lang": "en"
+    },
+    "color": "#c5b0d5"
+  },
+  "TermSciences": {
+    "controller": "Sparql_SKOS",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "graphUri": "http://api.termsciences.fr/termsciences/",
+    "schemaType": "SKOS",
+    "predicates": {
+      "topConceptFilter": "?topConcept skos:prefLabel ?topConceptLabel.filter( ?topConcept in(<http://api.termsciences.fr/termsciences/TE-48512>,<http://api.termsciences.fr/termsciences/TE-60624>,<http://api.termsciences.fr/termsciences/TE-42031>,<http://api.termsciences.fr/termsciences/TE-27516>,<http://api.termsciences.fr/termsciences/TE-42056>,<http://api.termsciences.fr/termsciences/TE-15428>,<http://api.termsciences.fr/termsciences/TE-10236>) )",
+      "lang": "en"
+    },
+    "color": "#c5b0d5"
+  },
+  "TEPDK_FL": {
+    "graphUri": [
+      "http://data.total.com/resource/one-model/assets/tepdk3/"
+    ],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_INDIVIDUALS",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
+    "schemaType": "INDIVIDUAL",
+    "dataSource": {
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "dbName": "TEPDK",
+      "table_schema": "dbo",
+      "local_dictionary": {
+        "table": "tblAttributePickListValue",
+        "idColumn": "ID",
+        "labelColumn": "Name"
+      }
+    },
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926-part-14": {
+    "graphUri": "http://standards.iso.org/iso/15926/part14/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926-part-13": {
+    "graphUri": "http://standards.iso.org/iso/15926/part13/",
+    "imports": [
+      "ISO_15926-part-14"
+    ],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?x rdfs:subClassOf ?topConcept . filter (NOT exists {?obj rdfs:subClassOf ?x})",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "CFIHOS_READI": {
+    "graphUri": "http://w3id.org/readi/rdl/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/Object>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "QUANTUM": {
+    "graphUri": "http://data.total.com/resource/quantum/",
+    "imports": [
+      "ISO_15926-part-14"
+    ],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWLXXXX",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_14224": {
+    "graphUri": "http://standards.iso.org/iso/14224/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "IOGP_ISO_14224_merged": {
+    "graphUri": "http://data.total.com/resource/one-model/iogp_iso14224/",
+    "imports": [
+      "ISO_14224"
+    ],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "IOGP_ISO_14224": {
+    "graphUri": [
+      "http://data.total.com/resource/one-model/iogp_iso14224/"
+    ],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "NPD": {
+    "graphUri": [
+      "http://sws.ifi.uio.no/vocab/npd-v2",
+      "http://sws.ifi.uio.no/data/npd-v2/"
+    ],
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#e377c2"
+  },
+  "CIDOC": {
+    "graphUri": "http://erlangen-crm.org/current/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+    "schemaType": "OWLXXX",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926-PCA": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://staging.data.posccaesar.org/rdl/",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22",
+    "options": {
+      "graphPropertiesFilterRegex": "http://data.posccaesar.org/dm/.*"
+    }
+  },
+  "CFIHOS-ISO": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://192.236.179.169/sparql",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "CFIHOS_equipment": {
+    "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926-org": {
+    "graphUri": "",
+    "sparql_server": {
+      "url": "http://192.236.179.169/sparql",
+      "method": "GET"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926-part-4": {
+    "editable": false,
+    "graphUri": "http://standards.iso.org/iso/15926/part4/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
+    "controller": "Sparql_OWL",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  },
+  "ISO_15926-part-12": {
+    "editable": false,
+    "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
+    "sparql_server": {
+      "url": "_default"
+    },
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
+    "schemaType": "OWL",
+    "schema": null,
+    "color": "#bcbd22"
+  }
+}

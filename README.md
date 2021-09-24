@@ -12,4 +12,16 @@ both  on  SKOS or OWL resources
 
 Annotate tool allows annotate textual corpus with several registered lexical resources and identify missing terms
 
+
+#prerequisities
+
+* Nodejs
+* A sparql endpoint with public access
+* optional :elasticSearch, Spacy server
+
+
+#installation
+
+configuration files are in souslesensVocables/config
+
  

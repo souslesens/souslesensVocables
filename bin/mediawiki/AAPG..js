@@ -9,83 +9,83 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var fs = require('fs');
-var httpProxy = require('../../httpProxy.')
-var async = require('async')
+var fs = require("fs");
+var httpProxy = require("../../httpProxy.");
+var async = require("async");
 var AAPG = {
-
     getLinks: function () {
         var path = "D:\\Total\\2020\\Stephanie\\AAPG-Pages.txt";
 
-        var data = "" + fs.readFileSync(path)
+        var data = "" + fs.readFileSync(path);
         var pages = data.split("\n");
-        var pageIndex = 0
+        var pageIndex = 0;
 
         var links = {};
-        async.eachSeries(pages, function (page, callbackEach) {
-            page=encodeURIComponent(page)
-            if (!links[page])
-                links[page] = [];
+        async.eachSeries(
+            pages,
+            function (page, callbackEach) {
+                page = encodeURIComponent(page);
+                if (!links[page]) links[page] = [];
 
+                var url =
+                    "https://wiki.aapg.org/index.php?title=Special%3AWhatLinksHere&format=json&target=" +
+                    page;
 
-                var url = "https://wiki.aapg.org/index.php?title=Special%3AWhatLinksHere&format=json&target=" + page;
-
-
-              setTimeout(function() {
+                setTimeout(function () {
                     httpProxy.get(url, {}, function (err, result) {
-
-                        if (err)
-                            return callbackEach(err)
+                        if (err) return callbackEach(err);
                         var text = result;
                         console.log(page);
-                        var regex = /<li><a href="\/([^".]*)" title/g
+                        var regex = /<li><a href="\/([^".]*)" title/g;
 
                         let array;
 
                         while ((array = regex.exec(text)) !== null) {
-
-                            links[page].push(array[1])
+                            links[page].push(array[1]);
                         }
-                        if((pageIndex++)%20==0)
-                            fs.writeFileSync( "D:\\Total\\2020\\Stephanie\\AAPG-links.json",JSON.stringify(links));
+                        if (pageIndex++ % 20 == 0)
+                            fs.writeFileSync(
+                                "D:\\Total\\2020\\Stephanie\\AAPG-links.json",
+                                JSON.stringify(links)
+                            );
 
-                        callbackEach()
-                    })
-              },10)
+                        callbackEach();
+                    });
+                }, 10);
+            },
+            function (err) {
+                if (err) return console.log(err);
+                var xx = links;
 
-
-
-
-        },function(err) {
-            if (err)
-                return console.log(err);
-            var xx=links;
-
-            fs.writeFileSync( "D:\\Total\\2020\\Stephanie\\AAPG-links.json",JSON.stringify(links));
-            })
-
-
-
+                fs.writeFileSync(
+                    "D:\\Total\\2020\\Stephanie\\AAPG-links.json",
+                    JSON.stringify(links)
+                );
+            }
+        );
     },
 
-    linksToRdf:function(){
-var json=  JSON.parse(""+ fs.readFileSync( "D:\\Total\\2020\\Stephanie\\AAPG-links.json"));
-var rdf=""
-        for(var key in json) {
+    linksToRdf: function () {
+        var json = JSON.parse("" + fs.readFileSync("D:\\Total\\2020\\Stephanie\\AAPG-links.json"));
+        var rdf = "";
+        for (var key in json) {
             json[key].forEach(function (item) {
-                key=key.replace(/%20/g,"_")
-                rdf += "<https://wiki.aapg.org/" + key +"> <http://www.w3.org/2000/01/rdf-schema#seeAlso> "+"<https://wiki.aapg.org/" + item+">.\n"
-
-            })
+                key = key.replace(/%20/g, "_");
+                rdf +=
+                    "<https://wiki.aapg.org/" +
+                    key +
+                    "> <http://www.w3.org/2000/01/rdf-schema#seeAlso> " +
+                    "<https://wiki.aapg.org/" +
+                    item +
+                    ">.\n";
+            });
         }
 
-        fs.writeFileSync( "D:\\Total\\2020\\Stephanie\\AAPG-rdf.ttl",rdf);
-    }
+        fs.writeFileSync("D:\\Total\\2020\\Stephanie\\AAPG-rdf.ttl", rdf);
+    },
+};
 
-
-}
-
-module.exports = AAPG
+module.exports = AAPG;
 
 //AAPG.getLinks()
-AAPG.linksToRdf()
+AAPG.linksToRdf();

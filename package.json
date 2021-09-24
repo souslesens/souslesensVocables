@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "format": "prettier -w --tab-width=4 --print-width=100 *.js {bin,data,other,routes,views}/**/*.js"
   },
   "dependencies": {
     "@futpib/tika-server-client": "0.0.5",

@@ -7,42 +7,33 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var fs = require('fs');
+var fs = require("fs");
 
 var util = {
-
     sliceArray: function (array, sliceSize) {
         var slices = [];
-        var slice = []
+        var slice = [];
         array.forEach(function (item) {
             if (slice.length >= sliceSize) {
                 slices.push(slice);
                 slice = [];
             }
-            slice.push(item)
-        })
+            slice.push(item);
+        });
         slices.push(slice);
         return slices;
-        ormat
-
-
+        ormat;
     },
     deconcatSQLTableColumn: function (str) {
-        if (str.indexOf(":") > -1)
-            return null;
-        var array = str.split(".")
-        if (array.length < 2)
-            return null;
+        if (str.indexOf(":") > -1) return null;
+        var array = str.split(".");
+        if (array.length < 2) return null;
         if (array.length == 2) {
-            return {table: array[0], column: array[1]}
+            return { table: array[0], column: array[1] };
         } else if (array.length == 3) {
-            return {table: array[0] + "." + array[1], column: array[2]}
-        } else
-            return null;
-
-
+            return { table: array[0] + "." + array[1], column: array[2] };
+        } else return null;
     },
-
 
     /**
      * https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
@@ -53,11 +44,9 @@ var util = {
     getRandomHexaId: function (length) {
         const str = Math.floor(Math.random() * Math.pow(16, length)).toString(16);
         return "0".repeat(length - str.length) + str;
-
     },
 
     getStringHash: function (str) {
-
         var hash = 5381,
             i = str.length;
 
@@ -69,32 +58,26 @@ var util = {
          * integers. Since we want the results to be always positive, convert the
          * signed int to an unsigned by doing an unsigned bitshift. */
         return hash >>> 0;
-
-
     },
 
     base64_encodeFile: function (file) {
         // read binary data
         var bitmap = fs.readFileSync(file);
         // convert binary data to base64 encoded string
-        return new Buffer(bitmap).toString('base64');
-    }
-    ,
+        return new Buffer(bitmap).toString("base64");
+    },
     prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))
          obj = JSON.parse(obj);*/
 
         for (var key in obj) {
-
             var value = obj[key];
             if (!(typeof value === "object")) {
                 if (key == "_id") {
                     /*  if(ObjectID.isValid(value))
                      obj[key] = new ObjectID(id);*/
                     var id = "" + obj[key];
-                    if (id.length > 24)
-                        id = id.substring(id.length - 24);
-
+                    if (id.length > 24) id = id.substring(id.length - 24);
 
                     while (id.length < 24) {
                         id = "F" + id;
@@ -102,12 +85,9 @@ var util = {
                     console.log(id);
                     obj[key] = new ObjectID.createFromHexString(id);
                     // obj[key] = new ObjectID(id);
-
                 } else if (!isNaN(value) && value.indexOf) {
-                    if (value.indexOf(".") > -1)
-                        value = parseFloat(value)
-                    else
-                        value = parseInt(value)
+                    if (value.indexOf(".") > -1) value = parseFloat(value);
+                    else value = parseInt(value);
                     obj[key] = value;
                 }
             }
@@ -118,60 +98,45 @@ var util = {
     hashCode: function (str) {
         var hash = 0;
         for (var i = 0; i < str.length; i++) {
-            hash = ~~(((hash << 5) - hash) + str.charCodeAt(i));
+            hash = ~~((hash << 5) - hash + str.charCodeAt(i));
         }
         return hash;
-    }
-    ,
+    },
     base64_encodeFile: function (file) {
         // read binary data
         var bitmap = fs.readFileSync(file);
         // convert binary data to base64 encoded string
-        return new Buffer(bitmap).toString('base64');
-    }
-    ,
+        return new Buffer(bitmap).toString("base64");
+    },
     convertNumStringToNumber: function (value) {
-        if (value.match && value.match(/.*[a-zA-Z\/\\$].*/))
-            return value;
-        if (Util.isInt(value))
-            return parseInt(value)
-        if (Util.isFloat(value))
-            return parseFloat(value)
-        if (value == "true")
-            return true;
-        if (value == "false")
-            return false;
+        if (value.match && value.match(/.*[a-zA-Z\/\\$].*/)) return value;
+        if (Util.isInt(value)) return parseInt(value);
+        if (Util.isFloat(value)) return parseFloat(value);
+        if (value == "true") return true;
+        if (value == "false") return false;
         return value;
-
     },
     isNumber: function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
-    }
-    ,
-
-
+    },
     isInt: function (value) {
         return /^-?[0-9]+$/.test("" + value);
-
     },
     isFloat: function (value) {
         return /^-?[0-9]+[.,]+[0-9]?$/.test("" + value);
-
     },
 
     cleanFieldsForNeo: function (obj) {
         var obj2 = {};
         for (var key in obj) {
-
             var key2 = key.replace(/-/g, "_");
 
             key2 = key2.replace(/ /g, "_");
             if (key2 != "") {
                 var valueObj = obj[key];
                 if (valueObj) {
-
                     if (isNaN(valueObj) && valueObj.indexOf && valueObj.indexOf("http") == 0) {
-                        value = encodeURI(valueObj)
+                        value = encodeURI(valueObj);
                     } else {
                         var value = "" + valueObj;
                         if (isNaN(valueObj)) {
@@ -188,19 +153,16 @@ var util = {
                               }
                               value=str;*/
 
-
                             value = value.replace(/[\n|\r|\t]+/g, " ");
                             value = value.replace(/&/g, " and ");
                             value = value.replace(/"/g, "'");
                             value = value.replace(/,/g, "\\,");
                             value = value.replace(/\[/g, "\\,");
                             // value = value.replace(/\//g, "%2F");
-                            value = value.replace(/\\/g, "")
+                            value = value.replace(/\\/g, "");
                             //  value = value.replace(/:/g, "")
-                        } else if (value.indexOf(".") > -1)
-                            value = parseFloat(value)
-                        else
-                            value = parseInt(value)
+                        } else if (value.indexOf(".") > -1) value = parseFloat(value);
+                        else value = parseInt(value);
                     }
 
                     obj2[key2] = value;
@@ -209,180 +171,164 @@ var util = {
         }
 
         return obj2;
-
     },
     capitalizeFirstLetter: function (string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     },
 
     formatStringForTriple: function (str, forUri) {
-        if (!str || !str.replace)
-            return null;
-        str = str.trim()
-        str = str.replace(/\\/gm, "")
-        str = str.replace(/"/gm, "\\\"")
+        if (!str || !str.replace) return null;
+        str = str.trim();
+        str = str.replace(/\\/gm, "");
+        str = str.replace(/"/gm, '\\"');
         // str = str.replace(/;/gm, "\\\;")
         //  str = str.replace(/\n/gm, "\\\\n")
-        str = str.replace(/\n/gm, "\\\\n")
+        str = str.replace(/\n/gm, "\\\\n");
         //  str = str.replace(/\r/gm, "\\\\r")
-        str = str.replace(/\r/gm, "")
-        str = str.replace(/\t/gm, "\\\\t")
-        str = str.replace(/\\xa0/gm, " ")
-        str = str.replace(/'/gm, "\\\'")
-        if (forUri)
-            str = str.replace(/ /gm, "_")
-
+        str = str.replace(/\r/gm, "");
+        str = str.replace(/\t/gm, "\\\\t");
+        str = str.replace(/\\xa0/gm, " ");
+        str = str.replace(/'/gm, "\\'");
+        if (forUri) str = str.replace(/ /gm, "_");
 
         return str;
     },
     getCsvFileSeparator: function (file, callback) {
-        var readStream = fs.createReadStream(file, {start: 0, end: 5000, encoding: 'utf8'});
+        var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         var separator = ",";
-        readStream.on('data', function (chunk) {
-            var separators = [",", "\t", ";"];
-            var p = chunk.indexOf("\n")
-            if (p < 0)
-                p = chunk.indexOf("\r")
-            if (p < 0) {
+        readStream
+            .on("data", function (chunk) {
+                var separators = [",", "\t", ";"];
+                var p = chunk.indexOf("\n");
+                if (p < 0) p = chunk.indexOf("\r");
+                if (p < 0) {
+                    readStream.destroy();
+                    console.log("no line break or return in file");
+                    return null;
+                }
+                var firstLine = chunk.substring(0, p);
+                for (var k = 0; k < separators.length; k++) {
+                    if (firstLine.indexOf(separators[k]) > 0) callback(separators[k]);
+                }
+
                 readStream.destroy();
-                console.log("no line break or return in file")
-                return null;
-            }
-            var firstLine = chunk.substring(0, p)
-            for (var k = 0; k < separators.length; k++) {
-                if (firstLine.indexOf(separators[k]) > 0)
-                    callback(separators[k]);
-            }
-
-
-            readStream.destroy();
-        }).on('end', function () {
-            var xx = 3
-            return;
-        })
-            .on('close', function () {
+            })
+            .on("end", function () {
+                var xx = 3;
                 return;
             })
-        ;
-
+            .on("close", function () {
+                return;
+            });
     },
 
     normalizeHeader: function (headerArray, s) {
         //   var   r = s.toLowerCase();
         var r = s;
-        r = r.replace(/[\(\)'.]/g, "")
+        r = r.replace(/[\(\)'.]/g, "");
         r = r.replace(/[\s-_]+\w/g, function (txt) {
-            return txt.charAt(txt.length - 1).toUpperCase()
+            return txt.charAt(txt.length - 1).toUpperCase();
         });
-        r = r.replace(new RegExp("\\s", 'g'), "");
-        r = r.replace(new RegExp("[àáâãäå]", 'g'), "a");
-        r = r.replace(new RegExp("æ", 'g'), "ae");
-        r = r.replace(new RegExp("ç", 'g'), "c");
-        r = r.replace(new RegExp("[èéêë]", 'g'), "e");
-        r = r.replace(new RegExp("[ìíîï]", 'g'), "i");
-        r = r.replace(new RegExp("ñ", 'g'), "n");
-        r = r.replace(new RegExp("[òóôõö]", 'g'), "o");
-        r = r.replace(new RegExp("œ", 'g'), "oe");
-        r = r.replace(new RegExp("[ùúûü]", 'g'), "u");
-        r = r.replace(new RegExp("[ýÿ]", 'g'), "y");
-        r = r.replace(new RegExp("\\W", 'g'), "");
+        r = r.replace(new RegExp("\\s", "g"), "");
+        r = r.replace(new RegExp("[àáâãäå]", "g"), "a");
+        r = r.replace(new RegExp("æ", "g"), "ae");
+        r = r.replace(new RegExp("ç", "g"), "c");
+        r = r.replace(new RegExp("[èéêë]", "g"), "e");
+        r = r.replace(new RegExp("[ìíîï]", "g"), "i");
+        r = r.replace(new RegExp("ñ", "g"), "n");
+        r = r.replace(new RegExp("[òóôõö]", "g"), "o");
+        r = r.replace(new RegExp("œ", "g"), "oe");
+        r = r.replace(new RegExp("[ùúûü]", "g"), "u");
+        r = r.replace(new RegExp("[ýÿ]", "g"), "y");
+        r = r.replace(new RegExp("\\W", "g"), "");
         r = "" + r.charAt(0).toLowerCase() + r.substring(1);
         headerArray.push(r);
         return r;
-    }
+    },
 
-    , csvToJson: function (filePath) {
+    csvToJson: function (filePath) {
         var str = "" + fs.readFileSync(filePath);
-        str = str.replace(/[\u{0080}-\u{FFFF}]/gu, "");//charactrese vides
+        str = str.replace(/[\u{0080}-\u{FFFF}]/gu, ""); //charactrese vides
         var lines = str.split("\n");
         var pagesJson = [];
         var cols = [];
 
         lines[0].split("\t").forEach(function (cell) {
-            cols.push(cell.trim())
-        })
+            cols.push(cell.trim());
+        });
 
         lines.forEach(function (line, lineIndex) {
             var cells = line.trim().split("\t");
-            var obj = {}
+            var obj = {};
             cells.forEach(function (cell, index) {
-                if (lineIndex == 0)
-                    ;// cols.push(cell.trim())
+                if (lineIndex == 0);
                 else {
+                    // cols.push(cell.trim())
                     obj[cols[index]] = cell.trim();
                 }
-            })
-            pagesJson.push(obj)
-        })
+            });
+            pagesJson.push(obj);
+        });
         return pagesJson;
-    }
-,
-    getFilesInDirRecursively: function (dirPath,options, callback) {
-        var path=require('path')
-        var dirsArray = []
-        var dirFilesMap = {}
-        var message=""
-        if(!options)
-            options={}
-        var rootDirName = path.basename(dirPath)
+    },
+    getFilesInDirRecursively: function (dirPath, options, callback) {
+        var path = require("path");
+        var dirsArray = [];
+        var dirFilesMap = {};
+        var message = "";
+        if (!options) options = {};
+        var rootDirName = path.basename(dirPath);
 
         function recurse(parent) {
             parent = path.normalize(parent);
-            if (!fs.existsSync(parent))
-                return ("dir doesnt not exist :" + parent)
-            if (parent.charAt(parent.length - 1) != path.sep)
-                parent += path.sep;
-
+            if (!fs.existsSync(parent)) return "dir doesnt not exist :" + parent;
+            if (parent.charAt(parent.length - 1) != path.sep) parent += path.sep;
 
             var files = fs.readdirSync(parent);
             for (var i = 0; i < files.length; i++) {
                 var fileName = parent + files[i];
                 var stats = fs.statSync(fileName);
-                var infos = {lastModified: stats.mtimeMs};//fileInfos.getDirInfos(dir);
+                var infos = { lastModified: stats.mtimeMs }; //fileInfos.getDirInfos(dir);
 
                 if (stats.isDirectory()) {
                     dirFilesMap[fileName + "\\"] = [];
-                    dirsArray.push({type: "dir", name: files[i], parent: parent})
-                    recurse(fileName)
+                    dirsArray.push({ type: "dir", name: files[i], parent: parent });
+                    recurse(fileName);
                 } else {
                     var p = fileName.lastIndexOf(".");
-                    if (p < 0)
-                        continue;
+                    if (p < 0) continue;
                     var extension = fileName.substring(p + 1).toLowerCase();
                     if (options.acceptedExtensions && acceptedExtensions.indexOf(extension) < 0) {
-                       message+=("!!!!!!  refusedExtension " + fileName);
+                        message += "!!!!!!  refusedExtension " + fileName;
                         continue;
                     }
-                    if (options.maxDocSize &&  stats.size > maxDocSize) {
-                        message+=("!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ");
+                    if (options.maxDocSize && stats.size > maxDocSize) {
+                        message +=
+                            "!!!!!! " +
+                            fileName +
+                            " file  too big " +
+                            Math.round(stats.size / 1000) +
+                            " Ko , not indexed ";
                         continue;
                     }
-                    if (!dirFilesMap[parent])
-                        dirFilesMap[parent] = []
-                    dirFilesMap[parent].push({type: "file", parent: parent, name: files[i], infos: infos})
+                    if (!dirFilesMap[parent]) dirFilesMap[parent] = [];
+                    dirFilesMap[parent].push({
+                        type: "file",
+                        parent: parent,
+                        name: files[i],
+                        infos: infos,
+                    });
                     // dirsArray.push({type: "file", parent: parent, name: files[i], infos: infos})
-
                 }
-
-
             }
-
         }
-
 
         recurse(dirPath, dirPath);
         var x = dirsArray;
-        var y = dirFilesMap
+        var y = dirFilesMap;
 
-
-
-        return callback (null, dirFilesMap)
-
-    }
-
-
-}
+        return callback(null, dirFilesMap);
+    },
+};
 
 module.exports = util;
-
-

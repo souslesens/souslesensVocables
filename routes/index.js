@@ -121,7 +121,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
 
 
         if (req.body.httpProxy) {
-            httpProxy.host = req.headers.host
+            httpProxy.setProxyForServerDomain(req.headers.host);
 
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body)

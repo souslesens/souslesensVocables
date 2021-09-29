@@ -23,12 +23,13 @@ var httpProxy = {
         if (!proxy) {
             var domainWithProxy = "XXXmain.glb.corp.local"
             var proxyUrl = "http://j0417704:Clarisse1208@10.16.152.65:8080"
-console.log(" -----------setting up proxy---------"+proxyUrl)
+//console.log(" -----------setting up proxy---------"+proxyUrl)
             if ((proxyUrl && host && host.indexOf(domainWithProxy) > -1)) {/// proxy for request
                 process.env['http_proxy'] = proxyUrl;
                 process.env['https_proxy'] = proxyUrl;
+
+                proxy = proxyUrl
             }
-            proxy = proxyUrl
         }
     },
 

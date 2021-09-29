@@ -14,12 +14,31 @@ var jsonFileStorage = require('./jsonFileStorage')
 var SourceManager = require("./sourceManager.")
 var path = require('path')
 var async = require("async")
+var fs=require('fs')
 
 var configs = {};
 var configManager = {
+    getGeneralConfig: function (callback) {
+        var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json/")
+        var str = fs.readFileSync(mainConfigFilePath);
+        var config = null;
+        try {
+            config = JSON.parse("" + str);
+            if (callback)
+                return callback(err,config);
+            return config;
+
+        } catch (e) {// in that case return the string content not parsed
+            if (callback)
+                return callback(null, str);
+        }
+
+    },
+
+
     getDictionary: function (dictionary, callback) {
 
-        var dictionaryPath = path.join(__dirname, "../config/dictionaries/"+dictionary)
+        var dictionaryPath = path.join(__dirname, "../config/dictionaries/" + dictionary)
         jsonFileStorage.retrieve(path.resolve(dictionaryPath), function (err, profiles) {
             callback(err, profiles)
         })

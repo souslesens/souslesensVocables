@@ -41,33 +41,14 @@ router.post('/upload', function (req, response) {
 
 
 router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
-        //  console.log(JSON.stringify(req.body,null,2))
 
-        /*if (req.body.executeQuery) {
-            var queryObj = JSON.parse(req.body.executeQuery);
-            var indexesStr = "";
-            if (req.body.indexes) {
-                var indexes = JSON.parse(req.body.indexes);
-                if (Array.isArray(indexes)) {
-                    indexes.forEach(function (index, p) {
-                        if (p > 0)
-                            indexesStr += ","
-                        indexesStr += index;
-                    })
-                } else
-                    indexesStr = indexes
-            }
-            var url = "";
-            if (req.body.url)
-                url = req.body.url
 
-            elasticRestProxy.executePostQuery(url + indexesStr + "/_search", queryObj, function (error, result) {
-                //   logger.info("QUERY :" + JSON.stringify(queryObj.query.bool) + "\n indexes :" + req.body.indexes)
-                processResponse(response, error, result);
+        if (req.body.getGeneralConfig) {
 
-            });
-
-        }*/
+                configManager.getGeneralConfig(function (err, result) {
+                    processResponse(response, err, result)
+                })
+        }
 
 
         if (req.body.elasticSearch) {
@@ -118,6 +99,7 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
                     processResponse(response, err, result)
                 })
         }
+
 
 
         if (req.body.httpProxy) {

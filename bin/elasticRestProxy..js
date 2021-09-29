@@ -11,24 +11,34 @@
  */
 const request = require('request');
 
+const ConfigManager = require('./configManager.')
 
-//const elasticUrl = "http://localhost:9200/";
-//const elasticUrl = "http://92.222.116.179:7201/";
-var  elasticUrl = "http://51.178.39.209:2009/";
-var elasticUrl = "http://164.132.194.227:2009/";
+
+// elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 
 
 const debug = true;
 var elasticRestProxy = {
-    elasticUrl: elasticUrl,
+    elasticUrl: null,
+    getElasticUrl: function () {
+        if (elasticRestProxy.elasticUrl)
+            return elasticRestProxy.elasticUrl
+        else {
 
-    executePostQuery: function (url, query,indexes, callback) {
+            var mainConfig = ConfigManager.getGeneralConfig();
+            if (mainConfig)
+                elasticRestProxy.elasticUrl = mainConfig.ElasticSearch.url
+            return elasticRestProxy.elasticUrl
+        }
+    },
+
+
+    executePostQuery: function (url, query, indexes, callback) {
 
         if (url.toLowerCase().trim().indexOf("http") < 0)
 
 
-
-        var indexesStr="";
+            var indexesStr = "";
         if (Array.isArray(indexes)) {
             indexes.forEach(function (index, p) {
                 if (p > 0)
@@ -37,10 +47,10 @@ var elasticRestProxy = {
             })
         } else
             indexesStr = indexes
-        if(indexesStr!="")
-            indexesStr+="/"
-
-        url = elasticUrl +indexesStr+ url;
+        if (indexesStr != "")
+            indexesStr += "/"
+        var elasticUrl = elasticRestProxy.getElasticUrl()
+        url = elasticUrl + indexesStr + url;
 
 
         var options = {
@@ -76,6 +86,7 @@ var elasticRestProxy = {
 
     },
     executeMsearch: function (ndjson, callback) {
+        var elasticUrl = elasticRestProxy.getElasticUrl()
         var options = {
             method: 'POST',
             body: ndjson,
@@ -116,9 +127,8 @@ var elasticRestProxy = {
             try {
 
                 body = JSON.parse(responseBody.toString());
-            }
-            catch(e){
-                return callback(e+" : "+responseBody.toString())
+            } catch (e) {
+                return callback(e + " : " + responseBody.toString())
 
             }
         else
@@ -167,10 +177,10 @@ var elasticRestProxy = {
         })
     },
 
-    analyzeSentence:function(sentence, callback){
-        var json={
-            "analyzer" : "stop",
-            "text" : sentence
+    analyzeSentence: function (sentence, callback) {
+        var json = {
+            "analyzer": "stop",
+            "text": sentence
         }
         var options = {
             method: 'POST',
@@ -178,7 +188,7 @@ var elasticRestProxy = {
             headers: {
                 'content-type': 'application/json'
             },
-            json:json,
+            json: json,
             url: elasticUrl + "_analyze"
         };
 
@@ -186,9 +196,8 @@ var elasticRestProxy = {
             if (error) {
                 return callback(error)
             }
-            return callback(null,body);
+            return callback(null, body);
         })
-
 
 
     }

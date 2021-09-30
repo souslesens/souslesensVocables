@@ -7,7 +7,7 @@
         "format": "prettier ./src/**/*.{jsx,tsx,ts,js,css}",
         "lint": "eslint src",
         "build": "webpack --config webpack.config.js",
-        "build:watch": "npm run build -- --watch",
+        "build:watch": "npm run build -- --watch"
     },
     "author": "Logilab",
     "license": "LGPL-3.0-or-later",
@@ -35,6 +35,8 @@
         "webpack-merge": "^5.1.4"
     },
     "dependencies": {
+        "@emotion/react": "^11.4.1",
+        "@emotion/styled": "^11.3.0",
         "@mui/material": "^5.0.2",
         "react": "^17.0.0",
         "react-dom": "^17.0.0"

@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var serverParams = {routesRootUrl: ""}
+var serverParams = { routesRootUrl: "" }
 
 
 var elasticRestProxy = require('../bin/elasticRestProxy..js');
@@ -20,6 +20,10 @@ var configManager = require("../bin/configManager.")
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.sendFile(path.join(__dirname, '/../mainapp/index.html'))
+});
+
+router.get('/users', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/users/users.json'))
 });
 
 router.post('/upload', function (req, response) {
@@ -42,239 +46,178 @@ router.post('/upload', function (req, response) {
 
 
 router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
-        //  console.log(JSON.stringify(req.body,null,2))
+    //  console.log(JSON.stringify(req.body,null,2))
 
-        /*if (req.body.executeQuery) {
-            var queryObj = JSON.parse(req.body.executeQuery);
-            var indexesStr = "";
-            if (req.body.indexes) {
-                var indexes = JSON.parse(req.body.indexes);
-                if (Array.isArray(indexes)) {
-                    indexes.forEach(function (index, p) {
-                        if (p > 0)
-                            indexesStr += ","
-                        indexesStr += index;
-                    })
-                } else
-                    indexesStr = indexes
-            }
-            var url = "";
-            if (req.body.url)
-                url = req.body.url
-
-            elasticRestProxy.executePostQuery(url + indexesStr + "/_search", queryObj, function (error, result) {
-                //   logger.info("QUERY :" + JSON.stringify(queryObj.query.bool) + "\n indexes :" + req.body.indexes)
-                processResponse(response, error, result);
-
-            });
-
-        }*/
-
-
-        if (req.body.elasticSearch) {
-            elasticRestProxy.executePostQuery(req.body.url,JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-
-        if (req.body.tryLoginJSON) {
-            authentication.authentify(req.body.login, req.body.password, function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-
-        if (req.body.getProfiles) {
-            configManager.getProfiles({}, function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-
-        if (req.body.getSources) {
-            configManager.getSources({}, function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-        if (req.body.getBlenderSources) {
-            configManager.getBlenderSources({}, function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-        if (req.body.createNewResource) {
-
-            configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-        if (req.body.deleteResource) {
-
-            configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-
-
-        if (req.body.ADLmappingDictionary) {
-            if (req.body.load)
-                configManager.getDictionary(req.body.load, function (err, result) {
-                    processResponse(response, err, result)
+    /*if (req.body.executeQuery) {
+        var queryObj = JSON.parse(req.body.executeQuery);
+        var indexesStr = "";
+        if (req.body.indexes) {
+            var indexes = JSON.parse(req.body.indexes);
+            if (Array.isArray(indexes)) {
+                indexes.forEach(function (index, p) {
+                    if (p > 0)
+                        indexesStr += ","
+                    indexesStr += index;
                 })
+            } else
+                indexesStr = indexes
+        }
+        var url = "";
+        if (req.body.url)
+            url = req.body.url
+
+        elasticRestProxy.executePostQuery(url + indexesStr + "/_search", queryObj, function (error, result) {
+            //   logger.info("QUERY :" + JSON.stringify(queryObj.query.bool) + "\n indexes :" + req.body.indexes)
+            processResponse(response, error, result);
+
+        });
+
+    }*/
+
+
+    if (req.body.elasticSearch) {
+        elasticRestProxy.executePostQuery(req.body.url, JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+
+    if (req.body.tryLoginJSON) {
+        authentication.authentify(req.body.login, req.body.password, function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+
+    if (req.body.getProfiles) {
+        configManager.getProfiles({}, function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+
+    if (req.body.getSources) {
+        configManager.getSources({}, function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+    if (req.body.getBlenderSources) {
+        configManager.getBlenderSources({}, function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+    if (req.body.createNewResource) {
+
+        configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+    if (req.body.deleteResource) {
+
+        configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+
+
+    if (req.body.ADLmappingDictionary) {
+        if (req.body.load)
+            configManager.getDictionary(req.body.load, function (err, result) {
+                processResponse(response, err, result)
+            })
+    }
+
+
+    if (req.body.httpProxy) {
+        httpProxy.host = req.headers.host
+
+        if (req.body.POST) {
+            var body = JSON.parse(req.body.body)
+            httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
+                processResponse(response, err, result)
+            })
+        } else {
+            var options = {};
+            if (req.body.options) {
+                if (typeof req.body.options == "string")
+                    options = JSON.parse(req.body.options);
+                else
+                    options = req.body.options
+
+            }
+            options.host = req.headers.host
+            httpProxy.get(req.body.url, options, function (err, result) {
+                processResponse(response, err, result)
+            })
+        }
+    }
+
+    if (req.body.analyzeSentence) {
+
+        elasticRestProxy.analyzeSentence(req.body.analyzeSentence, function (err, result) {
+            processResponse(response, err, result)
+        })
+    }
+
+
+    if (req.body.annotateLive) {
+        var annotatorLive = require("../bin/annotatorLive.")
+        var sources = JSON.parse(req.body.sources)
+        annotatorLive.annotate(req.body.text, sources, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+    if (req.body.getConceptsSubjectsTree) {
+
+        DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+    if (req.body.annotateAndStoreCorpus) {
+
+        DirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, JSON.parse(req.body.sources), req.body.corpusName, JSON.parse(req.body.options), function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+    if (req.body.getAnnotatedCorpusList) {
+        DirContentAnnotator.getAnnotatedCorpusList(req.body.group, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+
+    if (req.body.writeUserLog) {
+        var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
+        req.body.infos += "," + ip
+
+        logger.info(req.body.infos)
+        processResponse(response, null, { done: 1 })
+
+
+    }
+    if (req.body.ADLquery) {
+        var ADLSqlConnector = require("../bin/ADL/ADLSqlConnector.")
+        var SQLserverConnector = require("../bin/ADL/SQLserverConnector.")
+        if (req.body.getFromSparql) {
+
+            ADLSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), function (err, result) {
+                processResponse(response, err, result)
+
+            })
         }
 
-
-        if (req.body.httpProxy) {
-            httpProxy.host = req.headers.host
-
-            if (req.body.POST) {
-                var body = JSON.parse(req.body.body)
-                httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
+        if (req.body.getModel) {
+            req.body.getModel = JSON.parse(req.body.getModel)
+            if (req.body.getModel.type == "sql.sqlserver") {
+                SQLserverConnector.getADLmodel(req.body.getModel.dbName, function (err, result) {
                     processResponse(response, err, result)
+
                 })
             } else {
-                var options = {};
-                if (req.body.options) {
-                    if (typeof req.body.options == "string")
-                        options = JSON.parse(req.body.options);
-                    else
-                        options = req.body.options
-
-                }
-                options.host = req.headers.host
-                httpProxy.get(req.body.url, options, function (err, result) {
-                    processResponse(response, err, result)
-                })
-            }
-        }
-
-        if (req.body.analyzeSentence) {
-
-            elasticRestProxy.analyzeSentence(req.body.analyzeSentence, function (err, result) {
-                processResponse(response, err, result)
-            })
-        }
-
-
-        if (req.body.annotateLive) {
-            var annotatorLive = require("../bin/annotatorLive.")
-            var sources = JSON.parse(req.body.sources)
-            annotatorLive.annotate(req.body.text, sources, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-
-        if (req.body.getConceptsSubjectsTree) {
-
-            DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-
-        if (req.body.annotateAndStoreCorpus) {
-
-            DirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, JSON.parse(req.body.sources), req.body.corpusName, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-        if (req.body.getAnnotatedCorpusList) {
-            DirContentAnnotator.getAnnotatedCorpusList(req.body.group, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-
-
-        if (req.body.writeUserLog) {
-            var ip = req.header('x-forwarded-for') || req.connection.remoteAddress;
-            req.body.infos += "," + ip
-
-            logger.info(req.body.infos)
-            processResponse(response, null, {done: 1})
-
-
-        }
-        if (req.body.ADLquery) {
-            var ADLSqlConnector = require("../bin/ADL/ADLSqlConnector.")
-            var SQLserverConnector = require("../bin/ADL/SQLserverConnector.")
-            if (req.body.getFromSparql) {
-
-                ADLSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), function (err, result) {
-                    processResponse(response, err, result)
-
-                })
-            }
-
-            if (req.body.getModel) {
-                req.body.getModel = JSON.parse(req.body.getModel)
-                if (req.body.getModel.type == "sql.sqlserver") {
-                    SQLserverConnector.getADLmodel(req.body.getModel.dbName, function (err, result) {
-                        processResponse(response, err, result)
-
-                    })
-                } else {
-                    ADLSqlConnector.getADLmodel(req.body.getModel.dbName, function (err, result) {
-                        processResponse(response, err, result)
-
-                    })
-                }
-            }
-
-
-            if (req.body.getData) {
-                req.body.dataSource = JSON.parse(req.body.dataSource)
-                if (req.body.dataSource.type == "sql.sqlserver") {
-                    SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, result) {
-                        processResponse(response, err, result)
-
-                    })
-                } else {
-                    ADLSqlConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, result) {
-                        processResponse(response, err, result)
-
-                    })
-                }
-            }
-
-        }
-        if (req.body.buildADL) {
-
-
-            var mappingFileNames = JSON.parse(req.body.mappingFileNames)
-            ADLbuilder.buidlADL(mappingFileNames, req.body.sparqlServerUrl, req.body.adlGraphUri,  JSON.parse(req.body.replaceGraph), JSON.parse(req.body.dataSource), function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-
-
-        if (req.query.SPARQLquery) {
-
-            var query = req.body.query;
-            if (req.query.graphUri)
-                query = query.replace(/where/gi, 'from <' + req.query.graphUri + '> WHERE ')
-
-            if (req.query.method == "POST") {
-                var headers = {}
-                headers["Accept"] = "application/sparql-results+json";
-                headers["Content-Type"] = "application/x-www-form-urlencoded";
-
-
-                httpProxy.post(req.query.url, headers, {query: query}, function (err, result) {
-                    processResponse(response, err, result)
-
-                })
-            } else if (req.query.method == "GET") {
-                var headers = {}
-                headers["Accept"] = "application/sparql-results+json";
-                headers["Content-Type"] = "application/x-www-form-urlencoded"
-
-                var query2 = encodeURIComponent(query);
-                query2 = query2.replace(/%2B/g, "+").trim()
-                var url = req.query.url + "?format=json&query=" + query2;
-                httpProxy.get(url, headers, function (err, result) {
-                    if (result && typeof result === 'string')
-                        result = JSON.parse(result.trim());
+                ADLSqlConnector.getADLmodel(req.body.getModel.dbName, function (err, result) {
                     processResponse(response, err, result)
 
                 })
@@ -282,54 +225,115 @@ router.post(serverParams.routesRootUrl + '/elastic', function (req, response) {
         }
 
 
-        if (req.body.uploadOntologyFromOwlFile) {
+        if (req.body.getData) {
+            req.body.dataSource = JSON.parse(req.body.dataSource)
+            if (req.body.dataSource.type == "sql.sqlserver") {
+                SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, result) {
+                    processResponse(response, err, result)
 
-            OneModelManager.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+                })
+            } else {
+                ADLSqlConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, result) {
+                    processResponse(response, err, result)
+
+                })
+            }
+        }
+
+    }
+    if (req.body.buildADL) {
+
+
+        var mappingFileNames = JSON.parse(req.body.mappingFileNames)
+        ADLbuilder.buidlADL(mappingFileNames, req.body.sparqlServerUrl, req.body.adlGraphUri, JSON.parse(req.body.replaceGraph), JSON.parse(req.body.dataSource), function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+
+    if (req.query.SPARQLquery) {
+
+        var query = req.body.query;
+        if (req.query.graphUri)
+            query = query.replace(/where/gi, 'from <' + req.query.graphUri + '> WHERE ')
+
+        if (req.query.method == "POST") {
+            var headers = {}
+            headers["Accept"] = "application/sparql-results+json";
+            headers["Content-Type"] = "application/x-www-form-urlencoded";
+
+
+            httpProxy.post(req.query.url, headers, { query: query }, function (err, result) {
+                processResponse(response, err, result)
+
+            })
+        } else if (req.query.method == "GET") {
+            var headers = {}
+            headers["Accept"] = "application/sparql-results+json";
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
+
+            var query2 = encodeURIComponent(query);
+            query2 = query2.replace(/%2B/g, "+").trim()
+            var url = req.query.url + "?format=json&query=" + query2;
+            httpProxy.get(url, headers, function (err, result) {
+                if (result && typeof result === 'string')
+                    result = JSON.parse(result.trim());
                 processResponse(response, err, result)
 
             })
         }
-        if (req.body.ADL_SaveMappings) {
-            ADLcontroller.saveMappings(req.body.ADLsource, req.body.mappings, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-        if (req.body.ADL_GetMappings) {
-            ADLcontroller.getMappings(req.body.ADL_GetMappings, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-        if (req.body.getAssetGlobalMappings) {
-            ADLcontroller.getAssetGlobalMappings(req.body.getAssetGlobalMappings, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-
-        if (req.body.saveData) {
-            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-
-        if (req.body.listDirFiles) {
-            DataController.getFilesList(req.body.dir, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
-        if (req.body.readDataFile) {
-            DataController.readfile(req.body.dir, req.body.fileName, function (err, result) {
-                processResponse(response, err, result)
-
-            })
-        }
+    }
 
 
-    },
+    if (req.body.uploadOntologyFromOwlFile) {
+
+        OneModelManager.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+    if (req.body.ADL_SaveMappings) {
+        ADLcontroller.saveMappings(req.body.ADLsource, req.body.mappings, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+    if (req.body.ADL_GetMappings) {
+        ADLcontroller.getMappings(req.body.ADL_GetMappings, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+    if (req.body.getAssetGlobalMappings) {
+        ADLcontroller.getAssetGlobalMappings(req.body.getAssetGlobalMappings, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+    if (req.body.saveData) {
+        DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+    if (req.body.listDirFiles) {
+        DataController.getFilesList(req.body.dir, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+    if (req.body.readDataFile) {
+        DataController.readfile(req.body.dir, req.body.fileName, function (err, result) {
+            processResponse(response, err, result)
+
+        })
+    }
+
+
+},
 
 
     router.get('/heatMap', function (req, res, next) {
@@ -392,14 +396,14 @@ function processResponse(response, error, result) {
             }
             console.log("ERROR !!" + error);
             //   socket.message("ERROR !!" + error);
-            return response.status(404).send({ERROR: error});
+            return response.status(404).send({ ERROR: error });
 
         } else if (!result) {
-            return response.send({done: true});
+            return response.send({ done: true });
         } else {
 
             if (typeof result == "string") {
-                resultObj = {result: result};
+                resultObj = { result: result };
                 //  socket.message(resultObj);
                 response.send(JSON.stringify(resultObj));
             } else {

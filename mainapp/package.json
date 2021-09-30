@@ -1,0 +1,42 @@
+{
+    "name": "souslesens-webapp",
+    "version": "0.0.0",
+    "description": "Webapp for the Souslesens application",
+    "main": "index.js",
+    "scripts": {
+        "format": "prettier ./src/**/*.{jsx,tsx,ts,js,css}",
+        "lint": "eslint src",
+        "build": "webpack --config webpack.config.js",
+        "build:watch": "npm run build -- --watch",
+    },
+    "author": "Logilab",
+    "license": "LGPL-3.0-or-later",
+    "devDependencies": {
+        "@types/react-dom": "^17.0.8",
+        "@typescript-eslint/eslint-plugin": "^3.10.1",
+        "@typescript-eslint/parser": "^3.10.1",
+        "babel-eslint": "^10.1.0",
+        "css-loader": "^4.3.0",
+        "eslint": "^7.8.1",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-import": "^2.22.0",
+        "eslint-plugin-prettier": "^3.1.4",
+        "eslint-plugin-react": "^7.20.6",
+        "eslint-plugin-react-hooks": "^4.1.0",
+        "file-loader": "^6.1.0",
+        "prettier": "^2.1.1",
+        "source-map-loader": "^1.1.0",
+        "style-loader": "^1.2.1",
+        "ts-loader": "^8.0.3",
+        "typescript": "^4.0.2",
+        "webpack": "^4.44.1",
+        "webpack-cli": "^3.3.12",
+        "webpack-dev-server": "^3.11.0",
+        "webpack-merge": "^5.1.4"
+    },
+    "dependencies": {
+        "@mui/material": "^5.0.2",
+        "react": "^17.0.0",
+        "react-dom": "^17.0.0"
+    }
+}

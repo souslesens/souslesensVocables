@@ -8,7 +8,10 @@
         "strictNullChecks": true,
         "module": "commonjs",
         "target": "es6",
-        "lib": [ "es6", "dom" ],
+        "lib": [
+            "es6",
+            "dom"
+        ],
         "jsx": "react"
     },
     "include": [

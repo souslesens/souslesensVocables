@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@futpib/tika-server-client": "0.0.5",
+    "@material-ui/types": "^5.1.0",
     "@mui/x-data-grid": "^4.0.1",
     "@triply/yasgui": "^4.1.1",
     "async": "^3.2.0",

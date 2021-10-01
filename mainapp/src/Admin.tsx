@@ -1,9 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Button, dividerClasses } from '@mui/material';
+import { accordionActionsClasses, Button, dividerClasses } from '@mui/material';
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { User, getUsers } from './User'
-import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -20,22 +19,87 @@ const style = {
     p: 4,
 };
 
-//type Dispatcher = 'UserClickedOpenModale' | 
+type Msg =
+    { type: 'UserClickedOpenModale', payload: boolean }
+    | { type: 'ServerRespondedWithUsers', payload: RD<string, User[]> }
+    | { type: 'UserUpdatedField', key: string, fieldName: string, newValue: string }
 
+
+type Model = {
+    users: RD<string, User[]>,
+    isModaleOpen: boolean
+}
+
+const initialModel: Model =
+{
+    users: notAsked(),
+    isModaleOpen: false
+}
+
+const identity = (a: any): any => a
+//const arrayToDict = (arr: User[]): Record<string, User> => {
+//  return arr.reduce((acc, val) =>...acc, [val.key]: identity(val), {})
+//}
+
+function update(model: Model, action: Msg): Model {
+    const unwrapedUsers = SRD.unwrap([], identity, model.users)
+    switch (action.type) {
+        case 'UserClickedOpenModale':
+            return { ...model, isModaleOpen: action.payload }
+        case 'ServerRespondedWithUsers':
+            return { ...model, users: action.payload }
+        case 'UserUpdatedField':
+            return { ...model, users: model.users }
+        default:
+            return model
+    }
+}
 
 const Admin = () => {
-    const [users, setUser] = React.useState<RD<string, User[]>>(notAsked())
+
+    const [model, updatedModel] = React.useReducer(update, initialModel)
+    const handleOpen = () => updatedModel({ type: 'UserClickedOpenModale', payload: true });
+    const handleClose = () => updatedModel({ type: 'UserClickedOpenModale', payload: false });
 
     React.useEffect(() => {
-        setUser(loading())
+        updatedModel({ type: 'ServerRespondedWithUsers', payload: loading() })
         getUsers('/users')
-            .then((person) => setUser(success(person)))
-            .catch((err) => setUser(failure(err.msg)))
+            .then((person) => updatedModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .catch((err) => updatedModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
     }, [])
 
-    const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+
+
+    function viewUser(user: User) {
+        const fields = Object.keys(user)
+        return (
+            <>
+                <li><Button onClick={handleOpen}>{user.login}</Button></li>
+                <Modal
+                    open={model.isModaleOpen}
+                    onClose={handleClose}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box component="form"
+                        sx={style}
+                        noValidate
+                        autoComplete="off">
+                        <TextField value={user.login} id="login" label="Login" variant="standard" />
+                        <TextField value={user.password} id="password" label="mdp" variant="standard" />
+                        <Button onClick={handleOpen} variant="contained">Save changes</Button>
+                    </Box>
+                </Modal>
+            </>
+        )
+    }
+
+    function viewUsers(gotUsers: User[]): JSX.Element {
+        return (
+            <ul>{gotUsers.map(el => viewUser(el))}
+            </ul>)
+
+    }
 
     return <>
         {SRD.match({
@@ -44,26 +108,9 @@ const Admin = () => {
             failure: (msg) => `Il y a un problème: ${msg}`,
             success: gotUsers =>
                 <div>
-                    <ul>{gotUsers.map(el =>
-                        < li > <Button onClick={handleOpen}>{el.login}</Button> <Modal
-                            open={open}
-                            onClose={handleClose}
-                            aria-labelledby="modal-modal-title"
-                            aria-describedby="modal-modal-description"
-                        >
-                            <Box component="form"
-                                sx={style}
-                                noValidate
-                                autoComplete="off">
-                                <TextField defaultValue={el.login} id="standard-basic" label="Login" variant="standard" />
-                                <TextField defaultValue={el.password} id="standard-basic" label="Login" variant="standard" />
-                                <Button onClick={handleOpen} variant="contained">Save changes</Button>
-                            </Box>
-                        </Modal> </li>)}
-                    </ul>
-
+                    {viewUsers(gotUsers)}
                 </div>
-        }, users)}
+        }, model.users)}
     </>
 }
 

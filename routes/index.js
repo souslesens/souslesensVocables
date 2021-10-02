@@ -181,11 +181,9 @@ router.post(
             processResponse(response, null, { done: 1 });
         }
         if (req.body.ADLquery) {
-            ADLcontroller.ADLquery(req,function(err,result){
+            ADLcontroller.ADLquery(req, function (err, result) {
                 processResponse(response, err, result);
-            })
-
-
+            });
         }
         if (req.body.buildADL) {
             var mappingFileNames = JSON.parse(req.body.mappingFileNames);
@@ -195,6 +193,7 @@ router.post(
                 req.body.adlGraphUri,
                 JSON.parse(req.body.replaceGraph),
                 JSON.parse(req.body.dataSource),
+                JSON.parse(req.body.options),
                 function (err, result) {
                     processResponse(response, err, result);
                 }
@@ -260,7 +259,6 @@ router.post(
                 }
             );
         }
-
 
         if (req.body.saveData) {
             DataController.saveDataToFile(

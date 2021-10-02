@@ -155,7 +155,7 @@ var tulsaToSkos = {
             } else if (item.type == "SA") {
                 if (entity.relateds.indexOf(item.term) < 0) entity.relateds.push(item.term);
             } else if (item.type == "UF") {
-            /*else if (false && item.type.indexOf("US") == 0) {
+                /*else if (false && item.type.indexOf("US") == 0) {
                 if (entity.altLabels.indexOf(item.term) < 0)
                     entity.altLabels.push(item.term)
 

@@ -18,7 +18,7 @@ var sqlConnector = require("./ADLSqlConnector.");
 var SQLserverConnector = require("./SQLserverConnector.");
 var socket = require("../../routes/socket.js");
 
-var ADLcontroller=require('./ADLcontroller.')
+var ADLcontroller = require("./ADLcontroller.");
 
 var idsCache = {};
 
@@ -79,6 +79,9 @@ var ADLbuilder = {
                     var objectClass = mapping.object;
 
                     var classType = oneModelSuperClasses[objectClass];
+                    var processAsNoSubclass=false;
+
+
                     if (classType == "ARDL-SPECIFIC") {
                         var uri = ADLgraphUri + subjectValue;
                         if (ARDLdictionary[subjectValue]) {
@@ -98,12 +101,20 @@ var ADLbuilder = {
 
                             existingUrisMap[subjectValue] = uri;
                         } else {
+                            if(options.skipLocalDictionaryOrphans)
                             rejectedItems.push(item);
+                            else
+                                processAsNoSubclass=true;
                         }
-                    } else if (classType == "REFERENCE") {
+                    }
+
+                    else if (classType == "REFERENCE") {
                         var obj = oneModelReferenceDictionary[objectClass][subjectValue];
                         if (!obj) {
-                            rejectedItems.push(item);
+                            if(options.skipOneModelOrphans)
+                                rejectedItems.push(item);
+                            else
+                                processAsNoSubclass=true;
                         } else {
                             triples.push({
                                 subject: obj.classUri,
@@ -117,7 +128,10 @@ var ADLbuilder = {
                             });
                             existingUrisMap[subjectValue] = obj.classUri;
                         }
-                    } else if (classType == "NO-SUBCLASSES") {
+                    }
+
+
+                    if (classType == "NO-SUBCLASSES" || processAsNoSubclass) {
                         var uri = existingUrisMap[subjectValue];
                         if (!uri) {
                             uri = ADLgraphUri + util.getRandomHexaId(options.generateIds);
@@ -371,6 +385,7 @@ var ADLbuilder = {
                         options.oneModelReferenceDictionary = oneModelReferenceDictionary;
                         options.oneModelSuperClasses = oneModelSuperClasses;
                         options.existingUrisMap = existingUrisMap;
+                        options._options=options._options;
 
                         ADLbuilder.generateMappingFileTriples(
                             mappings.mappings,
@@ -618,6 +633,7 @@ var ADLbuilder = {
         graphUri,
         replaceGraph,
         dataSource,
+        _options,
         callback
     ) {
         var totalTriples = 0;
@@ -631,11 +647,10 @@ var ADLbuilder = {
                     "-----------Processing " + mappingFilePath + "--------------"
                 );
 
-                var mappingFilePath =ADLcontroller.getMappingsDirPath()+mappingFilePath
+                var mappingFilePath = ADLcontroller.getMappingsDirPath() + mappingFilePath;
 
-             if (mappingFilePath.indexOf(".json") < 0)
-                 mappingFilePath += ".json";
-             //   mappingFilePath = path.resolve(mappingFilePath);*/
+                if (mappingFilePath.indexOf(".json") < 0) mappingFilePath += ".json";
+                //   mappingFilePath = path.resolve(mappingFilePath);*/
 
                 if (!fs.existsSync(mappingFilePath)) {
                     return callbackEach("file " + mappingFilePath + " does not exist");
@@ -647,6 +662,7 @@ var ADLbuilder = {
                     oneModelGraphUri: oneModelGraphUri,
                     replaceGraph: replaceGraph,
                     dataSource: dataSource,
+                    _options:_options
                 };
 
                 socket.message("ADLbuild", "creating triples for mapping " + mappingFilePath);

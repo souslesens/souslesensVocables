@@ -124,10 +124,14 @@ var ADLmappings = (function () {
             var dataSource= Config.sources[source].dataSource;
             if(!dataSource)
                 return alert("no data source declared for source "+source)
-            $("#ADLmappings_DatabaseSelect").val(dataSource.dbName)
+
 
             self.currentKGsource = source;
             self.currentGraphUri = Config.sources[source].graphUri;
+
+            $("#ADLmappings_DatabaseSelect").val(dataSource.dbName);
+            ADLmappingData.loadADL_SQLModel(dataSource.dbName)
+
             $("#accordion").accordion("option", {active: 2});
           //  $("#graphDiv").html("")
             visjsGraph.clearGraph()

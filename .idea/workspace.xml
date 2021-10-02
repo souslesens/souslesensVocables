@@ -6,6 +6,67 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="improve ADL mappings : a mapping is define by source+ database">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder_v0..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLbuilder_v0..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLutil..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/codification..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/codification..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/codificationOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/codificationOld..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/definitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/definitions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/temporary..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/temporary..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/SQLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/SQLutil..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/_csvCrawler..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/_csvCrawler..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotatorLive..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotatorLive..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/authentication..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/authentication..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/configManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/dataController..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/dataController..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/elasticRestProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/elasticRestProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportGraph..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportGraph..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportRDF..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/globalParams..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/globalParams..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/jsonFileStorage.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/jsonFileStorage.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/logger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/logger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mySQLproxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mySQLproxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/tulsaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/tulsaToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/xsdToSkos2..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/xsdToSkos2..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sourceManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sourceManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/usersGenerator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/usersGenerator..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/util..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/xlsx2json..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/xlsx2json..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ClovParser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ClovParser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/dictionary..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/dictionary..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapperOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapperOld..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbuildDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbuildDialog.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/socket.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/socket.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/users.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/users.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -234,7 +295,7 @@
       <workItem from="1632656372893" duration="5360000" />
       <workItem from="1632746143564" duration="14709000" />
       <workItem from="1632835821016" duration="23535000" />
-      <workItem from="1633110032272" duration="8602000" />
+      <workItem from="1633110032272" duration="13746000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -257,7 +318,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633168644099</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="improve ADL mappings : a mapping is define by source+ database">
+      <created>1633183659419</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1633183659419</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -368,130 +436,160 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js</url>
           <line>320</line>
           <option name="timeStamp" value="29" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/graphController.js</url>
           <line>128</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/export.js</url>
           <line>309</line>
           <option name="timeStamp" value="32" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js</url>
           <line>631</line>
           <option name="timeStamp" value="42" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_SKOS.js</url>
           <line>32</line>
           <option name="timeStamp" value="43" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
           <line>1381</line>
           <option name="timeStamp" value="44" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
           <line>173</line>
           <option name="timeStamp" value="45" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
           <line>1379</line>
           <option name="timeStamp" value="46" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/configManager..js</url>
           <line>104</line>
           <option name="timeStamp" value="52" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/authentification.js</url>
           <line>175</line>
           <option name="timeStamp" value="57" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/authentification.js</url>
           <line>81</line>
           <option name="timeStamp" value="58" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/authentification.js</url>
           <line>176</line>
           <option name="timeStamp" value="59" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js</url>
           <line>44</line>
           <option name="timeStamp" value="69" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>361</line>
           <option name="timeStamp" value="78" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js</url>
           <line>178</line>
           <option name="timeStamp" value="91" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>108</line>
           <option name="timeStamp" value="97" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>213</line>
           <option name="timeStamp" value="175" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js</url>
-          <line>98</line>
+          <line>100</line>
           <option name="timeStamp" value="194" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js</url>
           <line>43</line>
           <option name="timeStamp" value="206" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
           <line>367</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>84</line>
           <option name="timeStamp" value="221" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/graphTraversal.js</url>
           <line>70</line>
           <option name="timeStamp" value="222" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
           <line>424</line>
           <option name="timeStamp" value="223" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
+        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js</url>
           <line>105</line>
           <option name="timeStamp" value="225" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/SQLutil..js</url>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/SQLutil..js.X</url>
           <line>108</line>
           <option name="timeStamp" value="250" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js</url>
+          <line>70</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="260" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
+          <line>245</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="263" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/ADL/ADLcontroller..js</url>
+          <line>20</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="265" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
+          <line>468</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="267" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/routes/index.js</url>
+          <line>203</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="271" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

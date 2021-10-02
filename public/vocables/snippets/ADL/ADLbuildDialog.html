@@ -20,15 +20,8 @@
     }
     .ADLbuild-input{
         width:550px
-    }.ADLbuild_infosError{
-        colo:red
-         }
-    .ADLbuild_infosOK{
-        color:blue
     }
-    .ADLbuild_infosServer{
-        color:#aaa
-    }
+
 
 </style>
 Build Asset triples
@@ -49,7 +42,9 @@ Build Asset triples
 
 
 <div class="ADLbuild_div">
-    replaceGraph <input type="checkbox"  id="ADLbuild_replaceGraph">
+    replace existing Graph <input type="checkbox"  id="ADLbuild_replaceGraph">&nbsp;
+    skip ONE-MODEL orphans <input type="checkbox" checked="checked" id="ADLbuild_skipOneModelOrphans">&nbsp;
+    skip LocalDictionary orphans <input type="checkbox"  id="ADLbuild_skipLocalDictionaryOrphans">&nbsp;
 </div>
 
 <div>

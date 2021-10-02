@@ -13,17 +13,17 @@ var ADLmappingData = (function () {
             if (!sourceObj.schemaType)
                 console.log(key)
 
-            if (sourceObj.schemaType.indexOf("KNOWLEDGE_GRAPH") > -1 ) {
-                if(!  sourceObj.dataSource || !sourceObj.dataSource.dbName)
-                    console.log("KNOWLEDGE_GRAPH source "+key +" should have a datasource declared")
+            if (sourceObj.schemaType.indexOf("KNOWLEDGE_GRAPH") > -1) {
+                if (!sourceObj.dataSource || !sourceObj.dataSource.dbName)
+                    console.log("KNOWLEDGE_GRAPH source " + key + " should have a datasource declared")
                 else {
                     var dbName = sourceObj.dataSource.dbName;
-                    if(adls.indexOf(dbName)<0)
-                    adls.push(dbName)
+                    if (adls.indexOf(dbName) < 0)
+                        adls.push(dbName)
                 }
             }
         }
-        common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true, )
+        common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true,)
 
     }
 
@@ -34,17 +34,18 @@ var ADLmappingData = (function () {
      *
      *
      */
-    self.loadADL_SQLModel = function () {
+    self.loadADL_SQLModel = function (dbName) {
 
         //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
         ADLmappings.clearMappings()
-     /*   if (source == "")
-            return alert("select a ADL database")*/
-        var dbName = $("#ADLmappings_DatabaseSelect").val();
+        /*   if (source == "")
+               return alert("select a ADL database")*/
+        if (!dbName)
+            dbName = $("#ADLmappings_DatabaseSelect").val();
         self.currentSource = ADLmappings.currentKGsource
-        self.currentADLdataSource = Config.sources[self.currentSource ].dataSource;
-        self.currentDatabase= dbName
-        self.currentADLgraphURI =  Config.sources[ ADLmappings.currentKGsource].graphUri
+        self.currentADLdataSource = Config.sources[self.currentSource].dataSource;
+        self.currentDatabase = dbName
+        self.currentADLgraphURI = Config.sources[ADLmappings.currentKGsource].graphUri
 
 
         $.ajax({
@@ -135,9 +136,9 @@ var ADLmappingData = (function () {
                 self.currentADLtable = obj.node
                 ADLmappings.clearMappings()
 
-                self.showSampleData(obj.node,function(){
+                self.showSampleData(obj.node, function () {
                     var name = self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
-                    ADLmappings.loadMappings(ADLmappings.currentKGsource+"_"+self.currentSource + "_" + name)
+                    ADLmappings.loadMappings(ADLmappings.currentKGsource + "_" + self.currentDatabase + "_" + name)
                 })
 
             },
@@ -208,7 +209,6 @@ var ADLmappingData = (function () {
                             anchor.css("color", "#86d5f8")
 
 
-
                     }
 
                 }, error(err) {
@@ -266,7 +266,7 @@ var ADLmappingData = (function () {
         common.jstree.addNodesToJstree("ADLmappings_dataModelTree", self.currentADLtable.id, [node])
 
     }
-    self.showSampleData = function (node,callback) {
+    self.showSampleData = function (node, callback) {
         ADLmappings.isModifyingMapping = false;
         var SampleSizelimit = 30;
 
@@ -328,8 +328,8 @@ var ADLmappingData = (function () {
             $("#ADLmappings_dataSampleDiv").html(str)
 
             setTimeout(function () {
-                if(callback)
-                     callback()
+                if (callback)
+                    callback()
 
                 /*   $(".dataSample_type").contextmenu(function (event) {*/
                 $(".dataSample_type").bind("dblclick", function (event) {
@@ -395,8 +395,8 @@ var ADLmappingData = (function () {
 
                 success: function (data, textStatus, jqXHR) {
 
-                        self.sampleData[table] = data,
-                            displaySampleData(self.sampleData[table])
+                    self.sampleData[table] = data,
+                        displaySampleData(self.sampleData[table])
 
                 }
 

@@ -12,18 +12,25 @@ var ADLmappingData = (function () {
             var sourceObj = Config.sources[key];
             if (!sourceObj.schemaType)
                 console.log(key)
-            if (sourceObj.schemaType.indexOf("INDIVIDUAL") > -1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
-                adls.push({id: key, label: key})
+
+            if (sourceObj.schemaType.indexOf("KNOWLEDGE_GRAPH") > -1 ) {
+                if(!  sourceObj.dataSource || !sourceObj.dataSource.dbName)
+                    console.log("KNOWLEDGE_GRAPH source "+key +" should have a datasource declared")
+                else {
+                    var dbName = sourceObj.dataSource.dbName;
+                    if(adls.indexOf(dbName)<0)
+                    adls.push(dbName)
+                }
             }
         }
-        common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true, "label", "id")
+        common.fillSelectOptions("ADLmappings_DatabaseSelect", adls, true, )
 
     }
 
     /**
      *
-     * dgdgdfhfgh
-     * fghfghfh
+     *
+     *
      *
      *
      */
@@ -31,11 +38,13 @@ var ADLmappingData = (function () {
 
         //  if(ADLmappings.currentMappedColumns && Object.keys(ADLmappings.currentMappedColumns.mappings)>0)
         ADLmappings.clearMappings()
-        if (source == "")
-            return alert("select a ADL database")
-        var source = $("#ADLmappings_DatabaseSelect").val();
-        self.currentSource = source
-        self.currentADLdataSource = Config.sources[source].dataSource;
+     /*   if (source == "")
+            return alert("select a ADL database")*/
+        var dbName = $("#ADLmappings_DatabaseSelect").val();
+        self.currentSource = ADLmappings.currentKGsource
+        self.currentADLdataSource = Config.sources[self.currentSource ].dataSource;
+        self.currentDatabase= dbName
+        self.currentADLgraphURI =  Config.sources[ ADLmappings.currentKGsource].graphUri
 
 
         $.ajax({
@@ -92,7 +101,7 @@ var ADLmappingData = (function () {
 
                 if (data[key].mappings.build) {
                     label = "<span style='color:#cc51ee'>" + label + "</span>"
-                    self.currentADLgraphURI = data[key].mappings.build.graphUri
+
                 } else
                     label = "<span style='color:#86d5f8'>" + label + "</span>"
             }
@@ -128,7 +137,7 @@ var ADLmappingData = (function () {
 
                 self.showSampleData(obj.node,function(){
                     var name = self.currentADLtable.data.adlView || self.currentADLtable.data.adlTable || self.currentADLtable.data.label
-                    ADLmappings.loadMappings(self.currentSource + "_" + name)
+                    ADLmappings.loadMappings(ADLmappings.currentKGsource+"_"+self.currentSource + "_" + name)
                 })
 
             },
@@ -198,8 +207,8 @@ var ADLmappingData = (function () {
                         else
                             anchor.css("color", "#86d5f8")
 
-                        if (result.data[key].build && result.data[key].build.graphUri)
-                            self.currentADLgraphURI = result.data[key].build.graphUri
+
+
                     }
 
                 }, error(err) {

@@ -1,14 +1,19 @@
-const sql = require('mssql')
-const async = require('async')
-const config = {
-    user: 'sa',
-    password: 'Fa1#majeur',
-    //   user: 'ECCENCA',
-    //    password: 'ONE-sense!rDf',
-    server: '51.178.39.209',
-    database: 'rdlquantum',
-}
+/**
+ The MIT License
+ The MIT License
+ Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+const sql = require("mssql");
+const async = require("async");
+
+const ConfigManager = require("../configManager.");
 
 //update dbo.QUANTUM_BOMST_TPUK_ELFR set breakdown= left (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))))
 //update dbo.QUANTUM_BOMST_TPUK_ELFR set tag= RIGHT(Functional_Location, CHARINDEX('/', REVERSE('/' + Functional_Location)) - 1)
@@ -38,89 +43,124 @@ FROM [rdlquantum].[rdl].[tblfunctionalClass] c  JOIN [EF_SAP].[dbo].[QUANTUM_BOM
 
 */
 //sudo docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Fa1#majeur' -e 'MSSQL_PID=Express' -p 1433:1433 --restart always  -v /var/opt/mssql/data:/var/opt/mssql/data -v /var/opt/mssql/log:/var/opt/mssql/log -v /var/opt/mssql/secrets:/var/opt/mssql/secrets -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+
+// DUMP
+
+/*
+SQL query
+Backup Database [clov] To Disk =     '/home/debian/backups/clov'
+
+
+get backup
+sudo docker ps
+sudo docker exec -t -i 75d81c946c51 /bin/bash
+cd /home/debian/backups/
+sudo docker cp 75d81c946c51:/home/debian/backups /home/debian/backupsSQLserver
+zip -r backupsSQLserverSept2021.zip backups/backupsSQLserver/
+
+scp backupsSQLserverSept2021.zip  root@vps254642.ovh.net:/var/lib/nodejs/souslesensVocables/public/dumps
+sur serveur datalab
+wget http://vps254642.ovh.net:3010/dumps/backupsSQLserverSept2021.zip
+
+
+docker exec -t -i e775dc13f609 /bin/bash
+
+
+cd dumpsSQLserver/backupsSQLserver
+
+
+:/var/opt/mssql
+docker cp  onemodel e775dc13f609:/var/opt/mssql/backups
+
+
+  sqlcmd -U SA -P Fa1#majeur -q  "RESTORE DATABASE onemodel  FROM DISK=N'/var/opt/mssql/backups/onemodel'
+
+
+
+
+
+
+
+
+
+
+ */
+
 var SQLserverConnector = {
+    connection: null,
 
-
-    test: function () {
-        config.database = "MDM_2.3_AFTWIN"
-        sql.connect(config, err => {
-            if (err)
-                return console.log(err)// ... error checks
-
-            // Query
-
-            new sql.Request().query('select * from dbo.tblModel', (err, result) => {
-                if (err)
-                    // ... error checks
-
-                    console.dir(result)
-            })
-        })
+    getConnection: function () {
+        if (SQLserverConnector.connection) return SQLserverConnector.connection;
+        else {
+            var mainConfig = ConfigManager.getGeneralConfig();
+            if (mainConfig) {
+                SQLserverConnector.connection = mainConfig.SQLserver;
+                return SQLserverConnector.connection;
+            }
+        }
     },
 
     getData: function (dbName, query, callback) {
-        config.database = dbName
-        sql.connect(config, err => {
-            if (err)
-                return console.log(err)// ... error checks
+        var connection = SQLserverConnector.getConnection();
+        connection.database = dbName;
+        sql.connect(connection, (err) => {
+            if (err) return console.log(err); // ... error checks
 
             // Query
-//console.log(query)
+            //console.log(query)
             new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
-                if (err)
-                    return callback(err)
+                if (err) return callback(err);
 
-                return callback(null, result.recordset)
-            })
-        })
+                return callback(null, result.recordset);
+            });
+        });
     },
 
-    getFetchedData: function (dbName, query, processorFn,fetchSize,uniqueTriples,callback) {
-        var data=[]
-        config.database = dbName
-        var fetchedCount=0
-        sql.connect(config, err => {
+    getFetchedData: function (dbName, query, processorFn, fetchSize, uniqueTriples, callback) {
+        var data = [];
+        var connection = SQLserverConnector.getConnection();
+        connection.database = dbName;
+        var fetchedCount = 0;
+        sql.connect(connection, (err) => {
             // ... error checks
 
-            const request = new sql.Request()
-            request.stream = true // You can set streaming differently for each request
-            request.query(query) // or request.execute(procedure)
+            const request = new sql.Request();
+            request.stream = true; // You can set streaming differently for each request
+            request.query(query); // or request.execute(procedure)
 
-            request.on('recordset', columns => {
-
+            request.on("recordset", (columns) => {
                 // Emitted once for each recordset in a query
-            })
+            });
 
-            request.on('row', row => {
-                data.push(row)
+            request.on("row", (row) => {
+                data.push(row);
 
                 if (data.length >= fetchSize) {
                     request.pause();
-                    fetchedCount+=data.length
-                    processorFn(data, uniqueTriples,fetchedCount, function (err, resultProcessor){
-                       data=[]
+                    fetchedCount += data.length;
+                    processorFn(data, uniqueTriples, fetchedCount, function (err, resultProcessor) {
+                        data = [];
                         request.resume();
-                   })
+                    });
                 }
 
                 // Emitted for each row in a recordset
-            })
+            });
 
-            request.on('rowsaffected', rowCount => {
+            request.on("rowsaffected", (rowCount) => {
                 // Emitted for each `INSERT`, `UPDATE` or `DELETE` statement
                 // Requires NOCOUNT to be OFF (default)
-            })
+            });
 
-            request.on('error', err => {
+            request.on("error", (err) => {
                 callback(err);
-            })
+            });
 
-            request.on('done', result => {
-                callback(null,data)
+            request.on("done", (result) => {
+                callback(null, data);
                 // Always emitted as the last one
-            })
-        })
-
+            });
+        });
     },
     /*
 
@@ -137,99 +177,41 @@ var SQLserverConnector = {
      */
 
     getADLmodel: function (dbName, callback) {
-
-        config.database = dbName
-        var query = "use [" + dbName + "]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
-            "FROM INFORMATION_SCHEMA.COLUMNS"
+        var connection = SQLserverConnector.getConnection();
+        connection.database = dbName;
+        var query =
+            "use [" +
+            dbName +
+            "]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
+            "FROM INFORMATION_SCHEMA.COLUMNS";
         //   query +=" where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
-        query += "  order by TABLE_SCHEMA,TABLE_NAME "
+        query += "  order by TABLE_SCHEMA,TABLE_NAME ";
 
-        sql.connect(config, err => {
-            if (err)
-                return console.log(err)// ... error checks
+        sql.connect(connection, (err) => {
+            if (err) return console.log(err); // ... error checks
 
             // Query
 
             new sql.Request().query(query, (err, result) => {
-                if (err)
-                    return callback(err)
+                if (err) return callback(err);
 
-                var model = {}
+                var model = {};
                 result.recordset.forEach(function (item) {
-                    var tableLabel = item.TABLE_SCHEMA + "." + item.TABLE_NAME
+                    var tableLabel = item.TABLE_SCHEMA + "." + item.TABLE_NAME;
                     /*   if(dbName=="MDM_2.3_AFTWIN")
                            tableLabel="dbo."+item.TABLE_NAME*/
                     if (!model[tableLabel]) {
-                        model[tableLabel] = []
+                        model[tableLabel] = [];
                     }
-                    model[tableLabel].push(item.COLUMN_NAME)
-
-
-                })
+                    model[tableLabel].push(item.COLUMN_NAME);
+                });
 
                 return callback(err, model);
-            })
-        })
-
+            });
+        });
     },
-
-    processFetchedDataXXX: function (connection, query, fetchSize, startOffset, maxOffset, processor, uniqueTriples, callback) {
-
-        var offset = startOffset
-        var length = 1
-        var allResults = []
-        if (!maxOffset)
-            maxOffset = 10000000
-        async.whilst(
-            function test(cb) {
-                return cb(null, length > 0 && offset < maxOffset);
-            },
-            function iter(callbackWhilst) {
-
-
-                //  query=query+" offset "+(""+offset);
-
-                var query2 = query + " OFFSET " + offset + " ROWS FETCH NEXT " + fetchSize + " ROWS ONLY"
-                offset += fetchSize;
-                console.log("processed lines: " + offset)
-                SQLserverConnector.connection = connection;
-                SQLserverConnector.getData(connection.dbName, query2, function (err, result) {
-                    if (err) {
-                        console.log("error " + err)
-                        console.log(query2)
-                        return callbackWhilst(err);
-                    }
-                    length = result.length
-                    if (processor) {
-                        processor(result, uniqueTriples, function (err, resultProcessor) {
-                            if (err) {
-
-                                return callbackWhilst(err);
-                            }
-                            return callbackWhilst();
-                        })
-                    } else {
-                        allResults = allResults.concat(result);
-                        return callbackWhilst();
-                    }
-
-
-                })
-            },
-            function (err, n) {
-                if (err)
-                    return callback(err);
-                callback(null, allResults);
-
-            }
-        )
-
-
-    },
-
-
-}
-module.exports = SQLserverConnector
+};
+module.exports = SQLserverConnector;
 //SQLserverConnector.getADLmodel()
 
 //SQLserverConnector.test()

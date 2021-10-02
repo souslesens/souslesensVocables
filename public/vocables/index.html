@@ -87,6 +87,8 @@
 
     <script src="js/tools/Standardizer.js"></script>
 
+    <script src="js/tools/SQLquery.js"></script>
+
 
 
 
@@ -145,62 +147,56 @@
         var h
 
         $(function () {
-            config = {loginMode: "none", appName: "VOCABLES"};
-            authentication.init()
+            MainController.initConfig(function(err) {
+                if(err)
+                  return  alert(err)
+             //   config = {loginMode: "none", appName: "VOCABLES"};
+                authentication.init()
 
-             w = $(document).width() - leftPanelWidth - 30;
-             h = $(document).height() - 20;
-             h=Math.min(h,1000)
-            // $("#centralPanel").width(w)
-            $("#graphDiv").width(w)
-            $("#blendDiv").width(w)
-            $("#graphDiv").height(h - 70)
-            $("#blendDiv").height(h - 70)
-            $("#leftPanelDiv").height(h - 50)
-            $("#rightPanelDiv").height(h - 50)
+                w = $(document).width() - leftPanelWidth - 30;
+                h = $(document).height() - 20;
+                h = Math.min(h, 1000)
+                // $("#centralPanel").width(w)
+                $("#graphDiv").width(w)
+                $("#blendDiv").width(w)
+                $("#graphDiv").height(h - 70)
+                $("#blendDiv").height(h - 70)
+                $("#leftPanelDiv").height(h - 50)
+                $("#rightPanelDiv").height(h - 50)
 
 
-            //  $('.jstree-default').css("max-height",h-200)
-               $(".jstree").height( w-100 );
+                //  $('.jstree-default').css("max-height",h-200)
+                $(".jstree").height(w - 100);
 
 
-            $("#accordion").accordion()
-            $("#accordion").accordion("option", {active: 0});
-            $("#accordion").on("accordionbeforeactivate",function( event, ui ) {
-                if(!ADLmappings.checkMappingEditionSave())
-                    return false;
+                $("#accordion").accordion()
+                $("#accordion").accordion("option", {active: 0});
+                $("#accordion").on("accordionbeforeactivate", function (event, ui) {
+                    if (!ADLmappings.checkMappingEditionSave())
+                        return false;
+                })
+                $("#accordion").on("accordionactivate", function (event, ui) {
+
+
+                    if (false && ui.newPanel[0].id == "blenderPanelDiv") {
+                        //Blender.initPanel();
+                        MainController.UI.showInCentralPanelDiv("blendDiv")
+                    } else {
+                        MainController.UI.showInCentralPanelDiv("graphDiv")
+                    }
+                });
+                $("#mainDialogDiv").dialog({
+                    autoOpen: false,
+                    height: 800,
+                    width: 1000,
+                    modal: false,
+                })
+
+
+                MainController.UI.setCredits();
             })
-            $("#accordion").on("accordionactivate", function (event, ui) {
-                if (ui.newHeader.text() === "Admin") {
-                    $("#graphDiv").html(`
-                        <div id="mount-app-here"></div>
-                    `);
-                    $.getScript("/mainapp.js");
-                } else {
-                    $("#graphDiv").html("...");
-                }
-
-
-                if (false && ui.newPanel[0].id == "blenderPanelDiv") {
-                    //Blender.initPanel();
-                    MainController.UI.showInCentralPanelDiv("blendDiv")
-                } else {
-                    MainController.UI.showInCentralPanelDiv("graphDiv")
-                }
-            });
-            $("#mainDialogDiv").dialog({
-                autoOpen: false,
-                height: 800,
-                width: 1000,
-                modal: false,
-            })
-
-
-
-
-
-            MainController.UI.setCredits();
         });
+
 
 
     </script>
@@ -409,10 +405,6 @@
                 </div>
             </div>
 
-            <h3><span class="title">Admin</span></h3>
-            <div style="margin:5px" class='max-height'>
-                <div id="adminDiv" style="min-height: 50px"></div>
-            </div>
 
             <h3><span class="title" id="sourcePanelLabel"> </span></h3>
             <div style="margin:5px" class='max-height'>

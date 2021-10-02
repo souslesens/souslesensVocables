@@ -1,10 +1,9 @@
-var fs = require("fs")
-var path = require("path")
-const util = require('../util.')
-const xlsx2json = require('../xlsx2json.')
-const async = require('async')
-var httpProxy = require('../httpProxy.')
-
+var fs = require("fs");
+var path = require("path");
+const util = require("../util.");
+const xlsx2json = require("../xlsx2json.");
+const async = require("async");
+var httpProxy = require("../httpProxy.");
 
 var uris = [
     "<http://data.posccaesar.org/dm/CartesianProductOfQuantityKind>",
@@ -2061,63 +2060,57 @@ var uris = [
     "<http://data.posccaesar.org/rdl/WellInjectionProject>",
     "<http://data.posccaesar.org/rdl/WorkBreakdownStructureDictionary>",
     "<http://data.posccaesar.org/rdl/WorkCentre>",
-    "<http://data.posccaesar.org/rdl/WorkOverOpenSea>"
+    "<http://data.posccaesar.org/rdl/WorkOverOpenSea>",
+];
 
-]
+var slices = util.sliceArray(uris, 50);
 
-var slices = util.sliceArray(uris, 50)
-
-
-
-var query = "PREFIX rdl: <http://data.posccaesar.org/rdl/>" +
+var query =
+    "PREFIX rdl: <http://data.posccaesar.org/rdl/>" +
     "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
     "SELECT distinct * WHERE {" +
     "?sub <http://data.posccaesar.org/rdl/hasDefinition> ?rdl_hasDefinition." +
     "" +
-    " filter(?sub in("
+    " filter(?sub in(";
 
+var data = [];
+var dataStr = "";
+async.eachSeries(
+    slices,
+    function (slice, callbackEach) {
+        var str = "";
+        slice.forEach(function (item, index) {
+            if (index > 0) str += ",";
+            str += item;
+        });
+        var sparqlServerUrl = "http://staging.data.posccaesar.org/rdl/";
+        var query2 = query + str + "))} ";
+        var params = { query: query2 };
+        var query2 = encodeURIComponent(query2);
+        query2 = query2.replace(/%2B/g, "+").trim();
+        var url = "";
+        url = sparqlServerUrl + "?query=" + query2 + "&format=json";
+        //  console.log(url)
+        httpProxy.get(url, {}, function (err, result) {
+            if (err) callbackEach(err);
+            result = JSON.parse("" + result);
+            if (result.results.bindings.length > 0) {
+                result.results.bindings.forEach(function (item) {
+                    dataStr +=
+                        item.sub.value +
+                        "\t" +
+                        item.rdl_hasDefinition.value.replace(/\t\n/g, "") +
+                        "\n";
+                    // data.push(item.sub.value+"\t"+item.rdl_hasDefinition.value+"\n")
+                });
+            }
 
-
-
-var data=[];
-var dataStr=""
-async.eachSeries(slices,function(slice,callbackEach){
-   var str="";
-   slice.forEach(function(item,index){
-       if(index>0)
-           str+=","
-       str+=item;
-
-   })
-  var sparqlServerUrl ="http://staging.data.posccaesar.org/rdl/"
-    var query2=query+str+"))} "
-    var params = {query: query2}
-    var query2 = encodeURIComponent(query2);
-    query2 = query2.replace(/%2B/g, "+").trim()
-    var url=""
-    url = sparqlServerUrl+"?query="+ query2+"&format=json"
-  //  console.log(url)
-    httpProxy.get(url , {},  function (err, result) {
-if(err)
-    callbackEach(err);
-        result=JSON.parse(""+result)
-        if( result.results.bindings.length>0){
-            result.results.bindings.forEach(function(item){
-                dataStr+=item.sub.value+"\t"+item.rdl_hasDefinition.value.replace(/\t\n/g,'')+"\n"
-               // data.push(item.sub.value+"\t"+item.rdl_hasDefinition.value+"\n")
-            })
-        }
-
-        callbackEach()
-    })
-
-
-},function(err){
-fs.writeFileSync("D:\\NLP\\ontologies\\dataDomains\\definitions.txt",dataStr)
-
-
-
-
-})
+            callbackEach();
+        });
+    },
+    function (err) {
+        fs.writeFileSync("D:\\NLP\\ontologies\\dataDomains\\definitions.txt", dataStr);
+    }
+);

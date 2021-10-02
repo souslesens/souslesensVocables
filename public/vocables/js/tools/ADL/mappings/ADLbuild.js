@@ -14,9 +14,8 @@ var ADLbuild = (function () {
         $("#mainDialogDiv").load("snippets/ADL/ADLbuildDialog.html");
         $("#mainDialogDiv").dialog("open");
         setTimeout(function () {
-            var graphUri = "http://data.total.com/resource/one-model/assets/..."
-            if (ADLmappingData.currentADLgraphURI)
-                graphUri = ADLmappingData.currentADLgraphURI
+
+               var graphUri = ADLmappingData.currentADLgraphURI
             $("#ADLbuild_sparqlServerUrl").val(Config.default_sparql_url)
             $("#ADLbuild_adlGraphUri").val(graphUri)
             $("#ADLbuild_rdlGraphUri").val("http://data.total.com/resource/one-model/quantum-rdl/")
@@ -49,9 +48,9 @@ var ADLbuild = (function () {
         self.checked_tables = $("#ADLmappings_dataModelTree").jstree().get_checked();
         if (self.checked_tables.length == 0)
             return alert("Select mapped tables")
-        var tables = []
+        var mappingFileNames = []
         self.checked_tables.forEach(function (table) {
-            tables.push(ADLmappingData.currentSource + "_" + table.replace(/_/,"."))
+            mappingFileNames.push(ADLmappings.currentKGsource+"_"+ADLmappingData.currentSource + "_" + table.replace(/_/,"."))
         })
 
         var sparqlServerUrl = $("#ADLbuild_sparqlServerUrl").val()
@@ -70,7 +69,7 @@ var ADLbuild = (function () {
         self.serverMessageCount=0;
         var payload = {
             buildADL: true,
-            mappingFileNames: JSON.stringify(tables),
+            mappingFileNames: JSON.stringify(mappingFileNames),
             sparqlServerUrl: sparqlServerUrl,
             adlGraphUri: adlGraphUri,
             replaceGraph: replaceGraph,

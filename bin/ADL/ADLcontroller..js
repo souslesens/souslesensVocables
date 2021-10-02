@@ -2,25 +2,28 @@ var fs = require('fs')
 var path = require('path')
 var async = require('async')
 
+var ADLSqlConnector = require("./ADLSqlConnector.");
+var SQLserverConnector = require("./SQLserverConnector.");
+
 
 
 var ADLcontroller = {
-    getSourceFilePath: function (source) {
-        var filePath = path.join(__dirname, "data/" + source + ".json")
-        return path.resolve(filePath)
+    getMappingsDirPath: function () {
+        var filePath = __dirname+"../../../data/mappings/"
+        return path.resolve(filePath)+path.sep
     },
 
 
     saveMappings: function (source, jsonStr, callback) {
 
-        var filePath = ADLcontroller.getSourceFilePath(source);
+        var filePath = ADLcontroller.getMappingsDirPath()+ source + ".json";
         fs.writeFile(filePath, jsonStr, null, function (err, result) {
             callback(err)
         })
     },
     getMappings: function (source, callback) {
 
-        var filePath = ADLcontroller.getSourceFilePath(source);
+        var filePath = ADLcontroller.getMappingsDirPath()+ source + ".json";
         if (!fs.existsSync(filePath))
             return callback(null, null)
         fs.readFile(filePath, function (err, result) {
@@ -39,8 +42,8 @@ var ADLcontroller = {
 
     },
     getAssetGlobalMappings: function (source, callback) {
-        var dir = path.join(__dirname, "data/")
-        dir = path.resolve(dir)
+
+       var  dir =  ADLcontroller.getMappingsDirPath()
         var files = fs.readdirSync(dir)
         var globalJson = {mappings: [], model: {}, relationalKeysMap: ADLcontroller.relationalKeysMap, data:{},infos:{}}
         async.eachSeries(files, function (file, callbackEach) {
@@ -111,6 +114,44 @@ var ADLcontroller = {
 
 
         })
+    }
+    ,ADLquery:function(req, callback){
+     // obsolete
+        if (req.body.getFromSparql) {
+            ADLSqlConnector.getFromSparql(
+                req.body.assetType,
+                JSON.parse(req.body.quantumObjs),callback);
+        }
+
+        if (req.body.getModel) {
+            req.body.getModel = JSON.parse(req.body.getModel);
+            if (req.body.getModel.type == "sql.sqlserver") {
+                SQLserverConnector.getADLmodel(
+                    req.body.getModel.dbName,
+                   callback
+                );
+            } else {
+                ADLSqlConnector.getADLmodel(req.body.getModel.dbName,callback)
+
+            }
+        }
+
+        if (req.body.getData) {
+            req.body.dataSource = JSON.parse(req.body.dataSource);
+            if (req.body.dataSource.type == "sql.sqlserver") {
+                SQLserverConnector.getData(
+                    req.body.dataSource.dbName,
+                    req.body.sqlQuery,
+                  callback
+                );
+            } else {
+                ADLSqlConnector.getData(
+                    req.body.dataSource.dbName,
+                    req.body.sqlQuery,
+                  callback
+                );
+            }
+        }
     }
 
 

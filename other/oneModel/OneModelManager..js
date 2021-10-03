@@ -15,7 +15,7 @@ var OneModelManager = {
     getGraphUri: function (sourceLabel) {
         if (graphUrisMap[sourceLabel]) return graphUrisMap[sourceLabel];
         //"D:\\GitHub\\souslesensVocables\\public\\vocables\\config"
-        var sourcesFilePath = path.join(__dirname, "../../public/vocables/config/sources.json");
+        var sourcesFilePath = path.join(__dirname, "../../config/sources.json");
         sourcesFilePath = path.resolve(sourcesFilePath);
         try {
             var str = fs.readFileSync(sourcesFilePath);

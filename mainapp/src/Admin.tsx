@@ -2,28 +2,24 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { accordionActionsClasses, Button, dividerClasses } from '@mui/material';
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { User, getUsers } from './User'
+import { User, getUsers, putUsers } from './User'
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
-const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-};
+
 
 type Msg =
     { type: 'UserClickedOpenModale', payload: boolean }
     | { type: 'ServerRespondedWithUsers', payload: RD<string, User[]> }
-    | { type: 'UserUpdatedField', key: string, fieldName: string, newValue: string }
+    | { type: 'UserUpdatedField', payload: UpadtedFieldPayload }
+    | { type: 'UserClickedSaveChanges', payload: {} }
 
+type UpadtedFieldTag =
+    { key: string, fieldName: string }
+
+type UpadtedFieldPayload =
+    { key: string, fieldName: string, newValue: string }
 
 type Model = {
     users: RD<string, User[]>,
@@ -37,19 +33,22 @@ const initialModel: Model =
 }
 
 const identity = (a: any): any => a
-//const arrayToDict = (arr: User[]): Record<string, User> => {
-//  return arr.reduce((acc, val) =>...acc, [val.key]: identity(val), {})
-//}
 
-function update(model: Model, action: Msg): Model {
-    const unwrapedUsers = SRD.unwrap([], identity, model.users)
-    switch (action.type) {
+
+function update(model: Model, msg: Msg): Model {
+    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users)
+    switch (msg.type) {
         case 'UserClickedOpenModale':
-            return { ...model, isModaleOpen: action.payload }
+            return { ...model, isModaleOpen: msg.payload }
+
         case 'ServerRespondedWithUsers':
-            return { ...model, users: action.payload }
+            return { ...model, users: msg.payload }
+
         case 'UserUpdatedField':
-            return { ...model, users: model.users }
+            const fieldToUpdate = msg.payload.fieldName
+            const updatedUsers = unwrappedUsers.map(u => u.key === msg.payload.key ? { ...u, [fieldToUpdate]: msg.payload.newValue } : u)
+            return { ...model, users: SRD.of(updatedUsers) }
+
         default:
             return model
     }
@@ -57,39 +56,46 @@ function update(model: Model, action: Msg): Model {
 
 const Admin = () => {
 
-    const [model, updatedModel] = React.useReducer(update, initialModel)
-    const handleOpen = () => updatedModel({ type: 'UserClickedOpenModale', payload: true });
-    const handleClose = () => updatedModel({ type: 'UserClickedOpenModale', payload: false });
+    const [model, updateModel] = React.useReducer(update, initialModel)
+    const handleOpen = () => updateModel({ type: 'UserClickedOpenModale', payload: true });
+    const handleClose = () => updateModel({ type: 'UserClickedOpenModale', payload: false });
+    const handleNewInput = ({ key, fieldName }: UpadtedFieldTag) => (event: React.ChangeEvent<HTMLInputElement>) => updateModel({ type: 'UserUpdatedField', payload: { key: key, fieldName: fieldName, newValue: event.target.value } })
+    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users)
 
     React.useEffect(() => {
-        updatedModel({ type: 'ServerRespondedWithUsers', payload: loading() })
+        updateModel({ type: 'ServerRespondedWithUsers', payload: loading() })
         getUsers('/users')
-            .then((person) => updatedModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
-            .catch((err) => updatedModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
     }, [])
+
+    const saveUsers = () => {
+        updateModel({ type: 'UserClickedSaveChanges', payload: {} })
+        putUsers('/users', unwrappedUsers)
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
+    }
 
 
 
     function viewUser(user: User) {
-        const fields = Object.keys(user)
+        const fields = Object.keys(user) //will use that to dynamically create field
         return (
             <>
                 <li><Button onClick={handleOpen}>{user.login}</Button></li>
-                <Modal
-                    open={model.isModaleOpen}
-                    onClose={handleClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                    <Box component="form"
-                        sx={style}
-                        noValidate
-                        autoComplete="off">
-                        <TextField value={user.login} id="login" label="Login" variant="standard" />
-                        <TextField value={user.password} id="password" label="mdp" variant="standard" />
-                        <Button onClick={handleOpen} variant="contained">Save changes</Button>
-                    </Box>
-                </Modal>
+
+                <TextField onChange={handleNewInput({ key: user.key, fieldName: "login" })}
+                    value={user.login}
+                    id="login"
+                    label="Login"
+                    variant="standard" />
+                <TextField onChange={handleNewInput({ key: user.key, fieldName: "password" })}
+                    value={user.password}
+                    id="password"
+                    label="Mot de passe"
+                    variant="standard" />
+                <Button onClick={saveUsers} variant="contained">Save changes</Button>
+
             </>
         )
     }

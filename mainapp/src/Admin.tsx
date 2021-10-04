@@ -79,22 +79,22 @@ const Admin = () => {
 
 
     function viewUser(user: User) {
-        const fields = Object.keys(user) //will use that to dynamically create field
+        const fields = Object.keys(user)
         return (
             <>
                 <li><Button onClick={handleOpen}>{user.login}</Button></li>
 
-                <TextField onChange={handleNewInput({ key: user.key, fieldName: "login" })}
-                    value={user.login}
-                    id="login"
-                    label="Login"
-                    variant="standard" />
-                <TextField onChange={handleNewInput({ key: user.key, fieldName: "password" })}
-                    value={user.password}
-                    id="password"
-                    label="Mot de passe"
-                    variant="standard" />
-                <Button onClick={saveUsers} variant="contained">Save changes</Button>
+
+                {fields.map(field => <TextField onChange={handleNewInput({ key: user.key, fieldName: field })}
+                    //@ts-ignore
+                    value={user[field]}
+                    id={`id-${field}`}
+                    label={field}
+                    variant="standard" />)
+                }
+
+
+
 
             </>
         )
@@ -102,8 +102,12 @@ const Admin = () => {
 
     function viewUsers(gotUsers: User[]): JSX.Element {
         return (
-            <ul>{gotUsers.map(el => viewUser(el))}
-            </ul>)
+            <>
+                <ul>{gotUsers.map(el => viewUser(el))}
+
+                </ul>
+                <Button onClick={saveUsers} variant="contained">Save changes</Button>
+            </>)
 
     }
 

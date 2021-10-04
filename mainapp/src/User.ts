@@ -14,6 +14,17 @@ async function getUsers(url: string): Promise<User[]> {
     return mapped_users
 }
 
+async function putUsers(url: string, body: User[]): Promise<User[]> {
+
+    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.key]: item }), {});
+    const response = await fetch(url, { method: "put", body: JSON.stringify(usersToObject), headers: { 'Content-Type': 'application/json' } });
+    const json = await response.json();
+    const users: [string, UserJSON][] = Object.entries(json);
+    const mapped_users = users.map(([key, val]) => decodeUser(val))
+
+    return mapped_users
+}
+
 
 
 const encodeUser = (user: User): UserJSON => {
@@ -41,4 +52,4 @@ type User = { key: string, login: string, password: string, groups: Group[] }
 
 type Group = 'admin' | 'regular';
 
-export { getUsers, User }
+export { getUsers, putUsers, User }

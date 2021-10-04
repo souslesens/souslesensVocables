@@ -17,13 +17,26 @@ var ADLbuilder = require("../bin/ADL/ADLbuilder.")
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.")
 var configManager = require("../bin/configManager.")
 
+const promiseFs = require('fs').promises;
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.sendFile(path.join(__dirname, '/../mainapp/index.html'))
 });
 
 router.get('/users', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/users/users.json'))
+    res.sendFile(path.join(__dirname, '/../config/users/users_test.json'))
+});
+
+router.put('/users', async function (req, res, next) {
+
+    try {
+        await promiseFs.writeFile(path.join(__dirname, '/../config/users/users_test.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/users/users_test.json'));
+    } catch (err) {
+        res.sendStatus(500);
+        console.log(err)
+    }
 });
 
 router.post('/upload', function (req, response) {

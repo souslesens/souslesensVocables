@@ -1,0 +1,24 @@
+{
+
+  "serverUrl" :"../elastic",
+  "default_sparql_url": "http://xxxxxx:8890/sparql",
+
+  "SQLserver": {
+    "user": "",
+    "password": "",
+    "server": "51.178.39.209",
+    "database": ""
+  },
+  "ElasticSearch": {
+    "url": "http://xxxx:9200/",
+    "other_servers": [
+
+    ]
+  },
+  "annotator": {
+    "tikaServerUrl": "127.0.0.1:41000",
+    "spacyServerUrl": "127.0.0.1:8000/pos",
+    "parsedDocumentsHomeDir": "",
+    "uploadDirPath": ""
+  }
+}

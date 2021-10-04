@@ -204,6 +204,7 @@ var MainController = (function () {
                 withCheckboxes: withCBX,
 
                 selectTreeNodeFn: function (evt, obj) {
+                    $("#mainDialogDiv").dialog("close");
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
                             if (obj.node.id == "INDIVIDUAL")
@@ -269,6 +270,7 @@ var MainController = (function () {
                     MainController.writeUserLog(authentication.currentUser, self.currentTool, "")
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
+                    $("#mainDialogDiv").dialog("close");
                     var controller = Config.tools[self.currentTool].controller
                     $("#currentSourceTreeDiv").html("")
 

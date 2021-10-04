@@ -133,26 +133,27 @@ var buildOwl = function (jsonPath) {
     json.classes.forEach(function (aClass) {
 
         var uri = graphUri + aClass.id
-        if (!classesMap[aClass.name])
+        if (!classesMap[aClass.name]) {
             classesMap[aClass.name] = uri;
 
-        triples.push({
-            subject: uri,
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "owl:Class",
-        });
-
-        triples.push({
-            subject: uri,
-            predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-            object: "'" + util.formatStringForTriple(aClass.name) + "'",
-        });
-        if (aClass.documentation) {
             triples.push({
                 subject: uri,
-                predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
-                object: "'" + util.formatStringForTriple(aClass.documentation) + "'",
+                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                object: "owl:Class",
             });
+
+            triples.push({
+                subject: uri,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                object: "'" + util.formatStringForTriple(aClass.name) + "'",
+            });
+            if (aClass.documentation) {
+                triples.push({
+                    subject: uri,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+                    object: "'" + util.formatStringForTriple(aClass.documentation) + "'",
+                });
+            }
         }
 
 
@@ -277,7 +278,7 @@ var buildOwl = function (jsonPath) {
 
     })
 
-    //return;
+    return;
 
 
     var allTriples = []

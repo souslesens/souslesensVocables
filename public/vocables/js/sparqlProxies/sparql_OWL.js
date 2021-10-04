@@ -237,9 +237,12 @@ var Sparql_OWL = (function () {
 
                 } else {
 
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + ". OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + "."
                     //   "?broader" + i + " rdf:type owl:Class."
-
+                    if (true || options.skipRestrictions) {
+                        query += " ?broader"+ (i)+" rdf:type ?broaderType"+ (i)+". filter(?broaderType"+ (i)+" !=owl:Restriction) "
+                    }
+                    query+="OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
                 }
 
@@ -449,7 +452,9 @@ var Sparql_OWL = (function () {
 
             if( options.selectGraph)
                 query +=" graph ?g "
-            query +="{ ?concept ?x ?y. FILTER (!isBlank(?concept))"
+            query +="{ ?concept ?x ?y.";
+            if(!options.includeBlankNodes)
+                query +="FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
             query += "OPTIONAL {?concept rdfs:subClassOf ?superClass. }";

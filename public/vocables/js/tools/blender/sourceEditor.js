@@ -21,11 +21,8 @@ var SourceEditor = (function () {
         self.editingObject;
 
 
-
-
-
         self.onLoaded = function () {
-                $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
+            $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
 
         }
 
@@ -59,7 +56,10 @@ var SourceEditor = (function () {
                 if (err)
                     return MainController.UI.message(err)
                 var contextMenu = self.getJstreeConceptsContextMenu()
-                SourceBrowser.showThesaurusTopConcepts(sourceLabel, {treeselectTreeNodeFn: SourceEditor.editjstreeNode, contextMenu: contextMenu})
+                SourceBrowser.showThesaurusTopConcepts(sourceLabel, {
+                    treeselectTreeNodeFn: SourceEditor.editjstreeNode,
+                    contextMenu: contextMenu
+                })
                 $("#graphDiv").load("snippets/sourceEditor.html")
                 $("#SourceEditor_NewObjectDiv").css("display", "none")
                 // $("#actionDivContolPanelDiv").html("<button onclick='SourceEditor.onAddNewObject()'>+</button>")
@@ -69,7 +69,7 @@ var SourceEditor = (function () {
 
         self.selectTreeNodeFn = function (event, propertiesMap) {
             self.editjstreeNode(event, propertiesMap)
-            SourceBrowser.openTreeNode( SourceBrowser.currentTargetDiv, MainController.currentSource, propertiesMap.node)
+            SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, MainController.currentSource, propertiesMap.node)
 
         }
 
@@ -112,7 +112,7 @@ var SourceEditor = (function () {
                 if (!classId)
                     classId = $("#SourceEditor_NewClassSelect").val();
 
-               var initData=_initData
+                var initData = _initData
                 OwlSchema.getClassDescription(sourceLabel, classId, function (err, result) {
                     if (err)
                         return MainController.UI.message(err)
@@ -124,7 +124,7 @@ var SourceEditor = (function () {
 
                     var newNodeId = common.getNewUri(sourceLabel)
                     $("#SourceEditor_ObjectUri").val(newNodeId);
-                  //  self.editNode = function (divId, source, nodeId, type, initData, isNew) {
+                    //  self.editNode = function (divId, source, nodeId, type, initData, isNew) {
 
                     self.editNode(divId, sourceLabel, newNodeId, classId, initData, true)
                 })
@@ -153,7 +153,7 @@ var SourceEditor = (function () {
         self.editNode = function (divId, source, nodeId, type, initData, isNew) {
 
             $("#" + divId).css("display", "block")
-            $("#Blender_nodeEditionButtonsDiv").css("display","block")
+            $("#Blender_nodeEditionButtonsDiv").css("display", "block")
             var editingObject;
 
             var nodeProps = {}
@@ -237,7 +237,7 @@ var SourceEditor = (function () {
                             $(".SourceEditor_minorDiv").remove();
                             var objectPropertiesList = Object.keys(OwlSchema.currentSourceSchema.classes[type].objectProperties).sort();
 
-                           // common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true, "label", "id")
+                            // common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true, "label", "id")
                             common.fillSelectOptions("SourceEditor_NewObjectPropertySelect", objectPropertiesList, true)
                             for (var key in editingObject.objectProperties) {
                                 if (editingObject.objectProperties[key].value) {
@@ -246,8 +246,8 @@ var SourceEditor = (function () {
                                 }
                             }
                             var annotationsList = Object.keys(OwlSchema.currentSourceSchema.classes[type].annotations).sort();
-                           // common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, "label", "id")
-                            common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, )
+                            // common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, "label", "id")
+                            common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true,)
                             for (var key in editingObject.annotations) {
                                 if (editingObject.annotations[key].value)
                                     self.drawObjectValue("annotations", key, editingObject, "SourceEditor_ObjectAnnotationsTableDiv")
@@ -296,12 +296,12 @@ var SourceEditor = (function () {
 
             var keyLabel = editingObject[metaType][key].label
             var html = ""
-            values.forEach(function (value,indexValue) {
+            values.forEach(function (value, indexValue) {
                 var langStr = "";
                 if (value["xml:lang"]) {
                     langStr = "<input class='SourceEditor_lang' value='" + value["xml:lang"] + "'>"
                 }
-                var valueId=common.getRandomHexaId(3)+"_"+key
+                var valueId = common.getRandomHexaId(3) + "_" + key
                 html += "<tr class='SourceEditor_input_TR' id='SourceEditor_" + valueId + "'>" +
                     "<td><span>" + keyLabel + "</span></td>" +
                     "<td>" + langStr + "<input class='SourceEditor_value '  value='" + value.value + "'></td>" +
@@ -342,7 +342,12 @@ var SourceEditor = (function () {
             var triples = [];
             var predicate
             var nodeLabel = null
-            triples.push({subject: self.editingObject.about, predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", object: self.editingObject.type, valueType: "uri"})
+            triples.push({
+                subject: self.editingObject.about,
+                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                object: self.editingObject.type,
+                valueType: "uri"
+            })
 
 
             self.editingObject.errors = []
@@ -362,7 +367,12 @@ var SourceEditor = (function () {
 
                 var valueType = self.getPredicateValueType(self.editingObject.type, predicate)
 
-                var triple = {subject: self.editingObject.about, predicate: predicate, object: value, valueType: valueType}
+                var triple = {
+                    subject: self.editingObject.about,
+                    predicate: predicate,
+                    object: value,
+                    valueType: valueType
+                }
                 if (lang && lang != "")
                     triple.lang = lang;
 
@@ -382,7 +392,12 @@ var SourceEditor = (function () {
             })
             for (var key in self.editingObject.inverseObjectProperties) {
                 self.editingObject.inverseObjectProperties[key].forEach(function (item) {
-                    triples.push({subject: item.value, predicate: key, object: self.editingObject.about, valueType: "uri"});
+                    triples.push({
+                        subject: item.value,
+                        predicate: key,
+                        object: self.editingObject.about,
+                        valueType: "uri"
+                    });
                 })
 
             }
@@ -407,7 +422,7 @@ var SourceEditor = (function () {
 
 
         self.onSelectNewProperty = function (property) {
-            if(!property || property=="")
+            if (!property || property == "")
                 return;
             $("#SourceEditor_NewPropertySelect").val("");
             self.drawObjectValue("objectProperties", property, self.editingObject, "SourceEditor_ObjectPropertiesTableDiv", "", true)
@@ -423,15 +438,15 @@ var SourceEditor = (function () {
 
         self.deleteEditingObject = function () {
 
-            var children = $('#'+SourceBrowser.currentTargetDiv).jstree(true).get_node(self.editingObject.about).children
+            var children = $('#' + SourceBrowser.currentTargetDiv).jstree(true).get_node(self.editingObject.about).children
             if (children.length > 0)
                 return alert("cannot delete node with children")
 
             Sparql_generic.deleteTriples(MainController.currentSource, self.editingObject.about, null, null, function (err, result) {
                 if (err)
                     MainController.UI.message(err);
-                $('#'+SourceBrowser.currentTargetDiv).jstree(true).delete_node(self.editingObject.about)
-                $('#'+SourceBrowser.currentTargetDiv).jstree(true).deselect_all();
+                $('#' + SourceBrowser.currentTargetDiv).jstree(true).delete_node(self.editingObject.about)
+                $('#' + SourceBrowser.currentTargetDiv).jstree(true).deselect_all();
                 self.editingObject = null;
                 $("#SourceEditor_mainDiv").css("display", "none")
 
@@ -442,21 +457,25 @@ var SourceEditor = (function () {
         }
 
         self.showNodeInfos = function (divId, defaultLang, nodeId, data) {
-var valueLabelsMap={}
+            var valueLabelsMap = {}
             var bindings = []
             var propertiesMap = {label: "", id: "", properties: {}};
+            var blankNodes = []
             data.forEach(function (item) {
+                if (item.value.type == "bnode") {
+                    return blankNodes.push(item.value.value)
+                }
                 var propName = item.prop.value
-                if(item.propLabel){
-                    propName=item.propLabel.value
-                }else{
-                    propName=Sparql_common.getLabelFromId(item.prop.value)
+                if (item.propLabel) {
+                    propName = item.propLabel.value
+                } else {
+                    propName = Sparql_common.getLabelFromId(item.prop.value)
                 }
 
                 var value = item.value.value;
-                if(item.valueLabel){
-                    if(!item["xml:lang"])
-                    valueLabelsMap[value]=item.valueLabel.value
+                if (item.valueLabel) {
+                    if (!item["xml:lang"])
+                        valueLabelsMap[value] = item.valueLabel.value
                 }
                 /*   if (item.valueLabel)
                        value = item.valueLabel.value;*/
@@ -478,105 +497,155 @@ var valueLabelsMap={}
             })
 
 
-            var defaultProps = ["UUID", "http://www.w3.org/2004/02/skos/core#prefLabel",
-                "http://www.w3.org/2004/02/skos/core#definition", "" +
-                "http://www.w3.org/2004/02/skos/core#altLabel",
-                "http://www.w3.org/2004/02/skos/core#broader",
-                "http://www.w3.org/2004/02/skos/core#narrower",
-                "http://www.w3.org/2004/02/skos/core#related",
-                "http://www.w3.org/2004/02/skos/core#exactMatch",
-                "http://www.w3.org/2004/02/skos/core#closeMatch",
-                //  "http://www.w3.org/2004/02/skos/core#sameAs"
-            ];
+            function draw() {
 
-            if (!defaultLang)
-                defaultLang = 'en';
+                var defaultProps = ["UUID", "http://www.w3.org/2004/02/skos/core#prefLabel",
+                    "http://www.w3.org/2004/02/skos/core#definition", "" +
+                    "http://www.w3.org/2004/02/skos/core#altLabel",
+                    "http://www.w3.org/2004/02/skos/core#broader",
+                    "http://www.w3.org/2004/02/skos/core#narrower",
+                    "http://www.w3.org/2004/02/skos/core#related",
+                    "http://www.w3.org/2004/02/skos/core#exactMatch",
+                    "http://www.w3.org/2004/02/skos/core#closeMatch",
+                    //  "http://www.w3.org/2004/02/skos/core#sameAs"
+                ];
 
-            for (var key in propertiesMap.properties) {
-                if (defaultProps.indexOf(key) < 0)
-                    defaultProps.push(key)
-            }
-            var str = "<div style='max-height:800px;overflow: auto'>" +
-                "<table class='infosTable'>"
-            str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
-            str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
+                if (!defaultLang)
+                    defaultLang = 'en';
 
-
-            defaultProps.forEach(function (key) {
-                if (!propertiesMap.properties[key])
-                    return;
-
-                str += "<tr class='infos_table'>"
+                for (var key in propertiesMap.properties) {
+                    if (defaultProps.indexOf(key) < 0)
+                        defaultProps.push(key)
+                }
+                var str = "<div style='max-height:800px;overflow: auto'>" +
+                    "<table class='infosTable'>"
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+                str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
 
 
-                if (propertiesMap.properties[key].value) {
-                    var values = propertiesMap.properties[key].value;
-                    str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + "</td>"
-                    var valuesStr = ""
-                    values.forEach(function (value, index) {
-                        if (value.indexOf("http") == 0) {
-                            if(valueLabelsMap[value])
-                            value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
-                            else
-                                value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
-                        }
-                        if (index > 0)
-                            valuesStr += "<br>"
-                        valuesStr += value
-                    })
-                    str += "<td class='detailsCellValue'>" + valuesStr + "</td>"
-                    str += "</tr>"
+                defaultProps.forEach(function (key) {
+                    if (!propertiesMap.properties[key])
+                        return;
+
+                    str += "<tr class='infos_table'>"
 
 
-                } else {
-                    var keyName = propertiesMap.properties[key].name
-                    var selectId = "detailsLangSelect_" + keyName
-                    var propNameSelect = "<select id='" + selectId + "' onchange=SourceBrowser.onNodeDetailsLangChange('" + keyName + "') >"
-                    var langDivs = "";
-
-
-                    for (var lang in propertiesMap.properties[key].langValues) {
-                        var values = propertiesMap.properties[key].langValues[lang];
-                        var selected = "";
-                        if (lang == defaultLang)
-                            selected = "selected";
-                        propNameSelect += "<option " + selected + ">" + lang + "</option> ";
+                    if (propertiesMap.properties[key].value) {
+                        var values = propertiesMap.properties[key].value;
+                        str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + "</td>"
                         var valuesStr = ""
                         values.forEach(function (value, index) {
                             if (value.indexOf("http") == 0) {
-                                if(valueLabelsMap[value])
+                                if (valueLabelsMap[value])
                                     value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
                                 else
-                                value += "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                                    value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
                             }
                             if (index > 0)
                                 valuesStr += "<br>"
                             valuesStr += value
-
                         })
+                        str += "<td class='detailsCellValue'>" + valuesStr + "</td>"
+                        str += "</tr>"
 
-                        langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>"
+
+                    } else {
+                        var keyName = propertiesMap.properties[key].name
+                        var selectId = "detailsLangSelect_" + keyName
+                        var propNameSelect = "<select id='" + selectId + "' onchange=SourceBrowser.onNodeDetailsLangChange('" + keyName + "') >"
+                        var langDivs = "";
+
+
+                        for (var lang in propertiesMap.properties[key].langValues) {
+                            var values = propertiesMap.properties[key].langValues[lang];
+                            var selected = "";
+                            if (lang == defaultLang)
+                                selected = "selected";
+                            propNameSelect += "<option " + selected + ">" + lang + "</option> ";
+                            var valuesStr = ""
+                            values.forEach(function (value, index) {
+                                if (value.indexOf("http") == 0) {
+                                    if (valueLabelsMap[value])
+                                        value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                    else
+                                        value += "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                                }
+                                if (index > 0)
+                                    valuesStr += "<br>"
+                                valuesStr += value
+
+                            })
+
+                            langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>"
+
+                        }
+
+
+                        propNameSelect += "</select>"
+
+                        str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + " " + propNameSelect + "</td>"
+                        str += "<td class='detailsCellValue'>" + langDivs + "</td>";
+
+                        if (propertiesMap.properties[key].langValues[defaultLang])
+                            str += "<script>SourceBrowser.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+
+                        str += "</tr>"
 
                     }
 
-
-                    propNameSelect += "</select>"
-
-                    str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + " " + propNameSelect + "</td>"
-                    str += "<td class='detailsCellValue'>" + langDivs + "</td>";
-
-                    if (propertiesMap.properties[key].langValues[defaultLang])
-                        str += "<script>SourceBrowser.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
-
-                    str += "</tr>"
-
-                }
-
-            })
-            str += "</table></div>"
+                })
+                str += "</table></div>"
 
 
-            $("#" + divId).html(str)
+                $("#" + divId).html(str)
+
+
+            }
+
+            // blankNodes.
+
+            if (Lineage_common.currentSource && blankNodes.length > 0) {
+
+                //  var filterStr=  Sparql_common.setFilter("concept",blankNodes,null,null);
+                /*   Sparql_OWL.getItems(Lineage_common.currentSource,{filter:filterStr,includeBlankNodes:true},function(err,result){*/
+
+
+                Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, [nodeId], null, function (err, result) {
+
+                    draw();
+                    if (err) {
+
+                        return console.log(err)
+                    }
+                    var str = "<hr>Restrictions<hr><div style='    background-color: beige;'> <table>"
+                    result.forEach(function (item) {
+
+                        str += "<tr class='infos_table'>"
+
+
+                        var propStr = "<a target='_blank' href='" + item.prop.value + "'>" + item.propLabel.value + "</a>"
+                        str += "<td class='detailsCellName'>" + propStr + "</td>"
+
+                        var targetClassStr = "..."
+                        if (item.value) {
+                            targetClassStr="<a target='_blank' href='" + item.value.value + "'>" + item.valueLabel.value + "</a>"
+                        }
+                        str += "<td class='detailsCellValue'>" + targetClassStr + "</td>"
+
+                        str += "</tr>"
+                    })
+
+                    str += "</table> </div>"
+
+                    $("#" + divId).append(str);
+
+
+                })
+
+
+            } else {
+                draw()
+            }
 
 
         }

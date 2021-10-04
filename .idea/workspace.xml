@@ -4,69 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="improve ADL mappings : a mapping is define by source+ database">
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="OSDU">
+      <change afterPath="$PROJECT_DIR$/config/blenderSources.json.default" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/mainConfig.json.default" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder_v0..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLbuilder_v0..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLutil..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/codification..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/codification..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/codificationOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/codificationOld..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/definitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/definitions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/temporary..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/temporary..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/SQLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/SQLutil..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/_csvCrawler..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/_csvCrawler..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotatorLive..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotatorLive..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/authentication..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/authentication..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/configManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/dataController..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/dataController..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/elasticRestProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/elasticRestProxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/exportGraph..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportGraph..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/exportRDF..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/globalParams..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/globalParams..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/jsonFileStorage.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/jsonFileStorage.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/logger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/logger..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/mySQLproxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mySQLproxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/tulsaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/tulsaToSkos..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/skosConverters/xsdToSkos2..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/xsdToSkos2..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/sourceManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sourceManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/usersGenerator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/usersGenerator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/util..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/xlsx2json..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/xlsx2json..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/ClovParser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ClovParser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/dictionary..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/dictionary..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapperOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapperOld..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/parseOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbuildDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbuildDialog.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/socket.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/socket.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/users.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/users.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/OSDUparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/OSDUparser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,41 +75,41 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.20" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/mappings" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/config" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="prettierjs.PrettierConfiguration.Package" value="D:\webstorm\souslesensVocables\node_modules\prettier" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2020.3.3\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\config" />
+      <recent name="D:\webstorm\souslesensVocables\config\users" />
       <recent name="D:\webstorm\souslesensVocables\data\mappings" />
       <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
-      <recent name="D:\webstorm\souslesensVocables\config\users" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\standardizer" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\js\external" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
+      <recent name="D:\webstorm\souslesensVocables\config" />
       <recent name="D:\webstorm\souslesensVocables\bin" />
+      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables\js" />
       <recent name="D:\webstorm\souslesensVocables\public\vocables" />
-      <recent name="D:\webstorm\souslesensVocables\config" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.bin\www">
+  <component name="RunManager" selected="Node.js.OSDUparser..js">
+    <configuration name="OSDUparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/OSDUparser..js" working-dir="$PROJECT_DIR$/bin">
+      <method v="2" />
+    </configuration>
     <configuration name="SQLserverConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
     <configuration name="SQLutil..js.X" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/SQLutil..js.X" working-dir="$PROJECT_DIR$/bin">
-      <method v="2" />
-    </configuration>
-    <configuration name="codification..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/codification..js" working-dir="$PROJECT_DIR$/bin/ADL">
       <method v="2" />
     </configuration>
     <configuration name="mainController.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/mainController.js" working-dir="$PROJECT_DIR$/public/vocables/js">
@@ -173,11 +120,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.OSDUparser..js" />
         <item itemvalue="Node.js.usersGenerator..js" />
         <item itemvalue="Node.js.SQLutil..js.X" />
         <item itemvalue="Node.js.SQLserverConnector..js" />
         <item itemvalue="Node.js.mainController.js" />
-        <item itemvalue="Node.js.codification..js" />
       </list>
     </recent_temporary>
   </component>
@@ -295,7 +242,7 @@
       <workItem from="1632656372893" duration="5360000" />
       <workItem from="1632746143564" duration="14709000" />
       <workItem from="1632835821016" duration="23535000" />
-      <workItem from="1633110032272" duration="13746000" />
+      <workItem from="1633110032272" duration="49254000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -325,7 +272,35 @@
       <option name="project" value="LOCAL" />
       <updated>1633183659419</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="improve ADL mappings : a mapping is define by source+ database">
+      <created>1633188883890</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1633188883890</updated>
+    </task>
+    <task id="LOCAL-00006" summary="OSDU">
+      <created>1633198310229</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1633198310229</updated>
+    </task>
+    <task id="LOCAL-00007" summary="OSDU">
+      <created>1633239386325</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1633239386325</updated>
+    </task>
+    <task id="LOCAL-00008" summary="OSDU">
+      <created>1633284850746</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1633284850746</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -431,7 +406,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="add prettier to packages.json" />
     <MESSAGE value="improve ADL mappings : a mapping is define by source+ database" />
-    <option name="LAST_COMMIT_MESSAGE" value="improve ADL mappings : a mapping is define by source+ database" />
+    <MESSAGE value="OSDU" />
+    <option name="LAST_COMMIT_MESSAGE" value="OSDU" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -591,12 +567,31 @@
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="271" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
+          <line>344</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="328" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
+          <line>280</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="335" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js</url>
+          <line>463</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="336" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js</url>
+          <line>615</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="338" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="NodeJSConfigurationType">
-        <watch expression="entries[&quot;0&quot;][&quot;0&quot;][&quot;0&quot;][&quot;0&quot;][&quot;0&quot;]" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>

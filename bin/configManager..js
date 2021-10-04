@@ -19,7 +19,7 @@ var fs = require("fs");
 var configs = {};
 var configManager = {
     getGeneralConfig: function (callback) {
-        var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json/");
+        var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
         var str = fs.readFileSync(mainConfigFilePath);
         var config = null;
         try {

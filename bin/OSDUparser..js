@@ -123,12 +123,11 @@ var parseOSDU = function (sourcePath, targetPath) {
 }
 
 
-var buildOwl = function (jsonPath) {
+var buildOwl = function (jsonPath,graphUri) {
     var triples = []
     var classesMap = {}
     var json = JSON.parse("" + fs.readFileSync(jsonPath));
 
-    var graphUri = "http://souslesens.org/osdu/ontology/"
 
     json.classes.forEach(function (aClass) {
 
@@ -170,6 +169,8 @@ var buildOwl = function (jsonPath) {
             var propLabel = util.formatStringForTriple("has" + attr.name)
             if(attr.ref ){
             var targetClass = classesMap[attr.ref]
+                if(!targetClass)
+                    targetClass = classesMap[attr.name]
 
 
             if (targetClass) {
@@ -278,7 +279,6 @@ var buildOwl = function (jsonPath) {
 
     })
 
-    return;
 
 
     var allTriples = []
@@ -362,11 +362,16 @@ var buildOwl = function (jsonPath) {
 
 
 var sourcePath = "D:\\NLP\\ontologies\\OSDU\\OSDU.xmi"
+var graphUri = "http://souslesens.org/osdu/ontology/"
+
+var sourcePath = "D:\\NLP\\ontologies\\PPDM\\PPDM.xml"
+var graphUri = "http://souslesens.org/ppdm/ontology/"
+
 var jsonPath = sourcePath + ".json";
 
 
 //parseOSDU(sourcePath, jsonPath);
-buildOwl(jsonPath)
+buildOwl(jsonPath,graphUri)
 
 
 

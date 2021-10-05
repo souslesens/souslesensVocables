@@ -1,0 +1,19 @@
+{
+    "01FH8KAJX9645STPQ1A4F20BQT": {
+        "login": "Yoelis",
+        "password": "b",
+        "groups": [
+            "admin",
+            "regular"
+        ],
+        "key": "01FH8KAJX9645STPQ1A4F20BQT"
+    },
+    "01FH8KAJX96MCMGJ5SFZSNYS1B": {
+        "login": "Alberto",
+        "password": "b",
+        "groups": [
+            "admin"
+        ],
+        "key": "01FH8KAJX96MCMGJ5SFZSNYS1B"
+    }
+}

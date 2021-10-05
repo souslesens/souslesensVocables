@@ -60,6 +60,7 @@
     "superagent": "^5.3.1",
     "superagent-proxy": "^2.1.0",
     "tika-server": "^1.2.11",
+    "ulid": "^2.3.0",
     "unzipper": "^0.10.11",
     "util": "^0.12.1",
     "winston": "^3.3.3",

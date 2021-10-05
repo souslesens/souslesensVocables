@@ -1,9 +1,9 @@
 declare function getUsers(url: string): Promise<User[]>;
+declare function putUsers(url: string, body: User[]): Promise<User[]>;
 declare type User = {
     key: string;
     login: string;
     password: string;
-    groups: Group[];
+    groups: string[];
 };
-declare type Group = 'admin' | 'regular';
-export { getUsers, User };
+export { getUsers, putUsers, User };

@@ -216,12 +216,13 @@ var Sparql_OWL = (function () {
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 " select distinct *  " + fromStr + "  WHERE {{"
 
+
+            query += "?concept rdf:type owl:Class."
             if (words) {
                 query += "?concept rdfs:label ?conceptLabel."
             } else {
                 query += "OPTIONAL { ?concept rdfs:label ?conceptLabel.}"
             }
-
 
 
             ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);

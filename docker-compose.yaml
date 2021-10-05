@@ -1,0 +1,30 @@
+version: "3"
+services:
+
+  vocables:
+    restart: unless-stopped
+    image: souslesens/souslesensvocables:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${LISTEN_PORT:-3010}:3010"
+    volumes:
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/config:\
+      /app/config"
+    env_file:
+      - default.env
+      - .env
+    networks:
+      - backend
+
+  virtuoso:
+    image: askomics/virtuoso
+    ports:
+      - 8899:8890
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: "bridge"

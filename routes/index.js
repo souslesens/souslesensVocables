@@ -28,6 +28,10 @@ router.get('/users', function (req, res, next) {
     res.sendFile(path.join(__dirname, '/../config/users/users_test.json'))
 });
 
+router.get('/profiles', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/profiles.json'))
+});
+
 router.put('/users', async function (req, res, next) {
 
     try {

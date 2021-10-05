@@ -8,9 +8,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${LISTEN_PORT:-3010}:3010"
+      - "${VOCABLES_LISTEN_PORT:-3010}:3010"
     volumes:
-      - "${DATA_ROOT_DIR:-/tmp}/vocables/config:\
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/app/config:\
       /app/config"
     env_file:
       - default.env
@@ -19,9 +19,12 @@ services:
       - backend
 
   virtuoso:
-    image: askomics/virtuoso
+    image: askomics/virtuoso:7.2.5.1
     ports:
-      - 8899:8890
+      - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
+    volumes:
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/virtuoso/data:\
+        /data"
     networks:
       - backend
 

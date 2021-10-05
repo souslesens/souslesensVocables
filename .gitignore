@@ -104,5 +104,4 @@ dist
 .tern-port
 public/vocables/images/descriptionXX.png
 
-config/*.json
-config/users/*.json
+config

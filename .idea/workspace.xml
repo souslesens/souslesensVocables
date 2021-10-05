@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="OSDU">
-      <change afterPath="$PROJECT_DIR$/config/blenderSources.json.default" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/mainConfig.json.default" afterDir="false" />
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="initiate dev master branch">
+      <change afterPath="$PROJECT_DIR$/bin/ADL/codificationOld..jsX" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/OSDUparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/OSDUparser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +35,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="admin-interface-dev" />
+        <entry key="$PROJECT_DIR$" value="master_devXX" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -242,7 +236,7 @@
       <workItem from="1632656372893" duration="5360000" />
       <workItem from="1632746143564" duration="14709000" />
       <workItem from="1632835821016" duration="23535000" />
-      <workItem from="1633110032272" duration="49254000" />
+      <workItem from="1633110032272" duration="62240000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -300,7 +294,42 @@
       <option name="project" value="LOCAL" />
       <updated>1633284850746</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="OSDU">
+      <created>1633359823984</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1633359823984</updated>
+    </task>
+    <task id="LOCAL-00010" summary="OSDU">
+      <created>1633359864625</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1633359864625</updated>
+    </task>
+    <task id="LOCAL-00011" summary="OSDU">
+      <created>1633366162880</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1633366162880</updated>
+    </task>
+    <task id="LOCAL-00012" summary="OSDU">
+      <created>1633371244624</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1633371244624</updated>
+    </task>
+    <task id="LOCAL-00013" summary="correct search query OWL">
+      <created>1633425405884</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1633425405884</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -407,7 +436,9 @@
     <MESSAGE value="add prettier to packages.json" />
     <MESSAGE value="improve ADL mappings : a mapping is define by source+ database" />
     <MESSAGE value="OSDU" />
-    <option name="LAST_COMMIT_MESSAGE" value="OSDU" />
+    <MESSAGE value="correct search query OWL" />
+    <MESSAGE value="initiate dev master branch" />
+    <option name="LAST_COMMIT_MESSAGE" value="initiate dev master branch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -568,18 +599,6 @@
           <option name="timeStamp" value="271" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
-          <line>344</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="328" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
-          <line>280</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="335" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js</url>
           <line>463</line>
           <properties lambdaOrdinal="-1" />
@@ -590,6 +609,12 @@
           <line>615</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="338" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
+          <line>417</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="366" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

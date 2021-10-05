@@ -223,6 +223,7 @@ var Sparql_OWL = (function () {
             }
 
 
+
             ancestorsDepth = Math.min(ancestorsDepth, self.ancestorsDepth);
 
             for (var i = 1; i <= ancestorsDepth; i++) {

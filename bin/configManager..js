@@ -33,7 +33,7 @@ var configManager = {
     },
 
     getDictionary: function (dictionary, callback) {
-        var dictionaryPath = path.join(__dirname, "../config/dictionaries/" + dictionary);
+        var dictionaryPath = path.join(__dirname, "../data/dictionaries/" + dictionary);
         jsonFileStorage.retrieve(path.resolve(dictionaryPath), function (err, profiles) {
             callback(err, profiles);
         });

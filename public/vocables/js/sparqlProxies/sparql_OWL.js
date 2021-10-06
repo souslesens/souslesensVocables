@@ -217,11 +217,11 @@ var Sparql_OWL = (function () {
                 " select distinct *  " + fromStr + "  WHERE {{"
 
 
-            query += "?concept rdf:type owl:Class."
+            query += "?concept rdf:type owl:Class. "
             if (words) {
-                query += "?concept rdfs:label ?conceptLabel."
+                query += " ?concept rdfs:label ?conceptLabel."
             } else {
-                query += "OPTIONAL { ?concept rdfs:label ?conceptLabel.}"
+                query += " OPTIONAL { ?concept rdfs:label ?conceptLabel.}"
             }
 
 

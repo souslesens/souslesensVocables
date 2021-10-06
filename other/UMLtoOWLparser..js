@@ -1,8 +1,8 @@
 var fs = require("fs");
 const async = require("async");
 var sax = require("sax");
-var util = require("./util.");
-var httpProxy = require("./httpProxy.")
+var util = require("../bin/util.");
+var httpProxy = require("../bin/httpProxy.")
 
 
 var topParentTag;
@@ -20,8 +20,8 @@ var currentX
 
 var parseOSDU = function (sourcePath, targetPath) {
     var saxStream = sax.createStream(false);
-    var distinctNodeNames= {}
-    var distinctAttrNames= {}
+    var distinctNodeNames = {}
+    var distinctAttrNames = {}
     saxStream.on("error", function (e) {
         console.error("error!", e);
         // clear the error
@@ -29,12 +29,12 @@ var parseOSDU = function (sourcePath, targetPath) {
         this._parser.resume();
     });
 
-    var json = {classes: [], generalizations: [],  collaborations:[], associations:[],}
+    var json = {classes: [], generalizations: [], collaborations: [], associations: [],}
     saxStream.on("opentag", function (node) {
-        if(!distinctNodeNames[node.name])
-            distinctNodeNames[node.name]=1
+        if (!distinctNodeNames[node.name])
+            distinctNodeNames[node.name] = 1
         line++;
-        if(line%10000==0)
+        if (line % 10000 == 0)
             console.log(line)
         //  console.log(node.name)
         var name = node.attributes["NAME"]
@@ -46,22 +46,22 @@ var parseOSDU = function (sourcePath, targetPath) {
             currentParent = {type: "CLASS", name: name, id: id, attributes: []}
 
         }
-      /*  if(node.name=="UML:COLLABORATION"){
-        var offset=this._parser.bufferCheckPosition
-            console.log(offset)
-        }
-        if(node.name=="UML:ASSOCIATION"){
-            var offset=this._parser.bufferCheckPosition
-            var offset=this._parser.bufferCheckPosition
-            console.log(offset)
-            fs.open(sourcePath, 'r', function(err, fd) {
-                var bufferSize = 10000;
-                var buffer = new Buffer(bufferSize);
-                fs.readSync(fd, buffer,0 , bufferSize,offset)
-                var str= buffer.toString('utf8');
-                console.log(str)
-            })
-        }*/
+        /*  if(node.name=="UML:COLLABORATION"){
+          var offset=this._parser.bufferCheckPosition
+              console.log(offset)
+          }
+          if(node.name=="UML:ASSOCIATION"){
+              var offset=this._parser.bufferCheckPosition
+              var offset=this._parser.bufferCheckPosition
+              console.log(offset)
+              fs.open(sourcePath, 'r', function(err, fd) {
+                  var bufferSize = 10000;
+                  var buffer = new Buffer(bufferSize);
+                  fs.readSync(fd, buffer,0 , bufferSize,offset)
+                  var str= buffer.toString('utf8');
+                  console.log(str)
+              })
+          }*/
 
 
         if (node.name == "UML:ATTRIBUTE" && currentParent.type == "CLASS") {
@@ -91,11 +91,10 @@ var parseOSDU = function (sourcePath, targetPath) {
         }
 
 
-
         if (node.name == "UML:TAGGEDVALUE") {
 
-            if(!distinctAttrNames[node.name])
-                distinctAttrNames[node.name]=1
+            if (!distinctAttrNames[node.name])
+                distinctAttrNames[node.name] = 1
 
             var tag = node.attributes["TAG"]
             var value = node.attributes["VALUE"];
@@ -127,6 +126,9 @@ var parseOSDU = function (sourcePath, targetPath) {
                     currentParent.documentation = value;
 
                 }
+                if (tag == "package_name") {
+                    currentParent.package_name = value;
+                }
             }
             if (tag == "format") {
                 if (currentAttr)
@@ -140,7 +142,7 @@ var parseOSDU = function (sourcePath, targetPath) {
             }
 
             if (tag == "ref") {
-                if (currentAttr  && value)
+                if (currentAttr && value)
                     currentAttr.ref = value;
 
             }
@@ -167,10 +169,10 @@ var parseOSDU = function (sourcePath, targetPath) {
             // json.generalizations.push(currentParent)
             currentAttr = null;
         }
-        if(node=="UML:COLLABORATION"){
+        if (node == "UML:COLLABORATION") {
             json.collaborations.push(currentParent)
         }
-        if(node=="UML:ASSOCIATION"){
+        if (node == "UML:ASSOCIATION") {
             json.associations.push(currentParent)
 
         }
@@ -178,8 +180,8 @@ var parseOSDU = function (sourcePath, targetPath) {
 
     });
     saxStream.on("end", function (node) {
-        fs.writeFileSync(targetPath+"Attrs.csv", JSON.stringify(distinctAttrNames, null, 2))
-        fs.writeFileSync(targetPath+"Nodes.csv", JSON.stringify(distinctNodeNames, null, 2))
+        fs.writeFileSync(targetPath + "Attrs.csv", JSON.stringify(distinctAttrNames, null, 2))
+        fs.writeFileSync(targetPath + "Nodes.csv", JSON.stringify(distinctNodeNames, null, 2))
 
         fs.writeFileSync(targetPath, JSON.stringify(json, null, 2))
     });
@@ -189,16 +191,17 @@ var parseOSDU = function (sourcePath, targetPath) {
 }
 
 
-var buildOwl = function (jsonPath,graphUri) {
+var buildOwl = function (jsonPath, graphUri) {
     var triples = []
     var classesMap = {}
     var json = JSON.parse("" + fs.readFileSync(jsonPath));
 
 
+    var packages={}
     json.classes.forEach(function (aClass) {
 
-        var uri = graphUri + util.formatStringForTriple(aClass.id,true)
-        var className=aClass.name.toLowerCase()
+        var uri = graphUri + util.formatStringForTriple(aClass.id, true)
+        var className = aClass.name.toLowerCase()
         if (!classesMap[className]) {
             classesMap[className] = uri;
 
@@ -221,6 +224,38 @@ var buildOwl = function (jsonPath,graphUri) {
                 });
             }
         }
+        if(aClass.package_name){
+            var packageUri= packages[aClass.package_name]
+            if(!packageUri){
+                packageUri = graphUri + util.formatStringForTriple(aClass.package_name, true)
+                packages[aClass.package_name]=packageUri
+                triples.push({
+                    subject: packageUri,
+                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                    object: "owl:Class",
+                });
+
+                triples.push({
+                    subject: packageUri,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                    object: "'" + util.formatStringForTriple(aClass.package_name) + "'",
+                });
+               /* triples.push({
+                    subject: aClassUri,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                    object: packageUri
+                })*/
+            }
+
+
+
+            triples.push({
+                subject: uri,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                object: packageUri
+            })
+
+        }
 
 
     })
@@ -230,7 +265,7 @@ var buildOwl = function (jsonPath,graphUri) {
     var propertiesMap = {}
     var blankNodeIndex = 0;
     json.classes.forEach(function (aClass) {
-        var className=aClass.name.toLowerCase()
+        var className = aClass.name.toLowerCase()
         var aClassUri = classesMap[className]
         aClass.attributes.forEach(function (attr) {
 
@@ -247,7 +282,7 @@ var buildOwl = function (jsonPath,graphUri) {
 
             if (targetClass) {
                 if (!propertiesMap[attr.name]) {
-                    propUri = graphUri + "has" + util.formatStringForTriple(attr.name,true)
+                    propUri = graphUri + "has" + util.formatStringForTriple(attr.name, true)
                     propertiesMap[attr.name] = propUri
 
                     objectPropertiesTriples.push({
@@ -291,7 +326,7 @@ var buildOwl = function (jsonPath,graphUri) {
             } else {//dataType property if no class
                 //   return;
                 if (!propertiesMap[attr.name]) {
-                    propUri = graphUri + "has" + util.formatStringForTriple(attr.name,true)
+                    propUri = graphUri + "has" + util.formatStringForTriple(attr.name, true)
                     propertiesMap[attr.name] = propUri
 
                     dataTypePropertiesTriples.push({
@@ -367,69 +402,93 @@ var buildOwl = function (jsonPath,graphUri) {
 
     var totalTriples = 0
     var sparqlServerUrl = "http://51.178.139.80:8890/sparql"
-    async.eachSeries(
-        slicedTriples,
-        function (triples, callbackEach) {
-            //    return callbackEach();
-            var triplesStr = "";
-            triples.forEach(function (triple) {
-                var subject = triple.subject
-                if (subject.indexOf("_:b") == 0)
-                    ;
-                else
-                    subject = "<" + subject + ">"
 
-                var value = triple.object;
-                if (value.indexOf("_:b") == 0)
-                    ;
-                else if (value.indexOf("http") == 0)
-                    value = "<" + value + ">";
-                var tripleStr =
-                    subject + " <" +
-                    triple.predicate +
-                    "> " +
-                    value +
-                    ".\n";
-                var tripleHash = util.hashCode(tripleStr);
-                if (uniqueTriples[tripleHash]) return;
-                else {
-                    uniqueTriples[tripleHash] = 1;
-                    triplesStr += tripleStr;
-                }
-            });
-            var queryGraph =
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
-            queryGraph += "with <" + graphUri + ">" + "insert {";
-            queryGraph += triplesStr;
 
-            queryGraph += "}";
+    async.series([
+        function (callbackSeries) {
 
+            var queryGraph = "CLEAR GRAPH <" + graphUri+">"
             var params = {query: queryGraph};
-
             httpProxy.post(
                 sparqlServerUrl,
                 null,
                 params,
                 function (err, result) {
-                    if (err) {
-                        var x=queryGraph
-                        return callbackEach(err);
-                    }
-                    totalTriples += triples.length;
-                   console.log(totalTriples)
-                    return callbackEach(null);
+                    return callbackSeries(err)
                 }
             );
         },
-        function (err) {
-            if (err) {
-                console.log(err)
-            }
-            return console.log("DONE " + totalTriples);
+        function (callbackSeries) {
+
+
+            async.eachSeries(
+                slicedTriples,
+                function (triples, callbackEach) {
+                    //    return callbackEach();
+                    var triplesStr = "";
+                    triples.forEach(function (triple) {
+                        var subject = triple.subject
+                        if (subject.indexOf("_:b") == 0)
+                            ;
+                        else
+                            subject = "<" + subject + ">"
+
+                        var value = triple.object;
+                        if (value.indexOf("_:b") == 0)
+                            ;
+                        else if (value.indexOf("http") == 0)
+                            value = "<" + value + ">";
+                        var tripleStr =
+                            subject + " <" +
+                            triple.predicate +
+                            "> " +
+                            value +
+                            ".\n";
+                        var tripleHash = util.hashCode(tripleStr);
+                        if (uniqueTriples[tripleHash]) return;
+                        else {
+                            uniqueTriples[tripleHash] = 1;
+                            triplesStr += tripleStr;
+                        }
+                    });
+                    var queryGraph =
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+                    queryGraph += "with <" + graphUri + ">" + "insert {";
+                    queryGraph += triplesStr;
+
+                    queryGraph += "}";
+
+                    var params = {query: queryGraph};
+
+
+                    httpProxy.post(
+                        sparqlServerUrl,
+                        null,
+                        params,
+                        function (err, result) {
+                            if (err) {
+                                var x = queryGraph
+                                return callbackEach(err);
+                            }
+                            totalTriples += triples.length;
+                            console.log(totalTriples)
+                            return callbackEach(null);
+                        }
+                    );
+                },
+                function (err) {
+                   return callbackSeries(err)
+                }
+            )
         }
-    );
+    ], function (err) {
+        if (err) {
+            console.log(err)
+        }
+        return console.log("DONE " + totalTriples);
+    })
 
 
 }

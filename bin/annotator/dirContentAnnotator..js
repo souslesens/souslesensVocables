@@ -32,9 +32,9 @@ var maxDocSize = 20 * 1000 * 1000;
 var tikaServerUrl = "127.0.0.1:41000";
 var spacyServerUrl = "http://51.178.39.209:8000/pos";
 
-var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\";
-//var parsedDocumentsHomeDir ="D:\\NLP\\annotatedCorpus\\"
-var uploadDirPath = "D:\\temp\\annotator\\corpus\\";
+//var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\";
+var parsedDocumentsHomeDir ="../../data/annotator/parsedDocuments"
+var uploadDirPath = "../../data/annotator/temp"
 var Inflector = require("inflected");
 var tikaServer = null;
 var tikaserverStarted = false;
@@ -50,6 +50,8 @@ var DirContentAnnotator = {
     },
 
     uploadAndAnnotateCorpus: function (zipFile, corpusName, sources, options, callback) {
+
+        console.log("uploadAndAnnotateCorpus 1")
         DirContentAnnotator.socket.message(
             "unziping file " + zipFile.name + "(" + zipFile.size / 1000 + "ko)"
         );

@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="organisation of code">
-      <change afterPath="$PROJECT_DIR$/data/mappings/readme.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/graphs/readme.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/graphs/readme.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/readme.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/readme.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +69,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.21" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/annotator/temp" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/dictionaries" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="prettierjs.PrettierConfiguration.Package" value="D:\webstorm\souslesensVocables\node_modules\prettier" />
@@ -83,11 +80,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\data\dictionaries" />
+      <recent name="D:\webstorm\souslesensVocables\data\graphs" />
       <recent name="D:\webstorm\souslesensVocables\data\annotator\temp" />
       <recent name="D:\webstorm\souslesensVocables\data\annotator\parsedDocuments" />
       <recent name="D:\webstorm\souslesensVocables\data\mappings" />
-      <recent name="D:\webstorm\souslesensVocables\data\graphs" />
-      <recent name="D:\webstorm\souslesensVocables\data\dictionaries" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\data\mappings" />
@@ -238,7 +235,7 @@
       <workItem from="1632746143564" duration="14709000" />
       <workItem from="1632835821016" duration="23535000" />
       <workItem from="1633110032272" duration="72148000" />
-      <workItem from="1633503412063" duration="10803000" />
+      <workItem from="1633503412063" duration="12947000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -359,7 +356,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633524623606</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="organisation of code">
+      <created>1633525040084</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1633525040084</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

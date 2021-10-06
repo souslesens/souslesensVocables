@@ -566,7 +566,7 @@ var ADLadvancedMapping = (function () {
         self.showEntityInfos = function (id) {
             var obj = self.currentdictionaryEntryEntities[id]
             var source = Config.ADL.elasticIndexSourceMap[obj.index]
-            MainController.UI.showNodeInfos(source, obj.id, "mainDialogDiv")
+            SourceBrowser.showNodeInfos(source, obj.id, "mainDialogDiv")
         }
 
 
@@ -1356,7 +1356,7 @@ var ADLadvancedMapping = (function () {
                     var node = ADLadvancedMapping.currentTreeNode
                     if (!node || node.parent == "#")
                         return;
-                    MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+                    SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
 
 
                 }

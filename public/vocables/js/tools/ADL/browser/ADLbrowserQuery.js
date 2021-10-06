@@ -1158,7 +1158,7 @@ var ADLbrowserQuery = (function () {
                     /*    items.nodeInfos = {
                             label: "node infos",
                             action: function (e, xx) {// pb avec source
-                                MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+                                SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
 
 
                             }

@@ -11,9 +11,9 @@
  */
 var Config = (function () {
     var self = {};
-    self.serverUrl = "/elastic";
+    self.serverUrl = "/slsv";
     if (window.location.href.indexOf("localhost") < 0)
-      self.serverUrl = "../elastic";
+      self.serverUrl = "../slsv";
  //   self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     //  self.default_sparql_url = "http://10.28.171.139:8890/sparql"
 //    self.default_sparql_url="http://opeppa-updtlb03.main.glb.corp.local:8890/sparql"

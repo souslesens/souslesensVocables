@@ -13,13 +13,13 @@ var Evaluate = (function () {
         self.copyTypeColors["concept"]="#a2afc8";
         self.copyTypeColors["altLabel"]="#bfb4a1";
 
-
-
         self.onSourceSelect = function () {
             /*   var html = "<button onclick='Evaluate.showActionPanel()'>OK</button>"
                $("#sourceDivControlPanelDiv").html(html)*/
 
         }
+
+
 
         self.onLoaded = function () {
             //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
@@ -525,6 +525,7 @@ var Evaluate = (function () {
         self.onMissingWordClick = function (event) {
             var word = event.currentTarget.innerText
             var html = "<b>" + word + "</b>&nbsp;" +
+                "<div style='    font-style: italic;color: #37d237;' id='Evaluate_infosDiv'></div>"+
                 "<button style=' background-color: "+Evaluate.copyTypeColors["concept"]+"' onclick='Evaluate.copyWordToClipboard(\"" + word + "\",\"concept\")'>Copy as Concept</button>" +
                 "<button style=' background-color: "+Evaluate.copyTypeColors["altLabel"]+"' onclick='Evaluate.copyWordToClipboard(\"" + word + "\",\"altLabel\")'>Copy as AltLabel</button>" +
                 "<br><ul>"
@@ -553,6 +554,7 @@ var Evaluate = (function () {
 
         }
         self.copyWordToClipboard = function (word, pasteType) {
+            $("#Evaluate_infosDiv").html("word "+word +" ready to paste in Blender")
             var id = "_annotate_missing_word_" + common.getRandomHexaId(5)
             var data = {
 

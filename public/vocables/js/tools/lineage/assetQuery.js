@@ -437,7 +437,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
             showNodeInfo: function () {
 
-                MainController.UI.showNodeInfos(MainController.currentSource, ADLquery.currentProperty.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(MainController.currentSource, ADLquery.currentProperty.id, "mainDialogDiv")
             }
 
 

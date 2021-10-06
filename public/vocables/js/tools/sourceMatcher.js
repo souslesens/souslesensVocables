@@ -648,7 +648,7 @@ var SourceMatcher = (function () {
             if (event && event.ctrlKey) {
                 Clipboard.copy({type: "node", source: node.data.source, id: node.id, label: node.label}, "_visjsNode", event)
             } else {
-                MainController.UI.showNodeInfos(node.data.source, node.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(node.data.source, node.id, "mainDialogDiv")
             }
 
 

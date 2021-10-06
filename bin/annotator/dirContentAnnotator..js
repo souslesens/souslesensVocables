@@ -7,6 +7,7 @@ const TikaServer = require("tika-server");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
 var socket = require("../../routes/socket.js");
+const ConfigManager = require("../configManager.");
 var async = require("async");
 //var annotatorLive = require('../annotatorLive.')
 
@@ -33,8 +34,8 @@ var tikaServerUrl = "127.0.0.1:41000";
 var spacyServerUrl = "http://51.178.39.209:8000/pos";
 
 //var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\";
-var parsedDocumentsHomeDir ="../../data/annotator/parsedDocuments"
-var uploadDirPath = "../../data/annotator/temp"
+var parsedDocumentsHomeDir =null;//"../../data/annotator/parsedDocuments"
+var uploadDirPath = null;//"../../data/annotator/temp"
 var Inflector = require("inflected");
 var tikaServer = null;
 var tikaserverStarted = false;
@@ -48,8 +49,13 @@ var DirContentAnnotator = {
             console.log(text);
         },
     },
+    init:function(){
+        parsedDocumentsHomeDir = path.resolve(ConfigManager.config.data_dir+ "annotator/parsedDocuments")+path.sep;
+        uploadDirPath = path.resolve(ConfigManager.config.data_dir+ "annotator/temp/")+path.sep;
+    },
 
     uploadAndAnnotateCorpus: function (zipFile, corpusName, sources, options, callback) {
+
 
         console.log("uploadAndAnnotateCorpus 1")
         DirContentAnnotator.socket.message(
@@ -885,7 +891,7 @@ var DirContentAnnotator = {
         }
     },
 };
-
+DirContentAnnotator.init()
 module.exports = DirContentAnnotator;
 if (false) {
     DirContentAnnotator.getDirContent("D:\\NLP\\ontologies");

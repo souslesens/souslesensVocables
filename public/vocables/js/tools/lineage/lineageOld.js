@@ -160,7 +160,7 @@ var Lineage_classes = (function () {
             if (propertiesMap.event.altKey)
                 self.addArbitraryNodeToGraph(data)
             if (propertiesMap.event.ctrlKey)
-                MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
             SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
         }
         self.initUI = function () {
@@ -1918,7 +1918,7 @@ var Lineage_classes = (function () {
                     self.currentGraphEdge = node;
                     if (!self.currentGraphEdge.data.propertyId)
                         return;
-                    MainController.UI.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv")
+                    SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv")
                 } else {
                     self.setGraphPopupMenus(node, event)
                     self.currentGraphNode = node;
@@ -1933,7 +1933,7 @@ var Lineage_classes = (function () {
 
                 self.currentGraphNode = node;
                 if (options.ctrlKey) {
-                    MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+                    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
                 }
                 if (options.dbleClick) {
                     Lineage_classes.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)
@@ -1971,7 +1971,7 @@ var Lineage_classes = (function () {
 
 
             showNodeInfos: function () {
-                MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
             },
 
             graphNodeNeighborhood: function (filter) {
@@ -2086,7 +2086,7 @@ Lineage_properties = (function () {
                 nodeInfos: {
                     label: "Property infos",
                     action: function (e) {// pb avec source
-                        MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
                     }
 
                 },
@@ -2667,7 +2667,7 @@ Lineage_properties = (function () {
                 self.drawGraph(node)
             },
             showNodeInfos: function () {
-                MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
             }
 
         }

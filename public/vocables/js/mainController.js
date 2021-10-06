@@ -28,6 +28,7 @@ var MainController = (function () {
             dataType: "json",
             success: function (serverConfig, textStatus, jqXHR) {
               //  Config.serverUrl = serverConfig.serverUrl
+                Config.default_lang= serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
                 return callback()
             },
@@ -326,23 +327,7 @@ var MainController = (function () {
 
 
         },
-        showNodeInfos: function (sourceLabel, nodeId, divId, callback) {
 
-            Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true}, function (err, result) {
-                if (err) {
-                    return MainController.UI.message(err);
-                }
-                if (divId.indexOf("Dialog") > -1) {
-                    $("#" + divId).dialog("open");
-                }
-                SourceEditor.showNodeInfos(divId, "en", nodeId, result)
-
-                if (callback)
-                    return callback()
-            })
-
-
-        },
 
         message: function (message, stopWaitImg) {
             $("#messageDiv").html(message)
@@ -452,6 +437,7 @@ var MainController = (function () {
 
 
     }
+
 
 
     return self;

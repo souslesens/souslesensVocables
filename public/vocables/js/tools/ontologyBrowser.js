@@ -436,7 +436,7 @@ var h=$("#graphDiv").height();
 
         showNodeInfo: function(){
 
-            MainController.UI.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode.id, "mainDialogDiv")
+            SourceBrowser.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode.id, "mainDialogDiv")
         }
 
 

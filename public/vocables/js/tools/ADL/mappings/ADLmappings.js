@@ -801,7 +801,7 @@ var ADLmappings = (function () {
             if (Array.isArray(node.data)) {
                 node.data = node.data[0];
             }
-            MainController.UI.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
+            SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
         }
 
 

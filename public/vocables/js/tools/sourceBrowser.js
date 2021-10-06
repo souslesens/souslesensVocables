@@ -256,7 +256,7 @@ var SourceBrowser = (function () {
             , items.nodeInfos = {
             label: "Node infos",
             action: function (e) {// pb avec source
-                MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
             }
 
         }
@@ -294,7 +294,7 @@ var SourceBrowser = (function () {
 
 
     self.editThesaurusConceptInfos = function (sourceLabel, node, callback) {
-        MainController.UI.showNodeInfos(sourceLabel, node.data.id, "graphDiv")
+        SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv")
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
               if (err) {
@@ -628,6 +628,215 @@ var SourceBrowser = (function () {
         var idsStr = Sparql_common.setFilter("id", self.currentFoundIds)
 
     }
+
+    self.showNodeInfos=function (sourceLabel, nodeId, divId, callback) {
+
+        Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true}, function (err, data) {
+            if (err) {
+                return MainController.UI.message(err);
+            }
+            if (divId.indexOf("Dialog") > -1) {
+                $("#" + divId).dialog("open");
+            }
+
+                var valueLabelsMap = {}
+                var bindings = []
+                var propertiesMap = {label: "", id: "", properties: {}};
+                var blankNodes = []
+                data.forEach(function (item) {
+                    if (item.value.type == "bnode") {
+                        return blankNodes.push(item.value.value)
+                    }
+                    var propName = item.prop.value
+                    if (item.propLabel) {
+                        propName = item.propLabel.value
+                    } else {
+                        propName = Sparql_common.getLabelFromId(item.prop.value)
+                    }
+
+                    var value = item.value.value;
+                    if (item.valueLabel) {
+                        if (!item["xml:lang"])
+                            valueLabelsMap[value] = item.valueLabel.value
+                    }
+                    /*   if (item.valueLabel)
+                           value = item.valueLabel.value;*/
+
+                    if (!propertiesMap.properties[propName])
+                        propertiesMap.properties[propName] = {name: propName, langValues: {}}
+
+                    if (item.value && item.value["xml:lang"]) {
+                        if (!propertiesMap.properties[propName].langValues[item.value["xml:lang"]])
+                            propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = []
+                        propertiesMap.properties[propName].langValues[item.value["xml:lang"]].push(value);
+                    } else {
+                        if (!propertiesMap.properties[propName].value)
+                            propertiesMap.properties[propName].value = [];
+
+                        propertiesMap.properties[propName].value.push(value);
+                    }
+
+                })
+
+
+                function draw() {
+
+                    var defaultProps = ["UUID", "http://www.w3.org/2004/02/skos/core#prefLabel",
+                        "http://www.w3.org/2004/02/skos/core#definition", "" +
+                        "http://www.w3.org/2004/02/skos/core#altLabel",
+                        "http://www.w3.org/2004/02/skos/core#broader",
+                        "http://www.w3.org/2004/02/skos/core#narrower",
+                        "http://www.w3.org/2004/02/skos/core#related",
+                        "http://www.w3.org/2004/02/skos/core#exactMatch",
+                        "http://www.w3.org/2004/02/skos/core#closeMatch",
+                        //  "http://www.w3.org/2004/02/skos/core#sameAs"
+                    ];
+
+                    var defaultLang  =Config.default_lang
+                   /* if (!defaultLang)
+                        defaultLang = 'en';*/
+
+                    for (var key in propertiesMap.properties) {
+                        if (defaultProps.indexOf(key) < 0)
+                            defaultProps.push(key)
+                    }
+                    var str = "<div style='max-height:800px;overflow: auto'>" +
+                        "<table class='infosTable'>"
+                    str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+                    str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
+
+
+                    defaultProps.forEach(function (key) {
+                        if (!propertiesMap.properties[key])
+                            return;
+
+                        str += "<tr class='infos_table'>"
+
+
+                        if (propertiesMap.properties[key].value) {
+                            var values = propertiesMap.properties[key].value;
+                            str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + "</td>"
+                            var valuesStr = ""
+                            values.forEach(function (value, index) {
+                                if (value.indexOf("http") == 0) {
+                                    if (valueLabelsMap[value])
+                                        value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                    else
+                                        value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                                }
+                                if (index > 0)
+                                    valuesStr += "<br>"
+                                valuesStr += value
+                            })
+                            str += "<td class='detailsCellValue'>" + valuesStr + "</td>"
+                            str += "</tr>"
+
+
+                        } else {
+                            var keyName = propertiesMap.properties[key].name
+                            var selectId = "detailsLangSelect_" + keyName
+                            var propNameSelect = "<select id='" + selectId + "' onchange=SourceBrowser.onNodeDetailsLangChange('" + keyName + "') >"
+                            var langDivs = "";
+
+
+                            for (var lang in propertiesMap.properties[key].langValues) {
+                                var values = propertiesMap.properties[key].langValues[lang];
+                                var selected = "";
+                                if (lang == defaultLang)
+                                    selected = "selected";
+                                propNameSelect += "<option " + selected + ">" + lang + "</option> ";
+                                var valuesStr = ""
+                                values.forEach(function (value, index) {
+                                    if (value.indexOf("http") == 0) {
+                                        if (valueLabelsMap[value])
+                                            value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                        else
+                                            value += "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                                    }
+                                    if (index > 0)
+                                        valuesStr += "<br>"
+                                    valuesStr += value
+
+                                })
+
+                                langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>"
+
+                            }
+
+
+                            propNameSelect += "</select>"
+
+                            str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + " " + propNameSelect + "</td>"
+                            str += "<td class='detailsCellValue'>" + langDivs + "</td>";
+
+                            if (propertiesMap.properties[key].langValues[defaultLang])
+                                str += "<script>SourceBrowser.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+
+                            str += "</tr>"
+
+                        }
+
+                    })
+                    str += "</table></div>"
+
+
+                    $("#" + divId).html(str)
+
+
+                }
+
+                // blankNodes.
+
+                if (Lineage_common.currentSource && blankNodes.length > 0) {
+
+                    Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, [nodeId], null, function (err, result) {
+
+                        draw();
+                        if (err) {
+
+                            return console.log(err)
+                        }
+                        var str = "<hr>Restrictions<hr><div style='    background-color: beige;'> <table>"
+                        result.forEach(function (item) {
+
+                            str += "<tr class='infos_table'>"
+
+
+                            var propStr = "<a target='_blank' href='" + item.prop.value + "'>" + item.propLabel.value + "</a>"
+                            str += "<td class='detailsCellName'>" + propStr + "</td>"
+
+                            var targetClassStr = "..."
+                            if (item.value) {
+                                targetClassStr="<a target='_blank' href='" + item.value.value + "'>" + item.valueLabel.value + "</a>"
+                            }
+                            str += "<td class='detailsCellValue'>" + targetClassStr + "</td>"
+
+                            str += "</tr>"
+                        })
+
+                        str += "</table> </div>"
+
+                        $("#" + divId).append(str);
+
+
+                    })
+
+
+                } else {
+                    draw()
+                }
+
+
+
+
+            if (callback)
+                return callback()
+        })
+
+
+    }
+
+
     return self;
 
 

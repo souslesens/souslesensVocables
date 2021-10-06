@@ -42,7 +42,7 @@ router.post("/upload", function (req, response) {
 });
 
 router.post(
-    serverParams.routesRootUrl + "/elastic",
+    serverParams.routesRootUrl + "/slsv",
     function (req, response) {
         if (req.body.getGeneralConfig) {
             configManager.getGeneralConfig(function (err, result) {

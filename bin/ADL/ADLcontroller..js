@@ -4,12 +4,14 @@ var async = require("async");
 
 var ADLSqlConnector = require("./ADLSqlConnector.");
 var SQLserverConnector = require("./SQLserverConnector.");
+var ConfigManager = require("../configManager.");
 
 var ADLcontroller = {
     getMappingsDirPath: function () {
-        var filePath = __dirname + "../../../data/mappings/";
+        var filePath = ConfigManager.config.data_dir+"mappings";
         return path.resolve(filePath) + path.sep;
     },
+
 
     saveMappings: function (source, jsonStr, callback) {
         var filePath = ADLcontroller.getMappingsDirPath() + source + ".json";

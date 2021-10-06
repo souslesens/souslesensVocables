@@ -156,7 +156,7 @@ var Annotator = (function () {
             var array = id.split("|")
             var source = array[1]
             id = array[2]
-            MainController.UI.showNodeInfos(source, id,"Annotator_EntityDetailsDiv")
+            SourceBrowser.showNodeInfos(source, id,"Annotator_EntityDetailsDiv")
           /*  Sparql_generic.getNodeInfos(source, id, null, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)

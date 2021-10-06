@@ -200,7 +200,7 @@ ADLbrowserCustom.initsuperClassesPalette()
         if (!node)
             node = self.currentJstreeNode
         source = self.currentSource
-        MainController.UI.showNodeInfos(source, node.data.id, "mainDialogDiv")
+        SourceBrowser.showNodeInfos(source, node.data.id, "mainDialogDiv")
     }
 
     self.getRdlJstreeData = function (parent, parentType, callback) {

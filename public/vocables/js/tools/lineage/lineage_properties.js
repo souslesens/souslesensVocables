@@ -38,7 +38,7 @@ Lineage_properties = (function () {
                 nodeInfos: {
                     label: "Property infos",
                     action: function (e) {// pb avec source
-                        MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
                     }
 
                 },
@@ -581,7 +581,7 @@ Lineage_properties = (function () {
                 self.drawGraph(node)
             },
             showNodeInfos: function () {
-                MainController.UI.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+                SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
             }
 
         }

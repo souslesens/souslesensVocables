@@ -16,14 +16,19 @@ var path = require("path");
 var async = require("async");
 var fs = require("fs");
 
-var configs = {};
-var configManager = {
+
+var ConfigManager = {
+    config:{},
     getGeneralConfig: function (callback) {
         var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
         var str = fs.readFileSync(mainConfigFilePath);
         var config = null;
         try {
             config = JSON.parse("" + str);
+            if( !config.data_dir)
+                config.data_dir=  path.join(__dirname, "../data/");
+
+            ConfigManager.config=config;
             if (callback) return callback(err, config);
             return config;
         } catch (e) {
@@ -154,5 +159,5 @@ var configManager = {
         );
     },
 };
-
-module.exports = configManager;
+ConfigManager.getGeneralConfig()
+module.exports = ConfigManager;

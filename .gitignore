@@ -108,3 +108,6 @@ public/vocables/images/descriptionXX.png
 config/users/users.json
 config/sources.json
 config/profiles.json
+
+#React build output
+mainapp/static/

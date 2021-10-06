@@ -30,18 +30,21 @@ const encodeUser = (user: User): UserJSON => {
     return {
         login: user.login,
         password: user.password,
-        groups: [],
+        groups: user.groups,
         key: user.key
 
     }
 }
 
 const decodeUser = (user: UserJSON): User => {
+    // TODO: (06/10/21 9:45 am) Uniquely identify users
+    // for now client generates ulid if user.key is null, it should be generated server-side
+    // As users.json doesn't contain key field, we should check for the presence of the field instead of whether the field is null
     return {
         key: user.key === null ? ulid() : user.key,
         login: user.login,
         password: user.password,
-        groups: []
+        groups: user.groups
 
     }
 }

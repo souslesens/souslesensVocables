@@ -8,12 +8,34 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 
+const style = {
+    position: 'absolute' as 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
 type Model = {
     users: RD<string, User[]>,
     isModaleOpen: boolean,
     profiles: RD<string, string[]>
 }
+
+type RenderFormProps = {
+    fields: string[]
+    , user: User
+}
+
+type RenderFieldProps = {
+    field: string,
+    user: User
+}
+
 
 
 type UpadtedFieldTag =
@@ -73,10 +95,15 @@ function update(model: Model, msg: Msg): Model {
 const Admin = () => {
 
     const [model, updateModel] = React.useReducer(update, initialModel)
+
     const handleOpen = () => updateModel({ type: 'UserClickedOpenModale', payload: true });
+
     const handleClose = () => updateModel({ type: 'UserClickedOpenModale', payload: false });
+
     const handleNewRoleInput = (key: string) => (event: SelectChangeEvent<string[]>) => updateModel({ type: 'UserUpdatedRoles', payload: { key: key, roles: event.target.value } });
+
     const handleNewInput = ({ key, fieldName }: UpadtedFieldTag) => (event: React.ChangeEvent<HTMLInputElement>) => updateModel({ type: 'UserUpdatedField', payload: { key: key, fieldName: fieldName, newValue: event.target.value } })
+
     const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users)
 
     //TODO: combine both fetch with promise.all() or something like that
@@ -104,23 +131,48 @@ const Admin = () => {
             .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
     }
 
-    function viewUser(user: User) {
-        const fields = Object.keys(user)
-        return (
-            fields.map(field => <FormControl sx={{ m: 1, minWidth: 100 }}>{renderFieldAppropriatly(user, field)}</FormControl>)
+    type ViewUserProps = { user: User }
+
+    const ViewUser: React.FC<ViewUserProps> = ({ user }) => {
+        const fields: string[] = Object.keys(user)
+        return (<>
+            <Button onClick={handleOpen}>{user.login}</Button>
+            <Modal
+                open={model.isModaleOpen}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <Box component="form"
+                    sx={style}
+                    noValidate
+                    autoComplete="off">
+                    <RenderForm fields={fields} user={user} />
+                </Box>
+            </Modal>
+            )
+        </>)
+    };
+
+    const RenderForm: React.FC<RenderFormProps> = (props) => {
+        return (<>{props.fields.map(field =>
+            <FormControl sx={{ m: 1, minWidth: 100 }}>
+                <RenderFieldAppropriatly user={props.user} field={field} />
+                <Button onClick={handleOpen} variant="contained">Save changes</Button>
+            </FormControl>)}</>
         )
     };
 
-    const renderFieldAppropriatly = (user: User, field: string) => {
-        switch (field) {
+    const RenderFieldAppropriatly: React.FC<RenderFieldProps> = (props) => {
+        switch (props.field) {
             case "key":
                 return <div></div>
             case "groups":
                 return (
                     SRD.match({
-                        notAsked: () => 'Nothing asked',
-                        loading: () => 'Loading...',
-                        failure: (msg) => `Il y a un problème: ${msg}`,
+                        notAsked: () => <div>'Nothing asked'</div>,
+                        loading: () => <div>'Loading...'</div>,
+                        failure: (msg) => <div>`Il y a un problème: ${msg}`</div>,
                         success: gotProfiles =>
                             <>
                                 <InputLabel id="select-groups-label">Groups</InputLabel>
@@ -128,11 +180,11 @@ const Admin = () => {
                                     labelId="select-groups-label"
                                     id="select-groups"
                                     multiple
-                                    value={user.groups}
-                                    defaultValue={user.groups}
+                                    value={props.user.groups}
+                                    defaultValue={props.user.groups}
                                     label="groups"
                                     renderValue={(selected => selected.join(', '))}
-                                    onChange={handleNewRoleInput(user.key)}
+                                    onChange={handleNewRoleInput(props.user.key)}
                                 >
                                     {gotProfiles.map(profile =>
                                         <MenuItem
@@ -148,20 +200,24 @@ const Admin = () => {
                     }, model.profiles)
                 )
             default:
-                return (<TextField onChange={handleNewInput({ key: user.key, fieldName: field })}
+                return (<TextField onChange={handleNewInput({ key: props.user.key, fieldName: props.field })}
                     //@ts-ignore
                     value={user[field]}
-                    id={`id-${field}-${user.key}`}
-                    label={field}
+                    id={`id-${props.field}-${props.user.key}`}
+                    label={props.field}
                     variant="standard" />)
 
         }
     }
 
-    function viewUsers(gotUsers: User[]): JSX.Element {
+    type ViewUsersProps = {
+        users: User[]
+    }
+
+    const ViewUsers: React.FC<ViewUsersProps> = ({ users }): JSX.Element => {
         return (
             <>
-                <ul>{gotUsers.map(el => viewUser(el))}</ul>
+                <ul>{users.map(el => <ViewUser user={el}></ViewUser>)}</ul>
                 <Button onClick={saveUsers} variant="contained">Save changes</Button>
             </>)
 
@@ -174,7 +230,7 @@ const Admin = () => {
             failure: (msg) => `Il y a un problème: ${msg}`,
             success: gotUsers =>
                 <div>
-                    {viewUsers(gotUsers)}
+                    <ViewUsers users={gotUsers} />
                 </div>
         }, model.users)}
     </>

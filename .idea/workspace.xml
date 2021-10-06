@@ -4,44 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="annotator fixes">
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/webServers.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/webServers.xml" afterDir="false" />
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="organisation of code">
+      <change afterPath="$PROJECT_DIR$/data/mappings/readme.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/configManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/elasticRestProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/elasticRestProxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/blenderSources.json.default" beforeDir="false" afterPath="$PROJECT_DIR$/config/blenderSources.json.default" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/mainConfig.json.default" beforeDir="false" afterPath="$PROJECT_DIR$/config/mainConfig.json.default" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/elastic/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/elastic/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/SPARQL_endpoint.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/SPARQL_endpoint.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/annotator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/collection.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/externalReferences.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluateOld.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluateXX.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/ontologyBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/graphs/readme.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/graphs/readme.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/readme.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/readme.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -271,7 +238,7 @@
       <workItem from="1632746143564" duration="14709000" />
       <workItem from="1632835821016" duration="23535000" />
       <workItem from="1633110032272" duration="72148000" />
-      <workItem from="1633503412063" duration="10379000" />
+      <workItem from="1633503412063" duration="10803000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -385,7 +352,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633502194401</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="organisation of code">
+      <created>1633524623606</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1633524623606</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -496,7 +470,8 @@
     <MESSAGE value="initiate dev master branch" />
     <MESSAGE value="correct search OWL" />
     <MESSAGE value="annotator fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="annotator fixes" />
+    <MESSAGE value="organisation of code" />
+    <option name="LAST_COMMIT_MESSAGE" value="organisation of code" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

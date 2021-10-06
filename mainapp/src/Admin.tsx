@@ -130,7 +130,7 @@ const Admin = () => {
                                     multiple
                                     value={user.groups}
                                     defaultValue={user.groups}
-                                    label="Role"
+                                    label="groups"
                                     renderValue={(selected => selected.join(', '))}
                                     onChange={handleNewRoleInput(user.key)}
                                 >

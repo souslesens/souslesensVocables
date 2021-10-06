@@ -11,7 +11,7 @@
  */
 const request = require("request");
 
-const ConfigManager = require("./ConfigManager.");
+const ConfigManager = require("./configManager.");
 
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 

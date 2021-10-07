@@ -4,78 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="organisation of code">
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGPropertyassocationDialog.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGbrowser.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGbrowserRightPanel.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGbuildDialog.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAvancedMAppingDialogOld.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingRightPanel.html" afterDir="false" />
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGSqlConnector..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGbuilder..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLbuilder_v0..js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLcontroller..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGcontroller..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/ADLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGutil..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/SQLserverConnector..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/codification..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/codification..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/codificationOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/codificationOld..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/definitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/definitions.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/dictionaryMatcher..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/tagAnalyzer..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/tagAnalyzer..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/temporary..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/temporary..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/ADL/tools/PIbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/tools/PIbuilder..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mainapp/static/mainapp.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/mainapp/static/mainapp.js.map" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/ClovParser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ClovParser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/socketProxy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/socketProxy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLassetGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/KGassetGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/ADLcommon.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/KGcommon.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/TextAnnotator.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/TextAnnotator.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserBI.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserBI.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserCustom.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserCustom.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserDataTable.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserDataTable.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQueryNew.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQueryNew.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/graphHighlight.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/graphHighlight.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGbuild.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingData.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGmappingData.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappingGraph.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGmappingGraph.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGmappings.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/SQLquery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/SQLquery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/evaluate.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/evaluate.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/assetQuery.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLPropertyassocationDialog.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowser.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbrowserRightPanel.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLbuildDialog.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappingAdvancedMappingDialog.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappingAvancedMAppingDialogOld.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappingRightPanel.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappingValueMappingDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingValueMappingDialog.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ADL/ADLmappings.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_central.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_right.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/evaluate/evaluate_right.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/assetQuery.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineageRightPanel.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/ontologyBrowser.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/ontologyBrowser.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/standardizer/standardizer_central.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,7 +34,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master_devXX" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -183,11 +114,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.UMLtoOWLparser..js" />
-        <item itemvalue="Node.js.dirContentAnnotator..js" />
-        <item itemvalue="Node.js.sparql_OWL.js" />
         <item itemvalue="Node.js.usersGenerator..js" />
+        <item itemvalue="Node.js.UMLtoOWLparser..js" />
         <item itemvalue="Node.js.SQLutil..js.X" />
+        <item itemvalue="Node.js.sparql_OWL.js" />
+        <item itemvalue="Node.js.dirContentAnnotator..js" />
       </list>
     </recent_temporary>
   </component>
@@ -309,6 +240,7 @@
       <workItem from="1633503412063" duration="24630000" />
       <workItem from="1633596652014" duration="593000" />
       <workItem from="1633597936432" duration="5944000" />
+      <workItem from="1633626069577" duration="194000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -600,26 +532,6 @@
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>1383</line>
-          <option name="timeStamp" value="44" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>173</line>
-          <option name="timeStamp" value="45" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>1381</line>
-          <option name="timeStamp" value="46" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/configManager..js</url>
-          <line>109</line>
-          <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/authentification.js</url>
           <line>175</line>
           <option name="timeStamp" value="57" />
@@ -690,11 +602,6 @@
           <option name="timeStamp" value="223" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js</url>
-          <line>105</line>
-          <option name="timeStamp" value="225" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/SQLutil..js.X</url>
           <line>108</line>
           <option name="timeStamp" value="250" />
@@ -720,29 +627,19 @@
           <option name="timeStamp" value="267" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/routes/index.js</url>
-          <line>203</line>
-          <option name="timeStamp" value="271" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>748</line>
-          <option name="timeStamp" value="380" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>63</line>
-          <option name="timeStamp" value="381" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
-          <line>698</line>
-          <option name="timeStamp" value="383" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/UMLtoOWLparser..js</url>
           <line>417</line>
           <option name="timeStamp" value="393" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>52</line>
+          <option name="timeStamp" value="402" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>108</line>
+          <option name="timeStamp" value="403" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

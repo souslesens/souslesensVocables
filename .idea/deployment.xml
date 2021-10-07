@@ -5,15 +5,14 @@
       <paths name="vpsDev">
         <serverdata>
           <mappings>
-            <mapping deploy="/var/lib/nodejs/dev/souslesensVocables/" local="$PROJECT_DIR$" web="http://51.178.39.209" />
+            <mapping deploy="/var/lib/nodejs/dev/souslesensVocables" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
       <paths name="vpsProd">
         <serverdata>
           <mappings>
-            <mapping deploy="/var/lib/nodejs/souslesensVocables/" local="$PROJECT_DIR$" web="http://51.178.39.209" />
-            <mapping deploy="" local="" web="" />
+            <mapping deploy="/var/lib/nodejs/dev/souslesensVocables" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

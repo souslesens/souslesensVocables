@@ -372,6 +372,48 @@ var buildOwl = function (jsonPath, graphUri) {
     json.generalizations.forEach(function (item) {
         var subClassUri = classesMap[item.source]
         var superClassUri = classesMap[item.target]
+
+        if(!subClassUri){
+            subClassUri = graphUri + util.formatStringForTriple(item.source, true)
+
+            triples.push({
+                subject: subClassUri,
+                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                object: "owl:Class",
+            });
+
+            triples.push({
+                subject: subClassUri,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                object: "'" + util.formatStringForTriple(item.source) + "'",
+            });
+            /* triples.push({
+                 subject: aClassUri,
+                 predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                 object: packageUri
+             })*/
+        }
+
+        if(!superClassUri){
+            superClassUri = graphUri + util.formatStringForTriple(item.target, true)
+
+            triples.push({
+                subject: superClassUri,
+                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                object: "owl:Class",
+            });
+
+            triples.push({
+                subject: superClassUri,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                object: "'" + util.formatStringForTriple(item.target) + "'",
+            });
+            /* triples.push({
+                 subject: aClassUri,
+                 predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                 object: packageUri
+             })*/
+        }
         if (subClassUri && superClassUri) {
             subClassTriples.push({
                 subject: subClassUri,
@@ -494,15 +536,26 @@ var buildOwl = function (jsonPath, graphUri) {
 }
 
 
-var sourcePath = "D:\\NLP\\ontologies\\OSDU\\OSDU.xmi"
-var graphUri = "http://souslesens.org/osdu/ontology/"
 
 var sourcePath = "D:\\NLP\\ontologies\\PPDM\\PPDM.xml"
 var graphUri = "http://souslesens.org/ppdm/ontology/"
 
+
+
+
+
+var sourcePath = "D:\\NLP\\ontologies\\PPDM\\PPDM.xml"
+var graphUri = "http://souslesens.org/ppdm/ontology/"
+
+
+var sourcePath = "D:\\NLP\\ontologies\\OSDU\\OSDU.xmi"
+var graphUri = "http://souslesens.org/osdu/ontology/"
+
 var sourcePath = "D:\\NLP\\ontologies\\PDEF\\PDEF.xml"
 var graphUri = "http://souslesens.org/pdef/ontology/"
 
+var sourcePath = "D:\\NLP\\ontologies\\NPDMS\\NPDMS.xml"
+var graphUri = "http://souslesens.org/pdms/ontology/"
 
 var jsonPath = sourcePath + ".json";
 

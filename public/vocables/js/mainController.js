@@ -27,8 +27,8 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
             success: function (serverConfig, textStatus, jqXHR) {
-              //  Config.serverUrl = serverConfig.serverUrl
-                Config.default_lang= serverConfig.default_lang
+                //  Config.serverUrl = serverConfig.serverUrl
+                Config.default_lang = serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
                 return callback()
             },
@@ -165,16 +165,18 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX, sources,callback) {
+        showSources: function (treeDiv, withCBX, sources, callback) {
             var treeData = [];
             var distinctNodes = {}
+
+            var distinctGroups = {}
 
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
                 treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
                 self.initControllers()
-                if(sources && sources.indexOf(sourceLabel)<0)
+                if (sources && sources.indexOf(sourceLabel) < 0)
                     return
                 if (Config.sources[sourceLabel].isDraft)
                     return;
@@ -186,6 +188,47 @@ var MainController = (function () {
 
                 Config.sources[sourceLabel].name = sourceLabel;
 
+
+
+                var parent=Config.sources[sourceLabel].schemaType
+
+                var othersGroup="OTHERS"
+                if (!distinctGroups[othersGroup]) {
+                    distinctGroups[othersGroup] = 1
+                    treeData.push({
+                        id: othersGroup + "_" + parent,
+                        text: "othersGroup",
+                        type: "group",
+                        parent: "#",
+                    })
+                }
+
+
+
+                var group = Config.sources[sourceLabel].group
+                if (group) {
+                    var subGroups = group.split("/")
+                    subGroups.forEach(function (subGroup, index) {
+
+                        if(index>0)
+                            parent=subGroups[index-1]
+                        if (!distinctGroups[subGroup]) {
+                            distinctGroups[subGroup]=1
+                            treeData.push({
+                                id: subGroup,
+                                text: subGroup,
+                                type: "group",
+                                parent: parent,
+                            })
+                        }
+                        group=subGroup
+                    })
+
+                }
+                else{
+                    group="OTHERS"
+                }
+
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1
 
@@ -196,9 +239,11 @@ var MainController = (function () {
                         id: sourceLabel,
                         text: sourceLabel,
                         type: Config.sources[sourceLabel].schemaType,
-                        parent: Config.sources[sourceLabel].schemaType,
+                        parent: group,
                     })// data: Config.sources[sourceLabel]})
                 }
+
+
             })
             common.jstree.loadJsTree(treeDiv, treeData, {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
@@ -232,9 +277,13 @@ var MainController = (function () {
                                 MainController.currentSchemaType = obj.node.id;
                         }
                     }
-                }
+                },
+              /*  ondblclickFn:function(nodeId){
+                    var x=3
+                }*/
             }, function () {
-                $("#" + treeDiv).jstree(true).open_node(Config.preferredSchemaType);
+
+                $("#" + treeDiv).jstree(true).open_all(Config.preferredSchemaType);
                 if (callback)
                     return callback()
 
@@ -437,7 +486,6 @@ var MainController = (function () {
 
 
     }
-
 
 
     return self;

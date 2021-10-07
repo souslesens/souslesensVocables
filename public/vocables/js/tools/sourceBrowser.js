@@ -147,7 +147,7 @@ var SourceBrowser = (function () {
                 label: "Show Properties",
                 action: function (e) {// pb avec source
 
-                    ADLquery.showProperties()
+                    KGquery.showProperties()
 
 
                 }
@@ -155,7 +155,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        if (MainController.currentTool == "lineage" || MainController.currentTool == "ADLmappings") {
+        if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
             items.graphNode = {
                 label: "graph Node lineage",
                 action: function (e) {// pb avec source

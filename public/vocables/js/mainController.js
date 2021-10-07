@@ -165,13 +165,14 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX, sources, callback) {
+        showSources: function (treeDiv, withCBX, sources, types,callback) {
             var treeData = [];
             var distinctNodes = {}
 
             var distinctGroups = {}
 
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
+                if(!types  || types.indexOf(item)>-1)
                 treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
@@ -193,11 +194,11 @@ var MainController = (function () {
                 var parent=Config.sources[sourceLabel].schemaType
 
                 var othersGroup="OTHERS"
-                if (!distinctGroups[othersGroup]) {
+                if (!types && !distinctGroups[othersGroup]) {
                     distinctGroups[othersGroup] = 1
                     treeData.push({
                         id: othersGroup + "_" + parent,
-                        text: "othersGroup",
+                        text: "OTHERS",
                         type: "group",
                         parent: "#",
                     })
@@ -226,7 +227,9 @@ var MainController = (function () {
 
                 }
                 else{
-                    group="OTHERS"
+                    group=othersGroup + "_" + parent
+                    if(types)
+                        group=   Config.sources[sourceLabel].schemaType
                 }
 
                 if (!distinctNodes[sourceLabel]) {
@@ -235,12 +238,14 @@ var MainController = (function () {
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     //  console.log(JSON.stringify(jstreeData,null,2))
-                    treeData.push({
-                        id: sourceLabel,
-                        text: sourceLabel,
-                        type: Config.sources[sourceLabel].schemaType,
-                        parent: group,
-                    })// data: Config.sources[sourceLabel]})
+                    if(!types  || types.indexOf(Config.sources[sourceLabel].schemaType)>-1) {
+                        treeData.push({
+                            id: sourceLabel,
+                            text: sourceLabel,
+                            type: Config.sources[sourceLabel].schemaType,
+                            parent: group,
+                        })
+                    }
                 }
 
 
@@ -253,7 +258,7 @@ var MainController = (function () {
                     $("#mainDialogDiv").dialog("close");
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if (obj.node.id == "INDIVIDUAL")
+                            if (obj.node.id == "KNOWLEDGE_GRAPH")
                                 MainController.currentSchemaType = "OWL"
                             else
                                 MainController.currentSchemaType = obj.node.id;
@@ -271,7 +276,7 @@ var MainController = (function () {
                 onOpenNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if (obj.node.id == "INDIVIDUAL")
+                            if (obj.node.id == "KNOWLEDGE_GRAPH")
                                 MainController.currentSchemaType = "OWL"
                             else
                                 MainController.currentSchemaType = obj.node.id;

@@ -42,7 +42,7 @@ var Config = (function () {
         maxZipFileSize: 30000000 //30MO
     }
 
-    self.ADL = {
+    self.KG = {
         dictionaries: {
             "CFIHOS_READI": {fileName: "dictionary_READI.json"}
         },
@@ -128,14 +128,14 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
-    self.tools["ADLmappings"] = {
-        label: "ADLmappings",
+    self.tools["KGmappings"] = {
+        label: "KGmappings",
         multiSources: 0,
-        controller: ADLmappings,
+        controller: KGmappings,
         toolDescriptionImg: null
     }
 
-    self.tools["ADLbrowser"] = {label: "ADLbrowser", multiSources: 0, controller: ADLbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["KGbrowser"] = {label: "KGbrowser", multiSources: 0, controller: KGbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["Standardizer"] = {
         label: "Standardizer",

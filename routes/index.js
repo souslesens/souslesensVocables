@@ -9,9 +9,9 @@ var httpProxy = require("../bin/httpProxy.");
 var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.");
 
 var OneModelManager = require("../other/oneModel/OneModelManager.");
-var ADLcontroller = require("../bin/ADL/ADLcontroller.");
+var KGcontroller = require("../bin/KG/KGcontroller.");
 var DataController = require("../bin/dataController.");
-var ADLbuilder = require("../bin/ADL/ADLbuilder.");
+var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
 
@@ -105,7 +105,7 @@ router.post(
             );
         }
 
-        if (req.body.ADLmappingDictionary) {
+        if (req.body.KGmappingDictionary) {
             if (req.body.load)
                 configManager.getDictionary(req.body.load, function (err, result) {
                     processResponse(response, err, result);
@@ -180,14 +180,14 @@ router.post(
             logger.info(req.body.infos);
             processResponse(response, null, { done: 1 });
         }
-        if (req.body.ADLquery) {
-            ADLcontroller.ADLquery(req, function (err, result) {
+        if (req.body.KGquery) {
+            KGcontroller.KGquery(req, function (err, result) {
                 processResponse(response, err, result);
             });
         }
-        if (req.body.buildADL) {
+        if (req.body.buildKG) {
             var mappingFileNames = JSON.parse(req.body.mappingFileNames);
-            ADLbuilder.buidlADL(
+            KGbuilder.buidlKG(
                 mappingFileNames,
                 req.body.sparqlServerUrl,
                 req.body.adlGraphUri,
@@ -199,13 +199,13 @@ router.post(
                 }
             );
         }
-        if (req.body.ADL_GetMappings) {
-            ADLcontroller.getMappings(req.body.ADL_GetMappings, function (err, result) {
+        if (req.body.KG_GetMappings) {
+            KGcontroller.getMappings(req.body.KG_GetMappings, function (err, result) {
                 processResponse(response, err, result);
             });
         }
         if (req.body.getAssetGlobalMappings) {
-            ADLcontroller.getAssetGlobalMappings(
+            KGcontroller.getAssetGlobalMappings(
                 req.body.getAssetGlobalMappings,
                 function (err, result) {
                     processResponse(response, err, result);
@@ -250,9 +250,9 @@ router.post(
                 }
             );
         }
-        if (req.body.ADL_SaveMappings) {
-            ADLcontroller.saveMappings(
-                req.body.ADLsource,
+        if (req.body.KG_SaveMappings) {
+            KGcontroller.saveMappings(
+                req.body.KGsource,
                 req.body.mappings,
                 function (err, result) {
                     processResponse(response, err, result);

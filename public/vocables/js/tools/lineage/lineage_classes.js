@@ -156,7 +156,7 @@ var Lineage_classes = (function () {
             var data = propertiesMap.node.data;
 
             if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
-                return ADLquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
+                return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
             }
             if (propertiesMap.event.altKey)
                 self.addArbitraryNodeToGraph(data)
@@ -1581,8 +1581,8 @@ var size=Lineage_classes.defaultShapeSize
 
             }
 
-            if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].ADLqueryController) {
-                html += "    <span class=\"popupMenuItem\" onclick=\"ADLquery.showNodeProperties();\"> add to Asset Query</span>"
+            if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].KGqueryController) {
+                html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties();\"> add to Asset Query</span>"
             }
             $("#graphPopupDiv").html(html);
 

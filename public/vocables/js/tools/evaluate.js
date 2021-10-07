@@ -60,7 +60,7 @@ var Evaluate = (function () {
             $("#mainDialogDiv").load("snippets/evaluate/annotateDialog.html");
             $("#mainDialogDiv").dialog("open");
             setTimeout(function () {
-                MainController.UI.showSources("annotate_resourcesTreeDiv", true, null,function () {
+                MainController.UI.showSources("annotate_resourcesTreeDiv", true, null,null,function () {
                     $("#annotate_resourcesTreeDiv").jstree(true).open_all()
                 })
 
@@ -108,14 +108,14 @@ var Evaluate = (function () {
 
                 success: function (result, textStatus, jqXHR) {
                     MainController.initControllers()
-                    $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
+                    $("#annotate_messageDiv").prepend("<span class='KGbuild_infosOK'>ALL DONE</span><br>")
                     $("#annotate_waitImg").css("display", "none");
                     self.initCorpusList();
 
                 }, error(err) {
                     MainController.initControllers()
                     $("#annotate_waitImg").css("display", "none");
-                    $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosError'>" + err.responseText + "</span><br>")
+                    $("#annotate_messageDiv").prepend("<span class='KGbuild_infosError'>" + err.responseText + "</span><br>")
                 }
             })
 
@@ -169,7 +169,7 @@ var Evaluate = (function () {
                 dataType: 'json',
                 success: function (textResponse) {
                     MainController.initControllers()
-                    $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
+                    $("#annotate_messageDiv").prepend("<span class='KGbuild_infosOK'>ALL DONE</span><br>")
                     $("#annotate_waitImg").css("display", "none");
                     self.initCorpusList();
                     // alert(textResponse.result);
@@ -199,14 +199,14 @@ var Evaluate = (function () {
 
                         success: function (result, textStatus, jqXHR) {
                             MainController.initControllers()
-                            $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosOK'>ALL DONE</span><br>")
+                            $("#annotate_messageDiv").prepend("<span class='KGbuild_infosOK'>ALL DONE</span><br>")
                             $("#annotate_waitImg").css("display", "none");
                             self.initCorpusList();
 
                         }, error(err) {
                             MainController.initControllers()
                             $("#annotate_waitImg").css("display", "none");
-                            $("#annotate_messageDiv").prepend("<span class='ADLbuild_infosError'>" + err.responseText + "</span><br>")
+                            $("#annotate_messageDiv").prepend("<span class='KGbuild_infosError'>" + err.responseText + "</span><br>")
                         }
                     })
 

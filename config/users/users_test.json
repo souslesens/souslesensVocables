@@ -1,19 +1,22 @@
 {
     "01FH8KAJX9645STPQ1A4F20BQT": {
+        "key": "01FH8KAJX9645STPQ1A4F20BQT",
         "login": "Yoelis",
-        "password": "b",
+        "password": "bdddz",
         "groups": [
-            "admin",
             "regular"
-        ],
-        "key": "01FH8KAJX9645STPQ1A4F20BQT"
+        ]
     },
     "01FH8KAJX96MCMGJ5SFZSNYS1B": {
-        "login": "Alberto",
-        "password": "b",
-        "groups": [
-            "admin"
-        ],
-        "key": "01FH8KAJX96MCMGJ5SFZSNYS1B"
+        "key": "01FH8KAJX96MCMGJ5SFZSNYS1B",
+        "login": "Fab423qzdqzd",
+        "password": "passwordddeddd",
+        "groups": "admins"
+    },
+    "01FHDS4B7009VBFPPB4HDF8ENY": {
+        "key": "01FHDS4B7009VBFPPB4HDF8ENY",
+        "login": "qzddd",
+        "password": "dddzzeert",
+        "groups": ""
     }
 }

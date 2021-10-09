@@ -230,6 +230,8 @@ var MainController = (function () {
                     group=othersGroup + "_" + parent
                     if(types)
                         group=   Config.sources[sourceLabel].schemaType
+                    else
+                        group=   Config.sources[sourceLabel].schemaType
                 }
 
                 if (!distinctNodes[sourceLabel]) {

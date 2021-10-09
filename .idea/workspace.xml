@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparserOld..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package-lock.json.backup" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,9 +74,9 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.21" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/other/energisitics" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="prettierjs.PrettierConfiguration.Package" value="D:\webstorm\souslesensVocables\node_modules\prettier" />
@@ -82,11 +87,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\other\energisitics" />
+      <recent name="D:\webstorm\souslesensVocables" />
       <recent name="D:\webstorm\souslesensVocables\data\dictionaries" />
       <recent name="D:\webstorm\souslesensVocables\data\graphs" />
       <recent name="D:\webstorm\souslesensVocables\data\annotator\temp" />
-      <recent name="D:\webstorm\souslesensVocables\data\annotator\parsedDocuments" />
-      <recent name="D:\webstorm\souslesensVocables\data\mappings" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\webstorm\souslesensVocables\data\mappings" />
@@ -96,14 +101,14 @@
       <recent name="D:\webstorm\souslesensVocables\config" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.bin\www">
+  <component name="RunManager" selected="Node.js.energisticsToOWLparser..js">
     <configuration name="SQLutil..js.X" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/SQLutil..js.X" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <configuration name="UMLtoOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/UMLtoOWLparser..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="dirContentAnnotator..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" working-dir="$PROJECT_DIR$/bin/annotator">
+    <configuration name="energisticsToOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" working-dir="$PROJECT_DIR$/other/energisitics">
       <method v="2" />
     </configuration>
     <configuration name="sparql_OWL.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" working-dir="$PROJECT_DIR$/public/vocables/js/sparqlProxies">
@@ -114,11 +119,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.energisticsToOWLparser..js" />
         <item itemvalue="Node.js.usersGenerator..js" />
         <item itemvalue="Node.js.UMLtoOWLparser..js" />
         <item itemvalue="Node.js.SQLutil..js.X" />
         <item itemvalue="Node.js.sparql_OWL.js" />
-        <item itemvalue="Node.js.dirContentAnnotator..js" />
       </list>
     </recent_temporary>
   </component>
@@ -240,7 +245,7 @@
       <workItem from="1633503412063" duration="24630000" />
       <workItem from="1633596652014" duration="593000" />
       <workItem from="1633597936432" duration="5944000" />
-      <workItem from="1633626069577" duration="194000" />
+      <workItem from="1633626069577" duration="44036000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -389,7 +394,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633590727171</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="change ADL prefix to KG">
+      <created>1633626544226</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1633626544226</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -501,7 +513,8 @@
     <MESSAGE value="correct search OWL" />
     <MESSAGE value="annotator fixes" />
     <MESSAGE value="organisation of code" />
-    <option name="LAST_COMMIT_MESSAGE" value="organisation of code" />
+    <MESSAGE value="change ADL prefix to KG" />
+    <option name="LAST_COMMIT_MESSAGE" value="change ADL prefix to KG" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -640,6 +653,18 @@
           <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
           <line>108</line>
           <option name="timeStamp" value="403" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
+          <line>230</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="429" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
+          <line>39</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="505" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

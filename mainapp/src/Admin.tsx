@@ -8,7 +8,7 @@ import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { ULID, ulid } from "ulid";
-
+//import DeleteIcon from '@mui/icons-material/Delete';
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -21,6 +21,7 @@ const style = {
     border: '2px solid #000',
     boxShadow: 24,
     p: 4,
+
 };
 
 type Model = {
@@ -38,9 +39,7 @@ type RenderFormProps = {
 
 type FieldProps = {
     field: string,
-    user: User,
-    //setField: (newValue: string, fieldName: string) => void,
-    //setGroups: (newValue: string | string[], fieldName: string) => void
+    user: User
 
 }
 
@@ -88,7 +87,7 @@ function update(model: Model, msg: Msg): Model {
             return { ...model, isModalOpen: false }
 
         case 'UserClickedAddUser':
-            console.log(msg.payload)
+            console.log(`userCreated ${msg.payload}`)
             return { ...model, users: SRD.of([...unwrappedUsers, newUser(msg.payload)]) }
 
         case 'UserUpdatedField':
@@ -155,7 +154,7 @@ const Admin = () => {
             success: gotUsers =>
 
                 <Grid container
-                    spacing={0}
+                    spacing={4}
                     direction="column"
                     alignItems="center"
                     justifyContent="center"
@@ -173,37 +172,98 @@ const Admin = () => {
 }
 
 const CreateUser = (props: { modal: boolean; updateModel: React.Dispatch<Msg>; setModal: React.Dispatch<React.SetStateAction<boolean>>; }) => {
-    const { model } = useModel()
-
+    const { model, updateModel } = useModel()
     const newUserID = ulid()
+    const [user, setNewUser] = React.useState(newUser(newUserID));
+
+    const profiles = SRD.unwrap([], identity, model.profiles)
+    const users = SRD.unwrap([], identity, model.users)
+
+
 
     React.useEffect(() => {
-        props.updateModel({ type: 'UserClickedAddUser', payload: newUserID })
-
+        setNewUser(newUser(newUserID))
     }, [])
 
-    const newlyCreatedUser = SRD.unwrap(newUser("bla"), (unwrapped: User[]) => unwrapped.find(element => element.key === newUserID), model.users)
+    const saveUser = () => {
 
-    console.log(newlyCreatedUser)
+        updateModel({ type: 'UserClickedSaveChanges', payload: {} })
+        putUsers('/users', [...users, user])
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .then(() => props.setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
+    }
+
+    const deleteUser = () => {
+
+
+        putUsers('/users', users.filter(prevUsers => prevUsers.key !== user.key))
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .then(() => props.setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
+    }
+
+    {//const newlyCreatedUser = SRD.unwrap(newUser("bla"), (unwrapped: User[]) => unwrapped.find(element => element.key === newUserID), model.users)
+        //props.updateModel({ type: 'UserClickedAddUser', payload: newUserID })
+    }
+
+    console.log(user)
 
     return (
         <>
-            <Button onClick={() => props.setModal(true)}>Add user</Button>
+            <Button color="success" variant="contained" onClick={() => props.setModal(true)}>Add user</Button>
             <Modal open={props.modal}
                 onClose={restoreUsers(props.updateModel, props.setModal)}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description">
                 <Grid component="form"
                     sx={style}
+
                     noValidate
                     autoComplete="off"
                     container
+                    spacing={8}
                 >
-                    <RenderForm
-                        fields={['login', 'password', 'groups']}
-                        user={newlyCreatedUser !== undefined ? newlyCreatedUser : newUser("blo")}
-                        setModal={props.setModal}
-                    ></RenderForm> </Grid>
+                    <FormControl fullWidth>
+                        <Stack spacing={4}><TextField fullWidth onChange={(event) => setNewUser({ ...user, login: event.target.value })}
+                            //@ts-ignore
+                            value={user.login}
+                            id={`id-login-${user.key}`}
+                            label={"login"}
+                            variant="standard" />
+                            <TextField fullWidth onChange={(event) => setNewUser({ ...user, password: event.target.value })}
+                                //@ts-ignore
+                                value={user.password}
+                                id={`id-password-${user.key}`}
+                                label={"password"}
+                                variant="standard" />
+                            <InputLabel id="select-groups-label">Groups</InputLabel>
+                            <Select
+                                labelId="select-groups-label"
+                                id="select-groups"
+                                multiple
+                                value={user.groups}
+                                defaultValue={user.groups}
+                                label=""
+                                fullWidth
+                                renderValue={(selected) => typeof selected === 'string' ? selected : selected.join(', ')}
+                                onChange={(event) => setNewUser({ ...user, groups: typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value })}
+                            >
+                                {profiles.map(profile =>
+                                    <MenuItem
+                                        key={profile}
+                                        value={profile}
+
+                                    >
+                                        {profile}
+                                    </MenuItem>)}
+                            </Select>
+                            <Button onClick={saveUser} variant="contained">Save changes</Button>
+                            <Button onClick={deleteUser} variant="contained" color="error">Delete User</Button>
+                        </Stack>
+
+
+                    </FormControl> </Grid>
             </Modal >
         </>
     )
@@ -215,6 +275,9 @@ const User: React.FC<UserProps> = ({ user }) => {
 
     const { model, updateModel } = useModel();
 
+    const [localUser, setNewUser] = React.useState(user);
+
+
     const [isModalOpen, setModal] = React.useState(false);
 
     const restoredUsers = restoreUsers(updateModel, setModal)
@@ -223,7 +286,27 @@ const User: React.FC<UserProps> = ({ user }) => {
 
     const handleClose = () => restoredUsers
 
+    const users: User[] = SRD.unwrap([], identity, model.users)
 
+    const profiles: string[] = SRD.unwrap([], identity, model.profiles)
+
+    const saveUser = () => {
+
+        updateModel({ type: 'UserClickedSaveChanges', payload: {} })
+        putUsers('/users', users.map(u => u.key === user.key ? localUser : u))
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .then(() => setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
+    }
+
+    const deleteUser = () => {
+
+
+        putUsers('/users', users.filter(prevUsers => prevUsers.key !== user.key))
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .then(() => setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
+    }
 
     return (<>
 
@@ -234,7 +317,54 @@ const User: React.FC<UserProps> = ({ user }) => {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
-            <UserEditionForm setModal={setModal} user={user} />
+            <Grid component="form"
+                sx={style}
+
+                noValidate
+                autoComplete="off"
+                container
+                spacing={8}
+            >
+                <FormControl fullWidth>
+                    <Stack spacing={4}><TextField fullWidth onChange={(event) => setNewUser({ ...localUser, login: event.target.value })}
+                        //@ts-ignore
+                        value={localUser.login}
+                        id={`id-login-${localUser.key}`}
+                        label={"login"}
+                        variant="standard" />
+                        <TextField fullWidth onChange={(event) => setNewUser({ ...localUser, password: event.target.value })}
+                            //@ts-ignore
+                            value={localUser.password}
+                            id={`id-password-${localUser.key}`}
+                            label={"password"}
+                            variant="standard" />
+                        <InputLabel id="select-groups-label">Groups</InputLabel>
+                        <Select
+                            labelId="select-groups-label"
+                            id="select-groups"
+                            multiple
+                            value={localUser.groups}
+                            defaultValue={localUser.groups}
+                            label=""
+                            fullWidth
+                            renderValue={(selected) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={(event) => setNewUser({ ...localUser, groups: typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value })}
+                        >
+                            {profiles.map(profile =>
+                                <MenuItem
+                                    key={profile}
+                                    value={profile}
+
+                                >
+                                    {profile}
+                                </MenuItem>)}
+                        </Select>
+                        <Button onClick={saveUser} variant="contained">Save changes</Button>
+                        <Button onClick={deleteUser} variant="contained" color="error">Delete User</Button>
+                    </Stack>
+
+
+                </FormControl> </Grid>
 
         </Modal>
     </>)
@@ -257,52 +387,6 @@ function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch
     };
 }
 
-//C'est là que l'état du formulaire d'un utilisateur est géré
-function UserEditionForm({ user, setModal }: UserEditionFormProps): JSX.Element {
-    const [editedUser, setEditedUser] = React.useState(user);
-    const { model, updateModel } = useModel();
-
-    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users)
-    const fields: string[] = Object.keys(user)
-
-
-    return <Grid component="form"
-        sx={style}
-        noValidate
-        autoComplete="off"
-        container
-    >
-        <RenderForm fields={fields} user={user} setModal={setModal} />
-
-    </Grid>
-
-}
-
-
-const RenderForm: React.FC<RenderFormProps> = (props) => {
-    const { model, updateModel } = useModel();
-    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users)
-
-
-    const saveUser = () => {
-
-        updateModel({ type: 'UserClickedSaveChanges', payload: {} })
-        putUsers('/users', unwrappedUsers)
-            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
-            .then(() => props.setModal(false))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
-    }
-    return (<>
-        <FormControl fullWidth>
-            <Grid container spacing={4}></Grid>
-            {props.fields.map(field =>
-                <Grid xs={12}><Field user={props.user} field={field} /></Grid>
-            )}
-            <Button onClick={saveUser} variant="contained">Save changes</Button>
-        </FormControl>
-    </>
-    )
-};
 
 
 type UsersProps = {
@@ -310,89 +394,13 @@ type UsersProps = {
 }
 
 const Users: React.FC<UsersProps> = ({ users }): JSX.Element => {
-    const { model, updateModel } = useModel();
+    //const { model, updateModel } = useModel();
     return (
         <Stack spacing={2}>{users.map(el => <User key={el.key} user={el}></User>)}</Stack>
     )
 
 }
 
-
-
-const Field: React.FC<FieldProps> = ({ field, user }) => {
-
-    const { model, updateModel } = useModel()
-
-    //const handleNewRoleInput = (event: SelectChangeEvent<string[] | string>) => setField(event.target.value, "groups");
-
-    const unwrappedProfiles: string[] = SRD.unwrap([], identity, model.profiles)
-
-    const handleNewRoleInput = (key: string) => (event: SelectChangeEvent<string[]>) => updateModel({ type: 'UserUpdatedRoles', payload: { key: key, roles: event.target.value } });
-
-
-    switch (field) {
-        case "key":
-            return <div></div>
-        case "groups":
-            <FieldGroups user={user} profiles={unwrappedProfiles} groups={user.groups}></FieldGroups>
-        default:
-            return (<TextField fullWidth onChange={(event) => updateModel({ type: 'UserUpdatedField', payload: { key: user.key, fieldName: field, newValue: event.target.value } })}
-                //@ts-ignore
-                value={user[field]}
-                id={`id-${field}-${user.key}`}
-                label={field}
-                variant="standard" />)
-
-    }
-}
-
-type FieldGroupsProps = { groups: string[], profiles: string[], user: User }
-
-
-const FieldGroups: React.FC<FieldGroupsProps> = ({ groups, user }) => {
-
-    const { model, updateModel } = useModel()
-
-    //const handleNewGroup = (event: SelectChangeEvent<string[] | string>) => {
-    //  const value = event.target.value
-    //const sanitizedValue = sanitizeValue(value)
-    //setGroups(sanitizedValue)
-
-    //}
-
-
-
-    return (SRD.match({
-        notAsked: () => <div>'Nothing asked'</div>,
-        loading: () => <div>'Loading...'</div>,
-        failure: (msg) => <div>`Il y a un problème: ${msg}`</div>,
-        success: (gotProfiles: string[]) =>
-            <>
-                <InputLabel id="select-groups-label">Groups</InputLabel>
-                <Select
-                    labelId="select-groups-label"
-                    id="select-groups"
-                    multiple
-                    value={groups}
-                    defaultValue={groups}
-                    label="groups"
-                    fullWidth
-                    renderValue={(selected) => typeof selected === 'string' ? selected : selected.join(', ')}
-                    onChange={(event) => updateModel({ type: 'UserUpdatedRoles', payload: { key: user.key, roles: event.target.value } })}
-                >
-                    {gotProfiles.map(profile =>
-                        <MenuItem
-                            key={profile}
-                            value={profile}
-
-                        >
-                            {profile}
-                        </MenuItem>)}
-                </Select>
-            </>
-
-    }, model.profiles))
-}
 
 
 

@@ -7,8 +7,12 @@
     "dev": "nodemon ./bin/www & (cd mainapp && npm run build:watch)"
   },
   "dependencies": {
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
     "@futpib/tika-server-client": "0.0.5",
+    "@material-ui/icons": "^4.11.2",
     "@material-ui/types": "^5.1.0",
+    "@mui/icons-material": "^5.0.3",
     "@mui/x-data-grid": "^4.0.1",
     "@triply/yasgui": "^4.1.1",
     "async": "^3.2.0",

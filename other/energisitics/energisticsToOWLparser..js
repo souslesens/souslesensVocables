@@ -500,7 +500,7 @@ if(false) {
 }
 if(false){
 
-    var dirPaths =[dirPathCommon,dirPathWitsml];
+    var dirPaths =[dirPathCommon,dirPathResqml];
     var globalJson=[]
     async.eachSeries(dirPaths, function (dirPath, callbackEachDir) {
         var files = fs.readdirSync(dirPath)
@@ -532,7 +532,8 @@ if(false){
 }
 
 if(true){
-    var dirPath=dirPathWitsml
+    var dirPath=dirPathResqml
+    var graphUri="http://souslesens.org/energistics/ontology/resqml/"
     var filePath=dirPath+"global.json"
     var json=JSON.parse(fs.readFileSync(filePath))
     var distinctClasses={}
@@ -542,7 +543,7 @@ if(true){
     var objectPropertiesTriples=[]
     var enumTriples=[]
     var blankNodeIndex=0;
-    var graphUri="http://souslesens.org/energistics/ontology/witsml/"
+
     json.forEach(function(item) {
         if (!distinctClasses[item.name]) {
             var className = item.name
@@ -596,6 +597,9 @@ if(true){
 
                 if (!propUri) {
                     propUri = graphUri + "has" + util.formatStringForTriple(element.name, true)
+                   if(element.name =="length")
+                       element.name ="Length"
+                        console.log(element.name)
                     propertiesMap[element.name] = propUri
 
                     if (targetClass) {
@@ -656,26 +660,39 @@ if(true){
 
             })
         }
-        if(item.enumerations){
-            item.enumerations.forEach(function(itemEnum){
-                var enumUri = graphUri + util.getRandomHexaId(10)
-               enumTriples.push({
-                    subject: enumUri,
-                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                    object: "'" + "has" + util.formatStringForTriple(itemEnum.value) + "'",
-                })
-                enumTriples.push({
-                    subject: enumUri,
-                    predicate:   "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object:  classUri,
-                });
 
-                if (itemEnum.documentation) {
+        if(item.enumerations){
+            var enumsMap={}
+
+            item.enumerations.forEach(function(itemEnum){
+                var enumLabel=itemEnum.value
+                if(!enumsMap[enumLabel]) {
+                    enumsMap[enumLabel]=1;
+                    var enumUri = graphUri + util.getRandomHexaId(10)
                     enumTriples.push({
                         subject: enumUri,
-                        predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
-                        object: "'" + util.formatStringForTriple(itemEnum.documentation) + "'",
+                        predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                        object: "'" + util.formatStringForTriple(enumLabel) + "'",
+                    })
+                    enumTriples.push({
+                        subject: enumUri,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: classUri,
                     });
+                    enumTriples.push({
+                        subject: enumUri,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: "http://www.w3.org/2002/07/owl:NamedIndividual"
+                    });
+
+
+                    if (itemEnum.documentation) {
+                        enumTriples.push({
+                            subject: enumUri,
+                            predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+                            object: "'" + util.formatStringForTriple(itemEnum.documentation) + "'",
+                        });
+                    }
                 }
 
 

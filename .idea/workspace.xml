@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
-      <change afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparserOld..js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/package-lock.json.backup" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/config/schemas.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/schemas.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +77,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.21" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/other/energisitics" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="prettierjs.PrettierConfiguration.Package" value="D:\webstorm\souslesensVocables\node_modules\prettier" />
@@ -245,7 +246,7 @@
       <workItem from="1633503412063" duration="24630000" />
       <workItem from="1633596652014" duration="593000" />
       <workItem from="1633597936432" duration="5944000" />
-      <workItem from="1633626069577" duration="44036000" />
+      <workItem from="1633626069577" duration="68451000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -401,7 +402,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633626544226</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="change ADL prefix to KG">
+      <created>1633801866449</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1633801866449</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -665,6 +673,24 @@
           <line>39</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="505" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
+          <line>892</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="515" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
+          <line>889</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="516" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js</url>
+          <line>688</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="520" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

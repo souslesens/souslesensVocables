@@ -234,7 +234,7 @@ var Sparql_OWL = (function () {
                     if (true || options.skipRestrictions) {
                         query += " ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction) "
                     }
-                    query+=" OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+                    query += " OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
 
                 } else {
@@ -242,12 +242,11 @@ var Sparql_OWL = (function () {
                     query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + "."
                     //   "?broader" + i + " rdf:type owl:Class."
                     if (true || options.skipRestrictions) {
-                        query += " ?broader"+ (i)+" rdf:type ?broaderType"+ (i)+". filter(?broaderType"+ (i)+" !=owl:Restriction) "
+                        query += " ?broader" + (i) + " rdf:type ?broaderType" + (i) + ". filter(?broaderType" + (i) + " !=owl:Restriction) "
                     }
-                    query+="OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
+                    query += "OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
                 }
-
 
 
             }
@@ -302,9 +301,9 @@ var Sparql_OWL = (function () {
 
 
             query += " select distinct * " + fromStr + "  WHERE {"
-            if( options.selectGraph)
-                query +=" graph ?g"
-                    query += "{ ?concept ?x ?y. FILTER (!isBlank(?concept))"
+            if (options.selectGraph)
+                query += " graph ?g"
+            query += "{ ?concept ?x ?y. FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
 
@@ -441,7 +440,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
 
 
             var query = "";
@@ -452,11 +451,11 @@ var Sparql_OWL = (function () {
 
             query += " select distinct * " + fromStr + "  WHERE {"
 
-            if( options.selectGraph)
-                query +=" graph ?g "
-            query +="{ ?concept ?x ?y.";
-            if(!options.includeBlankNodes)
-                query +="FILTER (!isBlank(?concept))"
+            if (options.selectGraph)
+                query += " graph ?g "
+            query += "{ ?concept ?x ?y.";
+            if (!options.includeBlankNodes)
+                query += "FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
             query += "OPTIONAL {?concept rdfs:subClassOf ?superClass. }";
@@ -504,7 +503,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
 
 
             var query = "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
@@ -513,8 +512,8 @@ var Sparql_OWL = (function () {
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel" + fromStr +
                 " WHERE {"
-            if( options.selectGraph)
-                query +=" graph ?g "
+            if (options.selectGraph)
+                query += " graph ?g "
             if (options.inheritedProperties)
                 query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty "
 
@@ -561,15 +560,15 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "SELECT * " + fromStr + " WHERE {"
-            if( options.selectGraph)
-                query +=" graph ?g "
+            if (options.selectGraph)
+                query += " graph ?g "
             query += "{ ?concept rdfs:subClassOf ?node. " + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
@@ -589,7 +588,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "concept","value"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "concept", "value"])
                 return callback(null, result.results.bindings)
 
             })
@@ -628,7 +627,7 @@ var Sparql_OWL = (function () {
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
-                    "   ?subject skos:prefLabel ?subjectLabel." +"filter(lang(?subjectLabel)='en')"+
+                    "   ?subject skos:prefLabel ?subjectLabel." + "filter(lang(?subjectLabel)='en')" +
                     "}"
             }
 
@@ -645,6 +644,56 @@ var Sparql_OWL = (function () {
             })
         }
 
+
+        self.getPropertyClasses = function (sourceLabel, propIds, options, callback) {
+
+            if (!options) {
+                options = {}
+            }
+            var filterStr = "";
+            filterStr = Sparql_common.setFilter("prop", propIds);
+            if (options.subPropIds)
+                filterStr = Sparql_common.setFilter("subProp", options.subPropIds);
+            if (options.filter)
+                filterStr = options.filter;
+            self.graphUri = Config.sources[sourceLabel].graphUri;
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
+
+
+            var query = "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "select distinct * " + fromStr +
+                " WHERE {"
+
+            query += " ?restriction <http://www.w3.org/2002/07/owl#onProperty> ?prop."
+                + filterStr +
+                "  ?sourceClass rdfs:subClassOf ?restriction." +
+                "   OPTIONAL {?restriction  owl:someValuesFrom ?targetClass.   OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" +
+                "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}"
+            var limit = options.limit || Config.queryLimit;
+            query += " }"
+            query += "  limit " + limit
+
+
+            var url = self.sparql_url + "?format=json&query=";
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params
+            if (self.no_params)
+                url = self.sparql_url
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+
+
+                if (err) {
+                    return callback(err)
+                }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
+                return callback(null, result.results.bindings)
+
+            })
+        }
 
         self.schema = {
             getOwlChildrenClasses: function (callback) {

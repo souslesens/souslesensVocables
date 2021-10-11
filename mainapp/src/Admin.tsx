@@ -1,13 +1,14 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { accordionActionsClasses, Button, Chip, dividerClasses, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material';
+import { accordionActionsClasses, Button, Chip, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, dividerClasses, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material';
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { User as EditUser, getUsers, putUsers } from './User'
+import { User as User, getUsers, putUsers } from './User'
 import { getProfiles } from './Profiles'
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { ULID, ulid } from "ulid";
+
 //import DeleteIcon from '@mui/icons-material/Delete';
 
 const style = {
@@ -16,7 +17,7 @@ const style = {
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 800,
-    height: 400,
+    height: 500,
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
@@ -25,7 +26,7 @@ const style = {
 };
 
 type Model = {
-    users: RD<string, EditUser[]>,
+    users: RD<string, User[]>,
     profiles: RD<string, string[]>,
     isModalOpen: boolean
 }
@@ -43,7 +44,7 @@ const initialModel: Model =
 }
 
 type Msg =
-    { type: 'ServerRespondedWithUsers', payload: RD<string, EditUser[]> }
+    { type: 'ServerRespondedWithUsers', payload: RD<string, User[]> }
     | { type: 'ServerRespondedWithProfiles', payload: RD<string, string[]> }
     | { type: 'UserUpdatedField', payload: UpadtedFieldPayload }
     | { type: 'UserUpdatedRoles', payload: { key: string, roles: string | string[] } }
@@ -54,10 +55,10 @@ type Msg =
 
 const identity = <Type,>(a: Type): Type => a;
 
-const newUser = (key: string): EditUser => { return ({ key: key, login: '', password: '', groups: [] }) }
+const newUser = (key: string): User => { return ({ key: key, login: '', password: '', groups: [] }) }
 
 function update(model: Model, msg: Msg): Model {
-    const unwrappedUsers: EditUser[] = SRD.unwrap([], identity, model.users)
+    const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users)
     console.log(msg);
     switch (msg.type) {
 
@@ -127,9 +128,6 @@ const Admin = () => {
 
 
 
-
-
-
     return <ModelContext.Provider value={{ model, updateModel }}>
         {SRD.match({
             notAsked: () => 'Nothing asked',
@@ -137,18 +135,19 @@ const Admin = () => {
             failure: (msg) => `Il y a un problème: ${msg}`,
             success: gotUsers =>
 
-                <Grid container
-                    spacing={4}
-                    direction="column"
-                    alignItems="center"
-                    justifyContent="center"
-                    style={{ maxHeight: 400, overflow: 'auto' }}
-                >
-                    <h1>Click users to edit</h1>
-                    <CreateUser modal={modal} updateModel={updateModel} setModal={setModal} />
+                <Box
+                    sx={{ display: 'flex', justifyContent: 'center', p: 4 }}
 
-                    <Users users={gotUsers} />
-                </Grid>
+                >
+                    <Stack>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                            <CreateUser modal={modal} updateModel={updateModel} setModal={setModal} /></Box>
+
+                        <Users users={gotUsers} />
+                    </Stack>
+
+
+                </Box>
 
 
         }, model.users)}
@@ -159,11 +158,8 @@ const CreateUser = (props: { modal: boolean; updateModel: React.Dispatch<Msg>; s
     const { model, updateModel } = useModel()
     const newUserID = ulid()
     const [user, setNewUser] = React.useState(newUser(newUserID));
-
     const profiles = SRD.unwrap([], identity, model.profiles)
     const users = SRD.unwrap([], identity, model.users)
-
-
 
     React.useEffect(() => {
         setNewUser(newUser(newUserID))
@@ -175,9 +171,9 @@ const CreateUser = (props: { modal: boolean; updateModel: React.Dispatch<Msg>; s
         putUsers('/users', [...users, user])
             .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
             .then(() => props.setModal(false))
+            .then(() => setNewUser(newUser(ulid())))
             .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
     }
-
 
 
     return (
@@ -198,14 +194,13 @@ const CreateUser = (props: { modal: boolean; updateModel: React.Dispatch<Msg>; s
     )
 }
 
-type UserProps = { user: EditUser }
+type UserProps = { user: User }
 
-const EditUser: React.FC<UserProps> = ({ user }) => {
+const User: React.FC<UserProps> = ({ user }) => {
 
     const { model, updateModel } = useModel();
 
     const [localUser, setNewUser] = React.useState(user);
-
 
     const [isModalOpen, setModal] = React.useState(false);
 
@@ -214,7 +209,7 @@ const EditUser: React.FC<UserProps> = ({ user }) => {
     const handleOpen = () => setModal(true);
 
 
-    const users: EditUser[] = SRD.unwrap([], identity, model.users)
+    const users: User[] = SRD.unwrap([], identity, model.users)
 
     const profiles: string[] = SRD.unwrap([], identity, model.profiles)
 
@@ -239,39 +234,35 @@ type UserFormProps = {
     modal: boolean,
     updateModel: React.Dispatch<Msg>,
     setModal: React.Dispatch<React.SetStateAction<boolean>>,
-    setNewUser: React.Dispatch<React.SetStateAction<EditUser>>,
-    user: EditUser,
+    setNewUser: React.Dispatch<React.SetStateAction<User>>,
+    user: User,
     profiles: string[],
     saveUser: () => void,
     deletedUser: () => void
 }
 
-const UserForm: React.FC<UserFormProps> = ({ modal, updateModel, setModal, setNewUser, user, profiles, saveUser, deletedUser }) => {
+const UserForm: React.FC<UserFormProps> = ({ modal, setModal, updateModel, setNewUser, user, profiles, saveUser, deletedUser }) => {
     return <Modal open={modal}
         onClose={restoreUsers(updateModel, setModal)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description">
-        <Grid component="form"
-            sx={style}
-
-            noValidate
-            autoComplete="off"
-            container
-            spacing={8}
-        >
-            <FormControl fullWidth>
-                <Stack spacing={4}><TextField fullWidth onChange={(event) => setNewUser({ ...user, login: event.target.value })}
+        <Box sx={style}>
+            <Stack spacing={4}>
+                <h2>{`Edit ${user.login}`}</h2>
+                <TextField fullWidth onChange={(event) => setNewUser({ ...user, login: event.target.value })}
                     //@ts-ignore
                     value={user.login}
                     id={`id-login-${user.key}`}
                     label={"login"}
                     variant="standard" />
-                    <TextField fullWidth onChange={(event) => setNewUser({ ...user, password: event.target.value })}
-                        //@ts-ignore
-                        value={user.password}
-                        id={`id-password-${user.key}`}
-                        label={"password"}
-                        variant="standard" />
+
+                <TextField fullWidth onChange={(event) => setNewUser({ ...user, password: event.target.value })}
+                    //@ts-ignore
+                    value={user.password}
+                    id={`id-password-${user.key}`}
+                    label={"password"}
+                    variant="standard" />
+                <FormControl>
                     <InputLabel id="select-groups-label">Groups</InputLabel>
                     <Select
                         labelId="select-groups-label"
@@ -279,7 +270,7 @@ const UserForm: React.FC<UserFormProps> = ({ modal, updateModel, setModal, setNe
                         multiple
                         value={user.groups}
                         defaultValue={user.groups}
-                        label=""
+                        label="select-groups-label"
                         fullWidth
                         renderValue={(selected) => typeof selected === 'string' ? selected : selected.join(', ')}
                         onChange={(event) => setNewUser({ ...user, groups: sanitizeValue(event.target.value) })}
@@ -292,27 +283,32 @@ const UserForm: React.FC<UserFormProps> = ({ modal, updateModel, setModal, setNe
                             {profile}
                         </MenuItem>)}
                     </Select>
-                    <Button onClick={saveUser} variant="contained">Save changes</Button>
-                    <Button onClick={deletedUser} variant="contained" color="error">Delete User</Button>
-                </Stack>
+                </FormControl>
 
 
-            </FormControl> </Grid>
-    </Modal>;
+
+
+                <Button onClick={saveUser} variant="contained">Save changes</Button>
+                <Button onClick={deletedUser} variant="contained" color="error">Delete User</Button>
+
+            </Stack>
+        </Box>
+    </Modal >;
 }
 
-function deleteUser(users: EditUser[], user: EditUser, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
+function deleteUser(users: User[], user: User, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>> = () => console.log("modal closed")) {
+    const updatedUsers = users.filter(prevUsers => prevUsers.key !== user.key);
+    console.log(`user ${user.key} deleted`)
+    console.log(updatedUsers)
     return () => {
-
-
-        putUsers('/users', users.filter(prevUsers => prevUsers.key !== user.key))
-            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+        putUsers('/users', updatedUsers)
+            .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
             .then(() => setModal(false))
             .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
     };
 }
 
-function saveUser(updateModel: React.Dispatch<Msg>, users: EditUser[], user: EditUser, localUser: EditUser, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
+function saveUser(updateModel: React.Dispatch<Msg>, users: User[], user: User, localUser: User, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
     return () => {
 
         updateModel({ type: 'UserClickedSaveChanges', payload: {} });
@@ -337,13 +333,45 @@ function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch
 
 
 type UsersProps = {
-    users: EditUser[],
+    users: User[],
 }
 
 const Users: React.FC<UsersProps> = ({ users }): JSX.Element => {
-    //const { model, updateModel } = useModel();
+    const { model, updateModel } = useModel();
     return (
-        <Stack spacing={2}>{users.map(el => <EditUser key={el.key} user={el}></EditUser>)}</Stack>
+        <Box sx={{ justifyContent: 'center', display: 'flex' }}>
+            <TableContainer component={Paper}>
+                <Table sx={{ width: '100%' }}>
+                    <TableHead>
+                        <TableRow >
+                            <TableCell>Login</TableCell>
+                            <TableCell>Groups</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>{users.map(user => (<TableRow key={user.key}>
+                        <TableCell>
+                            {user.login}
+                        </TableCell>
+                        <TableCell>
+                            {user.groups.join(', ')}
+                        </TableCell>
+                        <TableCell>
+                            <ButtonGroup>
+                                <User key={user.key} user={user}></User>
+                                {//<Button onClick={() => deleteUser(users, user, updateModel)} variant='contained' color='error'>Delete User</Button>
+                                }
+                            </ButtonGroup>
+
+                        </TableCell>
+
+                    </TableRow>))}</TableBody>
+                </Table>
+            </TableContainer>
+        </Box>
+        //<Stack spacing={2}>{users.map(el => <User key={el.key} user={el}></User>)}</Stack>
+
+
     )
 
 }

@@ -2,7 +2,7 @@ import {
     accordionActionsClasses, TextField,
     Modal, Box, Tabs, Tab, Button, CircularProgress, Chip, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, dividerClasses, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack
 } from '@mui/material';
-import { Msg } from '../Admin';
+import { Msg, useModel } from '../Admin';
 import { restoreUsers, User } from '../User';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
@@ -31,8 +31,8 @@ const style = {
 
 };
 
-const UserForm: React.FC<UserFormProps> = ({ modal, setModal, updateModel, setNewUser, user, profiles, saveUser, deletedUser }) => {
-
+const UserForm: React.FC<UserFormProps> = ({ modal, setModal, setNewUser, user, profiles, saveUser, deletedUser }) => {
+    const { updateModel } = useModel();
     return <Modal open={modal}
         onClose={restoreUsers(updateModel, setModal)}
         aria-labelledby="modal-modal-title"

@@ -27,8 +27,6 @@ async function putUsers(url: string, body: User[]): Promise<User[]> {
 
 function deleteUser(users: User[], user: User, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>> = () => console.log("modal closed")) {
     const updatedUsers = users.filter(prevUsers => prevUsers.key !== user.key);
-    console.log(`user ${user.key} deleted`)
-    console.log(updatedUsers)
     return () => {
         putUsers('/users', updatedUsers)
             .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
@@ -49,7 +47,6 @@ function saveUser(updateModel: React.Dispatch<Msg>, users: User[], user: User, l
 }
 
 function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
-    console.log("restore user")
     return () => {
         getUsers('/users')
             .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))

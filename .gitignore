@@ -110,4 +110,5 @@ config/sources.json
 config/profiles.json
 
 #React build output
-mainapp/static/
+mainapp/static/mainapp.js
+mainapp/static/mainapp.js.map

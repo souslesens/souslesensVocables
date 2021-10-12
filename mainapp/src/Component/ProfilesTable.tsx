@@ -24,10 +24,8 @@ const ProfilesTable = () => {
             success: (gotUsers: User[]) =>
 
                 <Box
-                    sx={{ display: 'flex', justifyContent: 'center', p: 4 }}
-                >
+                    sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
-
                         <Box sx={{ justifyContent: 'center', display: 'flex' }}>
                             <TableContainer component={Paper}>
                                 <Table sx={{ width: '100%' }}>

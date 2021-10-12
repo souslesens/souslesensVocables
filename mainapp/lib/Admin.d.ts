@@ -1,9 +1,12 @@
 import * as React from "react";
 import { RD } from 'srd';
 import { User as User } from './User';
+import { Profile } from './Profile';
+import { Source } from "./Source";
 declare type Model = {
     users: RD<string, User[]>;
-    profiles: RD<string, string[]>;
+    profiles: RD<string, Profile[]>;
+    sources: RD<string, Source[]>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
 };
@@ -22,16 +25,13 @@ declare type Msg = {
     payload: RD<string, User[]>;
 } | {
     type: 'ServerRespondedWithProfiles';
-    payload: RD<string, string[]>;
+    payload: RD<string, Profile[]>;
+} | {
+    type: 'ServerRespondedWithSources';
+    payload: RD<string, Source[]>;
 } | {
     type: 'UserUpdatedField';
     payload: UpadtedFieldPayload;
-} | {
-    type: 'UserUpdatedRoles';
-    payload: {
-        key: string;
-        roles: string | string[];
-    };
 } | {
     type: 'UserClickedSaveChanges';
     payload: {};

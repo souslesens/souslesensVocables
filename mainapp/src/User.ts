@@ -83,8 +83,6 @@ type UserJSON = { key: string, login: string, password: string, groups: string[]
 
 type User = { key: string, login: string, password: string, groups: string[] }
 
-type Group = 'admin' | 'regular';
-
 const newUser = (key: string): User => { return ({ key: key, login: '', password: '', groups: [] }) }
 
 

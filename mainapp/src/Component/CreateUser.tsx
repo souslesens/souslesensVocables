@@ -40,11 +40,9 @@ const CreateUser = (props: { modal: boolean; updateModel: React.Dispatch<Msg>; s
             }
             <UserForm
                 modal={props.modal}
-                updateModel={props.updateModel}
                 setModal={props.setModal}
                 setNewUser={setNewUser}
                 user={user}
-                profiles={profiles}
                 saveUser={saveUser}
                 deletedUser={deleteUser(users, user, updateModel, props.setModal)} />
         </>

@@ -9,6 +9,7 @@ import * as ReactDOM from "react-dom";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import UserForm from './UserForm';
 import { identity } from '../Utils';
+import { Profile } from '../Profile';
 
 type UserProps = { user: User }
 
@@ -27,7 +28,7 @@ const ViewUser: React.FC<UserProps> = ({ user }) => {
 
     const users: User[] = SRD.unwrap([], identity, model.users)
 
-    const profiles: string[] = SRD.unwrap([], identity, model.profiles)
+    const profiles: Profile[] = SRD.unwrap([], identity, model.profiles)
 
 
     return (<>
@@ -35,11 +36,9 @@ const ViewUser: React.FC<UserProps> = ({ user }) => {
         <Button variant="outlined" size="medium" onClick={handleOpen}>{`Edit`}</Button>
         <UserForm
             modal={isModalOpen}
-            updateModel={updateModel}
             setModal={setModal}
             setNewUser={setNewUser}
             user={localUser}
-            profiles={profiles}
             saveUser={saveUser(updateModel, users, user, localUser, setModal)}
             deletedUser={deleteUser(users, user, updateModel, setModal)} />
 

@@ -7,14 +7,16 @@ import Box from '@mui/material/Box';
 import { identity } from './Utils';
 import UsersTable from './Component/UsersTable';
 import ProfilesTable from './Component/ProfilesTable';
-
-
+import { Profile } from './Profile';
+import SourcesTable from './Component/SourcesTable';
+import { Source, getSources } from "./Source";
 
 
 
 type Model = {
     users: RD<string, User[]>,
-    profiles: RD<string, string[]>,
+    profiles: RD<string, Profile[]>,
+    sources: RD<string, Source[]>,
     isModalOpen: boolean,
     currentEditionTab: EditionTab
 }
@@ -48,6 +50,7 @@ const initialModel: Model =
 {
     users: loading(),
     profiles: loading(),
+    sources: loading(),
     isModalOpen: false,
     currentEditionTab: 'ProfilesEdition'
 }
@@ -64,9 +67,9 @@ function useModel() {
 
 type Msg =
     { type: 'ServerRespondedWithUsers', payload: RD<string, User[]> }
-    | { type: 'ServerRespondedWithProfiles', payload: RD<string, string[]> }
+    | { type: 'ServerRespondedWithProfiles', payload: RD<string, Profile[]> }
+    | { type: 'ServerRespondedWithSources', payload: RD<string, Source[]> }
     | { type: 'UserUpdatedField', payload: UpadtedFieldPayload }
-    | { type: 'UserUpdatedRoles', payload: { key: string, roles: string | string[] } }
     | { type: 'UserClickedSaveChanges', payload: {} }
     | { type: 'UserChangedModalState', payload: boolean }
     | { type: 'UserClickedAddUser', payload: string }
@@ -85,6 +88,9 @@ function update(model: Model, msg: Msg): Model {
         case 'ServerRespondedWithProfiles':
             return { ...model, profiles: msg.payload }
 
+        case 'ServerRespondedWithSources':
+            return { ...model, sources: msg.payload }
+
         case 'UserClickedSaveChanges':
             return { ...model, isModalOpen: false }
 
@@ -97,11 +103,6 @@ function update(model: Model, msg: Msg): Model {
             const updatedUsers = unwrappedUsers.map(u => u.key === msg.payload.key ? { ...u, [fieldToUpdate]: msg.payload.newValue } : u)
             return { ...model, users: SRD.of(updatedUsers) }
 
-        case 'UserUpdatedRoles':
-            const updatedUserRole = unwrappedUsers.map(u => u.key === msg.payload.key ? { ...u, groups: typeof msg.payload.roles === 'string' ? msg.payload.roles.split(',') : msg.payload.roles } : u)
-            console.log({ "prev": unwrappedUsers });
-            console.log({ "next": updatedUserRole });
-            return { ...model, users: SRD.of(updatedUserRole) }
 
         case 'UserClickedNewTab':
             return { ...model, currentEditionTab: editionTabToString(msg.payload) }
@@ -133,6 +134,13 @@ const Admin = () => {
             .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
     }, [])
 
+    React.useEffect(() => {
+        updateModel({ type: 'ServerRespondedWithSources', payload: loading() })
+        getSources()
+            .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }))
+    }, [])
+
     return <ModelContext.Provider value={{ model, updateModel }}>
         <Box sx={{ width: '100%', bgcolor: 'Background.paper' }}>
             <Tabs onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: 'UserClickedNewTab', payload: newValue })} value={editionTabToNumber(model.currentEditionTab)} centered>
@@ -153,7 +161,7 @@ const Dispatcher = (props: { model: Model }) => {
         case 'ProfilesEdition':
             return <ProfilesTable />
         case 'SourcesEdition':
-            return <div>Sources Edition</div>
+            return <SourcesTable />
         default:
             return <div>Problem</div>
     }

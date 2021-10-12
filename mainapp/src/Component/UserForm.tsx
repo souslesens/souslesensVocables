@@ -5,15 +5,15 @@ import {
 import { Msg, useModel } from '../Admin';
 import { restoreUsers, User } from '../User';
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+
+import { identity } from '../Utils';
+import { SRD } from 'srd';
 
 type UserFormProps = {
     modal: boolean,
-    updateModel: React.Dispatch<Msg>,
     setModal: React.Dispatch<React.SetStateAction<boolean>>,
     setNewUser: React.Dispatch<React.SetStateAction<User>>,
     user: User,
-    profiles: string[],
     saveUser: () => void,
     deletedUser: () => void
 }
@@ -31,8 +31,9 @@ const style = {
 
 };
 
-const UserForm: React.FC<UserFormProps> = ({ modal, setModal, setNewUser, user, profiles, saveUser, deletedUser }) => {
-    const { updateModel } = useModel();
+const UserForm: React.FC<UserFormProps> = ({ modal, setModal, setNewUser, user, saveUser, deletedUser }) => {
+    const { updateModel, model } = useModel();
+    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
     return <Modal open={modal}
         onClose={restoreUsers(updateModel, setModal)}
         aria-labelledby="modal-modal-title"
@@ -65,12 +66,12 @@ const UserForm: React.FC<UserFormProps> = ({ modal, setModal, setNewUser, user, 
                         renderValue={(selected) => typeof selected === 'string' ? selected : selected.join(', ')}
                         onChange={(event) => setNewUser({ ...user, groups: sanitizeValue(event.target.value) })}
                     >
-                        {profiles.map(profile => <MenuItem
-                            key={profile}
-                            value={profile}
+                        {unwrappedProfiles.map(profile => <MenuItem
+                            key={profile.name}
+                            value={profile.name}
 
                         >
-                            {profile}
+                            {profile.name}
                         </MenuItem>)}
                     </Select>
                 </FormControl>

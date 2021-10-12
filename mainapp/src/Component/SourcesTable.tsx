@@ -2,12 +2,11 @@ import {
     Box, CircularProgress, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack
 } from '@mui/material';
 import { useModel } from '../Admin';
-import { User } from '../User';
 import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { Profile } from '../Profile';
+import { Source } from '../Source';
 
-const ProfilesTable = () => {
+const SourcesTable = () => {
     const { model, updateModel } = useModel();
     const renderProfiles =
         SRD.match({
@@ -22,7 +21,7 @@ const ProfilesTable = () => {
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
 
                 </Box>,
-            success: (gotUsers: Profile[]) =>
+            success: (gotSources: Source[]) =>
 
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -33,16 +32,16 @@ const ProfilesTable = () => {
                                     <TableHead>
                                         <TableRow >
                                             <TableCell>Name</TableCell>
-                                            <TableCell>Allowed Sources</TableCell>
+                                            <TableCell>Controller</TableCell>
                                             <TableCell>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody>{gotUsers.map(profile => (<TableRow key={profile.name}>
+                                    <TableBody>{gotSources.map(source => (<TableRow key={source.name}>
                                         <TableCell>
-                                            {profile.name}
+                                            {source.name}
                                         </TableCell>
                                         <TableCell>
-                                            {profile.allowedSourceSchemas.join(', ')}
+                                            {source.controller}
                                         </TableCell>
                                         <TableCell>
                                             <ButtonGroup>
@@ -64,10 +63,10 @@ const ProfilesTable = () => {
                 </Box>
 
 
-        }, model.profiles)
+        }, model.sources)
 
     return (renderProfiles)
 }
 
 
-export default ProfilesTable
+export default SourcesTable

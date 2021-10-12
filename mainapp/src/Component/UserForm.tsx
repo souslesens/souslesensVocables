@@ -41,14 +41,13 @@ const UserForm: React.FC<UserFormProps> = ({ modal, setModal, setNewUser, user, 
             <Stack spacing={4}>
                 <h2>{`Edit ${user.login}`}</h2>
                 <TextField fullWidth onChange={(event) => setNewUser({ ...user, login: event.target.value })}
-                    //@ts-ignore
+
                     value={user.login}
                     id={`id-login-${user.key}`}
                     label={"login"}
                     variant="standard" />
 
                 <TextField fullWidth onChange={(event) => setNewUser({ ...user, password: event.target.value })}
-                    //@ts-ignore
                     value={user.password}
                     id={`id-password-${user.key}`}
                     label={"password"}

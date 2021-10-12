@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { accordionActionsClasses, Button, Chip, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, dividerClasses, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material';
+import { accordionActionsClasses, Tabs, Tab, Button, CircularProgress, Chip, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, dividerClasses, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack } from '@mui/material';
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { User as User, getUsers, putUsers } from './User'
 import { getProfiles } from './Profiles'
@@ -25,11 +25,35 @@ const style = {
 
 };
 
+type EditionTab
+    = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition'
+
+const editionTabToNumber = (editionTab: EditionTab) => {
+    switch (editionTab) {
+        case 'UsersEdition': return 0
+        case 'ProfilesEdition': return 1
+        case 'SourcesEdition': return 2
+        default: 0
+    }
+}
+
+const editionTabToString = (editionTab: number): EditionTab => {
+    switch (editionTab) {
+        case 0: return 'UsersEdition'
+        case 1: return 'ProfilesEdition'
+        case 2: return 'SourcesEdition'
+        default: return 'UsersEdition'
+    }
+}
+
+
 type Model = {
     users: RD<string, User[]>,
     profiles: RD<string, string[]>,
-    isModalOpen: boolean
+    isModalOpen: boolean,
+    currentEditionTab: EditionTab
 }
+
 
 
 type UpadtedFieldPayload =
@@ -40,7 +64,8 @@ const initialModel: Model =
 {
     users: loading(),
     profiles: loading(),
-    isModalOpen: false
+    isModalOpen: false,
+    currentEditionTab: 'UsersEdition'
 }
 
 type Msg =
@@ -51,6 +76,7 @@ type Msg =
     | { type: 'UserClickedSaveChanges', payload: {} }
     | { type: 'UserChangedModalState', payload: boolean }
     | { type: 'UserClickedAddUser', payload: string }
+    | { type: 'UserClickedNewTab', payload: number }
 
 
 const identity = <Type,>(a: Type): Type => a;
@@ -85,6 +111,8 @@ function update(model: Model, msg: Msg): Model {
             console.log({ "prev": unwrappedUsers });
             console.log({ "next": updatedUserRole });
             return { ...model, users: SRD.of(updatedUserRole) }
+        case 'UserClickedNewTab':
+            return { ...model, currentEditionTab: editionTabToString(msg.payload) }
 
 
         default:
@@ -106,7 +134,7 @@ function useModel() {
 const Admin = () => {
 
     const [model, updateModel] = React.useReducer(update, initialModel)
-    const [modal, setModal] = React.useState(false)
+
     //TODO: combine both fetch with promise.all() or something like that
 
     React.useEffect(() => {
@@ -129,28 +157,15 @@ const Admin = () => {
 
 
     return <ModelContext.Provider value={{ model, updateModel }}>
-        {SRD.match({
-            notAsked: () => 'Nothing asked',
-            loading: () => 'Loading...',
-            failure: (msg) => `Il y a un problème: ${msg}`,
-            success: gotUsers =>
+        <Box sx={{ width: '100%', bgcolor: 'Background.paper' }}>
+            <Tabs onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: 'UserClickedNewTab', payload: newValue })} value={editionTabToNumber(model.currentEditionTab)} centered>
+                <Tab label="Users" />
+                <Tab label="Profiles" />
+                <Tab label="Sources" />
+            </Tabs>
+        </Box>
+        <Users users={model.users}></Users>
 
-                <Box
-                    sx={{ display: 'flex', justifyContent: 'center', p: 4 }}
-
-                >
-                    <Stack>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                            <CreateUser modal={modal} updateModel={updateModel} setModal={setModal} /></Box>
-
-                        <Users users={gotUsers} />
-                    </Stack>
-
-
-                </Box>
-
-
-        }, model.users)}
     </ModelContext.Provider >
 }
 
@@ -216,7 +231,7 @@ const User: React.FC<UserProps> = ({ user }) => {
 
     return (<>
 
-        <Button variant="outlined" size="medium" onClick={handleOpen}>{`Edit ${user.login}`}</Button>
+        <Button variant="outlined" size="medium" onClick={handleOpen}>{`Edit`}</Button>
         <UserForm
             modal={isModalOpen}
             updateModel={updateModel}
@@ -242,6 +257,7 @@ type UserFormProps = {
 }
 
 const UserForm: React.FC<UserFormProps> = ({ modal, setModal, updateModel, setNewUser, user, profiles, saveUser, deletedUser }) => {
+
     return <Modal open={modal}
         onClose={restoreUsers(updateModel, setModal)}
         aria-labelledby="modal-modal-title"
@@ -333,44 +349,75 @@ function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch
 
 
 type UsersProps = {
-    users: User[],
+    users: RD<string, User[]>,
 }
 
 const Users: React.FC<UsersProps> = ({ users }): JSX.Element => {
     const { model, updateModel } = useModel();
-    return (
-        <Box sx={{ justifyContent: 'center', display: 'flex' }}>
-            <TableContainer component={Paper}>
-                <Table sx={{ width: '100%' }}>
-                    <TableHead>
-                        <TableRow >
-                            <TableCell>Login</TableCell>
-                            <TableCell>Groups</TableCell>
-                            <TableCell>Actions</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>{users.map(user => (<TableRow key={user.key}>
-                        <TableCell>
-                            {user.login}
-                        </TableCell>
-                        <TableCell>
-                            {user.groups.join(', ')}
-                        </TableCell>
-                        <TableCell>
-                            <ButtonGroup>
-                                <User key={user.key} user={user}></User>
-                                {//<Button onClick={() => deleteUser(users, user, updateModel)} variant='contained' color='error'>Delete User</Button>
-                                }
-                            </ButtonGroup>
+    const [modal, setModal] = React.useState(false)
+    const renderUsers = SRD.match({
+        notAsked: () => <p>Let's fetch some data!</p>,
+        loading: () =>
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
 
-                        </TableCell>
+            </Box>,
+        failure: (msg: string) =>
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
 
-                    </TableRow>))}</TableBody>
-                </Table>
-            </TableContainer>
-        </Box>
+            </Box>,
+        success: (gotUsers: User[]) =>
+
+            <Box
+                sx={{ display: 'flex', justifyContent: 'center', p: 4 }}
+            >
+                <Stack>
+
+                    <Box sx={{ justifyContent: 'center', display: 'flex' }}>
+                        <TableContainer component={Paper}>
+                            <Table sx={{ width: '100%' }}>
+                                <TableHead>
+                                    <TableRow >
+                                        <TableCell>Login</TableCell>
+                                        <TableCell>Groups</TableCell>
+                                        <TableCell>Actions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>{gotUsers.map(user => (<TableRow key={user.key}>
+                                    <TableCell>
+                                        {user.login}
+                                    </TableCell>
+                                    <TableCell>
+                                        {user.groups.join(', ')}
+                                    </TableCell>
+                                    <TableCell>
+                                        <ButtonGroup>
+                                            <User key={user.key} user={user}></User>
+                                            {//<Button onClick={() => deleteUser(users, user, updateModel)} variant='contained' color='error'>Delete User</Button>
+                                            }
+                                        </ButtonGroup>
+
+                                    </TableCell>
+
+                                </TableRow>))}</TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                        <CreateUser modal={modal} updateModel={updateModel} setModal={setModal} />
+                    </Box>
+                </Stack>
+
+            </Box>
+
+
+    }, model.users)
+
+
+    return (renderUsers
+
         //<Stack spacing={2}>{users.map(el => <User key={el.key} user={el}></User>)}</Stack>
-
 
     )
 

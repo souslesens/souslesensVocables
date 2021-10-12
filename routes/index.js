@@ -32,6 +32,10 @@ router.get('/profiles', function (req, res, next) {
     res.sendFile(path.join(__dirname, '/../config/profiles.json'))
 });
 
+router.get('/sources', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/sources.json'))
+});
+
 router.put('/users', async function (req, res, next) {
 
     try {

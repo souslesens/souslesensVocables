@@ -39,9 +39,8 @@ Lineage_properties = (function () {
                     label: "Property infos",
                     action: function (e) {// pb avec source
 
-                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv",function(err,result) {
-                            SourceBrowser.showPropertyRestrictions(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv", function (err, result) {
-                            })
+                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv",{resetVisited:1},function(err,result) {
+
                         })
                     }
 

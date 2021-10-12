@@ -200,12 +200,13 @@ var KGadvancedMapping = (function () {
         }
 
         self.setDictionaryMappings = function (dictionary, columnClassId, columnValues) {
+            var statsMap = {"total":0,"candidates":0}
             self.currentColumnClass = {id: columnClassId}
             var superClassDictionary = self.referenceDictionary[columnClassId];
             if (!superClassDictionary)
                 return alert("no dictionary exists for class " + columnClassId)
 
-            KGmappingData.currentColumn = null;
+
 
 
             $(".dataSample_type").removeClass("datasample_type_selected")
@@ -217,7 +218,7 @@ var KGadvancedMapping = (function () {
                 var cssClass = null;
                 var termObj = superClassDictionary.terms[value2];
                 var sourcesHtml = ""
-
+                statsMap["total"] += 1
                 var id = "columnValue" + common.getRandomHexaId(5)
                 self.currentColumnValueDivIds[id] = {value: value, sources: []}
                 if (termObj) {
@@ -227,10 +228,13 @@ var KGadvancedMapping = (function () {
                     for (var source in termObj) {
                         self.currentColumnValueDivIds[id].sources.push(source)
                         if (termObj[source].status == "CANDIDATE") {
+                            statsMap["candidates"]+=1
                             cssClass = "KGmapping_columnValues_isCandidate"
                             self.currentColumnValueDivIds[id].isCandidate = true;
                         } else {
-
+                            if (!statsMap[source])
+                                statsMap[source] = 0
+                            statsMap[source] += 1
                             if (source && distinctSources.indexOf(source) < 0)
                                 distinctSources.push(source)
                             sourcesHtml += "&nbsp;<span class='KGmapping_distinctColumnValueSource' style='background-color:" + self.getSourceColor(source) + "'>" + source + "</span>";
@@ -254,6 +258,12 @@ var KGadvancedMapping = (function () {
 
 
             })
+            var column=KGmappingData.currentColumn.substring(KGmappingData.currentColumn.indexOf("."))
+            var superClass=superClassDictionary.label
+            $("#advancedMappings_mappingStatsDiv").html(column+"->"+superClass+" : "+JSON.stringify(statsMap));
+            KGmappingData.currentColumn = null;
+
+
             distinctSources = ["readi", "cfihos", "pca"]
             var candidateEntities = distinctSources
             candidateEntities.splice(0, 0, "all")
@@ -352,7 +362,6 @@ var KGadvancedMapping = (function () {
         }
 
 
-
         self.searchColumn = function (word) {
             self.sortColumnValues("_search_" + word)
         }
@@ -424,11 +433,11 @@ var KGadvancedMapping = (function () {
 
         }
 
-        self.searchEntities=function(expression,validateClassFn){
+        self.searchEntities = function (expression, validateClassFn) {
             var queryType = $("#KGadvancedMapping_queryTypeSelect").val()
-          /*  var expression = columnValue;// columnValue.replace(/ /g, "/")
-            if (searchedText)
-                expression = searchedText*/
+            /*  var expression = columnValue;// columnValue.replace(/ /g, "/")
+              if (searchedText)
+                  expression = searchedText*/
 
 
             var queryObj;
@@ -532,8 +541,8 @@ var KGadvancedMapping = (function () {
 
         self.setAsMatchCandidate = function (candidateId) {
 
-            if(self.setAsMatchCandidateExternalFn)
-             ;// return   self.setAsMatchCandidateExternalFn(candidateId)
+            if (self.setAsMatchCandidateExternalFn)
+                ;// return   self.setAsMatchCandidateExternalFn(candidateId)
 
 
             var candidateEntityObj = self.currentdictionaryEntryEntities[candidateId]

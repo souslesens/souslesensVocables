@@ -7,12 +7,14 @@
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
       <change afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparserOld..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/schemas.json" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/schemas.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineageOld.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +77,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
     <property name="javascript.nodejs.core.library.typings.version" value="14.17.21" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
     <property name="nodejs_interpreter_path" value="node" />
@@ -102,7 +104,7 @@
       <recent name="D:\webstorm\souslesensVocables\config" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.energisticsToOWLparser..js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="SQLutil..js.X" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/SQLutil..js.X" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
@@ -246,7 +248,8 @@
       <workItem from="1633503412063" duration="24630000" />
       <workItem from="1633596652014" duration="593000" />
       <workItem from="1633597936432" duration="5944000" />
-      <workItem from="1633626069577" duration="68451000" />
+      <workItem from="1633626069577" duration="82528000" />
+      <workItem from="1634026844054" duration="6510000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -409,7 +412,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633801866449</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="change ADL prefix to KG">
+      <created>1633966639431</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1633966639431</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -574,7 +584,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
-          <line>361</line>
+          <line>370</line>
           <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -589,7 +599,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
-          <line>213</line>
+          <line>214</line>
           <option name="timeStamp" value="175" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -604,7 +614,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
-          <line>367</line>
+          <line>376</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -665,31 +675,16 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
           <line>230</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="429" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
           <line>39</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="505" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
-          <line>892</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="515" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js</url>
-          <line>889</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="516" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js</url>
           <line>688</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="520" />
         </line-breakpoint>
       </breakpoints>

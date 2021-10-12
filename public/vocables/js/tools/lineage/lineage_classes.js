@@ -1939,7 +1939,7 @@ var size=Lineage_classes.defaultShapeSize
                     self.currentGraphEdge = node;
                     if (!self.currentGraphEdge.data.propertyId)
                         return;
-                    SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv")
+                    SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv",{resetVisited:1})
                 } else {
                     self.setGraphPopupMenus(node, event)
                     self.currentGraphNode = node;
@@ -1954,7 +1954,7 @@ var size=Lineage_classes.defaultShapeSize
 
                 self.currentGraphNode = node;
                 if (options.ctrlKey) {
-                    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv")
+                    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv",{resetVisited:1})
                 }
                 if (options.dbleClick) {
                     Lineage_classes.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)

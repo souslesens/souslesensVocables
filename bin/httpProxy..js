@@ -20,7 +20,7 @@ var httpProxy = {
     setProxyForServerDomain: function (host) {
         if (!proxy) {
             var domainWithProxy = "XXXmain.glb.corp.local";
-            var proxyUrl = "http://j0417704:Clarisse1208@10.16.152.65:8080";
+            var proxyUrl = "http:10.16.152.65:8080";
             //console.log(" -----------setting up proxy---------"+proxyUrl)
             if (proxyUrl && host && host.indexOf(domainWithProxy) > -1) {
                 /// proxy for request

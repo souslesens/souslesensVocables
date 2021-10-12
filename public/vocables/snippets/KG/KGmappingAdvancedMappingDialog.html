@@ -83,7 +83,8 @@
 
     </ul>
 
-    <div id="KGMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%">
+    <div id="KGMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:column;width:100%">
+        <div  style="display:flex;flex-direction:row;width:100%">
         <div>
             <!-- <select size="10" onclick="KGadvancedMapping.editCandidateValues($(this).val())" class="KGmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
                      id="KGmapping_columnValues"></select>-->
@@ -93,6 +94,7 @@
                    onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">>
             <div id="KGmapping_distinctColumnValuesContainer"
                  style="display:flex;flex-direction: column;max-height: 600px;overflow: auto"></div>
+
         </div>
         <div>
             <div id="KGadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
@@ -123,9 +125,10 @@
 
             <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
         </div>
+
     </div>
 
-
+        <div id="advancedMappings_mappingStatsDiv"></div>
 </div>
 
 

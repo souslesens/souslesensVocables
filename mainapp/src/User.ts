@@ -1,6 +1,7 @@
 
 import { ulid } from 'ulid';
-
+import { SRD, RD, notAsked, loading, failure, success } from 'srd'
+import { Msg } from './Admin'
 
 
 async function getUsers(url: string): Promise<User[]> {
@@ -24,6 +25,38 @@ async function putUsers(url: string, body: User[]): Promise<User[]> {
     return encode_users
 }
 
+function deleteUser(users: User[], user: User, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>> = () => console.log("modal closed")) {
+    const updatedUsers = users.filter(prevUsers => prevUsers.key !== user.key);
+    console.log(`user ${user.key} deleted`)
+    console.log(updatedUsers)
+    return () => {
+        putUsers('/users', updatedUsers)
+            .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
+            .then(() => setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
+    };
+}
+
+function saveUser(updateModel: React.Dispatch<Msg>, users: User[], user: User, localUser: User, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
+    return () => {
+
+        updateModel({ type: 'UserClickedSaveChanges', payload: {} });
+        putUsers('/users', users.map(u => u.key === user.key ? localUser : u))
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .then(() => setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
+    };
+}
+
+function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
+    console.log("restore user")
+    return () => {
+        getUsers('/users')
+            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+            .then(() => setModal(false))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
+    };
+}
 
 
 const encodeUser = (user: User): UserJSON => {
@@ -55,6 +88,10 @@ type User = { key: string, login: string, password: string, groups: string[] }
 
 type Group = 'admin' | 'regular';
 
-export { getUsers, putUsers, User }
+const newUser = (key: string): User => { return ({ key: key, login: '', password: '', groups: [] }) }
+
+
+
+export { getUsers, newUser, restoreUsers, saveUser, deleteUser, putUsers, User }
 
 

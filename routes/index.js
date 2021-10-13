@@ -57,6 +57,17 @@ router.get('/sources', function (req, res, next) {
     res.sendFile(path.join(__dirname, '/../config/sources.json'))
 });
 
+router.put('/sources', async function (req, res, next) {
+
+    try {
+        await promiseFs.writeFile(path.join(__dirname, '/../config/sources.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/sources.json'));
+    } catch (err) {
+        res.sendStatus(500);
+        console.log(err)
+    }
+});
+
 
 
 router.post('/upload', function (req, response) {

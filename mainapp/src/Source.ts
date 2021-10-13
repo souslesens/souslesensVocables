@@ -9,6 +9,16 @@ async function getSources(): Promise<Source[]> {
 
     return decodedEntries
 }
+export async function putSources(body: Source[]): Promise<Source[]> {
+
+    const sourcesToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
+    const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, '\t'), headers: { 'Content-Type': 'application/json' } });
+    const json = await response.json();
+    const entries: [string, SourceJson][] = Object.entries(json);
+    const decodedEntries = entries.map(([key, val]) => decodeSource(key, val))
+
+    return decodedEntries
+}
 
 
 const decodeSource = (name: string, source: SourceJson): Source => {
@@ -37,6 +47,29 @@ export type Source = {
     dataSource: DataSource;
     schema: null;
     color: string;
+}
+
+export const defaultSource = {
+    name: "",
+    type: "",
+    graphUri: [],
+    sparql_server: "",
+    controller: "",
+    topClassFilter: "",
+    schemaType: "",
+    dataSource: {
+        type: "",
+        connection: "",
+        dbName: "",
+        table_schema: "",
+        local_dictionary: {
+            table: "",
+            idColumn: "",
+            labelColumn: "",
+        }
+    },
+    schema: null,
+    color: ""
 }
 
 interface SourceJson {

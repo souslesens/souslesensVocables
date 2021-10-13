@@ -14,6 +14,7 @@
     "@triply/yasgui": "^4.2.19",
     "async": "^3.2.1",
     "base64-stream": "^1.0.0",
+    "bcrypt": "^5.0.1",
     "chardet": "^0.8.0",
     "constantinople": "^3.1.2",
     "cookie-parser": "~1.4.4",

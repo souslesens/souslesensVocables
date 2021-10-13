@@ -3,7 +3,7 @@ services:
 
   vocables:
     restart: unless-stopped
-    image: ghcr.io/souslesens/souslesensvocables:${TAG:-latest}
+    image: souslesensvocables:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile

@@ -15,7 +15,7 @@ Annotate tool allows annotate textual corpus with several registered lexical res
 
 ## Prerequisites installation
 
-souslesensVocable need the following prerequisites:
+souslesensVocable needs the following prerequisites:
 
 * Nodejs
 * A sparql endpoint with public access

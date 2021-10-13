@@ -1,5 +1,4 @@
 {
-
     "TOP-TAXONOMY": {
         "editable": true,
         "controller": "Sparql_SKOS",
@@ -14,6 +13,5 @@
         "protected": true,
         "color": "#9edae3",
         "isBlenderTemplate": true
-    },
-
+    }
 }

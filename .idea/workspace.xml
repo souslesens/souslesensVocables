@@ -5,16 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
-      <change afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparserOld..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/genealogy.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_properties.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +72,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.21" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.22" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../souslesensEureka" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -249,7 +243,8 @@
       <workItem from="1633596652014" duration="593000" />
       <workItem from="1633597936432" duration="5944000" />
       <workItem from="1633626069577" duration="82528000" />
-      <workItem from="1634026844054" duration="6510000" />
+      <workItem from="1634026844054" duration="15692000" />
+      <workItem from="1634112263927" duration="3343000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -419,7 +414,14 @@
       <option name="project" value="LOCAL" />
       <updated>1633966639431</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="change ADL prefix to KG">
+      <created>1634058024169</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1634058024169</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -686,6 +688,11 @@
           <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js</url>
           <line>688</line>
           <option name="timeStamp" value="520" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>125</line>
+          <option name="timeStamp" value="534" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

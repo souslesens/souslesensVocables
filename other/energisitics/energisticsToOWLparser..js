@@ -531,7 +531,9 @@ if(false){
 
 }
 
-if(true){
+
+
+if(false){
     var dirPath=dirPathResqml
     var graphUri="http://souslesens.org/energistics/ontology/resqml/"
     var filePath=dirPath+"global.json"
@@ -815,6 +817,45 @@ var slicedTriples=util.sliceArray(allTriples,1000)
 
 }
 
+
+
+
+if( true){
+    var queryGraph =
+        "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT ?label " +
+        " FROM   <http://souslesens.org/energistics/ontology/witsml/>  WHERE {{ ?concept \n" +
+        "      rdfs:label ?label .?concept rdf:type owl:Class}}   order by ?label limit 10000"
+
+    var params = {query: queryGraph};
+
+    var sparqlServerUrl = "http://51.178.139.80:8890/sparql"
+    httpProxy.post(
+        sparqlServerUrl,
+        null,
+        params,
+        function (err, result) {
+            if (err) {
+                var x = queryGraph
+
+            }
+            var str=""
+            var data=result.results.bindings
+            data.forEach(function(item){
+                if( !item.label)
+                    return;
+                var str2=""
+                var array=item.label.value.match(/[A-Z][a-z]+|[0-9]+/g)
+                if(array && array.length>0)
+                   str2=array.join(" ")
+
+                str+=item.label.value+"\t"+str2+"\n"
+            })
+          fs.writeFileSync("D:\\NLP\\ontologies\\dictionaries\\WITSMlabels.txt",str)
+        }
+    );
+
+
+}
 
 
 

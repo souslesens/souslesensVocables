@@ -382,15 +382,15 @@ var KGbrowserQuery = (function () {
                     var filterId = nodeData.id;
                     var iconUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[nodeData.class].group.toLowerCase() + ".png";
                     var superClassLabel = KGbrowserQuery.model[nodeData.class].label;
-                    var divId="filter_"+common.getRandomHexaId(5)
-                    KGbrowserQuery.queryFilterNodes[0].filterDivId=divId
+                    var divId = "filter_" + common.getRandomHexaId(5)
+                    KGbrowserQuery.queryFilterNodes[0].filterDivId = divId
                     var html = "<div class='KGbrowser_filterDiv ' style='color:" + nodeData.color + "' id='" + divId + "'>" +
 
                         "<input  type='checkbox'  " + checkedStr + "class='KGbrowser_graphFilterCBX'>&nbsp;" +
-                      //  "<button title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                        //  "<button title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
                         "<button title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
                         "<img src='" + iconUrl + "' width='25'/>" +
-                        "<span style='font-weight:normal;color:" + "black" + "'>" + superClassLabel + " : "+ nodeData.count+"<br><i> "+ filterLabel + "</i></span>"
+                        "<span style='font-weight:normal;color:" + "black" + "'>" + superClassLabel + " : " + nodeData.count + "<br><i> " + filterLabel + "</i></span>"
                     "</div>"
 
                     $("#KGbrowser_filterDiv").prepend(html)
@@ -660,7 +660,7 @@ var KGbrowserQuery = (function () {
                     if (filterData.id == id) {
                         self.queryFilterNodes.splice(index, 1);
                         $("#" + filterData.filterDivId).remove()
-                     //   return visjsGraph.data.nodes.remove(id)
+                        //   return visjsGraph.data.nodes.remove(id)
                     }
 
                 })
@@ -960,20 +960,70 @@ var KGbrowserQuery = (function () {
             }
 
             var where = "";
-            self.queryFilterNodes.forEach(function (item, index) {
-                if (index == 0)
-                    return;
-                // fromNode=  self.queryFilterNodes[1]
-                fromNode = self.queryFilterNodes[index - 1]
-                toNode = self.queryFilterNodes[index]
+            if (true) {
+                self.queryFilterNodes.forEach(function (item, index) {
+                    if (index == 0)
+                        return;
+                    // fromNode=  self.queryFilterNodes[1]
+                    fromNode = self.queryFilterNodes[index - 1]
+                    toNode = self.queryFilterNodes[index]
 
-                var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
+                    var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
 
 
-                where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
-                where += fromNode.filter + "\n"
-                where += toNode.filter + "\n"
-            })
+                    where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
+                    where += fromNode.filter + "\n"
+                    where += toNode.filter + "\n"
+                })
+            }
+            if (false) {
+                var predicatesPaths = []
+                self.queryFilterNodes.forEach(function (item, index) {
+                    if (index == 0)
+                        return;
+                    // fromNode=  self.queryFilterNodes[1]
+                    fromNode = self.queryFilterNodes[index - 1]
+                    toNode = self.queryFilterNodes[index]
+
+                    var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
+                    predicatesPaths.push(predicatesPath)
+
+
+                })
+
+                var distinctPredicates = {}
+                var mixedPredicatesPaths = []
+                predicatesPaths.forEach(function (predicatesPath) {
+
+                    predicatesPath = predicatesPath.replace("/^/g", "")
+                    var array = predicatesPath.split("/")
+                    array.forEach(function (item) {
+                        if (distinctPredicates[item]) {
+                            distinctPredicates[item] = 0
+                        }
+                        distinctPredicates[item] += 1
+                    })
+
+                })
+                for (var predicate in distinctPredicates) {
+                    if (distinctPredicates[predicate] > 1) {
+                        predicatesPaths.forEach(function (predicatesPath) {
+                            var index = predicatesPath.indexOf(predicate)
+                            if (index > -1) {
+
+                            }
+                        })
+                    }
+
+                }
+
+
+                /*    where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
+                    where += fromNode.filter + "\n"
+                    where += toNode.filter + "\n"*/
+
+
+            }
 
 
             var source = KGbrowser.currentSource

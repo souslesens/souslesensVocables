@@ -171,8 +171,10 @@ var MainController = (function () {
 
             var distinctGroups = {}
 
+
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
-                if(!types  || types.indexOf(item)>-1)
+
+                if(!types  || ( types && types.indexOf(item)>-1))
                 treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {

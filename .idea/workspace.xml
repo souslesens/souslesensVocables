@@ -6,9 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/KG/KGmappingAdvancedMappingDialog.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,7 +28,7 @@
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="readme" />
+    <option name="BRANCH" value="origin/master" />
   </component>
   <component name="Git.Rebase.Settings">
     <option name="NEW_BASE" value="master" />
@@ -244,7 +244,7 @@
       <workItem from="1633597936432" duration="5944000" />
       <workItem from="1633626069577" duration="82528000" />
       <workItem from="1634026844054" duration="15692000" />
-      <workItem from="1634112263927" duration="3343000" />
+      <workItem from="1634112263927" duration="12102000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -421,7 +421,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634058024169</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="change ADL prefix to KG">
+      <created>1634132230170</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1634132230170</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -586,7 +593,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
-          <line>370</line>
+          <line>368</line>
           <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -601,7 +608,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
-          <line>214</line>
+          <line>212</line>
           <option name="timeStamp" value="175" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -616,7 +623,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
-          <line>376</line>
+          <line>374</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -676,7 +683,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
-          <line>230</line>
+          <line>232</line>
           <option name="timeStamp" value="429" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">

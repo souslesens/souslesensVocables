@@ -6,7 +6,7 @@ import { Msg, useModel } from '../Admin';
 import { restoreUsers, User } from '../User';
 import * as React from "react";
 
-import { identity } from '../Utils';
+import { identity, sanitizeValue } from '../Utils';
 import { SRD } from 'srd';
 
 type UserFormProps = {
@@ -17,7 +17,7 @@ type UserFormProps = {
     saveUser: () => void,
     deletedUser: () => void
 }
-const style = {
+export const style = {
     position: 'absolute' as 'absolute',
     top: '50%',
     left: '50%',
@@ -85,10 +85,6 @@ const UserForm: React.FC<UserFormProps> = ({ modal, setModal, setNewUser, user, 
             </Stack>
         </Box>
     </Modal >;
-}
-
-function sanitizeValue(value: string | string[]): string[] {
-    return (typeof value === 'string' ? value.split(',') : value);
 }
 
 export default UserForm

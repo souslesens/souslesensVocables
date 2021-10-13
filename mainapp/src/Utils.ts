@@ -1,3 +1,7 @@
 const identity = <Type,>(a: Type): Type => a;
 
-export { identity }
+function sanitizeValue(value: string | string[]): string[] {
+    return (typeof value === 'string' ? value.split(',') : value);
+}
+
+export { identity, sanitizeValue }

@@ -1,2 +1,3 @@
 declare const identity: <Type>(a: Type) => Type;
-export { identity };
+declare function sanitizeValue(value: string | string[]): string[];
+export { identity, sanitizeValue };

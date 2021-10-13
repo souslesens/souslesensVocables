@@ -27,15 +27,6 @@ router.get('/', function (req, res, next) {
 router.get('/users', function (req, res, next) {
     res.sendFile(path.join(__dirname, '/../config/users/users_test.json'))
 });
-
-router.get('/profiles', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/profiles.json'))
-});
-
-router.get('/sources', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/sources.json'))
-});
-
 router.put('/users', async function (req, res, next) {
 
     try {
@@ -46,6 +37,27 @@ router.put('/users', async function (req, res, next) {
         console.log(err)
     }
 });
+
+router.get('/profiles', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/profiles.json'))
+});
+
+router.put('/profiles', async function (req, res, next) {
+
+    try {
+        await promiseFs.writeFile(path.join(__dirname, '/../config/profiles.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/profiles.json'));
+    } catch (err) {
+        res.sendStatus(500);
+        console.log(err)
+    }
+});
+
+router.get('/sources', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/sources.json'))
+});
+
+
 
 router.post('/upload', function (req, response) {
     let sampleFile;

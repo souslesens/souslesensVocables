@@ -8,5 +8,17 @@ declare type UserFormProps = {
     saveUser: () => void;
     deletedUser: () => void;
 };
+export declare const style: {
+    position: "absolute";
+    top: string;
+    left: string;
+    transform: string;
+    width: number;
+    height: number;
+    bgcolor: string;
+    border: string;
+    boxShadow: number;
+    p: number;
+};
 declare const UserForm: React.FC<UserFormProps>;
 export default UserForm;

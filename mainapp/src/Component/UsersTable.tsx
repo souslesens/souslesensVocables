@@ -3,7 +3,7 @@ import {
     Modal, Box, Tabs, Tab, Button, CircularProgress, Chip, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, dividerClasses, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack
 } from '@mui/material';
 import { Msg, useModel } from '../Admin';
-import { restoreUsers, User } from '../User';
+import { deleteUser, restoreUsers, User } from '../User';
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
@@ -56,6 +56,7 @@ const UsersTable: React.FC<UsersProps> = ({ users }): JSX.Element => {
                                     <TableCell>
                                         <ButtonGroup>
                                             <ViewUser key={user.key} user={user} />
+                                            <Button onClick={deleteUser(gotUsers, user, updateModel)} color="error">Delete</Button>
                                             {//<Button onClick={() => deleteUser(users, user, updateModel)} variant='contained' color='error'>Delete User</Button>
                                             }
                                         </ButtonGroup>

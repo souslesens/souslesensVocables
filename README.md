@@ -115,6 +115,14 @@ Here is a list of the environment variable available:
 |`ANNOTATOR_PARSEDDUCUMENTSHOMEDIR`|||
 |`ANNOTATOR_UPLOADDIRPATH`|||
 
+### Build
+
+First, build `souslesensvocables`  image.
+
+```bash
+docker-compose build
+```
+
 ### Run
 
 ```bash

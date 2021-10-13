@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "format": "prettier -w --tab-width=4 --print-width=100 *.js {bin,data,other,routes,views}/**/*.js",
-    "lint": "npm run format -- --check",
+    "lint": "prettier --check --tab-width=4 --print-width=100 *.js {bin,data,other,routes,views}/**/*.js",
     "ncu": "ncu"
   },
   "devDependencies": {

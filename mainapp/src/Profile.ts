@@ -59,6 +59,8 @@ type Profile = {
     forbiddenTools: string[];
     blender: Blender;
 }
+
+
 export const defaultProfile: Profile = {
     name: "",
     allowedSourceSchemas: [],

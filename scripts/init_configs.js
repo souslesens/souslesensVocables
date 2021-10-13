@@ -12,12 +12,12 @@ if (!fs.existsSync(usersPath)) {
   const USERNAME = process.env.USER_USERNAME;
   const PASSWORD = process.env.USER_PASSWORD;
 
-  const HASH_PASSWORD = bcrypt.hashSync(PASSWORD, 10);
+  // const HASH_PASSWORD = bcrypt.hashSync(PASSWORD, 10);
 
   const user_json = {
     USERNAME: {
       "login": USERNAME,
-      "password": HASH_PASSWORD,
+      "password": PASSWORD,
       "groups": [
         "admin"
       ]

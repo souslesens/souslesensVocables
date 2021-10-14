@@ -31,7 +31,7 @@ const ViewUser: React.FC<UserProps> = ({ user }) => {
 
     return (<>
 
-        <Button variant="outlined" size="medium" onClick={handleOpen}>{`Edit`}</Button>
+        <Button variant="contained" color="primary" size="medium" onClick={handleOpen}>{`Edit`}</Button>
         <UserForm
             modal={isModalOpen}
             setModal={setModal}

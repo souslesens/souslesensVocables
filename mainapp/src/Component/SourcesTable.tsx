@@ -10,13 +10,14 @@ import { style } from './UserForm';
 import { identity } from '../Utils';
 
 
+
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
 
     const deleteSource = (source: Source) => {
 
-        const updatedSources = unwrappedSources.filter(prevProfiles => prevProfiles.name !== source.name);
+        const updatedSources = unwrappedSources.filter(prevSources => prevSources.name !== source.name);
         console.log("deleted")
 
         putSources(updatedSources)
@@ -43,7 +44,7 @@ const SourcesTable = () => {
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
-                        <Box sx={{ justifyContent: 'center', display: 'flex' }}>
+                        <Box id="table-container" sx={{ justifyContent: 'center', display: 'flex', overflowX: 'hidden', overflowY: 'auto', height: '400' }}>
                             <TableContainer component={Paper}>
                                 <Table sx={{ width: '100%' }}>
                                     <TableHead>
@@ -59,11 +60,14 @@ const SourcesTable = () => {
                                                 {source.name}
                                             </TableCell>
                                             <TableCell>
-                                                {source.graphUri}
+                                                {//source.graphUri}
+                                                }
                                             </TableCell>
                                             <TableCell>
-                                                <SourceForm source={source} />
-                                                <Button onClick={() => deleteSource(source)}>Delete</Button>
+
+                                                <Box sx={{ display: 'flex' }}><SourceForm source={source} />
+                                                    <Button color='secondary' onClick={() => deleteSource(source)}>Delete</Button>
+                                                </Box>
                                             </TableCell>
 
                                         </TableRow>);
@@ -98,14 +102,23 @@ type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
 
-const updateSource = (model: SourceEditionState, msg: Msg_): SourceEditionState => {
+const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
     console.log(Type[msg.type], msg.payload)
+    const { model } = useModel()
+    const unwrappedSources = SRD.unwrap([], identity, model.sources)
+
     switch (msg.type) {
+
         case Type.UserClickedModal:
-            return { ...model, modal: msg.payload }
+            const getUnmodifiedSource = unwrappedSources.reduce((acc, value) => sourceEditionState.sourceForm.id === value.id ? value : acc, defaultSource)
+            const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSource
+
+            return { ...sourceEditionState, modal: msg.payload, sourceForm: msg.payload ? sourceEditionState.sourceForm : resetSourceForm }
+
         case Type.UserUpdatedField:
             const fieldToUpdate = msg.payload.fieldname
-            return { ...model, sourceForm: { ...model.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
+
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
 
     }
 
@@ -120,7 +133,6 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
 
     const { model, updateModel } = useModel()
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
-    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
 
     const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: source })
 
@@ -131,7 +143,7 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
 
     const saveSources = () => {
 
-        const updateSources = unwrappedSources.map(p => p.name === source.name ? sourceModel.sourceForm : p)
+        const updateSources = unwrappedSources.map(s => s.name === source.name ? sourceModel.sourceForm : s)
         const addSources = [...unwrappedSources, sourceModel.sourceForm]
         updateModel({ type: 'UserClickedSaveChanges', payload: {} });
         putSources(create ? addSources : updateSources)
@@ -140,12 +152,10 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
             .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
     };
 
-
-
-
+    const creationVariant = (edition: any, creation: any) => create ? creation : edition
 
     return (<>
-        <Button variant='outlined' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+        <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
         <Modal onClose={handleClose} open={sourceModel.modal}>
             <Box sx={style}>
                 <Stack>
@@ -156,7 +166,7 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
                         label={"Name"}
                         variant="standard" />
 
-                    <Button variant="contained" onClick={saveSources}>Save Profile</Button>
+                    <Button color="primary" variant="contained" onClick={saveSources}>Save Profile</Button>
 
                 </Stack>
             </Box>

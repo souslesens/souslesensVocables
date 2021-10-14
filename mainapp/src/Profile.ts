@@ -24,6 +24,7 @@ export async function putProfiles(body: Profile[]): Promise<Profile[]> {
 }
 
 type ProfileJson = {
+    id?: string,
     allowedSourceSchemas: string[];
     allowedSources: string;
     forbiddenSources: string[];
@@ -40,6 +41,7 @@ type Blender = {
 const decodeProfile = (name: string, profile: ProfileJson): Profile => {
     return {
         name: name,
+        id: profile.id ? profile.id : ulid(),
         allowedSourceSchemas: profile.allowedSourceSchemas,
         allowedSources: profile.allowedSources,
         forbiddenSources: profile.forbiddenSources,
@@ -52,6 +54,7 @@ const decodeProfile = (name: string, profile: ProfileJson): Profile => {
 
 type Profile = {
     name: string,
+    id: string,
     allowedSourceSchemas: string[];
     allowedSources: string;
     forbiddenSources: string[];
@@ -63,6 +66,7 @@ type Profile = {
 
 export const defaultProfile: Profile = {
     name: "",
+    id: ulid(),
     allowedSourceSchemas: [],
     allowedSources: "",
     forbiddenSources: [],

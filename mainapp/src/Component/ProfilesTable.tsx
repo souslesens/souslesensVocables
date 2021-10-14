@@ -65,7 +65,7 @@ const ProfilesTable = () => {
                                             </TableCell>
                                             <TableCell>
                                                 <ProfileForm profile={profile} />
-                                                <Button onClick={() => deleteProfile(profile)}>Delete</Button>
+                                                <Button color="secondary" onClick={() => deleteProfile(profile)}>Delete</Button>
                                             </TableCell>
 
                                         </TableRow>);
@@ -100,14 +100,18 @@ type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
 
-const updateProfile = (model: ProfileEditionState, msg: Msg_): ProfileEditionState => {
+const updateProfile = (ProfileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
     console.log(Type[msg.type], msg.payload)
+    const { model } = useModel();
+    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
     switch (msg.type) {
         case Type.UserClickedModal:
-            return { ...model, modal: msg.payload }
+            const getUnmodifiedProfile = unwrappedProfiles.reduce((acc, value) => ProfileEditionState.profileForm.id === value.id ? value : acc, defaultProfile)
+            const resetSourceForm = msg.payload ? ProfileEditionState.profileForm : getUnmodifiedProfile
+            return { ...ProfileEditionState, modal: msg.payload }
         case Type.UserUpdatedField:
             const fieldToUpdate = msg.payload.fieldname
-            return { ...model, profileForm: { ...model.profileForm, [fieldToUpdate]: msg.payload.newValue } }
+            return { ...ProfileEditionState, profileForm: { ...ProfileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } }
 
     }
 
@@ -147,7 +151,7 @@ const ProfileForm = ({ profile = defaultProfile, create = false }: ProfileFormPr
 
 
     return (<>
-        <Button variant='outlined' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+        <Button variant='contained' color='primary' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
         <Modal onClose={handleClose} open={profileModel.modal}>
             <Box sx={style}>
                 <Stack>

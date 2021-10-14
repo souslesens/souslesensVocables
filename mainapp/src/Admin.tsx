@@ -121,21 +121,18 @@ const Admin = () => {
     //TODO: combine both fetch with promise.all() or something like that
 
     React.useEffect(() => {
-        updateModel({ type: 'ServerRespondedWithProfiles', payload: loading() })
         getProfiles('/profiles')
             .then((profiles) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(profiles) }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }))
     }, [])
 
     React.useEffect(() => {
-        updateModel({ type: 'ServerRespondedWithUsers', payload: loading() })
         getUsers('/users')
             .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }))
     }, [])
 
     React.useEffect(() => {
-        updateModel({ type: 'ServerRespondedWithSources', payload: loading() })
         getSources()
             .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }))

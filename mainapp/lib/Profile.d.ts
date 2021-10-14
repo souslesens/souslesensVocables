@@ -5,6 +5,7 @@ declare type Blender = {
 };
 declare type Profile = {
     name: string;
+    id: string;
     allowedSourceSchemas: string[];
     allowedSources: string;
     forbiddenSources: string[];

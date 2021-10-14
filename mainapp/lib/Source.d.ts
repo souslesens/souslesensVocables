@@ -1,6 +1,7 @@
 declare function getSources(): Promise<Source[]>;
 export declare function putSources(body: Source[]): Promise<Source[]>;
 export declare type Source = {
+    id: string;
     name: string;
     type: string;
     graphUri: string[];
@@ -14,6 +15,7 @@ export declare type Source = {
 };
 export declare const defaultSource: {
     name: string;
+    id: string;
     type: string;
     graphUri: never[];
     sparql_server: string;

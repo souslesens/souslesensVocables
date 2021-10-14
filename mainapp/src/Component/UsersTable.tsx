@@ -54,12 +54,12 @@ const UsersTable: React.FC<UsersProps> = ({ users }): JSX.Element => {
                                         {user.groups.join(', ')}
                                     </TableCell>
                                     <TableCell>
-                                        <ButtonGroup>
-                                            <ViewUser key={user.key} user={user} />
-                                            <Button onClick={deleteUser(gotUsers, user, updateModel)} color="error">Delete</Button>
-                                            {//<Button onClick={() => deleteUser(users, user, updateModel)} variant='contained' color='error'>Delete User</Button>
-                                            }
-                                        </ButtonGroup>
+
+                                        <ViewUser key={user.key} user={user} />
+                                        <Button onClick={deleteUser(gotUsers, user, updateModel)} color="error">Delete</Button>
+                                        {//<Button onClick={() => deleteUser(users, user, updateModel)} variant='contained' color='error'>Delete User</Button>
+                                        }
+
 
                                     </TableCell>
 

@@ -5,10 +5,10 @@ import { User as User, getUsers, newUser } from './User'
 import { getProfiles } from './Profile'
 import Box from '@mui/material/Box';
 import { identity } from './Utils';
-import UsersTable from './Component/UsersTable';
 import ProfilesTable from './Component/ProfilesTable';
 import { Profile } from './Profile';
 import SourcesTable from './Component/SourcesTable';
+import UsersTableBis from './Component/UsersTable';
 import { Source, getSources } from "./Source";
 
 
@@ -43,7 +43,7 @@ const editionTabToString = (editionTab: number): EditionTab => {
 }
 
 type UpadtedFieldPayload =
-    { key: string, fieldName: string, newValue: string }
+    { id: string, fieldName: string, newValue: string }
 
 
 const initialModel: Model =
@@ -52,7 +52,7 @@ const initialModel: Model =
     profiles: loading(),
     sources: loading(),
     isModalOpen: false,
-    currentEditionTab: 'ProfilesEdition'
+    currentEditionTab: 'UsersEdition'
 }
 
 const ModelContext = React.createContext<{ model: Model; updateModel: React.Dispatch<Msg> } | null>(null);
@@ -100,7 +100,7 @@ function update(model: Model, msg: Msg): Model {
 
         case 'UserUpdatedField':
             const fieldToUpdate = msg.payload.fieldName
-            const updatedUsers = unwrappedUsers.map(u => u.key === msg.payload.key ? { ...u, [fieldToUpdate]: msg.payload.newValue } : u)
+            const updatedUsers = unwrappedUsers.map(u => u.id === msg.payload.id ? { ...u, [fieldToUpdate]: msg.payload.newValue } : u)
             return { ...model, users: SRD.of(updatedUsers) }
 
 
@@ -154,7 +154,7 @@ const Admin = () => {
 const Dispatcher = (props: { model: Model }) => {
     switch (props.model.currentEditionTab) {
         case 'UsersEdition':
-            return <UsersTable users={props.model.users} />
+            return <UsersTableBis />
         case 'ProfilesEdition':
             return <ProfilesTable />
         case 'SourcesEdition':

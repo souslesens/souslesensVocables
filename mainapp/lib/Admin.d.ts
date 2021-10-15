@@ -12,7 +12,7 @@ declare type Model = {
 };
 declare type EditionTab = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition';
 declare type UpadtedFieldPayload = {
-    key: string;
+    id: string;
     fieldName: string;
     newValue: string;
 };

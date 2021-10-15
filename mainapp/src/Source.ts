@@ -28,6 +28,7 @@ const decodeSource = (name: string, source: SourceJson): Source => {
     console.log("j'essaie de décoder", source)
     const decodedSource = {
         name: name,
+        _type: 'source',
         id: source.id ? source.id : ulid(),
         type: source.type ? source.type : "missing type",
         graphUri: source.graphUri ? source.graphUri : [],
@@ -35,7 +36,7 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         controller: source.controller ? source.controller : "missing controller",
         topClassFilter: source.topClassFilter ? source.topClassFilter : "missing topClassFilter",
         schemaType: source.schemaType ? source.schemaType : "missing schema type",
-        dataSource: source.dataSource ? source.dataSource : defaultSource.dataSource,
+        dataSource: source.dataSource ? source.dataSource : defaultSource(ulid()).dataSource,
         schema: source.schema ? source.schema : null,
         color: source.color ? source.color : "default color"
     }
@@ -46,6 +47,7 @@ const decodeSource = (name: string, source: SourceJson): Source => {
 export type Source = {
     id: string;
     name: string;
+    _type: string;
     type: string;
     graphUri: string[];
     sparql_server: string;
@@ -57,29 +59,32 @@ export type Source = {
     color: string;
 }
 
-export const defaultSource = {
-    name: "",
-    id: ulid(),
-    type: "",
-    graphUri: [],
-    sparql_server: "",
-    controller: "",
-    topClassFilter: "",
-    schemaType: "",
-    dataSource: {
+export const defaultSource = (id: string): Source => {
+    return ({
+        name: "",
+        _type: 'source',
+        id: id,
         type: "",
-        connection: "",
-        dbName: "",
-        table_schema: "",
-        local_dictionary: {
-            table: "",
-            idColumn: "",
-            labelColumn: "",
-        }
-    },
-    schema: null,
-    color: ""
-}
+        graphUri: [],
+        sparql_server: "",
+        controller: "",
+        topClassFilter: "",
+        schemaType: "",
+        dataSource: {
+            type: "",
+            connection: "",
+            dbName: "",
+            table_schema: "",
+            local_dictionary: {
+                table: "",
+                idColumn: "",
+                labelColumn: "",
+            }
+        },
+        schema: null,
+        color: ""
+    })
+};
 
 interface SourceJson {
     id?: string;

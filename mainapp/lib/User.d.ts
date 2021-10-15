@@ -6,7 +6,8 @@ declare function deleteUser(users: User[], user: User, updateModel: React.Dispat
 declare function saveUser(updateModel: React.Dispatch<Msg>, users: User[], user: User, localUser: User, setModal: React.Dispatch<React.SetStateAction<boolean>>): () => void;
 declare function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>): () => void;
 declare type User = {
-    key: string;
+    id: string;
+    _type: string;
     login: string;
     password: string;
     groups: string[];

@@ -16,17 +16,17 @@ async function getUsers(url: string): Promise<User[]> {
 
 async function putUsers(url: string, body: User[]): Promise<User[]> {
 
-    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.key]: item }), {});
+    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.id]: item }), {});
     const response = await fetch(url, { method: "put", body: JSON.stringify(usersToObject, null, '\t'), headers: { 'Content-Type': 'application/json' } });
     const json = await response.json();
     const users: [string, UserJSON][] = Object.entries(json);
-    const encode_users = users.map(([key, val]) => encodeUser(val))
+    const decoded_users = users.map(([key, val]) => decodeUser(val))
 
-    return encode_users
+    return decoded_users
 }
 
 function deleteUser(users: User[], user: User, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>> = () => console.log("modal closed")) {
-    const updatedUsers = users.filter(prevUsers => prevUsers.key !== user.key);
+    const updatedUsers = users.filter(prevUsers => prevUsers.id !== user.id);
     return () => {
         putUsers('/users', updatedUsers)
             .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
@@ -39,7 +39,7 @@ function saveUser(updateModel: React.Dispatch<Msg>, users: User[], user: User, l
     return () => {
 
         updateModel({ type: 'UserClickedSaveChanges', payload: {} });
-        putUsers('/users', users.map(u => u.key === user.key ? localUser : u))
+        putUsers('/users', users.map(u => u.id === user.id ? localUser : u))
             .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
             .then(() => setModal(false))
             .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
@@ -61,7 +61,7 @@ const encodeUser = (user: User): UserJSON => {
         login: user.login,
         password: user.password,
         groups: user.groups,
-        key: user.key
+        id: user.id,
 
     }
 }
@@ -71,19 +71,20 @@ const decodeUser = (user: UserJSON): User => {
     // for now client generates ulid if user.key is null, it should be generated server-side
     // As users.json doesn't contain key field, we should check for the presence of the field instead of whether the field is null
     return {
-        key: user.key === null ? ulid() : user.key,
+        id: user.id === null ? ulid() : user.id,
         login: user.login,
         password: user.password,
-        groups: user.groups
+        groups: user.groups,
+        _type: 'user'
 
     }
 }
 
-type UserJSON = { key: string, login: string, password: string, groups: string[] }
+type UserJSON = { id: string, login: string, password: string, groups: string[] }
 
-type User = { key: string, login: string, password: string, groups: string[] }
+type User = { id: string, _type: string, login: string, password: string, groups: string[] }
 
-const newUser = (key: string): User => { return ({ key: key, login: '', password: '', groups: [] }) }
+const newUser = (key: string): User => { return ({ id: key, _type: 'user', login: '', password: '', groups: [] }) }
 
 
 

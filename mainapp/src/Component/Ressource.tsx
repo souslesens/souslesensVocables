@@ -7,7 +7,7 @@ import { newUser, User } from "../User"
 import { exhaustiveCheck, identity } from "../Utils"
 import { ulid } from 'ulid';
 
-
+//TODO: WRAP PROFILES, SOURCES AND USERS LOGIC IN ONE COMPONENT INSTEAD OF 3 DUPLICATES
 
 enum Mode { Creation, Edition }
 

@@ -7,9 +7,8 @@ import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { defaultProfile, Profile, putProfiles } from '../Profile';
 import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
-import { style } from './UserForm';
-import { identity } from '../Utils';
-
+import { identity, style } from '../Utils';
+import { ulid } from 'ulid';
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -50,9 +49,9 @@ const ProfilesTable = () => {
                                 <Table sx={{ width: '100%' }}>
                                     <TableHead>
                                         <TableRow >
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>Allowed Sources</TableCell>
-                                            <TableCell>Actions</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Name</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Allowed Sources</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>{gotUsers.map(profile => {
@@ -61,7 +60,8 @@ const ProfilesTable = () => {
                                                 {profile.name}
                                             </TableCell>
                                             <TableCell>
-                                                {profile.allowedSourceSchemas.join(', ')}
+                                                {profile.allowedSourceSchemas.join(', ')
+                                                }
                                             </TableCell>
                                             <TableCell>
                                                 <ProfileForm profile={profile} />
@@ -89,30 +89,45 @@ const ProfilesTable = () => {
 
 type ProfileEditionState = { modal: boolean, profileForm: Profile }
 
-const initProfileEditionState: ProfileEditionState = { modal: false, profileForm: defaultProfile, }
+const initProfileEditionState: ProfileEditionState = { modal: false, profileForm: defaultProfile(ulid()), }
 
 enum Type {
     UserClickedModal,
-    UserUpdatedField
+    UserUpdatedField,
+    ResetProfile
 }
+
+enum Mode { Creation, Edition }
 
 type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
+    | { type: Type.ResetProfile, payload: Mode }
 
-const updateProfile = (ProfileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
+
+const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
     console.log(Type[msg.type], msg.payload)
     const { model } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
     switch (msg.type) {
         case Type.UserClickedModal:
-            const getUnmodifiedProfile = unwrappedProfiles.reduce((acc, value) => ProfileEditionState.profileForm.id === value.id ? value : acc, defaultProfile)
-            const resetSourceForm = msg.payload ? ProfileEditionState.profileForm : getUnmodifiedProfile
-            return { ...ProfileEditionState, modal: msg.payload }
+            return { ...profileEditionState, modal: msg.payload }
+
         case Type.UserUpdatedField:
             const fieldToUpdate = msg.payload.fieldname
-            return { ...ProfileEditionState, profileForm: { ...ProfileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } }
+            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } }
 
+        case Type.ResetProfile:
+            switch (msg.payload) {
+                case Mode.Creation:
+                    console.log("resetSourceCreationMode")
+                    return { ...profileEditionState, profileForm: defaultProfile(ulid()) }
+                case Mode.Edition:
+                    const getUnmodifiedProfiles = unwrappedProfiles.reduce((acc, value) => profileEditionState.profileForm.id === value.id ? value : acc, defaultProfile(ulid()))
+                    const resetSourceForm = msg.payload ? profileEditionState.profileForm : getUnmodifiedProfiles
+
+                    return { ...profileEditionState, profileForm: msg.payload ? profileEditionState.profileForm : resetSourceForm }
+            }
     }
 
 }
@@ -122,7 +137,7 @@ type ProfileFormProps = {
     create?: boolean
 }
 
-const ProfileForm = ({ profile = defaultProfile, create = false }: ProfileFormProps) => {
+const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
 
     const { model, updateModel } = useModel()
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
@@ -143,6 +158,7 @@ const ProfileForm = ({ profile = defaultProfile, create = false }: ProfileFormPr
         putProfiles(create ? addProfile : updateProfiles)
             .then((person) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(person) }))
             .then(() => update({ type: Type.UserClickedModal, payload: false }))
+            .then(() => update({ type: Type.ResetProfile, payload: create ? Mode.Creation : Mode.Edition }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
     };
 
@@ -151,10 +167,10 @@ const ProfileForm = ({ profile = defaultProfile, create = false }: ProfileFormPr
 
 
     return (<>
-        <Button variant='contained' color='primary' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+        <Button variant='contained' color='primary' onClick={handleOpen}>{create ? "Create Profile" : "Edit"}</Button>
         <Modal onClose={handleClose} open={profileModel.modal}>
             <Box sx={style}>
-                <Stack>
+                <Stack spacing={4}>
                     <TextField fullWidth onChange={handleFieldUpdate("name")}
 
                         value={profileModel.profileForm.name}
@@ -182,7 +198,7 @@ const ProfileForm = ({ profile = defaultProfile, create = false }: ProfileFormPr
                             </MenuItem>)}
                         </Select>
                     </FormControl>
-                    <Button variant="contained" onClick={saveProfiles}>Save Profile</Button>
+                    <Button variant="contained" color='primary' onClick={saveProfiles}>Save Profile</Button>
 
                 </Stack>
             </Box>

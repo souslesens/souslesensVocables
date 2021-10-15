@@ -41,6 +41,7 @@ type Blender = {
 const decodeProfile = (name: string, profile: ProfileJson): Profile => {
     return {
         name: name,
+        _type: 'profile',
         id: profile.id ? profile.id : ulid(),
         allowedSourceSchemas: profile.allowedSourceSchemas,
         allowedSources: profile.allowedSources,
@@ -54,6 +55,7 @@ const decodeProfile = (name: string, profile: ProfileJson): Profile => {
 
 type Profile = {
     name: string,
+    _type: string,
     id: string,
     allowedSourceSchemas: string[];
     allowedSources: string;
@@ -64,15 +66,19 @@ type Profile = {
 }
 
 
-export const defaultProfile: Profile = {
-    name: "",
-    id: ulid(),
-    allowedSourceSchemas: [],
-    allowedSources: "",
-    forbiddenSources: [],
-    allowedTools: "",
-    forbiddenTools: [],
-    blender: { contextMenuActionStartLevel: 0 }
+export const defaultProfile = (uuid: string): Profile => {
+    return ({
+        name: "",
+        _type: 'profile',
+        id: uuid,
+        allowedSourceSchemas: [],
+        allowedSources: "",
+        forbiddenSources: [],
+        allowedTools: "",
+        forbiddenTools: [],
+        blender: { contextMenuActionStartLevel: 0 }
+    }
+    )
 }
 const test = {
     "admin": {

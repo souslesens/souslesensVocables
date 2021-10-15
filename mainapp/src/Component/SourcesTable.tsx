@@ -6,9 +6,8 @@ import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { Source, putSources, defaultSource } from '../Source';
 import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
-import { style } from './UserForm';
-import { identity } from '../Utils';
-
+import { identity, style } from '../Utils';
+import { ulid } from 'ulid';
 
 
 const SourcesTable = () => {
@@ -17,7 +16,7 @@ const SourcesTable = () => {
 
     const deleteSource = (source: Source) => {
 
-        const updatedSources = unwrappedSources.filter(prevSources => prevSources.name !== source.name);
+        const updatedSources = unwrappedSources.filter(prevSources => prevSources.id !== source.id);
         console.log("deleted")
 
         putSources(updatedSources)
@@ -44,24 +43,24 @@ const SourcesTable = () => {
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
-                        <Box id="table-container" sx={{ justifyContent: 'center', display: 'flex', overflowX: 'hidden', overflowY: 'auto', height: '400' }}>
-                            <TableContainer component={Paper}>
-                                <Table sx={{ width: '100%' }}>
+                        <Box id="table-container" sx={{ justifyContent: 'center', height: '400', display: 'flex' }}>
+                            <TableContainer sx={{ height: '400' }} component={Paper}>
+                                <Table>
                                     <TableHead>
-                                        <TableRow >
-                                            <TableCell>Name</TableCell>
-                                            <TableCell>graphUro</TableCell>
-                                            <TableCell>Actions</TableCell>
+                                        <TableRow>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Name</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold' }}>graphUri</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody>{gotSources.map(source => {
+                                    <TableBody sx={{ width: '100%', overflow: 'clip' }}>{gotSources.map(source => {
                                         return (<TableRow key={source.name}>
                                             <TableCell>
                                                 {source.name}
                                             </TableCell>
                                             <TableCell>
-                                                {//source.graphUri}
-                                                }
+                                                {typeof source.graphUri === 'string' ? source.graphUri : source.graphUri.join(', ')}
+
                                             </TableCell>
                                             <TableCell>
 
@@ -91,16 +90,21 @@ const SourcesTable = () => {
 
 type SourceEditionState = { modal: boolean, sourceForm: Source }
 
-const initSourceEditionState: SourceEditionState = { modal: false, sourceForm: defaultSource }
+const initSourceEditionState: SourceEditionState = { modal: false, sourceForm: defaultSource(ulid()) }
 
 enum Type {
     UserClickedModal,
-    UserUpdatedField
+    UserUpdatedField,
+    ResetSource
 }
+
+enum Mode { Creation, Edition }
 
 type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
+    | { type: Type.ResetSource, payload: Mode }
+
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
     console.log(Type[msg.type], msg.payload)
@@ -110,15 +114,24 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
     switch (msg.type) {
 
         case Type.UserClickedModal:
-            const getUnmodifiedSource = unwrappedSources.reduce((acc, value) => sourceEditionState.sourceForm.id === value.id ? value : acc, defaultSource)
-            const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSource
-
-            return { ...sourceEditionState, modal: msg.payload, sourceForm: msg.payload ? sourceEditionState.sourceForm : resetSourceForm }
+            return { ...sourceEditionState, modal: msg.payload }
 
         case Type.UserUpdatedField:
             const fieldToUpdate = msg.payload.fieldname
 
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
+
+        case Type.ResetSource:
+            switch (msg.payload) {
+                case Mode.Creation:
+                    console.log("resetSourceCreationMode")
+                    return { ...sourceEditionState, sourceForm: defaultSource(ulid()) }
+                case Mode.Edition:
+                    const getUnmodifiedSources = unwrappedSources.reduce((acc, value) => sourceEditionState.sourceForm.id === value.id ? value : acc, defaultSource(ulid()))
+                    const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources
+
+                    return { ...sourceEditionState, sourceForm: msg.payload ? sourceEditionState.sourceForm : resetSourceForm }
+            }
 
     }
 
@@ -129,7 +142,7 @@ type SourceFormProps = {
     create?: boolean
 }
 
-const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps) => {
+const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFormProps) => {
 
     const { model, updateModel } = useModel()
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
@@ -145,10 +158,11 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
 
         const updateSources = unwrappedSources.map(s => s.name === source.name ? sourceModel.sourceForm : s)
         const addSources = [...unwrappedSources, sourceModel.sourceForm]
-        updateModel({ type: 'UserClickedSaveChanges', payload: {} });
+
         putSources(create ? addSources : updateSources)
-            .then((person) => updateModel({ type: 'ServerRespondedWithSources', payload: success(person) }))
+            .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
             .then(() => update({ type: Type.UserClickedModal, payload: false }))
+            .then(() => update({ type: Type.ResetSource, payload: create ? Mode.Creation : Mode.Edition }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
     };
 
@@ -158,7 +172,7 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
         <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create Source" : "Edit"}</Button>
         <Modal onClose={handleClose} open={sourceModel.modal}>
             <Box sx={style}>
-                <Stack>
+                <Stack spacing={4}>
                     <TextField fullWidth onChange={handleFieldUpdate("name")}
 
                         value={sourceModel.sourceForm.name}
@@ -166,7 +180,7 @@ const SourceForm = ({ source = defaultSource, create = false }: SourceFormProps)
                         label={"Name"}
                         variant="standard" />
 
-                    <Button color="primary" variant="contained" onClick={saveSources}>Save Profile</Button>
+                    <Button color="primary" variant="contained" onClick={saveSources}>Save Source</Button>
 
                 </Stack>
             </Box>

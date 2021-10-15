@@ -5,6 +5,7 @@ declare type Blender = {
 };
 declare type Profile = {
     name: string;
+    _type: string;
     id: string;
     allowedSourceSchemas: string[];
     allowedSources: string;
@@ -13,5 +14,5 @@ declare type Profile = {
     forbiddenTools: string[];
     blender: Blender;
 };
-export declare const defaultProfile: Profile;
+export declare const defaultProfile: (uuid: string) => Profile;
 export { getProfiles, Profile };

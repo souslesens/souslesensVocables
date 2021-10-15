@@ -7,7 +7,8 @@
         "format": "prettier ./src/**/*.{jsx,tsx,ts,js,css}",
         "lint": "eslint src",
         "build": "webpack --config webpack.config.js",
-        "build:watch": "npm run build -- --watch --mode=development"
+        "build:watch": "npm run build -- --watch --mode=development",
+        "cypress:open": "cypress open"
     },
     "author": "Logilab",
     "license": "LGPL-3.0-or-later",

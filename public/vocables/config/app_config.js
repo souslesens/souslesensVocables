@@ -111,7 +111,7 @@ var Config = (function () {
         label: "Browse",
         multiSources: 0,
         controller: SourceBrowser,
-        toolDescriptionImg: null
+        toolDescriptionImg: null,
     }//"images/browse.png"}
     //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
     self.tools["sourceMatcher"] = {label: "Match", multiSources: 0, controller: SourceMatcher, toolDescriptionImg: null}//"images/match.png"}

@@ -1312,3 +1312,50 @@ var KGbrowserQuery = (function () {
         return self;
     }
 )()
+
+
+if( true) {
+    var path1 = "^<http://standards.iso.org/iso/15926/part14/hasQuality>/^<http://standards.iso.org/iso/15926/part14/representedBy>/<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/^<http://standards.iso.org/iso/15926/part14/hasSubLocation> ?FacilitySector_1."
+    var path2 = " <http://standards.iso.org/iso/15926/part14/hasSubLocation>/^<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/<http://standards.iso.org/iso/15926/part14/concretizedBy>/<http://w3id.org/readi/rdl/D101001101> ?organization_0."
+
+    var shortestPathQueriesStack = [path1, path2]
+    var query = ""
+    var varIndex = 0
+    var allPropertiesMap = {}
+    shortestPathQueriesStack.forEach(function (path, index) {
+        //  var str = path.replace(/^/g, "")
+        var predicates = path.split(">/")
+
+        path.predicatesArray = predicates
+        predicates.forEach(function (property) {
+            if (!allPropertiesMap[property])
+                allPropertiesMap[property]=0
+            allPropertiesMap[property]+=1
+        })
+    })
+
+  var indexProperty=0
+for( var property in allPropertiesMap) {
+    shortestPathQueriesStack.forEach(function (path, indexPath) {
+
+        var count = allPropertiesMap[property]
+        if (count > 1) {
+            var varName = "?Q" + (indexProperty++)
+            varName = varName + ". " + varName
+            var p = path.predicatesArray.indexOf(property)
+            if (p > 0 && p < path.predicatesArray.length - 1) {
+                if (path.predicatesArray[p].indexOf("^") > -1) {
+                    path.predicatesArray[p] = varName + path.predicatesArray[p]
+                } else {
+                    path.predicatesArray[p] = path.predicatesArray[p] + varName
+                }
+            }
+        }
+
+
+    })
+
+
+}}
+
+

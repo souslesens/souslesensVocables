@@ -2,7 +2,7 @@ var GraphTraversal = (function () {
 
     var self = {}
 
-    self.getShortestPaths = function (fromNodeId, toNodeId, allClassesMap) {
+    self.getShortestPaths = function (fromNodeId, toNodeId, allClassesMap, previousPaths) {
         //   const Graph = require('dijkstra-short-path');
 
         const route = new Graph();
@@ -71,7 +71,9 @@ var GraphTraversal = (function () {
                 if (directPredicates[str])
                     where += "<" + directPredicates[str] + ">"
                 else if (inversePredicates[str])
-                    where += "^<" + inversePredicates[str] + ">"
+                    where += "^<" + inversePredicates[str] + ">";
+
+
 
             }
         })

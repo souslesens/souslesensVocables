@@ -272,6 +272,7 @@ var Sparql_OWL = (function () {
             if (self.no_params)
                 url = self.sparql_url
             var method = Config.sources[sourceLabel].server_method;
+
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
                 if (err) {
                     return callback(err)

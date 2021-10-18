@@ -1,960 +1,972 @@
 var KGbrowserQuery = (function () {
 
-        var self = {}
-        self.classes = {}
-        self.existingNodesIds = {}
-        self.model = null
-        self.queryMode = "count";
-        self.queryFilterNodes = [];
-        self.shortestPathQueriesStack = []
-        self.varNamesMap = {}
-        var previousVarName = null;
-        self.onSelectKGtreeNode = function (event, obj) {
+    var self = {}
+    self.classes = {}
+    self.existingNodesIds = {}
+    self.model = null
+    self.queryMode = "count";
+    self.queryFilterNodes = [];
+    self.shortestPathQueriesStack = []
+    self.varNamesMap = {}
+        self.currentPath=null
+    var previousVarName = null;
+    self.onSelectKGtreeNode = function (event, obj) {
 
-            if (obj.node.id == "..")
-                return self.loadAdl()
+        if (obj.node.id == "..")
+            return self.loadAdl()
 
-            //  return self.loadAdl(obj.node)
-
-
-            self.currentNode = obj.node;
-            KGbrowser.currentNode = obj.node;
-            KGbrowser.queryMode = "graph"
-            self.queryMode = "count"
-            self.showQueryParamsDialog({x: w - 100, y: h / 3},)
-            //   $("#KGbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("KGbrowser_adlJstreeDiv")
-
-        }
+        //  return self.loadAdl(obj.node)
 
 
-        self.hideQueryParamsDialog = function () {
-            $("#KGbrowserQueryParamsDialog").css("display", "none")
-        }
+        self.currentNode = obj.node;
+        KGbrowser.currentNode = obj.node;
+        KGbrowser.queryMode = "graph"
+        self.queryMode = "count"
+        self.showQueryParamsDialog({x: w - 100, y: h / 3},)
+        //   $("#KGbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("KGbrowser_adlJstreeDiv")
 
-        self.showQueryParamsDialog = function (position, node) {
-            if (!node)
-                node = self.currentNode;
+    }
 
-            var firstClass = KGbrowserQuery.queryFilterNodes.length == 0
+
+    self.hideQueryParamsDialog = function () {
+        $("#KGbrowserQueryParamsDialog").css("display", "none")
+    }
+
+    self.showQueryParamsDialog = function (position, node) {
+        if (!node)
+            node = self.currentNode;
+
+        var firstClass = KGbrowserQuery.queryFilterNodes.length == 0
+        self.currentQueryDialogPredicates = []
+        if (!firstClass) {
+            var predicates = self.getClassesPredicates(node.data.id, true)
+            var ok = false;
+            //  var ok = true;
             self.currentQueryDialogPredicates = []
-            if (!firstClass) {
-                var predicates = self.getClassesPredicates(node.data.id, true)
-                var ok = false;
-                //  var ok = true;
-                self.currentQueryDialogPredicates = []
 
 
-                predicates.forEach(function (item) {
-                    item.predicateLabel = self.model[item.predicate].label
-                    if (firstClass) {
-                        self.currentQueryDialogPredicates.push(item)
-                    } else {
-                        self.currentMatchingFilterNode = null;
-                        KGbrowserQuery.queryFilterNodes.forEach(function (filter, index) {
-                            var previousClass = filter.class
-                            if (item.object == previousClass) {
-                                ok = true
-                                self.currentMatchingFilterNode = filter
-                                if (item.inverse) item.predicateLabel = "^" + item.predicateLabel
-                                self.currentQueryDialogPredicates.push(item)
-                            }
+            predicates.forEach(function (item) {
+                item.predicateLabel = self.model[item.predicate].label
+                if (firstClass) {
+                    self.currentQueryDialogPredicates.push(item)
+                } else {
+                    self.currentMatchingFilterNode = null;
+                    KGbrowserQuery.queryFilterNodes.forEach(function (filter, index) {
+                        var previousClass = filter.class
+                        if (item.object == previousClass) {
+                            ok = true
+                            self.currentMatchingFilterNode = filter
+                            if (item.inverse) item.predicateLabel = "^" + item.predicateLabel
+                            self.currentQueryDialogPredicates.push(item)
+                        }
 
+                    })
+                }
+            })
+            if (!ok)
+                ;//  return alert("class have to be contiguous in the graph")
+        }
+
+        self.currentQueryDialogField = node.data.id
+        self.showNodeProperties(node);
+        $("#KGbrowserQueryParams_typeSelect").css("display", "none")
+
+
+        //   $("#KGbrowserQueryParamsDialog").css("left", position.x - 200)
+        $("#KGbrowserQueryParamsDialog").css("left", position.x + 200)
+        $("#KGbrowserQueryParamsDialog").css("top", position.y)
+        $("#KGbrowserQueryParamsDialog").css("display", "block")
+        setTimeout(function () {
+            $("#KGbrowserQueryParams_operator").val("=")
+            $("#KGbrowserQueryParams_value").val("")
+            $("#KGbrowserQueryParams_valuesSelect").val("")
+            common.fillSelectOptions("KGbrowserQueryParams_valuesSelect", [""])
+
+            var emptyOptions = self.currentQueryDialogPredicates.length > 1
+            common.fillSelectOptions("KGbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", 'predicate')
+            if (node.data.searchedLabel) {
+                var array = [{label: " rdfs:label", id: "http://www.w3.org/2000/01/rdf-schema#label"}]
+                common.fillSelectOptions("KGbrowserQueryParams_property", array, false, "label", "id")
+
+                $("#KGbrowserQueryParams_value").val(node.data.searchedLabel)
+            }
+
+
+        }, 500)
+
+    }
+
+
+    self.getClassesPredicates = function (classIds, withInverse) {
+        var classes = KGbrowserQuery.classes
+        if (!Array.isArray(classIds))
+            classIds = [classIds]
+
+        var uniquePredicates = {}
+        var retainedPredicates = []
+        classIds.forEach(function (classId) {
+            var predicates = classes[classId]
+            for (var predicate in predicates) {
+
+                predicates[predicate].forEach(function (object) {
+                    if (predicate.indexOf("label") > -1)
+                        return;
+                    if (predicate.indexOf("type") > -1)
+                        return;
+                    ;
+                    if (!uniquePredicates[predicate + object]) {
+                        uniquePredicates[predicate + object] = 1
+                        var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[object].label
+                        var id = classId + "|" + predicate + "|" + object
+                        retainedPredicates.push({
+                            predicate: predicate,
+                            inverse: false,
+                            subject: classId,
+                            object: object,
+                            id: id,
+                            label: label
                         })
                     }
                 })
-                if (!ok)
-                    ;//  return alert("class have to be contiguous in the graph")
+
             }
-
-            self.currentQueryDialogField = node.data.id
-            self.showNodeProperties(node);
-            $("#KGbrowserQueryParams_typeSelect").css("display", "none")
-
-
-            //   $("#KGbrowserQueryParamsDialog").css("left", position.x - 200)
-            $("#KGbrowserQueryParamsDialog").css("left", position.x + 200)
-            $("#KGbrowserQueryParamsDialog").css("top", position.y)
-            $("#KGbrowserQueryParamsDialog").css("display", "block")
-            setTimeout(function () {
-                $("#KGbrowserQueryParams_operator").val("=")
-                $("#KGbrowserQueryParams_value").val("")
-                $("#KGbrowserQueryParams_valuesSelect").val("")
-                common.fillSelectOptions("KGbrowserQueryParams_valuesSelect", [""])
-
-                var emptyOptions = self.currentQueryDialogPredicates.length > 1
-                common.fillSelectOptions("KGbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", 'predicate')
-                if (node.data.searchedLabel) {
-                    var array = [{label: " rdfs:label", id: "http://www.w3.org/2000/01/rdf-schema#label"}]
-                    common.fillSelectOptions("KGbrowserQueryParams_property", array, false, "label", "id")
-
-                    $("#KGbrowserQueryParams_value").val(node.data.searchedLabel)
-                }
-
-
-            }, 500)
-
-        }
-
-
-        self.getClassesPredicates = function (classIds, withInverse) {
-            var classes = KGbrowserQuery.classes
-            if (!Array.isArray(classIds))
-                classIds = [classIds]
-
-            var uniquePredicates = {}
-            var retainedPredicates = []
-            classIds.forEach(function (classId) {
-                var predicates = classes[classId]
-                for (var predicate in predicates) {
-
-                    predicates[predicate].forEach(function (object) {
-                        if (predicate.indexOf("label") > -1)
-                            return;
-                        if (predicate.indexOf("type") > -1)
-                            return;
-                        ;
-                        if (!uniquePredicates[predicate + object]) {
-                            uniquePredicates[predicate + object] = 1
-                            var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[object].label
-                            var id = classId + "|" + predicate + "|" + object
-                            retainedPredicates.push({
-                                predicate: predicate,
-                                inverse: false,
-                                subject: classId,
-                                object: object,
-                                id: id,
-                                label: label
-                            })
-                        }
-                    })
-
-                }
-                if (true || withInverse) {
-                    //inverse
-                    for (var subject in classes) {
-                        for (var predicate in classes[subject]) {
-                            classes[subject][predicate].forEach(function (object) {
-                                if (predicate.indexOf("label") > -1)
-                                    return;
-                                if (predicate.indexOf("type") > -1)
-                                    return;
-                                if (object == classId) {
-                                    if (!uniquePredicates["^" + predicate + object]) {
-                                        uniquePredicates["^" + predicate + object] = 1
-                                        if (false) {
-                                            var label = KGbrowserQuery.model[subject].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[classId].label
-                                            var id = subject + "|" + predicate + "|" + classId
-                                            retainedPredicates.push({
-                                                predicate: predicate,
-                                                inverse: true,
-                                                subject: subject,
-                                                object: classId,
-                                                id: id,
-                                                label: label
-                                            })
-                                        } else {
-                                            var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label
-                                            var id = classId + "|" + predicate + "|" + subject
-                                            retainedPredicates.push({
-                                                predicate: predicate,
-                                                inverse: true,
-                                                subject: classId,
-                                                object: subject,
-                                                id: id,
-                                                label: label
-                                            })
-                                        }
+            if (true || withInverse) {
+                //inverse
+                for (var subject in classes) {
+                    for (var predicate in classes[subject]) {
+                        classes[subject][predicate].forEach(function (object) {
+                            if (predicate.indexOf("label") > -1)
+                                return;
+                            if (predicate.indexOf("type") > -1)
+                                return;
+                            if (object == classId) {
+                                if (!uniquePredicates["^" + predicate + object]) {
+                                    uniquePredicates["^" + predicate + object] = 1
+                                    if (false) {
+                                        var label = KGbrowserQuery.model[subject].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[classId].label
+                                        var id = subject + "|" + predicate + "|" + classId
+                                        retainedPredicates.push({
+                                            predicate: predicate,
+                                            inverse: true,
+                                            subject: subject,
+                                            object: classId,
+                                            id: id,
+                                            label: label
+                                        })
+                                    } else {
+                                        var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label
+                                        var id = classId + "|" + predicate + "|" + subject
+                                        retainedPredicates.push({
+                                            predicate: predicate,
+                                            inverse: true,
+                                            subject: classId,
+                                            object: subject,
+                                            id: id,
+                                            label: label
+                                        })
                                     }
                                 }
-                            })
-                        }
+                            }
+                        })
                     }
                 }
-            })
-            return retainedPredicates;
-
-        }
-
-        self.onQueryParamsListClick = function () {
-            var listValue = $("#KGbrowserQueryParams_valuesSelect").val()
-            if (listValue == "") {
-                KGbrowserQuery.listQueryParamsDialogFieldValues();
-                return $('#KGbrowserQueryParams_operator').val('=')
             }
-        }
-        self.onQueryParamsListChange = function () {
-            var value = $("#KGbrowserQueryParams_valuesSelect").val()
-            $("#KGbrowserQueryParams_value").val(value)
-            self.onQueryParamsDialogValidate("union")
-        }
-        self.showNodeProperties = function (node) {
-            var properties = []
-            for (var predicate in self.classes[node.data.id]) {
-                if (predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                    var label = predicate;
-                    if (self.model[predicate])
-                        label = self.model[predicate].label
-                    properties.push({
-                        propertyLabel: label,
-                        property: predicate
-                    })
-                }
+        })
+        return retainedPredicates;
 
-            }
-            if (true || properties.length == 0) {
+    }
+
+    self.onQueryParamsListClick = function () {
+        var listValue = $("#KGbrowserQueryParams_valuesSelect").val()
+        if (listValue == "") {
+            KGbrowserQuery.listQueryParamsDialogFieldValues();
+            return $('#KGbrowserQueryParams_operator').val('=')
+        }
+    }
+    self.onQueryParamsListChange = function () {
+        var value = $("#KGbrowserQueryParams_valuesSelect").val()
+        $("#KGbrowserQueryParams_value").val(value)
+        self.onQueryParamsDialogValidate("union")
+    }
+    self.showNodeProperties = function (node) {
+        var properties = []
+        for (var predicate in self.classes[node.data.id]) {
+            if (predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
+                var label = predicate;
+                if (self.model[predicate])
+                    label = self.model[predicate].label
                 properties.push({
-                    propertyLabel: "label",
-                    property: "http://www.w3.org/2000/01/rdf-schema#label"
+                    propertyLabel: label,
+                    property: predicate
                 })
-
-                /*   Sparql_OWL.getItems(KGbrowser.currentSource, {
-                       filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
-                   }, function (err, result) {
-                   })*/
             }
-            var withBlankOption = false;
-            if (properties.length > 1)
-                withBlankOption = true;
-            $("#KGbrowserQueryParams_type").html(node.data.label)
-            $("#KGbrowserQueryParams_typeId").html(node.data.id)
-            common.fillSelectOptions("KGbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
 
         }
-
-        self.listQueryParamsDialogFieldValues = function () {
-
-            var field = self.currentNode.data.id;
-            var property = $("#KGbrowserQueryParams_property").val();
-            var value = $("#KGbrowserQueryParams_value").val()
-
-
-            var filter = "";
-            if (value != "")
-                filter = "FILTER (regex(?obj, \"^" + value + "\", \"i\") || regex(?objLabelLabel, \"^" + value + "\", \"i\") )"
-
-
-            var filterGraphStr = ""
-            /*   if( KGbrowser.currentGraphNodeSelection)
-                   filterGraphStr = Sparql_common.setFilter("sub",KGbrowser.currentGraphNodeSelection.id)*/
-
-            if (!property || property == "")
-                return alert("select a property")
-            var fromStr = Sparql_common.getFromStr(KGbrowser.currentSource)
-            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
-                "Select  distinct ?obj ?objLabel " + fromStr + " where {" +
-                " ?sub <" + property + "> ?obj . ?sub rdf:type <" + field + ">. optional {?obj rdfs:label ?objLabel}" +
-                filter + filterGraphStr +
-                "} order by ?objLabel  ?obj limit " + Config.KG.queryLimit
-            var url = Config.sources[KGbrowser.currentSource].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: KGbrowser.currentSource}, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err);
-                if (result.results.bindings.length > Config.KG.queryLimit)
-                    return alert("Too many values found : > " + result.results.bindings.length)
-                var data = []
-                result.results.bindings.forEach(function (item) {
-                    var label
-                    if (!item.objLabel)
-                        label = item.obj.value
-                    else
-                        label = item.objLabel.value
-                    data.push({id: item.obj.value, label: label})
-                })
-                common.fillSelectOptions("KGbrowserQueryParams_valuesSelect", data, true, "label", "id",)
+        if (true || properties.length == 0) {
+            properties.push({
+                propertyLabel: "label",
+                property: "http://www.w3.org/2000/01/rdf-schema#label"
             })
 
+            /*   Sparql_OWL.getItems(KGbrowser.currentSource, {
+                   filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
+               }, function (err, result) {
+               })*/
         }
-            ,
-            self.updateAdlTree = function (node) {
-                KGbrowser.jstree.load.loadAdl(node)
-            },
+        var withBlankOption = false;
+        if (properties.length > 1)
+            withBlankOption = true;
+        $("#KGbrowserQueryParams_type").html(node.data.label)
+        $("#KGbrowserQueryParams_typeId").html(node.data.id)
+        common.fillSelectOptions("KGbrowserQueryParams_property", properties, withBlankOption, "propertyLabel", "property", "http://www.w3.org/2000/01/rdf-schema#label")
 
-            self.onSelectDialogField = function (type) {
-                self.currentQueryDialogField = type
-                self.query.showNodeProperties({data: {type: type, id: type, label: self.OneModelDictionary[type]}})
-            }
+    }
 
-        self.onOperatorSelect = function (operator) {
+    self.listQueryParamsDialogFieldValues = function () {
 
-        }
-
-
-        self.onQueryParamsDialogValidate = function (logicalMode) {
-
-            var predicate = $("#KGbrowserQueryParams_predicateSelect").val();
-            if (predicate == "" && self.queryFilterNodes.length > 0)
-                return alert("select a predicate")
-
-            var predicateIndex = $("#KGbrowserQueryParams_predicateSelect")[0].selectedIndex;
-            var property = $("#KGbrowserQueryParams_property").val()
-            var operator = $("#KGbrowserQueryParams_operator").val()
-            var value = $("#KGbrowserQueryParams_value").val()
-            var field = self.currentQueryDialogField
-            $("#KGbrowserQueryParamsDialog").css("display", "none")
-            var dialogFilterStr = "";
-            var numberOperators = ("<", ">", "<=", ">=")
-
-            var varName = "?" + Sparql_common.formatStringForTriple(self.model[field].label, true) + "_" + self.queryFilterNodes.length
-            if (!self.varNamesMap[varName]) {
-                var color = self.model[field].color
-                self.varNamesMap[varName] = {id: field, predicates: self.classes[field], color: color}
-            }
-            var varNameX = varName + "_X"
-            var typeVarName = varName;
-            /*   if (logicalMode == "union")//self.queryTypesArray.length == 0)
-                   typeVarName = "?sub"
-               else
-                   typeVarName = "?obj"*/
+        var field = self.currentNode.data.id;
+        var property = $("#KGbrowserQueryParams_property").val();
+        var value = $("#KGbrowserQueryParams_value").val()
 
 
-            if (property && property != "") {
-                if (value && value != "") {
-                    if (operator == "contains")
-                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter ( regex(" + varNameX + ",'" + value + "','i')) "
-                    else if (operator == "not contains")
-                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter regex(" + varNameX + ", '^((?!" + value + ").)*$','i') "
-                    else if ($("#KGbrowserQueryParams_valuesSelect").val() != "") {
-                        if (value.indexOf("http") > -1)
-                            dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " =<" + value + ">) "
-                        else
-                            dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
-                    } else if (numberOperators.indexOf(operator) > -1) {
-                        if (!common.isNumber(value) && operator == "=")
-                            dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
-                        else
-                            dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter ( xsd:float(" + varNameX + ")" + operator + value + ") "
-                    } else
-                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + value + ") "
-                } else {
-
-                    dialogFilterStr = "";//typeVarName + " <" + property + "> "+varName+". "
-                }
+        var filter = "";
+        if (value != "")
+            filter = "FILTER (regex(?obj, \"^" + value + "\", \"i\") || regex(?objLabelLabel, \"^" + value + "\", \"i\") )"
 
 
-            }
-            var filterLabel
-            if (dialogFilterStr == "")
-                filterLabel = "all"
-            else {
-                filterLabel = self.model[property].label + " " + operator + " " + value
-            }
+        var filterGraphStr = ""
+        /*   if( KGbrowser.currentGraphNodeSelection)
+               filterGraphStr = Sparql_common.setFilter("sub",KGbrowser.currentGraphNodeSelection.id)*/
 
-            dialogFilterStr += varName + "    rdf:type " + varName + "Type."
-            dialogFilterStr += "filter(   " + varName + "Type =<" + field + "> )"
+        if (!property || property == "")
+            return alert("select a property")
+        var fromStr = Sparql_common.getFromStr(KGbrowser.currentSource)
+        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
+            "Select  distinct ?obj ?objLabel " + fromStr + " where {" +
+            " ?sub <" + property + "> ?obj . ?sub rdf:type <" + field + ">. optional {?obj rdfs:label ?objLabel}" +
+            filter + filterGraphStr +
+            "} order by ?objLabel  ?obj limit " + Config.KG.queryLimit
+        var url = Config.sources[KGbrowser.currentSource].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, {source: KGbrowser.currentSource}, function (err, result) {
+            if (err)
+                return MainController.UI.message(err);
+            if (result.results.bindings.length > Config.KG.queryLimit)
+                return alert("Too many values found : > " + result.results.bindings.length)
+            var data = []
+            result.results.bindings.forEach(function (item) {
+                var label
+                if (!item.objLabel)
+                    label = item.obj.value
+                else
+                    label = item.objLabel.value
+                data.push({id: item.obj.value, label: label})
+            })
+            common.fillSelectOptions("KGbrowserQueryParams_valuesSelect", data, true, "label", "id",)
+        })
 
-            if (dialogFilterStr.indexOf("Label") < 0)
-                dialogFilterStr += "optional {" + varName + " rdfs:label " + varName + "Label} "
+    }
+        ,
+        self.updateAdlTree = function (node) {
+            KGbrowser.jstree.load.loadAdl(node)
+        },
 
-            if (self.queryMode == "expandGraphNode") {
-                KGbrowserGraph.expandNode(dialogFilterStr)
-            } else if (self.queryMode == "count") {
-                var options = {
-                    filter: dialogFilterStr,
-                    filterLabel: filterLabel,
-                    logicalMode: logicalMode,
-                    varName: varName,
-                    count: 1,
-                    classId: field,
-                    predicate: self.currentQueryDialogPredicates[predicateIndex]
-                }
-
-
-                var nodeData = {
-                    type: "count",
-                    class: self.currentNode.data.id,
-                    count: 0,
-                    filter: options.filter,
-                    filterLabel: options.filterLabel,
-                    varName: options.varName,
-                    color: color,
-                    id: self.currentNode.data.id,
-                    predicate: options.predicate
-
-                }
-                KGbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
-
-                var setFilterCountUI = function () {
-                    //  KGbrowserGraph.addCountNodeToModelGraph(self.currentNode, nodeData, queryResult, options, function (err, nodeData) {
-                    $('#KGbrowser_accordion').accordion('option', {active: 1});
-                    var checkedStr = "";
-                    if (nodeData.count < 50)
-                        checkedStr = " checked='checked' "
-                    var filterId = nodeData.id;
-                    var iconUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[nodeData.class].group.toLowerCase() + ".png";
-                    var superClassLabel = KGbrowserQuery.model[nodeData.class].label;
-                    var divId = "filter_" + common.getRandomHexaId(5)
-                    KGbrowserQuery.queryFilterNodes[0].filterDivId = divId
-                    var html = "<div class='KGbrowser_filterDiv ' style='color:" + nodeData.color + "' id='" + divId + "'>" +
-
-                        "<input  type='checkbox'  " + checkedStr + "class='KGbrowser_graphFilterCBX'>&nbsp;" +
-                        //  "<button title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
-                        "<button title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
-                        "<img src='" + iconUrl + "' width='25'/>" +
-                        "<span style='font-weight:normal;color:" + "black" + "'>" + superClassLabel + " : " + nodeData.count + "<br><i> " + filterLabel + "</i></span>"
-                    "</div>"
-
-                    $("#KGbrowser_filterDiv").prepend(html)
-                    // })
-                }
-
-                if (self.queryFilterNodes.length < 2) {
-                    self.executeQuery(self.currentNode, options, function (err, queryResult) {
-                        $("#waitImg").css("display", "none");
-                        if (err)
-                            return alert(err)
-
-
-                        if (queryResult.data[0].count.value == "0") {
-                            KGbrowserQuery.queryFilterNodes.splice(0, 1);
-                            return MainController.UI.message("No data found ", true)
-                        }
-                        KGbrowserQuery.queryFilterNodes[0].count = queryResult.data[0].count.value
-                        setFilterCountUI()
-
-
-                    })
-                } else {
-                    KGbrowserQuery.executeShortestPathQuery(null, null, {count: true}, function (err, queryResult) {
-                        $("#waitImg").css("display", "none");
-                        if (err)
-                            return alert(err)
-                        if (queryResult[0].count.value == "0") {
-                            KGbrowserQuery.queryFilterNodes.splice(0, 1);
-                            return MainController.UI.message("No data found ", true)
-                        }
-                        KGbrowserQuery.queryFilterNodes[0].count = queryResult[0].count.value
-                        setFilterCountUI()
-
-                    })
-                }
-
-
-            }
+        self.onSelectDialogField = function (type) {
+            self.currentQueryDialogField = type
+            self.query.showNodeProperties({data: {type: type, id: type, label: self.OneModelDictionary[type]}})
         }
 
+    self.onOperatorSelect = function (operator) {
 
-        self.onQueryParamsDialogCancel = function () {
+    }
 
-            $("#KGbrowserQueryParamsDialog").css("display", "none")
+
+    self.onQueryParamsDialogValidate = function (logicalMode) {
+
+        var predicate = $("#KGbrowserQueryParams_predicateSelect").val();
+        if (predicate == "" && self.queryFilterNodes.length > 0)
+            return alert("select a predicate")
+
+        var predicateIndex = $("#KGbrowserQueryParams_predicateSelect")[0].selectedIndex;
+        var property = $("#KGbrowserQueryParams_property").val()
+        var operator = $("#KGbrowserQueryParams_operator").val()
+        var value = $("#KGbrowserQueryParams_value").val()
+        var field = self.currentQueryDialogField
+        $("#KGbrowserQueryParamsDialog").css("display", "none")
+        var dialogFilterStr = "";
+        var numberOperators = ("<", ">", "<=", ">=")
+
+        var varName = "?" + Sparql_common.formatStringForTriple(self.model[field].label, true) + "_" + self.queryFilterNodes.length
+        if (!self.varNamesMap[varName]) {
+            var color = self.model[field].color
+            self.varNamesMap[varName] = {id: field, predicates: self.classes[field], color: color}
+        }
+        var varNameX = varName + "_X"
+        var typeVarName = varName;
+        /*   if (logicalMode == "union")//self.queryTypesArray.length == 0)
+               typeVarName = "?sub"
+           else
+               typeVarName = "?obj"*/
+
+
+        if (property && property != "") {
+            if (value && value != "") {
+                if (operator == "contains")
+                    dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter ( regex(" + varNameX + ",'" + value + "','i')) "
+                else if (operator == "not contains")
+                    dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter regex(" + varNameX + ", '^((?!" + value + ").)*$','i') "
+                else if ($("#KGbrowserQueryParams_valuesSelect").val() != "") {
+                    if (value.indexOf("http") > -1)
+                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " =<" + value + ">) "
+                    else
+                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
+                } else if (numberOperators.indexOf(operator) > -1) {
+                    if (!common.isNumber(value) && operator == "=")
+                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + "'" + value + "') "
+                    else
+                        dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter ( xsd:float(" + varNameX + ")" + operator + value + ") "
+                } else
+                    dialogFilterStr = varName + " <" + property + "> " + varNameX + ". filter (" + varNameX + " " + operator + value + ") "
+            } else {
+
+                dialogFilterStr = "";//typeVarName + " <" + property + "> "+varName+". "
+            }
 
 
         }
+        var filterLabel
+        if (dialogFilterStr == "")
+            filterLabel = "all"
+        else {
+            filterLabel = self.model[property].label + " " + operator + " " + value
+        }
+
+        dialogFilterStr += varName + "    rdf:type " + varName + "Type."
+        dialogFilterStr += "filter(   " + varName + "Type =<" + field + "> )"
+
+        if (dialogFilterStr.indexOf("Label") < 0)
+            dialogFilterStr += "optional {" + varName + " rdfs:label " + varName + "Label} "
+
+        if (self.queryMode == "expandGraphNode") {
+            KGbrowserGraph.expandNode(dialogFilterStr)
+        } else if (self.queryMode == "count") {
+            var options = {
+                filter: dialogFilterStr,
+                filterLabel: filterLabel,
+                logicalMode: logicalMode,
+                varName: varName,
+                count: 1,
+                classId: field,
+                predicate: self.currentQueryDialogPredicates[predicateIndex]
+            }
 
 
-        self.addNodeToQueryTree = function (node, prop) {
+            var nodeData = {
+                type: "count",
+                class: self.currentNode.data.id,
+                count: 0,
+                filter: options.filter,
+                filterLabel: options.filterLabel,
+                varName: options.varName,
+                color: color,
+                id: self.currentNode.data.id,
+                predicate: options.predicate
+
+            }
+            KGbrowserQuery.queryFilterNodes.splice(0, 0, nodeData);
+
+            var setFilterCountUI = function () {
+                //  KGbrowserGraph.addCountNodeToModelGraph(self.currentNode, nodeData, queryResult, options, function (err, nodeData) {
+                $('#KGbrowser_accordion').accordion('option', {active: 1});
+                var checkedStr = "";
+                if (nodeData.count < 50)
+                    checkedStr = " checked='checked' "
+                var filterId = nodeData.id;
+                var iconUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[nodeData.class].group.toLowerCase() + ".png";
+                var superClassLabel = KGbrowserQuery.model[nodeData.class].label;
+                var divId = "filter_" + common.getRandomHexaId(5)
+                KGbrowserQuery.queryFilterNodes[0].filterDivId = divId
+                var html = "<div class='KGbrowser_filterDiv ' style='color:" + nodeData.color + "' id='" + divId + "'>" +
+
+                    "<input  type='checkbox'  " + checkedStr + "class='KGbrowser_graphFilterCBX'>&nbsp;" +
+                    //  "<button title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                    "<button title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
+                    "<img src='" + iconUrl + "' width='25'/>" +
+                    "<span style='font-weight:normal;color:" + "black" + "'>" + superClassLabel + " : " + nodeData.count + "<br><i> " + filterLabel + "</i></span>"
+                "</div>"
+
+                $("#KGbrowser_filterDiv").prepend(html)
+                // })
+            }
+
+            if (self.queryFilterNodes.length < 2) {
+                self.executeQuery(self.currentNode, options, function (err, queryResult) {
+                    $("#waitImg").css("display", "none");
+                    if (err)
+                        return alert(err)
 
 
-            self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
-                var isNewTree = $("#KGbrowser_queryTreeDiv").is(':empty');
-                var existingNodes = []
-                if (!isNewTree)
-                    existingNodes = common.jstree.getjsTreeNodes("KGbrowser_queryTreeDiv", true)
-                var jstreeData = [];
-                var typeId = "type" + common.getRandomHexaId(5)
-                if (existingNodes.indexOf(node.data.id) < 0) {
+                    if (queryResult.data[0].count.value == "0") {
+                        KGbrowserQuery.queryFilterNodes.splice(0, 1);
+                        return MainController.UI.message("No data found ", true)
+                    }
+                    KGbrowserQuery.queryFilterNodes[0].count = queryResult.data[0].count.value
+                    setFilterCountUI()
+
+
+                })
+            } else {
+                KGbrowserQuery.executeShortestPathQuery(null, null, {count: true}, function (err, queryResult) {
+                    $("#waitImg").css("display", "none");
+                    if (err)
+                        return alert(err)
+                    if (queryResult[0].count.value == "0") {
+                        KGbrowserQuery.queryFilterNodes.splice(0, 1);
+                        return MainController.UI.message("No data found ", true)
+                    }
+                    KGbrowserQuery.queryFilterNodes[0].count = queryResult[0].count.value
+                    setFilterCountUI()
+
+                })
+            }
+
+
+        }
+    }
+
+
+    self.onQueryParamsDialogCancel = function () {
+
+        $("#KGbrowserQueryParamsDialog").css("display", "none")
+
+
+    }
+
+
+    self.addNodeToQueryTree = function (node, prop) {
+
+
+        self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
+            var isNewTree = $("#KGbrowser_queryTreeDiv").is(':empty');
+            var existingNodes = []
+            if (!isNewTree)
+                existingNodes = common.jstree.getjsTreeNodes("KGbrowser_queryTreeDiv", true)
+            var jstreeData = [];
+            var typeId = "type" + common.getRandomHexaId(5)
+            if (existingNodes.indexOf(node.data.id) < 0) {
+                jstreeData.push({
+                    id: typeId,
+                    text: Sparql_common.getLabelFromId(node.data.label),
+                    parent: '#',
+                    data: {
+                        type: "type",
+                        id: node.data.id,
+                        label: node.data.label,
+                        role: node.data.role,
+                        sourceType: node.data.sourceType
+
+
+                    }
+                })
+                if (!isNewTree) {
+                    var options = {}
+
+                    common.jstree.addNodesToJstree("KGbrowser_queryTreeDiv", "#", jstreeData)
+                    jstreeData = []
+                }
+                setTimeout(function () {
+                    $("#KGbrowser_queryTreeDiv").jstree(true).select_node(node.data.id)
+                }, 200)
+
+            }
+
+            if (err) {
+                return callback(err)
+            }
+            result.forEach(function (item) {
+                if (existingNodes.indexOf(item.prop.id) < 0) {
+
                     jstreeData.push({
-                        id: typeId,
-                        text: Sparql_common.getLabelFromId(node.data.label),
-                        parent: '#',
+                        id: "prop" + common.getRandomHexaId(5),
+                        text: item.propLabel.value,
+                        parent: typeId,
                         data: {
-                            type: "type",
-                            id: node.data.id,
-                            label: node.data.label,
+                            label: item.propLabel.value,
+                            id: item.prop.value,
+                            type: "property",
+                            parent: node.data.id,
+                            range: node.data.subType,
                             role: node.data.role,
                             sourceType: node.data.sourceType
 
-
                         }
                     })
-                    if (!isNewTree) {
-                        var options = {}
-
-                        common.jstree.addNodesToJstree("KGbrowser_queryTreeDiv", "#", jstreeData)
-                        jstreeData = []
-                    }
-                    setTimeout(function () {
-                        $("#KGbrowser_queryTreeDiv").jstree(true).select_node(node.data.id)
-                    }, 200)
-
                 }
-
-                if (err) {
-                    return callback(err)
-                }
-                result.forEach(function (item) {
-                    if (existingNodes.indexOf(item.prop.id) < 0) {
-
-                        jstreeData.push({
-                            id: "prop" + common.getRandomHexaId(5),
-                            text: item.propLabel.value,
-                            parent: typeId,
-                            data: {
-                                label: item.propLabel.value,
-                                id: item.prop.value,
-                                type: "property",
-                                parent: node.data.id,
-                                range: node.data.subType,
-                                role: node.data.role,
-                                sourceType: node.data.sourceType
-
-                            }
-                        })
-                    }
-                })
-
-                if (isNewTree) {
-                    var options = {
-
-                        selectTreeNodeFn: self.jstree.events.onSelectNodeQuery,
-                        contextMenu: self.jstree.getJstreeQueryContextMenu("KGbrowser_queryTreeDiv")
-
-                        ,
-                        openAll: true,
-                        withCheckboxes: true,
-
-                    }
-                    common.jstree.loadJsTree("KGbrowser_queryTreeDiv", jstreeData, options)
-                } else {
-                    common.jstree.addNodesToJstree("KGbrowser_queryTreeDiv", node.data.id, jstreeData)
-                }
-
             })
 
-
-        }
-
-
-        self.getQueryFilter = function (filterId) {
-            var obj = null
-            self.queryFilterNodes.forEach(function (filterData, index) {
-                if (filterData.filterDivId == filterId)
-                    obj = filterData
-            })
-            return obj;
-        }
-
-        self.graphActions = {
-
-
-            backToModel: function () {
-
-
-                if (!self.ALDmodelGraph)
-                    return;
-                var visjsData = {
-                    nodes: self.ALDmodelGraph.nodes,
-                    edges: self.ALDmodelGraph.edges,
-                }
-                var options = {}
-                if (self.ALDmodelGraph.params)
-                    options = self.ALDmodelGraph.params.options;
-
-                visjsGraph.draw("graphDiv", visjsData, options)
-                self.ALDmodelGraph = null;
-
-
-            },
-            listFilter: function (id) {
-                var filterData = self.getQueryFilter(id)
-                self.currentFilterData = filterData
-
+            if (isNewTree) {
                 var options = {
-                    logicalMode: "union",
-                    selectVars: [filterData.varName]
+
+                    selectTreeNodeFn: self.jstree.events.onSelectNodeQuery,
+                    contextMenu: self.jstree.getJstreeQueryContextMenu("KGbrowser_queryTreeDiv")
+
+                    ,
+                    openAll: true,
+                    withCheckboxes: true,
 
                 }
-
-                var node = {data: {id: id}}
-                self.executeQuery(self.currentNode, options, function (err, queryResult) {
-                    var jstreeData = []
-                    var keyName = filterData.varName.substring(1)
-                    queryResult.data.forEach(function (item) {
-                        if (item[keyName]) {
-                            var label = ""
-                            if (item[keyName + "Label"])
-                                label = item[keyName + "Label"].value
-                            else
-                                label = Sparql_common.getLabelFromId(item[keyName].value)
-                            jstreeData.push(
-                                {
-                                    id: item[keyName].value,
-                                    text: label,
-                                    parent: "#",
-                                    data: self.currentNode.data
-                                })
-                        }
-
-                    })
-
-                    jstreeData.sort(function (a, b) {
-                        if (a.text > b.text)
-                            return 1;
-                        if (a.text < b.text)
-                            return -1;
-                        return 0;
-                    })
-
-                    var options = {
-                        withCheckboxes: true,
-                    }
-                    common.jstree.loadJsTree("KGbrowser_adlJstreeDiv", jstreeData, options)
-
-
-                })
-            },
-
-            queryFilters: function (output, addToGraph) {
-
-                var selectVars = []
-                $(".KGbrowser_graphFilterCBX").each(function () {
-
-                    if ($(this).prop("checked")) {
-                        var filterDiv = $(this).parent()
-                        var filterId = filterDiv.attr("id")
-                        var filterObj = self.getQueryFilter(filterId)
-                        selectVars.push(filterObj.varName)
-                    }
-
-                })
-
-
-                var options = {
-                    logicalMode: "union",
-                    selectVars: selectVars
-
-                }
-                KGbrowserQuery.executeShortestPathQuery(null, null, {}, function (err, queryResult) {
-                    // self.executeQuery(null, options, function (err, queryResult) {
-                    if (queryResult.length == 0)
-                        return MainController.UI.message("No results", true)
-                    if (output == "graph") {
-
-
-                        if (!self.ALDmodelGraph) {//save modelGraph before drawing quryGraph
-                            self.ALDmodelGraph = {nodes: [], edges: [], params: {}}
-                            self.ALDmodelGraph.nodes = visjsGraph.data.nodes.get()
-                            self.ALDmodelGraph.edges = visjsGraph.data.edges.get()
-                            self.ALDmodelGraph.params = visjsGraph.currentContext
-                        }
-                        MainController.UI.message("drawing Graph...", true)
-                        KGbrowserGraph.drawGraph("graphDiv", {data: queryResult}, {
-                            addToGraph: addToGraph,
-                            selectVars: selectVars
-                        })
-
-
-                    }
-                    if (output == "table") {
-                        MainController.UI.message("drawing Table...", true)
-                        KGbrowserDataTable.showQueryResult({data: queryResult}, {selectVars: selectVars})
-
-                    }
-
-                })
+                common.jstree.loadJsTree("KGbrowser_queryTreeDiv", jstreeData, options)
+            } else {
+                common.jstree.addNodesToJstree("KGbrowser_queryTreeDiv", node.data.id, jstreeData)
             }
 
-            ,
+        })
 
-            removeFilter: function (id) {
-                self.queryFilterNodes.forEach(function (filterData, index) {
-                    if (filterData.id == id) {
-                        self.queryFilterNodes.splice(index, 1);
-                        $("#" + filterData.filterDivId).remove()
-                        //   return visjsGraph.data.nodes.remove(id)
-                    }
 
-                })
+    }
+
+
+    self.getQueryFilter = function (filterId) {
+        var obj = null
+        self.queryFilterNodes.forEach(function (filterData, index) {
+            if (filterData.filterDivId == filterId)
+                obj = filterData
+        })
+        return obj;
+    }
+
+    self.graphActions = {
+
+
+        backToModel: function () {
+
+
+            if (!self.ALDmodelGraph)
+                return;
+            var visjsData = {
+                nodes: self.ALDmodelGraph.nodes,
+                edges: self.ALDmodelGraph.edges,
+            }
+            var options = {}
+            if (self.ALDmodelGraph.params)
+                options = self.ALDmodelGraph.params.options;
+
+            visjsGraph.draw("graphDiv", visjsData, options)
+            self.ALDmodelGraph = null;
+
+
+        },
+        listFilter: function (id) {
+            var filterData = self.getQueryFilter(id)
+            self.currentFilterData = filterData
+
+            var options = {
+                logicalMode: "union",
+                selectVars: [filterData.varName]
 
             }
-            ,
 
-            resetAllFilters: function () {
-
-                KGbrowserQuery.graphActions.backToModel();
-                setTimeout(function () {
-
-                    previousVarName = null;
-                    if ($('#KGbrowser_adlJstreeDiv').jstree)
-                        $('#KGbrowser_adlJstreeDiv').jstree("destroy")
-
-                    while (self.queryFilterNodes.length > 0) {
-                        var filterData = self.queryFilterNodes[0]
-                        self.graphActions.removeFilter(filterData.id)
-
-                    }
-                    if (visjsGraph.data && visjsGraph.data.nodes) {
-                        visjsGraph.data.nodes.remove(KGbrowserGraph.zeroCountIds)
-                    }
-                    KGbrowserGraph.zeroCountIds = []
-                    self.shortestPathQueriesStack = []
-                    MainController.UI.message("", true)
-                }, 500)
-
-            }
-            ,
-            /*   addIndividualsFilter:function(){
-                   var checkedIds=$("#KGbrowser_adlJstreeDiv").jstree().get_checked();
-                   self.individualFilters={varName:self.currentFilterData.varName,ids:checkedIds}
-
-
-               },*/
-            clearIndividualsFilter: function () {
-                if ($("#KGbrowser_adlJstreeDiv").jstree(true))
-                    $("#KGbrowser_adlJstreeDiv").jstree().deselect_all(true)
-            },
-
-            clickClassesGraph: function (obj, point) {
-                MainController.UI.hidePopup("graphPopupDiv")
-                if (!obj)
-                    return KGbrowserQuery.hideQueryParamsDialog(point);
-                if (obj.from)
-                    self.currentEdge = obj
-                else {
-                    self.currentNode = obj
-                    if (obj.data.type == "count") {
-
-                        self.graphActions.showGraphPopupMenu(self.currentNode, point)
-
-                    } else //class
-                    {
-                        self.queryMode = "count"
-                        KGbrowserQuery.showQueryParamsDialog(point)
-                    }
-                }
-            }
-            ,
-            showGraphPopupMenu: function (node, point, e) {
-
-                var top = $("#graphDiv").position().top
-                point.y += top
-                var html = "";
-                if (node.from) {//edge
-
-                } else {
-
-                    html = "    <span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.listCountItems();\"> list items</span>" +
-                        //   "<span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.addToGraph();\"> Add to graph</span>" +
-                        // "<span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.setAsFilter();\"> Set as filter</span>"+
-                        "<span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.executeQuery();\"> Execute  Query</span>"
-                }
-                $("#graphPopupDiv").html(html);
-                MainController.UI.showPopup(point, "graphPopupDiv")
-            }
-            ,
-
-
-            listCountItems: function () {
-
-                var query = ""
-                var source = KGbrowser.currentSource
-                var fromStr = Sparql_common.getFromStr(source)
-                query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-                    "select distinct ?sub ?subLabel  " +
-                    fromStr +
-                    "WHERE {"
-
-                var where = self.currentNode.data.queryWhere
-                query += where + " } order by ?subLabel limit 10000"
-
-                var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-                MainController.UI.message("searching...")
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
-                    // $("#waitImg").css("display", "none");
-                    if (err) {
-                        return MainController.UI.message(err)
-                    }
-                    var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"])
-                    var jstreeData = []
-                    result.results.bindings.forEach(function (item) {
+            var node = {data: {id: id}}
+            self.executeQuery(self.currentNode, options, function (err, queryResult) {
+                var jstreeData = []
+                var keyName = filterData.varName.substring(1)
+                queryResult.data.forEach(function (item) {
+                    if (item[keyName]) {
+                        var label = ""
+                        if (item[keyName + "Label"])
+                            label = item[keyName + "Label"].value
+                        else
+                            label = Sparql_common.getLabelFromId(item[keyName].value)
                         jstreeData.push(
                             {
-                                id: item.sub.value,
-                                text: item.subLabel.value,
+                                id: item[keyName].value,
+                                text: label,
                                 parent: "#",
                                 data: self.currentNode.data
                             })
-
-                    })
-
-
-                    common.jstree.loadJsTree("KGbrowser_adlJstreeDiv", jstreeData, {})
+                    }
 
                 })
 
+                jstreeData.sort(function (a, b) {
+                    if (a.text > b.text)
+                        return 1;
+                    if (a.text < b.text)
+                        return -1;
+                    return 0;
+                })
 
-                MainController.UI.hidePopup("graphPopupDiv")
-            }
-            ,
-            addToGraph: function () {
-                MainController.UI.hidePopup("graphPopupDiv")
-
-            }
-            ,
-
-
-        }
-
-        self.executeQuery = function (node, options, callback) {
-
-            var fetchLength = Config.KG.queryLimit
-            var queryFilterNodes = KGbrowserQuery.queryFilterNodes;
-            var dialogFilterStr = "";
-            var where = ""
-            var varName = options.varName;
-            var source = KGbrowser.currentSource
-            if (varName) {// add filter to query
-                if (options.filter)
-                    dialogFilterStr = options.filter
-                if (!dialogFilterStr)
-                    dialogFilterStr = "";
-                where += dialogFilterStr
-
-
-            }
-
-
-            // join classes (anonym predicate)
-            var message = null
-            var filterSubType
-            var filterObjType
-
-            var varName2 = varName;
-
-
-            if (options.predicate) {// links new filter predicate to a previous varName matching
-                var predicateStr = "<" + options.predicate.predicate + ">"
-                if (options.predicate.inverse)
-                    predicateStr = "^" + predicateStr
-                //  predicateStr = predicateStr + "|^" + predicateStr
-                var previousVarName = null;
-                if (queryFilterNodes.length == 1) {// the first query has no predicate
-                    previousVarName = queryFilterNodes[0].varName
-                    predicateStr = " " + varName2 + predicateStr + previousVarName + ". "
-                    queryFilterNodes[0].filter += predicateStr
-                    self.currentNode.filter += predicateStr;
-                } else {
-                    queryFilterNodes.forEach(function (filterNodeData, index2) {
-                        if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
-                            previousVarName = filterNodeData.varName
-                            predicateStr = " " + varName2 + " " + predicateStr + " " + previousVarName + ". "
-                            filterNodeData.filter += predicateStr
-                            self.currentNode.filter += predicateStr;
-                        }
-                    })
+                var options = {
+                    withCheckboxes: true,
                 }
-            }
-
-
-            //build query with all previous filters and varnames
-
-            queryFilterNodes.forEach(function (filterNodeData, index) {
-                if (!filterNodeData)
-                    return
-
-
-                where += filterNodeData.filter
-
-
-                varName2 = filterNodeData.varName
-                if (!options.count) {
-                    where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
-                    //  where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
-                    //  where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
-                    where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
-
-                }
+                common.jstree.loadJsTree("KGbrowser_adlJstreeDiv", jstreeData, options)
 
 
             })
+        },
 
-            if (message)
-                return callback(message)
+        queryFilters: function (output, addToGraph) {
 
-            //checked chexkboxes in class individuals
-            if ($("#KGbrowser_adlJstreeDiv").jstree(true)) {
-                var checkedIds = $("#KGbrowser_adlJstreeDiv").jstree().get_checked();
-                if (checkedIds && checkedIds.length > 0) {
-                    self.individualFilters = {varName: self.currentFilterData.varName, ids: checkedIds}
+            var selectVars = []
+            $(".KGbrowser_graphFilterCBX").each(function () {
 
-                    var idsStr = "";
-                    self.individualFilters.ids.forEach(function (id, index) {
-                        if (index > 0)
-                            idsStr += ","
-                        idsStr += "<" + id + ">"
+                if ($(this).prop("checked")) {
+                    var filterDiv = $(this).parent()
+                    var filterId = filterDiv.attr("id")
+                    var filterObj = self.getQueryFilter(filterId)
+                    selectVars.push(filterObj.varName)
+                }
+
+            })
+
+
+            var options = {
+                logicalMode: "union",
+                selectVars: selectVars
+
+            }
+            KGbrowserQuery.executeShortestPathQuery(null, null, {}, function (err, queryResult) {
+                // self.executeQuery(null, options, function (err, queryResult) {
+                if (queryResult.length == 0)
+                    return MainController.UI.message("No results", true)
+                if (output == "graph") {
+
+
+                    if (!self.ALDmodelGraph) {//save modelGraph before drawing quryGraph
+                        self.ALDmodelGraph = {nodes: [], edges: [], params: {}}
+                        self.ALDmodelGraph.nodes = visjsGraph.data.nodes.get()
+                        self.ALDmodelGraph.edges = visjsGraph.data.edges.get()
+                        self.ALDmodelGraph.params = visjsGraph.currentContext
+                    }
+                    MainController.UI.message("drawing Graph...", true)
+                    KGbrowserGraph.drawGraph("graphDiv", {data: queryResult}, {
+                        addToGraph: addToGraph,
+                        selectVars: selectVars
                     })
-                    where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))"
+
+
+                }
+                if (output == "table") {
+                    MainController.UI.message("drawing Table...", true)
+                    KGbrowserDataTable.showQueryResult({data: queryResult}, {selectVars: selectVars})
+
+                }
+
+            })
+        }
+
+        ,
+
+        removeFilter: function (id) {
+            self.queryFilterNodes.forEach(function (filterData, index) {
+                if (filterData.id == id) {
+                    self.queryFilterNodes.splice(index, 1);
+                    $("#" + filterData.filterDivId).remove()
+                    //   return visjsGraph.data.nodes.remove(id)
+                }
+
+            })
+
+        }
+        ,
+
+        resetAllFilters: function () {
+
+            KGbrowserQuery.graphActions.backToModel();
+            setTimeout(function () {
+
+                previousVarName = null;
+                if ($('#KGbrowser_adlJstreeDiv').jstree)
+                    $('#KGbrowser_adlJstreeDiv').jstree("destroy")
+
+                while (self.queryFilterNodes.length > 0) {
+                    var filterData = self.queryFilterNodes[0]
+                    self.graphActions.removeFilter(filterData.id)
+
+                }
+                if (visjsGraph.data && visjsGraph.data.nodes) {
+                    visjsGraph.data.nodes.remove(KGbrowserGraph.zeroCountIds)
+                }
+                KGbrowserGraph.zeroCountIds = []
+                self.shortestPathQueriesStack = []
+                MainController.UI.message("", true)
+            }, 500)
+
+        }
+        ,
+        /*   addIndividualsFilter:function(){
+               var checkedIds=$("#KGbrowser_adlJstreeDiv").jstree().get_checked();
+               self.individualFilters={varName:self.currentFilterData.varName,ids:checkedIds}
+
+
+           },*/
+        clearIndividualsFilter: function () {
+            if ($("#KGbrowser_adlJstreeDiv").jstree(true))
+                $("#KGbrowser_adlJstreeDiv").jstree().deselect_all(true)
+        },
+
+        clickClassesGraph: function (obj, point) {
+            MainController.UI.hidePopup("graphPopupDiv")
+            if (!obj)
+                return KGbrowserQuery.hideQueryParamsDialog(point);
+            if (obj.from)
+                self.currentEdge = obj
+            else {
+                self.currentNode = obj
+                if (obj.data.type == "count") {
+
+                    self.graphActions.showGraphPopupMenu(self.currentNode, point)
+
+                } else //class
+                {
+                    self.queryMode = "count"
+                    KGbrowserQuery.showQueryParamsDialog(point)
                 }
             }
-            if (where == "")
-                return MainController.UI.message("Wrong query : no where clasues", true)
+        }
+        ,
+        showGraphPopupMenu: function (node, point, e) {
 
-            var fromStr = Sparql_common.getFromStr(source)
-            var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
-            if (options.count)
-                query += "select (count(distinct " + varName + ") as ?count) "
-            else if (options.selectVars) {
-                var selectVarsStr = ""
-                options.selectVars.forEach(function (varName, index) {
-                    selectVarsStr += varName + " " + varName + "Label " + varName + "Type "
-
-                })
-                query += "select distinct " + selectVarsStr
+            var top = $("#graphDiv").position().top
+            point.y += top
+            var html = "";
+            if (node.from) {//edge
 
             } else {
-                query += "select distinct " + varName + " " + varName + "Label " + varName + "Type "
+
+                html = "    <span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.listCountItems();\"> list items</span>" +
+                    //   "<span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.addToGraph();\"> Add to graph</span>" +
+                    // "<span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.setAsFilter();\"> Set as filter</span>"+
+                    "<span class=\"popupMenuItem\" onclick=\"KGbrowserQuery.graphActions.executeQuery();\"> Execute  Query</span>"
             }
-            query += fromStr +
+            $("#graphPopupDiv").html(html);
+            MainController.UI.showPopup(point, "graphPopupDiv")
+        }
+        ,
+
+
+        listCountItems: function () {
+
+            var query = ""
+            var source = KGbrowser.currentSource
+            var fromStr = Sparql_common.getFromStr(source)
+            query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
+                "select distinct ?sub ?subLabel  " +
+                fromStr +
                 "WHERE {"
 
-            query += where + " } "
+            var where = self.currentNode.data.queryWhere
+            query += where + " } order by ?subLabel limit 10000"
 
-
-            var offset = 0
-            var length = 1
-            var allResults = []
-
-            var maxOffset = 50000
+            var url = Config.sources[source].sparql_server.url + "?format=json&query=";
             MainController.UI.message("searching...")
-            async.whilst(
-                function (callbackTest) {//test
-                    if (offset >= maxOffset)
-                        alert("query results truncated : larger than " + maxOffset + " maximum authorized ")
-                    return length > 0 && offset < maxOffset;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: source}, function (err, result) {
+                // $("#waitImg").css("display", "none");
+                if (err) {
+                    return MainController.UI.message(err)
                 }
-                ,
-                function iter(callbackWhilst) {
-                    var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-                    var query2 = query;
-                    if (!options.count)
-                        query2 = query + " limit " + fetchLength + " OFFSET " + offset;
-                    offset += fetchLength
-                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
-                        if (err) {
-                            return callbackWhilst(err)
-                        }
-                        length = result.results.bindings.length
-                        if (options.count)
-                            length = 0
-                        allResults = allResults.concat(result.results.bindings);
-                        MainController.UI.message("searching..." + allResults.length)
-                        callbackWhilst();
-                    })
-                }, function (err) {
-                    if (err)
-                        return callback(err)
-
-                    return callback(null, {data: allResults, filter: dialogFilterStr})
+                var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"])
+                var jstreeData = []
+                result.results.bindings.forEach(function (item) {
+                    jstreeData.push(
+                        {
+                            id: item.sub.value,
+                            text: item.subLabel.value,
+                            parent: "#",
+                            data: self.currentNode.data
+                        })
 
                 })
+
+
+                common.jstree.loadJsTree("KGbrowser_adlJstreeDiv", jstreeData, {})
+
+            })
+
+
+            MainController.UI.hidePopup("graphPopupDiv")
+        }
+        ,
+        addToGraph: function () {
+            MainController.UI.hidePopup("graphPopupDiv")
+
+        }
+        ,
+
+
+    }
+
+    self.executeQuery = function (node, options, callback) {
+
+        var fetchLength = Config.KG.queryLimit
+        var queryFilterNodes = KGbrowserQuery.queryFilterNodes;
+        var dialogFilterStr = "";
+        var where = ""
+        var varName = options.varName;
+        var source = KGbrowser.currentSource
+        if (varName) {// add filter to query
+            if (options.filter)
+                dialogFilterStr = options.filter
+            if (!dialogFilterStr)
+                dialogFilterStr = "";
+            where += dialogFilterStr
 
 
         }
 
-        self.executeShortestPathQuery = function (fromNode, toNode, options, callback) {
-            if (!self.shortestPathQueriesStack)
-                self.shortestPathQueriesStack = []
-            if (self.queryFilterNodes.length < 2)
-                return alert("this query needs at least 2 superClasses ")
+
+        // join classes (anonym predicate)
+        var message = null
+        var filterSubType
+        var filterObjType
+
+        var varName2 = varName;
+
+
+        if (options.predicate) {// links new filter predicate to a previous varName matching
+            var predicateStr = "<" + options.predicate.predicate + ">"
+            if (options.predicate.inverse)
+                predicateStr = "^" + predicateStr
+            //  predicateStr = predicateStr + "|^" + predicateStr
+            var previousVarName = null;
+            if (queryFilterNodes.length == 1) {// the first query has no predicate
+                previousVarName = queryFilterNodes[0].varName
+                predicateStr = " " + varName2 + predicateStr + previousVarName + ". "
+                queryFilterNodes[0].filter += predicateStr
+                self.currentNode.filter += predicateStr;
+            } else {
+                queryFilterNodes.forEach(function (filterNodeData, index2) {
+                    if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
+                        previousVarName = filterNodeData.varName
+                        predicateStr = " " + varName2 + " " + predicateStr + " " + previousVarName + ". "
+                        filterNodeData.filter += predicateStr
+                        self.currentNode.filter += predicateStr;
+                    }
+                })
+            }
+        }
+
+
+        //build query with all previous filters and varnames
+
+        queryFilterNodes.forEach(function (filterNodeData, index) {
+            if (!filterNodeData)
+                return
+
+
+            where += filterNodeData.filter
+
+
+            varName2 = filterNodeData.varName
+            if (!options.count) {
+                where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} "
+                //  where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} "
+                //  where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". "
+                where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". "
+
+            }
+
+
+        })
+
+        if (message)
+            return callback(message)
+
+        //checked chexkboxes in class individuals
+        if ($("#KGbrowser_adlJstreeDiv").jstree(true)) {
+            var checkedIds = $("#KGbrowser_adlJstreeDiv").jstree().get_checked();
+            if (checkedIds && checkedIds.length > 0) {
+                self.individualFilters = {varName: self.currentFilterData.varName, ids: checkedIds}
+
+                var idsStr = "";
+                self.individualFilters.ids.forEach(function (id, index) {
+                    if (index > 0)
+                        idsStr += ","
+                    idsStr += "<" + id + ">"
+                })
+                where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))"
+            }
+        }
+        if (where == "")
+            return MainController.UI.message("Wrong query : no where clasues", true)
+
+        var fromStr = Sparql_common.getFromStr(source)
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> "
+        if (options.count)
+            query += "select (count(distinct " + varName + ") as ?count) "
+        else if (options.selectVars) {
+            var selectVarsStr = ""
+            options.selectVars.forEach(function (varName, index) {
+                selectVarsStr += varName + " " + varName + "Label " + varName + "Type "
+
+            })
+            query += "select distinct " + selectVarsStr
+
+        } else {
+            query += "select distinct " + varName + " " + varName + "Label " + varName + "Type "
+        }
+        query += fromStr +
+            "WHERE {"
+
+        query += where + " } "
+
+
+        var offset = 0
+        var length = 1
+        var allResults = []
+
+        var maxOffset = 50000
+        MainController.UI.message("searching...")
+        async.whilst(
+            function (callbackTest) {//test
+                if (offset >= maxOffset)
+                    alert("query results truncated : larger than " + maxOffset + " maximum authorized ")
+                return length > 0 && offset < maxOffset;
+            }
+            ,
+            function iter(callbackWhilst) {
+                var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+                var query2 = query;
+                if (!options.count)
+                    query2 = query + " limit " + fetchLength + " OFFSET " + offset;
+                offset += fetchLength
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: source}, function (err, result) {
+                    if (err) {
+                        return callbackWhilst(err)
+                    }
+                    length = result.results.bindings.length
+                    if (options.count)
+                        length = 0
+                    allResults = allResults.concat(result.results.bindings);
+                    MainController.UI.message("searching..." + allResults.length)
+                    callbackWhilst();
+                })
+            }, function (err) {
+                if (err)
+                    return callback(err)
+
+                return callback(null, {data: allResults, filter: dialogFilterStr})
+
+            })
+
+
+    }
+
+    self.executeShortestPathQuery = function (fromNode, toNode, options, callback) {
+        if (!self.shortestPathQueriesStack)
+            self.shortestPathQueriesStack = []
+        if (self.queryFilterNodes.length < 2)
+            return alert("this query needs at least 2 superClasses ")
+
+
+        if (self.currentPath) {
+            toNode = self.queryFilterNodes[0].id
+            GraphTraversal.addNodeToPath(toNode,self.classes,self.currentPath)
+return;
+
+        }
+
+
+
             if (!options) {
                 options = {}
             }
@@ -969,7 +981,7 @@ var KGbrowserQuery = (function () {
                     toNode = self.queryFilterNodes[index]
 
                     var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
-
+                    self.currentPath=predicatesPath
 
                     where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
                     where += fromNode.filter + "\n"
@@ -1314,7 +1326,7 @@ var KGbrowserQuery = (function () {
 )()
 
 
-if( true) {
+if (false) {
     var path1 = "^<http://standards.iso.org/iso/15926/part14/hasQuality>/^<http://standards.iso.org/iso/15926/part14/representedBy>/<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/^<http://standards.iso.org/iso/15926/part14/hasSubLocation> ?FacilitySector_1."
     var path2 = " <http://standards.iso.org/iso/15926/part14/hasSubLocation>/^<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/<http://standards.iso.org/iso/15926/part14/concretizedBy>/<http://w3id.org/readi/rdl/D101001101> ?organization_0."
 
@@ -1322,40 +1334,52 @@ if( true) {
     var query = ""
     var varIndex = 0
     var allPropertiesMap = {}
+    var predicatesMap = {}
     shortestPathQueriesStack.forEach(function (path, index) {
-        //  var str = path.replace(/^/g, "")
-        var predicates = path.split(">/")
 
-        path.predicatesArray = predicates
-        predicates.forEach(function (property) {
+        var regex = /<(.[^>]*)>/gm
+        var predicates
+
+        while ((predicates = regex.exec(path)) != null) {
+            var property = predicates[1]
+            if (!predicatesMap[index])
+                predicatesMap[index] = []
+            predicatesMap[index].push(property)
+
             if (!allPropertiesMap[property])
-                allPropertiesMap[property]=0
-            allPropertiesMap[property]+=1
-        })
-    })
-
-  var indexProperty=0
-for( var property in allPropertiesMap) {
-    shortestPathQueriesStack.forEach(function (path, indexPath) {
-
-        var count = allPropertiesMap[property]
-        if (count > 1) {
-            var varName = "?Q" + (indexProperty++)
-            varName = varName + ". " + varName
-            var p = path.predicatesArray.indexOf(property)
-            if (p > 0 && p < path.predicatesArray.length - 1) {
-                if (path.predicatesArray[p].indexOf("^") > -1) {
-                    path.predicatesArray[p] = varName + path.predicatesArray[p]
-                } else {
-                    path.predicatesArray[p] = path.predicatesArray[p] + varName
-                }
-            }
+                allPropertiesMap[property] = 0
+            allPropertiesMap[property] += 1
         }
 
 
     })
 
+    var indexProperty = 0
+    for (var property in allPropertiesMap) {
+        indexProperty++;
+        shortestPathQueriesStack.forEach(function (path, indexPath) {
 
-}}
+            var count = allPropertiesMap[property]
+            if (count > 1) {
+                var varName = " ?Q" + (indexProperty)
+                varName = varName + ". " + varName + " "
+                var p = predicatesMap[indexPath].indexOf(property)
+                if (p > 0 && p < predicatesMap[indexPath].length - 1) {
+                    if (predicatesMap[indexPath].indexOf("^") > -1) {
+                        predicatesMap[indexPath][p] = varName + predicatesMap[indexPath][p]
+                    } else {
+                        predicatesMap[indexPath][p] = predicatesMap[indexPath][p] + varName
+                    }
+                }
+            }
+
+
+        })
+
+
+    }
+    var x = predicatesMap
+
+}
 
 

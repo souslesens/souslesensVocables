@@ -958,84 +958,41 @@ var KGbrowserQuery = (function () {
             return alert("this query needs at least 2 superClasses ")
 
 
-        if (self.currentPath) {
-            toNode = self.queryFilterNodes[0].id
-            GraphTraversal.addNodeToPath(toNode,self.classes,self.currentPath)
-return;
 
-        }
 
 
 
             if (!options) {
                 options = {}
             }
+        var where = "";
+        if (self.queryFilterNodes.length ==2) {
 
-            var where = "";
-            if (true) {
+
                 self.queryFilterNodes.forEach(function (item, index) {
                     if (index == 0)
                         return;
                     // fromNode=  self.queryFilterNodes[1]
                     fromNode = self.queryFilterNodes[index - 1]
                     toNode = self.queryFilterNodes[index]
+                    where += GraphTraversal.getShortestPaths(fromNode, toNode, self.classes)
 
-                    var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
-                    self.currentPath=predicatesPath
 
-                    where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
-                    where += fromNode.filter + "\n"
-                    where += toNode.filter + "\n"
+
                 })
             }
-            if (false) {
-                var predicatesPaths = []
-                self.queryFilterNodes.forEach(function (item, index) {
-                    if (index == 0)
-                        return;
-                    // fromNode=  self.queryFilterNodes[1]
-                    fromNode = self.queryFilterNodes[index - 1]
-                    toNode = self.queryFilterNodes[index]
 
-                    var predicatesPath = GraphTraversal.getShortestPaths(fromNode.class, toNode.class, self.classes)
-                    predicatesPaths.push(predicatesPath)
+        if (self.queryFilterNodes.length >2) {
+            toNode = self.queryFilterNodes[0]
+            where += GraphTraversal.addNodeToPath(toNode,self.classes,self.queryFilterNodes.length)
+            where += toNode.filter + "\n"
+        }
 
-
-                })
-
-                var distinctPredicates = {}
-                var mixedPredicatesPaths = []
-                predicatesPaths.forEach(function (predicatesPath) {
-
-                    predicatesPath = predicatesPath.replace("/^/g", "")
-                    var array = predicatesPath.split("/")
-                    array.forEach(function (item) {
-                        if (distinctPredicates[item]) {
-                            distinctPredicates[item] = 0
-                        }
-                        distinctPredicates[item] += 1
-                    })
-
-                })
-                for (var predicate in distinctPredicates) {
-                    if (distinctPredicates[predicate] > 1) {
-                        predicatesPaths.forEach(function (predicatesPath) {
-                            var index = predicatesPath.indexOf(predicate)
-                            if (index > -1) {
-
-                            }
-                        })
-                    }
-
-                }
+        self.queryFilterNodes.forEach(function(filterNode){
+            where += filterNode.filter + "\n"
+        })
 
 
-                /*    where += fromNode.varName + " " + predicatesPath + " " + toNode.varName + ".\n"
-                    where += fromNode.filter + "\n"
-                    where += toNode.filter + "\n"*/
-
-
-            }
 
 
             var source = KGbrowser.currentSource

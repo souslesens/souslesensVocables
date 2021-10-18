@@ -65,7 +65,7 @@ var GraphTraversal = (function () {
         }
 
 
-        self.getShortestPaths = function (fromNodeId, toNodeId, allClassesMap) {
+        self.getShortestPaths = function (fromNodeObj, toNodeObj, allClassesMap) {
             //   const Graph = require('dijkstra-short-path');
 
             var obj = self.initRoute(allClassesMap);
@@ -75,21 +75,20 @@ var GraphTraversal = (function () {
             var inversePredicates = obj.inversePredicates;
 
 
-            var path = route.path(fromNodeId, toNodeId).path;
+            var path = route.path(fromNodeObj.class, toNodeObj.class).path;
+            self.currentPathNodes = []
+            self.currentPathNodes.push({fromNodeObj: fromNodeObj, toNodeObj: toNodeObj, path: path})
 
             var where = ""
-
-            self.currentPathNodes = path
-
-            return self.getWhereFromPath(path)
-
-
+            var pathStr = self.getWhereFromPath(path)
+            where += fromNodeObj.varName + " " + toNodeObj + " " + toNode.varName + ".\n"
+            return where;
 
 
         }
 
-        self.getWhereFromPath=function(path){
-            var where=""
+        self.getWhereFromPath = function (path) {
+            var where = ""
             path.forEach(function (aclass, index) {
                 var propertyObj = {}
                 if (index > 0) {
@@ -112,57 +111,97 @@ var GraphTraversal = (function () {
         }
 
 
-        self.addNodeToPath = function (targetNodeId, allClassesMap) {
+        self.addNodeToPath = function (targetNodeObj, allClassesMap, seqNumber) {
             var obj = self.initRoute(allClassesMap);
             var route = obj.route;
             var directPredicates = obj.directPredicates;
             var inversePredicates = obj.inversePredicates;
 
 
-
             var candidatePathes = []
-            self.currentPathNodes.forEach(function (node) {
-                var path = route.path(node, targetNodeId).path;
-                candidatePathes.push(path)
+            self.currentPathNodes.forEach(function (pathObj) {
+                pathObj.path.forEach(function (node) {
+                    var path = route.path(node, targetNodeObj.class).path;
+                    candidatePathes.push(path)
+                })
             })
 
 
-            var minSize=1000
-            var shortestPathIndex=-1
-             candidatePathes.forEach(function (path,index) {
-                 if(path.length<minSize){
-                     minSize=path.length;
-                     shortestPathIndex=index;
-                 }
-            })
-            var shortestPath=candidatePathes[shortestPathIndex]
-            var  intersectionPointIndex=self.currentPathNodes.indexOf(shortestPath[0])
-            var targetPaths=[];
-
-
-            var splitPath1=[];
-            var splitPath2=[]
-            self.currentPathNodes.forEach(function(node,index){
-                var currentPath=[]
-                if(index<intersectionPointIndex)
-                    splitPath1.push(node)
-                else if(index>intersectionPointIndex)
-                    splitPath2.push(node)
-                else{
-                    splitPath1.push(node)
-                    splitPath2.push(node)
+            var minSize = 1000
+            var shortestPathIndex = -1
+            candidatePathes.forEach(function (path, index) {
+                if (path.length < minSize) {
+                    minSize = path.length;
+                    shortestPathIndex = index;
                 }
-
-
             })
 
-            var where1= self.getWhereFromPath(splitPath1)
-            var where2= self.getWhereFromPath(splitPath2)
-            var where3= self.getWhereFromPath(shortestPath)
+            var intersectionPoint
+            var shortestPath = candidatePathes[shortestPathIndex]
+            self.currentPathNodes.forEach(function (pathObj, pathIndex) {
+                var p = pathObj.path.indexOf(shortestPath[0])
+                if (p > -1)
+                    intersectionPoint = {pathIndex: pathIndex, nodeIndex: p, className: pathObj.path[p]}
+            })
 
-var varName=" ?Q1. ?Q1 "
-            var where= where1+varName+where2+ " ?Q1" +where3+ "?X"
-            return where;
+
+            var where = ""
+            self.currentPathNodes.forEach(function (pathObj, pathIndex) {
+                    if (pathIndex != intersectionPoint) {// on laisse le path entier
+
+                        var path = []
+                        pathObj.path.forEach(function (node, nodeIndex) {
+                            path.push(node)
+                        })
+                        var pathStr = self.getWhereFromPath(path);
+                        where += pathObj.fromNodeObj.varName + " " + pathStr + " " + pathObj.toNodeObj.varName + ".\n"
+
+                    } else {// on coupe le path en deux et on ajoute un variable triangulaire
+                        var splitPath1 = []
+                        var splitPath2 = []
+
+                        pathObj.path.forEach(function (node, nodeIndex) {
+                            var currentPath = []
+                            if (index < intersectionPoint.nodeIndex)
+                                splitPath1.push(node)
+                            else if (index > intersectionPoint.nodeIndex)
+                                splitPath2.push(node)
+                            else {
+                                splitPath1.push(node)
+                                splitPath2.push(node)
+                            }
+                        })
+                        var classLabel = KGbrowser.OneModelDictionary[intersectionPoint.class]
+                    }
+                    //on enleve le vieux path
+                    self.currentPathNodes.splice(pathIndex, 1)
+
+                    var cutPathNodeObj = {class: intersectionPoint.class, varName: seqNumber + "_" + classLabel}
+
+                    var path1 = self.getWhereFromPath(splitPath1);
+                    self.currentPathNodes.push({
+                        fromNodeObj: pathObj.fromNodeObj.varName,
+                        toNodeObj: cutPathNodeObj,
+                        path: path1
+                    })
+                    var where1 = self.getWhereFromPath(path1)
+                    where += "?" + cutPathNodeObj.varName + " " + path1 + " ?" + cutPathNodeObj.varName + " .\n"
+
+                    var path2 = self.getWhereFromPath(splitPath2);
+                    self.currentPathNodes.push({fromNodeObj: cutPathNodeObj, toNodeObj: targetNodeObj, path: path1})
+                    var where1 = self.getWhereFromPath(path1)
+                    where += "?" + cutPathNodeObj.varName + " " + path1 + " ?" + pathObj.toNodeObj.varName + " .\n"
+
+
+                    var path3 = self.getWhereFromPath(splitPath1);
+                    self.currentPathNodes.push({fromNodeObj: cutPathNodeObj, toNodeObj: targetNodeObj, path: path1})
+                    var where1 = self.getWhereFromPath(path1)
+                    where += "?" + cutPathNodeObj.varName + " " + intersectionPoint.path + " ?" + targetNodeObj.varName + " .\n"
+
+                }
+            )
+
+
         }
 
 
@@ -170,5 +209,6 @@ var varName=" ?Q1. ?Q1 "
 
 
     }
-)()
+)
+()
 

@@ -169,13 +169,21 @@
                 $(".jstree").height(w - 100);
 
 
-                $("#accordion").accordion()
-                $("#accordion").accordion("option", {active: 0});
-                $("#accordion").on("accordionbeforeactivate", function (event, ui) {
-                    if (!ADLmappings.checkMappingEditionSave())
-                        return false;
-                })
-                $("#accordion").on("accordionactivate", function (event, ui) {
+            $("#accordion").accordion()
+            $("#accordion").accordion("option", {active: 0});
+            $("#accordion").on("accordionbeforeactivate",function( event, ui ) {
+                if(!ADLmappings.checkMappingEditionSave())
+                    return false;
+            })
+            $("#accordion").on("accordionactivate", function (event, ui) {
+                if (ui.newHeader.text() === "Admin") {
+                    $("#graphDiv").html(`
+                        <div id="mount-app-here"></div>
+                    `);
+                    $.getScript("/mainapp.js");
+                } else {
+                    $("#graphDiv").html("...");
+                }
 
 
                     if (false && ui.newPanel[0].id == "blenderPanelDiv") {
@@ -405,6 +413,10 @@
                 </div>
             </div>
 
+            <h3><span class="title">Admin</span></h3>
+            <div style="margin:5px" class='max-height'>
+                <div id="adminDiv" style="min-height: 50px"></div>
+            </div>
 
             <h3><span class="title" id="sourcePanelLabel"> </span></h3>
             <div style="margin:5px" class='max-height'>

@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
-var serverParams = { routesRootUrl: "" };
+var path = require('path');
+var serverParams = { routesRootUrl: "" }
+
 
 var elasticRestProxy = require("../bin/elasticRestProxy..js");
 var authentication = require("../bin/authentication..js");

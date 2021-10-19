@@ -52,7 +52,7 @@ const initialModel: Model =
     profiles: loading(),
     sources: loading(),
     isModalOpen: false,
-    currentEditionTab: 'UsersEdition'
+    currentEditionTab: 'ProfilesEdition'
 }
 
 const ModelContext = React.createContext<{ model: Model; updateModel: React.Dispatch<Msg> } | null>(null);

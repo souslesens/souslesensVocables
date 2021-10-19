@@ -7,10 +7,11 @@ export declare const style: {
     left: string;
     transform: string;
     width: number;
-    height: number;
+    height: string;
     bgcolor: string;
     border: string;
     boxShadow: number;
     p: number;
+    overflowY: string;
 };
 export { identity, sanitizeValue };

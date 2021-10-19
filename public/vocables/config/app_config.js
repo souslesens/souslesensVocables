@@ -13,8 +13,8 @@ var Config = (function () {
     var self = {};
     self.serverUrl = "/elastic";
     if (window.location.href.indexOf("localhost") < 0)
-        self.serverUrl = "../elastic";
-    self.default_sparql_url = "http://51.178.139.80:8890/sparql"
+      self.serverUrl = "../elastic";
+ //   self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     //  self.default_sparql_url = "http://10.28.171.139:8890/sparql"
 //    self.default_sparql_url="http://opeppa-updtlb03.main.glb.corp.local:8890/sparql"
 
@@ -23,7 +23,7 @@ var Config = (function () {
     self.defaultNewUriRoot = "http://souslesens.org/resource/"
     self.loginMode = "json";
 
-    self.loginMode = "none";
+   self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}
@@ -144,7 +144,12 @@ var Config = (function () {
         toolDescriptionImg: null
     }//"images/taxonomy.png"}
 
-
+    self.tools["SQLquery"] = {
+        label: "SQLquery",
+        multiSources: 0,
+        controller: SQLquery,
+        toolDescriptionImg: null
+    }//"images/taxonomy.png"}
 
 
 

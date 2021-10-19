@@ -9,46 +9,44 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var winston = require('winston');
+var winston = require("winston");
 
-
-const {createLogger, format, transports} = require('winston');
-const {combine, timestamp, json} = format;
+const { createLogger, format, transports } = require("winston");
+const { combine, timestamp, json } = format;
 
 const logger = createLogger({
-    level: 'info',
+    level: "info",
 
     format: combine(
         timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss'
+            format: "YYYY-MM-DD HH:mm:ss",
         }),
-        json(),
+        json()
     ),
-
 
     //  format: winston.format.json(),
 
-
-    defaultMeta: {service: 'user-navigation'},
+    defaultMeta: { service: "user-navigation" },
     transports: [
         //
         // - Write to all logs with level `info` and below to `combined.log`
         // - Write all logs error (and below) to `error.log`.
         //
-        new winston.transports.File({filename: '../logs/error.log', level: 'error'}),
-        new winston.transports.File({filename: '../logs/vocables.log', level: 'info'})
-    ]
+        new winston.transports.File({ filename: "../logs/error.log", level: "error" }),
+        new winston.transports.File({ filename: "../logs/vocables.log", level: "info" }),
+    ],
 });
-
 
 //
 // If we're not in production then log to the `console` with the format:
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-// 
-if (process.env.NODE_ENV !== 'production') {
-    logger.add(new winston.transports.Console({
-        format: winston.format.simple()
-    }));
+//
+if (process.env.NODE_ENV !== "production") {
+    logger.add(
+        new winston.transports.Console({
+            format: winston.format.simple(),
+        })
+    );
 }
 
 module.exports = logger;

@@ -306,7 +306,7 @@ ADLbrowserCustom.initsuperClassesPalette()
                 for (var source in Config.sources) {
                    // console.log(Config.sources[source].schemaType)
                    // if (Config.sources[source].schemaType.indexOf("INDIVIDUAL")>-1)
-                    if (Config.sources[source].schemaType=="INDIVIDUAL")
+                    if (Config.sources[source].schemaType=="KNOWLEDGE_GRAPH")
                         jstreeData.push({
                             id: source,
                             text: source,

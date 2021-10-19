@@ -144,7 +144,7 @@ var ADLadvancedMapping = (function () {
                 var column = obj.column;
                 var table = "[" + ADLmappingData.currentADLdataSource.dbName + "]." + obj.table;
 
-                var sqlQuery = " select count( distinct " + column + ") as count from " + table;
+                var sqlQuery = " select count( distinct [" + column + "]) as count from " + table;
                 self.executeSqlserverQuery(sqlQuery, ADLmappingData.currentADLdataSource, function (err, data) {
                     if (err) {
                         alert(err.responseText)
@@ -157,7 +157,7 @@ var ADLadvancedMapping = (function () {
 
                     var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.ADL.maxDistinctValuesForAdvancedMapping;
                     if (ADLmappingData.currentADLdataSource.type == "sql.sqlserver")
-                        sqlQuery = " select  distinct top(10000) " + column + " from " + table;
+                        sqlQuery = " select  distinct top(10000) [" + column + "] from " + table;
 
                     self.executeSqlserverQuery(sqlQuery, ADLmappingData.currentADLdataSource, function (err, data) {
                         if (err) {
@@ -213,7 +213,7 @@ var ADLadvancedMapping = (function () {
             var distinctSources = []
             columnValues.forEach(function (value) {
 
-                var value2 = value.toLowerCase();//.replace(/\-/g," ")
+                var value2 = value.toLowerCase().trim();//.replace(/\-/g," ")
                 var cssClass = null;
                 var termObj = superClassDictionary.terms[value2];
                 var sourcesHtml = ""
@@ -398,7 +398,7 @@ var ADLadvancedMapping = (function () {
                     keys.forEach(function (key) {
                         var value = "" + entity[source][key]
                         if (value.indexOf("http://") == 0)
-                            value = "<a href='" + value + "'>" + value + "</a>"
+                            value = "<a href='" + value + "' target='_blank'>" + value + "</a>"
                         html += "<tr><td>" + key + "</td><td>" + value + "</td></tr>"
                     })
                     html += "</table>" +
@@ -957,34 +957,7 @@ var ADLadvancedMapping = (function () {
 
 
             $("#ADLMappingAdvancedMappings_ontologiesSelect").val("");
-            //concat Quantum RDL
-            /*  function unconcatQuantumRDL() {
-                  var newValues = []
 
-
-                  ADLmappingData.currentColumnDistinctValues.forEach(function (item, index) {
-                      if (item.indexOf('|') > -1) {
-                          newValues = newValues.concat(item.split("|"))
-                          newValues.forEach(function (item) {
-                              item.trim()
-                          })
-                      } else if (item.indexOf('-') > -1) {
-                          newValues = newValues.concat(item.split("-"))
-                          newValues.forEach(function (item) {
-                              item.trim()
-                          })
-                      } else {
-                          newValues.push(Sparql_common.formatStringForTriple(item.trim()))
-                      }
-                  })
-
-                  ADLmappingData.currentColumnDistinctValues = newValues;
-
-              }
-
-              if (false && ADLmappingData.currentSource == "ASSETS-QUANTUM-RDL") {
-                  unconcatQuantumRDL()
-              }*/
             async.series([
 
 

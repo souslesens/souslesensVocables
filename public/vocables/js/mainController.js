@@ -15,6 +15,30 @@ var MainController = (function () {
     self.currentSchemaType = null;
     self.currentSource = null;
 
+
+    self.initConfig = function (callback) {
+
+        var payload = {
+            getGeneralConfig: 1,
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (serverConfig, textStatus, jqXHR) {
+              //  Config.serverUrl = serverConfig.serverUrl
+                Config.default_sparql_url = serverConfig.default_sparql_url
+                return callback()
+            },
+            error: function (err) {
+                return callback(err)
+            }
+        })
+
+
+    }
+
     self.loadSources = function (callback) {
         var payload = {
             getSources: 1,
@@ -140,7 +164,7 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX, callback) {
+        showSources: function (treeDiv, withCBX, sources,callback) {
             var treeData = [];
             var distinctNodes = {}
 
@@ -149,6 +173,8 @@ var MainController = (function () {
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
                 self.initControllers()
+                if(sources && sources.indexOf(sourceLabel)<0)
+                    return
                 if (Config.sources[sourceLabel].isDraft)
                     return;
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
@@ -178,6 +204,7 @@ var MainController = (function () {
                 withCheckboxes: withCBX,
 
                 selectTreeNodeFn: function (evt, obj) {
+                    $("#mainDialogDiv").dialog("close");
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
                             if (obj.node.id == "INDIVIDUAL")
@@ -243,6 +270,7 @@ var MainController = (function () {
                     MainController.writeUserLog(authentication.currentUser, self.currentTool, "")
                     Clipboard.clear();
                     $("#accordion").accordion("option", {active: 1});
+                    $("#mainDialogDiv").dialog("close");
                     var controller = Config.tools[self.currentTool].controller
                     $("#currentSourceTreeDiv").html("")
 
@@ -378,8 +406,8 @@ var MainController = (function () {
             $("#" + popupDiv).css("display", "flex")
         },
         hidePopup: function (popupDiv) {
-            if(self.UI.blockHidePopup)
-                return self.UI.blockHidePopup=false;//one shot
+            if (self.UI.blockHidePopup)
+                return self.UI.blockHidePopup = false;//one shot
             if (!popupDiv)
                 popupDiv = "popupDiv"
             $("#" + popupDiv).css("display", "none")

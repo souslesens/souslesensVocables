@@ -1141,13 +1141,16 @@ var Lineage_classes = (function () {
                 var color = self.getSourceColor(source)
               //  console.log(JSON.stringify(result, null, 2))
                 result.forEach(function (item) {
-
+var size=Lineage_classes.defaultShapeSize
                     if (!item.value) {
+                        color="#ddd"
                         item.value = {value: "?_" + item.prop.value}
-                        item.valueLabel = {value: "?"}
+                        item.valueLabel = {value: ""}
+                        size=3
                     }
                     if (!item.valueLabel) {
-                        item.valueLabel = {value: "?"}
+                        item.valueLabel = {value: ""}
+                        size=3
                     }
                     if (!existingNodes[item.value.value]) {
                         existingNodes[item.value.value] = 1;
@@ -1181,7 +1184,7 @@ var Lineage_classes = (function () {
                             arrows: {
                                 to: {
                                     enabled: true,
-                                    type: "bar",
+                                    type: "solid",
                                     scaleFactor: 0.5
                                 },
                             },

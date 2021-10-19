@@ -40,8 +40,17 @@ var ADLmappings = (function () {
 
         self.onLoaded = function () {
             self.init()
-            MainController.UI.openRightPanel()
+            var KGsources = []
+            for (var source in Config.sources) {
+                if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH")
+                    KGsources.push(source)
+            }
+            MainController.UI.showSources("sourcesTreeDiv", false, KGsources, function (err, result) {
+                if (err)
+                    alert(err)
 
+            })
+            MainController.UI.openRightPanel()
             $("#actionDivContolPanelDiv").html("ADL database &nbsp;<select onchange='ADLmappingData.loadADL_SQLModel()' id=\"ADLmappings_DatabaseSelect\"> </select>" +
                 //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
                 "<button onclick='ADLassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  " +
@@ -49,16 +58,13 @@ var ADLmappings = (function () {
                 "<button id='ADLmappings_buildTriplesButton' onclick='ADLbuild.initDialog()'>Build Triples</button>  "
 
 
-                //   "<button onclick='ADLassetGraph.drawSemanticAsset()'>target Graph</button>  "
             );
 
             $("#actionDiv").html(" <div id='ADLmappings_dataModelTree'  style='width:350px;height: 600px;overflow: auto'></div>");
-            $("#accordion").accordion("option", {active: 2});
-            //
-
-            //  MainController.UI.toogleRightPanel(true)
             $("#graphDiv").html("")
             visjsGraph.clearGraph()
+
+
             $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
             $("#rightPanelDiv").load("snippets/ADL/ADLmappingRightPanel.html");
 
@@ -87,7 +93,7 @@ var ADLmappings = (function () {
                     height: 800,
                     width: 1000,
                     modal: false,
-                    beforeClose:function(ui,event){
+                    beforeClose: function (ui, event) {
                         return ADLadvancedMapping.beforeCloseDialog()
                     }
                 });
@@ -108,22 +114,30 @@ var ADLmappings = (function () {
 
             }, 500)
 
+
         }
 
         //
         self.onSourceSelect = function (source) {
-            MainController.writeUserLog(authentication.currentUser, "ADLmappings", source)
-            self.clearMappings()
+
+
+            var dataSource= Config.sources[source].dataSource;
+            if(!dataSource)
+                return alert("no data source declared for source "+source)
+
+
+            self.currentKGsource = source;
+            self.currentGraphUri = Config.sources[source].graphUri;
+
+            $("#ADLmappings_DatabaseSelect").val(dataSource.dbName);
+            ADLmappingData.loadADL_SQLModel(dataSource.dbName)
+
+            $("#accordion").accordion("option", {active: 2});
+          //  $("#graphDiv").html("")
             visjsGraph.clearGraph()
-            //   visjsGraph.data.nodes()
-            //  MainController.UI.toogleRightPanel(true)
+         //   $("#graphDiv").load("./snippets/ADL/ADLmappings.html");
 
-            OwlSchema.currentADLdataSourceSchema = null;
 
-            ADLcommon.Ontology.load(Config.ADL.OneModelSource, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err)
-            })
 
         }
 
@@ -147,7 +161,7 @@ var ADLmappings = (function () {
                 } else if (false && ADLadvancedMapping.assignConditionalTypeOn)
                     return ADLmappingData.assignConditionalType(propertiesMap.node)
                 else
-                    self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node,true)
+                    self.AssignOntologyTypeToColumn(ADLmappingData.currentColumn, propertiesMap.node, true)
             } else if (TextAnnotator.isAnnotatingText)
                 TextAnnotator.setAnnotation(propertiesMap.node)
         }
@@ -319,8 +333,8 @@ var ADLmappings = (function () {
 
                     contextMenu: self.contextMenuFn("ADLmappings_OneModelTree")
                 }
-                if( false)
-                common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
+                if (false)
+                    common.jstree.loadJsTree("ADLmappings_OneModelTree", propJstreeData, optionsClass)
             })
         }
 
@@ -388,7 +402,7 @@ var ADLmappings = (function () {
         }
 
 
-        self.AssignOntologyTypeToColumn = function (column, node,useDictionary) {
+        self.AssignOntologyTypeToColumn = function (column, node, useDictionary) {
             ADLmappingData.setDataSampleColumntype(column, node)
 
 
@@ -411,17 +425,14 @@ var ADLmappings = (function () {
             ADLmappingGraph.drawNode(column, color, node.position)
 
 
-
-
             //show dictionary for this column
-         //   if(useDictionary && ADLadvancedMapping.dictionaries[node.data[0].dictionary]){
-            if(useDictionary){
-                ADLadvancedMapping.showAdvancedMappingDialog(node.data[0].dictionary,node.data[0].id, ADLmappingData.currentColumn)
-            }else{
+            //   if(useDictionary && ADLadvancedMapping.dictionaries[node.data[0].dictionary]){
+            if (useDictionary) {
+                ADLadvancedMapping.showAdvancedMappingDialog(node.data[0].dictionary, node.data[0].id, ADLmappingData.currentColumn)
+            } else {
                 ADLmappingData.currentColumn = null;
                 $(".dataSample_type").removeClass("datasample_type_selected")
             }
-
 
 
         }
@@ -456,7 +467,7 @@ var ADLmappings = (function () {
         self.loadMappings = function (name) {
 
             if (!name)
-                name = ADLmappingData.currentSource + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
+                name = self.currentKGsource+"_"+ADLmappingData.currentDatabase + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
             //    name = ADLmappingData.currentADLdataSource.dbName + "_" + ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable
 
             var payload = {ADL_GetMappings: name}
@@ -528,7 +539,7 @@ var ADLmappings = (function () {
                                 node.position = data.graph[item.subject]
                             }
 
-                            self.AssignOntologyTypeToColumn(item.subject, node,false)
+                            self.AssignOntologyTypeToColumn(item.subject, node, false)
                         }
 
                         //association
@@ -673,9 +684,9 @@ var ADLmappings = (function () {
 
         }
         self.saveMappings = function () {
-            var mappingName = ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable || ADLmappingData.currentADLtable.data.label
+           var mappingName = ADLmappingData.currentADLtable.data.adlView || ADLmappingData.currentADLtable.data.adlTable || ADLmappingData.currentADLtable.data.label
 
-            mappingName = ADLmappingData.currentSource + "_" + mappingName
+             mappingName = self.currentKGsource+"_"+ADLmappingData.currentDatabase  + "_" + mappingName
             //   mappingName = ADLmappingData.currentADLdataSource.dbName + "_" +  mappingName
             var mappings = self.generateMappings();
             var comment = prompt(mappingName + " optional comment :")

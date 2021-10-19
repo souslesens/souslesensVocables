@@ -60,7 +60,7 @@ var Evaluate = (function () {
             $("#mainDialogDiv").load("snippets/evaluate/annotateDialog.html");
             $("#mainDialogDiv").dialog("open");
             setTimeout(function () {
-                MainController.UI.showSources("annotate_resourcesTreeDiv", true, function () {
+                MainController.UI.showSources("annotate_resourcesTreeDiv", true, null,function () {
                     $("#annotate_resourcesTreeDiv").jstree(true).open_all()
                 })
 

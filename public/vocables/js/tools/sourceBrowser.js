@@ -181,21 +181,21 @@ var SourceBrowser = (function () {
                     graphNodeNeighborhood_incoming: {
                         label: "incoming",
                         action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data,'incoming')
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'incoming')
 
                         }
                     },
                     graphNodeNeighborhood_outcoming: {
                         label: "outcoming",
                         action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data,'outcoming')
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'outcoming')
 
                         }
                     },
                     graphNodeNeighborhood_ranges: {
                         label: "ranges",
                         action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data,'ranges')
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'ranges')
 
                         }
                     },
@@ -204,8 +204,6 @@ var SourceBrowser = (function () {
 
             }
             if (Lineage_common.currentSource && Config.sources[Lineage_common.currentSource].editable) {
-
-
 
 
                 items.pasteNodeFromClipboard = {
@@ -271,14 +269,14 @@ var SourceBrowser = (function () {
             options = {}
         var existingNodes = common.jstree.getjsTreeNodes(divId, true)
         if (node.children && node.children.length > 0)
-            if ( !options.reopen)
+            if (!options.reopen)
                 return;
             else {
-                common.jstree.deleteBranch(divId,node.id)
+                common.jstree.deleteBranch(divId, node.id)
             }
-          var  descendantsDepth =1
+        var descendantsDepth = 1
         if (options.depth)
-            descendantsDepth=options.depth;
+            descendantsDepth = options.depth;
         options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
@@ -385,21 +383,18 @@ var SourceBrowser = (function () {
             }
 
 
-
-
-
         } else {
             if (!MainController.currentSource)
                 return alert("select a source or search in all source")
-            searchedSources.push( MainController.currentSource)
+            searchedSources.push(MainController.currentSource)
         }
         var jstreeData = []
         var uniqueIds = {}
         async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
 
-           // setTimeout(function () {
-                MainController.UI.message("searching in " + sourceLabel)
-           // }, 100)
+            // setTimeout(function () {
+            MainController.UI.message("searching in " + sourceLabel)
+            // }, 100)
             if (!term)
                 term = $("#GenericTools_searchTermInput").val()
 
@@ -411,18 +406,18 @@ var SourceBrowser = (function () {
                 exactMatch: exactMatch,
                 limit: Config.searchLimit,
             }
-            var type=Config.sources[sourceLabel].schemaType
+            var type = Config.sources[sourceLabel].schemaType
 
             SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
                 if (err) {
                     MainController.UI.message(err.responseText)
-                    var text = "<span class='searched_conceptSource'>" + sourceLabel +" Error !!!"+ "</span>"
+                    var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
                     jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
-                }else {
+                } else {
 
                     var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
 
-                    jstreeData.push({id: sourceLabel, text: text, parent: "#",type:type, data: {source: sourceLabel}})
+                    jstreeData.push({id: sourceLabel, text: text, parent: "#", type: type, data: {source: sourceLabel}})
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1
@@ -481,7 +476,7 @@ var SourceBrowser = (function () {
     }
 
     self.getFilteredNodesJstreeData = function (sourceLabel, options, callback) {
-        self.currentFoundIds=[]
+        self.currentFoundIds = []
         if (!options.term)
             options.term = $("#GenericTools_searchTermInput").val()
 
@@ -513,28 +508,27 @@ var SourceBrowser = (function () {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
 
-                  //   item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
-                     item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value
+                        //   item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
+                        item["broader" + i].jstreeId = sourceLabel + "_" + item["broader" + i].value
                     }
 
                 }
-                item.concept.jstreeId = sourceLabel+"_"+item.concept.value ;
+                item.concept.jstreeId = sourceLabel + "_" + item.concept.value;
             })
 
-            var type=Config.sources[sourceLabel].schemaType
-            if(type=="SKOS")
-                type="concept"
-            else if(type=="OWL")
-                type="class"
+            var type = Config.sources[sourceLabel].schemaType
+            if (type == "SKOS")
+                type = "concept"
+            else if (type == "OWL")
+                type = "class"
             result.forEach(function (item, index) {
 
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
 
 
-
                         var id = item["broader" + i].value
-                        if(false && id.indexOf("nodeID://")>-1)//skip anonym nodes
+                        if (false && id.indexOf("nodeID://") > -1)//skip anonym nodes
                             return
                         var jstreeId = item["broader" + i].jstreeId
                         if (!existingNodes[jstreeId]) {
@@ -548,7 +542,7 @@ var SourceBrowser = (function () {
                                 id: jstreeId,
                                 text: label,
                                 parent: parentId,
-                                type:type,
+                                type: type,
                                 data: {
                                     type: "http://www.w3.org/2002/07/owl#Class",
                                     source: sourceLabel,
@@ -565,26 +559,28 @@ var SourceBrowser = (function () {
                     existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>"
                     var id = item.concept.value;
-self.currentFoundIds.push(id)
+                    self.currentFoundIds.push(id)
 
-                    var broader1=item["broader1"]
-                    if(!broader1)
-                        var x=3
-                    else {
+                    var broader1 = item["broader1"]
+                    var parent
+                    if (!broader1)
+                        parent = options.rootId
+                    else
+                        parent = item["broader1"].jstreeId
 
-                        jstreeData.push({
-                            id: jstreeId,
-                            text: text,
-                            parent: item["broader1"].jstreeId,
-                            type:type,
-                            data: {
-                                type: "http://www.w3.org/2002/07/owl#Class",
-                                source: sourceLabel,
-                                id: id,
-                                label: item.conceptLabel.value
-                            }
-                        })
-                    }
+                    jstreeData.push({
+                        id: jstreeId,
+                        text: text,
+                        parent: parent,
+                        type: type,
+                        data: {
+                            type: "http://www.w3.org/2002/07/owl#Class",
+                            source: sourceLabel,
+                            id: id,
+                            label: item.conceptLabel.value
+                        }
+                    })
+
                 }
             })
 //console.log(JSON.stringify(jstreeData))
@@ -625,11 +621,11 @@ self.currentFoundIds.push(id)
 
     }
 
-    self.exportSearchResult=function(){
-        if(!self.currentFoundIds || self.currentFoundIds.length==0)
+    self.exportSearchResult = function () {
+        if (!self.currentFoundIds || self.currentFoundIds.length == 0)
             return;
-        var query=""
-        var idsStr=Sparql_common.setFilter("id",self.currentFoundIds)
+        var query = ""
+        var idsStr = Sparql_common.setFilter("id", self.currentFoundIds)
 
     }
     return self;

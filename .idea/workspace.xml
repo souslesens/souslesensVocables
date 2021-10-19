@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
+      <change afterPath="$PROJECT_DIR$/bin/SPARQLutil..js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/other/Iso19800toOWL..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/graphTraversal.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphTraversal.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" afterDir="false" />
     </list>
@@ -97,11 +102,11 @@
       <recent name="D:\webstorm\souslesensVocables\config" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.graphTraversal.js">
-    <configuration name="KGbrowserQuery.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/KG/browser">
+  <component name="RunManager" selected="Node.js.Iso19800toOWL..js">
+    <configuration name="Iso19800toOWL..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/Iso19800toOWL..js" working-dir="$PROJECT_DIR$/other">
       <method v="2" />
     </configuration>
-    <configuration name="UMLtoOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/UMLtoOWLparser..js" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="KGbrowserQuery.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/KG/browser">
       <method v="2" />
     </configuration>
     <configuration name="energisticsToOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" working-dir="$PROJECT_DIR$/other/energisitics">
@@ -115,11 +120,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.Iso19800toOWL..js" />
         <item itemvalue="Node.js.graphTraversal.js" />
         <item itemvalue="Node.js.KGbrowserQuery.js" />
         <item itemvalue="Node.js.energisticsToOWLparser..js" />
         <item itemvalue="Node.js.usersGenerator..js" />
-        <item itemvalue="Node.js.UMLtoOWLparser..js" />
       </list>
     </recent_temporary>
   </component>
@@ -246,7 +251,8 @@
       <workItem from="1634112263927" duration="18873000" />
       <workItem from="1634276654279" duration="11050000" />
       <workItem from="1634471930363" duration="4730000" />
-      <workItem from="1634490940304" duration="29624000" />
+      <workItem from="1634490940304" duration="34876000" />
+      <workItem from="1634624661848" duration="16962000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -451,7 +457,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634568023713</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="change ADL prefix to KG">
+      <created>1634579428306</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1634579428306</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -656,7 +669,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
-          <line>425</line>
+          <line>426</line>
           <option name="timeStamp" value="223" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -694,11 +707,6 @@
           <line>52</line>
           <option name="timeStamp" value="402" />
         </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
-          <line>108</line>
-          <option name="timeStamp" value="403" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
           <line>232</line>
@@ -706,7 +714,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
-          <line>39</line>
+          <line>40</line>
           <option name="timeStamp" value="505" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
@@ -715,27 +723,24 @@
           <option name="timeStamp" value="520" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
-          <line>125</line>
-          <option name="timeStamp" value="534" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
-          <line>1337</line>
-          <properties lambdaOrdinal="-1" />
+          <line>1303</line>
           <option name="timeStamp" value="559" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
-          <line>1314</line>
-          <properties lambdaOrdinal="-1" />
+          <line>1280</line>
           <option name="timeStamp" value="561" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
-          <line>1311</line>
-          <properties lambdaOrdinal="-1" />
+          <line>1277</line>
           <option name="timeStamp" value="562" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/graphTraversal.js</url>
+          <line>216</line>
+          <option name="timeStamp" value="565" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

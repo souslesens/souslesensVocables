@@ -1,7 +1,7 @@
 var GraphTraversal = (function () {
 
         var self = {}
-
+        self.currentPathNodes=[]
         self.routeObject = null;
         self.initRoute = function (allClassesMap) {
             if (self.routeObject)
@@ -81,7 +81,7 @@ var GraphTraversal = (function () {
 
             var where = ""
             var pathStr = self.getWhereFromPath(path)
-            where += fromNodeObj.varName + " " + toNodeObj + " " + toNode.varName + ".\n"
+            where += fromNodeObj.varName + " " + pathStr + " " + toNodeObj.varName + ".\n"
             return where;
 
 
@@ -137,18 +137,25 @@ var GraphTraversal = (function () {
             })
 
             var intersectionPoint
-            var shortestPath = candidatePathes[shortestPathIndex]
+            var newPath = candidatePathes[shortestPathIndex]
             self.currentPathNodes.forEach(function (pathObj, pathIndex) {
-                var p = pathObj.path.indexOf(shortestPath[0])
+                var p = pathObj.path.indexOf(newPath[0])
                 if (p > -1)
-                    intersectionPoint = {pathIndex: pathIndex, nodeIndex: p, className: pathObj.path[p]}
+                    intersectionPoint = {
+                        pathIndex: pathIndex,
+                        nodeIndex: p,
+                        className: pathObj.path[p],
+                        newPath: newPath
+                    }
             })
 
 
             var where = ""
+            var newPathNodes=[]
             self.currentPathNodes.forEach(function (pathObj, pathIndex) {
-                    if (pathIndex != intersectionPoint) {// on laisse le path entier
 
+                    if (pathIndex != intersectionPoint.pathIndex) {// on laisse le path entier
+                        newPathNodes.push(pathObj)
                         var path = []
                         pathObj.path.forEach(function (node, nodeIndex) {
                             path.push(node)
@@ -156,51 +163,80 @@ var GraphTraversal = (function () {
                         var pathStr = self.getWhereFromPath(path);
                         where += pathObj.fromNodeObj.varName + " " + pathStr + " " + pathObj.toNodeObj.varName + ".\n"
 
+
+
+
                     } else {// on coupe le path en deux et on ajoute un variable triangulaire
+
+
+
                         var splitPath1 = []
                         var splitPath2 = []
-
                         pathObj.path.forEach(function (node, nodeIndex) {
                             var currentPath = []
-                            if (index < intersectionPoint.nodeIndex)
+                            if (nodeIndex < intersectionPoint.nodeIndex)
                                 splitPath1.push(node)
-                            else if (index > intersectionPoint.nodeIndex)
+                            else if (nodeIndex > intersectionPoint.nodeIndex)
                                 splitPath2.push(node)
                             else {
                                 splitPath1.push(node)
                                 splitPath2.push(node)
                             }
                         })
-                        var classLabel = KGbrowser.OneModelDictionary[intersectionPoint.class]
+
+
+                        //on enleve le vieux path
+                        //  self.currentPathNodes.splice(pathIndex, 1)
+                        var classLabel = KGbrowser.OneModelDictionary[intersectionPoint.className]
+
+
+                        var cutPathNodeObj
+                        if(intersectionPoint.nodeIndex==0){
+                            cutPathNodeObj= self.currentPathNodes[intersectionPoint.pathIndex].fromNodeObj
+                        }else  if(intersectionPoint.nodeIndex== self.currentPathNodes[intersectionPoint.pathIndex].length-1){
+                            cutPathNodeObj= self.currentPathNodes[intersectionPoint.pathIndex].toNodeObj
+                        }
+                        else {
+                            cutPathNodeObj = {
+                                class: intersectionPoint.className,
+                                varName: "?" + classLabel + "_" + seqNumber
+                            }
+                        }
+
+
+
+                        var path1 = self.getWhereFromPath(splitPath1);
+                        newPathNodes.push({
+                            fromNodeObj: pathObj.fromNodeObj,
+                            toNodeObj: cutPathNodeObj,
+                            path: splitPath1
+                        })
+                        where += " " + pathObj.fromNodeObj.varName + " " + path1 + "  " + cutPathNodeObj.varName + " .\n"
+
+
+                        var path2 = self.getWhereFromPath(splitPath2);
+                        newPathNodes.push({
+                            fromNodeObj: cutPathNodeObj,
+                            toNodeObj: pathObj.toNodeObj,
+                            path: splitPath2
+                        })
+                        where += " " + cutPathNodeObj.varName + " " + path2 + " " + pathObj.toNodeObj.varName + " .\n"
+
+
+                        var path3 = self.getWhereFromPath(intersectionPoint.newPath);
+                        newPathNodes.push({
+                            fromNodeObj: cutPathNodeObj,
+                            toNodeObj: targetNodeObj,
+                            path: intersectionPoint.newPath
+                        })
+
+                        where += " " + cutPathNodeObj.varName + " " + path3 + " " + targetNodeObj.varName + " .\n"
                     }
-                    //on enleve le vieux path
-                    self.currentPathNodes.splice(pathIndex, 1)
-
-                    var cutPathNodeObj = {class: intersectionPoint.class, varName: seqNumber + "_" + classLabel}
-
-                    var path1 = self.getWhereFromPath(splitPath1);
-                    self.currentPathNodes.push({
-                        fromNodeObj: pathObj.fromNodeObj.varName,
-                        toNodeObj: cutPathNodeObj,
-                        path: path1
-                    })
-                    var where1 = self.getWhereFromPath(path1)
-                    where += "?" + cutPathNodeObj.varName + " " + path1 + " ?" + cutPathNodeObj.varName + " .\n"
-
-                    var path2 = self.getWhereFromPath(splitPath2);
-                    self.currentPathNodes.push({fromNodeObj: cutPathNodeObj, toNodeObj: targetNodeObj, path: path1})
-                    var where1 = self.getWhereFromPath(path1)
-                    where += "?" + cutPathNodeObj.varName + " " + path1 + " ?" + pathObj.toNodeObj.varName + " .\n"
-
-
-                    var path3 = self.getWhereFromPath(splitPath1);
-                    self.currentPathNodes.push({fromNodeObj: cutPathNodeObj, toNodeObj: targetNodeObj, path: path1})
-                    var where1 = self.getWhereFromPath(path1)
-                    where += "?" + cutPathNodeObj.varName + " " + intersectionPoint.path + " ?" + targetNodeObj.varName + " .\n"
 
                 }
             )
-
+            self.currentPathNodes=JSON.parse(JSON.stringify(newPathNodes));
+            return where;
 
         }
 

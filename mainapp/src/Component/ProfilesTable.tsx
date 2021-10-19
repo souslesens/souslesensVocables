@@ -94,7 +94,8 @@ const initProfileEditionState: ProfileEditionState = { modal: false, profileForm
 enum Type {
     UserClickedModal,
     UserUpdatedField,
-    ResetProfile
+    ResetProfile,
+    UserClickedCheckAll
 }
 
 enum Mode { Creation, Edition }
@@ -103,7 +104,7 @@ type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
     | { type: Type.ResetProfile, payload: Mode }
-
+    | { type: Type.UserClickedCheckAll, payload: { fieldname: string, value: boolean } }
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
     console.log(Type[msg.type], msg.payload)
@@ -116,6 +117,11 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
         case Type.UserUpdatedField:
             const fieldToUpdate = msg.payload.fieldname
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } }
+
+
+        case Type.UserClickedCheckAll:
+            const _fieldToUpdate = msg.payload.fieldname
+            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [_fieldToUpdate]: msg.payload.value ? "ALL" : [] } }
 
         case Type.ResetProfile:
             switch (msg.payload) {
@@ -141,15 +147,19 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const { model, updateModel } = useModel()
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
+    const schemaTypes = [...new Set(unwrappedSources.map(source => source.schemaType))]
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
-
+    const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"]
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile })
 
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true })
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false })
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } })
+    console.log(tools, typeof profileModel.profileForm.allowedTools)
 
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } })
+    const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } })
+    const shouldDisplayMultiselect = () => Array.isArray(profileModel.profileForm.allowedTools)
     const saveProfiles = () => {
 
         const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
@@ -169,7 +179,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     return (<>
         <Button variant='contained' color='primary' onClick={handleOpen}>{create ? "Create Profile" : "Edit"}</Button>
         <Modal onClose={handleClose} open={profileModel.modal}>
-            <Box sx={style}>
+            <Box component='form' sx={style}>
                 <Stack spacing={4}>
                     <TextField fullWidth onChange={handleFieldUpdate("name")}
 
@@ -189,12 +199,104 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
                             onChange={handleFieldUpdate("allowedSourceSchemas")}
                         >
+                            {schemaTypes.map(schemaType => <MenuItem
+                                key={schemaType}
+                                value={schemaType}
+
+                            >
+                                {schemaType}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormGroup>
+                        <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedSources")} checked={profileModel.profileForm.allowedSources === "ALL"} />} label="Allow all sources" />
+                        <FormControl style={{ display: profileModel.profileForm.allowedSources === "ALL" ? 'none' : '' }} disabled={profileModel.profileForm.allowedSources === "ALL"} >
+
+                            <InputLabel id="allowedSources-label">Forbiden Sources</InputLabel>
+                            <Select
+                                labelId="allowedSources-label"
+                                id="allowedSources"
+                                multiple
+                                value={!Array.isArray(profileModel.profileForm.allowedSources) ? [] : profileModel.profileForm.allowedSources}
+                                label="select-allowedSources-label"
+                                fullWidth
+                                renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                                onChange={handleFieldUpdate("allowedSources")}
+                            >
+                                {unwrappedSources.map(source => <MenuItem
+                                    key={source.name}
+                                    value={source.name}
+
+                                >
+                                    {source.name}
+                                </MenuItem>)}
+                            </Select>
+
+
+                        </FormControl>
+                    </FormGroup>
+                    <FormControl>
+                        <InputLabel id="forbidenSources-label">Forbiden Sources</InputLabel>
+                        <Select
+                            labelId="forbidenSources-label"
+                            id="forbidenSources"
+                            multiple
+                            value={profileModel.profileForm.forbiddenSources}
+                            label="select-forbiddenSources-label"
+                            fullWidth
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("forbiddenSources")}
+                        >
                             {unwrappedSources.map(source => <MenuItem
                                 key={source.name}
                                 value={source.name}
 
                             >
                                 {source.name}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <FormGroup  >
+                        <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
+
+                        <FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? 'none' : '' }} disabled={profileModel.profileForm.allowedTools === "ALL"} >
+                            <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
+                            <Select
+                                labelId="allowedTools-label"
+                                id="allowedTools"
+                                multiple
+                                value={!Array.isArray(profileModel.profileForm.allowedTools) ? [] : profileModel.profileForm.allowedTools}
+                                label="select-allowedTools-label"
+                                renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                                onChange={handleFieldUpdate("allowedTools")}
+                            >
+                                {tools.map(tool => <MenuItem
+                                    key={tool}
+                                    value={tool}
+
+                                >
+                                    {tool}
+                                </MenuItem>)}
+                            </Select>
+                        </FormControl></FormGroup>
+                    <FormControl>
+                        <InputLabel id="forbiddenTools-label">Forbidden tools</InputLabel>
+                        <Select
+                            labelId="forbiddenTools-label"
+                            id="forbiddenTools"
+                            multiple
+                            value={!Array.isArray(profileModel.profileForm.forbiddenTools) ? [] : profileModel.profileForm.forbiddenTools}
+                            label="select-forbiddenTools-label"
+                            fullWidth
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("forbiddenTools")}
+                        >
+                            {tools.map(tool => <MenuItem
+                                key={tool}
+                                value={tool}
+
+                            >
+                                {tool}
                             </MenuItem>)}
                         </Select>
                     </FormControl>

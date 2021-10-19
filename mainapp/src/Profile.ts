@@ -28,7 +28,7 @@ type ProfileJson = {
     allowedSourceSchemas: string[];
     allowedSources: string;
     forbiddenSources: string[];
-    allowedTools: string;
+    allowedTools: string[];
     forbiddenTools: string[];
     blender: Blender;
 }
@@ -58,9 +58,9 @@ type Profile = {
     _type: string,
     id: string,
     allowedSourceSchemas: string[];
-    allowedSources: string;
-    forbiddenSources: string[];
-    allowedTools: string;
+    allowedSources: string | string[];
+    forbiddenSources: string | string[];
+    allowedTools: string | string[];
     forbiddenTools: string[];
     blender: Blender;
 }
@@ -72,9 +72,9 @@ export const defaultProfile = (uuid: string): Profile => {
         _type: 'profile',
         id: uuid,
         allowedSourceSchemas: [],
-        allowedSources: "",
+        allowedSources: "ALL",
         forbiddenSources: [],
-        allowedTools: "",
+        allowedTools: "ALL",
         forbiddenTools: [],
         blender: { contextMenuActionStartLevel: 0 }
     }

@@ -8,9 +8,9 @@ declare type Profile = {
     _type: string;
     id: string;
     allowedSourceSchemas: string[];
-    allowedSources: string;
-    forbiddenSources: string[];
-    allowedTools: string;
+    allowedSources: string | string[];
+    forbiddenSources: string | string[];
+    allowedTools: string | string[];
     forbiddenTools: string[];
     blender: Blender;
 };

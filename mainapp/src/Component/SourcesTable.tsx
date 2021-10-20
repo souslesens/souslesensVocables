@@ -113,7 +113,7 @@ type Msg_ =
     | { type: Type.UserClickedCheckBox, payload: { checkboxName: string, value: boolean } }
     | { type: Type.UserUpdatedPredicates, payload: { broaderPredicate: string, lang: string } }
     | { type: Type.UserClickedAddDataSource, payload: boolean }
-    | { type: Type.UserUpdatedDataSource, payload: DataSource }
+    | { type: Type.UserUpdatedDataSource, payload: { type: string, table_schema: string, connection: string, dbName: string, local_dictionary: { table: string, labelColumn: string, idColumn: string } } }
 
 
 
@@ -270,7 +270,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.Dispatch<Msg_> }) => {
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } })
     const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } })
-    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedDataSource, payload: { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value } })
+    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedDataSource, payload: props.model.sourceForm.dataSource ? { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value } : { type: "string", table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } } })
 
     const handleAddDataSource = (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked })
     const dataSource = props.model.sourceForm.dataSource

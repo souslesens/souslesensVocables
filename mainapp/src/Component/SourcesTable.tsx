@@ -295,27 +295,27 @@ const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.D
             return ((<>
                 <Grid item xs={3}><FormControlLabel control={<Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />} label="Do you want to add a data source ?" /></Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("type")}
-                    value={dataSource ? dataSource.type : ""}
+                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : ""}
                     id={`type`}
                     label={"Data Source's type"}
                     variant="standard"
                     style={{ display: !dataSource ? "none" : "" }} /></Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("connection")}
-                    value={dataSource ? dataSource.connection : "_default"}
+                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.connection : ""}
                     id={`connection`}
                     label={"Connection"}
                     variant="standard"
                     style={{ display: !dataSource ? "none" : "" }} />
                 </Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("dbName")}
-                    value={dataSource ? dataSource.dbName : ""}
+                    value={dataSource ?? ""}
                     id={`dbName`}
                     label={"Data Base's Name"}
                     variant="standard"
                     style={{ display: !dataSource ? "none" : "" }}
                 /></Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("table_schema")}
-                    value={dataSource ? dataSource.table_schema : ""}
+                    value={dataSource ?? ""}
                     id={`table_schema`}
                     label={"Table Schema"}
                     style={{ display: !dataSource ? "none" : "" }}

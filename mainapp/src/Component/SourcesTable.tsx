@@ -44,7 +44,7 @@ const SourcesTable = () => {
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
                         <Box id="table-container" sx={{ justifyContent: 'center', height: '400', display: 'flex' }}>
-                            <TableContainer sx={{ height: '400' }} component={Paper}>
+                            <TableContainer sx={{ height: '400px' }} component={Paper}>
                                 <Table>
                                     <TableHead>
                                         <TableRow>
@@ -53,9 +53,9 @@ const SourcesTable = () => {
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody sx={{ width: '100%', overflow: 'clip' }}>{gotSources.map(source => {
+                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotSources.map(source => {
                                         return (<TableRow key={source.name}>
-                                            <TableCell>
+                                            <TableCell >
                                                 {source.name}
                                             </TableCell>
                                             <TableCell>

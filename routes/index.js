@@ -30,8 +30,8 @@ router.get('/users', function (req, res, next) {
 router.put('/users', async function (req, res, next) {
 
     try {
-        await promiseFs.writeFile(path.join(__dirname, '/../config/users/users_test.json'), JSON.stringify(req.body))
-        res.sendFile(path.join(__dirname, '/../config/users/users_test.json'));
+        await promiseFs.writeFile(path.join(__dirname, '/../config/users/users.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/users/users.json'));
     } catch (err) {
         res.sendStatus(500);
         console.log(err)

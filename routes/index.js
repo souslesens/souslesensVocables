@@ -25,7 +25,7 @@ router.get('/', function (req, res, next) {
 });
 
 router.get('/users', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/users/users_test.json'))
+    res.sendFile(path.join(__dirname, '/../config/users/users.json'))
 });
 router.put('/users', async function (req, res, next) {
 

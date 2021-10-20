@@ -11,7 +11,7 @@ export declare const style: {
     bgcolor: string;
     border: string;
     boxShadow: number;
+    m: number;
     p: number;
-    overflowY: string;
 };
 export { identity, sanitizeValue };

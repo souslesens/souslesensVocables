@@ -25,7 +25,7 @@ export async function putSources(body: Source[]): Promise<Source[]> {
 
 
 const decodeSource = (name: string, source: SourceJson): Source => {
-    console.log("j'essaie de décoder", source)
+
     const decodedSource = {
         name: name,
         _type: 'source',
@@ -36,11 +36,13 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         controller: source.controller ? source.controller : "missing controller",
         topClassFilter: source.topClassFilter ? source.topClassFilter : "missing topClassFilter",
         schemaType: source.schemaType ? source.schemaType : "missing schema type",
-        dataSource: source.dataSource ? source.dataSource : defaultSource(ulid()).dataSource,
+        dataSource: source.dataSource ? source.dataSource : null,
         schema: source.schema ? source.schema : null,
-        color: source.color ? source.color : "default color"
+        isDraft: source.isDraft ? source.isDraft : true,
+        editable: source.editable ? source.editable : true,
+        color: source.color ? source.color : "default color",
+        predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates
     }
-    console.log("Voici la version décodée", decodedSource)
     return decodedSource
 }
 
@@ -54,9 +56,12 @@ export type Source = {
     controller: string;
     topClassFilter: string;
     schemaType: string;
-    dataSource: DataSource;
+    dataSource: null | DataSource;
     schema: null;
+    editable: boolean;
     color: string;
+    isDraft: boolean;
+    predicates: { broaderPredicate: string, lang: string }
 }
 
 export const defaultSource = (id: string): Source => {
@@ -67,22 +72,15 @@ export const defaultSource = (id: string): Source => {
         type: "",
         graphUri: [],
         sparql_server: "",
+        editable: true,
         controller: "",
         topClassFilter: "",
         schemaType: "",
-        dataSource: {
-            type: "",
-            connection: "",
-            dbName: "",
-            table_schema: "",
-            local_dictionary: {
-                table: "",
-                idColumn: "",
-                labelColumn: "",
-            }
-        },
+        dataSource: null,
         schema: null,
-        color: ""
+        color: "",
+        isDraft: true,
+        predicates: { broaderPredicate: "", lang: "" }
     })
 };
 
@@ -94,17 +92,51 @@ interface SourceJson {
     controller?: string;
     topClassFilter?: string;
     schemaType?: string;
-    dataSource?: DataSource;
+    editable?: boolean;
+    isDraft?: boolean;
+    dataSource?: null | DataSource;
     schema?: null;
     color?: string;
+    predicates?: { broaderPredicate: string, lang: string }
 }
 
-interface DataSource {
+interface CommonSource {
+    id: string,
+    graphUri: string[],
+    sparql_server: { url: string, method: string, headers: string[] },
+    color: string,
+    controller: string,
+    topClassFilter: string
+}
+
+interface SkosSpecificSource {
+    editable: boolean,
+    isDraft: boolean,
+    predicates: { broaderPredicate: string, lang: string }
+}
+
+//Data modeling source.json could be better
+
+export type Knowledge_GraphSource = CommonSource & DataSource
+
+export type SkosSource = CommonSource & SkosSpecificSource
+
+export type _Source = Knowledge_GraphSource | SkosSource
+
+export interface DataSource {
     type: string;
     connection: string;
     dbName: string;
     table_schema: string;
     local_dictionary: LocalDictionary;
+}
+
+const defaultDataSource = {
+    type: "",
+    connection: "_default",
+    dbName: "",
+    table_schema: "",
+    local_dictionary: { table: "", idColumn: "", labelColumn: "" }
 }
 
 interface LocalDictionary {
@@ -115,7 +147,9 @@ interface LocalDictionary {
 
 interface SparqlServer {
     url: string;
+    method: string;
+    headers: string[];
 }
 
-export { getSources }
+export { getSources, defaultDataSource }
 

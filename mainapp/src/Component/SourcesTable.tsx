@@ -1,11 +1,11 @@
 import {
-    Box, CircularProgress, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack
+    RadioGroup, Box, CircularProgress, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack, SliderValueLabel
 } from '@mui/material';
 import { useModel } from '../Admin';
 import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { Source, putSources, defaultSource } from '../Source';
-import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
+import { Source, putSources, defaultSource, DataSource } from '../Source';
+import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel, MenuItem, Modal, Radio, Select, TextField } from '@material-ui/core';
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
 
@@ -95,7 +95,12 @@ const initSourceEditionState: SourceEditionState = { modal: false, sourceForm: d
 enum Type {
     UserClickedModal,
     UserUpdatedField,
-    ResetSource
+    ResetSource,
+    UserAddedGraphUri,
+    UserClickedCheckBox,
+    UserUpdatedPredicates,
+    UserClickedAddDataSource,
+    UserUpdatedDataSource,
 }
 
 enum Mode { Creation, Edition }
@@ -104,6 +109,12 @@ type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
     | { type: Type.ResetSource, payload: Mode }
+    | { type: Type.UserAddedGraphUri, payload: string }
+    | { type: Type.UserClickedCheckBox, payload: { checkboxName: string, value: boolean } }
+    | { type: Type.UserUpdatedPredicates, payload: { broaderPredicate: string, lang: string } }
+    | { type: Type.UserClickedAddDataSource, payload: boolean }
+    | { type: Type.UserUpdatedDataSource, payload: DataSource }
+
 
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
@@ -121,11 +132,27 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
 
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
 
+        case Type.UserAddedGraphUri:
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload.split(',') } }
+
+        case Type.UserClickedAddDataSource:
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, dataSource: msg.payload ? { type: "", table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null } }
+
+        case Type.UserClickedCheckBox:
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [msg.payload.checkboxName]: msg.payload.value } }
+
+        case Type.UserUpdatedPredicates:
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["predicates"]: msg.payload } }
+
+        case Type.UserUpdatedDataSource:
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["dataSource"]: msg.payload } }
+
+
         case Type.ResetSource:
             switch (msg.payload) {
                 case Mode.Creation:
-                    console.log("resetSourceCreationMode")
                     return { ...sourceEditionState, sourceForm: defaultSource(ulid()) }
+
                 case Mode.Edition:
                     const getUnmodifiedSources = unwrappedSources.reduce((acc, value) => sourceEditionState.sourceForm.id === value.id ? value : acc, defaultSource(ulid()))
                     const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources
@@ -148,11 +175,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
 
     const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: source })
-
+    const schemaTypes = [...new Set(unwrappedSources.map(source => source.schemaType))]
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true })
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false })
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } })
+    const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value })
 
     const saveSources = () => {
 
@@ -171,20 +199,130 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     return (<>
         <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create Source" : "Edit"}</Button>
         <Modal onClose={handleClose} open={sourceModel.modal}>
-            <Box sx={style}>
-                <Stack spacing={4}>
-                    <TextField fullWidth onChange={handleFieldUpdate("name")}
+            <Box component='form' sx={style}>
+                <Grid container spacing={4} >
+                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("name")}
 
                         value={sourceModel.sourceForm.name}
                         id={`name`}
                         label={"Name"}
                         variant="standard" />
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={_handleFieldUpdate}
 
-                    <Button color="primary" variant="contained" onClick={saveSources}>Save Source</Button>
+                        value={Array.isArray(sourceModel.sourceForm.graphUri) ? sourceModel.sourceForm.graphUri.join() : ""}
+                        id={`graphUris`}
+                        label={"graph' Uris"}
+                        variant="standard" />
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("topClassFilter")}
 
-                </Stack>
+                        value={sourceModel.sourceForm.topClassFilter}
+                        id={`topClassFilter`}
+                        label={"Top Class filter"}
+                        variant="standard" />
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("controller")}
+
+                        value={sourceModel.sourceForm.controller}
+                        id={`controller`}
+                        label={"Controller"}
+                        variant="standard" />
+                    </Grid>
+
+
+
+                    <Grid item xs={6}><FormControl>
+                        <InputLabel id="schemaType-label">Schema's Type</InputLabel>
+                        <Select
+                            labelId="schemaType-label"
+                            id="schemaType"
+                            value={sourceModel.sourceForm.schemaType}
+                            label="select-schemaTyoe-label"
+                            fullWidth
+                            style={{ width: '400px' }}
+
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("schemaType")}
+                        >
+                            {schemaTypes.map(schemaType => <MenuItem
+                                key={schemaType}
+                                value={schemaType}
+
+                            >
+                                {schemaType}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    </Grid>
+                    <FormGivenSchemaType update={update} model={sourceModel} />
+
+
+
+                    <Grid item xs={12} style={{ textAlign: 'center' }}><Button color="primary" variant="contained" onClick={saveSources}>Save Source</Button></Grid>
+                </Grid>
+
+
             </Box>
         </Modal></>)
 }
 
+const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.Dispatch<Msg_> }) => {
+    const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } })
+    const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } })
+    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedDataSource, payload: { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value } })
+
+    const handleAddDataSource = (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked })
+    const dataSource = props.model.sourceForm.dataSource
+
+    switch (props.model.sourceForm.schemaType) {
+        case "SKOS":
+            return (<>
+                <Grid item xs={3}><FormControlLabel control={<Checkbox checked={props.model.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" /></Grid>
+                <Grid item xs={3}><FormControlLabel control={<Checkbox checked={props.model.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" /></Grid>
+                <Grid item xs={6}><TextField fullWidth onChange={handlePredicateUpdate("broaderPredicate")}
+                    value={props.model.sourceForm.predicates.broaderPredicate}
+                    id={`broaderPredicate`}
+                    label={"Broader Predicate"}
+                    variant="standard" /></Grid>
+                <Grid item xs={6}><TextField fullWidth onChange={handlePredicateUpdate("lang")}
+                    value={props.model.sourceForm.predicates.lang}
+                    id={`predicateLang`}
+                    label={"Language"}
+                    variant="standard" /></Grid>
+            </>)
+        case "KNOWLEDGE_GRAPH":
+            return ((<>
+                <Grid item xs={3}><FormControlLabel control={<Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />} label="Do you want to add a data source ?" /></Grid>
+                <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("type")}
+                    value={dataSource ? dataSource.type : ""}
+                    id={`type`}
+                    label={"Data Source's type"}
+                    variant="standard"
+                    style={{ display: !dataSource ? "none" : "" }} /></Grid>
+                <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("connection")}
+                    value={dataSource ? dataSource.connection : "_default"}
+                    id={`connection`}
+                    label={"Connection"}
+                    variant="standard"
+                    style={{ display: !dataSource ? "none" : "" }} />
+                </Grid>
+                <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("dbName")}
+                    value={dataSource ? dataSource.dbName : ""}
+                    id={`dbName`}
+                    label={"Data Base's Name"}
+                    variant="standard"
+                    style={{ display: !dataSource ? "none" : "" }}
+                /></Grid>
+                <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("table_schema")}
+                    value={dataSource ? dataSource.table_schema : ""}
+                    id={`table_schema`}
+                    label={"Table Schema"}
+                    style={{ display: !dataSource ? "none" : "" }}
+                    variant="standard" /></Grid>
+            </>))
+        default:
+            return <div></div>
+    }
+}
 export default SourcesTable

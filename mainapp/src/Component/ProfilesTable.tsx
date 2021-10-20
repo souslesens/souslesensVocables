@@ -155,7 +155,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true })
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false })
-    console.log(tools, typeof profileModel.profileForm.allowedTools)
 
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } })
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } })
@@ -212,7 +211,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedSources")} checked={profileModel.profileForm.allowedSources === "ALL"} />} label="Allow all sources" />
                         <FormControl style={{ display: profileModel.profileForm.allowedSources === "ALL" ? 'none' : '' }} disabled={profileModel.profileForm.allowedSources === "ALL"} >
 
-                            <InputLabel id="allowedSources-label">Forbiden Sources</InputLabel>
+                            <InputLabel id="allowedSources-label">Allowed Sources</InputLabel>
                             <Select
                                 labelId="allowedSources-label"
                                 id="allowedSources"

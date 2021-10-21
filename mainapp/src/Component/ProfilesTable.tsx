@@ -45,8 +45,8 @@ const ProfilesTable = () => {
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
                         <Box sx={{ justifyContent: 'center', display: 'flex' }}>
-                            <TableContainer component={Paper}>
-                                <Table sx={{ width: '100%' }}>
+                            <TableContainer sx={{ height: '400px' }} component={Paper}>
+                                <Table>
                                     <TableHead>
                                         <TableRow >
                                             <TableCell style={{ fontWeight: 'bold' }}>Name</TableCell>
@@ -54,7 +54,7 @@ const ProfilesTable = () => {
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody>{gotUsers.map(profile => {
+                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotUsers.map(profile => {
                                         return (<TableRow key={profile.name}>
                                             <TableCell>
                                                 {profile.name}

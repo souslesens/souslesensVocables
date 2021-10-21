@@ -43,7 +43,7 @@ const SourcesTable = () => {
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
-                        <Box id="table-container" sx={{ justifyContent: 'center', height: '400', display: 'flex' }}>
+                        <Box id="table-container" sx={{ justifyContent: 'center', height: '400px', display: 'flex' }}>
                             <TableContainer sx={{ height: '400px' }} component={Paper}>
                                 <Table>
                                     <TableHead>

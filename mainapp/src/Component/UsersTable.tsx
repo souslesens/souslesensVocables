@@ -44,7 +44,7 @@ const UsersTable = () => {
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack spacing={2}>
                         <Box id="table-container" sx={{ justifyContent: 'center', display: 'flex', width: '600' }}>
-                            <TableContainer component={Paper}>
+                            <TableContainer sx={{ maxHeight: '400px' }} component={Paper}>
                                 <Table sx={{ width: '100%' }}>
                                     <TableHead>
                                         <TableRow style={{ fontWeight: "bold" }}>
@@ -53,7 +53,7 @@ const UsersTable = () => {
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody>{gotUsers.map(user => {
+                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotUsers.map(user => {
                                         return (<TableRow key={user.id}>
                                             <TableCell >
                                                 {user.login}

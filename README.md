@@ -44,11 +44,11 @@ npm --version
 
 ### Install node dependencies
 
-Use `npm ci` to install the node environment.
+Use `npm ci` to install the node environment along with react app dependancies.
 
 
 ```bash
-npm ci
+npm ci && cd mainapp && npm ci && cd ..
 ```
 
 ### Configure
@@ -66,6 +66,11 @@ Then, edit `scripts/*.json` to your needs.
 ### Run
 
 Start the app with `npm start`
+
+You may also want to start the app in dev mode with `npm run dev`.
+
+!Caveats! Dev mode use nodemon to restart node when there is a change in file, including files within `config/`.
+When you write those files from the Admin interface, nodemon will restart and, for a short moment, you won't have access to the routes allowing you to write those files.
 
 
 ```bash

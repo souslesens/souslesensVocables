@@ -38,7 +38,7 @@
 </style>
 
 
-<div class="SourceMatcher_paramsDiv">
+<!--<div class="SourceMatcher_paramsDiv">
 
     <button onclick="Lineage_classes.initUI()">clear</button>
     <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
@@ -46,17 +46,22 @@
     <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
 
     </div>
+</div>-->
+<div>
+    <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
+    </div>
 </div>
 <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
 
-    <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
+  <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
         <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
-        <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>
+        <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>>
 
 
         <button class="lineage_button" onclick="Lineage_classes.addParentsToGraph()">parents</button>
         <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
+    <button onclick="Lineage_classes.initUI()">clear</button>
 
     </div>
     <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel1Div">
@@ -71,21 +76,24 @@
         <option>filter value</option>
         </select>
     </div>
-<hr>
 
 
-    <div>
+
+
+ <!--   <div>
 
         <input type='radio' id='Lineage_topClassesRadio' name='Lineage_similarTypeRadio' checked="checked"/> topClasses
         <input type='radio' id='Lineage_similarTypeRadio_Labels' name='Lineage_similarTypeRadio' /> Labels
         <input type='radio' id='Lineage_similarTypeRadio_SameAs' name='Lineage_similarTypeRadio'/> SameAs
-    </div>
+    </div>-->
   <!--  <select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>-->
     <!-- <button onclick="Lineage_classes.onPlusButton()">+</button>-->
 </div>
+
+<!--
 <div id="Lineage_sources">
 
-
+-->
 
 
 </div>

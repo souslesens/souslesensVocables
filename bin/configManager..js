@@ -21,10 +21,13 @@ var ConfigManager = {
     config:{},
     getGeneralConfig: function (callback) {
         var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
+
         var str = fs.readFileSync(mainConfigFilePath);
+     //   console.log(str)
         var config = null;
         try {
             config = JSON.parse("" + str);
+            console.log(config,null,2)
             if( !config.data_dir)
                 config.data_dir=  path.join(__dirname, "../data/");
 

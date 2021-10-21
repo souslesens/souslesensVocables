@@ -18,7 +18,7 @@ var SourceMatcher = (function () {
 
             //  $("#actionDivContolPanelDiv").html("<button onclick='SourceMatcher.showcompareWithDialog()'>Compare with...</button>")
             // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='SourceBrowser.searchTerm()'>Search</button>")
-
+            $("#accordion").accordion("option", {active: 2});
             SourceBrowser.showThesaurusTopConcepts(sourceLabel)
 
 

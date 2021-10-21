@@ -37,10 +37,10 @@ var KGbrowser = (function () {
         MainController.UI.message("");
 KGbrowserCustom.initsuperClassesPalette()
 
-        $("#accordion").accordion("option", {active: 2});
+        $("#accordion").accordion("option", {active: 1});
         MainController.UI.openRightPanel()
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html");
-        $("#actionDivContolPanelDiv").load("snippets/KG/KGbrowser.html");
+        $("#sourcesTreeDiv").load("snippets/KG/KGbrowser.html");
         setTimeout(function () {
             self.jstree.load.loadAdlsList();
             self.jstree.load.loadOneModel();

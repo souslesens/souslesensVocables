@@ -28,6 +28,7 @@ var SourceBrowser = (function () {
         MainController.currentSource = sourceLabel;
         OwlSchema.currentSourceSchema = null;
         self.currentTargetDiv = "currentSourceTreeDiv"
+        $("#accordion").accordion("option", {active: 2});
         self.showThesaurusTopConcepts(sourceLabel,)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match" +
@@ -92,7 +93,7 @@ var SourceBrowser = (function () {
             var html = "<div id='" + self.currentTargetDiv + "'></div>"
             $("#actionDiv").html(html);
         }
-        $("#accordion").accordion("option", {active: 2});
+
         options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getTopConcepts(sourceLabel, options, function (err, result) {
             if (err)
@@ -141,6 +142,9 @@ var SourceBrowser = (function () {
     self.getJstreeConceptsContextMenu = function () {
         // return {}
         var items = {}
+
+
+          return items
         ;
 
      items.nodeInfos = {
@@ -171,6 +175,15 @@ var SourceBrowser = (function () {
                 }
 
             }
+            items.graphNamedIndividuals = {
+                label: "graph namedIndividuals ",
+                action: function () {
+                    Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id)
+
+                }
+            }
+
+
             items.graphNodeNeighborhood = {
                 label: "graph node neighborhood ",
                 "action": false,
@@ -880,7 +893,7 @@ var SourceBrowser = (function () {
         })
     }
 
-    self.showClassRestrictions = function (sourceLabel, nodeId, callback) {
+    self.showClassRestrictions = function (sourceLabel, nodeId,options, callback) {
 
         // blankNodes.
 
@@ -1000,6 +1013,16 @@ var SourceBrowser = (function () {
         }
 
 
+    }
+
+
+    self.generateSourceDictionary=function(sourceLabel) {
+        if (Config.sources[sourceLabel].schemaType == "OWL")
+           Sparql_OWL.getDictionary(sourceLabel,{},function(err, result){
+               if(err)
+                   MainController.UI.message(err,true)
+
+        })
     }
 
     return self;

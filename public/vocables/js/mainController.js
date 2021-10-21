@@ -254,6 +254,7 @@ var MainController = (function () {
 
 
             })
+
             common.jstree.loadJsTree(treeDiv, treeData, {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,

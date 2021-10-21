@@ -163,6 +163,8 @@
                 $("#blendDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
+              //  $(".ui-accordion-content-active").height(h-100)
+              //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
 
 
                 //  $('.jstree-default').css("max-height",h-200)
@@ -224,15 +226,25 @@
             width:24px !important;
         }
 
+        #sourcesTreeDivContainer{
+            max-height: 650px;
+        }
         #actionDiv {
             width: 385px;
             max-height: 550px;
         }
 
+        .ui-accordion .ui-accordion-content{
+            overflow: hidden !important;
+           height: 85% !important;
+
+        }
+
         .ui-accordion-content-active {
             margin-left: -30px !important;
-            overflow: auto;
-            Xwidth: 400px;
+            overflow: hidden;
+
+
         }
 
         #graphDiv {
@@ -398,9 +410,9 @@
 
 
             <h3><span class="title">Sources </span></h3>
-            <div style="margin:5px" class='max-height'>
+            <div id="sourcesPanel" style="margin:5px" class='max-height'>
                 <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
-                <div>
+                <div id="sourcesTreeDivContainer">
                     <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
                 </div>
             </div>

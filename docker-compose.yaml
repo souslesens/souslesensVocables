@@ -28,6 +28,20 @@ services:
     networks:
       - backend
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      discovery.type: single-node
+    networks:
+      - backend
+
+  spacyserver:
+    image: neelkamath/spacy-server:2-en_core_web_sm
+    networks:
+      - backend
+
+
 networks:
   backend:
     driver: "bridge"

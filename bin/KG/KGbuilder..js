@@ -79,8 +79,7 @@ var KGbuilder = {
                     var objectClass = mapping.object;
 
                     var classType = oneModelSuperClasses[objectClass];
-                    var processAsNoSubclass=false;
-
+                    var processAsNoSubclass = false;
 
                     if (classType == "ARDL-SPECIFIC") {
                         var uri = KGgraphUri + subjectValue;
@@ -101,20 +100,14 @@ var KGbuilder = {
 
                             existingUrisMap[subjectValue] = uri;
                         } else {
-                            if(options.skipLocalDictionaryOrphans)
-                            rejectedItems.push(item);
-                            else
-                                processAsNoSubclass=true;
+                            if (options.skipLocalDictionaryOrphans) rejectedItems.push(item);
+                            else processAsNoSubclass = true;
                         }
-                    }
-
-                    else if (classType == "REFERENCE") {
+                    } else if (classType == "REFERENCE") {
                         var obj = oneModelReferenceDictionary[objectClass][subjectValue];
                         if (!obj) {
-                            if(options.skipOneModelOrphans)
-                                rejectedItems.push(item);
-                            else
-                                processAsNoSubclass=true;
+                            if (options.skipOneModelOrphans) rejectedItems.push(item);
+                            else processAsNoSubclass = true;
                         } else {
                             triples.push({
                                 subject: obj.classUri,
@@ -129,7 +122,6 @@ var KGbuilder = {
                             existingUrisMap[subjectValue] = obj.classUri;
                         }
                     }
-
 
                     if (classType == "NO-SUBCLASSES" || processAsNoSubclass) {
                         var uri = existingUrisMap[subjectValue];
@@ -385,7 +377,7 @@ var KGbuilder = {
                         options.oneModelReferenceDictionary = oneModelReferenceDictionary;
                         options.oneModelSuperClasses = oneModelSuperClasses;
                         options.existingUrisMap = existingUrisMap;
-                        options._options=options._options;
+                        options._options = options._options;
 
                         KGbuilder.generateMappingFileTriples(
                             mappings.mappings,
@@ -662,7 +654,7 @@ var KGbuilder = {
                     oneModelGraphUri: oneModelGraphUri,
                     replaceGraph: replaceGraph,
                     dataSource: dataSource,
-                    _options:_options
+                    _options: _options,
                 };
 
                 socket.message("KGbuild", "creating triples for mapping " + mappingFilePath);

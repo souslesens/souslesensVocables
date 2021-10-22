@@ -1,8 +1,7 @@
 var express = require("express");
 var router = express.Router();
-var path = require('path');
-var serverParams = { routesRootUrl: "" }
-
+var path = require("path");
+var serverParams = { routesRootUrl: "" };
 
 var elasticRestProxy = require("../bin/elasticRestProxy..js");
 var authentication = require("../bin/authentication..js");
@@ -17,58 +16,62 @@ var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
 
-const promiseFs = require('fs').promises;
+const promiseFs = require("fs").promises;
 
 /* GET home page. */
-router.get('/', function (req, res, next) {
-    res.redirect('vocables');
+router.get("/", function (req, res, next) {
+    res.redirect("vocables");
 });
 
-router.get('/users', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/users/users.json'))
+router.get("/users", function (req, res, next) {
+    res.sendFile(path.join(__dirname, "/../config/users/users.json"));
 });
-router.put('/users', async function (req, res, next) {
-
+router.put("/users", async function (req, res, next) {
     try {
-        await promiseFs.writeFile(path.join(__dirname, '/../config/users/users.json'), JSON.stringify(req.body, null, 2))
-        res.sendFile(path.join(__dirname, '/../config/users/users.json'));
+        await promiseFs.writeFile(
+            path.join(__dirname, "/../config/users/users.json"),
+            JSON.stringify(req.body, null, 2)
+        );
+        res.sendFile(path.join(__dirname, "/../config/users/users.json"));
     } catch (err) {
         res.sendStatus(500);
-        console.log(err)
+        console.log(err);
     }
 });
 
-router.get('/profiles', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/profiles.json'))
+router.get("/profiles", function (req, res, next) {
+    res.sendFile(path.join(__dirname, "/../config/profiles.json"));
 });
 
-router.put('/profiles', async function (req, res, next) {
-
+router.put("/profiles", async function (req, res, next) {
     try {
-        await promiseFs.writeFile(path.join(__dirname, '/../config/profiles.json'), JSON.stringify(req.body, null, 2))
-        res.sendFile(path.join(__dirname, '/../config/profiles.json'));
+        await promiseFs.writeFile(
+            path.join(__dirname, "/../config/profiles.json"),
+            JSON.stringify(req.body, null, 2)
+        );
+        res.sendFile(path.join(__dirname, "/../config/profiles.json"));
     } catch (err) {
         res.sendStatus(500);
-        console.log(err)
+        console.log(err);
     }
 });
 
-router.get('/sources', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../config/sources.json'))
+router.get("/sources", function (req, res, next) {
+    res.sendFile(path.join(__dirname, "/../config/sources.json"));
 });
 
-router.put('/sources', async function (req, res, next) {
-
+router.put("/sources", async function (req, res, next) {
     try {
-        await promiseFs.writeFile(path.join(__dirname, '/../config/sources.json'), JSON.stringify(req.body, null, 2))
-        res.sendFile(path.join(__dirname, '/../config/sources.json'));
+        await promiseFs.writeFile(
+            path.join(__dirname, "/../config/sources.json"),
+            JSON.stringify(req.body, null, 2)
+        );
+        res.sendFile(path.join(__dirname, "/../config/sources.json"));
     } catch (err) {
         res.sendStatus(500);
-        console.log(err)
+        console.log(err);
     }
 });
-
-
 
 router.get("/", function (req, res, next) {
     res.render("index", { title: "Express" });
@@ -305,13 +308,9 @@ router.post(
             );
         }
         if (req.body.KG_SaveMappings) {
-            KGcontroller.saveMappings(
-                req.body.KGsource,
-                req.body.mappings,
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            KGcontroller.saveMappings(req.body.KGsource, req.body.mappings, function (err, result) {
+                processResponse(response, err, result);
+            });
         }
 
         if (req.body.saveData) {

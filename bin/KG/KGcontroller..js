@@ -8,10 +8,9 @@ var ConfigManager = require("../configManager.");
 
 var KGcontroller = {
     getMappingsDirPath: function () {
-        var filePath = ConfigManager.config.data_dir+"mappings";
+        var filePath = ConfigManager.config.data_dir + "mappings";
         return path.resolve(filePath) + path.sep;
     },
-
 
     saveMappings: function (source, jsonStr, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";

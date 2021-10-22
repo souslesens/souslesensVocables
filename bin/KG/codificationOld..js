@@ -17,7 +17,7 @@ var codeRegex501 = {
     equipment:
         /^(?<sector>[\d]{2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})$/,
     AFtwin: /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
-    "Equipment":
+    Equipment:
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
     "7.2	Switchgears and MCC compartments tag structure (TOTAL-T0000000003)":
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,5})(?<suffix>\w{0,1})-(?<busBar>\w{1,2})(?<column>\d{0,2})(?<row>\d{0,2})$/g,

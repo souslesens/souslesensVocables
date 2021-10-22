@@ -1,5 +1,5 @@
 var httpProxy = require("../../bin/httpProxy.");
-var SQLserverConnector = require("../../bin/ADL/SQLserverConnector.");
+var SQLserverConnector = require("../../bin/KG/SQLserverConnector.");
 var async = require("async");
 var util = require("../../bin/util.");
 var DictionaryManager = {

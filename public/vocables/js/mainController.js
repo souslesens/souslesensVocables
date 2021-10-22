@@ -27,7 +27,8 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
             success: function (serverConfig, textStatus, jqXHR) {
-              //  Config.serverUrl = serverConfig.serverUrl
+                //  Config.serverUrl = serverConfig.serverUrl
+                Config.default_lang = serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
                 return callback()
             },
@@ -164,16 +165,21 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX, sources,callback) {
+        showSources: function (treeDiv, withCBX, sources, types,callback) {
             var treeData = [];
             var distinctNodes = {}
 
+            var distinctGroups = {}
+
+
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
+
+                if(!types  || ( types && types.indexOf(item)>-1))
                 treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
                 self.initControllers()
-                if(sources && sources.indexOf(sourceLabel)<0)
+                if (sources && sources.indexOf(sourceLabel) < 0)
                     return
                 if (Config.sources[sourceLabel].isDraft)
                     return;
@@ -185,20 +191,70 @@ var MainController = (function () {
 
                 Config.sources[sourceLabel].name = sourceLabel;
 
+
+
+                var parent=Config.sources[sourceLabel].schemaType
+
+                var othersGroup="OTHERS"
+                if (!types && !distinctGroups[othersGroup]) {
+                    distinctGroups[othersGroup] = 1
+                    treeData.push({
+                        id: othersGroup + "_" + parent,
+                        text: "OTHERS",
+                        type: "group",
+                        parent: "#",
+                    })
+                }
+
+
+
+                var group = Config.sources[sourceLabel].group
+                if (group) {
+                    var subGroups = group.split("/")
+                    subGroups.forEach(function (subGroup, index) {
+
+                        if(index>0)
+                            parent=subGroups[index-1]
+                        if (!distinctGroups[subGroup]) {
+                            distinctGroups[subGroup]=1
+                            treeData.push({
+                                id: subGroup,
+                                text: subGroup,
+                                type: "group",
+                                parent: parent,
+                            })
+                        }
+                        group=subGroup
+                    })
+
+                }
+                else{
+                    group=othersGroup + "_" + parent
+                    if(types)
+                        group=   Config.sources[sourceLabel].schemaType
+                    else
+                        group=   Config.sources[sourceLabel].schemaType
+                }
+
                 if (!distinctNodes[sourceLabel]) {
                     distinctNodes[sourceLabel] = 1
 
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     //  console.log(JSON.stringify(jstreeData,null,2))
-                    treeData.push({
-                        id: sourceLabel,
-                        text: sourceLabel,
-                        type: Config.sources[sourceLabel].schemaType,
-                        parent: Config.sources[sourceLabel].schemaType,
-                    })// data: Config.sources[sourceLabel]})
+                    if(!types  || types.indexOf(Config.sources[sourceLabel].schemaType)>-1) {
+                        treeData.push({
+                            id: sourceLabel,
+                            text: sourceLabel,
+                            type: Config.sources[sourceLabel].schemaType,
+                            parent: group,
+                        })
+                    }
                 }
+
+
             })
+
             common.jstree.loadJsTree(treeDiv, treeData, {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,
@@ -207,7 +263,7 @@ var MainController = (function () {
                     $("#mainDialogDiv").dialog("close");
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if (obj.node.id == "INDIVIDUAL")
+                            if (obj.node.id == "KNOWLEDGE_GRAPH")
                                 MainController.currentSchemaType = "OWL"
                             else
                                 MainController.currentSchemaType = obj.node.id;
@@ -225,15 +281,19 @@ var MainController = (function () {
                 onOpenNodeFn: function (evt, obj) {
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if (obj.node.id == "INDIVIDUAL")
+                            if (obj.node.id == "KNOWLEDGE_GRAPH")
                                 MainController.currentSchemaType = "OWL"
                             else
                                 MainController.currentSchemaType = obj.node.id;
                         }
                     }
-                }
+                },
+              /*  ondblclickFn:function(nodeId){
+                    var x=3
+                }*/
             }, function () {
-                $("#" + treeDiv).jstree(true).open_node(Config.preferredSchemaType);
+
+                $("#" + treeDiv).jstree(true).open_all(Config.preferredSchemaType);
                 if (callback)
                     return callback()
 
@@ -326,23 +386,7 @@ var MainController = (function () {
 
 
         },
-        showNodeInfos: function (sourceLabel, nodeId, divId, callback) {
 
-            Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true}, function (err, result) {
-                if (err) {
-                    return MainController.UI.message(err);
-                }
-                if (divId.indexOf("Dialog") > -1) {
-                    $("#" + divId).dialog("open");
-                }
-                SourceEditor.showNodeInfos(divId, "en", nodeId, result)
-
-                if (callback)
-                    return callback()
-            })
-
-
-        },
 
         message: function (message, stopWaitImg) {
             $("#messageDiv").html(message)

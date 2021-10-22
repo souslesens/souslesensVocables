@@ -211,6 +211,15 @@ var common = (function () {
                         });
                     }
                 }
+                if(options.ondblclickFn) {
+                    $('#' + jstreeDiv+ ' a').on('dblclick', function (e) {
+                        var node = $(e.target).closest("li");
+                        var type = node.attr('rel');
+                        var item = node[0].id;
+                        options.ondblclickFn(item)
+                        // do stuff...
+                    });
+                }
 
 
             },

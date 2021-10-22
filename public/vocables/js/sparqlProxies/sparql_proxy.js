@@ -123,6 +123,7 @@ var Sparql_proxy = (function () {
         if(url.indexOf(Config.default_sparql_url)==0)
             useProxy=true;
 
+
         if (sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
             payload.GET = true;
             var query2 = encodeURIComponent(query);

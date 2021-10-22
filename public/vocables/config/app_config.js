@@ -11,9 +11,9 @@
  */
 var Config = (function () {
     var self = {};
-    self.serverUrl = "/elastic";
+    self.serverUrl = "/slsv";
     if (window.location.href.indexOf("localhost") < 0)
-      self.serverUrl = "../elastic";
+      self.serverUrl = "../slsv";
  //   self.default_sparql_url = "http://51.178.139.80:8890/sparql"
     //  self.default_sparql_url = "http://10.28.171.139:8890/sparql"
 //    self.default_sparql_url="http://opeppa-updtlb03.main.glb.corp.local:8890/sparql"
@@ -42,7 +42,7 @@ var Config = (function () {
         maxZipFileSize: 30000000 //30MO
     }
 
-    self.ADL = {
+    self.KG = {
         dictionaries: {
             "CFIHOS_READI": {fileName: "dictionary_READI.json"}
         },
@@ -111,7 +111,7 @@ var Config = (function () {
         label: "Browse",
         multiSources: 0,
         controller: SourceBrowser,
-        toolDescriptionImg: null
+        toolDescriptionImg: null,
     }//"images/browse.png"}
     //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
     self.tools["sourceMatcher"] = {label: "Match", multiSources: 0, controller: SourceMatcher, toolDescriptionImg: null}//"images/match.png"}
@@ -128,14 +128,14 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
-    self.tools["ADLmappings"] = {
-        label: "ADLmappings",
+    self.tools["KGmappings"] = {
+        label: "KGmappings",
         multiSources: 0,
-        controller: ADLmappings,
+        controller: KGmappings,
         toolDescriptionImg: null
     }
 
-    self.tools["ADLbrowser"] = {label: "ADLbrowser", multiSources: 0, controller: ADLbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["KGbrowser"] = {label: "KGbrowser", multiSources: 0, controller: KGbrowser, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["Standardizer"] = {
         label: "Standardizer",

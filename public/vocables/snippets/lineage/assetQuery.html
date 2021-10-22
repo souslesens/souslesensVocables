@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
 <style>
 
-    .ADLquery_majorDiv {
+    .KGquery_majorDiv {
         min-height: 100px;
         border-radius: 5px;
         border: #372806 2px solid;
@@ -12,7 +12,7 @@
 
     }
 
-    .ADLquery_minorDiv {
+    .KGquery_minorDiv {
 
         border-radius: 5px;
         border: #372806 1px solid;
@@ -22,13 +22,13 @@
 
     }
 
-    #ADLquery_tabs_result {
+    #KGquery_tabs_result {
 
         overflow: auto;
     }
 
 
-    .ADLquery_propertyDiv {
+    .KGquery_propertyDiv {
         margin: 5px;
         padding: 2px;
         border-radius: 3px;
@@ -37,14 +37,14 @@
 
     }
 
-    #ADLquery_propertiesDiv {
+    #KGquery_propertiesDiv {
         height: 300px;
         whidth: 100%;
         overflow: auto;
 
     }
 
-    #ADLquery_queryTreeDiv {
+    #KGquery_queryTreeDiv {
         background-color: #cdd;
         height: 300px;
         whidth: 100%;
@@ -52,7 +52,7 @@
         border: blue solid 1px;
     }
 
-    .ADLquery_existsInRemoteSource {
+    .KGquery_existsInRemoteSource {
         background-color: #a3b7a8;
     }
 
@@ -60,12 +60,12 @@
 </style>
 
 <div>
-    Asset <select id="ADLquery_assetNameSelect">
+    Asset <select id="KGquery_assetNameSelect">
     <option>
         CLOV
     </option>
 </select>
-    object <select id="ADLquery_assetObjectSelect">
+    object <select id="KGquery_assetObjectSelect">
     <option>
         tag
     </option>
@@ -73,31 +73,31 @@
         model
     </option>
 </select>
-    <button onclick="ADLquery.actions.selectAllProps()"> select all</button>
+    <button onclick="KGquery.actions.selectAllProps()"> select all</button>
 
 
-    <div id="ADLquery_graphDiv"></div>
-    <div id="ADLquery_selectionDiv" style="border: blue;margin-left: 5px">
-        <div id="ADLquery_propertiesDiv"></div>
+    <div id="KGquery_graphDiv"></div>
+    <div id="KGquery_selectionDiv" style="border: blue;margin-left: 5px">
+        <div id="KGquery_propertiesDiv"></div>
         <div><B>Query Fields</B></div>
-        <div id="ADLquery_queryTreeDiv" style="width: 100%;height: 400px;overflow: auto"></div>
-        <div id="ADLquery_actionDiv" style="width: 100%;height: 5%;overflow: auto">
-            <input type="checkbox" checked="checked" id="ADLquery_queryShowItemsIdsCBX">show Ids
-            <button onclick="ADLquery.query.executeQuery()">Execute Query</button>
-            <button onclick="ADLquery.actions.resetFilters()">Reset</button>
+        <div id="KGquery_queryTreeDiv" style="width: 100%;height: 400px;overflow: auto"></div>
+        <div id="KGquery_actionDiv" style="width: 100%;height: 5%;overflow: auto">
+            <input type="checkbox" checked="checked" id="KGquery_queryShowItemsIdsCBX">show Ids
+            <button onclick="KGquery.query.executeQuery()">Execute Query</button>
+            <button onclick="KGquery.actions.resetFilters()">Reset</button>
         </div>
     </div>
 
 
 </div>
-<div id="ADLquery_dataPropertyFilterDialog">
-    <span id="ADLquery_dataPropertyFilterDialog_name"></span>
-    <select id="ADLquery_dataPropertyFilterDialog_operator">
+<div id="KGquery_dataPropertyFilterDialog">
+    <span id="KGquery_dataPropertyFilterDialog_name"></span>
+    <select id="KGquery_dataPropertyFilterDialog_operator">
 
     </select>
-    <input id="ADLquery_dataPropertyFilterDialog_value"></input>
+    <input id="KGquery_dataPropertyFilterDialog_value"></input>
     <br>
-    <button onclick="ADLquery.query.validateFilterDialog()">Add filter</button>
-    <button onclick="ADLquery.query.cancelFilterDialog()">Cancel</button>
+    <button onclick="KGquery.query.validateFilterDialog()">Add filter</button>
+    <button onclick="KGquery.query.cancelFilterDialog()">Cancel</button>
 </div>
 

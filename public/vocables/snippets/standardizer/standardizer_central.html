@@ -1,7 +1,7 @@
 
 
 <style>
-    .ADLmapping_conditionalMapping {
+    .KGmapping_conditionalMapping {
 border: #a1aec7 solid 1px;
 border-radius: 2px;
 background-color: #ddd;
@@ -12,28 +12,28 @@ margin: 3px;
 padding: 2px;
 }
 
-.ADLmappingData_treeItem2 {
+.KGmappingData_treeItem2 {
 font-weight: normal;
 }
 
-.ADLmapping_columnValues {
+.KGmapping_columnValues {
 background-color: #ee8577;
 }
 
-.ADLmapping_columnValues_referenceValue {
+.KGmapping_columnValues_referenceValue {
 background-color: #77ee77;
 }
 
-.ADLmapping_columnValues_hasCandidateValues {
+.KGmapping_columnValues_hasCandidateValues {
 background-color: #eeb477;
 }
 
-.ADLmapping_columnValueSelected {
+.KGmapping_columnValueSelected {
 background-color: #ddd;
 
 }
 
-.ADLmapping_candidateEntity {
+.KGmapping_candidateEntity {
 margin: 3px;
 padding: 3px;
 justify-content: space-between;
@@ -44,7 +44,7 @@ background-color: #ddd;
 
 }
 
-.ADLmapping_distinctColumnValueSource {
+.KGmapping_distinctColumnValueSource {
 border-radius: 2px;
 border: #6e2500 solid 1px;
 margin: 1px;
@@ -52,7 +52,7 @@ padding: 1px;
 width: 40px;
 }
 
-.ADLmapping_entitySource {
+.KGmapping_entitySource {
 border-radius: 2px;
 border: #6e2500 solid 1px;
 margin: 1px;
@@ -60,58 +60,58 @@ padding: 1px;
 width: 40px;
 }
 
-.ADLmapping_columnValues_isCandidate {
+.KGmapping_columnValues_isCandidate {
 background-color: #77e0ee;
 
 }
 
-.ADLadvancedMapping_searchEntitiesInput {
+.KGadvancedMapping_searchEntitiesInput {
 border: #6e2500 solid 2px;
 width: 300px
 }
 </style>
 
 
-<div id="ADLMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%;margin:10px;padding :20px">
+<div id="KGMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%;margin:10px;padding :20px">
     <div style="margin: 5px;padding :5px">
-        <!-- <select size="10" onclick="ADLadvancedMapping.editCandidateValues($(this).val())" class="ADLmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
-                 id="ADLmapping_columnValues"></select>-->
-    <!--    Sort <select id="ADLmapping_distinctColumnSortSelect"
-                     onchange="ADLadvancedMapping.sortColumnValues($(this).val())"></select>-->
-        Search <input id="ADLadvancedMapping_searchColumnInput"
-                      onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchColumn($(this).val())">
+        <!-- <select size="10" onclick="KGadvancedMapping.editCandidateValues($(this).val())" class="KGmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
+                 id="KGmapping_columnValues"></select>-->
+    <!--    Sort <select id="KGmapping_distinctColumnSortSelect"
+                     onchange="KGadvancedMapping.sortColumnValues($(this).val())"></select>-->
+        Search <input id="KGadvancedMapping_searchColumnInput"
+                      onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
         <br>
-        <div id="ADLmapping_distinctColumnValuesContainer"
+        <div id="KGmapping_distinctColumnValuesContainer"
              style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;overflow: auto"></div>
     </div>
     <div>
-        <div id="ADLadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
+        <div id="KGadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
 
-        search<input class="ADLadvancedMapping_searchEntitiesInput" id="ADLadvancedMapping_searchEntitiesInput"
-                     onkeyup="if (event.keyCode == 13)ADLadvancedMapping.searchEntities($(this).val())">
-        source <select id="ADLadvancedMapping_filterCandidateMappingsSelect"
-                       onchange="ADLadvancedMapping.editCandidateValues()"> </select>
+        search<input class="KGadvancedMapping_searchEntitiesInput" id="KGadvancedMapping_searchEntitiesInput"
+                     onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchEntities($(this).val())">
+        source <select id="KGadvancedMapping_filterCandidateMappingsSelect"
+                       onchange="KGadvancedMapping.editCandidateValues()"> </select>
         <br><i>  mode:</i>
-        <select onchange="ADLadvancedMapping.editCandidateValues()" id="ADLadvancedMapping_queryTypeSelect">
+        <select onchange="KGadvancedMapping.editCandidateValues()" id="KGadvancedMapping_queryTypeSelect">
             <option value="machAnyWord"> match any word</option>
             <option value="moreLikeThis"> more like this</option>
             <option value="exactMatch"> exact match</option>
 
         </select>
-        sort<select onchange="ADLadvancedMapping.editCandidateValues()"
-                    id="ADLadvancedMapping_sortCandidateMappingsSelect">
+        sort<select onchange="KGadvancedMapping.editCandidateValues()"
+                    id="KGadvancedMapping_sortCandidateMappingsSelect">
         <option value="alphabetic"> search score</option>
         <option value="alphabetic"> alphabetic</option>
     </select>
 
 
-        <div id="ADLadvancedMapping_dictionaryMappingContainerDiv"
+        <div id="KGadvancedMapping_dictionaryMappingContainerDiv"
              style="display:flex;flex-direction: column;width: 500px;height: 580px;  margin: 10px;  background: beige;overflow: auto"></div>
 
 <input type="checkbox" id="Standardizer_exportAncestorsCBX">ancestors
         <button onclick="Standardizer.exportMappings()"> Export mappings</button>
 
-        <button onclick="ADLadvancedMapping.cancelMapping()">Cancel</button>
+        <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
     </div>
 </div>
 <script>

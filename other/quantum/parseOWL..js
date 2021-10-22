@@ -1,7 +1,7 @@
 var fs = require("fs");
 const async = require("async");
 var sax = require("sax");
-const csv = require("csv-parser");
+
 var distinctTags = {};
 var parseOWL = {
     parse: function (sourcePath, options, callback) {

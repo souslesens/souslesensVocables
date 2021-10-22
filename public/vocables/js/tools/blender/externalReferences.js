@@ -177,7 +177,7 @@ var ExternalReferences = (function () {
             if (!params.sourceLabel)
                 return MainController.UI.message("no sourceLabel found from node id url params")
             var sourceLabel = Blender.currentTreeNode.data.source
-            MainController.UI.showNodeInfos(params.sourceLabel, params.id,"mainDialogDiv")
+            SourceBrowser.showNodeInfos(params.sourceLabel, params.id,"mainDialogDiv")
           /*  Sparql_generic.getNodeInfos(params.sourceLabel, params.id, null, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);

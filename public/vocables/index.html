@@ -40,7 +40,7 @@
 
     <script src="js/tools/sourceMatcher.js"></script>
     <!--script src="js/tools/evaluate.js"></script-->
-    <script src="js/tools/evaluate2.js"></script>
+    <script src="js/tools/evaluate.js"></script>
     <script src="js/tools/genealogy.js"></script>
     <script src="js/tools/owlSchema.js"></script>
     <script src="js/tools/annotator.js"></script>
@@ -60,30 +60,30 @@
     <script src="js/tools/blender/owlEditor.js"></script>
 
 
-   <!-- <script src="js/tools/lineage/ADLquery.js"></script>-->
+   <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
 
-    <script src="js/tools/ADL/mappings/ADLmappings.js"></script>
-    <script src="js/tools/ADL/mappings/ADLmappingGraph.js"></script>
-    <script src="js/tools/ADL/mappings/ADLmappingData.js"></script>
-    <script src="js/tools/ADL/mappings/ADLadvancedMapping.js"></script>
-    <script src="js/tools/ADL/ADLassetGraph.js"></script>
-    <script src="js/tools/ADL/mappings/ADLbuild.js"></script>
-
-
-
-    <script src="js/tools/ADL/TextAnnotator.js"></script>
+    <script src="js/tools/KG/mappings/KGmappings.js"></script>
+    <script src="js/tools/KG/mappings/KGmappingGraph.js"></script>
+    <script src="js/tools/KG/mappings/KGmappingData.js"></script>
+    <script src="js/tools/KG/mappings/KGadvancedMapping.js"></script>
+    <script src="js/tools/KG/KGassetGraph.js"></script>
+    <script src="js/tools/KG/mappings/KGbuild.js"></script>
 
 
 
+    <script src="js/tools/KG/TextAnnotator.js"></script>
 
-    <script src="js/tools/ADL/ADLcommon.js"></script>
-    <script src="js/tools/ADL/browser/ADLbrowserGraph.js"></script>
-    <script src="js/tools/ADL/browser/ADLbrowserQuery.js"></script>
-   <!-- <script src="js/tools/ADL/browser/ADLbrowserQueryNew.js"></script>-->
-    <script src="js/tools/ADL/browser/ADLbrowser.js"></script>
-    <script src="js/tools/ADL/browser/ADLbrowserBI.js"></script>
-    <script src="js/tools/ADL/browser/ADLbrowserDataTable.js"></script>
-    <script src="js/tools/ADL/browser/ADLbrowserCustom.js"></script>
+
+
+
+    <script src="js/tools/KG/KGcommon.js"></script>
+    <script src="js/tools/KG/browser/KGbrowserGraph.js"></script>
+    <script src="js/tools/KG/browser/KGbrowserQuery.js"></script>
+   <!-- <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>-->
+    <script src="js/tools/KG/browser/KGbrowser.js"></script>
+    <script src="js/tools/KG/browser/KGbrowserBI.js"></script>
+    <script src="js/tools/KG/browser/KGbrowserDataTable.js"></script>
+    <script src="js/tools/KG/browser/KGbrowserCustom.js"></script>
 
     <script src="js/tools/Standardizer.js"></script>
 
@@ -163,6 +163,8 @@
                 $("#blendDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
+              //  $(".ui-accordion-content-active").height(h-100)
+              //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
 
 
                 //  $('.jstree-default').css("max-height",h-200)
@@ -172,7 +174,7 @@
                 $("#accordion").accordion()
                 $("#accordion").accordion("option", {active: 0});
                 $("#accordion").on("accordionbeforeactivate", function (event, ui) {
-                    if (!ADLmappings.checkMappingEditionSave())
+                    if (!KGmappings.checkMappingEditionSave())
                         return false;
                 })
                 $("#accordion").on("accordionactivate", function (event, ui) {
@@ -224,15 +226,25 @@
             width:24px !important;
         }
 
+        #sourcesTreeDivContainer{
+            max-height: 650px;
+        }
         #actionDiv {
             width: 385px;
             max-height: 550px;
         }
 
+        .ui-accordion .ui-accordion-content{
+            overflow: hidden !important;
+           height: 85% !important;
+
+        }
+
         .ui-accordion-content-active {
             margin-left: -30px !important;
-            overflow: auto;
-            Xwidth: 400px;
+            overflow: hidden;
+
+
         }
 
         #graphDiv {
@@ -398,9 +410,9 @@
 
 
             <h3><span class="title">Sources </span></h3>
-            <div style="margin:5px" class='max-height'>
+            <div id="sourcesPanel" style="margin:5px" class='max-height'>
                 <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
-                <div>
+                <div id="sourcesTreeDivContainer">
                     <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
                 </div>
             </div>

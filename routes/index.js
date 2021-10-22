@@ -21,7 +21,7 @@ const promiseFs = require('fs').promises;
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-    res.sendFile(path.join(__dirname, '/../mainapp/index.html'))
+    res.redirect('vocables');
 });
 
 router.get('/users', function (req, res, next) {

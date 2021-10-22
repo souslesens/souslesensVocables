@@ -265,7 +265,7 @@ if (false) {
             "tblTagToTag",
         ],
         util: [
-            //'tblADLChangeManagement',
+            //'tblKGChangeManagement',
             "tblBreakdownAttribute",
             "tblBreakdownToBreakdown",
             "tblBreakdownToDocument",

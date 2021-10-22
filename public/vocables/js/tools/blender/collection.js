@@ -35,7 +35,7 @@ var Collection = (function () {
             menuItems.nodeInfos = {
                 label: "Show Node infos",
                 action: function (obj, sss, cc) {
-                    MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
+                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
                 },
 
 

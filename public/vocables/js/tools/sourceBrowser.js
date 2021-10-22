@@ -28,6 +28,7 @@ var SourceBrowser = (function () {
         MainController.currentSource = sourceLabel;
         OwlSchema.currentSourceSchema = null;
         self.currentTargetDiv = "currentSourceTreeDiv"
+        $("#accordion").accordion("option", {active: 2});
         self.showThesaurusTopConcepts(sourceLabel,)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match" +
@@ -92,7 +93,7 @@ var SourceBrowser = (function () {
             var html = "<div id='" + self.currentTargetDiv + "'></div>"
             $("#actionDiv").html(html);
         }
-        $("#accordion").accordion("option", {active: 2});
+
         options.filterCollections = Collection.currentCollectionFilter
         Sparql_generic.getTopConcepts(sourceLabel, options, function (err, result) {
             if (err)
@@ -141,23 +142,23 @@ var SourceBrowser = (function () {
     self.getJstreeConceptsContextMenu = function () {
         // return {}
         var items = {}
+
+
+          return items
         ;
-        if (false && MainController.currentSource && Config.sources[MainController.currentSource].schemaType == "OWL") {
-            items.showProperties = {
-                label: "Show Properties",
-                action: function (e) {// pb avec source
 
-                    ADLquery.showProperties()
+     items.nodeInfos = {
+         label: "Node infos",
+         action: function (e) {// pb avec source
+             SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+         }
+     }
 
 
-                }
 
-            }
-
-        }
-        if (MainController.currentTool == "lineage" || MainController.currentTool == "ADLmappings") {
+        if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
             items.graphNode = {
-                label: "graph Node lineage",
+                label: "graph Node",
                 action: function (e) {// pb avec source
 
                     Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
@@ -174,6 +175,15 @@ var SourceBrowser = (function () {
                 }
 
             }
+            items.graphNamedIndividuals = {
+                label: "graph namedIndividuals ",
+                action: function () {
+                    Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id)
+
+                }
+            }
+
+
             items.graphNodeNeighborhood = {
                 label: "graph node neighborhood ",
                 "action": false,
@@ -245,7 +255,6 @@ var SourceBrowser = (function () {
                 }
             }
         }
-
         items.copyNode = {
             label: "Copy Node",
             action: function (e) {// pb avec source
@@ -253,13 +262,11 @@ var SourceBrowser = (function () {
             }
 
         }
-            , items.nodeInfos = {
-            label: "Node infos",
-            action: function (e) {// pb avec source
-                MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
-            }
 
-        }
+
+
+
+
 
         return items;
     }
@@ -294,7 +301,7 @@ var SourceBrowser = (function () {
 
 
     self.editThesaurusConceptInfos = function (sourceLabel, node, callback) {
-        MainController.UI.showNodeInfos(sourceLabel, node.data.id, "graphDiv")
+        SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv")
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
               if (err) {
@@ -628,7 +635,398 @@ var SourceBrowser = (function () {
         var idsStr = Sparql_common.setFilter("id", self.currentFoundIds)
 
     }
+
+    self.showNodeInfos = function (sourceLabel, nodeId, divId, options, callback) {
+        if (!options) {
+            options = {}
+        }
+
+
+
+        if (!self.visitedNodes || options.resetVisited) {
+            self.visitedNodes = []
+            self.visitedNodes.currentIndex = 0
+        }
+        var index = self.visitedNodes.indexOf(nodeId)
+        if (index < 0) {
+            self.visitedNodes.push(nodeId)
+            self.visitedNodes.currentIndex = self.visitedNodes.length - 1
+        } else {
+            self.visitedNodes.currentIndex = index
+
+        }
+
+
+        self.currentNodeInfosSource = sourceLabel
+        self.currentNodeInfosDivId = divId
+
+
+        var type;
+        var classesWithRestrictions = false
+        async.series([
+
+
+                function (callbackSeries) {
+                    self.drawCommonInfos(sourceLabel, nodeId, divId, options, function (err, result) {
+                        type = result.type
+                        classesWithRestrictions = result.blankNodes.length > 0
+                        callbackSeries()
+                    })
+
+
+                },
+                function (callbackSeries) {
+                    if (self.visitedNodes.length <2) {
+                        return callbackSeries()
+                    }
+                    var str = "<div><button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+                    $("#" + divId).prepend(str)
+                    callbackSeries()
+                },
+                function (callbackSeries) {
+                    if (type != "http://www.w3.org/2002/07/owl#Class") {
+                        return callbackSeries()
+                    }
+                    self.showNamedIndividualProperties(sourceLabel, nodeId, function (err, result) {
+                        callbackSeries(err)
+
+                    })
+
+                },
+                function (callbackSeries) {
+                    if (type != "http://www.w3.org/2002/07/owl#Class") {
+                        return callbackSeries()
+                    }
+                    self.showClassRestrictions(sourceLabel, [nodeId], options, function (err, result) {
+                        callbackSeries(err)
+                    })
+
+                },
+
+
+                function (callbackSeries) {
+                    if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                        return callbackSeries()
+                    }
+                    self.showPropertyRestrictions(sourceLabel, nodeId, divId, function (err, result) {
+                        callbackSeries()
+                    })
+
+                }
+
+
+            ],
+            function (err) {
+
+
+                if (callback)
+                    callback(err)
+                if (err)
+                    return alert(err)
+            }
+        )
+
+
+    }
+
+
+    self.drawCommonInfos = function (sourceLabel, nodeId, divId, options, callback) {
+        var valueLabelsMap = {}
+        var bindings = []
+        var propertiesMap = {label: "", id: "", properties: {}};
+        var blankNodes = []
+        Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true}, function (err, data) {
+            if (err) {
+                return MainController.UI.message(err);
+            }
+            if (divId.indexOf("Dialog") > -1) {
+                $("#" + divId).dialog("open");
+            }
+            var type = null;
+            data.forEach(function (item) {
+                if (item.value.type == "bnode") {
+                    return blankNodes.push(item.value.value)
+                }
+
+
+                if (item.prop.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                    type = item.value.value
+
+                var propName = item.prop.value
+                if (item.propLabel) {
+                    propName = item.propLabel.value
+                } else {
+                    propName = Sparql_common.getLabelFromId(item.prop.value)
+                }
+
+                var value = item.value.value;
+                if (item.valueLabel) {
+                    if (!item["xml:lang"])
+                        valueLabelsMap[value] = item.valueLabel.value
+                }
+                /*   if (item.valueLabel)
+                       value = item.valueLabel.value;*/
+
+                if (!propertiesMap.properties[propName])
+                    propertiesMap.properties[propName] = {name: propName, langValues: {}}
+
+                if (item.value && item.value["xml:lang"]) {
+                    if (!propertiesMap.properties[propName].langValues[item.value["xml:lang"]])
+                        propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = []
+                    propertiesMap.properties[propName].langValues[item.value["xml:lang"]].push(value);
+                } else {
+                    if (!propertiesMap.properties[propName].value)
+                        propertiesMap.properties[propName].value = [];
+
+                    propertiesMap.properties[propName].value.push(value);
+                }
+
+            })
+
+            var defaultProps = ["UUID", "http://www.w3.org/2004/02/skos/core#prefLabel",
+                "http://www.w3.org/2004/02/skos/core#definition", "" +
+                "http://www.w3.org/2004/02/skos/core#altLabel",
+                "http://www.w3.org/2004/02/skos/core#broader",
+                "http://www.w3.org/2004/02/skos/core#narrower",
+                "http://www.w3.org/2004/02/skos/core#related",
+                "http://www.w3.org/2004/02/skos/core#exactMatch",
+                "http://www.w3.org/2004/02/skos/core#closeMatch",
+                //  "http://www.w3.org/2004/02/skos/core#sameAs"
+            ];
+
+            var defaultLang = Config.default_lang
+            /* if (!defaultLang)
+                 defaultLang = 'en';*/
+
+            for (var key in propertiesMap.properties) {
+                if (defaultProps.indexOf(key) < 0)
+                    defaultProps.push(key)
+            }
+            var str = "<div style='max-height:800px;overflow: auto'>" +
+                "<table class='infosTable'>"
+            str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+            str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
+
+
+            defaultProps.forEach(function (key) {
+                if (!propertiesMap.properties[key])
+                    return;
+
+                str += "<tr class='infos_table'>"
+
+
+                if (propertiesMap.properties[key].value) {
+                    var values = propertiesMap.properties[key].value;
+                    str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + "</td>"
+                    var valuesStr = ""
+                    values.forEach(function (value, index) {
+                        if (value.indexOf("http") == 0) {
+                            if (valueLabelsMap[value])
+                                value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                            else
+                                value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                        }
+                        if (index > 0)
+                            valuesStr += "<br>"
+                        valuesStr += value
+                    })
+                    str += "<td class='detailsCellValue'>" + valuesStr + "</td>"
+                    str += "</tr>"
+
+
+                } else {
+                    var keyName = propertiesMap.properties[key].name
+                    var selectId = "detailsLangSelect_" + keyName
+                    var propNameSelect = "<select id='" + selectId + "' onchange=SourceBrowser.onNodeDetailsLangChange('" + keyName + "') >"
+                    var langDivs = "";
+
+
+                    for (var lang in propertiesMap.properties[key].langValues) {
+                        var values = propertiesMap.properties[key].langValues[lang];
+                        var selected = "";
+                        if (lang == defaultLang)
+                            selected = "selected";
+                        propNameSelect += "<option " + selected + ">" + lang + "</option> ";
+                        var valuesStr = ""
+                        values.forEach(function (value, index) {
+                            if (value.indexOf("http") == 0) {
+                                if (valueLabelsMap[value])
+                                    value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                else
+                                    value += "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                            }
+                            if (index > 0)
+                                valuesStr += "<br>"
+                            valuesStr += value
+
+                        })
+
+                        langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>"
+
+                    }
+
+
+                    propNameSelect += "</select>"
+
+                    str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + " " + propNameSelect + "</td>"
+                    str += "<td class='detailsCellValue'>" + langDivs + "</td>";
+
+                    if (propertiesMap.properties[key].langValues[defaultLang])
+                        str += "<script>SourceBrowser.onNodeDetailsLangChange('" + keyName + "','" + defaultLang + "') </script>";
+
+                    str += "</tr>"
+
+                }
+
+            })
+            str += "</table></div>"
+
+            str += " <hr><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;';>" +
+                "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px'></div>" +
+                "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px'></div>" +
+                "</div>"
+
+            $("#" + divId).html(str)
+
+            return callback(null, {type: type, blankNodes: blankNodes})
+
+        })
+    }
+
+    self.showClassRestrictions = function (sourceLabel, nodeId,options, callback) {
+
+        // blankNodes.
+
+
+        Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, null, function (err, result) {
+
+            if (err) {
+                return callback(err)
+            }
+            var str = "<b>Restrictions </b> <div style='    background-color: beige;'> <table>"
+            result.forEach(function (item) {
+
+                str += "<tr class='infos_table'>"
+
+                var propStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>"
+                //  var propStr = "<a target='_blank' href='" + item.prop.value + "'>" + item.propLabel.value + "</a>"
+                str += "<td class='detailsCellName'>" + propStr + "</td>"
+
+                var targetClassStr = "any"
+                if (item.value) {
+                    var targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>"
+                    //  targetClassStr = "<a target='_blank' href='" + item.value.value + "'>" + item.valueLabel.value + "</a>"
+                }
+                str += "<td class='detailsCellValue'>" + targetClassStr + "</td>"
+
+                str += "</tr>"
+            })
+
+            str += "</table> </div>" +
+                "</div>"
+
+            $("#nodeInfos_restrictionsDiv").append(str);
+            callback()
+        })
+
+
+    }
+
+
+    self.showNamedIndividualProperties = function (sourceLabel, nodeId, callback) {
+        var graphUri = Config.sources[sourceLabel].graphUri;
+        var sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var fromStr = Sparql_common.getFromStr(sourceLabel)
+        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+            "select distinct * " + fromStr + " where {";
+
+
+        query += "?value <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + nodeId + ">";
+        query += "  Optional {?value rdfs:label ?valueLabel}  "
+        query += "} order by ?valueLabel limit 1000 "
+        var url = sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            var data = result.results.bindings
+
+            if (data.length == 0) {
+            } else {
+                var str = "<b>NamedIndividuals</b><br><table>"
+
+                data.forEach(function (item) {
+
+                    //  var targetClassStr = "<a target='_blank' href='" + item.value.value + "'>" + item.valueLabel.value + "</a>"
+                    var targetClassStr = "<span class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>"
+                    str += "<tr><td>" + targetClassStr + "</td></tr>"
+
+                })
+                str += "</table>"
+                $("#nodeInfos_individualsDiv").append(str);
+
+            }
+            callback()
+        })
+    }
+
+
+    self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, callback) {
+        Sparql_OWL.getPropertyClasses(sourceLabel, nodeId, {}, function (err, result) {
+            if (err) {
+                alert(err.responseText)
+                return MainController.UI.message(err.responseText, true)
+            }
+
+            var str = "<b>Property restrictions</b><table>"
+            result.forEach(function (item) {
+                str += "<tr class='infos_table'>"
+
+                str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel.value + "</td>"
+
+                str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</td>"
+
+                str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" + item.targetClassLabel.value + "</td>"
+
+
+                str += "</tr>"
+
+            })
+            $("#" + divId).append(str)
+        })
+    }
+
+
+    self.onClickLink = function (nodeId) {
+        self.showNodeInfos(self.currentNodeInfosSource, nodeId, self.currentNodeInfosDivId, {previousNode: true})
+    }
+
+    self.showVisitedNode = function (direction) {
+
+        if (direction > 0 && self.visitedNodes.currentIndex < (self.visitedNodes.length - 1)) {
+            self.visitedNodes.currentIndex += 1
+            self.showNodeInfos(self.currentNodeInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeInfosDivId)
+        } else if (direction < 0 && self.visitedNodes.currentIndex > 0) {
+            self.visitedNodes.currentIndex -= 1;
+            self.showNodeInfos(self.currentNodeInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeInfosDivId)
+        }
+
+
+    }
+
+
+    self.generateSourceDictionary=function(sourceLabel) {
+        if (Config.sources[sourceLabel].schemaType == "OWL")
+           Sparql_OWL.getDictionary(sourceLabel,{},function(err, result){
+               if(err)
+                   MainController.UI.message(err,true)
+
+        })
+    }
+
     return self;
 
 
-})()
+})
+()

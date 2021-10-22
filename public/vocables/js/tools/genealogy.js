@@ -81,19 +81,19 @@ var Genealogy = (function () {
 
         });
         var selectedIds = [];
-        setTimeout(function () {
+
             //  sourceLabels.forEach(function (source) {
             async.eachSeries(sourceLabels, function (sourceId, callbackEach) {
                 if(!Config.sources[sourceId].controller)
                     callbackEach()
-                setTimeout(function () {
+              //  setTimeout(function () {
                     MainController.UI.message("searching in " + sourceId)
-                    callbackEach()
+                //    callbackEach()
                     Sparql_generic.getNodeParents(sourceId, word, null, 1, {exactMatch: exactMatch}, function (err, result) {
                         // sparql_abstract.list(source.name, word, {exactMatch: exactMatch}, function (err, result) {
 
                         if (err) {
-                            return console.log(err);
+                           return  callbackEach(err)
                         }
 
                         result.forEach(function (item) {
@@ -103,7 +103,7 @@ var Genealogy = (function () {
                                       selectedIds.push(item.id)*/
                                 conceptsMap[conceptId] = item;
                                 item.sourceId = sourceId;
-                                item.title = item.conceptLabel.value + " / " + (item.description || item.broader1Label.value)
+                                item.title = item.conceptLabel.value + " / " + (item.description )//|| item.broader1Label.value)
 
                                 var newNode = {id: conceptId, text: "<span class='tree_level_2'>" + item.title + "</span>", data: item}
                                 // setTimeout(function () {
@@ -117,31 +117,28 @@ var Genealogy = (function () {
                             }
 
                         })
-
+                        callbackEach()
 
                     })
-                }, 500)
+             //   }, 500)
 
 
             }, function (err) {
-
-
                 if (err)
                     return $("#messageDiv").html(err)
-            })
-            return;
-
-
-            setTimeout(function () {
-
                 $("#conceptsJstreeDiv").jstree(true).select_node(selectedIds);
                 MainController.UI.message("done")
                 $("#waitImg").css("display", "none");
+                return;
+            })
 
-            }, 1000)
 
 
-        }, 1000)
+
+
+
+
+
     }
 
     self.displayGraph = function (direction) {
@@ -317,7 +314,7 @@ var Genealogy = (function () {
         }
         ,
         showDetails: function (defaultLang) {
-            MainController.UI.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, "Genealogy_nodeInfosDialogDiv")
+            SourceBrowser.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, "Genealogy_nodeInfosDialogDiv")
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
                        return MainController.UI.message(err);

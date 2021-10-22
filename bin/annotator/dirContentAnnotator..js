@@ -2,11 +2,12 @@ var fs = require("fs");
 var path = require("path");
 
 var TikaClient = require("@futpib/tika-server-client");
-var tika = new TikaClient("http://localhost:41000");
+var tika
 const TikaServer = require("tika-server");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
 var socket = require("../../routes/socket.js");
+const ConfigManager = require("../configManager.");
 var async = require("async");
 //var annotatorLive = require('../annotatorLive.')
 
@@ -28,13 +29,13 @@ var acceptedExtensions = [
 ];
 var base64Extensions = ["doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx"];
 var maxDocSize = 20 * 1000 * 1000;
-//var tikaServerUrl = 'http://vps475829.ovh.net:9998';
-var tikaServerUrl = "127.0.0.1:41000";
-var spacyServerUrl = "http://51.178.39.209:8000/pos";
 
-var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\";
-//var parsedDocumentsHomeDir ="D:\\NLP\\annotatedCorpus\\"
-var uploadDirPath = "D:\\temp\\annotator\\corpus\\";
+var tikaServerUrl
+var spacyServerUrl
+
+//var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\";
+var parsedDocumentsHomeDir =null;//"../../data/annotator/parsedDocuments"
+var uploadDirPath = null;//"../../data/annotator/temp"
 var Inflector = require("inflected");
 var tikaServer = null;
 var tikaserverStarted = false;
@@ -48,8 +49,21 @@ var DirContentAnnotator = {
             console.log(text);
         },
     },
+    init:function(){
+
+        DirContentAnnotator.socket.message("init in "+ConfigManager.config.data_dir)
+        parsedDocumentsHomeDir = path.resolve(ConfigManager.config.data_dir+ "annotator/parsedDocuments")+path.sep;
+        uploadDirPath = path.resolve(ConfigManager.config.data_dir+ "annotator/temp/")+path.sep;
+        spacyServerUrl =ConfigManager.config.annotator.spacyServerUrl
+        tikaServerUrl=ConfigManager.config.annotator.tikaServerUrl
+
+
+    },
 
     uploadAndAnnotateCorpus: function (zipFile, corpusName, sources, options, callback) {
+
+
+        console.log("uploadAndAnnotateCorpus 1")
         DirContentAnnotator.socket.message(
             "unziping file " + zipFile.name + "(" + zipFile.size / 1000 + "ko)"
         );
@@ -93,6 +107,7 @@ var DirContentAnnotator = {
                             callback(err, result);
 
                             tempFileNames.push(tempzip);
+                            return;
                             async.eachSeries(tempFileNames, function (fileName, callbackSeries) {
                                 fs.unlink(fileName, (err) => {
                                     if (err) {
@@ -361,7 +376,7 @@ var DirContentAnnotator = {
             var initFile = uploadDirPath + "init.txt";
             DirContentAnnotator.startTikaServer(initFile, function (err, result) {
                 if (err) return callback(err);
-                var tika = new TikaClient("http://localhost:41000");
+                tika = new TikaClient(tikaServerUrl);
 
                 tika.tikaFromStream(stream).then(function (text) {
                     console.log(text);
@@ -380,13 +395,17 @@ var DirContentAnnotator = {
         tikaServer = new TikaServer();
         (async () => {
             tikaServer.on("debug", (msg) => {
-                //  console.log(`DEBUG: ${msg}`)
+                 console.log(`DEBUG: ${msg}`)
             });
             await tikaServer.start();
             var options = {};
             /* await tikaServer.query(text).then((data) => {
                    callback(null,data)
                  })*/
+            if(! tika)
+                tika= new TikaClient(tikaServerUrl);
+            if(!fs.existsSync(filePath))
+                return callback("file not exists :"+filePath);
             await tika.tikaFromFile(filePath).then(function (text) {
                 //  console.log( text );
                 return callback(null, text);
@@ -419,12 +438,13 @@ var DirContentAnnotator = {
         if (base64) {
             fileContent = util.base64_encodeFile(filePath);
             if (!tikaServer) {
+                DirContentAnnotator.socket.message(" try startTikaServer ")
                 DirContentAnnotator.startTikaServer(filePath, function (err, result) {
                     if (err) return callback(err);
-                    var tika = new TikaClient("http://localhost:41000");
-
+                     tika = new TikaClient(tikaServerUrl);
+                    DirContentAnnotator.socket.message(" try start TikaServer ")
                     tika.tikaFromFile(filePath).then(function (text) {
-                        console.log(text);
+                        DirContentAnnotator.socket.message(" TikaServer text extraction OK ")
                         return callback(null, result);
                     });
                 });
@@ -883,7 +903,7 @@ var DirContentAnnotator = {
         }
     },
 };
-
+DirContentAnnotator.init()
 module.exports = DirContentAnnotator;
 if (false) {
     DirContentAnnotator.getDirContent("D:\\NLP\\ontologies");
@@ -940,4 +960,36 @@ if (false) {
 
 if (false) {
     DirContentAnnotator.getAnnotatedCorpusList();
+}
+if(false){
+    var tika = new TikaClient( "127.0.0.1:41000");
+
+   var filePath="D:\\\\webstorm\\souslesensVocables\\data\\annotator\\temp\\Portable extinguishers_EN.pdf" ;
+
+
+       var tikaServer = new TikaServer();
+        (async () => {
+            tikaServer.on("debug", (msg) => {
+                console.log(`DEBUG: ${msg}`)
+            });
+            await tikaServer.start();
+            var options = {};
+            /* await tikaServer.query(text).then((data) => {
+                   callback(null,data)
+                 })*/
+            if(! tika)
+                tika= new TikaClient(tikaServerUrl);
+            if(!fs.existsSync(filePath))
+                return callback("file not exists :"+filePath);
+            await tika.tikaFromFile(filePath).then(function (text) {
+                //  console.log( text );
+                return callback(null, text);
+            });
+        })().catch((err) => {
+            console.log(`ERROR: ${err}`);
+            callback(err);
+        });
+
+
+
 }

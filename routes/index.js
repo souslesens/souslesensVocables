@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
-var serverParams = { routesRootUrl: "" };
+var path = require('path');
+var serverParams = { routesRootUrl: "" }
+
 
 var elasticRestProxy = require("../bin/elasticRestProxy..js");
 var authentication = require("../bin/authentication..js");
@@ -9,13 +11,65 @@ var httpProxy = require("../bin/httpProxy.");
 var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.");
 
 var OneModelManager = require("../other/oneModel/OneModelManager.");
-var ADLcontroller = require("../bin/ADL/ADLcontroller.");
+var KGcontroller = require("../bin/KG/KGcontroller.");
 var DataController = require("../bin/dataController.");
-var ADLbuilder = require("../bin/ADL/ADLbuilder.");
+var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
 
+const promiseFs = require('fs').promises;
+
 /* GET home page. */
+router.get('/', function (req, res, next) {
+    res.redirect('vocables');
+});
+
+router.get('/users', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/users/users.json'))
+});
+router.put('/users', async function (req, res, next) {
+
+    try {
+        await promiseFs.writeFile(path.join(__dirname, '/../config/users/users.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/users/users.json'));
+    } catch (err) {
+        res.sendStatus(500);
+        console.log(err)
+    }
+});
+
+router.get('/profiles', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/profiles.json'))
+});
+
+router.put('/profiles', async function (req, res, next) {
+
+    try {
+        await promiseFs.writeFile(path.join(__dirname, '/../config/profiles.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/profiles.json'));
+    } catch (err) {
+        res.sendStatus(500);
+        console.log(err)
+    }
+});
+
+router.get('/sources', function (req, res, next) {
+    res.sendFile(path.join(__dirname, '/../config/sources.json'))
+});
+
+router.put('/sources', async function (req, res, next) {
+
+    try {
+        await promiseFs.writeFile(path.join(__dirname, '/../config/sources.json'), JSON.stringify(req.body))
+        res.sendFile(path.join(__dirname, '/../config/sources.json'));
+    } catch (err) {
+        res.sendStatus(500);
+        console.log(err)
+    }
+});
+
+
+
 router.get("/", function (req, res, next) {
     res.render("index", { title: "Express" });
 });
@@ -42,7 +96,7 @@ router.post("/upload", function (req, response) {
 });
 
 router.post(
-    serverParams.routesRootUrl + "/elastic",
+    serverParams.routesRootUrl + "/slsv",
     function (req, response) {
         if (req.body.getGeneralConfig) {
             configManager.getGeneralConfig(function (err, result) {
@@ -105,7 +159,7 @@ router.post(
             );
         }
 
-        if (req.body.ADLmappingDictionary) {
+        if (req.body.KGmappingDictionary) {
             if (req.body.load)
                 configManager.getDictionary(req.body.load, function (err, result) {
                     processResponse(response, err, result);
@@ -180,14 +234,14 @@ router.post(
             logger.info(req.body.infos);
             processResponse(response, null, { done: 1 });
         }
-        if (req.body.ADLquery) {
-            ADLcontroller.ADLquery(req, function (err, result) {
+        if (req.body.KGquery) {
+            KGcontroller.KGquery(req, function (err, result) {
                 processResponse(response, err, result);
             });
         }
-        if (req.body.buildADL) {
+        if (req.body.buildKG) {
             var mappingFileNames = JSON.parse(req.body.mappingFileNames);
-            ADLbuilder.buidlADL(
+            KGbuilder.buidlKG(
                 mappingFileNames,
                 req.body.sparqlServerUrl,
                 req.body.adlGraphUri,
@@ -199,13 +253,13 @@ router.post(
                 }
             );
         }
-        if (req.body.ADL_GetMappings) {
-            ADLcontroller.getMappings(req.body.ADL_GetMappings, function (err, result) {
+        if (req.body.KG_GetMappings) {
+            KGcontroller.getMappings(req.body.KG_GetMappings, function (err, result) {
                 processResponse(response, err, result);
             });
         }
         if (req.body.getAssetGlobalMappings) {
-            ADLcontroller.getAssetGlobalMappings(
+            KGcontroller.getAssetGlobalMappings(
                 req.body.getAssetGlobalMappings,
                 function (err, result) {
                     processResponse(response, err, result);
@@ -250,9 +304,9 @@ router.post(
                 }
             );
         }
-        if (req.body.ADL_SaveMappings) {
-            ADLcontroller.saveMappings(
-                req.body.ADLsource,
+        if (req.body.KG_SaveMappings) {
+            KGcontroller.saveMappings(
+                req.body.KGsource,
                 req.body.mappings,
                 function (err, result) {
                     processResponse(response, err, result);

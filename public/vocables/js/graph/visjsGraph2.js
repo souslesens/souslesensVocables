@@ -195,8 +195,8 @@ var visjsGraph = (function () {
             })
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
-                    if (false || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
-                        return;
+                   /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
+                        return;*/
 
                     var nodeId = params.nodes[0]
                     self.lastMovedNode=nodeId

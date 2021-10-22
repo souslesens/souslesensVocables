@@ -2,7 +2,7 @@
 
 
 {
-  "SKOS": {
+  "": {
     "sparql_url": "_default",
     "graphUri": "http://www.w3.org/2004/02/skos/core/",
     "label": "skos",
@@ -22,6 +22,7 @@
       ]
     }
   },
+
   "OWLXXX": {
     "sparql_url": "_default",
     "graphUri":"http://data.total.com/resource/one-model/rdfsOwlSimplified/",

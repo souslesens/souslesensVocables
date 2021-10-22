@@ -67,6 +67,7 @@
     "streamify-string": "^1.0.1",
     "streams": "^0.1.0",
     "superagent": "^5.3.1",
+    "superagent-proxy": "^3.0.0",
     "tika-server": "^1.2.11",
     "ulid": "^2.3.0",
     "unzipper": "^0.10.11",

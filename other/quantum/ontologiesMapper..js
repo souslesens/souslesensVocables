@@ -1682,9 +1682,9 @@ if (true) {
 
         }
     ]
-    rdf:type owl:Restriction ;
-    owl:onProperty npdv:operatorForField ;
-    owl:someValuesFrom npdv:Field
+    // rdf:type owl:Restriction ;
+    // owl:onProperty npdv:operatorForField ;
+    // owl:someValuesFrom npdv:Field
 
   /*  xx = {
        "ID": "2cbd25fd-7774-4913-b226-0af1ee4ba776",

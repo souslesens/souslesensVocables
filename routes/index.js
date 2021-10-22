@@ -14,6 +14,7 @@ var DataController = require("../bin/dataController.");
 var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
+var DictionariesManager=require("../bin/KG/DictionariesManager.")
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -204,6 +205,19 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+
+        if (req.body.dictionaries_listIndexes) {
+            DictionariesManager.listIndexes( function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
+        if (req.body.dictionaries_indexSource) {
+            DictionariesManager.indexSource(req.body.indexName,JSON.parse(req.body.data),JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
         if (req.body.getAssetGlobalMappings) {
             KGcontroller.getAssetGlobalMappings(
                 req.body.getAssetGlobalMappings,

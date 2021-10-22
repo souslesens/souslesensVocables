@@ -153,6 +153,14 @@ var Lineage_classes = (function () {
 
                 }
             }
+            items.generateElasticIndex = {
+                label: "generate Elastic Index",
+                action: function (e) {
+
+                    SourceBrowser.generateElasticIndex(Lineage_common.currentSource)
+
+                }
+            }
 
 
             return items;

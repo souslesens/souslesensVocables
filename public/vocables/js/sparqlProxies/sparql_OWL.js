@@ -736,7 +736,7 @@ var Sparql_OWL = (function () {
 
             })
         }
-        self.getDictionary = function (sourceLabel, options, callback) {
+        self.getDictionary = function (sourceLabel, options, processor,callback) {
             var fromStr = Sparql_common.getFromStr(sourceLabel)
             var filterStr = ""
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -770,8 +770,19 @@ var Sparql_OWL = (function () {
                     result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
                     resultSize=result.length
                     offset+=limit
-                    allData = allData.concat(result);
-                    callbackWhilst()
+                    if(processor) {
+                        processor(result, function (err, result) {
+                            if(err)
+                                return callbackWhilst(err)
+                            callbackWhilst()
+                        })
+                    }
+                    else {
+
+                        allData = allData.concat(result);
+                        callbackWhilst()
+                    }
+
                 })
             }, function (err) {
                 callback(err, allData)

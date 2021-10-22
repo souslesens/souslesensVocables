@@ -18,26 +18,32 @@ var fs = require("fs");
 
 
 var ConfigManager = {
-    config:{},
+    config: {},
     getGeneralConfig: function (callback) {
         var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
 
         var str = fs.readFileSync(mainConfigFilePath);
-     //   console.log(str)
+        //   console.log(str)
         var config = null;
+        var err=null;
         try {
             config = JSON.parse("" + str);
-            console.log(config,null,2)
-            if( !config.data_dir)
-                config.data_dir=  path.join(__dirname, "../data/");
+            console.log(config, null, 2)
+            if (!config.data_dir)
+                config.data_dir = path.join(__dirname, "../data/");
 
-            ConfigManager.config=config;
-            if (callback) return callback(err, config);
-            return config;
+            ConfigManager.config = config;
+
         } catch (e) {
+           console.log(e);
             // in that case return the string content not parsed
-            if (callback) return callback(null, str);
+            err=e;
         }
+        finally {
+            if (callback)
+                return callback(err, config);
+        }
+
     },
 
     getDictionary: function (dictionary, callback) {
@@ -95,7 +101,7 @@ var ConfigManager = {
 
                                 graphUri: graphUri,
                                 schemaType: "SKOS",
-                                predicates: { lang: options.lang },
+                                predicates: {lang: options.lang},
                                 color: "#9edae3",
                             };
                         } else if (options.type == "OWL") {

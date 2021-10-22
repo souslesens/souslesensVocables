@@ -144,16 +144,15 @@ var SourceBrowser = (function () {
         var items = {}
 
 
-          return items
-        ;
+        return items
+            ;
 
-     items.nodeInfos = {
-         label: "Node infos",
-         action: function (e) {// pb avec source
-             SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
-         }
-     }
-
+        items.nodeInfos = {
+            label: "Node infos",
+            action: function (e) {// pb avec source
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+            }
+        }
 
 
         if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
@@ -262,10 +261,6 @@ var SourceBrowser = (function () {
             }
 
         }
-
-
-
-
 
 
         return items;
@@ -642,7 +637,6 @@ var SourceBrowser = (function () {
         }
 
 
-
         if (!self.visitedNodes || options.resetVisited) {
             self.visitedNodes = []
             self.visitedNodes.currentIndex = 0
@@ -676,7 +670,7 @@ var SourceBrowser = (function () {
 
                 },
                 function (callbackSeries) {
-                    if (self.visitedNodes.length <2) {
+                    if (self.visitedNodes.length < 2) {
                         return callbackSeries()
                     }
                     var str = "<div><button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
@@ -893,7 +887,7 @@ var SourceBrowser = (function () {
         })
     }
 
-    self.showClassRestrictions = function (sourceLabel, nodeId,options, callback) {
+    self.showClassRestrictions = function (sourceLabel, nodeId, options, callback) {
 
         // blankNodes.
 
@@ -1016,13 +1010,56 @@ var SourceBrowser = (function () {
     }
 
 
-    self.generateSourceDictionary=function(sourceLabel) {
-        if (Config.sources[sourceLabel].schemaType == "OWL")
-           Sparql_OWL.getDictionary(sourceLabel,{},function(err, result){
-               if(err)
-                   MainController.UI.message(err,true)
+    self.generateSourceDictionary = function (sourceLabel) {
+        if (Config.sources[sourceLabel].schemaType == "OWL") {
+            Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, result) {
+                if (err)
+                    MainController.UI.message(err, true)
 
-        })
+            })
+        }
+    }
+
+    self.generateElasticIndex = function (sourceLabel) {
+        var totalLines=0
+        var processor = function (data, callback) {
+            if(data.length==0)
+               return callback();
+            MainController.UI.message("indexing "  +data.length)
+            var options = {replaceIndex: true}
+            var payload = {
+                dictionaries_indexSource: 1,
+                indexName:sourceLabel.toLowerCase(),
+                data: JSON.stringify(data),
+                options: JSON.stringify(options)
+            }
+
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: payload,
+                dataType: "json",
+                success: function (data, textStatus, jqXHR) {
+                    totalLines+=data.length
+                    MainController.UI.message("indexed "  +totalLines+ " in index "+sourceLabel.toLowerCase())
+                    callback(null, data)
+                }
+                , error: function (err) {
+                    callback(err);
+
+                }
+
+
+            })
+
+        }
+        if (Config.sources[sourceLabel].schemaType == "OWL") {
+
+            Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
+                if (err)
+                    MainController.UI.message(err, true)
+            })
+        }
     }
 
     return self;

@@ -18,6 +18,7 @@ var Standardizer = (function () {
             common.fillSelectOptions("KGadvancedMapping_filterCandidateMappingsSelect", candidateEntities, false)
 
 
+            self.initSourcesIndexesList()
             var sortList = ["alphabetic","candidates"]
             distinctSources.forEach(function(source){
                 sortList.push({value:"_search_"+source,text:source})
@@ -32,6 +33,45 @@ var Standardizer = (function () {
         }, 200)
     }
 
+
+    self.initSourcesIndexesList=function(){
+
+
+        var payload = {
+            dictionaries_listIndexes: 1,
+
+        }
+
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data, textStatus, jqXHR) {
+               var sources=[];
+               for(var source in Config.sources){
+                   sources.push(source.toLowerCase())
+               }
+               var indexedSources=[]
+               data.forEach(function(item){
+                   if(sources.indexOf(item)>-1){
+                       indexedSources.push({id:item,text:item,parent:"#"});
+                   }
+               })
+               common.jstree.loadJsTree("KGMappingAdvancedMappings_sources", indexedSources,{withCheckboxes:1});
+
+            }
+            , error: function (err) {
+               return MainController.UI.message(err)
+
+            }
+
+
+        })
+
+
+
+    }
 
 
 
@@ -75,7 +115,12 @@ var Standardizer = (function () {
                         ]
                     },
                 }
-                var indexes = ["readi", "pca", "cfihos"]
+                var indexesArray= $('#KGMappingAdvancedMappings_sources').jstree(true).get_checked();
+            var indexes=[];
+            indexesArray.forEach(function(item){
+                indexes.push(item)
+            })
+             var indexes = ["readi", "pca", "cfihos"]
 
                 ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
                     if (err)

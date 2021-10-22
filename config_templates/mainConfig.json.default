@@ -1,6 +1,6 @@
 {
 
-  "serverUrl" :"../elastic",
+  "serverUrl" :"../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
 
   "SQLserver": {
@@ -18,7 +18,7 @@
   "annotator": {
     "tikaServerUrl": "127.0.0.1:41000",
     "spacyServerUrl": "127.0.0.1:8000/pos",
-    "parsedDocumentsHomeDir": "",
-    "uploadDirPath": ""
+    "parsedDocumentsHomeDir": null,
+    "uploadDirPath": null
   }
 }

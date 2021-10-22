@@ -15,7 +15,7 @@ var Standardizer = (function () {
             var distinctSources = ["readi", "cfihos", "pca"]
             var candidateEntities = distinctSources
             candidateEntities.splice(0, 0, "all")
-            common.fillSelectOptions("ADLadvancedMapping_filterCandidateMappingsSelect", candidateEntities, false)
+            common.fillSelectOptions("KGadvancedMapping_filterCandidateMappingsSelect", candidateEntities, false)
 
 
             var sortList = ["alphabetic","candidates"]
@@ -26,8 +26,8 @@ var Standardizer = (function () {
 
 
 
-            common.fillSelectOptions("ADLmapping_distinctColumnSortSelect", sortList, false,"text","value")
-            ADLadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
+            common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false,"text","value")
+            KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
             self.matchCandidates = {}
         }, 200)
     }
@@ -38,8 +38,8 @@ var Standardizer = (function () {
     self.getElasticSearchExactMatches = function (words) {
         $("#waitImg").css("display", "block")
         MainController.UI.message("Searching exact matches ")
-        ADLadvancedMapping.currentColumnValueDivIds={}
-        $("#ADLmapping_distinctColumnValuesContainer").html("")
+        KGadvancedMapping.currentColumnValueDivIds={}
+        $("#KGmapping_distinctColumnValuesContainer").html("")
         var text = $("#Standardizer_wordsTA").val()
         if (text == "")
             return alert("Enter text to standardize")
@@ -110,37 +110,37 @@ var Standardizer = (function () {
 
 
                 self.entitiesMap = entitiesMap;
-                ADLadvancedMapping.currentColumnValueDivIds = {}
+                KGadvancedMapping.currentColumnValueDivIds = {}
                 var distinctSources = []
                 words.forEach(function (word) {
                     word = word.toLowerCase().trim()
                     var sourcesHtml = ""
                     var id = "columnValue" + common.getRandomHexaId(5)
-                    ADLadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
+                    KGadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
                     var cssClass;
                     if (entitiesMap[word]) {//exact match
-                        cssClass = "ADLmapping_columnValues_referenceValue"
+                        cssClass = "KGmapping_columnValues_referenceValue"
                         for (var index in entitiesMap[word]) {
-                            ADLadvancedMapping.currentColumnValueDivIds[id].indexData.push(entitiesMap[word])
-                            ADLadvancedMapping.currentColumnValueDivIds[id].sources.push(index)
+                            KGadvancedMapping.currentColumnValueDivIds[id].indexData.push(entitiesMap[word])
+                            KGadvancedMapping.currentColumnValueDivIds[id].sources.push(index)
 
                             if (index && distinctSources.indexOf(index) < 0)
                                 distinctSources.push(index)
-                            sourcesHtml += "&nbsp;<span class='ADLmapping_distinctColumnValueSource' style='background-color:" + ADLadvancedMapping.getSourceColor(index) + "'>" + index + "</span>";
+                            sourcesHtml += "&nbsp;<span class='KGmapping_distinctColumnValueSource' style='background-color:" + KGadvancedMapping.getSourceColor(index) + "'>" + index + "</span>";
 
                         }
                     } else {
-                        cssClass = "ADLmapping_columnValues_hasCandidateValues"
+                        cssClass = "KGmapping_columnValues_hasCandidateValues"
                     }
 
 
                     if (cssClass && cssClass != "") {
-                        $("#ADLmapping_columnValues option[value='" + word + "']").addClass(cssClass);
+                        $("#KGmapping_columnValues option[value='" + word + "']").addClass(cssClass);
 
                     }
 
-                    var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='ADLmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
-                    $("#ADLmapping_distinctColumnValuesContainer").append(html)
+                    var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
+                    $("#KGmapping_distinctColumnValuesContainer").append(html)
 
 
                 })
@@ -149,9 +149,9 @@ var Standardizer = (function () {
     }
 
     self.editCandidateValues = function (columnValueDivId, searchedText) {
-        ADLadvancedMapping.currentColumnValueDivId = columnValueDivId
-        var columnValue = ADLadvancedMapping.currentColumnValueDivIds[columnValueDivId].value
-        $("#ADLadvancedMapping_searchEntitiesInput").val(columnValue)
+        KGadvancedMapping.currentColumnValueDivId = columnValueDivId
+        var columnValue = KGadvancedMapping.currentColumnValueDivIds[columnValueDivId].value
+        $("#KGadvancedMapping_searchEntitiesInput").val(columnValue)
         var entity = self.entitiesMap[columnValue.toLowerCase()]
         if (entity) {
             var keys = []
@@ -185,12 +185,12 @@ var Standardizer = (function () {
 
             }
 
-            $("#ADLadvancedMapping_dictionaryMappingContainerDiv").html(html)
+            $("#KGadvancedMapping_dictionaryMappingContainerDiv").html(html)
             MainController.UI.message("",true)
 
         } else {
 
-            ADLadvancedMapping.searchEntities(columnValue,)
+            KGadvancedMapping.searchEntities(columnValue,)
         }
     }
 
@@ -223,9 +223,9 @@ var Standardizer = (function () {
         }
 
 
-        for (var columnValueDivId in ADLadvancedMapping.matchCandidates) {
+        for (var columnValueDivId in KGadvancedMapping.matchCandidates) {
 
-            var item = ADLadvancedMapping.matchCandidates[columnValueDivId];
+            var item = KGadvancedMapping.matchCandidates[columnValueDivId];
             item.target.status = "similar"
             var source = Config.Standardizer.elasticIndexesSourcesMap[item.target.index]
             if (!sourcesMap[source])

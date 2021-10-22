@@ -1,4 +1,4 @@
-var filePath = "D:\\NLP\\ontologies\\assets\\CLOV\\ADL_tblTagAttribute.csv";
+var filePath = "D:\\NLP\\ontologies\\assets\\CLOV\\KG_tblTagAttribute.csv";
 var lineIndex = 0;
 var maxLines = 200;
 var readStream = require("fs").createReadStream(filePath);

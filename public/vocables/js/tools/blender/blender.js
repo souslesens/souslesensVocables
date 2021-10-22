@@ -350,7 +350,7 @@ var Blender = (function () {
                 menuItems.nodeInfos = {
                     label: "Show Node infos",
                     action: function (obj, sss, cc) {
-                        MainController.UI.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
+                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv")
                     },
 
 
@@ -765,7 +765,8 @@ var Blender = (function () {
                         if (err) {
                             return MainController.UI.message(err)
                         }
-                        MainController.UI.message("node " + word + " created")
+                        MainController.UI.message("",true)
+                        $("#Evaluate_infosDiv").html("word " + word + " created as "+pasteType)
                         var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id);
                         if(pasteType == "concept")
                         SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, {reopen: true});
@@ -911,6 +912,7 @@ var Blender = (function () {
                         if (!cancel)
                             MainController.UI.message("nodes copied")
                         $("#waitImg").css("display", "none")
+                        $("#Evaluate_infosDiv").html("")
                     }
 
 

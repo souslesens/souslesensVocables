@@ -37,14 +37,14 @@ var SQLquery=(function(){
             return alert ("no source specified")
 
 
-        self.currentADLdataSource=Config.sources[source].dataSource
+        self.currentKGdataSource=Config.sources[source].dataSource
         $.ajax({
             type: "POST",
             url: Config.serverUrl,
             data: {
-                ADLquery: 1,
+                KGquery: 1,
                 getData: 1,
-                dataSource: JSON.stringify(self.currentADLdataSource),
+                dataSource: JSON.stringify(self.currentKGdataSource),
                 sqlQuery: query
             },
             dataType: "json",

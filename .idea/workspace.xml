@@ -4,16 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="OSDU">
-      <change afterPath="$PROJECT_DIR$/config/blenderSources.json.default" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/mainConfig.json.default" afterDir="false" />
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="change ADL prefix to KG">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/OSDUparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/OSDUparser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/config/app_config.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/config/app_config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/configManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/Iso19800toOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/Iso19800toOWL..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/mainController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/mainController.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowser.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceMatcher.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/init_configs.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/init_configs.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,7 +37,7 @@
     </option>
   </component>
   <component name="Git.Merge.Settings">
-    <option name="BRANCH" value="readme" />
+    <option name="BRANCH" value="origin/master" />
   </component>
   <component name="Git.Rebase.Settings">
     <option name="NEW_BASE" value="master" />
@@ -41,7 +45,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="admin-interface-dev" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -66,6 +70,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="Git.Branch.Popup.ShowAllRemotes" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -75,9 +80,9 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.20" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/config" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.27" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="prettierjs.PrettierConfiguration.Package" value="D:\webstorm\souslesensVocables\node_modules\prettier" />
@@ -88,31 +93,31 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\webstorm\souslesensVocables\config" />
-      <recent name="D:\webstorm\souslesensVocables\config\users" />
-      <recent name="D:\webstorm\souslesensVocables\data\mappings" />
-      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\snippets\standardizer" />
+      <recent name="D:\webstorm\souslesensVocables" />
+      <recent name="D:\webstorm\souslesensVocables\other\energisitics" />
+      <recent name="D:\webstorm\souslesensVocables\data\dictionaries" />
+      <recent name="D:\webstorm\souslesensVocables\data\graphs" />
+      <recent name="D:\webstorm\souslesensVocables\data\annotator\temp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\webstorm\souslesensVocables\data\mappings" />
+      <recent name="D:\webstorm\souslesensVocables\data" />
+      <recent name="D:\webstorm\souslesensVocables\config\mappings" />
+      <recent name="D:\webstorm\souslesensVocables\other" />
       <recent name="D:\webstorm\souslesensVocables\config" />
-      <recent name="D:\webstorm\souslesensVocables\bin" />
-      <recent name="D:\webstorm\souslesensVocables\bin\ADL" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables\js" />
-      <recent name="D:\webstorm\souslesensVocables\public\vocables" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.OSDUparser..js">
-    <configuration name="OSDUparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/OSDUparser..js" working-dir="$PROJECT_DIR$/bin">
+  <component name="RunManager" selected="Node.js.bin\www">
+    <configuration name="Iso19800toOWL..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/Iso19800toOWL..js" working-dir="$PROJECT_DIR$/other">
       <method v="2" />
     </configuration>
-    <configuration name="SQLserverConnector..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/ADL/SQLserverConnector..js" working-dir="$PROJECT_DIR$/bin/ADL">
+    <configuration name="KGbrowserQuery.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/KG/browser">
       <method v="2" />
     </configuration>
-    <configuration name="SQLutil..js.X" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/SQLutil..js.X" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="energisticsToOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" working-dir="$PROJECT_DIR$/other/energisitics">
       <method v="2" />
     </configuration>
-    <configuration name="mainController.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/mainController.js" working-dir="$PROJECT_DIR$/public/vocables/js">
+    <configuration name="graphTraversal.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/graphTraversal.js" working-dir="$PROJECT_DIR$/public/vocables/js">
       <method v="2" />
     </configuration>
     <configuration name="usersGenerator..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/usersGenerator..js" working-dir="$PROJECT_DIR$/bin">
@@ -120,11 +125,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.OSDUparser..js" />
+        <item itemvalue="Node.js.Iso19800toOWL..js" />
+        <item itemvalue="Node.js.graphTraversal.js" />
+        <item itemvalue="Node.js.KGbrowserQuery.js" />
+        <item itemvalue="Node.js.energisticsToOWLparser..js" />
         <item itemvalue="Node.js.usersGenerator..js" />
-        <item itemvalue="Node.js.SQLutil..js.X" />
-        <item itemvalue="Node.js.SQLserverConnector..js" />
-        <item itemvalue="Node.js.mainController.js" />
       </list>
     </recent_temporary>
   </component>
@@ -242,7 +247,18 @@
       <workItem from="1632656372893" duration="5360000" />
       <workItem from="1632746143564" duration="14709000" />
       <workItem from="1632835821016" duration="23535000" />
-      <workItem from="1633110032272" duration="49254000" />
+      <workItem from="1633110032272" duration="72148000" />
+      <workItem from="1633503412063" duration="24630000" />
+      <workItem from="1633596652014" duration="593000" />
+      <workItem from="1633597936432" duration="5944000" />
+      <workItem from="1633626069577" duration="82528000" />
+      <workItem from="1634026844054" duration="15692000" />
+      <workItem from="1634112263927" duration="18873000" />
+      <workItem from="1634276654279" duration="11050000" />
+      <workItem from="1634471930363" duration="4730000" />
+      <workItem from="1634490940304" duration="34876000" />
+      <workItem from="1634624661848" duration="38710000" />
+      <workItem from="1634804898892" duration="15782000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -300,7 +316,168 @@
       <option name="project" value="LOCAL" />
       <updated>1633284850746</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="OSDU">
+      <created>1633359823984</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1633359823984</updated>
+    </task>
+    <task id="LOCAL-00010" summary="OSDU">
+      <created>1633359864625</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1633359864625</updated>
+    </task>
+    <task id="LOCAL-00011" summary="OSDU">
+      <created>1633366162880</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1633366162880</updated>
+    </task>
+    <task id="LOCAL-00012" summary="OSDU">
+      <created>1633371244624</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1633371244624</updated>
+    </task>
+    <task id="LOCAL-00013" summary="correct search query OWL">
+      <created>1633425405884</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1633425405884</updated>
+    </task>
+    <task id="LOCAL-00014" summary="initiate dev master branch">
+      <created>1633425760643</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1633425760643</updated>
+    </task>
+    <task id="LOCAL-00015" summary="correct search OWL">
+      <created>1633427476269</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1633427476269</updated>
+    </task>
+    <task id="LOCAL-00016" summary="annotator fixes">
+      <created>1633502194401</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1633502194401</updated>
+    </task>
+    <task id="LOCAL-00017" summary="organisation of code">
+      <created>1633524623606</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1633524623606</updated>
+    </task>
+    <task id="LOCAL-00018" summary="organisation of code">
+      <created>1633525040084</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1633525040084</updated>
+    </task>
+    <task id="LOCAL-00019" summary="organisation of code">
+      <created>1633527521954</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1633527521954</updated>
+    </task>
+    <task id="LOCAL-00020" summary="organisation of code">
+      <created>1633527813192</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1633527813192</updated>
+    </task>
+    <task id="LOCAL-00021" summary="organisation of code">
+      <created>1633590727171</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1633590727171</updated>
+    </task>
+    <task id="LOCAL-00022" summary="change ADL prefix to KG">
+      <created>1633626544226</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1633626544226</updated>
+    </task>
+    <task id="LOCAL-00023" summary="change ADL prefix to KG">
+      <created>1633801866449</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1633801866449</updated>
+    </task>
+    <task id="LOCAL-00024" summary="change ADL prefix to KG">
+      <created>1633966639431</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1633966639431</updated>
+    </task>
+    <task id="LOCAL-00025" summary="change ADL prefix to KG">
+      <created>1634058024169</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1634058024169</updated>
+    </task>
+    <task id="LOCAL-00026" summary="change ADL prefix to KG">
+      <created>1634132230170</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1634132230170</updated>
+    </task>
+    <task id="LOCAL-00027" summary="change ADL prefix to KG">
+      <created>1634148678064</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1634148678064</updated>
+    </task>
+    <task id="LOCAL-00028" summary="change ADL prefix to KG">
+      <created>1634486204061</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1634486204061</updated>
+    </task>
+    <task id="LOCAL-00029" summary="change ADL prefix to KG">
+      <created>1634568023713</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1634568023713</updated>
+    </task>
+    <task id="LOCAL-00030" summary="change ADL prefix to KG">
+      <created>1634579428306</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1634579428306</updated>
+    </task>
+    <task id="LOCAL-00031" summary="change ADL prefix to KG">
+      <created>1634665285999</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1634665285999</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -407,13 +584,19 @@
     <MESSAGE value="add prettier to packages.json" />
     <MESSAGE value="improve ADL mappings : a mapping is define by source+ database" />
     <MESSAGE value="OSDU" />
-    <option name="LAST_COMMIT_MESSAGE" value="OSDU" />
+    <MESSAGE value="correct search query OWL" />
+    <MESSAGE value="initiate dev master branch" />
+    <MESSAGE value="correct search OWL" />
+    <MESSAGE value="annotator fixes" />
+    <MESSAGE value="organisation of code" />
+    <MESSAGE value="change ADL prefix to KG" />
+    <option name="LAST_COMMIT_MESSAGE" value="change ADL prefix to KG" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate2.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/evaluate.js</url>
           <line>320</line>
           <option name="timeStamp" value="29" />
         </line-breakpoint>
@@ -438,26 +621,6 @@
           <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>1381</line>
-          <option name="timeStamp" value="44" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>173</line>
-          <option name="timeStamp" value="45" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/blender.js</url>
-          <line>1379</line>
-          <option name="timeStamp" value="46" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/configManager..js</url>
-          <line>104</line>
-          <option name="timeStamp" value="52" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/authentification.js</url>
           <line>175</line>
           <option name="timeStamp" value="57" />
@@ -473,32 +636,32 @@
           <option name="timeStamp" value="59" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLSqlConnector..js</url>
+          <url>file://$PROJECT_DIR$/bin/KG/KGSqlConnector..js</url>
           <line>44</line>
           <option name="timeStamp" value="69" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
-          <line>361</line>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
+          <line>368</line>
           <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/dictionaryMatcher..js</url>
+          <url>file://$PROJECT_DIR$/bin/KG/dictionaryMatcher..js</url>
           <line>178</line>
           <option name="timeStamp" value="91" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
           <line>108</line>
           <option name="timeStamp" value="97" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
-          <line>213</line>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
+          <line>212</line>
           <option name="timeStamp" value="175" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGbuild.js</url>
           <line>100</line>
           <option name="timeStamp" value="194" />
         </line-breakpoint>
@@ -508,29 +671,19 @@
           <option name="timeStamp" value="206" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLadvancedMapping.js</url>
-          <line>367</line>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGadvancedMapping.js</url>
+          <line>374</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>84</line>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
+          <line>85</line>
           <option name="timeStamp" value="221" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/graphTraversal.js</url>
-          <line>70</line>
-          <option name="timeStamp" value="222" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/browser/ADLbrowserQuery.js</url>
-          <line>424</line>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
+          <line>426</line>
           <option name="timeStamp" value="223" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/Standardizer.js</url>
-          <line>105</line>
-          <option name="timeStamp" value="225" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/SQLutil..js.X</url>
@@ -538,58 +691,99 @@
           <option name="timeStamp" value="250" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLbuild.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGbuild.js</url>
           <line>70</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="260" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLbuilder..js</url>
+          <url>file://$PROJECT_DIR$/bin/KG/KGbuilder..js</url>
           <line>245</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="263" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/ADL/ADLcontroller..js</url>
-          <line>20</line>
-          <properties lambdaOrdinal="-1" />
+          <url>file://$PROJECT_DIR$/bin/KG/KGcontroller..js</url>
+          <line>22</line>
           <option name="timeStamp" value="265" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/ADL/mappings/ADLmappings.js</url>
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/mappings/KGmappings.js</url>
           <line>468</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="267" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/routes/index.js</url>
-          <line>203</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="271" />
+          <url>file://$PROJECT_DIR$/other/UMLtoOWLparser..js</url>
+          <line>417</line>
+          <option name="timeStamp" value="393" />
+        </line-breakpoint>
+        <line-breakpoint type="javascript">
+          <url>file://$PROJECT_DIR$/bin/httpProxy..js</url>
+          <line>52</line>
+          <option name="timeStamp" value="402" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
-          <line>344</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="328" />
+          <url>file://$PROJECT_DIR$/public/vocables/js/mainController.js</url>
+          <line>232</line>
+          <option name="timeStamp" value="429" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/bin/OSDUparser..js</url>
-          <line>280</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="335" />
+          <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
+          <line>40</line>
+          <option name="timeStamp" value="505" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js</url>
-          <line>463</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="336" />
+          <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js</url>
+          <line>730</line>
+          <option name="timeStamp" value="520" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/blender/sourceEditor.js</url>
-          <line>615</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="338" />
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
+          <line>1303</line>
+          <option name="timeStamp" value="559" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
+          <line>1280</line>
+          <option name="timeStamp" value="561" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js</url>
+          <line>1277</line>
+          <option name="timeStamp" value="562" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/public/vocables/js/graphTraversal.js</url>
+          <line>216</line>
+          <option name="timeStamp" value="565" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>410</line>
+          <option name="timeStamp" value="590" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>414</line>
+          <option name="timeStamp" value="591" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>408</line>
+          <option name="timeStamp" value="593" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>378</line>
+          <option name="timeStamp" value="595" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>404</line>
+          <option name="timeStamp" value="599" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
+          <line>407</line>
+          <option name="timeStamp" value="601" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

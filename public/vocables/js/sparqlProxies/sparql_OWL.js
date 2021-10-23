@@ -745,8 +745,8 @@ var Sparql_OWL = (function () {
                 "SELECT distinct * " + fromStr + " WHERE "
             if (options.selectGraph)
                 query += " graph ?g "
-            query += "{ ?concept rdf:type ?type. "+
-            " OPTIONAL {?concept rdfs:label ?conceptLabel}" +
+            query += "{ ?id rdf:type ?type. "+
+            " OPTIONAL {?id rdfs:label ?label}" +
             " }"
 
             var allData = []

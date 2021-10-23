@@ -1,4 +1,5 @@
-var socket = io();
+
+/*var socket = io();
 socket.emit('chat message', "hello from Client");
 
 socket.on('KGbuild', function (data) {
@@ -7,4 +8,4 @@ socket.on('KGbuild', function (data) {
 
 socket.on('annotate', function (data) {
    Evaluate.serverMessage(data)
-})
+})*/

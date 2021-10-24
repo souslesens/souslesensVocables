@@ -55,13 +55,14 @@ var GraphController = (function () {
             } else {
                 var fromId = ""
                 var fromLabel = "";
-
-                if (fromVar == "#") {
+                if (!fromVar) {
+                    ;
+                }
+                else if (fromVar == "#") {
                     fromId = "#"
                     fromLabel = visjOptions.rootLabel || "#"
-                } else if (!fromVar) {
-                    ;
-                } else {
+                }
+                else {
                     if (!item[fromVar])
                         return;//console.log(JSON.stringify(item));
                     fromId = item[fromVar].value
@@ -70,13 +71,14 @@ var GraphController = (function () {
 
 
                 if (!existingIds[fromId]) {
+                    var color = Lineage_classes.getSourceColor(null,fromId)
                     existingIds[fromId] = 1;
                     var node = {
                         id: fromId,
                         label: fromLabel,
                         shape: getShape("from", fromId),
                         size: visjOptions.to.size || 5,
-                        color: visjOptions.from.color || self.defaultNodeColor
+                        color: color || visjOptions.from.color || self.defaultNodeColor
                     }
                     node.data = {}
                     if (visjOptions.data)
@@ -106,13 +108,13 @@ var GraphController = (function () {
 
                 if (!existingIds[toId]) {
                     existingIds[toId] = 1;
-
+                    var color = Lineage_classes.getSourceColor(null,toId)
                     var node = {
                         id: toId,
                         label: toLabel,
                         shape: getShape("to", toId),
                         size: visjOptions.to.size || 5,
-                        color: visjOptions.to.color || self.defaultNodeColor
+                        color: color || visjOptions.from.color || self.defaultNodeColor
                     }
                     node.data = {}
                     if (visjOptions.data)

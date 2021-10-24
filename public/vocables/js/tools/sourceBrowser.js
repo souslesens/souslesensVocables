@@ -144,7 +144,6 @@ var SourceBrowser = (function () {
         var items = {}
 
 
-
         items.nodeInfos = {
             label: "Node infos",
             action: function (e) {// pb avec source
@@ -668,10 +667,23 @@ var SourceBrowser = (function () {
 
                 },
                 function (callbackSeries) {
-                    if (self.visitedNodes.length < 2) {
-                        return callbackSeries()
+                    var str = "<div>"
+                    if (self.visitedNodes.length > 1) {
+                        var str = "<button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+
                     }
-                    var str = "<div><button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+
+
+                    if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+                        self.nodeInfos.currentNodeId = nodeId
+                        self.nodeInfos.sourceLabel = sourceLabel;
+                        str += "<button onclick='SourceBrowser.nodeInfos.copyNode()'> copyNode </button>"
+
+                        if (type= "http://www.w3.org/2002/07/owl#Class") {
+                            str += "<button onclick='SourceBrowser.nodeInfos.pasteAsSubClassOf()'> pasteAsSubClassOfThisNode </button>"
+                        }
+                    }
+                    str += "</div>"
                     $("#" + divId).prepend(str)
                     callbackSeries()
                 },
@@ -1019,15 +1031,15 @@ var SourceBrowser = (function () {
     }
 
     self.generateElasticIndex = function (sourceLabel) {
-        var totalLines=0
+        var totalLines = 0
 
 
         var processor = function (data, callback) {
-            if(data.length==0)
-               return callback();
-            var data2=[]
-            data.forEach(function(item){
-                if( item.label) {
+            if (data.length == 0)
+                return callback();
+            var data2 = []
+            data.forEach(function (item) {
+                if (item.label) {
                     data2.push({
                         id: item.id.value,
                         label: item.label.value,
@@ -1035,11 +1047,11 @@ var SourceBrowser = (function () {
                     })
                 }
             })
-            MainController.UI.message("indexing "  +data.length)
+            MainController.UI.message("indexing " + data.length)
             var options = {replaceIndex: true}
             var payload = {
                 dictionaries_indexSource: 1,
-                indexName:sourceLabel.toLowerCase(),
+                indexName: sourceLabel.toLowerCase(),
                 data: JSON.stringify(data2),
                 options: JSON.stringify(options)
             }
@@ -1050,8 +1062,8 @@ var SourceBrowser = (function () {
                 data: payload,
                 dataType: "json",
                 success: function (data2, textStatus, jqXHR) {
-                    totalLines+=data.length
-                    MainController.UI.message("indexed "  +totalLines+ " in index "+sourceLabel.toLowerCase())
+                    totalLines += data.length
+                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
                     callback(null, data)
                 }
                 , error: function (err) {
@@ -1069,10 +1081,40 @@ var SourceBrowser = (function () {
                 if (err)
                     MainController.UI.message(err, true)
 
-                MainController.UI.message("DONE ",true)
+                MainController.UI.message("DONE ", true)
             })
         }
     }
+
+
+    self.nodeInfos = {
+
+        copyNode: function () {
+            self.nodeInfos.copiedNodeId = self.nodeInfos.currentNodeId
+            self.nodeInfos.copiedNodeSourceLabel = self.nodeInfos.sourceLabel
+        },
+
+        pasteAsSubClassOf: function () {
+            if (!self.nodeInfos.copiedNodeId)
+                return alert("No node copied")
+            if (!confirm("pasteAsSubClassOf this node"))
+                return;
+            var triple = {
+                subject: self.nodeInfos.copiedNodeId,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                object: self.nodeInfos.currentNodeId
+            }
+            Sparql_generic.insertTriples(self.nodeInfos.copiedNodeSourceLabel, [triple], function (err, result) {
+                if(err)
+                    return alert(err);
+                return alert("DONE")
+
+            })
+
+        }
+
+    }
+
 
     return self;
 

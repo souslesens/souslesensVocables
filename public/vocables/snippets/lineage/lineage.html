@@ -11,6 +11,7 @@
         font-size: 14px;
         border: solid 1px black;
         border-radius: 5px;
+        width:150px;
     }
 
     .Lineage_selectedSourceDiv {
@@ -48,7 +49,7 @@
     </div>
 </div>-->
 <div>
-    <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
+    <div id="lineage_drawnSources" style="display: flex;">
     </div>
 </div>
 <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
@@ -61,6 +62,7 @@
 
         <button class="lineage_button" onclick="Lineage_classes.addParentsToGraph()">parents</button>
         <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
+      <button class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>
     <button onclick="Lineage_classes.initUI()">clear</button>
 
     </div>

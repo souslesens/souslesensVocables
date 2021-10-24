@@ -258,8 +258,30 @@ var SourceBrowser = (function () {
             }
 
         }
+        var clipboardContent = Clipboard.self.getContent()
+        if (clipboardContent && clipboardContent.type == "lineage_node") {
+            items.graphNodeNeighborhood = {
+                label: "graph node neighborhood ",
+                "action": false,
+                "submenu": {
+                    graphNodeNeighborhood_incoming: {
+                        label: "incoming",
+                        action: function () {
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'incoming')
 
+                        }
+                    },
+                    graphNodeNeighborhood_outcoming: {
+                        label: "outcoming",
+                        action: function () {
+                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'outcoming')
 
+                        }
+                    }
+                }
+            }
+        }
+        items.copyNode = {}
         return items;
     }
 
@@ -679,7 +701,7 @@ var SourceBrowser = (function () {
                         self.nodeInfos.sourceLabel = sourceLabel;
                         str += "<button onclick='SourceBrowser.nodeInfos.copyNode()'> copyNode </button>"
 
-                        if (type= "http://www.w3.org/2002/07/owl#Class") {
+                        if (type = "http://www.w3.org/2002/07/owl#Class") {
                             str += "<button onclick='SourceBrowser.nodeInfos.pasteAsSubClassOf()'> pasteAsSubClassOfThisNode </button>"
                         }
                     }
@@ -1105,7 +1127,7 @@ var SourceBrowser = (function () {
                 object: self.nodeInfos.currentNodeId
             }
             Sparql_generic.insertTriples(self.nodeInfos.copiedNodeSourceLabel, [triple], function (err, result) {
-                if(err)
+                if (err)
                     return alert(err);
                 return alert("DONE")
 

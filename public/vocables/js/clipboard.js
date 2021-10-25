@@ -36,7 +36,7 @@ if(false && !data.source)
 
         if (element) {
             if (element === "_visjsNode") {
-                blinkVisjsNode(data.id);
+                blinkVisjsNode(data.id,data.initialShape);
             } else {
                 var elt = document.getElementById(element)
                 if (elt) {
@@ -62,10 +62,11 @@ if(false && !data.source)
     }
 
 
-    blinkVisjsNode = function (selectedNodeId) {
+    blinkVisjsNode = function (selectedNodeId,initialShape) {
         var hidden = true
         var setInt;
-
+if(!initialShape)
+    initialShape="box"
 
         function nodeFlash(nodeId, _stop) {
 
@@ -90,10 +91,11 @@ if(false && !data.source)
             return
         visjsGraph.data.nodes.getIds().forEach(function (id) {
             var newNode = {id: id, hidden: false}
-            if (selectedNodeId && selectedNodeId == id)
+            if (selectedNodeId && selectedNodeId == id) {
                 newNode.shape = "star";
-            else
-                newNode.shape = "box";
+
+            } else
+                newNode.shape = initialShape;
 
             newNodes.push(newNode)
 

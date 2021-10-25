@@ -38,6 +38,8 @@ if(!replaceGraph)
                     //    return callbackEach();
                     var triplesStr = "";
                     triples.forEach(function (triple) {
+                        if(!triple.subject || !triple.object)
+                            return
                         var subject = triple.subject
                         if (subject.indexOf("_:b") == 0)
                             ;
@@ -81,11 +83,13 @@ if(!replaceGraph)
                         function (err, result) {
                             if (err) {
                                 var x = queryGraph
-                                return callbackEach(err);
+                                console.log(err)
+                                return callbackEach();
+                            }else {
+                                totalTriples += triples.length;
+                                console.log(totalTriples)
+                                return callbackEach(null);
                             }
-                            totalTriples += triples.length;
-                            console.log(totalTriples)
-                            return callbackEach(null);
                         }
                     );
                 },

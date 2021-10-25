@@ -188,7 +188,7 @@ var util = {
         str = str.replace(/\r/gm, "");
         str = str.replace(/\t/gm, "\\\\t");
         str = str.replace(/\\xa0/gm, " ");
-        str = str.replace(/'/gm, "\\'");
+        str = str.replace(/'/gm, "");
         if (forUri)
             str = str.replace(/ /gm, "_");
 

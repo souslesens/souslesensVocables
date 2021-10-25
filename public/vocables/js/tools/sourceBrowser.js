@@ -68,13 +68,19 @@ var SourceBrowser = (function () {
 
     }
 
-    self.copyNode = function (event) {
+    self.copyNode = function (event,node) {
+        if(!node)
+            node=self.currentTreeNode;
+        if(!node)
+            node= self.currentGraphNode
+        if(!node)
+            return;
         Clipboard.copy({
                 type: "node",
-                id: self.currentTreeNode.data.id,
-                label: self.currentTreeNode.data.label,
-                source: self.currentTreeNode.data.source,
-                data: self.currentTreeNode.data
+                id:node.data.id,
+                label:node.data.label,
+                source: node.data.source,
+                data: node.data
             },
             self.currentTreeNode.id + "_anchor",
             event)
@@ -258,30 +264,9 @@ var SourceBrowser = (function () {
             }
 
         }
-        var clipboardContent = Clipboard.self.getContent()
-        if (clipboardContent && clipboardContent.type == "lineage_node") {
-            items.graphNodeNeighborhood = {
-                label: "graph node neighborhood ",
-                "action": false,
-                "submenu": {
-                    graphNodeNeighborhood_incoming: {
-                        label: "incoming",
-                        action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'incoming')
-
-                        }
-                    },
-                    graphNodeNeighborhood_outcoming: {
-                        label: "outcoming",
-                        action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, 'outcoming')
-
-                        }
-                    }
-                }
-            }
+        if(authentication.currentUser.groupes.indexOf("admin") > -1) {
+            items = Lineage_blend.addBlendJstreeMenuItems(items);
         }
-        items.copyNode = {}
         return items;
     }
 
@@ -696,15 +681,7 @@ var SourceBrowser = (function () {
                     }
 
 
-                    if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-                        self.nodeInfos.currentNodeId = nodeId
-                        self.nodeInfos.sourceLabel = sourceLabel;
-                        str += "<button onclick='SourceBrowser.nodeInfos.copyNode()'> copyNode </button>"
 
-                        if (type = "http://www.w3.org/2002/07/owl#Class") {
-                            str += "<button onclick='SourceBrowser.nodeInfos.pasteAsSubClassOf()'> pasteAsSubClassOfThisNode </button>"
-                        }
-                    }
                     str += "</div>"
                     $("#" + divId).prepend(str)
                     callbackSeries()
@@ -1109,33 +1086,13 @@ var SourceBrowser = (function () {
     }
 
 
-    self.nodeInfos = {
 
-        copyNode: function () {
-            self.nodeInfos.copiedNodeId = self.nodeInfos.currentNodeId
-            self.nodeInfos.copiedNodeSourceLabel = self.nodeInfos.sourceLabel
-        },
 
-        pasteAsSubClassOf: function () {
-            if (!self.nodeInfos.copiedNodeId)
-                return alert("No node copied")
-            if (!confirm("pasteAsSubClassOf this node"))
-                return;
-            var triple = {
-                subject: self.nodeInfos.copiedNodeId,
-                predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                object: self.nodeInfos.currentNodeId
-            }
-            Sparql_generic.insertTriples(self.nodeInfos.copiedNodeSourceLabel, [triple], function (err, result) {
-                if (err)
-                    return alert(err);
-                return alert("DONE")
 
-            })
 
-        }
 
-    }
+
+
 
 
     return self;

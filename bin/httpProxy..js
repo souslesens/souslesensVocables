@@ -115,16 +115,21 @@ var httpProxy = {
 
             if (typeof body === "string") {
                 body = body.trim();
-                if (body.indexOf("{") < 0) return callback(body); //error
+                if (body.indexOf("{") < 0)
+                    return callback(body); //error
 
                 var err = null;
                 try {
                     var obj = JSON.parse(body);
-                    return callback(null, obj);
+                  //  return callback(null, obj);
                 } catch (e) {
                     console.log(body)
                     console.log(e)
-                    return callback(body);
+                    err=e
+
+                }
+                finally{
+                    return callback(err,body);
                 }
             } else {
                 return callback(null, body);

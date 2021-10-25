@@ -5,9 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="commit CF du 23/10">
+      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_blend.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/SPARQLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/SPARQLutil..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/util..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/Iso19800toOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/Iso19800toOWL..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/clipboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/clipboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graphController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,8 +31,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JS module" />
-        <option value="JavaScript File" />
         <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -70,8 +80,8 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.28" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.30" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/snippets/standardizer" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
@@ -97,17 +107,17 @@
       <recent name="D:\webstorm\souslesensVocables\other" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.bin\www">
+  <component name="RunManager" selected="Node.js.Iso19800toOWL..js">
     <configuration name="Iso19800toOWL..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/Iso19800toOWL..js" working-dir="$PROJECT_DIR$/other">
       <method v="2" />
     </configuration>
     <configuration name="KGbrowserQuery.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/KG/browser">
       <method v="2" />
     </configuration>
-    <configuration name="elasticRestProxy..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/elasticRestProxy..js" working-dir="$PROJECT_DIR$/bin">
+    <configuration name="SPARQLutil..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/SPARQLutil..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="energisticsToOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" working-dir="$PROJECT_DIR$/other/energisitics">
+    <configuration name="elasticRestProxy..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/elasticRestProxy..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
     <configuration name="graphTraversal.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/graphTraversal.js" working-dir="$PROJECT_DIR$/public/vocables/js">
@@ -115,11 +125,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Node.js.elasticRestProxy..js" />
         <item itemvalue="Node.js.Iso19800toOWL..js" />
+        <item itemvalue="Node.js.SPARQLutil..js" />
+        <item itemvalue="Node.js.elasticRestProxy..js" />
         <item itemvalue="Node.js.graphTraversal.js" />
         <item itemvalue="Node.js.KGbrowserQuery.js" />
-        <item itemvalue="Node.js.energisticsToOWLparser..js" />
       </list>
     </recent_temporary>
   </component>
@@ -249,7 +259,8 @@
       <workItem from="1634490940304" duration="34876000" />
       <workItem from="1634624661848" duration="38710000" />
       <workItem from="1634804898892" duration="34904000" />
-      <workItem from="1634984156210" duration="37021000" />
+      <workItem from="1634984156210" duration="52904000" />
+      <workItem from="1635169490639" duration="11971000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -489,7 +500,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635095791938</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="commit CF du 23/10">
+      <created>1635098951337</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1635098951337</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -797,12 +815,6 @@
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>407</line>
           <option name="timeStamp" value="601" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js</url>
-          <line>1671</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="666" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

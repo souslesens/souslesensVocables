@@ -86,7 +86,7 @@ var GraphController = (function () {
                     node.data.id = fromId;
                     node.data.label = fromLabel;
                     node.data.varName = fromVar;
-                    node.data.graphLevel = fromLevel
+                   // node.data.graphLevel = fromLevel
                     visjsData.nodes.push(node)
                 }
             }
@@ -122,7 +122,7 @@ var GraphController = (function () {
                     node.data.id = toId;
                     node.data.label = toLabel;
                     node.data.varName = toVar;
-                    node.data.graphLevel = fromLevel + 1
+                   // node.data.graphLevel = fromLevel + 1
                     visjsData.nodes.push(node);
                 }
 

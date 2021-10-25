@@ -44,6 +44,9 @@ services:
     environment:
       ES_JAVA_OPTS: "-Xmx256m -Xms256m"
       discovery.type: single-node
+    volumes:
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/elasticsearch/data:\
+      /usr/share/elasticsearch/data"
     networks:
       - backend
 

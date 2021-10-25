@@ -28,6 +28,17 @@ services:
     networks:
       - backend
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${SA_PASSWORD:-superSecretP4ssword!}
+    volumes:
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/sqlserver:\
+      /var/opt/mssql"
+    networks:
+      - backend
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
     environment:

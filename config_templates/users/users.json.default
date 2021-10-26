@@ -1,9 +1,11 @@
- {"ADMIN": {
-    "login": "ADMIN",
+{
+  "01FJKGRJ8WA97N07KWEJJHXKZT": {
+    "id": "01FJKGRJ8WA97N07KWEJJHXKZT",
+    "login": "admin",
     "password": "admin",
     "groups": [
       "admin"
-    ]
+    ],
+    "_type": "user"
   }
-  }
-  
+}

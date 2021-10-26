@@ -1,5 +1,9 @@
 # SouslesensVocables
 
+![Lint](https://github.com/souslesens/souslesensVocables/actions/workflows/lint.yaml/badge.svg)
+![Check updates](https://github.com/souslesens/souslesensVocables/actions/workflows/check-updates.yaml/badge.svg)
+
+
 ![sousLeSensVocables large](https://user-images.githubusercontent.com/1880078/130787939-adf887d3-0054-4aa7-9867-0fbcd5bfc7a2.png)
 
 **SousLesensVocables is a set of tools developped to manage Thesaurus and Ontologies resources through SKOS , OWL and RDF standards and graph visualisation approaches.**
@@ -44,11 +48,11 @@ npm --version
 
 ### Install node dependencies
 
-Use `npm ci` to install the node environment.
+Use `npm ci` to install the node environment along with react app dependancies.
 
 
 ```bash
-npm ci
+npm ci && cd mainapp && npm ci && cd ..
 ```
 
 ### Configure
@@ -66,6 +70,11 @@ Then, edit `scripts/*.json` to your needs.
 ### Run
 
 Start the app with `npm start`
+
+You may also want to start the app in dev mode with `npm run dev`.
+
+!Caveats! Dev mode use nodemon to restart node when there is a change in file, including files within `config/`.
+When you write those files from the Admin interface, nodemon will restart and, for a short moment, you won't have access to the routes allowing you to write those files.
 
 
 ```bash

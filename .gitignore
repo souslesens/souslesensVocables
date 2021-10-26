@@ -6,6 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# editors
+.idea
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -105,6 +108,11 @@ dist
 public/vocables/images/descriptionXX.png
 
 config
+
 data/**/*.json
 data/**/*.pdf
 data/**/*.zip
+
+#React build output
+mainapp/static/mainapp.js
+mainapp/static/mainapp.js.map

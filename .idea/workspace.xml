@@ -4,19 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="commit CF du 23/10">
-      <change afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_blend.js" afterDir="false" />
+    <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="Lineage composition">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/SPARQLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/SPARQLutil..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bin/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/util..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/other/Iso19800toOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/Iso19800toOWL..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/clipboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/clipboard.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graphController.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graphController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/UMLtoOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/UMLtoOWLparser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_blend.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_blend.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/sourceBrowser.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -107,29 +103,29 @@
       <recent name="D:\webstorm\souslesensVocables\other" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.Iso19800toOWL..js">
+  <component name="RunManager" selected="Node.js.UMLtoOWLparser..js">
     <configuration name="Iso19800toOWL..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/Iso19800toOWL..js" working-dir="$PROJECT_DIR$/other">
-      <method v="2" />
-    </configuration>
-    <configuration name="KGbrowserQuery.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/tools/KG/browser/KGbrowserQuery.js" working-dir="$PROJECT_DIR$/public/vocables/js/tools/KG/browser">
       <method v="2" />
     </configuration>
     <configuration name="SPARQLutil..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/SPARQLutil..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
+    <configuration name="UMLtoOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/UMLtoOWLparser..js" working-dir="$PROJECT_DIR$/other">
+      <method v="2" />
+    </configuration>
     <configuration name="elasticRestProxy..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/bin/elasticRestProxy..js" working-dir="$PROJECT_DIR$/bin">
       <method v="2" />
     </configuration>
-    <configuration name="graphTraversal.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/public/vocables/js/graphTraversal.js" working-dir="$PROJECT_DIR$/public/vocables/js">
+    <configuration name="energisticsToOWLparser..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" working-dir="$PROJECT_DIR$/other/energisitics">
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Node.js.UMLtoOWLparser..js" />
+        <item itemvalue="Node.js.energisticsToOWLparser..js" />
         <item itemvalue="Node.js.Iso19800toOWL..js" />
         <item itemvalue="Node.js.SPARQLutil..js" />
         <item itemvalue="Node.js.elasticRestProxy..js" />
-        <item itemvalue="Node.js.graphTraversal.js" />
-        <item itemvalue="Node.js.KGbrowserQuery.js" />
       </list>
     </recent_temporary>
   </component>
@@ -260,7 +256,7 @@
       <workItem from="1634624661848" duration="38710000" />
       <workItem from="1634804898892" duration="34904000" />
       <workItem from="1634984156210" duration="52904000" />
-      <workItem from="1635169490639" duration="11971000" />
+      <workItem from="1635169490639" duration="20198000" />
     </task>
     <task id="LOCAL-00001" summary="add prettier to packages.json">
       <created>1633107317762</created>
@@ -507,7 +503,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635098951337</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Lineage composition">
+      <created>1635186250583</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1635186250583</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -621,7 +624,8 @@
     <MESSAGE value="organisation of code" />
     <MESSAGE value="change ADL prefix to KG" />
     <MESSAGE value="commit CF du 23/10" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit CF du 23/10" />
+    <MESSAGE value="Lineage composition" />
+    <option name="LAST_COMMIT_MESSAGE" value="Lineage composition" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -643,7 +647,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js</url>
-          <line>631</line>
+          <line>659</line>
           <option name="timeStamp" value="42" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -815,6 +819,24 @@
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
           <line>407</line>
           <option name="timeStamp" value="601" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
+          <line>413</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="687" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
+          <line>402</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="688" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/other/UMLtoOWLparser..js</url>
+          <line>512</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="696" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

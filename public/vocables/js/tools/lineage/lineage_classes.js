@@ -361,7 +361,8 @@ var Lineage_classes = (function () {
                     },
                     "minVelocity": 0.75,
 
-                }
+                },
+               // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
                 //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
             }
@@ -1125,7 +1126,7 @@ var Lineage_classes = (function () {
             }
 
 
-            Sparql_OWL.getObjectProperties(source, classIds, null, function (err, result) {
+            Sparql_OWL.getObjectProperties(source, classIds, {withoutImports:1}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 if (result.length == 0) {
@@ -1209,15 +1210,16 @@ var Lineage_classes = (function () {
                 $("#waitImg").css("display", "none");
 
                 if (Config.sources[source].schemaType != "INDIVIDUAL") {
-                    Lineage_classes.drawRestrictions(classIds)
+                  //  Lineage_classes.drawRestrictions(classIds)
                 }
 
             })
 
         }
 
-        self.drawRestrictions = function (classIds) {
-            var source = Lineage_common.currentSource
+        self.drawRestrictions = function (classIds,descendants,source) {
+            if(!source)
+            source = Lineage_common.currentSource
             if (!source)
                 return alert("select a source");
             if (!classIds) {
@@ -1226,7 +1228,7 @@ var Lineage_classes = (function () {
             }
             MainController.UI.message("")
 
-            Sparql_OWL.getObjectRestrictions(source, classIds, null, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports:1}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 if (result.length == 0) {
@@ -2070,14 +2072,14 @@ var Lineage_classes = (function () {
             onNodeClick: function (node, point, options) {
                 if (!node)
                     return MainController.UI.hidePopup("graphPopupDiv")
-                Lineage_blend.setCurrentNode(node)
+
                 self.currentGraphNode = node;
 
                 if (options.ctrlKey) {
                     SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
                 }
                 if (options && options.altKey) {
-                    Lineage_blend.setClipboardNode(node)
+                    Lineage_blend.addNodeToAssociationNode(node)
                     return Clipboard.copy({
                         type: "lineage_node",
                         source: node.data.source,
@@ -2092,6 +2094,7 @@ var Lineage_classes = (function () {
 
 
             },
+
             drawChildren: function () {
 
                 Lineage_classes.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)

@@ -30,27 +30,30 @@ var Lineage_blend = (function () {
 
     }
 
-    self.setClipboardNode = function (node) {
-        self.currentClipboardNode = node.data
-        $("#lineage_clipboardNodeDiv").html(node.data.source + "." + node.data.label)
+
+    self.addNodeToAssociationNode = function (node) {
+        if(!self.currentAssociation || self.currentAssociation.length==2 ) {
+            self.currentAssociation = [node.data]
+            $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
+        } else {
+            self.currentAssociation.push(node.data);
+            $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
+        }
+        if(self.currentAssociation && self.currentAssociation.length==2){
+            $("#lineage_blendButtonsDiv").css('display','block')
+        }else{
+            $("#lineage_blendButtonsDiv").css('display','none')
+        }
 
     }
 
 
-    self.setCurrentNode = function (node) {
-        self.currentSelectedNode = node.data
-        $("#lineage_currentNodeDiv").html(node.data.source + "." + node.data.label)
 
-    }
-    self.clearClipboardNode = function () {
-        self.currentClipboardNode = null
-        $("#lineage_clipboardNodeDiv").html("")
-    }
 
     self.pasteAsSubClassOf = function () {
 
-        var sourceNode = self.currentClipboardNode
-        var targetNode = self.currentSelectedNode
+        var sourceNode = self.currentAssociation[0]
+        var targetNode = self.currentAssociation[1]
         if (!sourceNode || !targetNode)
             return "copy a source node and select "
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as subClassOf " + targetNode.source + "." + targetNode.label + "?"))
@@ -59,7 +62,7 @@ var Lineage_blend = (function () {
         self.createRestriction(sourceNode.id,targetNode.id, propId, function(err, result) {
             if (err)
                 return alert(err);
-            return alert("DONE")
+          //  return alert("DONE")
         })
 
 
@@ -76,7 +79,7 @@ var Lineage_blend = (function () {
         self.createRestriction(sourceNode.id,targetNode.id, propId, function(err, result) {
             if (err)
                 return alert(err);
-            return alert("DONE")
+         //   return alert("DONE")
         })
 
 
@@ -99,16 +102,17 @@ var Lineage_blend = (function () {
         restrictionsTriples.push({
             subject: blankNode,
             predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: targetNodeId
+            object: propId
         })
         restrictionsTriples.push({
             subject: blankNode,
             predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            object: propId
+            object: targetNodeId
         })
 
 
         Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionsTriples, function (err, result) {
+            Lineage_classes.drawRestrictions(null, false,Lineage_classes.mainSource)
            callback(err,"DONE")
         })
     }

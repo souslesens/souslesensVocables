@@ -561,7 +561,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph,options.withoutImports)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +

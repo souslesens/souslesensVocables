@@ -55,8 +55,7 @@ var skosToElastic = {
                                 sep += "_";
                             }
                             if (ancestor.indexOf("GROUP IIB") > -1) var x = 3;
-                            ancestors =
-                                ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
+                            ancestors = ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
                         });
                         newJson.push({
                             id: item.id,
@@ -87,9 +86,7 @@ var skosToElastic = {
     flatToElastic: function (flatJson, startIdValue, createIndex, callback) {
         // var indexName = "flat_thesaurus"
         var indexName = "flat_thesaurus2";
-        var indexconfig = JSON.parse(
-            "" + fs.readFileSync("D:\\GitHub\\nlp2\\config\\elastic\\sources\\flat_thesaurus2.json")
-        );
+        var indexconfig = JSON.parse("" + fs.readFileSync("D:\\GitHub\\nlp2\\config\\elastic\\sources\\flat_thesaurus2.json"));
         var type = indexName;
 
         var countCreated = 0;
@@ -128,9 +125,7 @@ var skosToElastic = {
                     flatJson.forEach(function (record, indexedLine) {
                         var id = record.thesaurus + "_" + (startIdValue + indexedLine);
 
-                        bulkStr +=
-                            JSON.stringify({ index: { _index: indexName, _type: type, _id: id } }) +
-                            "\r\n";
+                        bulkStr += JSON.stringify({ index: { _index: indexName, _type: type, _id: id } }) + "\r\n";
                         bulkStr += JSON.stringify(record) + "\r\n";
                     });
 
@@ -160,10 +155,8 @@ var skosToElastic = {
                         if (!body.items) return callbackSeries(null, "done");
                         body.items.forEach(function (item) {
                             if (item.index && item.index.error) errors.push(item.index.error);
-                            else if (item.update && item.update.error)
-                                errors.push(item.update.error);
-                            else if (item.delete && item.delete.error)
-                                errors.push(item.delete.error);
+                            else if (item.update && item.update.error) errors.push(item.update.error);
+                            else if (item.delete && item.delete.error) errors.push(item.delete.error);
                         });
 
                         if (errors.length > 0) {
@@ -353,24 +346,17 @@ var skosToElastic = {
                                     scrollSize = body.hits.hits.length;
                                     hitsIndexSource = hitsIndexSource.concat(body.hits.hits);
                                     totalHits += body.hits.hits.length;
-                                    skosToElastic.getCommonConcepts(
-                                        hitsIndexSource,
-                                        indexTarget,
-                                        function (err, result) {
-                                            if (err) return callbackWhilst(err);
-                                            console.log(result.length + " /" + totalHits);
-                                            commonConcepts = commonConcepts.concat(result);
-                                            callbackWhilst();
-                                        }
-                                    );
+                                    skosToElastic.getCommonConcepts(hitsIndexSource, indexTarget, function (err, result) {
+                                        if (err) return callbackWhilst(err);
+                                        console.log(result.length + " /" + totalHits);
+                                        commonConcepts = commonConcepts.concat(result);
+                                        callbackWhilst();
+                                    });
                                 });
                             },
                             function (err, n) {
                                 if (err) return callbackSeries(err);
-                                fs.writeFileSync(
-                                    "D:\\NLP\\LOC\\commonConcepts_" + indexTarget + ".json",
-                                    JSON.stringify(commonConcepts, null, 2)
-                                );
+                                fs.writeFileSync("D:\\NLP\\LOC\\commonConcepts_" + indexTarget + ".json", JSON.stringify(commonConcepts, null, 2));
                                 callbackSeries();
                             }
                         );
@@ -378,10 +364,7 @@ var skosToElastic = {
                 },
                 //search common
                 function (callbackSeries) {
-                    fs.writeFileSync(
-                        "D:\\NLP\\commonConcepts_" + indexTarget + ".json",
-                        JSON.stringify(commonConcepts, null, 2)
-                    );
+                    fs.writeFileSync("D:\\NLP\\commonConcepts_" + indexTarget + ".json", JSON.stringify(commonConcepts, null, 2));
                     callbackSeries();
                 },
             ],

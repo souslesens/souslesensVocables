@@ -90,8 +90,7 @@ var httpProxy = {
         if (headers) {
             options.headers = headers;
 
-            if (headers["content-type"] && headers["content-type"].indexOf("json") > -1)
-                options.json = params;
+            if (headers["content-type"] && headers["content-type"].indexOf("json") > -1) options.json = params;
             else options.form = params;
         } else {
             options.headers = {
@@ -115,21 +114,18 @@ var httpProxy = {
 
             if (typeof body === "string") {
                 body = body.trim();
-                if (body.indexOf("{") < 0)
-                    return callback(body); //error
+                if (body.indexOf("{") < 0) return callback(body); //error
 
                 var err = null;
                 try {
                     var obj = JSON.parse(body);
-                  //  return callback(null, obj);
+                    //  return callback(null, obj);
                 } catch (e) {
-                    console.log(body)
-                    console.log(e)
-                    err=e
-
-                }
-                finally{
-                    return callback(err,body);
+                    console.log(body);
+                    console.log(e);
+                    err = e;
+                } finally {
+                    return callback(err, body);
                 }
             } else {
                 return callback(null, body);

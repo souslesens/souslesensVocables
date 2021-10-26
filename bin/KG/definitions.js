@@ -2098,11 +2098,7 @@ async.eachSeries(
             result = JSON.parse("" + result);
             if (result.results.bindings.length > 0) {
                 result.results.bindings.forEach(function (item) {
-                    dataStr +=
-                        item.sub.value +
-                        "\t" +
-                        item.rdl_hasDefinition.value.replace(/\t\n/g, "") +
-                        "\n";
+                    dataStr += item.sub.value + "\t" + item.rdl_hasDefinition.value.replace(/\t\n/g, "") + "\n";
                     // data.push(item.sub.value+"\t"+item.rdl_hasDefinition.value+"\n")
                 });
             }

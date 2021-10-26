@@ -45,15 +45,7 @@ var PIbuilder = {
                 function (callbackSeries) {
                     var str = "clause\ttag\tfunctionalClass\tequipment\n";
                     objs.forEach(function (item) {
-                        str +=
-                            item.clause +
-                            "\t" +
-                            item.tag +
-                            "\t" +
-                            item.functionalClass +
-                            "\t" +
-                            item.equipment +
-                            "\n";
+                        str += item.clause + "\t" + item.tag + "\t" + item.functionalClass + "\t" + item.equipment + "\n";
                     });
 
                     fs.writeFileSync("D:\\NLP\\ontologies\\SIL\\test.txt", str);

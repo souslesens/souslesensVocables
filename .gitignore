@@ -105,3 +105,6 @@ dist
 public/vocables/images/descriptionXX.png
 
 config
+data/**/*.json
+data/**/*.pdf
+data/**/*.zip

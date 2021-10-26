@@ -21,8 +21,7 @@ var OneModelManager = {
             var str = fs.readFileSync(sourcesFilePath);
             var sources = JSON.parse(str);
             if (!sources[sourceLabel]) return "no source matching";
-            if (Array.isArray(sources[sourceLabel].graphUri))
-                return sources[sourceLabel].graphUri[0];
+            if (Array.isArray(sources[sourceLabel].graphUri)) return sources[sourceLabel].graphUri[0];
             return sources[sourceLabel].graphUri;
         } catch (e) {
             return e;
@@ -31,8 +30,7 @@ var OneModelManager = {
 
     getOntology: function (sourceLabel, callback) {
         var graphUri = OneModelManager.getGraphUri(sourceLabel);
-        if (graphUri.indexOf("http") != 0)
-            return callback(null, "ERROR reading graphUri :" + sourceLabel + "  " + graphUri);
+        if (graphUri.indexOf("http") != 0) return callback(null, "ERROR reading graphUri :" + sourceLabel + "  " + graphUri);
 
         var query = "select  ?s ?p ?o  from <" + graphUri + ">  WHERE { ?s ?p ?o  } order by ?s";
         var params = { query: query };
@@ -68,11 +66,7 @@ var OneModelManager = {
                         object: object,
                     });
                 } else if (item.o.value.indexOf("_:b") > -1) {
-                    writer.addQuad(
-                        namedNode(item.s.value),
-                        namedNode(item.p.value),
-                        writer.blank(blanknodesMap[item.o.value])
-                    );
+                    writer.addQuad(namedNode(item.s.value), namedNode(item.p.value), writer.blank(blanknodesMap[item.o.value]));
                 } else {
                     writer.addQuad(namedNode(item.s.value), namedNode(item.p.value), object);
                 }
@@ -103,14 +97,7 @@ var OneModelManager = {
 
                 // delete old graph
                 function (callbackSeries) {
-                    var queryDeleteGraph =
-                        "with <" +
-                        graphUri +
-                        ">\n" +
-                        "delete {\n" +
-                        "  ?sub ?pred ?obj .\n" +
-                        "} \n" +
-                        "where { ?sub ?pred ?obj .}";
+                    var queryDeleteGraph = "with <" + graphUri + ">\n" + "delete {\n" + "  ?sub ?pred ?obj .\n" + "} \n" + "where { ?sub ?pred ?obj .}";
 
                     var params = { query: queryDeleteGraph };
 

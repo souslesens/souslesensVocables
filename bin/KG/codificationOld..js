@@ -2,8 +2,7 @@ var Codification = {};
 var sqlServer = require("./SQLserverConnector.");
 var fs = require("fs");
 var codeRegex = {
-    "6.2	Main equipment tag structure  (TOTAL-T0000000001) ":
-        /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
+    "6.2	Main equipment tag structure  (TOTAL-T0000000001) ": /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
     "7.2	Switchgears and MCC compartments tag structure (TOTAL-T0000000003)":
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,5})(?<suffix>\w{0,1})-(?<busBar>\w{1,2})(?<column>\d{0,2})(?<row>\d{0,2})$/g,
     "7.3	Lighting and small power equipment tag structure (TOTAL-T0000000018))":
@@ -14,11 +13,9 @@ var codeRegex = {
 };
 
 var codeRegex501 = {
-    equipment:
-        /^(?<sector>[\d]{2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})$/,
+    equipment: /^(?<sector>[\d]{2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})$/,
     AFtwin: /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
-    "Equipment":
-        /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
+    Equipment: /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
     "7.2	Switchgears and MCC compartments tag structure (TOTAL-T0000000003)":
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,5})(?<suffix>\w{0,1})-(?<busBar>\w{1,2})(?<column>\d{0,2})(?<row>\d{0,2})$/g,
     "7.3	Lighting and small power equipment tag structure (TOTAL-T0000000018))":
@@ -58,16 +55,11 @@ var decodeFunctionalLocation = function () {
         result2.forEach(function (item) {
             if (!formatMap[item.format]) formatMap[item.format] = {};
             if (!formatMap[item.format][item.order]) formatMap[item.format][item.order] = {};
-            if (!formatMap[item.format][item.order][item.positionMeaning])
-                formatMap[item.format][item.order][item.positionMeaning] = {};
-            formatMap[item.format][item.order][item.positionMeaning][item.PermittedValue] =
-                item.valueMeaning;
+            if (!formatMap[item.format][item.order][item.positionMeaning]) formatMap[item.format][item.order][item.positionMeaning] = {};
+            formatMap[item.format][item.order][item.positionMeaning][item.PermittedValue] = item.valueMeaning;
         });
 
-        fs.writeFileSync(
-            "D:\\NLP\\ontologies\\codification\\EF_formatMap",
-            JSON.stringify(formatMap, null, 2)
-        );
+        fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_formatMap", JSON.stringify(formatMap, null, 2));
         //   console.log(JSON.stringify(formatMap, null, 2))
     });
 };
@@ -97,10 +89,7 @@ processBreakDown = function () {
                 if (!map[v0][v1][v2][v3]) map[v0][v1][v2][v3] = {};
             }
         });
-        fs.writeFileSync(
-            "D:\\NLP\\ontologies\\codification\\EF_FL.json",
-            JSON.stringify(map, null, 2)
-        );
+        fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_FL.json", JSON.stringify(map, null, 2));
         //   var x = maxLength
     });
 };
@@ -120,11 +109,7 @@ var processKGtagsBreakDown = function () {
         "      ,[childAliasSystem]\n" +
         "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]";
 
-    var sql =
-        "SELECT distinct  " +
-        "      [parentName]\n" +
-        "      ,[childName]\n" +
-        "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]";
+    var sql = "SELECT distinct  " + "      [parentName]\n" + "      ,[childName]\n" + "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]";
     /*  var sql = "SELECT Functional_Location\n" +
           "  [EF_SAP].[dbo].[Functional_Locations_IH06] "*/
 
@@ -183,10 +168,7 @@ var processKGtagsBreakDown = function () {
 
         return;
 
-        fs.writeFileSync(
-            "D:\\NLP\\ontologies\\codification\\EF_FL.json",
-            JSON.stringify(map, null, 2)
-        );
+        fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_FL.json", JSON.stringify(map, null, 2));
         //   var x = maxLength
     });
 };
@@ -242,11 +224,7 @@ var processTEPDKtags = function () {
                 }
             }*/
         });
-        var query =
-            "SELECT [TagNumber]\n" +
-            "      ,[FunctionalClassID]\n" +
-            "      ,[FunctionalClassLabel]\n" +
-            "      ,[ServiceDescription] FROM [TEPDK].[dbo].[tblTag] ";
+        var query = "SELECT [TagNumber]\n" + "      ,[FunctionalClassID]\n" + "      ,[FunctionalClassLabel]\n" + "      ,[ServiceDescription] FROM [TEPDK].[dbo].[tblTag] ";
         sqlServer.getFetchedData("TEPDK", query, processor, 1000, codesMap, function (err, result) {
             fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\tagDescriptor.csv", str);
         });

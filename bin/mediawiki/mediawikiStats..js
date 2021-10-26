@@ -31,8 +31,7 @@ var mediawikiStats = {
                 category = category.substring(category.lastIndexOf("/") + 1);
                 if (Allconcepts.indexOf(concept) < 0) Allconcepts.push(concept);
                 if (!catWordsMap[category]) catWordsMap[category] = { concepts: {} };
-                if (!catWordsMap[category].concepts[concept])
-                    catWordsMap[category].concepts[concept] = 0;
+                if (!catWordsMap[category].concepts[concept]) catWordsMap[category].concepts[concept] = 0;
                 catWordsMap[category].concepts[concept] += 1;
             });
 
@@ -62,8 +61,7 @@ var mediawikiStats = {
                 var category = item.category.value.toLowerCase();
                 category = category.substring(category.lastIndexOf("/") + 1);
                 if (Allconcepts.indexOf(concept) < 0) Allconcepts.push(concept);
-                if (!catWordsMap[category])
-                    catWordsMap[category] = { concepts: [], occurences: [] };
+                if (!catWordsMap[category]) catWordsMap[category] = { concepts: [], occurences: [] };
                 catWordsMap[category].concepts.push(concept);
             });
 
@@ -101,8 +99,7 @@ var mediawikiStats = {
 
         if (thesaurusWord) thesaurusFilter = ' regex(str(?a),"' + thesaurusWord + '","i")';
 
-        if (thesaurusWord && categoryWord)
-            filter = "filter (" + catFilter + " && " + thesaurusFilter + ")";
+        if (thesaurusWord && categoryWord) filter = "filter (" + catFilter + " && " + thesaurusFilter + ")";
         else if (categoryWord) filter = "filter (" + catFilter + ")";
         else if (thesaurusWord) filter = "filter (" + thesaurusFilter + ")";
 

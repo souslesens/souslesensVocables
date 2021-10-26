@@ -37,8 +37,7 @@ var mapQuatumCfihos = {
                         result.results.bindings.forEach(function (item) {
                             var id = item.concept.value;
                             var label = item.label.value.toLowerCase(); //id.substring(id.indexOf("#") + 1)
-                            if (sourceConfig.labelProcessor)
-                                label = sourceConfig.labelProcessor(label);
+                            if (sourceConfig.labelProcessor) label = sourceConfig.labelProcessor(label);
                             sourceClasses[label] = {
                                 sourceId: id,
                                 targetIds: [],
@@ -62,8 +61,7 @@ var mapQuatumCfihos = {
                                 fitlerStr += "^" + label.replace(/\\/g, "") + "$";
                             });
                             var fromStr = "";
-                            if (targetConfig.graphUri)
-                                fromStr = " from <" + targetConfig.graphUri + "> ";
+                            if (targetConfig.graphUri) fromStr = " from <" + targetConfig.graphUri + "> ";
                             var query =
                                 "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct *  " +
                                 fromStr +
@@ -79,42 +77,31 @@ var mapQuatumCfihos = {
                                     "Content-Type": "application/x-www-form-urlencoded",
                                 };
 
-                                httpProxy.post(
-                                    targetConfig.sparql_url + "?output=json&format=json&query=",
-                                    headers,
-                                    params,
-                                    function (err, data) {
-                                        if (err) return callbackEach(err);
-                                        if (typeof data === "string")
-                                            data = JSON.parse(data.trim());
-                                        else if (data.result && typeof data.result != "object")
-                                            //cas GEMET
-                                            data = JSON.parse(data.result.trim());
+                                httpProxy.post(targetConfig.sparql_url + "?output=json&format=json&query=", headers, params, function (err, data) {
+                                    if (err) return callbackEach(err);
+                                    if (typeof data === "string") data = JSON.parse(data.trim());
+                                    else if (data.result && typeof data.result != "object")
+                                        //cas GEMET
+                                        data = JSON.parse(data.result.trim());
 
-                                        data.results.bindings.forEach(function (item) {
-                                            var x = item;
-                                            var id = item.concept.value;
-                                            var label = item.conceptLabel.value.toLowerCase();
-                                            if (!sourceClasses[label]) return console.log(label);
+                                    data.results.bindings.forEach(function (item) {
+                                        var x = item;
+                                        var id = item.concept.value;
+                                        var label = item.conceptLabel.value.toLowerCase();
+                                        if (!sourceClasses[label]) return console.log(label);
 
-                                            sourceClasses[label].targetIds.push(id);
-                                            sourceClasses[label].targetLabels.push(
-                                                item.conceptLabel.value
-                                            );
-                                        });
+                                        sourceClasses[label].targetIds.push(id);
+                                        sourceClasses[label].targetLabels.push(item.conceptLabel.value);
+                                    });
 
-                                        callbackEach();
-                                    }
-                                );
+                                    callbackEach();
+                                });
                             } else if (targetConfig.method == "GET") {
                                 var query2 = encodeURIComponent(query);
                                 query2 = query2.replace(/%2B/g, "+").trim();
 
                                 var body = {
-                                    url:
-                                        targetConfig.sparql_url +
-                                        "?output=json&format=json&query=" +
-                                        query2,
+                                    url: targetConfig.sparql_url + "?output=json&format=json&query=" + query2,
                                     params: { query: query },
                                     headers: {
                                         Accept: "application/sparql-results+json",
@@ -134,9 +121,7 @@ var mapQuatumCfihos = {
                                         if (!sourceClasses[label]) return console.log(label);
 
                                         sourceClasses[label].targetIds.push(id);
-                                        sourceClasses[label].targetLabels.push(
-                                            item.conceptLabel.value
-                                        );
+                                        sourceClasses[label].targetLabels.push(item.conceptLabel.value);
                                     });
 
                                     callbackEach();
@@ -167,14 +152,8 @@ var mapQuatumCfihos = {
         for (var key in json) {
             var item = json[key];
             item.targetIds.forEach(function (targetId, index) {
-                triples +=
-                    "<" +
-                    item.sourceId +
-                    "> <http://www.w3.org/2002/07/owl#sameAs> <" +
-                    targetId +
-                    ">.\n";
-                str +=
-                    item.sourceId + key + "\t" + targetId + "\t" + item.targetLabels[index] + "\n";
+                triples += "<" + item.sourceId + "> <http://www.w3.org/2002/07/owl#sameAs> <" + targetId + ">.\n";
+                str += item.sourceId + key + "\t" + targetId + "\t" + item.targetLabels[index] + "\n";
             });
         }
         var x = str;

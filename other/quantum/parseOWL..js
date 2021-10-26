@@ -30,11 +30,9 @@ var parseOWL = {
 
             if (topParentTag == "SUBCLASSOF") {
                 if (node.name == "CLASS") {
-                    if (currentTriple == "")
-                        currentTriple += "<" + toShortURI(node.attributes["IRI"]) + ">";
+                    if (currentTriple == "") currentTriple += "<" + toShortURI(node.attributes["IRI"]) + ">";
                     else {
-                        currentTriple +=
-                            " rdfs:subclassOf <" + toShortURI(node.attributes["IRI"]) + ">.\n";
+                        currentTriple += " rdfs:subclassOf <" + toShortURI(node.attributes["IRI"]) + ">.\n";
                         //  console.log(currentTriple)
                         //   triples+=currentTriple
                         currentTriple = "";
@@ -44,15 +42,9 @@ var parseOWL = {
             }
             if (topParentTag == "CLASSASSERTION") {
                 if (node.name == "CLASS") {
-                    if (currentTriple == "")
-                        currentTriple += "<" + toShortURI(node.attributes["IRI"]) + ">";
+                    if (currentTriple == "") currentTriple += "<" + toShortURI(node.attributes["IRI"]) + ">";
                 } else if (node.name == "NAMEDINDIVIDUAL") {
-                    currentTriple =
-                        "<" +
-                        toShortURI(node.attributes["IRI"]) +
-                        "> rdf:type " +
-                        currentTriple +
-                        ".\n";
+                    currentTriple = "<" + toShortURI(node.attributes["IRI"]) + "> rdf:type " + currentTriple + ".\n";
                     //  console.log(currentTriple)
                     //  triples+=currentTriple
                     currentTriple = "";
@@ -65,8 +57,7 @@ var parseOWL = {
                     currentUri = "<" + toShortURI(node.attributes["IRI"]) + ">";
                     //  triples += currentUri +" rdf:type owl:DatatypeProperty.\n ";
                 } else if (node.name == "CLASS") {
-                    currentTriple =
-                        currentUri + " rdfs:domain <" + toShortURI(node.attributes["IRI"]) + ">.\n";
+                    currentTriple = currentUri + " rdfs:domain <" + toShortURI(node.attributes["IRI"]) + ">.\n";
                     //   triples += currentTriple;
                     topParentTag = null;
                 }
@@ -85,8 +76,7 @@ var parseOWL = {
                     currentUri = "<" + toShortURI(node.attributes["IRI"]) + ">";
                     triples += currentUri + " rdf:type owl:ObjectProperty.\n ";
                 } else if (node.name == "CLASS") {
-                    currentTriple =
-                        currentUri + " rdfs:domain <" + toShortURI(node.attributes["IRI"]) + ">.\n";
+                    currentTriple = currentUri + " rdfs:domain <" + toShortURI(node.attributes["IRI"]) + ">.\n";
                     triples += currentTriple;
                     topParentTag = null;
                 }

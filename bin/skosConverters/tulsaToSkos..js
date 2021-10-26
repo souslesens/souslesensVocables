@@ -14,19 +14,7 @@ var async = require("async");
 var common = require("../backoffice/common.");
 
 var tulsaToSkos = {
-    topConcepts: [
-        "COMMON ATTRIBUTE",
-        "EARTH AND SPACE CONCEPTS",
-        "ECONOMIC FACTOR",
-        "EQUIPMENT",
-        "LIFE FORM",
-        "OPERATING CONDITION",
-        "PHENOMENON",
-        "PROCESS",
-        "PROPERTY",
-        "WORLD",
-        "MATERIAL",
-    ],
+    topConcepts: ["COMMON ATTRIBUTE", "EARTH AND SPACE CONCEPTS", "ECONOMIC FACTOR", "EQUIPMENT", "LIFE FORM", "OPERATING CONDITION", "PHENOMENON", "PROCESS", "PROPERTY", "WORLD", "MATERIAL"],
     parseTxt: function () {
         var entitiesArray = [];
 
@@ -87,12 +75,7 @@ var tulsaToSkos = {
         var str = "";
         jsonArray.forEach(function (item, i) {
             if ((i > 0 && item.scheme != jsonArray[i - 1].scheme) || i == jsonArray.length - 1) {
-                fs.writeFileSync(
-                    "D:\\NLP\\Tulsa_" + jsonArray[i - 1].scheme + ".txt",
-                    str,
-                    null,
-                    2
-                );
+                fs.writeFileSync("D:\\NLP\\Tulsa_" + jsonArray[i - 1].scheme + ".txt", str, null, 2);
                 str = "";
             } else str += item.type + "\t" + item.term + "\t" + item.num + "\t" + item.scheme + "\t" + item.line + "\n";
         });
@@ -251,14 +234,9 @@ var tulsaToSkos = {
 
                 //  var scheme = "all"
                 var str = "";
-                str +=
-                    '<?xml version="1.0" encoding="utf-8"?>\n' +
-                    '<rdf:RDF xmlns:skos="http://www.w3.org/2004/02/skos/core#"  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">';
+                str += '<?xml version="1.0" encoding="utf-8"?>\n' + '<rdf:RDF xmlns:skos="http://www.w3.org/2004/02/skos/core#"  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">';
 
-                str +=
-                    "<skos:ConceptScheme rdf:about='http://PetroleumAbstractsThesaurus/" +
-                    scheme.replace(/ /g, "_") +
-                    "'>";
+                str += "<skos:ConceptScheme rdf:about='http://PetroleumAbstractsThesaurus/" + scheme.replace(/ /g, "_") + "'>";
                 str += "  <skos:prefLabel xml:lang='en'>" + scheme + "</skos:prefLabel>";
                 str += "</skos:ConceptScheme>";
 
@@ -280,41 +258,23 @@ var tulsaToSkos = {
                         return;
                 }*/
 
-                    str +=
-                        "<skos:Concept rdf:about='http://PetroleumAbstractsThesaurus/" +
-                        entity.prefLabel.replace(/ /g, "_") +
-                        "'>\n";
+                    str += "<skos:Concept rdf:about='http://PetroleumAbstractsThesaurus/" + entity.prefLabel.replace(/ /g, "_") + "'>\n";
                     //   str += "  <skos:inScheme rdf:resource='http://PetroleumAbstractsThesaurus/" + entity.inScheme.replace(/ /g, '_') + "'/>\n"
 
-                    str +=
-                        "  <skos:prefLabel xml:lang='en'>" +
-                        entity.prefLabel +
-                        "</skos:prefLabel>\n";
+                    str += "  <skos:prefLabel xml:lang='en'>" + entity.prefLabel + "</skos:prefLabel>\n";
 
                     entity.altLabels.forEach(function (altLabel) {
-                        str +=
-                            "  <skos:altLabel xml:lang='en'>" +
-                            altLabel.replace(/&/g, " ") +
-                            "</skos:altLabel>\n";
+                        str += "  <skos:altLabel xml:lang='en'>" + altLabel.replace(/&/g, " ") + "</skos:altLabel>\n";
                     });
 
                     entity.broaders.forEach(function (broader) {
-                        str +=
-                            "  <skos:broader rdf:resource='http://PetroleumAbstractsThesaurus/" +
-                            broader.replace(/ /g, "_") +
-                            "'/>\n";
+                        str += "  <skos:broader rdf:resource='http://PetroleumAbstractsThesaurus/" + broader.replace(/ /g, "_") + "'/>\n";
                     });
                     entity.narrowers.forEach(function (narrower) {
-                        str +=
-                            "  <skos:narrower rdf:resource='http://PetroleumAbstractsThesaurus/" +
-                            narrower.replace(/ /g, "_") +
-                            "'/>\n";
+                        str += "  <skos:narrower rdf:resource='http://PetroleumAbstractsThesaurus/" + narrower.replace(/ /g, "_") + "'/>\n";
                     });
                     entity.relateds.forEach(function (related) {
-                        str +=
-                            "  <skos:related rdf:resource='http://PetroleumAbstractsThesaurus/" +
-                            related.replace(/ /g, "_") +
-                            "'/>\n";
+                        str += "  <skos:related rdf:resource='http://PetroleumAbstractsThesaurus/" + related.replace(/ /g, "_") + "'/>\n";
                     });
                     str += "</skos:Concept>\n";
                 });
@@ -338,17 +298,12 @@ var tulsaToSkos = {
         }
         var str = "";
         entitiesArray.forEach(function (entity) {
-            var conceptUri =
-                "<http://PetroleumAbstractsThesaurus/" + entity.prefLabel.replace(/ /g, "_") + ">";
+            var conceptUri = "<http://PetroleumAbstractsThesaurus/" + entity.prefLabel.replace(/ /g, "_") + ">";
 
             //     str += conceptUri + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + entity.prefLabel.replace(/&/g, " ") + "'@en.\n"
 
             entity.altLabels.forEach(function (altLabel) {
-                str +=
-                    conceptUri +
-                    " <http://www.w3.org/2004/02/skos/core#altLabel> '" +
-                    altLabel.replace(/&/g, " ") +
-                    "'@en.\n";
+                str += conceptUri + " <http://www.w3.org/2004/02/skos/core#altLabel> '" + altLabel.replace(/&/g, " ") + "'@en.\n";
             });
             /*     entity.narrowers.forEach(function (narrower) {
                 var narrowerUri = "<http://PetroleumAbstractsThesaurus/" +narrower.replace(/ /g, '_') + ">"
@@ -405,13 +360,7 @@ if (false) {
         if (prefix.indexOf("SN") == 0) {
             if (sns.indexOf(prefix) < 0) sns.push(prefix);
             var str3 = line.substring(6, 26).trim() + "\t" + index + "\n";
-            if (
-                str3.indexOf("NT ") != 0 &&
-                str3.indexOf("BT ") != 0 &&
-                str3.indexOf("USED ") != 0 &&
-                str3.indexOf("ADDED ") != 0
-            )
-                str2 += str3;
+            if (str3.indexOf("NT ") != 0 && str3.indexOf("BT ") != 0 && str3.indexOf("USED ") != 0 && str3.indexOf("ADDED ") != 0) str2 += str3;
         }
     });
     console.log(sns.toString());

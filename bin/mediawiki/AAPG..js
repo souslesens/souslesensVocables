@@ -27,9 +27,7 @@ var AAPG = {
                 page = encodeURIComponent(page);
                 if (!links[page]) links[page] = [];
 
-                var url =
-                    "https://wiki.aapg.org/index.php?title=Special%3AWhatLinksHere&format=json&target=" +
-                    page;
+                var url = "https://wiki.aapg.org/index.php?title=Special%3AWhatLinksHere&format=json&target=" + page;
 
                 setTimeout(function () {
                     httpProxy.get(url, {}, function (err, result) {
@@ -43,11 +41,7 @@ var AAPG = {
                         while ((array = regex.exec(text)) !== null) {
                             links[page].push(array[1]);
                         }
-                        if (pageIndex++ % 20 == 0)
-                            fs.writeFileSync(
-                                "D:\\Total\\2020\\Stephanie\\AAPG-links.json",
-                                JSON.stringify(links)
-                            );
+                        if (pageIndex++ % 20 == 0) fs.writeFileSync("D:\\Total\\2020\\Stephanie\\AAPG-links.json", JSON.stringify(links));
 
                         callbackEach();
                     });
@@ -57,10 +51,7 @@ var AAPG = {
                 if (err) return console.log(err);
                 var xx = links;
 
-                fs.writeFileSync(
-                    "D:\\Total\\2020\\Stephanie\\AAPG-links.json",
-                    JSON.stringify(links)
-                );
+                fs.writeFileSync("D:\\Total\\2020\\Stephanie\\AAPG-links.json", JSON.stringify(links));
             }
         );
     },
@@ -71,13 +62,7 @@ var AAPG = {
         for (var key in json) {
             json[key].forEach(function (item) {
                 key = key.replace(/%20/g, "_");
-                rdf +=
-                    "<https://wiki.aapg.org/" +
-                    key +
-                    "> <http://www.w3.org/2000/01/rdf-schema#seeAlso> " +
-                    "<https://wiki.aapg.org/" +
-                    item +
-                    ">.\n";
+                rdf += "<https://wiki.aapg.org/" + key + "> <http://www.w3.org/2000/01/rdf-schema#seeAlso> " + "<https://wiki.aapg.org/" + item + ">.\n";
             });
         }
 

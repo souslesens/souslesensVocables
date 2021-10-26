@@ -27,8 +27,7 @@ var xlsx2json = {
                     else sheet_name_list = workbook.SheetNames;
 
                     sheet_name_list.forEach(function (sheetName, sheetIndex) {
-                        if (!options.firstSheetNumber || sheetIndex >= options.firstSheetNumber - 1)
-                            sheets[sheetName] = workbook.Sheets[sheetName];
+                        if (!options.firstSheetNumber || sheetIndex >= options.firstSheetNumber - 1) sheets[sheetName] = workbook.Sheets[sheetName];
                     });
                     callbackSeries();
                 },

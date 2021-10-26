@@ -5,15 +5,71 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="90d1308a-a215-4181-84d6-d2c248e03c51" name="Default Changelist" comment="Lineage composition">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/KGSqlConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGSqlConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/KGbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGbuilder..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/KGcontroller..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGcontroller..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/KGutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/KGutil..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/SQLserverConnector..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/SQLserverConnector..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/codification..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/codification..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/codificationOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/codificationOld..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/definitions.js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/definitions.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/dictionariesManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/dictionariesManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/dictionaryMatcher..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/dictionaryMatcher..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/tagAnalyzer..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/tagAnalyzer..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/temporary..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/temporary..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/KG/tools/PIbuilder..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/KG/tools/PIbuilder..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/SPARQLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/SPARQLutil..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/SQLutil..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/SQLutil..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/_csvCrawler..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/_csvCrawler..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/annotatorLive..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/annotatorLive..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/authentication..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/authentication..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/configManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/configManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/elasticRestProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/elasticRestProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/exportRDF..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/exportRDF..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/httpProxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/httpProxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/AAPG..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiStats..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mediawiki/mediawikiTagger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/mySQLproxy..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/mySQLproxy..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/CSVtoSKOS..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/RcReportsTriples..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/gaiaToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/onTheFlyTagger..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/quantumToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/skosToElastic..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/termScienceToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/tulsaToSkos..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/tulsaToSkos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/skosConverters/xsdToSkos2..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/skosConverters/xsdToSkos2..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/sourceManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/sourceManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/util..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/util..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bin/xlsx2json..js" beforeDir="false" afterPath="$PROJECT_DIR$/bin/xlsx2json..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/app.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/bin/www" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/public/stylesheets/style.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/routes/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/routes/users.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/views/error.pug" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/views/index.pug" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/myapp/views/layout.pug" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/Iso19800toOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/Iso19800toOWL..js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/other/UMLtoOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/UMLtoOWLparser..js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/graph/visjsGraph2.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_OWL.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_common.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/sparqlProxies/sparql_generic.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_blend.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_blend.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/js/tools/lineage/lineage_classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" beforeDir="false" afterPath="$PROJECT_DIR$/public/vocables/snippets/lineage/lineage.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparserOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/energisitics/energisticsToOWLparserOld..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/OneModelManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/oneModel/dictionaryManager..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ClovParser..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ClovParser..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/mapQuatumCfihos..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ontologiesMapperOld..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologiesMapperOld..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/ontologyCTG..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseOWL..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseOWL..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/other/quantum/parseXlsx..js" beforeDir="false" afterPath="$PROJECT_DIR$/other/quantum/parseXlsx..js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/routes/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testEpim" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,7 +97,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="mater_dev_x" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -76,14 +132,14 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="javascript.nodejs.core.library.configured.version" value="14.16.0" />
-    <property name="javascript.nodejs.core.library.typings.version" value="14.17.30" />
+    <property name="javascript.nodejs.core.library.configured.version" value="14.15.0" />
+    <property name="javascript.nodejs.core.library.typings.version" value="14.17.32" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/public/vocables/snippets/standardizer" />
     <property name="nodejs_interpreter_path" value="node" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="prettierjs.PrettierConfiguration.Package" value="D:\webstorm\souslesensVocables\node_modules\prettier" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.JavaScript" />
     <property name="ts.external.directory.path" value="C:\Program Files\JetBrains\WebStorm 2020.3.3\plugins\JavaScriptLanguage\jsLanguageServicesImpl\external" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -103,7 +159,7 @@
       <recent name="D:\webstorm\souslesensVocables\other" />
     </key>
   </component>
-  <component name="RunManager" selected="Node.js.UMLtoOWLparser..js">
+  <component name="RunManager" selected="Node.js.bin\www">
     <configuration name="Iso19800toOWL..js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/other/Iso19800toOWL..js" working-dir="$PROJECT_DIR$/other">
       <method v="2" />
     </configuration>
@@ -122,9 +178,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Node.js.UMLtoOWLparser..js" />
-        <item itemvalue="Node.js.energisticsToOWLparser..js" />
-        <item itemvalue="Node.js.Iso19800toOWL..js" />
         <item itemvalue="Node.js.SPARQLutil..js" />
+        <item itemvalue="Node.js.Iso19800toOWL..js" />
+        <item itemvalue="Node.js.energisticsToOWLparser..js" />
         <item itemvalue="Node.js.elasticRestProxy..js" />
       </list>
     </recent_temporary>
@@ -682,7 +738,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/KG/dictionaryMatcher..js</url>
-          <line>178</line>
+          <line>167</line>
           <option name="timeStamp" value="91" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -732,12 +788,12 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/KG/KGbuilder..js</url>
-          <line>245</line>
+          <line>230</line>
           <option name="timeStamp" value="263" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/KG/KGcontroller..js</url>
-          <line>22</line>
+          <line>21</line>
           <option name="timeStamp" value="265" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -747,7 +803,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/other/UMLtoOWLparser..js</url>
-          <line>417</line>
+          <line>365</line>
           <option name="timeStamp" value="393" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -762,7 +818,7 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
-          <line>40</line>
+          <line>34</line>
           <option name="timeStamp" value="505" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
@@ -792,50 +848,37 @@
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>410</line>
+          <line>315</line>
           <option name="timeStamp" value="590" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>414</line>
+          <line>319</line>
           <option name="timeStamp" value="591" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>408</line>
+          <line>313</line>
           <option name="timeStamp" value="593" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>378</line>
+          <line>285</line>
           <option name="timeStamp" value="595" />
         </line-breakpoint>
         <line-breakpoint type="javascript">
           <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>404</line>
+          <line>311</line>
           <option name="timeStamp" value="599" />
-        </line-breakpoint>
-        <line-breakpoint type="javascript">
-          <url>file://$PROJECT_DIR$/bin/annotator/dirContentAnnotator..js</url>
-          <line>407</line>
-          <option name="timeStamp" value="601" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
-          <line>413</line>
-          <properties lambdaOrdinal="-1" />
+          <line>369</line>
           <option name="timeStamp" value="687" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/other/energisitics/energisticsToOWLparser..js</url>
-          <line>402</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="688" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/other/UMLtoOWLparser..js</url>
-          <line>512</line>
-          <properties lambdaOrdinal="-1" />
+          <line>430</line>
           <option name="timeStamp" value="696" />
         </line-breakpoint>
       </breakpoints>

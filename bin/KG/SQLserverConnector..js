@@ -179,11 +179,7 @@ var SQLserverConnector = {
     getKGmodel: function (dbName, callback) {
         var connection = SQLserverConnector.getConnection();
         connection.database = dbName;
-        var query =
-            "use [" +
-            dbName +
-            "]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" +
-            "FROM INFORMATION_SCHEMA.COLUMNS";
+        var query = "use [" + dbName + "]; SELECT COLUMN_NAME,TABLE_NAME,TABLE_SCHEMA\n" + "FROM INFORMATION_SCHEMA.COLUMNS";
         //   query +=" where  TABLE_SCHEMA not in ('dbo') order by TABLE_SCHEMA,TABLE_NAME "
         query += "  order by TABLE_SCHEMA,TABLE_NAME ";
 

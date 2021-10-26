@@ -117,13 +117,7 @@ var CSVtoSKOS = {
                                             // colName variable
                                             var langStr = "";
                                             if (mapping.lang) langStr = "@" + mapping.lang;
-                                            object =
-                                                "'" +
-                                                util.formatStringForTriple(
-                                                    line[mapping.object.substring(1)]
-                                                ) +
-                                                "'" +
-                                                langStr;
+                                            object = "'" + util.formatStringForTriple(line[mapping.object.substring(1)]) + "'" + langStr;
                                         } else {
                                             object = mapping.object;
                                         }
@@ -132,8 +126,7 @@ var CSVtoSKOS = {
                                     var predicate = "<" + mapping.predicate + ">";
 
                                     if (subject && predicate && object) {
-                                        var triple =
-                                            subject + " " + predicate + " " + object + ".\n";
+                                        var triple = subject + " " + predicate + " " + object + ".\n";
                                         var tripleHash = util.getStringHash(triple);
 
                                         if (mapping.distinctTriple && distinctTriples[tripleHash]) {

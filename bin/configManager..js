@@ -16,7 +16,6 @@ var path = require("path");
 var async = require("async");
 var fs = require("fs");
 
-
 var ConfigManager = {
     config: {},
     getGeneralConfig: function (callback) {
@@ -25,25 +24,20 @@ var ConfigManager = {
         var str = fs.readFileSync(mainConfigFilePath);
         //   console.log(str)
         var config = null;
-        var err=null;
+        var err = null;
         try {
             config = JSON.parse("" + str);
-            console.log(config, null, 2)
-            if (!config.data_dir)
-                config.data_dir = path.join(__dirname, "../data/");
+            console.log(config, null, 2);
+            if (!config.data_dir) config.data_dir = path.join(__dirname, "../data/");
 
             ConfigManager.config = config;
-
         } catch (e) {
-           console.log(e);
+            console.log(e);
             // in that case return the string content not parsed
-            err=e;
+            err = e;
+        } finally {
+            if (callback) return callback(err, config);
         }
-        finally {
-            if (callback)
-                return callback(err, config);
-        }
-
     },
 
     getDictionary: function (dictionary, callback) {
@@ -76,15 +70,9 @@ var ConfigManager = {
                 // create and initiate graph triples
                 function (callbackSeries) {
                     if (options.type == "SKOS")
-                        SourceManager.createNewSkosSourceGraph(
-                            sourceName,
-                            graphUri,
-                            targetSparqlServerUrl,
-                            options,
-                            function (err, result) {
-                                return callbackSeries(err, result);
-                            }
-                        );
+                        SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
+                            return callbackSeries(err, result);
+                        });
                     else if (options.type == "OWL") return callbackSeries(null);
                 },
                 function (callbackSeries) {
@@ -101,7 +89,7 @@ var ConfigManager = {
 
                                 graphUri: graphUri,
                                 schemaType: "SKOS",
-                                predicates: {lang: options.lang},
+                                predicates: { lang: options.lang },
                                 color: "#9edae3",
                             };
                         } else if (options.type == "OWL") {
@@ -117,13 +105,9 @@ var ConfigManager = {
                             };
                         }
 
-                        jsonFileStorage.store(
-                            path.resolve(sourcesPath),
-                            sources,
-                            function (err, sources) {
-                                callbackSeries(err);
-                            }
-                        );
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+                            callbackSeries(err);
+                        });
                     });
                 },
             ],
@@ -138,13 +122,9 @@ var ConfigManager = {
             [
                 // create and initiate graph triples
                 function (callbackSeries) {
-                    SourceManager.deleteSourceGraph(
-                        graphUri,
-                        targetSparqlServerUrl,
-                        function (err, result) {
-                            return callbackSeries(err, result);
-                        }
-                    );
+                    SourceManager.deleteSourceGraph(graphUri, targetSparqlServerUrl, function (err, result) {
+                        return callbackSeries(err, result);
+                    });
                 },
                 function (callbackSeries) {
                     var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
@@ -152,13 +132,9 @@ var ConfigManager = {
                         if (err) return callback(err);
                         delete sources[sourceName];
 
-                        jsonFileStorage.store(
-                            path.resolve(sourcesPath),
-                            sources,
-                            function (err, sources) {
-                                callbackSeries(err);
-                            }
-                        );
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+                            callbackSeries(err);
+                        });
                     });
                 },
             ],
@@ -168,5 +144,5 @@ var ConfigManager = {
         );
     },
 };
-ConfigManager.getGeneralConfig()
+ConfigManager.getGeneralConfig();
 module.exports = ConfigManager;

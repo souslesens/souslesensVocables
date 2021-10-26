@@ -103,11 +103,7 @@ var KGcontroller = {
     KGquery: function (req, callback) {
         // obsolete
         if (req.body.getFromSparql) {
-            KGSqlConnector.getFromSparql(
-                req.body.assetType,
-                JSON.parse(req.body.quantumObjs),
-                callback
-            );
+            KGSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), callback);
         }
 
         if (req.body.getModel) {
@@ -158,11 +154,9 @@ var KGcontroller = {
         "tblPhysicalClassToAttribute.PhysicalClassID": "tblPhysicalClass.ID",
         "tblPhysicalClassToAttribute.AttributeID": "tblAttribute.ID",
         "tblFunctionalClassToDisciplineDocumentType.FunctionalClassID": "tblFunctionalClass.ID",
-        "tblFunctionalClassToDisciplineDocumentType.DisciplineDocumentTypeID":
-            "tblDisciplineDocumentType.ID",
+        "tblFunctionalClassToDisciplineDocumentType.DisciplineDocumentTypeID": "tblDisciplineDocumentType.ID",
         "tblPhysicalClassToDisciplineDocumentType.PhysicalClassID": "tblPhysicalClass.ID",
-        "tblPhysicalClassToDisciplineDocumentType.DisciplineDocumentTypeID":
-            "tblDisciplineDocumentType.ID",
+        "tblPhysicalClassToDisciplineDocumentType.DisciplineDocumentTypeID": "tblDisciplineDocumentType.ID",
         "tblCompany.ISOCountryCodeID": "tblAttributePickListValue.ID",
         "tblPurchaseOrder.IssuerID": "tblCompany.ID",
         "tblPurchaseOrder.ReceiverID": "tblCompany.ID",
@@ -224,8 +218,7 @@ var KGcontroller = {
         "tblSource.ItemID": "tblXXX.ID",
         "tblComments.ItemID": "tblXXX.ID",
         "tblTagToTagToTypicalAssemblyRequirement.TagToTagID": "tblTagToTag.ID",
-        "tblTagToTagToTypicalAssemblyRequirement.TypicalAssemblyRequirementID":
-            "tblTypicalAssemblyRequirement.ID",
+        "tblTagToTagToTypicalAssemblyRequirement.TypicalAssemblyRequirementID": "tblTypicalAssemblyRequirement.ID",
         "tblBreakdownAttribute.BreakdownID": "tblAttributePickListValue.ID",
         "tblBreakdownAttribute.AttributeID": "tblAttribute.ID",
         "tblBreakdownAttribute.UnitOfMeasureID": "tblUnitOfMeasure.ID",
@@ -248,15 +241,12 @@ var KGcontroller = {
         "tblMappingSource.FunctionalClassToPhysicalClassID": "tblFunctionalClassToPhysicalClass.ID",
         "tblMappingSource.FunctionalClassToAttributeID": "tblFunctionalClassToAttribute.ID",
         "tblMappingSource.PhysicalClassToAttributeID": "tblPhysicalClassToAttribute.ID",
-        "tblMappingSource.FunctionalClassToDisciplineDocumentTypeID":
-            "tblFunctionalClassToDisciplineDocumentType.ID",
-        "tblMappingSource.PhysicalClassToDisciplineDocumentTypeID":
-            "tblPhysicalClassToDisciplineDocumentType.ID",
+        "tblMappingSource.FunctionalClassToDisciplineDocumentTypeID": "tblFunctionalClassToDisciplineDocumentType.ID",
+        "tblMappingSource.PhysicalClassToDisciplineDocumentTypeID": "tblPhysicalClassToDisciplineDocumentType.ID",
         "tblMappingSourceDetails.MappingSourceID": "tblMappingSource.ID",
         "tblRequirementOrigin.DisciplineID": "tblDiscipline.ID",
         "tblTypicalAssemblyRequirement.RequirementOriginID": "tblRequirementOrigin.ID",
-        "tblTypicalAssemblyPattern.TypicalAssemblyRequirementID":
-            "tblTypicalAssemblyRequirement.ID",
+        "tblTypicalAssemblyPattern.TypicalAssemblyRequirementID": "tblTypicalAssemblyRequirement.ID",
         "tblTypicalAssemblyPattern.PrimaryFunctionalClassID": "tblFunctionalClass.ID",
         "tblTypicalAssemblyPattern.PrimaryAttributeID": "tblAttribute.ID",
         "tblTypicalAssemblyPattern.LinkFunctionalClassID": "tblFunctionalClass.ID",
@@ -275,27 +265,19 @@ var KGcontroller = {
         "tblRegisterTagToDocuments.TagID": "tblTag.ID",
 
         //views created in AFTWIN UK for child parent
-        "tbltypicalassemblypatterntofunctionalclassparent.functionalclassid":
-            "tblFunctionalClass.ID",
-        "tbltypicalassemblypatterntofunctionalclasschild.functionalclassid":
-            "tblFunctionalClass.ID",
+        "tbltypicalassemblypatterntofunctionalclassparent.functionalclassid": "tblFunctionalClass.ID",
+        "tbltypicalassemblypatterntofunctionalclasschild.functionalclassid": "tblFunctionalClass.ID",
         "dbo.tbltypicalassemblypatterntoattributechild.attributeid": "tblAttribute.ID",
         "dbo.tbltypicalassemblypatterntoattributeparent.attributeid": "tblAttribute.ID",
 
-        "tbltypicalassemblypatterntofunctionalclassparent.typicalassemblypatternid":
-            "tblTypicalAssemblyPattern.ID",
-        "tbltypicalassemblypatterntofunctionalclasschild.typicalassemblypatternid":
-            "tblTypicalAssemblyPattern.ID",
-        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid":
-            "tblTypicalAssemblyPattern.ID",
+        "tbltypicalassemblypatterntofunctionalclassparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
+        "tbltypicalassemblypatterntofunctionalclasschild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
+        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid":
-            "tblTypicalAssemblyPattern.ID",
-        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid":
-            "tblTypicalAssemblyPattern.ID",
+        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
+        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid":
-            "tblTypicalAssemblyPattern.ID",
+        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
     },
 };
 

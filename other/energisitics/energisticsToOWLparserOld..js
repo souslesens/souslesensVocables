@@ -67,12 +67,7 @@ var parse = function (sourcePath, targetPath) {
         //  currentParentObj =getCurrentParentObject(currentNodePath)
 
         if (currentNodeName == "XS:SIMPLETYPE") {
-            currentObjects[currentNodePath].push({
-                type: node.name,
-                name: name,
-                id: id,
-                children: [],
-            });
+            currentObjects[currentNodePath].push({ type: node.name, name: name, id: id, children: [] });
         }
 
         if (currentNodePath == "/XS:SCHEMA/XS:SIMPLETYPE/XS:RESTRICTION/XS:ENUMERATION") {
@@ -372,8 +367,7 @@ var buildOwl = function (jsonPath, graphUri) {
                             var value = triple.object;
                             if (value.indexOf("_:b") == 0);
                             else if (value.indexOf("http") == 0) value = "<" + value + ">";
-                            var tripleStr =
-                                subject + " <" + triple.predicate + "> " + value + ".\n";
+                            var tripleStr = subject + " <" + triple.predicate + "> " + value + ".\n";
                             var tripleHash = util.hashCode(tripleStr);
                             if (uniqueTriples[tripleHash]) return;
                             else {
@@ -382,9 +376,7 @@ var buildOwl = function (jsonPath, graphUri) {
                             }
                         });
                         var queryGraph =
-                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                            "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
                         queryGraph += "with <" + graphUri + ">" + "insert {";
                         queryGraph += triplesStr;
 
@@ -417,8 +409,7 @@ var buildOwl = function (jsonPath, graphUri) {
     );
 };
 
-var sourcePath =
-    "D:\\NLP\\importedResources\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
+var sourcePath = "D:\\NLP\\importedResources\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
 var graphUri = "http://souslesens.org/pdms/ontology/";
 
 var jsonPath = sourcePath + ".json";

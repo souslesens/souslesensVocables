@@ -46,8 +46,7 @@ var csvCrawler = {
                                 });
                                 record[config.schema.contentField] = lineContent;
                                 var incrementRecordId;
-                                if (elacticIdsfromHash)
-                                    incrementRecordId = util.getStringHash(lineContent);
+                                if (elacticIdsfromHash) incrementRecordId = util.getStringHash(lineContent);
                                 else incrementRecordId = common.getRandomHexaId(10);
                                 record.incrementRecordId = incrementRecordId;
                                 var id = "R" + incrementRecordId;
@@ -81,23 +80,17 @@ var csvCrawler = {
                                     return callbackEach(error);
                                 }
                                 const elasticRestProxy = require("./elasticRestProxy..js");
-                                elasticRestProxy.checkBulkQueryResponse(
-                                    body,
-                                    function (err, result) {
-                                        if (err) return callbackEach(err);
-                                        var message = "indexed " + totalLines + " records ";
-                                        socket.message(message);
-                                        setTimeout(function () {
-                                            elasticRestProxy.refreshIndex(
-                                                config,
-                                                function (err, result) {
-                                                    if (err) return callbackEach(err);
-                                                    return callbackEach();
-                                                }
-                                            );
-                                        }, 5000);
-                                    }
-                                );
+                                elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
+                                    if (err) return callbackEach(err);
+                                    var message = "indexed " + totalLines + " records ";
+                                    socket.message(message);
+                                    setTimeout(function () {
+                                        elasticRestProxy.refreshIndex(config, function (err, result) {
+                                            if (err) return callbackEach(err);
+                                            return callbackEach();
+                                        });
+                                    }, 5000);
+                                });
                             });
                         },
                         function (err) {
@@ -111,8 +104,7 @@ var csvCrawler = {
                 if (err) return callback(err);
 
                 var duration = new Date().getTime() - t0;
-                var message =
-                    "*** indexation done : " + data.length + " records  in " + duration + " msec.";
+                var message = "*** indexation done : " + data.length + " records  in " + duration + " msec.";
                 socket.message(message);
                 callback(null, "done");
             }
@@ -139,8 +131,7 @@ var csvCrawler = {
     },
 
     readCsv: function (connector, lines, callback) {
-        if (!fs.existsSync(connector.filePath))
-            return callback("file does not exists :" + connector.filePath);
+        if (!fs.existsSync(connector.filePath)) return callback("file does not exists :" + connector.filePath);
         util.getCsvFileSeparator(connector.filePath, function (separator) {
             //  var separator="\t"
             var headers = [];

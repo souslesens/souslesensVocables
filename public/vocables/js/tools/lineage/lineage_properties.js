@@ -486,7 +486,7 @@ Lineage_properties = (function () {
                     var existingNodes = {}
                     if (visjsGraph.data && visjsGraph.data.nodes)
                         existingNodes = visjsGraph.getExistingIdsMap()
-                    var color = Lineage_classes.getSourceColor(Lineage_common.currentSource, "palette")
+                    var color = Lineage_classes.getSourceColor(Lineage_common.currentSource)
 
                     result.forEach(function (item) {
 

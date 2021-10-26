@@ -15,6 +15,7 @@ var DataController = require("../bin/dataController.");
 var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
+var DictionariesManager = require("../bin/KG/DictionariesManager.");
 
 const promiseFs = require("fs").promises;
 
@@ -28,10 +29,7 @@ router.get("/users", function (req, res, next) {
 });
 router.put("/users", async function (req, res, next) {
     try {
-        await promiseFs.writeFile(
-            path.join(__dirname, "/../config/users/users.json"),
-            JSON.stringify(req.body, null, 2)
-        );
+        await promiseFs.writeFile(path.join(__dirname, "/../config/users/users.json"), JSON.stringify(req.body, null, 2));
         res.sendFile(path.join(__dirname, "/../config/users/users.json"));
     } catch (err) {
         res.sendStatus(500);
@@ -45,10 +43,7 @@ router.get("/profiles", function (req, res, next) {
 
 router.put("/profiles", async function (req, res, next) {
     try {
-        await promiseFs.writeFile(
-            path.join(__dirname, "/../config/profiles.json"),
-            JSON.stringify(req.body, null, 2)
-        );
+        await promiseFs.writeFile(path.join(__dirname, "/../config/profiles.json"), JSON.stringify(req.body, null, 2));
         res.sendFile(path.join(__dirname, "/../config/profiles.json"));
     } catch (err) {
         res.sendStatus(500);
@@ -62,10 +57,7 @@ router.get("/sources", function (req, res, next) {
 
 router.put("/sources", async function (req, res, next) {
     try {
-        await promiseFs.writeFile(
-            path.join(__dirname, "/../config/sources.json"),
-            JSON.stringify(req.body, null, 2)
-        );
+        await promiseFs.writeFile(path.join(__dirname, "/../config/sources.json"), JSON.stringify(req.body, null, 2));
         res.sendFile(path.join(__dirname, "/../config/sources.json"));
     } catch (err) {
         res.sendStatus(500);
@@ -86,15 +78,9 @@ router.post("/upload", function (req, response) {
     }
     if (req.files.EvaluateToolZipFile) {
         var zipFile = req.files.EvaluateToolZipFile;
-        DirContentAnnotator.uploadAndAnnotateCorpus(
-            zipFile,
-            req.body.corpusName,
-            JSON.parse(req.body.sources),
-            JSON.parse(req.body.options),
-            function (err, result) {
-                processResponse(response, err, result);
-            }
-        );
+        DirContentAnnotator.uploadAndAnnotateCorpus(zipFile, req.body.corpusName, JSON.parse(req.body.sources), JSON.parse(req.body.options), function (err, result) {
+            processResponse(response, err, result);
+        });
     }
 });
 
@@ -108,14 +94,9 @@ router.post(
         }
 
         if (req.body.elasticSearch) {
-            elasticRestProxy.executePostQuery(
-                req.body.url,
-                JSON.parse(req.body.executeQuery),
-                JSON.parse(req.body.indexes),
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            elasticRestProxy.executePostQuery(req.body.url, JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
+                processResponse(response, err, result);
+            });
         }
 
         if (req.body.tryLoginJSON) {
@@ -141,25 +122,14 @@ router.post(
             });
         }
         if (req.body.createNewResource) {
-            configManager.createNewResource(
-                req.body.sourceName,
-                req.body.graphUri,
-                req.body.targetSparqlServerUrl,
-                JSON.parse(req.body.options),
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
         }
         if (req.body.deleteResource) {
-            configManager.deleteResource(
-                req.body.sourceName,
-                req.body.graphUri,
-                req.body.sparqlServerUrl,
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
+                processResponse(response, err, result);
+            });
         }
 
         if (req.body.KGmappingDictionary) {
@@ -205,24 +175,15 @@ router.post(
         }
 
         if (req.body.getConceptsSubjectsTree) {
-            DirContentAnnotator.getConceptsSubjectsTree(
-                req.body.corpusName,
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
+                processResponse(response, err, result);
+            });
         }
 
         if (req.body.annotateAndStoreCorpus) {
-            DirContentAnnotator.annotateAndStoreCorpus(
-                req.body.corpusPath,
-                JSON.parse(req.body.sources),
-                req.body.corpusName,
-                JSON.parse(req.body.options),
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            DirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, JSON.parse(req.body.sources), req.body.corpusName, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
         }
         if (req.body.getAnnotatedCorpusList) {
             DirContentAnnotator.getAnnotatedCorpusList(req.body.group, function (err, result) {
@@ -261,19 +222,28 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+
+        if (req.body.dictionaries_listIndexes) {
+            DictionariesManager.listIndexes(function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
+        if (req.body.dictionaries_indexSource) {
+            DictionariesManager.indexSource(req.body.indexName, JSON.parse(req.body.data), JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
         if (req.body.getAssetGlobalMappings) {
-            KGcontroller.getAssetGlobalMappings(
-                req.body.getAssetGlobalMappings,
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            KGcontroller.getAssetGlobalMappings(req.body.getAssetGlobalMappings, function (err, result) {
+                processResponse(response, err, result);
+            });
         }
 
         if (req.query.SPARQLquery) {
             var query = req.body.query;
-            if (req.query.graphUri)
-                query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
+            if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
 
             if (req.query.method == "POST") {
                 var headers = {};
@@ -299,13 +269,9 @@ router.post(
         }
 
         if (req.body.uploadOntologyFromOwlFile) {
-            OneModelManager.uploadOntologyFromOwlFile(
-                req.body.graphUri,
-                req.body.filePath,
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            OneModelManager.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+                processResponse(response, err, result);
+            });
         }
         if (req.body.KG_SaveMappings) {
             KGcontroller.saveMappings(req.body.KGsource, req.body.mappings, function (err, result) {
@@ -314,14 +280,9 @@ router.post(
         }
 
         if (req.body.saveData) {
-            DataController.saveDataToFile(
-                req.body.dir,
-                req.body.fileName,
-                req.body.data,
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
+            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
+                processResponse(response, err, result);
+            });
         }
 
         if (req.body.listDirFiles) {
@@ -359,14 +320,11 @@ router.post(
         });
     }),
     router.get("/15926/part14/", function (req, res, next) {
-        OneModelManager.getOntology(
-            "http://standards.iso.org/iso/15926/part14/",
-            function (err, result) {
-                //  res.setHeader('Content-type', "text:plain");
-                // response.send(JSON.stringify(resultObj));
-                res.send(result);
-            }
-        );
+        OneModelManager.getOntology("http://standards.iso.org/iso/15926/part14/", function (err, result) {
+            //  res.setHeader('Content-type', "text:plain");
+            // response.send(JSON.stringify(resultObj));
+            res.send(result);
+        });
     })
 );
 
@@ -378,10 +336,7 @@ function processResponse(response, error, result) {
             res.setHeader('Access-Control-Allow-Credentials', true); // If needed.setHeader('Content-Type', 'application/json');*/
 
         response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader(
-            "Access-Control-Allow-Methods",
-            "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-        ); // If needed
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"); // If needed
         response.setHeader("Access-Control-Allow-Headers", "X-Requested-With,contenttype"); // If needed
         response.setHeader("Access-Control-Allow-Credentials", true); // If needed*/
 

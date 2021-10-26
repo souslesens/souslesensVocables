@@ -404,14 +404,13 @@ var buildOwl = function (jsonPath, graphUri) {
                         var triplesStr = "";
                         triples.forEach(function (triple) {
                             var subject = triple.subject;
-                            if (subject.indexOf("_:b") == 0);
+                            if (subject.indexOf("_:b") == 0) var x = 3;
                             else subject = "<" + subject + ">";
 
                             var value = triple.object;
-                            if (value.indexOf("_:b") == 0);
+                            if (value.indexOf("_:b") == 0) var x = 3;
                             else if (value.indexOf("http") == 0) value = "<" + value + ">";
-                            var tripleStr =
-                                subject + " <" + triple.predicate + "> " + value + ".\n";
+                            var tripleStr = subject + " <" + triple.predicate + "> " + value + ".\n";
                             var tripleHash = util.hashCode(tripleStr);
                             if (uniqueTriples[tripleHash]) return;
                             else {
@@ -420,9 +419,7 @@ var buildOwl = function (jsonPath, graphUri) {
                             }
                         });
                         var queryGraph =
-                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                            "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
                         queryGraph += "with <" + graphUri + ">" + "insert {";
                         queryGraph += triplesStr;
 
@@ -461,14 +458,14 @@ var graphUri = "http://souslesens.org/ppdm/ontology/";
 var sourcePath = "D:\\NLP\\ontologies\\PPDM\\PPDM.xml";
 var graphUri = "http://souslesens.org/ppdm/ontology/";
 
-var sourcePath = "D:\\NLP\\ontologies\\OSDU\\OSDU.xmi";
-var graphUri = "http://souslesens.org/osdu/ontology/";
-
 var sourcePath = "D:\\NLP\\ontologies\\PDEF\\PDEF.xml";
 var graphUri = "http://souslesens.org/pdef/ontology/";
 
 var sourcePath = "D:\\NLP\\ontologies\\NPDMS\\NPDMS.xml";
 var graphUri = "http://souslesens.org/pdms/ontology/";
+
+var sourcePath = "D:\\NLP\\ontologies\\OSDU\\OSDU.xmi";
+var graphUri = "http://souslesens.org/osduX/ontology/";
 
 var jsonPath = sourcePath + ".json";
 

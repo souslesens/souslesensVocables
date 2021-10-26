@@ -54,44 +54,16 @@ var xsdToSkos = {
 
             if (node.tagName && node.tagName == "xs:complexType") {
                 var name = node.getAttribute("name");
-                strElements +=
-                    "<" +
-                    graphURI +
-                    name +
-                    ">" +
-                    ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' +
-                    name +
-                    '".\n';
-                strElements +=
-                    "<" +
-                    graphURI +
-                    name +
-                    ">" +
-                    " <http://www.w3.org/2004/02/skos/core#broader> " +
-                    parentId +
-                    ".\n";
+                strElements += "<" + graphURI + name + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + name + '".\n';
+                strElements += "<" + graphURI + name + ">" + " <http://www.w3.org/2004/02/skos/core#broader> " + parentId + ".\n";
                 parentId = "<" + graphURI + name + ">";
             }
             if (node.tagName && node.tagName == "xs:sequence") {
             }
             if (node.tagName && node.tagName == "xs:simpleType") {
                 var name = node.getAttribute("name");
-                strElements +=
-                    "<" +
-                    graphURI +
-                    name +
-                    ">" +
-                    ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' +
-                    name +
-                    '".\n';
-                strElements +=
-                    "<" +
-                    graphURI +
-                    name +
-                    ">" +
-                    " <http://www.w3.org/2004/02/skos/core#broader> " +
-                    parentId +
-                    ".\n";
+                strElements += "<" + graphURI + name + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + name + '".\n';
+                strElements += "<" + graphURI + name + ">" + " <http://www.w3.org/2004/02/skos/core#broader> " + parentId + ".\n";
                 parentId = "<" + graphURI + name + ">";
             }
 
@@ -102,96 +74,39 @@ var xsdToSkos = {
             }
             if (node.tagName && node.tagName == "xs:enumeration") {
                 var value = node.getAttribute("value");
-                strElements +=
-                    parentId + ' <http://schema.org/ListItem> "' + formatString(value) + '" .\n';
-                strElements +=
-                    "<" +
-                    graphURI +
-                    formatString(value, { replaceSpaces: 1 }) +
-                    ">" +
-                    ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' +
-                    formatString(value) +
-                    '".\n';
-                strElements +=
-                    "<" +
-                    graphURI +
-                    formatString(value, { replaceSpaces: 1 }) +
-                    ">" +
-                    " <http://www.w3.org/2004/02/skos/core#broader> " +
-                    parentId +
-                    ".\n";
+                strElements += parentId + ' <http://schema.org/ListItem> "' + formatString(value) + '" .\n';
+                strElements += "<" + graphURI + formatString(value, { replaceSpaces: 1 }) + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + formatString(value) + '".\n';
+                strElements += "<" + graphURI + formatString(value, { replaceSpaces: 1 }) + ">" + " <http://www.w3.org/2004/02/skos/core#broader> " + parentId + ".\n";
             }
 
             if (node.tagName && node.tagName == "xs:element") {
                 var name = node.getAttribute("name");
-                strElements +=
-                    "<" +
-                    graphURI +
-                    name +
-                    ">" +
-                    ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' +
-                    name +
-                    '".\n';
-                strElements +=
-                    "<" +
-                    graphURI +
-                    name +
-                    ">" +
-                    " <http://www.w3.org/2004/02/skos/core#broader> " +
-                    parentId +
-                    ".\n";
+                strElements += "<" + graphURI + name + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + name + '".\n';
+                strElements += "<" + graphURI + name + ">" + " <http://www.w3.org/2004/02/skos/core#broader> " + parentId + ".\n";
                 parentId = "<" + graphURI + name + ">";
 
                 var typeId = "<" + graphURI + node.getAttribute("type") + ">";
-                strElements +=
-                    parentId +
-                    ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "' +
-                    typeId +
-                    '" .\n';
+                strElements += parentId + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "' + typeId + '" .\n';
             }
 
             if (node.tagName && node.tagName == "xs:annotation") {
                 var name = node.getAttribute("name");
-                var definition = node
-                    .getElementsByTagName("xs:documentation")
-                    .item(0)
-                    .childNodes.item(0).data;
+                var definition = node.getElementsByTagName("xs:documentation").item(0).childNodes.item(0).data;
                 definition = formatString(definition);
 
                 if (node.parentNode.tagName == "xs:enumeration") {
-                    var enumName =
-                        node.parentNode.parentNode.parentNode.getAttribute("name") +
-                        "/" +
-                        node.parentNode.getAttribute("value");
-                    strElements +=
-                        "<" +
-                        graphURI +
-                        "enumeration/" +
-                        formatString(enumName, { replaceSpaces: 1 }) +
-                        ">" +
-                        ' <http://www.w3.org/2004/02/skos/core#definition> "' +
-                        definition +
-                        '".\n';
+                    var enumName = node.parentNode.parentNode.parentNode.getAttribute("name") + "/" + node.parentNode.getAttribute("value");
+                    strElements += "<" + graphURI + "enumeration/" + formatString(enumName, { replaceSpaces: 1 }) + ">" + ' <http://www.w3.org/2004/02/skos/core#definition> "' + definition + '".\n';
                 } else if (node.parentNode.tagName == "xs:schema") {
-                    strElements +=
-                        parentId +
-                        ' <http://www.w3.org/2004/02/skos/core#definition> "' +
-                        definition +
-                        '".\n';
+                    strElements += parentId + ' <http://www.w3.org/2004/02/skos/core#definition> "' + definition + '".\n';
                 } else {
                     var parentName = node.parentNode.getAttribute("name");
-                    if (parentName == "")
-                        parentName = node.parentNode.parentNode.getAttribute("name");
-                    if (parentName == "")
-                        parentName = node.parentNode.parentNode.parentNode.getAttribute("name");
+                    if (parentName == "") parentName = node.parentNode.parentNode.getAttribute("name");
+                    if (parentName == "") parentName = node.parentNode.parentNode.parentNode.getAttribute("name");
                     if (parentName == "") var x = 3;
                     parentId = "<" + graphURI + parentName + ">";
 
-                    strElements +=
-                        parentId +
-                        ' <http://www.w3.org/2004/02/skos/core#definition> "' +
-                        definition +
-                        '" .\n';
+                    strElements += parentId + ' <http://www.w3.org/2004/02/skos/core#definition> "' + definition + '" .\n';
                 }
                 //   strElements += "<http://www.w3.org/2004/02/skos/core#definition>"
             }
@@ -202,26 +117,8 @@ var xsdToSkos = {
                 }
             }
         }
-        strElements +=
-            "<" +
-            graphURI +
-            fileTitle +
-            ">" +
-            ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' +
-            fileTitle +
-            '".\n';
-        strElements +=
-            "<" +
-            graphURI +
-            fileTitle +
-            ">" +
-            " <http://www.w3.org/2004/02/skos/core#topConceptOf> " +
-            "<" +
-            graphURI +
-            "scheme/" +
-            options.scheme +
-            "/>" +
-            " .\n";
+        strElements += "<" + graphURI + fileTitle + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + fileTitle + '".\n';
+        strElements += "<" + graphURI + fileTitle + ">" + " <http://www.w3.org/2004/02/skos/core#topConceptOf> " + "<" + graphURI + "scheme/" + options.scheme + "/>" + " .\n";
         recurseElements(schema, "<" + graphURI + fileTitle + ">");
 
         return callback(null, strElements);
@@ -266,10 +163,7 @@ var xsdToSkos = {
             },
             function (err) {
                 if (err) return console.log(err);
-                fs.writeFileSync(
-                    "D:\\NLP\\importedResources\\energistics\\" + options.scheme + ".rdf.nt",
-                    allElementsStr
-                );
+                fs.writeFileSync("D:\\NLP\\importedResources\\energistics\\" + options.scheme + ".rdf.nt", allElementsStr);
             }
         );
     },
@@ -284,12 +178,8 @@ var scheme = "Reservoir";
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\prodml\\v2.1\\xsd_schemas\\";var scheme="Production"
 
 var includeFiles = [""];
-xsdToSkos.parseXsdToSkos(
-    xsdPath,
-    { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" },
-    function (err, result) {
-        var x = err;
-    }
-);
+xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (err, result) {
+    var x = err;
+});
 
 //var commonEnums=xsdToSkos.getCommonEnumeration();

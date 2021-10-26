@@ -36,28 +36,15 @@ var parse = function (sourcePath, targetPath, callback) {
             if (simpleTypes) {
                 simpleTypes.forEach(function (item) {
                     var documentation = "";
-                    if (item["xs:annotation"] && item["xs:annotation"][0]["xs:documentation"])
-                        documentation = item["xs:annotation"][0]["xs:documentation"][0];
-                    var simpleTypeObj = {
-                        name: item.$.name,
-                        documentation: documentation,
-                        enumerations: [],
-                    };
+                    if (item["xs:annotation"] && item["xs:annotation"][0]["xs:documentation"]) documentation = item["xs:annotation"][0]["xs:documentation"][0];
+                    var simpleTypeObj = { name: item.$.name, documentation: documentation, enumerations: [] };
 
                     var enumerations = [];
-                    if (item["xs:restriction"] && item["xs:restriction"][0]["xs:enumeration"])
-                        enumerations = item["xs:restriction"][0]["xs:enumeration"];
+                    if (item["xs:restriction"] && item["xs:restriction"][0]["xs:enumeration"]) enumerations = item["xs:restriction"][0]["xs:enumeration"];
                     enumerations.forEach(function (enumeration) {
                         var documentation = "";
-                        if (
-                            enumeration["xs:annotation"] &&
-                            enumeration["xs:annotation"][0]["xs:documentation"]
-                        )
-                            documentation = enumeration["xs:annotation"][0]["xs:documentation"][0];
-                        simpleTypeObj.enumerations.push({
-                            value: enumeration.$.value,
-                            documentation: documentation,
-                        });
+                        if (enumeration["xs:annotation"] && enumeration["xs:annotation"][0]["xs:documentation"]) documentation = enumeration["xs:annotation"][0]["xs:documentation"][0];
+                        simpleTypeObj.enumerations.push({ value: enumeration.$.value, documentation: documentation });
                     });
 
                     json.push(simpleTypeObj);
@@ -68,35 +55,18 @@ var parse = function (sourcePath, targetPath, callback) {
             if (complexTypes) {
                 complexTypes.forEach(function (item) {
                     var documentation = "";
-                    if (item["xs:annotation"] && item["xs:annotation"][0]["xs:documentation"])
-                        documentation = item["xs:annotation"][0]["xs:documentation"][0];
-                    var complexTypeObj = {
-                        name: item.$.name,
-                        documentation: documentation,
-                        elements: [],
-                    };
+                    if (item["xs:annotation"] && item["xs:annotation"][0]["xs:documentation"]) documentation = item["xs:annotation"][0]["xs:documentation"][0];
+                    var complexTypeObj = { name: item.$.name, documentation: documentation, elements: [] };
 
                     var sequences = [];
                     var extensionBase = null;
-                    if (
-                        item["xs:complexContent"] &&
-                        item["xs:complexContent"][0]["xs:extension"] &&
-                        item["xs:complexContent"][0]["xs:extension"][0]["xs:sequence"]
-                    ) {
+                    if (item["xs:complexContent"] && item["xs:complexContent"][0]["xs:extension"] && item["xs:complexContent"][0]["xs:extension"][0]["xs:sequence"]) {
                         extensionBase = item["xs:complexContent"][0]["xs:extension"][0].$["base"];
                         sequences = item["xs:complexContent"][0]["xs:extension"][0]["xs:sequence"];
-                    } else if (
-                        item["xs:complexContent"] &&
-                        item["xs:complexContent"][0]["eml:extension"] &&
-                        item["xs:complexContent"][0]["eml:extension"][0]["xs:sequence"]
-                    ) {
+                    } else if (item["xs:complexContent"] && item["xs:complexContent"][0]["eml:extension"] && item["xs:complexContent"][0]["eml:extension"][0]["xs:sequence"]) {
                         extensionBase = item["xs:complexContent"][0]["eml:extension"][0].$["base"];
                         sequences = item["xs:complexContent"][0]["eml:extension"][0]["xs:sequence"];
-                    } else if (
-                        item["xs:complexContent"] &&
-                        item["xs:complexContent"][0] &&
-                        item["xs:complexContent"][0]["xs:sequence"]
-                    ) {
+                    } else if (item["xs:complexContent"] && item["xs:complexContent"][0] && item["xs:complexContent"][0]["xs:sequence"]) {
                         sequences = item["xs:complexContent"][0]["xs:sequence"];
                     }
 
@@ -110,12 +80,7 @@ var parse = function (sourcePath, targetPath, callback) {
                             } else {
                                 elements.forEach(function (element) {
                                     var documentation = "";
-                                    if (
-                                        element["xs:annotation"] &&
-                                        element["xs:annotation"][0]["xs:documentation"]
-                                    )
-                                        documentation =
-                                            element["xs:annotation"][0]["xs:documentation"][0];
+                                    if (element["xs:annotation"] && element["xs:annotation"][0]["xs:documentation"]) documentation = element["xs:annotation"][0]["xs:documentation"][0];
                                     var elementObj = element.$;
                                     elementObj.documentation = documentation;
                                     elementObj.extensionBase = extensionBase;
@@ -390,8 +355,7 @@ var buildOwl = function (jsonPath, graphUri) {
                             var value = triple.object;
                             if (value.indexOf("_:b") == 0);
                             else if (value.indexOf("http") == 0) value = "<" + value + ">";
-                            var tripleStr =
-                                subject + " <" + triple.predicate + "> " + value + ".\n";
+                            var tripleStr = subject + " <" + triple.predicate + "> " + value + ".\n";
                             var tripleHash = util.hashCode(tripleStr);
                             if (uniqueTriples[tripleHash]) return;
                             else {
@@ -400,9 +364,7 @@ var buildOwl = function (jsonPath, graphUri) {
                             }
                         });
                         var queryGraph =
-                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                            "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
                         queryGraph += "with <" + graphUri + ">" + "insert {";
                         queryGraph += triplesStr;
 
@@ -435,8 +397,7 @@ var buildOwl = function (jsonPath, graphUri) {
     );
 };
 
-var sourcePath =
-    "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
+var sourcePath = "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
 var graphUri = "http://souslesens.org/pdms/ontology/";
 
 var jsonPath = sourcePath + ".json";

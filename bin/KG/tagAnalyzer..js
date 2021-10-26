@@ -31,8 +31,7 @@ var TagAnalyzer = {
                         if (err) return callback(err);
                         result.forEach(function (item) {
                             systemCodesMap[item.system_code_501] = item;
-                            subSystemCodesMap[item.system_code_501 + item.subSystem_code_501] =
-                                item;
+                            subSystemCodesMap[item.system_code_501 + item.subSystem_code_501] = item;
                         });
 
                         return callbackSeries();
@@ -80,8 +79,7 @@ var TagAnalyzer = {
                 function (callbackSeries) {
                     var patterns = {};
                     var output = [];
-                    var regexEquipment_501 =
-                        /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g;
+                    var regexEquipment_501 = /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g;
 
                     tags.forEach(function (tag) {
                         var obj = TagAnalyzer.parseTag(tag.number, regexEquipment_501);
@@ -198,55 +196,19 @@ return callbackSeries()
 
     clovFormats: [
         ["TOTAL-T0000000001", "XX-NN-AA(A)(A)-NNNN(A)", "Main equipments tag structure"],
-        [
-            "TOTAL-T0000000002",
-            "XX-NN-AAAA-NNNN(A)",
-            "Piping equipments (SP items) tagging specific requirements",
-        ],
-        [
-            "TOTAL-T0000000003",
-            "XX-NN-AA(A)(A)-NNNN(A)-A(A)(N)(N)(N)(N)(N)",
-            "Switchgears and MCC compartments",
-        ],
-        [
-            "TOTAL-T0000000004",
-            "XX-NN-AA(A)(A)-NNNN(A)",
-            "Electrical equipment related to other main equipment",
-        ],
-        [
-            "TOTAL-T0000000005",
-            "XX-NN-XXXX-NNNN(A)",
-            "Telecom equipments tagging specific requirements",
-        ],
-        [
-            "TOTAL-T0000000006",
-            "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)",
-            "Field instruments & instrumented functions tag structure",
-        ],
+        ["TOTAL-T0000000002", "XX-NN-AAAA-NNNN(A)", "Piping equipments (SP items) tagging specific requirements"],
+        ["TOTAL-T0000000003", "XX-NN-AA(A)(A)-NNNN(A)-A(A)(N)(N)(N)(N)(N)", "Switchgears and MCC compartments"],
+        ["TOTAL-T0000000004", "XX-NN-AA(A)(A)-NNNN(A)", "Electrical equipment related to other main equipment"],
+        ["TOTAL-T0000000005", "XX-NN-XXXX-NNNN(A)", "Telecom equipments tagging specific requirements"],
+        ["TOTAL-T0000000006", "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)", "Field instruments & instrumented functions tag structure"],
         ["TOTAL-T0000000007", "XX-NN-AA(A)(A)-NNNN(A)-AX(X)(X)(X)", "Electrical consumer controls"],
-        [
-            "TOTAL-T0000000008",
-            "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA",
-            "Hardwired links between ICSS sub-systems",
-        ],
-        [
-            "TOTAL-T0000000009",
-            "XX-NN-N(N)(N)(N)N-AA(A)-NNN-ANN(A)(X)-(A)(A)",
-            "Piping tag structure",
-        ],
+        ["TOTAL-T0000000008", "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA", "Hardwired links between ICSS sub-systems"],
+        ["TOTAL-T0000000009", "XX-NN-N(N)(N)(N)N-AA(A)-NNN-ANN(A)(X)-(A)(A)", "Piping tag structure"],
         ["TOTAL-T0000000010", "XX-NN-N(N)(N)(N)N-AA(A)-NNN-AANN", "Piping supports"],
         ["TOTAL-T0000000011", "XX-NN-AANN-AAA-NNNN", "Ducting tag structure"],
-        [
-            "TOTAL-T0000000012",
-            "XX(X)(X)-NN-N(N)(N)(N)NAA(A)-(N)(N)NN(A)-(A)(A)",
-            "Pipeline tag structure",
-        ],
+        ["TOTAL-T0000000012", "XX(X)(X)-NN-N(N)(N)(N)NAA(A)-(N)(N)NN(A)-(A)(A)", "Pipeline tag structure"],
         ["TOTAL-T0000000013", "XX-NN-AA-NNNN(A)", "Manual valves"],
-        [
-            "TOTAL-T0000000014",
-            "XX-NN-AA(A)(A)-NNNN(A)-AA(X)(X)(X)",
-            "Electrical & instrumentation cables tag structure",
-        ],
+        ["TOTAL-T0000000014", "XX-NN-AA(A)(A)-NNNN(A)-AA(X)(X)(X)", "Electrical & instrumentation cables tag structure"],
         ["TOTAL-T0000000015", "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA(X)(X)(X)", "Tubing"],
     ],
 
@@ -259,8 +221,7 @@ return callbackSeries()
                 value: item[1],
             });
         });
-        var regexEquipment_501 =
-            /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g;
+        var regexEquipment_501 = /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g;
         var x = formats;
         var formatRegexmap = {};
         formats.forEach(function (item) {
@@ -286,10 +247,7 @@ return callbackSeries()
 
                     if (i == 0) {
                         content.push({ letter: letter, optional: isOptional, count: 1 });
-                    } else if (
-                        letter != str.charAt(i - 1) ||
-                        content[content.length - 1].optional != isOptional
-                    ) {
+                    } else if (letter != str.charAt(i - 1) || content[content.length - 1].optional != isOptional) {
                         content.push({ letter: letter, optional: isOptional, count: 1 });
                     } else {
                         content[content.length - 1].count += 1;
@@ -334,65 +292,57 @@ return callbackSeries()
         501: /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
     },
     ClovRegexpsXX: {
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})":
-            {
-                name: "Electrical equipment related to other main equipment",
-                id: "TOTAL-T0000000004",
-                value: "XX-NN-AA(A)(A)-NNNN(A)",
-            },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})": {
+            name: "Electrical equipment related to other main equipment",
+            id: "TOTAL-T0000000004",
+            value: "XX-NN-AA(A)(A)-NNNN(A)",
+        },
         "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{4})-(?<group3>\\d{4}\\w{0,1})": {
             name: "Piping equipments (SP items) tagging specific requirements",
             id: "TOTAL-T0000000002",
             value: "XX-NN-AAAA-NNNN(A)",
         },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{1}\\w{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})":
-            {
-                name: "Switchgears and MCC compartments",
-                id: "TOTAL-T0000000003",
-                value: "XX-NN-AA(A)(A)-NNNN(A)-A(A)(N)(N)(N)(N)(N)",
-            },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>[\\w\\d]{4})-(?<group3>\\d{4}\\w{0,1})":
-            {
-                name: "Telecom equipments tagging specific requirements",
-                id: "TOTAL-T0000000005",
-                value: "XX-NN-XXXX-NNNN(A)",
-            },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})":
-            {
-                name: "Field instruments & instrumented functions tag structure",
-                id: "TOTAL-T0000000006",
-                value: "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)",
-            },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{1}[\\w\\d]{1}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})":
-            {
-                name: "Electrical consumer controls",
-                id: "TOTAL-T0000000007",
-                value: "XX-NN-AA(A)(A)-NNNN(A)-AX(X)(X)(X)",
-            },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2})":
-            {
-                name: "Hardwired links between ICSS sub-systems",
-                id: "TOTAL-T0000000008",
-                value: "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA",
-            },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{1}\\w{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})": {
+            name: "Switchgears and MCC compartments",
+            id: "TOTAL-T0000000003",
+            value: "XX-NN-AA(A)(A)-NNNN(A)-A(A)(N)(N)(N)(N)(N)",
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>[\\w\\d]{4})-(?<group3>\\d{4}\\w{0,1})": {
+            name: "Telecom equipments tagging specific requirements",
+            id: "TOTAL-T0000000005",
+            value: "XX-NN-XXXX-NNNN(A)",
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})": {
+            name: "Field instruments & instrumented functions tag structure",
+            id: "TOTAL-T0000000006",
+            value: "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)",
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{1}[\\w\\d]{1}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})": {
+            name: "Electrical consumer controls",
+            id: "TOTAL-T0000000007",
+            value: "XX-NN-AA(A)(A)-NNNN(A)-AX(X)(X)(X)",
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2})": {
+            name: "Hardwired links between ICSS sub-systems",
+            id: "TOTAL-T0000000008",
+            value: "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA",
+        },
         "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})-(?<group3>\\w{2}\\w{0,1})-(?<group4>\\d{3})-(?<group5>\\w{1}\\d{2}\\w{0,1}[\\w\\d]{0,1})-(?<group6>\\w{0,1}\\w{0,1})":
             {
                 name: "Piping tag structure",
                 id: "TOTAL-T0000000009",
                 value: "XX-NN-N(N)(N)(N)N-AA(A)-NNN-ANN(A)(X)-(A)(A)",
             },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})-(?<group3>\\w{2}\\w{0,1})-(?<group4>\\d{3})-(?<group5>\\w{2}\\d{2})":
-            {
-                name: "Piping supports",
-                id: "TOTAL-T0000000010",
-                value: "XX-NN-N(N)(N)(N)N-AA(A)-NNN-AANN",
-            },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\d{2})-(?<group3>\\w{3})-(?<group4>\\d{4})":
-            {
-                name: "Ducting tag structure",
-                id: "TOTAL-T0000000011",
-                value: "XX-NN-AANN-AAA-NNNN",
-            },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1})-(?<group3>\\w{2}\\w{0,1})-(?<group4>\\d{3})-(?<group5>\\w{2}\\d{2})": {
+            name: "Piping supports",
+            id: "TOTAL-T0000000010",
+            value: "XX-NN-N(N)(N)(N)N-AA(A)-NNN-AANN",
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\d{2})-(?<group3>\\w{3})-(?<group4>\\d{4})": {
+            name: "Ducting tag structure",
+            id: "TOTAL-T0000000011",
+            value: "XX-NN-AANN-AAA-NNNN",
+        },
         "(?<group0>[\\w\\d]{2}[\\w\\d]{0,1}[\\w\\d]{0,1})-(?<group1>\\d{2})-(?<group2>\\d{1}\\d{0,1}\\d{0,1}\\d{0,1}\\d{0,1}\\w{0,2}\\w{0,1})-(?<group3>\\d{0,1}\\d{0,1}\\d{0,2}\\w{0,1})-(?<group4>\\w{0,1}\\w{0,1})":
             {
                 name: "Pipeline tag structure",
@@ -404,18 +354,16 @@ return callbackSeries()
             id: "TOTAL-T0000000013",
             value: "XX-NN-AA-NNNN(A)",
         },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})":
-            {
-                name: "Electrical & instrumentation cables tag structure",
-                id: "TOTAL-T0000000014",
-                value: "XX-NN-AA(A)(A)-NNNN(A)-AA(X)(X)(X)",
-            },
-        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})":
-            {
-                name: "Tubing",
-                id: "TOTAL-T0000000015",
-                value: "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA(X)(X)(X)",
-            },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{2}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})": {
+            name: "Electrical & instrumentation cables tag structure",
+            id: "TOTAL-T0000000014",
+            value: "XX-NN-AA(A)(A)-NNNN(A)-AA(X)(X)(X)",
+        },
+        "(?<group0>[\\w\\d]{2})-(?<group1>\\d{2})-(?<group2>\\w{1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1}\\w{0,1})-(?<group3>\\d{4}\\w{0,1})-(?<group4>\\w{2}[\\w\\d]{0,1}[\\w\\d]{0,1}[\\w\\d]{0,1})": {
+            name: "Tubing",
+            id: "TOTAL-T0000000015",
+            value: "XX-NN-A(A)(A)(A)(A)(A)-NNNN(A)-AA(X)(X)(X)",
+        },
     },
 
     parseClovTags: function () {

@@ -303,12 +303,7 @@ var util = {
                         continue;
                     }
                     if (options.maxDocSize && stats.size > maxDocSize) {
-                        message +=
-                            "!!!!!! " +
-                            fileName +
-                            " file  too big " +
-                            Math.round(stats.size / 1000) +
-                            " Ko , not indexed ";
+                        message += "!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ";
                         continue;
                     }
                     if (!dirFilesMap[parent]) dirFilesMap[parent] = [];

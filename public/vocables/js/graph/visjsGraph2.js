@@ -155,6 +155,12 @@ var visjsGraph = (function () {
             var point = params.pointer.DOM;
             self.context.currentNode = node;
             var options = {}
+          /*  var options = {
+
+                ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
+                altKey: (params.event.srcEvent.altKey ? 1 : 0),
+                shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
+            }*/
             if (_options.onHoverNodeFn)
                 _options.onHoverNodeFn(node, point, options)
 
@@ -181,6 +187,7 @@ var visjsGraph = (function () {
         })
 
             .on("dragStart", function (params) {
+                return;
                 var nodeId = params.nodes[0]
                 if (!nodeId)
                     return;

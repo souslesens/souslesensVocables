@@ -81,16 +81,7 @@ var authentication = {
                     var sql;
                     if (user.id)
                         //modification
-                        sql =
-                            "update  utilisateur set identifiant='" +
-                            user.identifiant +
-                            "',nomComplet='" +
-                            user.nomComplet +
-                            "',groupes='" +
-                            user.groupes +
-                            "' where id=" +
-                            user.id +
-                            "";
+                        sql = "update  utilisateur set identifiant='" + user.identifiant + "',nomComplet='" + user.nomComplet + "',groupes='" + user.groupes + "' where id=" + user.id + "";
                     else
                         sql =
                             "insert into utilisateur (identifiant,nomComplet,motDePasse,groupes) values ('" +
@@ -125,17 +116,10 @@ var authentication = {
                 } else logger.info("! AUTHENTICATION " + login + " changing password");
 
             if (!newPassword.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)) {
-                callback(
-                    "invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number"
-                );
+                callback("invalid  login : Minimum eight characters, at least one uppercase letter, one lowercase letter and one number");
             }
             bcrypt.hash(newPassword, saltRounds, function (err, hash) {
-                var sql =
-                    "update  utilisateur  set motDePasse='" +
-                    hash +
-                    "' where identifiant='" +
-                    login +
-                    "'";
+                var sql = "update  utilisateur  set motDePasse='" + hash + "' where identifiant='" + login + "'";
                 mySqlProxy.exec(null, sql, function (err, result) {
                     if (err) return callback(err);
                     return callback(null, "done");

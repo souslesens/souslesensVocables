@@ -188,7 +188,7 @@ var util = {
         str = str.replace(/\r/gm, "");
         str = str.replace(/\t/gm, "\\\\t");
         str = str.replace(/\\xa0/gm, " ");
-        str = str.replace(/'/gm, "\\'");
+        str = str.replace(/'/gm, "");
         if (forUri) str = str.replace(/ /gm, "_");
 
         return str;
@@ -303,12 +303,7 @@ var util = {
                         continue;
                     }
                     if (options.maxDocSize && stats.size > maxDocSize) {
-                        message +=
-                            "!!!!!! " +
-                            fileName +
-                            " file  too big " +
-                            Math.round(stats.size / 1000) +
-                            " Ko , not indexed ";
+                        message += "!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ";
                         continue;
                     }
                     if (!dirFilesMap[parent]) dirFilesMap[parent] = [];

@@ -54,8 +54,7 @@ var ontologiesMapper = {
                         result.results.bindings.forEach(function (item) {
                             var id = item.concept.value;
                             var label = item.label.value.toLowerCase(); //id.substring(id.indexOf("#") + 1)
-                            if (sourceConfig.labelProcessor)
-                                label = sourceConfig.labelProcessor(label);
+                            if (sourceConfig.labelProcessor) label = sourceConfig.labelProcessor(label);
                             sourceClassesLabels[label] = {
                                 label: label,
                                 sourceId: id,
@@ -128,8 +127,7 @@ var ontologiesMapper = {
                                     });
 
                                     var fromStr = "";
-                                    if (targetConfig.graphUri)
-                                        fromStr = " from <" + targetConfig.graphUri + "> ";
+                                    if (targetConfig.graphUri) fromStr = " from <" + targetConfig.graphUri + "> ";
                                     var query =
                                         "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct *  " +
                                         fromStr +
@@ -142,9 +140,7 @@ var ontologiesMapper = {
                                         bindings.forEach(function (item) {
                                             var x = item;
                                             var id = item.concept.value;
-                                            var label = ontologiesMapper.formatLabel(
-                                                item.conceptLabel.value
-                                            );
+                                            var label = ontologiesMapper.formatLabel(item.conceptLabel.value);
                                             for (var id2 in sourceClassesIds)
                                                 if (sourceClassesIds[id2].label == label)
                                                     sourceClassesIds[id2].targets[source].push({
@@ -155,49 +151,30 @@ var ontologiesMapper = {
                                         });
                                     }
 
-                                    if (
-                                        !targetConfig.sparql_server.method ||
-                                        targetConfig.sparql_server.method == "POST"
-                                    ) {
+                                    if (!targetConfig.sparql_server.method || targetConfig.sparql_server.method == "POST") {
                                         var params = { query: query };
                                         var headers = {
                                             Accept: "application/sparql-results+json",
                                             "Content-Type": "application/x-www-form-urlencoded",
                                         };
 
-                                        httpProxy.post(
-                                            targetConfig.sparql_server.url +
-                                                "?output=json&format=json&query=",
-                                            headers,
-                                            params,
-                                            function (err, data) {
-                                                if (err) return callbackEachSlice(err);
-                                                if (typeof data === "string")
-                                                    data = JSON.parse(data.trim());
-                                                else if (
-                                                    data.result &&
-                                                    typeof data.result != "object"
-                                                )
-                                                    //cas GEMET
-                                                    data = JSON.parse(data.result.trim());
+                                        httpProxy.post(targetConfig.sparql_server.url + "?output=json&format=json&query=", headers, params, function (err, data) {
+                                            if (err) return callbackEachSlice(err);
+                                            if (typeof data === "string") data = JSON.parse(data.trim());
+                                            else if (data.result && typeof data.result != "object")
+                                                //cas GEMET
+                                                data = JSON.parse(data.result.trim());
 
-                                                setTargetValues(
-                                                    targetConfig.name,
-                                                    data.results.bindings
-                                                );
+                                            setTargetValues(targetConfig.name, data.results.bindings);
 
-                                                callbackEachSlice();
-                                            }
-                                        );
+                                            callbackEachSlice();
+                                        });
                                     } else if (targetConfig.sparql_server.method == "GET") {
                                         var query2 = encodeURIComponent(query);
                                         query2 = query2.replace(/%2B/g, "+").trim();
 
                                         var body = {
-                                            url:
-                                                targetConfig.sparql_server.url +
-                                                "?output=json&format=json&query=" +
-                                                query2,
+                                            url: targetConfig.sparql_server.url + "?output=json&format=json&query=" + query2,
                                             params: { query: query },
                                             headers: {
                                                 Accept: "application/sparql-results+json",
@@ -206,15 +183,11 @@ var ontologiesMapper = {
                                         };
                                         httpProxy.get(body.url, body, function (err, data) {
                                             if (err) return callbackEachSlice(err);
-                                            if (typeof data === "string")
-                                                data = JSON.parse(data.trim());
+                                            if (typeof data === "string") data = JSON.parse(data.trim());
                                             else if (data.result && typeof data.result != "object")
                                                 //cas GEMET
                                                 data = JSON.parse(data.result.trim());
-                                            setTargetValues(
-                                                targetConfig.name,
-                                                data.results.bindings
-                                            );
+                                            setTargetValues(targetConfig.name, data.results.bindings);
 
                                             callbackEachSlice();
                                         });
@@ -289,13 +262,7 @@ var ontologiesMapper = {
             "TOTAL-SA0000000046": "MEL",
             "TOTAL-SA0000000047": "MEL",
         };
-        var mappingSourceFields = [
-            "SourceCode",
-            "SourceDescription",
-            "MappingSourceOriginID",
-            "ChangeRequestNumber",
-            "ItemStatus",
-        ];
+        var mappingSourceFields = ["SourceCode", "SourceDescription", "MappingSourceOriginID", "ChangeRequestNumber", "ItemStatus"];
 
         var matchingFieldsMap = {
             tblPhysicalClass: "PhysicalClassID",
@@ -344,14 +311,7 @@ var ontologiesMapper = {
         sources.forEach(function (source) {
             orphans += "\t" + source.name;
         });
-        orphans +=
-            "entityId" +
-            "\tSourceCode" +
-            "\tSourceDescription" +
-            "\tMappingSourceOriginID" +
-            "\tChangeRequestNumber" +
-            "\tItemStatus" +
-            "\tMappingSourceOriginType\t";
+        orphans += "entityId" + "\tSourceCode" + "\tSourceDescription" + "\tMappingSourceOriginID" + "\tChangeRequestNumber" + "\tItemStatus" + "\tMappingSourceOriginType\t";
 
         orphans += "\n";
         var tableType = "http://data.total.com/resource/quantum/table/" + table + "";
@@ -359,13 +319,7 @@ var ontologiesMapper = {
             var mappingLabelItem = mappingLabelMap[id];
             var mappingSourceItem = mappingSourceNormalMap[id];
 
-            orphans +=
-                table +
-                "\t" +
-                mappingLabelItem.sourceId +
-                "\t" +
-                mappingLabelItem.sourceLabel +
-                "\t";
+            orphans += table + "\t" + mappingLabelItem.sourceId + "\t" + mappingLabelItem.sourceLabel + "\t";
             if (mappingLabelItem.parent)
                 triplesSubClassOf +=
                     "<http://data.total.com/resource/quantum/" +
@@ -373,26 +327,10 @@ var ontologiesMapper = {
                     "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://data.total.com/resource/quantum/" +
                     mappingLabelItem.parent +
                     ">.\n";
-            else
-                triplesSubClassOf +=
-                    "<http://data.total.com/resource/quantum/" +
-                    mappingLabelItem.sourceId +
-                    "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" +
-                    typesMap[table] +
-                    "> .\n";
-            triplesType +=
-                "<http://data.total.com/resource/quantum/" +
-                mappingLabelItem.sourceId +
-                "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" +
-                tableType +
-                "> .\n";
+            else triplesSubClassOf += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n";
+            triplesType += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + tableType + "> .\n";
 
-            triplesLabel +=
-                "<http://data.total.com/resource/quantum/" +
-                mappingLabelItem.sourceId +
-                "> <http://www.w3.org/2000/01/rdf-schema#label> '" +
-                mappingLabelItem.sourceLabel +
-                "'.\n";
+            triplesLabel += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + mappingLabelItem.sourceLabel + "'.\n";
 
             sources.forEach(function (source, indexSource) {
                 var orphansMatch = "";
@@ -452,8 +390,7 @@ var ontologiesMapper = {
 
         var targetConfig = {
             type: "jsonMap",
-            filePath:
-                "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json",
+            filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json",
             table: "tblPhysicalClass",
             labelKey: "Name",
             idKey: "ID",
@@ -585,10 +522,7 @@ var ontologiesMapper = {
                 str += "\n";
             });
 
-            fs.writeFileSync(
-                targetConfig.filePath.replace(".json", "_" + sourceConfig.table + ".txt"),
-                str
-            );
+            fs.writeFileSync(targetConfig.filePath.replace(".json", "_" + sourceConfig.table + ".txt"), str);
         }
     },
 
@@ -612,24 +546,10 @@ var ontologiesMapper = {
                  'FunctionalClassToDisciplineDocumentTypeID',
                  'PhysicalClassToDisciplineDocumentTypeID',*/
         ];
-        var mappedFields = [
-            "ID",
-            "SourceCode",
-            "SourceDescription",
-            "MappingSourceOriginID",
-            "ChangeRequestNumber",
-            "ItemStatus",
-        ];
+        var mappedFields = ["ID", "SourceCode", "SourceDescription", "MappingSourceOriginID", "ChangeRequestNumber", "ItemStatus"];
 
-        var multipleFields = [
-            "PhysicalClassID",
-            "FunctionalClassID",
-            "AttributeID",
-            "AttributePickListValueID",
-            "PickListValueGroupingID",
-        ];
-        var filePath =
-            "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json";
+        var multipleFields = ["PhysicalClassID", "FunctionalClassID", "AttributeID", "AttributePickListValueID", "PickListValueGroupingID"];
+        var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json";
         var data = JSON.parse(fs.readFileSync(filePath));
 
         var data2 = [];
@@ -654,10 +574,7 @@ var ontologiesMapper = {
                 }
             });
         });
-        fs.writeFileSync(
-            filePath.replace(".json", "._normal.json"),
-            JSON.stringify(data2, null, 2)
-        );
+        fs.writeFileSync(filePath.replace(".json", "._normal.json"), JSON.stringify(data2, null, 2));
     },
 
     getQuantumAttributesSuperclassesTriples: function () {
@@ -713,30 +630,17 @@ var ontologiesMapper = {
             var id = item.ID;
             var dimension = item.UnitOfMeasureDimensionID;
             if (dimension && dimensionsMap[dimension]) {
-                triples +=
-                    "<http://data.total.com/resource/quantum/" +
-                    id +
-                    "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
-                    "<http://w3id.org/readi/rdl/" +
-                    dimensionsMap[dimension] +
-                    ">.\n";
+                triples += "<http://data.total.com/resource/quantum/" + id + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + "<http://w3id.org/readi/rdl/" + dimensionsMap[dimension] + ">.\n";
             }
         });
 
         for (var key in dimensionsMap) {
-            triples +=
-                "<http://w3id.org/readi/rdl/" +
-                dimensionsMap[key] +
-                "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
-                " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n";
+            triples += "<http://w3id.org/readi/rdl/" + dimensionsMap[key] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n";
         }
 
         //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
 
-        fs.writeFileSync(
-            "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\attributesSubClassOf.nt",
-            triples
-        );
+        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\attributesSubClassOf.nt", triples);
     },
     getQuantumPickListSuperclassesTriples: function () {
         var dimensionsMap = {
@@ -949,12 +853,8 @@ var ontologiesMapper = {
             var id = item.ID;
             var pickListGroup = item.PickListValueGroupingID;
             if (pickListGroup && pickListMap[pickListGroup]) {
-                triples +=
-                    "<http://data.total.com/resource/quantum/" +
-                    id +
-                    "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
-                if (pickListMap[pickListGroup] == "LOV")
-                    triples += "<http://data.total.com/resource/quantum/pickList#LOV>.\n";
+                triples += "<http://data.total.com/resource/quantum/" + id + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
+                if (pickListMap[pickListGroup] == "LOV") triples += "<http://data.total.com/resource/quantum/pickList#LOV>.\n";
                 else triples += "<http://w3id.org/readi/rdl/" + pickListMap[pickListGroup] + ">.\n";
             }
         });
@@ -964,21 +864,15 @@ var ontologiesMapper = {
             if (!uniques[pickListMap[key]]) {
                 uniques[pickListMap[key]] = 1;
 
-                if (pickListMap[key] == "LOV")
-                    triples += "<http://data.total.com/resource/quantum/pickList#LOV>";
+                if (pickListMap[key] == "LOV") triples += "<http://data.total.com/resource/quantum/pickList#LOV>";
                 else triples += "<http://w3id.org/readi/rdl/" + pickListMap[key] + ">";
-                triples +=
-                    " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
-                    " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n";
+                triples += " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n";
             }
         }
 
         //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
 
-        fs.writeFileSync(
-            "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\pickListSubClassOf.nt",
-            triples
-        );
+        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\pickListSubClassOf.nt", triples);
     },
 
     getQuantumClassToAttributeTriples: function () {
@@ -993,22 +887,14 @@ var ontologiesMapper = {
         if (!tableData) return callbackSeries("no key " + sourceConfig.table);
         var triples = "";
 
-        var objectPropertiesArray = JSON.parse(
-            fs.readFileSync(
-                "D:\\NLP\\ontologies\\readi\\PropertiesAndRestrictions._objectProperties.json"
-            )
-        );
+        var objectPropertiesArray = JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\readi\\PropertiesAndRestrictions._objectProperties.json"));
         var rangeMap = {};
         objectPropertiesArray.forEach(function (item) {
             if (!item.range) return;
             rangeMap[item.range] = item;
         });
 
-        var attrsSourceMappingsArray = JSON.parse(
-            fs.readFileSync(
-                "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.json"
-            )
-        );
+        var attrsSourceMappingsArray = JSON.parse(fs.readFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.json"));
         var mappingMap = {};
         attrsSourceMappingsArray.forEach(function (item) {
             if (!item.QuantumId) return;
@@ -1034,47 +920,21 @@ var ontologiesMapper = {
                     if (!propIds[predicate]) {
                         propIds[predicate] = 1;
                         propLabel = rangeMap[readiId].propLabel;
-                        propLabelTriples +=
-                            "<" +
-                            predicate +
-                            "> <http://www.w3.org/2000/01/rdf-schema#label> '" +
-                            propLabel +
-                            "'.\n";
+                        propLabelTriples += "<" + predicate + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + propLabel + "'.\n";
                     }
                 }
             }
 
             if (predicate && objIdF && attrId) {
-                triples +=
-                    "<http://data.total.com/resource/quantum/" +
-                    objIdF +
-                    "> <" +
-                    predicate +
-                    "> " +
-                    "<http://data.total.com/resource/quantum/" +
-                    attrId +
-                    ">.\n";
+                triples += "<http://data.total.com/resource/quantum/" + objIdF + "> <" + predicate + "> " + "<http://data.total.com/resource/quantum/" + attrId + ">.\n";
             }
             if (predicate && objIdP && attrId) {
-                triples +=
-                    "<http://data.total.com/resource/quantum/" +
-                    objIdP +
-                    "> <" +
-                    predicate +
-                    "> " +
-                    "<http://data.total.com/resource/quantum/" +
-                    attrId +
-                    ">.\n";
+                triples += "<http://data.total.com/resource/quantum/" + objIdP + "> <" + predicate + "> " + "<http://data.total.com/resource/quantum/" + attrId + ">.\n";
             }
         });
         triples += propLabelTriples;
 
-        fs.writeFileSync(
-            "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\" +
-                sourceConfig.table +
-                "2Attribute.nt",
-            triples
-        );
+        fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\" + sourceConfig.table + "2Attribute.nt", triples);
     },
 
     // donne aux attributs de Quantum les attributs parents d'une classe de la sources
@@ -1179,10 +1039,7 @@ var ontologiesMapper = {
                                 query2 = query2.replace(/%2B/g, "+").trim();
 
                                 var body = {
-                                    url:
-                                        targetConfig.sparql_server.url +
-                                        "?output=json&format=json&query=" +
-                                        query2,
+                                    url: targetConfig.sparql_server.url + "?output=json&format=json&query=" + query2,
                                     params: { query: query },
                                     headers: {
                                         Accept: "application/sparql-results+json",
@@ -1209,16 +1066,11 @@ var ontologiesMapper = {
                                         "Content-Type": "application/x-www-form-urlencoded",
                                     },
                                 };
-                                httpProxy.post(
-                                    body.url,
-                                    body.headers,
-                                    body.params,
-                                    function (err, result) {
-                                        if (err) return console.log(err);
-                                        processResult(result.results.bindings);
-                                        callbackEach();
-                                    }
-                                );
+                                httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                                    if (err) return console.log(err);
+                                    processResult(result.results.bindings);
+                                    callbackEach();
+                                });
                             }
                         },
                         function (err) {
@@ -1237,9 +1089,7 @@ var ontologiesMapper = {
     getTurboGenTriples: function (filePath) {
         var data = JSON.parse(fs.readFileSync(filePath));
         var existingNodes = {};
-        var triples =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
         var tripleTags = "";
         data.forEach(function (item) {
             for (var i = 1; i < 4; i++) {
@@ -1249,44 +1099,22 @@ var ontologiesMapper = {
                     console.log(id);
                     existingNodes[id] = 1;
 
-                    var idUri =
-                        "<http://data.total.com/resource/one-model/assets/turbognerator/" +
-                        ontologiesMapper.formatLabel(id, true) +
-                        ">";
+                    var idUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(id, true) + ">";
                     triples += idUri + " rdfs:label '" + ontologiesMapper.formatLabel(id) + "'.\n";
-                    triples +=
-                        idUri +
-                        " rdf:type <http://standards.iso.org/iso/15926/part14/FunctionalObject>.\n";
+                    triples += idUri + " rdf:type <http://standards.iso.org/iso/15926/part14/FunctionalObject>.\n";
                     if (i == 1) {
-                        triples +=
-                            idUri +
-                            " rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>.\n";
+                        triples += idUri + " rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>.\n";
                     } else {
-                        var parentUri =
-                            "<http://data.total.com/resource/one-model/assets/turbognerator/" +
-                            ontologiesMapper.formatLabel(item["FunctionalClass" + (i - 1)], true) +
-                            ">";
-                        triples +=
-                            parentUri +
-                            " <http://standards.iso.org/iso/15926/part14/hasArrangedPart> " +
-                            idUri +
-                            ".\n";
+                        var parentUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(item["FunctionalClass" + (i - 1)], true) + ">";
+                        triples += parentUri + " <http://standards.iso.org/iso/15926/part14/hasArrangedPart> " + idUri + ".\n";
                         triples += idUri + " rdfs:subClassOf " + parentUri + ".\n";
                     }
 
                     var tag = item["TAG" + i];
                     if (tag) {
-                        var tagUri =
-                            "<http://data.total.com/resource/one-model/assets/turbognerator/" +
-                            ontologiesMapper.formatLabel(tag, true) +
-                            ">";
-                        tripleTags +=
-                            tagUri + " rdf:type <http://data.15926.org/rdl/RDS2222036>.\n";
-                        tripleTags +=
-                            idUri +
-                            " <http://standards.iso.org/iso/15926/part14/installedAs> " +
-                            tagUri +
-                            ".\n";
+                        var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
+                        tripleTags += tagUri + " rdf:type <http://data.15926.org/rdl/RDS2222036>.\n";
+                        tripleTags += idUri + " <http://standards.iso.org/iso/15926/part14/installedAs> " + tagUri + ".\n";
                     }
                 }
             }
@@ -1304,9 +1132,7 @@ var ontologiesMapper = {
     getTurboGenAttrsTriples: function (filePath) {
         var data = JSON.parse(fs.readFileSync(filePath));
         var existingNodes = {};
-        var triples =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
         var tripleTags = "";
         var str = "";
         data.forEach(function (item) {
@@ -1318,12 +1144,7 @@ var ontologiesMapper = {
                 existingNodes[tagRef] = 1;
                 //    console.log(id+","+item["AttributeValue"])
 
-                str +=
-                    "<http://data.total.com/resource/one-model/assets/turbognerator/" +
-                    tagRef +
-                    "> <http://data.total.com/resource/one-model/assets#hasTagID>   '" +
-                    tagId +
-                    "'.\n";
+                str += "<http://data.total.com/resource/one-model/assets/turbognerator/" + tagRef + "> <http://data.total.com/resource/one-model/assets#hasTagID>   '" + tagId + "'.\n";
 
                 str +=
                     "<http://data.total.com/resource/one-model/assets/turbognerator/" +
@@ -1340,9 +1161,7 @@ var ontologiesMapper = {
     getTurboGenTagToTagTriples: function (filePath) {
         var data = JSON.parse(fs.readFileSync(filePath));
         var existingNodes = {};
-        var triples =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
+        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
         var tripleTags = "";
         var str = "";
         data.forEach(function (item) {
@@ -1354,12 +1173,7 @@ var ontologiesMapper = {
                 existingNodes[tagRef] = 1;
                 //    console.log(id+","+item["AttributeValue"])
 
-                str +=
-                    "<http://data.total.com/resource/one-model/assets/turbognerator/" +
-                    tagRef +
-                    "> <http://data.total.com/resource/one-model/assets#hasTagID>   '" +
-                    tagId +
-                    "'.\n";
+                str += "<http://data.total.com/resource/one-model/assets/turbognerator/" + tagRef + "> <http://data.total.com/resource/one-model/assets#hasTagID>   '" + tagId + "'.\n";
 
                 str +=
                     "<http://data.total.com/resource/one-model/assets/turbognerator/" +
@@ -1375,9 +1189,7 @@ var ontologiesMapper = {
 
     sources: {
         QUANTUM: {
-            graphUri: [
-                "http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/",
-            ],
+            graphUri: ["http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"],
             sparql_server: {
                 url: "http://51.178.139.80:8890/sparql",
             },
@@ -1418,8 +1230,7 @@ var ontologiesMapper = {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter:
-                " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1444,8 +1255,7 @@ var ontologiesMapper = {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter:
-                " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1469,8 +1279,7 @@ var ontologiesMapper = {
             sparql_server: {
                 url: "http://51.178.139.80:8890/sparql",
             },
-            topClassFilter:
-                "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
+            topClassFilter: "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
             controller: "Sparql_OWL",
             schemaType: "OWL",
             schema: null,
@@ -1521,8 +1330,7 @@ if (false) {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter:
-                " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1573,8 +1381,7 @@ if (false) {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter:
-                " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1587,8 +1394,7 @@ if (false) {
             sparql_server: {
                 url: "http://51.178.139.80:8890/sparql",
             },
-            topClassFilter:
-                "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
+            topClassFilter: "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
             controller: "Sparql_OWL",
             schemaType: "OWL",
             schema: null,
@@ -1632,17 +1438,10 @@ if (false) {
 
         // ontologiesMapper.setMappingsSourceAttrs(result.labelsMap, sourceConfig.filePath, sourceConfig.table)
 
-        var mappingSourceArrayPath =
-            "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json";
+        var mappingSourceArrayPath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._tblMappingSource.json";
         var mappingSourceArray = JSON.parse(fs.readFileSync(mappingSourceArrayPath));
 
-        ontologiesMapper.writeMappings(
-            targetConfigs,
-            sourceConfig.table,
-            result,
-            mappingSourceArray,
-            sourceConfig.filePath.replace(".json", "_mappings.json")
-        );
+        ontologiesMapper.writeMappings(targetConfigs, sourceConfig.table, result, mappingSourceArray, sourceConfig.filePath.replace(".json", "_mappings.json"));
     });
 }
 
@@ -1665,48 +1464,23 @@ if (false) {
     var str = "";
     var nodeIds = {};
     data.forEach(function (item) {
-        var objectUri =
-            "<http://standards.iso.org/iso/14224/" + item.Object.replace(/ /g, "_") + ">";
+        var objectUri = "<http://standards.iso.org/iso/14224/" + item.Object.replace(/ /g, "_") + ">";
         if (!nodeIds[item.Object]) {
             nodeIds[item.Object] = 1;
 
-            str +=
-                objectUri +
-                " <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>.\n";
-            str +=
-                objectUri +
-                " <http://www.w3.org/2000/01/rdf-schema#label> '" +
-                item.Object.replace(/_/g, " ") +
-                "'.\n";
+            str += objectUri + " <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>.\n";
+            str += objectUri + " <http://www.w3.org/2000/01/rdf-schema#label> '" + item.Object.replace(/_/g, " ") + "'.\n";
         }
         if (item["Attribute Name"]) {
-            var attrUri =
-                "<http://standards.iso.org/iso/14224/" +
-                item["Attribute Name"].replace(/ /g, "_") +
-                ">";
-            var attrPropUri =
-                "<http://standards.iso.org/iso/14224/Has" +
-                item["Attribute Name"].replace(/ /g, "_") +
-                ">";
+            var attrUri = "<http://standards.iso.org/iso/14224/" + item["Attribute Name"].replace(/ /g, "_") + ">";
+            var attrPropUri = "<http://standards.iso.org/iso/14224/Has" + item["Attribute Name"].replace(/ /g, "_") + ">";
             if (!nodeIds[item["Attribute Name"]]) {
                 nodeIds[item["Attribute Name"]] = 1;
-                str +=
-                    attrPropUri +
-                    " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty>.\n";
-                str +=
-                    attrPropUri +
-                    " <http://www.w3.org/2000/01/rdf-schema#label> 'has" +
-                    item.Definition.replace() +
-                    "'.\n";
-                str +=
-                    attrPropUri +
-                    " <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity>.\n";
+                str += attrPropUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty>.\n";
+                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#label> 'has" + item.Definition.replace() + "'.\n";
+                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity>.\n";
 
-                str +=
-                    attrUri +
-                    " <http://www.w3.org/2000/01/rdf-schema#label> '" +
-                    item.Definition.replace(/_/g, " ") +
-                    "'.\n";
+                str += attrUri + " <http://www.w3.org/2000/01/rdf-schema#label> '" + item.Definition.replace(/_/g, " ") + "'.\n";
             }
             str += objectUri + " " + attrPropUri + " " + attrUri + ".\n";
         }
@@ -1721,8 +1495,7 @@ if (false) {
 
 //getTurboGenTriplesAttrs
 if (false) {
-    var filePath =
-        "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
+    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
     ontologiesMapper.getTurboGenAttrsTriples(filePath);
 }
 
@@ -1763,8 +1536,7 @@ if (true) {
     "RequirementID": "TOTAL-RB0000000028"
     }*/
 
-    var filePath =
-        "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
+    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
     ontologiesMapper.getTurboGenAttrsTriples(filePath);
 }
 

@@ -18,8 +18,7 @@ var parseXlsx = {
                     var sheet_name_list = workbook.SheetNames;
 
                     sheet_name_list.forEach(function (sheetName, sheetIndex) {
-                        if (!options.firstSheetNumber || sheetIndex >= options.firstSheetNumber - 1)
-                            sheets[sheetName] = workbook.Sheets[sheetName];
+                        if (!options.firstSheetNumber || sheetIndex >= options.firstSheetNumber - 1) sheets[sheetName] = workbook.Sheets[sheetName];
                     });
                     callbackSeries();
                 },
@@ -86,10 +85,7 @@ var parseXlsx = {
                         console.log("saving " + filePath.replace(/\.xlsx/i, "json"));
                         var str = JSON.stringify(allData[sheetKey], null, 2);
                         var xx = filePath.replace(/\.xlsx/i, "_") + sheetKey + ".json";
-                        fs.writeFileSync(
-                            filePath.replace(/\.xlsx/i, "_") + sheetKey + ".json",
-                            str
-                        );
+                        fs.writeFileSync(filePath.replace(/\.xlsx/i, "_") + sheetKey + ".json", str);
                         console.log("done");
                     }
                     callbackSeries();
@@ -208,10 +204,7 @@ if (false) {
 
 if (false) {
     var options = { firstSheetNumber: 4, firstLineNumber: 7 };
-    parseXlsx.parse(
-        "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx",
-        options
-    );
+    parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options);
 }
 
 if (false) {
@@ -286,8 +279,7 @@ if (false) {
         ],
     };
     if (false) {
-        var model =
-            "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json";
+        var model = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json";
         var data = JSON.parse(fs.readFileSync(model));
         var obj = {};
         for (var key in groups) {
@@ -305,10 +297,7 @@ if (false) {
             var obj = {};
 
             groups[key].forEach(function (fileName) {
-                var file =
-                    "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._" +
-                    fileName +
-                    ".json";
+                var file = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._" + fileName + ".json";
                 if (!fs.existsSync(file)) {
                     return console.log(file);
                 }
@@ -322,8 +311,7 @@ if (false) {
 }
 
 if (false) {
-    var filePath =
-        "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.xlsx";
+    var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.xlsx";
     var options = { firstSheetNumber: 1, firstLineNumber: 1 };
     parseXlsx.parse(filePath, options);
 }

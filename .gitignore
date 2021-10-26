@@ -109,6 +109,10 @@ public/vocables/images/descriptionXX.png
 
 config
 
+data/**/*.json
+data/**/*.pdf
+data/**/*.zip
+
 #React build output
 mainapp/static/mainapp.js
 mainapp/static/mainapp.js.map

@@ -217,7 +217,7 @@ var Sparql_OWL = (function () {
                 " select distinct *  " + fromStr + "  WHERE {{"
 
 
-            query += "?concept rdf:type owl:Class. "
+            query += "?concept rdf:type ?type. "
             if (words) {
                 query += " ?concept rdfs:label ?conceptLabel."
             } else {
@@ -232,7 +232,7 @@ var Sparql_OWL = (function () {
 
                     query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
                     if (true || options.skipRestrictions) {
-                        query += " ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction) "
+                        query += " OPTIONAL {?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} "
                     }
                     query += " OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 
@@ -561,7 +561,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph,options.withoutImports)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -736,7 +736,7 @@ var Sparql_OWL = (function () {
 
             })
         }
-        self.getDictionary = function (sourceLabel, options, callback) {
+        self.getDictionary = function (sourceLabel, options, processor,callback) {
             var fromStr = Sparql_common.getFromStr(sourceLabel)
             var filterStr = ""
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -745,8 +745,8 @@ var Sparql_OWL = (function () {
                 "SELECT distinct * " + fromStr + " WHERE "
             if (options.selectGraph)
                 query += " graph ?g "
-            query += "{ ?concept rdf:type ?type. "+
-            " OPTIONAL {?concept rdfs:label ?conceptLabel}" +
+            query += "{ ?id rdf:type ?type. "+
+            " OPTIONAL {?id rdfs:label ?label}" +
             " }"
 
             var allData = []
@@ -770,8 +770,19 @@ var Sparql_OWL = (function () {
                     result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
                     resultSize=result.length
                     offset+=limit
-                    allData = allData.concat(result);
-                    callbackWhilst()
+                    if(processor) {
+                        processor(result, function (err, result) {
+                            if(err)
+                                return callbackWhilst(err)
+                            callbackWhilst()
+                        })
+                    }
+                    else {
+
+                        allData = allData.concat(result);
+                        callbackWhilst()
+                    }
+
                 })
             }, function (err) {
                 callback(err, allData)

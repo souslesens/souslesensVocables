@@ -26,8 +26,7 @@ var RcReportsTriples = {
             });
 
         lines.forEach(function (line, lineIndex) {
-            if (line.indexOf("é") > -1)
-                line = line.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            if (line.indexOf("é") > -1) line = line.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
             var cells = line.trim().split(sep);
             var obj = {};
             cells.forEach(function (cell, index) {
@@ -71,12 +70,7 @@ var RcReportsTriples = {
 
         var dontProcessCorpus = true;
 
-        var corpusHierarchy = [
-            "equipment_category",
-            "equipment_manufacturer",
-            "location_id",
-            "report_id",
-        ];
+        var corpusHierarchy = ["equipment_category", "equipment_manufacturer", "location_id", "report_id"];
 
         var conceptsMap = {
             //    "Failure Mechanism": ["concept_Niv1", "concept_Niv2", "concept_Niv3", "concept_Niv4", "concept_Niv5", "concept_Niv6"],
@@ -93,30 +87,15 @@ var RcReportsTriples = {
         var corpusStream = fs.createWriteStream(corpusFilePath);
         var conceptsStream = fs.createWriteStream(conceptsFilePath);
 
-        corpusStream.write(
-            "<http://data.total.com/resource/reportsRC/Report>  <http://www.w3.org/2004/02/skos/core#topConceptOf> <http://data.total.com/resource/reportsRC/corpus/>.\n"
-        );
-        corpusStream.write(
-            "<" +
-                graphUri +
-                "Report" +
-                ">  <http://www.w3.org/2004/02/skos/core#prefLabel> 'Report'@en .\n"
-        );
+        corpusStream.write("<http://data.total.com/resource/reportsRC/Report>  <http://www.w3.org/2004/02/skos/core#topConceptOf> <http://data.total.com/resource/reportsRC/corpus/>.\n");
+        corpusStream.write("<" + graphUri + "Report" + ">  <http://www.w3.org/2004/02/skos/core#prefLabel> 'Report'@en .\n");
 
         //*************************** init top concepts****************************************
         for (var key in conceptsMap) {
             var conceptTypeUri = "<" + graphUri + RcReportsTriples.formatString(key, true) + "> ";
             typesConcept.push(key);
-            conceptsStream.write(
-                conceptTypeUri +
-                    " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#ConceptScheme>.\n"
-            );
-            conceptsStream.write(
-                conceptTypeUri +
-                    " <http://www.w3.org/2004/02/skos/core#prefLabel> '" +
-                    key +
-                    "' .\n"
-            );
+            conceptsStream.write(conceptTypeUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#ConceptScheme>.\n");
+            conceptsStream.write(conceptTypeUri + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + key + "' .\n");
         }
 
         //*************************** each line key****************************************
@@ -135,8 +114,7 @@ var RcReportsTriples = {
             //*************************** each concepts Type****************************************
             for (var conceptType in conceptsMap) {
                 //     var conceptType=item["conceptsMap"]
-                var conceptTypeUri =
-                    "<" + graphUri + RcReportsTriples.formatString(conceptType, true) + "> ";
+                var conceptTypeUri = "<" + graphUri + RcReportsTriples.formatString(conceptType, true) + "> ";
 
                 var fields = conceptsMap[conceptType];
                 if (!fields) return;
@@ -145,40 +123,20 @@ var RcReportsTriples = {
                 fields.forEach(function (field, indexFields) {
                     if (!item[field]) return;
 
-                    var conceptUri =
-                        "<" + graphUri + RcReportsTriples.formatString(item[field], true) + ">";
+                    var conceptUri = "<" + graphUri + RcReportsTriples.formatString(item[field], true) + ">";
 
                     //*************************** concepts Hierarchy unique****************************************
                     if (typesConcept.indexOf(item[field]) < 0) {
                         typesConcept.push(item[field]);
                         var broaderFieldValueUri;
                         if (indexFields > 0) {
-                            broaderFieldValueUri =
-                                "<" +
-                                graphUri +
-                                RcReportsTriples.formatString(item[fields[indexFields - 1]], true) +
-                                ">";
+                            broaderFieldValueUri = "<" + graphUri + RcReportsTriples.formatString(item[fields[indexFields - 1]], true) + ">";
                         } else {
                             broaderFieldValueUri = conceptTypeUri;
                         }
-                        conceptsStream.write(
-                            conceptUri +
-                                " <http://www.w3.org/2004/02/skos/core#broader> " +
-                                broaderFieldValueUri +
-                                ".\n"
-                        );
-                        conceptsStream.write(
-                            conceptUri +
-                                " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> " +
-                                conceptTypeUri +
-                                ".\n"
-                        );
-                        conceptsStream.write(
-                            conceptUri +
-                                " <http://www.w3.org/2004/02/skos/core#prefLabel> '" +
-                                RcReportsTriples.formatString(item[field]) +
-                                "'@en.\n"
-                        );
+                        conceptsStream.write(conceptUri + " <http://www.w3.org/2004/02/skos/core#broader> " + broaderFieldValueUri + ".\n");
+                        conceptsStream.write(conceptUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> " + conceptTypeUri + ".\n");
+                        conceptsStream.write(conceptUri + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + RcReportsTriples.formatString(item[field]) + "'@en.\n");
                     }
                     //*************************** end concepts Hierarchy unique****************************************
 
@@ -188,23 +146,10 @@ var RcReportsTriples = {
                     var conceptReport = reportUri + "_" + conceptUri;
                     if (!typesConceptReport[conceptReport]) {
                         typesConceptReport[conceptReport] = "x";
-                        if (
-                            indexFields < fields.length - 1 &&
-                            item[fields[indexFields + 1]] == ""
-                        ) {
-                            corpusStream.write(
-                                reportUri +
-                                    " <http://purl.org/dc/terms/subject> " +
-                                    conceptUri +
-                                    ".\n"
-                            );
+                        if (indexFields < fields.length - 1 && item[fields[indexFields + 1]] == "") {
+                            corpusStream.write(reportUri + " <http://purl.org/dc/terms/subject> " + conceptUri + ".\n");
                         } else if (fields.length == 1) {
-                            corpusStream.write(
-                                reportUri +
-                                    " <http://purl.org/dc/terms/subject> " +
-                                    conceptUri +
-                                    ".\n"
-                            );
+                            corpusStream.write(reportUri + " <http://purl.org/dc/terms/subject> " + conceptUri + ".\n");
                         }
                     }
                 });
@@ -224,41 +169,20 @@ var RcReportsTriples = {
                         if (types.indexOf(value) < 0 || colName == "report_id") {
                             types.push(value);
 
-                            var uri =
-                                "<" + graphUri + RcReportsTriples.formatString(value, true) + ">";
+                            var uri = "<" + graphUri + RcReportsTriples.formatString(value, true) + ">";
                             var parentUri;
                             if (index == 0) parentUri = "<" + graphUri + "Report>";
                             else {
                                 var parentValue = item[corpusHierarchy[index - 1]];
-                                if (!parentValue)
-                                    parentValue = corpusHierarchy[index - 1] + "_unknown";
-                                parentUri =
-                                    "<" +
-                                    graphUri +
-                                    RcReportsTriples.formatString(parentValue, true) +
-                                    ">";
+                                if (!parentValue) parentValue = corpusHierarchy[index - 1] + "_unknown";
+                                parentUri = "<" + graphUri + RcReportsTriples.formatString(parentValue, true) + ">";
                             }
 
-                            corpusStream.write(
-                                uri +
-                                    " <http://www.w3.org/2004/02/skos/core#broader> " +
-                                    parentUri +
-                                    ".\n"
-                            );
-                            corpusStream.write(
-                                uri +
-                                    " <http://www.w3.org/2004/02/skos/core#prefLabel> '" +
-                                    RcReportsTriples.formatString(value) +
-                                    "'@en.\n"
-                            );
+                            corpusStream.write(uri + " <http://www.w3.org/2004/02/skos/core#broader> " + parentUri + ".\n");
+                            corpusStream.write(uri + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + RcReportsTriples.formatString(value) + "'@en.\n");
 
                             // if(index<corpusHierarchy.length-1)
-                            corpusStream.write(
-                                uri +
-                                    "  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> " +
-                                    colUri +
-                                    ".\n"
-                            );
+                            corpusStream.write(uri + "  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> " + colUri + ".\n");
                             //  corpusStream.write( reportUri + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + RcReportsTriples.formatString(item.report_id) + "'.\n";
                         }
                     });

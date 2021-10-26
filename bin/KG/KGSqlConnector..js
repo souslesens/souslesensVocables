@@ -89,15 +89,7 @@ var KGSqlConnector = {
         });
     },
 
-    processFetchedData: function (
-        dbName,
-        query,
-        fetchSize,
-        startOffset,
-        maxOffset,
-        processor,
-        callback
-    ) {
+    processFetchedData: function (dbName, query, fetchSize, startOffset, maxOffset, processor, callback) {
         var offset = startOffset;
         var length = 1;
         var allResults = [];
@@ -140,12 +132,7 @@ var KGSqlConnector = {
     },
 
     getKGmodel: function (dbName, callback) {
-        var query =
-            "SELECT TABLE_NAME ,COLUMN_NAME\n" +
-            "  FROM INFORMATION_SCHEMA.COLUMNS\n" +
-            "  WHERE TABLE_SCHEMA = '" +
-            dbName +
-            "'";
+        var query = "SELECT TABLE_NAME ,COLUMN_NAME\n" + "  FROM INFORMATION_SCHEMA.COLUMNS\n" + "  WHERE TABLE_SCHEMA = '" + dbName + "'";
         KGSqlConnector.connection.database = dbName;
         mysql.exec(KGSqlConnector.connection, query, function (err, result) {
             if (err) return callback(err);

@@ -11,6 +11,7 @@
         font-size: 14px;
         border: solid 1px black;
         border-radius: 5px;
+        width:150px;
     }
 
     .Lineage_selectedSourceDiv {
@@ -48,7 +49,7 @@
     </div>
 </div>-->
 <div>
-    <div id="lineage_drawnSources" style="display: flex;flex-direction: column">
+    <div id="lineage_drawnSources" style="display: flex;flex-wrap: wrap">
     </div>
 </div>
 <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
@@ -56,25 +57,29 @@
   <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
         <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
-        <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>>
+        <button class="lineage_button" onclick="Lineage_classes.removeLastChildrenFromGraph()">collapse</button>
 
 
         <button class="lineage_button" onclick="Lineage_classes.addParentsToGraph()">parents</button>
         <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
+      <button class="lineage_button" onclick="Lineage_classes.drawRestrictions()">Restrictions</button>
+    <!--  <button class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
     <button onclick="Lineage_classes.initUI()">clear</button>
 
     </div>
-    <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel1Div">
-      <!--  Property  <select  id= "lineage_individualsPropertiesSelect"></select>-->
-        <b>Property </b> <div  style="height: 80px " id= "lineage_individualsPropertiesTree"></div>
-        <button class="lineage_button" onclick="Lineage_classes.drawIndividualsProperties()">draw direct</button>
-        <button class="lineage_button" onclick="Lineage_classes.drawIndividualsProperties()">draw inverse</button>
-     <input type="checkbox" id="lineage_clearIndividualsPropertiesCBX" >replace
-        <br>  <b>Filter</b><select id="lineage_clearIndividualsPropertiesFilterSelect">
-            <option>graph nodes</option>
-        <option>all items</option>
-        <option>filter value</option>
-        </select>
+    <div class="lineage_actionDiv" style="display: flex;flex-direction: column;margin: 5px" id="lineage_blendDiv">
+
+
+        <div> source node <div id="lineage_sourceNodeDiv" style="background-color: #8792a2;font-weight: bold;text-align: center;"></div><button onclick="Lineage_blend.clearClipboardNode()">X</button></div>
+        <div> target node<div id="lineage_targetNodeDiv" style="background-color: #8792a2;font-weight: bold;text-align: center;"></div></div>
+        <div id="lineage_blendButtonsDiv"  style="margin: 5px; display: none">
+           <!-- <button  class='lineage_button' onclick="SourceBrowser.copyNode()">Copy node</button>-->
+            <button   class='lineage_button' onclick="Lineage_blend.pasteAsSameAs()">paste as SameAs</button>
+            <button  class='lineage_button' onclick="Lineage_blend.pasteAsSubClassOf()">paste as SubClassOf</button>
+
+        </div>
+
+
     </div>
 
 

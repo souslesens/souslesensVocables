@@ -29,29 +29,24 @@ var annotatorLive = {
                         text: text,
                     };
 
-                    httpProxy.post(
-                        spacyServerUrl,
-                        { "content-type": "application/json" },
-                        json,
-                        function (err, result) {
-                            if (err) {
-                                console.log(err);
-                                return callbackSeries(err);
-                            }
-
-                            result.data.forEach(function (sentence) {
-                                sentence.tags.forEach(function (item) {
-                                    if (item.tag.indexOf("NN") > -1) {
-                                        //item.tag.indexOf("NN")>-1) {
-                                        var text = Inflector.singularize(item.text.toLowerCase());
-                                        // if (textNouns.indexOf(item.text) < 0)
-                                        textNouns.push({ text: text, entities: {} });
-                                    }
-                                });
-                            });
-                            callbackSeries();
+                    httpProxy.post(spacyServerUrl, { "content-type": "application/json" }, json, function (err, result) {
+                        if (err) {
+                            console.log(err);
+                            return callbackSeries(err);
                         }
-                    );
+
+                        result.data.forEach(function (sentence) {
+                            sentence.tags.forEach(function (item) {
+                                if (item.tag.indexOf("NN") > -1) {
+                                    //item.tag.indexOf("NN")>-1) {
+                                    var text = Inflector.singularize(item.text.toLowerCase());
+                                    // if (textNouns.indexOf(item.text) < 0)
+                                    textNouns.push({ text: text, entities: {} });
+                                }
+                            });
+                        });
+                        callbackSeries();
+                    });
                 },
 
                 //extract concepts for each source
@@ -82,11 +77,7 @@ var annotatorLive = {
                                         "> " +
                                         "WHERE {" +
                                         "?id skos:prefLabel|skos:altLabel ?prefLabel .";
-                                    if (source.predicates && source.predicates.lang)
-                                        query +=
-                                            "FILTER (lang(?prefLabel) = '" +
-                                            source.predicates.lang +
-                                            "')";
+                                    if (source.predicates && source.predicates.lang) query += "FILTER (lang(?prefLabel) = '" + source.predicates.lang + "')";
 
                                     query += " filter " + filter + "} limit 10000";
 
@@ -108,8 +99,7 @@ var annotatorLive = {
                                             result.results.bindings.forEach(function (item) {
                                                 var key = item.prefLabel.value.toLowerCase();
                                                 if (!entities[key]) entities[key] = {};
-                                                if (!entities[key][source.name])
-                                                    entities[key][source.name] = [];
+                                                if (!entities[key][source.name]) entities[key][source.name] = [];
                                                 entities[key][source.name].push({
                                                     source: source.name,
                                                     id: item.id.value,

@@ -100,34 +100,29 @@ var dictionaryMatcher = {
                                     }
                                 }
                             }*/
-                            elasticRestProxy.executePostQuery(
-                                "_search",
-                                query,
-                                index,
-                                function (err, result) {
-                                    if (err) return callbackEach(err);
-                                    if (result.error) return callbackEach(result.error);
-                                    if (result && result.hits) {
-                                        var data = result.hits.hits;
-                                        if (data.length == 0) orphans.push(line);
-                                        else {
-                                            matchesMap[line[fileField]] = [];
-                                            //  matchesMap[line.subject] = {label: line.label, matches: data}
-                                            data.forEach(function (hit) {
-                                                //  matchesMap[line.subject].matches.push(match)
-                                                matchesMap[line[fileField]].push({
-                                                    score: hit._score,
-                                                    term: hit._source[indexLabelField],
-                                                    id: hit._source[indexIdField],
-                                                });
+                            elasticRestProxy.executePostQuery("_search", query, index, function (err, result) {
+                                if (err) return callbackEach(err);
+                                if (result.error) return callbackEach(result.error);
+                                if (result && result.hits) {
+                                    var data = result.hits.hits;
+                                    if (data.length == 0) orphans.push(line);
+                                    else {
+                                        matchesMap[line[fileField]] = [];
+                                        //  matchesMap[line.subject] = {label: line.label, matches: data}
+                                        data.forEach(function (hit) {
+                                            //  matchesMap[line.subject].matches.push(match)
+                                            matchesMap[line[fileField]].push({
+                                                score: hit._score,
+                                                term: hit._source[indexLabelField],
+                                                id: hit._source[indexIdField],
                                             });
-                                        }
-                                    } else {
-                                        var x = 3;
+                                        });
                                     }
-                                    callbackEach();
+                                } else {
+                                    var x = 3;
                                 }
-                            );
+                                callbackEach();
+                            });
                         },
                         function (err) {
                             callbackSeries();
@@ -136,14 +131,8 @@ var dictionaryMatcher = {
                 },
             ],
             function (err) {
-                fs.writeFileSync(
-                    filePath + "_" + index + "_orphans.json",
-                    JSON.stringify(orphans, null, 2)
-                );
-                fs.writeFileSync(
-                    filePath + "_" + index + "_matches.json",
-                    JSON.stringify(matchesMap, null, 2)
-                );
+                fs.writeFileSync(filePath + "_" + index + "_orphans.json", JSON.stringify(orphans, null, 2));
+                fs.writeFileSync(filePath + "_" + index + "_matches.json", JSON.stringify(matchesMap, null, 2));
                 if (callback) return callback(null, matchesMap);
             }
         );
@@ -179,10 +168,7 @@ var dictionaryMatcher = {
 
         fs.writeFileSync(dir + "QuantumReadiDictionary_" + index + ".csv", str);
         fs.writeFileSync(dir + "QuantumReadiDictionary_" + index + "orphans.csv", strOrphans);
-        fs.writeFileSync(
-            dir + "Dictionary_" + index + ".json",
-            JSON.stringify(bigMatchesMap, null, 2)
-        );
+        fs.writeFileSync(dir + "Dictionary_" + index + ".json", JSON.stringify(bigMatchesMap, null, 2));
     },
 };
 
@@ -201,22 +187,15 @@ if (false) {
 
 //dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\readiLabel.csv", "bomaftwin","label","equipmentDescription","materialNumber ")
 if (true) {
-    dictionaryMatcher.getSimilars(
-        "D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv",
-        "tepdk_tags",
-        "assetTagCode",
-        "Functional_Location_code",
-        "tagName",
-        function (err, result) {
-            var str = "";
-            for (var code in result) {
-                result[code].forEach(function (tag) {
-                    str += tag.id + "\t" + code + "\n";
-                });
-            }
-            fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str);
+    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv", "tepdk_tags", "assetTagCode", "Functional_Location_code", "tagName", function (err, result) {
+        var str = "";
+        for (var code in result) {
+            result[code].forEach(function (tag) {
+                str += tag.id + "\t" + code + "\n";
+            });
         }
-    );
+        fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str);
+    });
 }
 
 if (false) {
@@ -231,13 +210,7 @@ if (false) {
     // var file = "Quantum_UOM.txt"
     //  var file = "Quantum_UOMdimension.txt"
 
-    dictionaryMatcher.getSimilars(
-        "D:\\NLP\\ontologies\\dictionaries\\" + file,
-        "pca",
-        "name",
-        "label",
-        "subject"
-    );
+    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\" + file, "pca", "name", "label", "subject");
 }
 if (false) {
     var files = {

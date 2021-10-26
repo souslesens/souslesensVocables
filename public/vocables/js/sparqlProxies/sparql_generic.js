@@ -375,7 +375,35 @@ var Sparql_generic = (function () {
         }
 
         self.triplesObjectToString = function (item) {
-            if (typeof item === "string")
+            var subjectStr = ""
+            if (item.subject.indexOf("_:b") == 0)
+                subjectStr = "<" + item.subject + ">"
+            else
+                subjectStr = "<" + item.subject + ">"
+
+
+            var objectStr = ""
+            if (item.object.indexOf("_:b") == 0)
+                objectStr = "<" + item.object + ">"
+            else if (item.object.indexOf('http')==0 || item.valueType == "uri")
+                objectStr = "<" + item.object + ">"
+            else {
+                var langStr = "";
+                if (item.lang)
+                    langStr = "@" + item.lang
+                objectStr = "'" + item.object + "'" + langStr
+            }
+
+            var p = item.predicate.indexOf("^")
+            if (p == 0) {
+                var predicate = item.predicate.substring(1)
+                return objectStr + ' <' + predicate + '> <' + item.subject + '>. ';
+            } else
+                return  subjectStr + ' <' + item.predicate + '> ' + objectStr + '. ';
+
+
+
+         /*   if (typeof item === "string")
                 return item
 
 
@@ -394,7 +422,7 @@ var Sparql_generic = (function () {
                 var predicate = item.predicate.substring(1)
                 return valueStr + ' <' + predicate + '> <' + item.subject + '>. ';
             } else
-                return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';
+                return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';*/
         }
 
         self.insertTriples = function (sourceLabel, triples, callback) {

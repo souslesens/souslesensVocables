@@ -100,8 +100,7 @@ var gaiaToSkos = {
             var label = gaiaToSkos.formatString(item);
             var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
             classesMap[item] = subject;
-            str +=
-                subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
+            str += subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
 
             counter++;
         });
@@ -109,8 +108,7 @@ var gaiaToSkos = {
             var label = gaiaToSkos.formatString(item);
             var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
             categoriesMap[item] = subject;
-            str +=
-                subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
+            str += subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
 
             counter++;
         });
@@ -119,26 +117,16 @@ var gaiaToSkos = {
             var subject = categoriesMap[key];
             var object = classesMap[categoriesClassMap[key]];
             if (!object) object = "<http://data.total.com/resource/dictionary/gaia/" + "null" + ">";
-            else
-                str += subject + " <http://www.w3.org/2004/02/skos/core#broader> " + object + ".\n";
+            else str += subject + " <http://www.w3.org/2004/02/skos/core#broader> " + object + ".\n";
         }
 
         if (true) {
             objs.forEach(function (item, index) {
                 if (item.ClassExtended) {
-                    var subject =
-                        "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
+                    var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
                     var label = gaiaToSkos.formatString(item.Term);
-                    str +=
-                        subject +
-                        " <http://www.w3.org/2004/02/skos/core#prefLabel> '" +
-                        label +
-                        "'@en .\n";
-                    str +=
-                        subject +
-                        "  <http://www.w3.org/2004/02/skos/core#broader> " +
-                        categoriesMap[item.ClassExtended] +
-                        ".\n";
+                    str += subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
+                    str += subject + "  <http://www.w3.org/2004/02/skos/core#broader> " + categoriesMap[item.ClassExtended] + ".\n";
                     counter++;
                 }
             });
@@ -169,35 +157,12 @@ var gaiaToSkos = {
                 var acronymEn = gaiaToSkos.formatString(item.acronymEn);
                 var synEn = gaiaToSkos.formatString(item.synEn);
 
-                str +=
-                    subject +
-                    " <http://www.w3.org/2004/02/skos/core#prefLabel> '" +
-                    label +
-                    "'@en .\n";
-                str +=
-                    subject +
-                    "  <http://www.w3.org/2004/02/skos/core#broader> <http://data.total.com/resource/acronyms/" +
-                    item.category.replace(/ /g, "_") +
-                    ">.\n";
+                str += subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
+                str += subject + "  <http://www.w3.org/2004/02/skos/core#broader> <http://data.total.com/resource/acronyms/" + item.category.replace(/ /g, "_") + ">.\n";
 
-                if (syn)
-                    str +=
-                        subject +
-                        " <http://www.w3.org/2004/02/skos/core#altLabel> '" +
-                        syn +
-                        "'@en .\n";
-                if (acronymEn)
-                    str +=
-                        subject +
-                        " <http://www.w3.org/2004/02/skos/core#altLabel> '" +
-                        acronymEn +
-                        "'@en .\n";
-                if (synEn)
-                    str +=
-                        subject +
-                        " <http://www.w3.org/2004/02/skos/core#altLabel> '" +
-                        synEn +
-                        "'@en .\n";
+                if (syn) str += subject + " <http://www.w3.org/2004/02/skos/core#altLabel> '" + syn + "'@en .\n";
+                if (acronymEn) str += subject + " <http://www.w3.org/2004/02/skos/core#altLabel> '" + acronymEn + "'@en .\n";
+                if (synEn) str += subject + " <http://www.w3.org/2004/02/skos/core#altLabel> '" + synEn + "'@en .\n";
             }
         });
         fs.writeFileSync(filePath.replace(".txt", ".rdf.nt"), str);

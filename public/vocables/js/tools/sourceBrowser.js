@@ -68,13 +68,19 @@ var SourceBrowser = (function () {
 
     }
 
-    self.copyNode = function (event) {
+    self.copyNode = function (event,node) {
+        if(!node)
+            node=self.currentTreeNode;
+        if(!node)
+            node= self.currentGraphNode
+        if(!node)
+            return;
         Clipboard.copy({
                 type: "node",
-                id: self.currentTreeNode.data.id,
-                label: self.currentTreeNode.data.label,
-                source: self.currentTreeNode.data.source,
-                data: self.currentTreeNode.data
+                id:node.data.id,
+                label:node.data.label,
+                source: node.data.source,
+                data: node.data
             },
             self.currentTreeNode.id + "_anchor",
             event)
@@ -144,16 +150,12 @@ var SourceBrowser = (function () {
         var items = {}
 
 
-          return items
-        ;
-
-     items.nodeInfos = {
-         label: "Node infos",
-         action: function (e) {// pb avec source
-             SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
-         }
-     }
-
+        items.nodeInfos = {
+            label: "Node infos",
+            action: function (e) {// pb avec source
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+            }
+        }
 
 
         if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
@@ -262,12 +264,9 @@ var SourceBrowser = (function () {
             }
 
         }
-
-
-
-
-
-
+        if(authentication.currentUser.groupes.indexOf("admin") > -1) {
+            items = Lineage_blend.addBlendJstreeMenuItems(items);
+        }
         return items;
     }
 
@@ -642,7 +641,6 @@ var SourceBrowser = (function () {
         }
 
 
-
         if (!self.visitedNodes || options.resetVisited) {
             self.visitedNodes = []
             self.visitedNodes.currentIndex = 0
@@ -676,10 +674,15 @@ var SourceBrowser = (function () {
 
                 },
                 function (callbackSeries) {
-                    if (self.visitedNodes.length <2) {
-                        return callbackSeries()
+                    var str = "<div>"
+                    if (self.visitedNodes.length > 1) {
+                        var str = "<button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+
                     }
-                    var str = "<div><button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+
+
+
+                    str += "</div>"
                     $("#" + divId).prepend(str)
                     callbackSeries()
                 },
@@ -893,7 +896,7 @@ var SourceBrowser = (function () {
         })
     }
 
-    self.showClassRestrictions = function (sourceLabel, nodeId,options, callback) {
+    self.showClassRestrictions = function (sourceLabel, nodeId, options, callback) {
 
         // blankNodes.
 
@@ -1016,14 +1019,81 @@ var SourceBrowser = (function () {
     }
 
 
-    self.generateSourceDictionary=function(sourceLabel) {
-        if (Config.sources[sourceLabel].schemaType == "OWL")
-           Sparql_OWL.getDictionary(sourceLabel,{},function(err, result){
-               if(err)
-                   MainController.UI.message(err,true)
+    self.generateSourceDictionary = function (sourceLabel) {
+        if (Config.sources[sourceLabel].schemaType == "OWL") {
+            Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, result) {
+                if (err)
+                    MainController.UI.message(err, true)
 
-        })
+            })
+        }
     }
+
+    self.generateElasticIndex = function (sourceLabel) {
+        var totalLines = 0
+
+
+        var processor = function (data, callback) {
+            if (data.length == 0)
+                return callback();
+            var data2 = []
+            data.forEach(function (item) {
+                if (item.label) {
+                    data2.push({
+                        id: item.id.value,
+                        label: item.label.value,
+                        type: item.type.value
+                    })
+                }
+            })
+            MainController.UI.message("indexing " + data.length)
+            var options = {replaceIndex: true}
+            var payload = {
+                dictionaries_indexSource: 1,
+                indexName: sourceLabel.toLowerCase(),
+                data: JSON.stringify(data2),
+                options: JSON.stringify(options)
+            }
+
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: payload,
+                dataType: "json",
+                success: function (data2, textStatus, jqXHR) {
+                    totalLines += data.length
+                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
+                    callback(null, data)
+                }
+                , error: function (err) {
+                    callback(err);
+
+                }
+
+
+            })
+
+        }
+        if (Config.sources[sourceLabel].schemaType == "OWL") {
+
+            Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
+                if (err)
+                    MainController.UI.message(err, true)
+
+                MainController.UI.message("DONE ", true)
+            })
+        }
+    }
+
+
+
+
+
+
+
+
+
+
 
     return self;
 

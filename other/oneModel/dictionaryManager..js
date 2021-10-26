@@ -46,36 +46,14 @@ var DictionaryManager = {
                             if (!id) {
                                 id = util.getRandomHexaId(15);
                                 distinctLabels[label] = id;
-                                sparql +=
-                                    "<" +
-                                    dictionaryGraphUri +
-                                    id +
-                                    "> rdfs:label '" +
-                                    label +
-                                    "'.\n";
+                                sparql += "<" + dictionaryGraphUri + id + "> rdfs:label '" + label + "'.\n";
                             }
 
-                            sparql +=
-                                "<" +
-                                dictionaryGraphUri +
-                                id +
-                                "> owl:sameAs <" +
-                                item.class +
-                                ">.\n";
+                            sparql += "<" + dictionaryGraphUri + id + "> owl:sameAs <" + item.class + ">.\n";
                             if (!distinctLabels[item.class]) {
                                 distinctLabels[item.class] = 1;
-                                sparql +=
-                                    "<" +
-                                    item.class +
-                                    "> skos:inScheme <" +
-                                    schemes[item.source] +
-                                    ">.\n";
-                                sparql +=
-                                    "<" +
-                                    item.class +
-                                    "> rdfs:label '" +
-                                    util.formatStringForTriple(item.classLabel) +
-                                    "'.\n";
+                                sparql += "<" + item.class + "> skos:inScheme <" + schemes[item.source] + ">.\n";
+                                sparql += "<" + item.class + "> rdfs:label '" + util.formatStringForTriple(item.classLabel) + "'.\n";
                             }
                         });
                         sparql += "}";

@@ -16,10 +16,7 @@ var exportRDF = {
     export: function (sparql_url, graphUri, stream, callback) {
         var fromStr = "";
         if (graphUri) fromStr = " FROM <" + graphUri + "> ";
-        var query =
-            "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " +
-            fromStr +
-            " where { ?subject ?predicate ?object.}";
+        var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " + fromStr + " where { ?subject ?predicate ?object.}";
 
         stream.write("with <" + graphUri + "> insert{\n");
         exportRDF.POST_cursor(sparql_url, query, stream, function (err, result) {
@@ -40,16 +37,14 @@ var exportRDF = {
         data.forEach(function (item) {
             var objectStr = "";
             if (item.object.type != "uri") {
-                if (item.object.value.indexOf("every part in every performance of the system") > -1)
-                    var x = 3;
+                if (item.object.value.indexOf("every part in every performance of the system") > -1) var x = 3;
                 objectStr = "'" + util.formatStringForTriple(item.object.value) + "'";
                 if (item.object.lang) objectStr += "@" + item.object.lang;
             } else {
                 objectStr = "<" + item.object.value + ">";
             }
 
-            str +=
-                "<" + item.subject.value + "> <" + item.predicate.value + "> " + objectStr + ".\n";
+            str += "<" + item.subject.value + "> <" + item.predicate.value + "> " + objectStr + ".\n";
         });
         stream.write(str);
         callback(null);
@@ -148,46 +143,24 @@ if (true) {
     for (var source in map) {
         var graphUri = map[source];
         var fileName = graphUri.substring(graphUri.lastIndexOf("/") + 1) + "000001.ttl.gz";
-        console.log(
-            "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" +
-                fileName +
-                "', '" +
-                graphUri +
-                "');"
-        );
+        console.log("ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" + fileName + "', '" + graphUri + "');");
     }
 }
 if (false) {
     for (var source in map) {
-        console.log(
-            "with <" +
-                map[source] +
-                ">" +
-                "delete {" +
-                "  ?sub ?pred ?obj ." +
-                "} " +
-                "where { ?sub ?pred ?obj .}"
-        );
+        console.log("with <" + map[source] + ">" + "delete {" + "  ?sub ?pred ?obj ." + "} " + "where { ?sub ?pred ?obj .}");
     }
 }
 if (false) {
     for (var source in map) {
-        var str =
-            "dump_one_graph ('" +
-            map[source] +
-            "', '/etc/virtuoso-data/exportOwl/" +
-            source +
-            "', 1000000000); ";
+        var str = "dump_one_graph ('" + map[source] + "', '/etc/virtuoso-data/exportOwl/" + source + "', 1000000000); ";
         console.log(str);
     }
 }
 
 if (false) {
     for (var source in map) {
-        var str =
-            "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" +
-            map[source].substring(map[source].lastIndexOf("/")) +
-            ".ttl000001.ttl.gz', 'http://standards.iso.org/iso/15926/part14/');\n";
+        var str = "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" + map[source].substring(map[source].lastIndexOf("/")) + ".ttl000001.ttl.gz', 'http://standards.iso.org/iso/15926/part14/');\n";
         console.log(str);
     }
 }

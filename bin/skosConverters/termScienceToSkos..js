@@ -73,8 +73,7 @@ var termScienceToSkos = {
                             lang = childValue;
                         }
                         if (childType == "term") {
-                            if (obj.prefLabels.length == 0 || obj.prefLabels[0].lang != "en")
-                                obj.prefLabels.push({ lang: lang, value: childValue });
+                            if (obj.prefLabels.length == 0 || obj.prefLabels[0].lang != "en") obj.prefLabels.push({ lang: lang, value: childValue });
                             else obj.altLabels.push({ lang: lang, value: childValue });
                         }
                     }
@@ -117,11 +116,7 @@ var termScienceToSkos = {
             var q = body.indexOf("</textarea");
             var xml = body.substring(p + 1, q);
             xml = decodeXml(xml);
-            xml =
-                '<?xml version="1.0" encoding="utf-8"?>\n' +
-                "<termSienceRoot>\n" +
-                xml +
-                "</termSienceRoot>\n";
+            xml = '<?xml version="1.0" encoding="utf-8"?>\n' + "<termSienceRoot>\n" + xml + "</termSienceRoot>\n";
             callback(null, xml);
         });
     },
@@ -176,8 +171,7 @@ var termScienceToSkos = {
                                 if (err) return callbackEach(err);
 
                                 conceptsMap[concept.id] = concept;
-                                if (level3_exclude.indexOf(concept.name) > -1)
-                                    return callbackEach();
+                                if (level3_exclude.indexOf(concept.name) > -1) return callbackEach();
                                 concept.narrowers.forEach(function (child) {
                                     child.parent = concept.id;
                                     children2.push(child);
@@ -296,8 +290,7 @@ var termScienceToSkos = {
                     for (var key in conceptsMap) {
                         var concept = conceptsMap[key];
                         concept.narrowers.forEach(function (narrower) {
-                            if (conceptsMap[narrower] && conceptsMap[narrower].broaders)
-                                conceptsMap[narrower].broaders.push(concept.id);
+                            if (conceptsMap[narrower] && conceptsMap[narrower].broaders) conceptsMap[narrower].broaders.push(concept.id);
                             else var x = 3;
                         });
                     }
@@ -422,12 +415,7 @@ var termScienceToSkos = {
                 async.eachSeries(
                     pageNums,
                     function (pageNum, callbackEachPageNum) {
-                        var url =
-                            "http://www.termsciences.fr/-/Index/Explorer/Alphabet/?lettre=" +
-                            page +
-                            "&page=" +
-                            pageNum +
-                            "&lng=en";
+                        var url = "http://www.termsciences.fr/-/Index/Explorer/Alphabet/?lettre=" + page + "&page=" + pageNum + "&lng=en";
                         var options = {
                             method: "GET",
                             url: url,
@@ -483,10 +471,7 @@ var termScienceToSkos = {
             },
             function (err) {
                 var x = terms;
-                fs.writeFileSync(
-                    "D:\\NLP\\termScience\\allTerms.csv",
-                    JSON.stringify(terms, null, 2)
-                );
+                fs.writeFileSync("D:\\NLP\\termScience\\allTerms.csv", JSON.stringify(terms, null, 2));
             }
         );
     },
@@ -663,10 +648,7 @@ if (false) {
         },
         function (err) {
             if (err) console.log(err);
-            fs.writeFileSync(
-                "d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf",
-                JSON.stringify(concepts, null, 2)
-            );
+            fs.writeFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf", JSON.stringify(concepts, null, 2));
         }
     );
 }
@@ -715,82 +697,70 @@ if (false) {
         function (err) {
             if (err) console.log(err);
             data = data.concat(newBroaders);
-            fs.writeFileSync(
-                "d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf",
-                JSON.stringify(data, null, 2)
-            );
+            fs.writeFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf", JSON.stringify(data, null, 2));
         }
     );
 }
 
 // getChildren
 if (false) {
-    skoReader.rdfToEditor(
-        "D:\\NLP\\commonConcepts_TERM_SCIENCE_CTGshort.rdf",
-        {},
-        function (err, result) {
-            var dataShort = result;
-            var shortIds = [];
-            dataShort.skos.forEach(function (item) {
-                shortIds.push(item.id);
-            });
+    skoReader.rdfToEditor("D:\\NLP\\commonConcepts_TERM_SCIENCE_CTGshort.rdf", {}, function (err, result) {
+        var dataShort = result;
+        var shortIds = [];
+        dataShort.skos.forEach(function (item) {
+            shortIds.push(item.id);
+        });
 
-            var dataLong = JSON.parse(
-                "" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf")
-            );
+        var dataLong = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf"));
 
-            var data = [];
-            dataLong.forEach(function (item) {
-                if (shortIds.indexOf(item.id) > -1) data.push(item);
-            });
+        var data = [];
+        dataLong.forEach(function (item) {
+            if (shortIds.indexOf(item.id) > -1) data.push(item);
+        });
 
-            var concepts = [];
-            var conceptIds = [];
-            var allNarrowers = [];
+        var concepts = [];
+        var conceptIds = [];
+        var allNarrowers = [];
 
-            data.forEach(function (item) {
-                if (conceptIds.indexOf(item.id) < 0) conceptIds.push(item.id);
-            });
-            data.forEach(function (item) {
-                item.narrowers.forEach(function (narrower) {
-                    if (conceptIds.indexOf(narrower) < 0) {
-                        conceptIds.push(narrower);
-                        allNarrowers.push(narrower);
-                    }
-                });
-            });
-
-            var newNarrowers = [];
-            // var newNarrowersIds = [];
-
-            async.eachSeries(
-                allNarrowers,
-                function (conceptId, callbackEach) {
-                    termScienceToSkos.queryTermScience(conceptId, function (err, xmlStr) {
-                        if (err) return console.log(err);
-                        var concept = termScienceToSkos.xmlToSkosConcept(xmlStr);
-
-                        newNarrowers.push(concept);
-                        if (newNarrowers.length % 100 == 0) {
-                            console.log(newNarrowers.length);
-                        }
-
-                        setTimeout(function () {
-                            callbackEach();
-                        }, 50);
-                    });
-                },
-                function (err) {
-                    if (err) console.log(err);
-                    data = data.concat(newNarrowers);
-                    fs.writeFileSync(
-                        "d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf",
-                        JSON.stringify(data, null, 2)
-                    );
+        data.forEach(function (item) {
+            if (conceptIds.indexOf(item.id) < 0) conceptIds.push(item.id);
+        });
+        data.forEach(function (item) {
+            item.narrowers.forEach(function (narrower) {
+                if (conceptIds.indexOf(narrower) < 0) {
+                    conceptIds.push(narrower);
+                    allNarrowers.push(narrower);
                 }
-            );
-        }
-    );
+            });
+        });
+
+        var newNarrowers = [];
+        // var newNarrowersIds = [];
+
+        async.eachSeries(
+            allNarrowers,
+            function (conceptId, callbackEach) {
+                termScienceToSkos.queryTermScience(conceptId, function (err, xmlStr) {
+                    if (err) return console.log(err);
+                    var concept = termScienceToSkos.xmlToSkosConcept(xmlStr);
+
+                    newNarrowers.push(concept);
+                    if (newNarrowers.length % 100 == 0) {
+                        console.log(newNarrowers.length);
+                    }
+
+                    setTimeout(function () {
+                        callbackEach();
+                    }, 50);
+                });
+            },
+            function (err) {
+                if (err) console.log(err);
+                data = data.concat(newNarrowers);
+                fs.writeFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf", JSON.stringify(data, null, 2));
+            }
+        );
+    });
 }
 
 //var commonEnums=xsdToSkos.getCommonEnumeration();

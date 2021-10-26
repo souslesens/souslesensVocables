@@ -220,7 +220,7 @@ var Sparql_common = (function () {
 
 
 
-    self.getFromStr = function (source,named) {
+    self.getFromStr = function (source,named,withoutImports) {
         var from=" FROM "
         if(named)
             from+=" NAMED"
@@ -235,12 +235,14 @@ var Sparql_common = (function () {
         graphUris.forEach(function (graphUri, index) {
             fromStr += from+"  <" + graphUri + "> "
         })
-        var imports=Config.sources[source].imports;
-        if(imports){
-            imports.forEach(function(source2){
-                var importGraphUri = Config.sources[source2].graphUri
-                fromStr += from+"  <" + importGraphUri + "> "
-            })
+        if(!withoutImports) {
+            var imports = Config.sources[source].imports;
+            if (imports) {
+                imports.forEach(function (source2) {
+                    var importGraphUri = Config.sources[source2].graphUri
+                    fromStr += from + "  <" + importGraphUri + "> "
+                })
+            }
         }
         return fromStr;
     }

@@ -46,8 +46,7 @@ var locationsMap = {
 
 var processTEPDKtags = function () {
     var str = "";
-    str +=
-        "type\titem.TagNumber\t functionCode\tfunctionLabel\tmoduleCode\tmoduleLabel\tlocationCode\tlocationLabel\tKG.FunctionalClassID\tKG.FunctionalClassLabel\tKG.ServiceDescription\n";
+    str += "type\titem.TagNumber\t functionCode\tfunctionLabel\tmoduleCode\tmoduleLabel\tlocationCode\tlocationLabel\tKG.FunctionalClassID\tKG.FunctionalClassLabel\tKG.ServiceDescription\n";
     var GormCodesMap = {};
     var codesMap = {};
     var count = 0;
@@ -62,8 +61,7 @@ var processTEPDKtags = function () {
                 if (array) {
                     var locationCode = array.groups["Location"];
                     var locationLabel = "";
-                    if (locationCode && locationsMap[locationCode])
-                        locationLabel = locationsMap[locationCode];
+                    if (locationCode && locationsMap[locationCode]) locationLabel = locationsMap[locationCode];
 
                     var moduleCode = array.groups["Module"];
                     var moduleLabel = "";
@@ -76,8 +74,7 @@ var processTEPDKtags = function () {
                             functionLabel = codesMap[functionCode];
                         } else if (GormCodesMap[functionCode]) {
                             if (GormCodesMap[functionCode][item.FacilitySectorID]) {
-                                functionLabel =
-                                    "*" + GormCodesMap[functionCode][item.FacilitySectorID];
+                                functionLabel = "*" + GormCodesMap[functionCode][item.FacilitySectorID];
                             }
                         }
                     }
@@ -120,42 +117,28 @@ var processTEPDKtags = function () {
             function (callbackSeries) {
                 var query = "SELECT  * FROM [TEPDK].[dbo].[functionCode]  ";
 
-                sqlServer.getFetchedData(
-                    "TEPDK",
-                    query,
-                    processor,
-                    1000,
-                    null,
-                    function (err, result) {
-                        result.forEach(function (item) {
-                            var code = item["Code"];
-                            codesMap[code] = item.Description;
-                        });
-                        callbackSeries();
-                    }
-                );
+                sqlServer.getFetchedData("TEPDK", query, processor, 1000, null, function (err, result) {
+                    result.forEach(function (item) {
+                        var code = item["Code"];
+                        codesMap[code] = item.Description;
+                    });
+                    callbackSeries();
+                });
             },
             //sepecific GORM codes
             function (callbackSeries) {
                 var query = "SELECT  * FROM [TEPDK].[dbo].[codesTEPDKexistingFields]  ";
-                sqlServer.getFetchedData(
-                    "TEPDK",
-                    query,
-                    processor,
-                    1000,
-                    null,
-                    function (err, result) {
-                        result.forEach(function (item) {
-                            for (var totalId in facilitiesMap) {
-                                var facilityCode = facilitiesMap[totalId];
-                                var code = item[facilityCode];
-                                if (!GormCodesMap[code]) GormCodesMap[code] = {};
-                                GormCodesMap[code][totalId] = item.Description;
-                            }
-                        });
-                        callbackSeries();
-                    }
-                );
+                sqlServer.getFetchedData("TEPDK", query, processor, 1000, null, function (err, result) {
+                    result.forEach(function (item) {
+                        for (var totalId in facilitiesMap) {
+                            var facilityCode = facilitiesMap[totalId];
+                            var code = item[facilityCode];
+                            if (!GormCodesMap[code]) GormCodesMap[code] = {};
+                            GormCodesMap[code][totalId] = item.Description;
+                        }
+                    });
+                    callbackSeries();
+                });
             },
 
             // query tags
@@ -168,21 +151,12 @@ var processTEPDKtags = function () {
                     "      ,[ServiceDescription] " +
                     "FROM [TEPDK].[dbo].[tblTag] ";
 
-                query =
-                    " select * FROM [TEPDK].[dbo].[functional_location] " +
-                    " where SUBSTRING(tagName,1,2) in('GA','GB','GC','GD')";
-                sqlServer.getFetchedData(
-                    "TEPDK",
-                    query,
-                    processor,
-                    1000,
-                    GormCodesMap,
-                    function (err, result) {
-                        if (err) return callbackSeries(err);
+                query = " select * FROM [TEPDK].[dbo].[functional_location] " + " where SUBSTRING(tagName,1,2) in('GA','GB','GC','GD')";
+                sqlServer.getFetchedData("TEPDK", query, processor, 1000, GormCodesMap, function (err, result) {
+                    if (err) return callbackSeries(err);
 
-                        callbackSeries();
-                    }
-                );
+                    callbackSeries();
+                });
             },
         ],
         function (err) {

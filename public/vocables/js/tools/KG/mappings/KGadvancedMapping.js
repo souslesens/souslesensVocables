@@ -446,7 +446,7 @@ var KGadvancedMapping = (function () {
                             {
                                 "query_string": {
                                     "query": expression,
-                                    "default_field": "attachment.content",
+                                  //  "default_field": "attachment.content",
                                     "default_operator": "OR"
                                 }
                             }
@@ -470,7 +470,7 @@ var KGadvancedMapping = (function () {
                             {
                                 "query_string": {
                                     "query": expression,
-                                    "default_field": "attachment.content",
+                                   // "default_field": "attachment.content",
                                     "default_operator": "AND"
                                 }
                             }
@@ -490,7 +490,8 @@ var KGadvancedMapping = (function () {
                     ]
                 },
             }
-            var indexes = ["readi", "pca", "cfihos"]
+          //  var indexes = ["readi", "pca", "cfihos"]
+            var indexes = $('#KGMappingAdvancedMappings_sources').jstree(true).get_checked();
             var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val()
             if (selectedSource != "all")
                 indexes = [selectedSource]

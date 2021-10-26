@@ -12,7 +12,7 @@
 const request = require("request");
 
 const ConfigManager = require("./configManager.");
-
+const async = require("async");
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 
 const debug = true;
@@ -36,7 +36,7 @@ var elasticRestProxy = {
             });
         } else indexesStr = indexes;
         if (indexesStr != "") indexesStr += "/";
-        var elasticUrl = elasticRestProxy.getElasticUrl();
+        var elasticUrl = ConfigManager.config.ElasticSearch.url;
         url = elasticUrl + indexesStr + url;
 
         var options = {
@@ -48,7 +48,7 @@ var elasticRestProxy = {
             url: url,
         };
 
-        if (false && debug) console.log(JSON.stringify(query, null, 2));
+        if (true) console.log(JSON.stringify(query, null, 2));
         request(options, function (error, response, body) {
             if (error) return callback(error);
 
@@ -164,6 +164,72 @@ var elasticRestProxy = {
             return callback(null, body);
         });
     },
+
+    deleteIndex: function (elasticUrl, indexName, callback) {
+        var elasticUrl = elasticUrl;
+        var indexExists = false;
+        async.series(
+            [
+                //******check if index exist*************
+                function (callbackSeries) {
+                    var options = {
+                        method: "HEAD",
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        url: elasticUrl + indexName + "/",
+                    };
+                    request(options, function (error, response, body) {
+                        if (error) return callbackSeries(error);
+                        if (response.statusCode == 200) indexExists = true;
+                        callbackSeries();
+                    });
+                },
+
+                //******deleteIndex*************
+                function (callbackSeries) {
+                    if (!indexExists) return callbackSeries();
+
+                    var options = {
+                        method: "DELETE",
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        url: elasticUrl + indexName,
+                    };
+                    request(options, function (error, response, body) {
+                        if (error) return callbackSeries(error);
+                        var message = "delete index :" + indexName;
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                callback(err);
+            }
+        );
+    },
+    listIndexes: function (elasticUrl, callback) {
+        var options = {
+            method: "GET",
+            headers: {
+                "content-type": "application/json",
+            },
+            url: elasticUrl + "_cat/indices?format=json",
+        };
+
+        request(options, function (error, response, body) {
+            if (error) return callback(error);
+            var json = JSON.parse(body);
+            var indexes = [];
+            json.forEach(function (item) {
+                indexes.push(item.index);
+            });
+            callback(null, indexes);
+        });
+    },
 };
 
 module.exports = elasticRestProxy;
+
+//elasticRestProxy.listIndexes("http://164.132.194.227:2009/");

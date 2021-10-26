@@ -92,10 +92,7 @@ var KGbuilder = {
                             triples.push({
                                 subject: uri,
                                 predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                                object:
-                                    "'" +
-                                    util.formatStringForTriple(ARDLdictionary[subjectValue]) +
-                                    "'",
+                                object: "'" + util.formatStringForTriple(ARDLdictionary[subjectValue]) + "'",
                             });
 
                             existingUrisMap[subjectValue] = uri;
@@ -164,11 +161,7 @@ var KGbuilder = {
                 if (mapping.object instanceof Object) {
                     var p;
                     if ((p = mapping.object.indexOf("^^xsd:")) > -1) {
-                        objectValue =
-                            "'" +
-                            item[mapping.object.substring(0, p)] +
-                            "'" +
-                            mapping.object.substring(p);
+                        objectValue = "'" + item[mapping.object.substring(0, p)] + "'" + mapping.object.substring(p);
                     }
                 } else {
                     objectValue = item[mapping.object];
@@ -249,25 +242,14 @@ var KGbuilder = {
                         socket.message("KGbuild", "loading KG local_dictionary ");
 
                         var sqlQuery =
-                            "select " +
-                            options.dataSource.local_dictionary.idColumn +
-                            "," +
-                            options.dataSource.local_dictionary.labelColumn +
-                            " from " +
-                            options.dataSource.local_dictionary.table;
-                        SQLserverConnector.getData(
-                            options.dataSource.dbName,
-                            sqlQuery,
-                            function (err, result) {
-                                if (err) return callbackSeries(err);
-                                result.forEach(function (item) {
-                                    ARDLdictionary[
-                                        item[options.dataSource.local_dictionary.idColumn]
-                                    ] = item[options.dataSource.local_dictionary.labelColumn];
-                                });
-                                return callbackSeries();
-                            }
-                        );
+                            "select " + options.dataSource.local_dictionary.idColumn + "," + options.dataSource.local_dictionary.labelColumn + " from " + options.dataSource.local_dictionary.table;
+                        SQLserverConnector.getData(options.dataSource.dbName, sqlQuery, function (err, result) {
+                            if (err) return callbackSeries(err);
+                            result.forEach(function (item) {
+                                ARDLdictionary[item[options.dataSource.local_dictionary.idColumn]] = item[options.dataSource.local_dictionary.labelColumn];
+                            });
+                            return callbackSeries();
+                        });
                     } else {
                         return callbackSeries();
                     }
@@ -277,8 +259,7 @@ var KGbuilder = {
                 function (callbackSeries) {
                     socket.message("KGbuild", "loading ONE MODEL reference dictionary ");
 
-                    var sqlQuery =
-                        "select term,superClassUri,superClassLabel,classLabel,classUri,source from reference_dictionary ";
+                    var sqlQuery = "select term,superClassUri,superClassLabel,classLabel,classUri,source from reference_dictionary ";
                     SQLserverConnector.getData("onemodel", sqlQuery, function (err, result) {
                         if (err) return callbackSeries(err);
 
@@ -293,8 +274,7 @@ var KGbuilder = {
                         });
 
                         result.forEach(function (item) {
-                            if (!oneModelReferenceDictionary[item.superClassUri])
-                                oneModelReferenceDictionary[item.superClassUri] = {};
+                            if (!oneModelReferenceDictionary[item.superClassUri]) oneModelReferenceDictionary[item.superClassUri] = {};
                             if (!oneModelReferenceDictionary[item.superClassUri][item.term]) {
                                 oneModelReferenceDictionary[item.superClassUri][item.term] = {
                                     classUri: item.classUri,
@@ -327,16 +307,11 @@ var KGbuilder = {
                 function (callbackSeries) {
                     if (options.replaceGraph) return callbackSeries();
                     socket.message("KGbuild", "loading KG existing IDS ");
-                    KGbuilder.getExistingLabelUriMap(
-                        options.sparqlServerUrl,
-                        KGgraphUri,
-                        null,
-                        function (err, result) {
-                            if (err) return callbackSeries(err);
-                            existingUrisMap = result;
-                            callbackSeries();
-                        }
-                    );
+                    KGbuilder.getExistingLabelUriMap(options.sparqlServerUrl, KGgraphUri, null, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        existingUrisMap = result;
+                        callbackSeries();
+                    });
                 },
 
                 //get uniqueTriples map // TO IMPLEMENT
@@ -366,12 +341,7 @@ var KGbuilder = {
                 },
                 //generate triples and write in triple store
                 function (callbackSeries) {
-                    var processor = function (
-                        data,
-                        uniqueTriples,
-                        fetchedCount,
-                        callbackProcessor
-                    ) {
+                    var processor = function (data, uniqueTriples, fetchedCount, callbackProcessor) {
                         options.existingUrisMap = existingUrisMap;
                         options.ARDLdictionary = ARDLdictionary;
                         options.oneModelReferenceDictionary = oneModelReferenceDictionary;
@@ -379,88 +349,60 @@ var KGbuilder = {
                         options.existingUrisMap = existingUrisMap;
                         options._options = options._options;
 
-                        KGbuilder.generateMappingFileTriples(
-                            mappings.mappings,
-                            data,
-                            KGgraphUri,
-                            options,
-                            function (err, result) {
-                                if (err) return callbackProcessor(err);
+                        KGbuilder.generateMappingFileTriples(mappings.mappings, data, KGgraphUri, options, function (err, result) {
+                            if (err) return callbackProcessor(err);
 
-                                for (var key in result.urisMap) {
-                                    existingUrisMap[key] = result.urisMap[key];
-                                }
-
-                                // create new  triples in graph
-
-                                var slicedTriples = util.sliceArray(
-                                    result.triples,
-                                    triplesFetchtLength
-                                );
-
-                                async.eachSeries(
-                                    slicedTriples,
-                                    function (triples, callbackEach) {
-                                        //    return callbackEach();
-                                        var triplesStr = "";
-                                        triples.forEach(function (triple) {
-                                            var value = triple.object;
-
-                                            if (value.indexOf("http") == 0)
-                                                value = "<" + value + ">";
-                                            var tripleStr =
-                                                "<" +
-                                                triple.subject +
-                                                "> <" +
-                                                triple.predicate +
-                                                "> " +
-                                                value +
-                                                ".\n";
-                                            var tripleHash = util.hashCode(tripleStr);
-                                            if (uniqueTriples[tripleHash]) return;
-                                            else {
-                                                uniqueTriples[tripleHash] = 1;
-                                                triplesStr += tripleStr;
-                                            }
-                                        });
-
-                                        var queryGraph = "with <" + KGgraphUri + ">" + "insert {";
-                                        queryGraph += triplesStr;
-
-                                        queryGraph += "}";
-
-                                        var params = { query: queryGraph };
-
-                                        httpProxy.post(
-                                            options.sparqlServerUrl,
-                                            null,
-                                            params,
-                                            function (err, result) {
-                                                if (err) {
-                                                    socket.message(err);
-                                                    return callbackEach(err);
-                                                }
-                                                socket.message(
-                                                    "KGbuild",
-                                                    "rows processed :" +
-                                                        fetchedCount +
-                                                        "  triples created: " +
-                                                        totalTriples
-                                                );
-                                                totalTriples += triples.length;
-                                                return callbackEach(null);
-                                            }
-                                        );
-                                    },
-                                    function (err) {
-                                        if (err) {
-                                            callbackProcessor(err);
-                                        }
-                                        return callbackProcessor(null, totalTriples);
-                                    }
-                                );
+                            for (var key in result.urisMap) {
+                                existingUrisMap[key] = result.urisMap[key];
                             }
-                        );
+
+                            // create new  triples in graph
+
+                            var slicedTriples = util.sliceArray(result.triples, triplesFetchtLength);
+
+                            async.eachSeries(
+                                slicedTriples,
+                                function (triples, callbackEach) {
+                                    //    return callbackEach();
+                                    var triplesStr = "";
+                                    triples.forEach(function (triple) {
+                                        var value = triple.object;
+
+                                        if (value.indexOf("http") == 0) value = "<" + value + ">";
+                                        var tripleStr = "<" + triple.subject + "> <" + triple.predicate + "> " + value + ".\n";
+                                        var tripleHash = util.hashCode(tripleStr);
+                                        if (uniqueTriples[tripleHash]) return;
+                                        else {
+                                            uniqueTriples[tripleHash] = 1;
+                                            triplesStr += tripleStr;
+                                        }
+                                    });
+
+                                    var queryGraph = "with <" + KGgraphUri + ">" + "insert {";
+                                    queryGraph += triplesStr;
+
+                                    queryGraph += "}";
+
+                                    var params = { query: queryGraph };
+
+                                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                                        if (err) {
+                                            socket.message(err);
+                                            return callbackEach(err);
+                                        }
+                                        socket.message("KGbuild", "rows processed :" + fetchedCount + "  triples created: " + totalTriples);
+                                        totalTriples += triples.length;
+                                        return callbackEach(null);
+                                    });
+                                },
+                                function (err) {
+                                    if (err) {
+                                        callbackProcessor(err);
+                                    }
+                                    return callbackProcessor(null, totalTriples);
+                                }
+                            );
+                        });
                     };
                     var selectStr = "";
                     for (var mapping in mappings.mappings) {
@@ -475,47 +417,24 @@ var KGbuilder = {
                     }
 
                     if (dbConnection.type == "sql.sqlserver") {
-                        var sqlQuery =
-                            "select count(*) as count from  " +
-                            dbConnection.dbName +
-                            "." +
-                            sqlTable +
-                            " ";
-                        SQLserverConnector.getData(
-                            dbConnection.dbName,
-                            sqlQuery,
-                            function (err, result) {
-                                if (err) {
-                                    console.log(err);
-                                    return callback(err);
-                                }
-                                socket.message("KGbuild", "tableSize_" + result[0].count);
-
-                                var sqlQuery =
-                                    "select distinct " +
-                                    selectStr +
-                                    " from  " +
-                                    dbConnection.dbName +
-                                    "." +
-                                    sqlTable +
-                                    " ";
-
-                                //sqlQuery += " ORDER BY " + selectStr + " "
-                                SQLserverConnector.getFetchedData(
-                                    dbConnection.dbName,
-                                    sqlQuery,
-                                    processor,
-                                    sqlParams.fetchSize,
-                                    uniqueTriples,
-                                    function (err, result) {
-                                        //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
-                                        if (err) return callbackSeries(err);
-
-                                        callbackSeries();
-                                    }
-                                );
+                        var sqlQuery = "select count(*) as count from  " + dbConnection.dbName + "." + sqlTable + " ";
+                        SQLserverConnector.getData(dbConnection.dbName, sqlQuery, function (err, result) {
+                            if (err) {
+                                console.log(err);
+                                return callback(err);
                             }
-                        );
+                            socket.message("KGbuild", "tableSize_" + result[0].count);
+
+                            var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName + "." + sqlTable + " ";
+
+                            //sqlQuery += " ORDER BY " + selectStr + " "
+                            SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, result) {
+                                //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
+                                if (err) return callbackSeries(err);
+
+                                callbackSeries();
+                            });
+                        });
                     } else {
                         sqlConnector.processFetchedData(
                             sqlParams.database,
@@ -545,13 +464,9 @@ var KGbuilder = {
                     } catch (e) {
                         return callbackSeries(e);
                     }
-                    fs.writeFile(
-                        mappingFilePath,
-                        JSON.stringify(mappings, null, 2),
-                        function (err, result) {
-                            return callbackSeries(err);
-                        }
-                    );
+                    fs.writeFile(mappingFilePath, JSON.stringify(mappings, null, 2), function (err, result) {
+                        return callbackSeries(err);
+                    });
                 },
             ],
 
@@ -619,25 +534,14 @@ var KGbuilder = {
             }
         );
     },
-    buidlKG: function (
-        mappingFilePaths,
-        sparqlServerUrl,
-        graphUri,
-        replaceGraph,
-        dataSource,
-        _options,
-        callback
-    ) {
+    buidlKG: function (mappingFilePaths, sparqlServerUrl, graphUri, replaceGraph, dataSource, _options, callback) {
         var totalTriples = 0;
         var count = 0;
         async.eachSeries(
             mappingFilePaths,
             function (mappingFilePath, callbackEach) {
                 if (count++ > 0) replaceGraph = false;
-                socket.message(
-                    "KGbuild",
-                    "-----------Processing " + mappingFilePath + "--------------"
-                );
+                socket.message("KGbuild", "-----------Processing " + mappingFilePath + "--------------");
 
                 var mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
 
@@ -658,16 +562,11 @@ var KGbuilder = {
                 };
 
                 socket.message("KGbuild", "creating triples for mapping " + mappingFilePath);
-                KGbuilder.generateAdlSqlTriples(
-                    mappingFilePath,
-                    graphUri,
-                    options,
-                    function (err, result) {
-                        if (err) return callbackEach(err);
-                        //  totalTriples += result.length
-                        return callbackEach();
-                    }
-                );
+                KGbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, result) {
+                    if (err) return callbackEach(err);
+                    //  totalTriples += result.length
+                    return callbackEach();
+                });
             },
             function (err) {
                 if (err) callback(err);
@@ -689,10 +588,7 @@ if (false) {
         var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/";
         var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/";
         var adlGraphUri = "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/";
-        var mappingFilePaths = [
-            "MDM_2.3_AFTWIN_adl.tblModel.json",
-            "MDM_2.3_AFTWIN_adl.tblModelAttribute.json",
-        ];
+        var mappingFilePaths = ["MDM_2.3_AFTWIN_adl.tblModel.json", "MDM_2.3_AFTWIN_adl.tblModelAttribute.json"];
 
         var dbConnection = {
             host: "localhost",
@@ -705,14 +601,8 @@ if (false) {
         var replaceGraph = true;
     }
 
-    KGbuilder.buidlKG(
-        mappingFilePaths,
-        sparqlServerUrl,
-        adlGraphUri,
-        replaceGraph,
-        function (err, result) {
-            if (err) return socket.message("KGbuild", err);
-            return socket.message("KGbuild", "ALL DONE");
-        }
-    );
+    KGbuilder.buidlKG(mappingFilePaths, sparqlServerUrl, adlGraphUri, replaceGraph, function (err, result) {
+        if (err) return socket.message("KGbuild", err);
+        return socket.message("KGbuild", "ALL DONE");
+    });
 }

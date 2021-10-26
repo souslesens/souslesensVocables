@@ -20,14 +20,9 @@ var generateRdf = function (entitiesArray) {
 
             //  var scheme = "all"
             var str = "";
-            str +=
-                '<?xml version="1.0" encoding="utf-8"?>\n' +
-                '<rdf:RDF xmlns:skos="http://www.w3.org/2004/02/skos/core#"  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">';
+            str += '<?xml version="1.0" encoding="utf-8"?>\n' + '<rdf:RDF xmlns:skos="http://www.w3.org/2004/02/skos/core#"  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">';
 
-            str +=
-                "<skos:ConceptScheme rdf:about='http://PetroleumAbstractsThesaurus/" +
-                scheme +
-                "'>";
+            str += "<skos:ConceptScheme rdf:about='http://PetroleumAbstractsThesaurus/" + scheme + "'>";
             str += "  <skos:prefLabel xml:lang='en'>" + scheme + "</skos:prefLabel>";
             str += "</skos:ConceptScheme>";
 
@@ -46,37 +41,20 @@ var generateRdf = function (entitiesArray) {
                     if (entity.inScheme != scheme) return;
                 }
 
-                str +=
-                    "<skos:Concept rdf:about='http://PetroleumAbstractsThesaurus/" +
-                    entity.prefLabel +
-                    "'>\n";
-                str +=
-                    "  <skos:inScheme rdf:resource='http://PetroleumAbstractsThesaurus/" +
-                    entity.inScheme +
-                    "'/>\n";
+                str += "<skos:Concept rdf:about='http://PetroleumAbstractsThesaurus/" + entity.prefLabel + "'>\n";
+                str += "  <skos:inScheme rdf:resource='http://PetroleumAbstractsThesaurus/" + entity.inScheme + "'/>\n";
 
-                str +=
-                    "  <skos:prefLabel xml:lang='en'>" + entity.prefLabel + "</skos:prefLabel>\n";
+                str += "  <skos:prefLabel xml:lang='en'>" + entity.prefLabel + "</skos:prefLabel>\n";
 
                 entity.altLabels.forEach(function (altLabel) {
-                    str +=
-                        "  <skos:altLabel xml:lang='en'>" +
-                        altLabel.replace(/&/g, " ") +
-                        "</skos:altLabel>\n";
+                    str += "  <skos:altLabel xml:lang='en'>" + altLabel.replace(/&/g, " ") + "</skos:altLabel>\n";
                 });
 
-                if (entity.broader)
-                    str +=
-                        "  <skos:broader rdf:resource='http://PetroleumAbstractsThesaurus/" +
-                        entity.broader +
-                        "'/>\n";
+                if (entity.broader) str += "  <skos:broader rdf:resource='http://PetroleumAbstractsThesaurus/" + entity.broader + "'/>\n";
 
                 if (entity.relateds) {
                     entity.relateds.forEach(function (related) {
-                        str +=
-                            "  <skos:related rdf:resource='http://PetroleumAbstractsThesaurus/" +
-                            related +
-                            "'/>\n";
+                        str += "  <skos:related rdf:resource='http://PetroleumAbstractsThesaurus/" + related + "'/>\n";
                     });
                 }
                 str += "</skos:Concept>\n";

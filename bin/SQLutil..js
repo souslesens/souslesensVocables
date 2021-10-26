@@ -155,10 +155,4 @@ var SQLutil = {
 
 module.exports = SQLutil;
 
-SQLutil.createTableFromCsv(
-    null,
-    "",
-    "testX",
-    "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv",
-    function (err, result) {}
-);
+SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (err, result) {});

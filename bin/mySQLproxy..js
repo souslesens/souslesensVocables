@@ -47,19 +47,13 @@ var mySQLproxy = {
         var excludedTables = [];
         mySQLproxy.getConnection(connection, function (err, conn) {
             if (err) return callback(err);
-            var sql =
-                'SELECT * FROM information_schema.columns where table_schema="' +
-                mySqlConnectionOptions.database +
-                '"';
+            var sql = 'SELECT * FROM information_schema.columns where table_schema="' + mySqlConnectionOptions.database + '"';
             conn.query(sql, function (err, result) {
                 if (err) return callback(err);
 
                 var model = {};
                 result.forEach(function (line) {
-                    if (
-                        line.TABLE_NAME.indexOf("r_") == 0 ||
-                        excludedTables.indexOf(line.TABLE_NAME) > -1
-                    );
+                    if (line.TABLE_NAME.indexOf("r_") == 0 || excludedTables.indexOf(line.TABLE_NAME) > -1);
                     else {
                         //relation
                         if (!model[line.TABLE_NAME]) model[line.TABLE_NAME] = [];

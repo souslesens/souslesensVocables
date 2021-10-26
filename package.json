@@ -23,7 +23,7 @@
     "csv-parser": "^3.0.0",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/types": "^5.1.0",
-    "@mui/icons-material": "^5.0.4",
+    "@mui/icons-material": "^5.0.5",
     "@mui/x-data-grid": "^4.0.1",
     "async": "^3.2.1",
     "base64-stream": "^1.0.0",

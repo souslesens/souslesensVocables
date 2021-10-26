@@ -159,9 +159,7 @@
                 h = Math.min(h, 1000)
                 // $("#centralPanel").width(w)
                 $("#graphDiv").width(w)
-                $("#blendDiv").width(w)
                 $("#graphDiv").height(h - 70)
-                $("#blendDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
               //  $(".ui-accordion-content-active").height(h-100)
@@ -184,15 +182,11 @@
                     `);
                     $.getScript("/mainapp.js");
                 } else {
-                    $("#graphDiv").html("...");
+
+                    MainController.UI.onAccordionChangePanel(ui.newPanel[0].id)
                 }
 
-                    if (false && ui.newPanel[0].id == "blenderPanelDiv") {
-                        //Blender.initPanel();
-                        MainController.UI.showInCentralPanelDiv("blendDiv")
-                    } else {
-                        MainController.UI.showInCentralPanelDiv("graphDiv")
-                    }
+
                 });
                 $("#mainDialogDiv").dialog({
                     autoOpen: false,
@@ -407,7 +401,7 @@
 
         <div id="accordion">
 
-            <h3><span class="title">Tools </span></h3>
+            <h3><span id="toolsListPanelDiv" class="title">Tools </span></h3>
             <div style="margin:5px" class='max-height'>
                 <div class='max-height' id="toolsTreeDiv" class="jstree"></div>
             </div>
@@ -424,7 +418,7 @@
 
 
             <h3><span class="title" id="sourcePanelLabel"> </span></h3>
-            <div style="margin:5px" class='max-height'>
+            <div id="toolPanelDiv" style="margin:5px" class='max-height'>
                 <div id="actionDivContolPanelDiv"></div>
                 <div id="actionDiv" class="jstree"></div>
 
@@ -452,21 +446,7 @@
 
         </div>
 
-     <!--   <div id="blendDiv">
 
-            <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
-            <div style='display: flex;flex-direction: row;background-color: #ccc;'>
-                <div id='Blender_conceptTreeContainerDiv'></div>
-                <div>
-                    <div id="Blender_nodeEditionButtonsDiv" style="display: none">
-                        <button onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
-                        <button onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
-                    </div>
-                    <div id='Blender_nodeEditionContainerDiv'></div>
-                </div>
-
-            </div>
-        </div>-->
 
 
     </div>

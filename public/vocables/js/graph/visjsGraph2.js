@@ -187,7 +187,7 @@ var visjsGraph = (function () {
         })
 
             .on("dragStart", function (params) {
-                return;
+
                 var nodeId = params.nodes[0]
                 if (!nodeId)
                     return;

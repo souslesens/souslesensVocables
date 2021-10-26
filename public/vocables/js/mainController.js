@@ -458,14 +458,15 @@ var MainController = (function () {
         },
 
 
-        showInCentralPanelDiv: function (divId) {
-            if (divId == "graphDiv") {
-                $("#graphDiv").css("display", "block")
-                $("#blendDiv").css("display", "none")
-            } else if (divId = "blendDiv" && Blender.displayMode == "centralPanelDiv") {
-                $("#graphDiv").css("display", "none")
-                $("#blendDiv").css("display", "block")
+        onAccordionChangePanel: function (panelLabel) {
+
+
+            if ( self.previousPanelLabel &&  self.previousPanelLabel == "toolPanelDiv") {
+               ;
+            } else {
+              //  $("#graphDiv").html("...");
             }
+            self.previousPanelLabel=panelLabel
 
         },
 

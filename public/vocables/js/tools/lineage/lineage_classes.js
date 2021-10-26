@@ -33,9 +33,13 @@ var Lineage_classes = (function () {
 
         self.maxChildrenDrawn = 30;
         self.soucesLevelMap = {}
-        self.mainSource = null
+        self.mainSource = null;
+        self.isLoaded=false
 
         self.onLoaded = function () {
+            if(self.isLoaded)
+                return;
+            self.isLoaded=true
             $("#sourceDivControlPanelDiv").html("")
             Lineage_common.currentSource = null;
             MainController.UI.message("");
@@ -140,16 +144,14 @@ var Lineage_classes = (function () {
             items.addSimilarlabels = {
                 label: "add similars (label)",
                 action: function (e) {
-                    $("#Lineage_similarTypeRadio_Labels").prop("checked", true)
-                    Lineage_classes.drawSimilarsNodes()
+                    Lineage_classes.drawSimilarsNodes("sameLabel")
 
                 }
             }
             items.addSameAs = {
                 label: "add similars (sameAs)",
                 action: function (e) {
-                    $("#Lineage_similarTypeRadio_SameAs").prop("checked", true)
-                    Lineage_classes.drawSimilarsNodes()
+                    Lineage_classes.drawSimilarsNodes("sameAs")
 
                 }
             }
@@ -362,7 +364,7 @@ var Lineage_classes = (function () {
                     "minVelocity": 0.75,
 
                 },
-               // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
+                // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
                 //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
             }
@@ -407,7 +409,7 @@ var Lineage_classes = (function () {
 
             if (nodeIds) {
 
-                var parentIds = visjsGraph.getNodeDescendantIds(nodeIds, true)
+                var parentIds = nodeIds;// visjsGraph.getNodeDescendantIds(nodeIds, true)
 
 
             } else {
@@ -651,15 +653,12 @@ var Lineage_classes = (function () {
         }
 
 
-        self.drawSimilarsNodes = function (node, sources, descendantsAlso) {
+        self.drawSimilarsNodes = function (similarType,node, sources, descendantsAlso) {
             MainController.UI.message("")
             //    $("#Lineage_toSource").val("")
 
             var similarType
-            if ($("#Lineage_similarTypeRadio_Labels").prop("checked"))
-                similarType = "labels";
-            else if ($("#Lineage_similarTypeRadio_SameAs").prop("checked"))
-                similarType = "sameAs";
+
 
             var similars = [];
             if (!sources)
@@ -673,7 +672,7 @@ var Lineage_classes = (function () {
             var slices;
             async.series([
                 function (callbackSeries) {
-                    if (similarType != "labels")
+                    if (similarType != "sameLabel")
                         return callbackSeries()
                     if (!node) {
                         if (!sources)
@@ -765,7 +764,7 @@ var Lineage_classes = (function () {
 
                             }
                             var filter = ""
-                            if (similarType == "labels") {
+                            if (similarType == "sameLabel") {
                                 filter = Sparql_common.setFilter("concept", null, items, {exactMatch: true})
                             } else if (similarType == "sameAs") {
                                 filter = Sparql_common.setFilter("concept", items, null)
@@ -835,7 +834,7 @@ var Lineage_classes = (function () {
 
                                     var from;
                                     var width, arrows;
-                                    if (similarType == "labels") {
+                                    if (similarType == "sameLabel") {
                                         from = sourceItemsMap[item.label.toLowerCase()]
                                         width = 1
                                         arrows = {
@@ -1126,7 +1125,7 @@ var Lineage_classes = (function () {
             }
 
 
-            Sparql_OWL.getObjectProperties(source, classIds, {withoutImports:1}, function (err, result) {
+            Sparql_OWL.getObjectProperties(source, classIds, {withoutImports: 1}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 if (result.length == 0) {
@@ -1166,11 +1165,11 @@ var Lineage_classes = (function () {
                         })
 
                     }
-                    if( !item.domain){
-                        item.domain={value:"?"}
+                    if (!item.domain) {
+                        item.domain = {value: "?"}
                     }
-                    if(! item.range){
-                        item.range={range:"?"}
+                    if (!item.range) {
+                        item.range = {range: "?"}
                     }
 
                     var edgeId = item.domain.value + "_" + item.range.value + "_" + item.prop.value
@@ -1210,16 +1209,16 @@ var Lineage_classes = (function () {
                 $("#waitImg").css("display", "none");
 
                 if (Config.sources[source].schemaType != "INDIVIDUAL") {
-                  //  Lineage_classes.drawRestrictions(classIds)
+                    //  Lineage_classes.drawRestrictions(classIds)
                 }
 
             })
 
         }
 
-        self.drawRestrictions = function (classIds,descendants,source) {
-            if(!source)
-            source = Lineage_common.currentSource
+        self.drawRestrictions = function (classIds, descendants, source) {
+            if (!source)
+                source = Lineage_common.currentSource
             if (!source)
                 return alert("select a source");
             if (!classIds) {
@@ -1228,7 +1227,7 @@ var Lineage_classes = (function () {
             }
             MainController.UI.message("")
 
-            Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports:1}, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 if (result.length == 0) {
@@ -1264,7 +1263,8 @@ var Lineage_classes = (function () {
                                 source: source,
                                 id: item.value.value,
                                 label: item.valueLabel.value,
-                                varName: "value"
+                                varName: "value",
+
                             }
                         })
 
@@ -1278,7 +1278,7 @@ var Lineage_classes = (function () {
                             from: item.concept.value,
                             to: item.value.value,
                             label: "<i>" + item.propLabel.value + "</i>",
-                            data: {propertyId: item.prop.value, source: source},
+                            data: {propertyId: item.prop.value,  bNodeId:item.node.value, source: source},
                             font: {multi: true, size: 10},
                             // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
                             //   physics:false,
@@ -2079,14 +2079,19 @@ var Lineage_classes = (function () {
                     SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
                 }
                 if (options && options.altKey) {
-                    Lineage_blend.addNodeToAssociationNode(node)
-                    return Clipboard.copy({
-                        type: "lineage_node",
-                        source: node.data.source,
-                        id: node.id,
-                        label: node.label,
-                        initialShape: node.shape
-                    }, "_visjsNode", options)
+                    if (node.fromNode && node.toNode && node.data) {//edge
+                        Lineage_blend.deleteRestriction(node)
+
+                    } else {//node
+                        Lineage_blend.addNodeToAssociationNode(node)
+                        return Clipboard.copy({
+                            type: "lineage_node",
+                            source: node.data.source,
+                            id: node.id,
+                            label: node.label,
+                            initialShape: node.shape
+                        }, "_visjsNode", options)
+                    }
                 }
                 if (options.dbleClick) {
                     Lineage_classes.addChildrenToGraph([self.currentGraphNode.id], self.currentGraphNode.data.source)
@@ -2105,7 +2110,7 @@ var Lineage_classes = (function () {
 
             drawSimilars: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
-                Lineage_classes.drawSimilarsNodes(self.currentGraphNode, null, descendantsAlso)
+                Lineage_classes.drawSimilarsNodes("label",self.currentGraphNode, null, descendantsAlso)
             },
             hideChildren: function () {
                 Lineage_classes.removeLastChildrenFromGraph(self.currentGraphNode.id)

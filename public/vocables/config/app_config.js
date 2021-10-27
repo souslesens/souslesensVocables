@@ -23,7 +23,7 @@ var Config = (function () {
     self.defaultNewUriRoot = "http://souslesens.org/resource/"
     self.loginMode = "json";
 
-  // self.loginMode = "none";
+  self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}

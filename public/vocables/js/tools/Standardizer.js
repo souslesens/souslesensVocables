@@ -32,6 +32,7 @@ var Standardizer = (function () {
                 indexes.forEach(function (item) {
                     indexesTreeData.push({id: item, text: item, parent: "#"})
                 })
+
                 var distinctSources = indexes
                 common.jstree.loadJsTree("KGMappingAdvancedMappings_sources", indexesTreeData, {withCheckboxes: 1});
                 //    var distinctSources = ["readi", "cfihos", "pca"]
@@ -48,6 +49,10 @@ var Standardizer = (function () {
 
                 common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value")
                 KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
+
+                common.fillSelectOptions("Standardizer_sourcesSelect", indexes, true);
+
+
             })
             self.matchCandidates = {}
         }, 200)
@@ -104,7 +109,7 @@ var Standardizer = (function () {
 
         var words = text.split("\n")
         var entitiesMap = {};
-        self.fuzzyMatchesMap={}
+        self.fuzzyMatchesMap = {}
         var count = 0
         var matrixHtml = ""
 
@@ -126,7 +131,7 @@ var Standardizer = (function () {
 
         async.eachSeries(words, function (word, callbackEach) {
 
-            self.fuzzyMatchesMap[word]={entities:[]}
+            self.fuzzyMatchesMap[word] = {entities: []}
             word = word.toLowerCase().trim()
             if ((count++) % 10 == 0)
                 MainController.UI.message("Searching exact matches " + count + "/" + words.length)
@@ -205,18 +210,20 @@ var Standardizer = (function () {
                         }
 
                         entitiesMap[key][entity.index] = entity
-                    }else if(key.indexOf(word)>-1){
-                        self.fuzzyMatchesMap[word].entities.push(entity)
+                    } else if (key.indexOf(word) > -1) {
+                      //  entitiesMap[key][entity.index] = entity
+                   //  self.fuzzyMatchesMap[key].entities.push(entity)
                     }
-                
+
                 })
+                self.entitiesMap = entitiesMap;
                 callbackEach()
             })
         }, function (err) {
 
 
             if (self.mode == "normal") {
-                self.entitiesMap = entitiesMap;
+
                 KGadvancedMapping.currentColumnValueDivIds = {}
                 var distinctSources = []
                 words.forEach(function (word) {
@@ -257,28 +264,37 @@ var Standardizer = (function () {
                 })
             } else if (self.mode == "matrix") {
 
-                words.forEach(function (word) {
-
+                words.forEach(function (Word) {
+                    var word=Word.toLowerCase()
+                    matrixHtml +="<div class='matrixRow'>"
+                    matrixHtml += "<div class='matrixRowTitle'>" + word  + "</div>"
                     indexes.forEach(function (indexName) {
-                        self.fuzzyMatchesMap[word]
-                        matrixHtml += "<div class='matrixRowTitle'>" + word + "</div>"
+                        var cellStr=""
+                        if(self.entitiesMap[word]) {
+                            var entity = self.entitiesMap[word][indexName]
+                            if (entity)
+                                cellStr="X"
+
+                        }
+                        matrixHtml += "<div class='matrixCell'>" + cellStr + "</div>"
                     })
+                    matrixHtml +="</div>"
+
+
+
                 })
 
-                        
-                    
-                 
+
+                /* self.currentHits.forEach(function (index) {
 
 
-               /* self.currentHits.forEach(function (index) {
-
-
-                })*/
+                 })*/
 
             }
+            $("#KGmapping_distinctColumnValuesContainer").html(matrixHtml)
         })
 
-        $("#KGmapping_distinctColumnValuesContainer").html(matrixHtml)
+
     }
 
     self.editCandidateValues = function (columnValueDivId, searchedText) {
@@ -465,6 +481,40 @@ var Standardizer = (function () {
 
         })
 
+    }
+
+    self.listSourceLabels = function () {
+        var source = $("#Standardizer_sourcesSelect").val();
+        if (!source || source == "")
+            return alert("select a source");
+
+
+        var queryObj = {"match_all": {}}
+
+
+        var query = {
+            "query": queryObj,
+            "from": 0,
+            "size": 100,
+            "_source": {
+                "excludes": [
+                    "attachment.content"
+                ]
+            },
+        }
+
+
+        ElasticSearchProxy.queryElastic(query, source, function (err, result) {
+            if (err)
+                return alert(err)
+            self.currentHits = result.hits.hits;
+            var str = ""
+            result.hits.hits.forEach(function (hit) {
+                str += hit._source.label + "\n";
+
+            })
+            $("#Standardizer_wordsTA").val(str)
+        })
     }
 
 

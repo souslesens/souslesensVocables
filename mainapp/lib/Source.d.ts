@@ -5,7 +5,7 @@ export declare type Source = {
     name: string;
     _type: string;
     type: string;
-    graphUri: string[];
+    graphUri: string;
     sparql_server: SparqlServer;
     controller: string;
     topClassFilter: string;

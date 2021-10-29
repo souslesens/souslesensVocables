@@ -337,14 +337,14 @@ const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.D
                     style={{ display: !dataSource ? "none" : "" }} />
                 </Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("dbName")}
-                    value={dataSource ?? ""}
+                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.dbName : ""}
                     id={`dbName`}
                     label={"Data Base's Name"}
                     variant="standard"
                     style={{ display: !dataSource ? "none" : "" }}
                 /></Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("table_schema")}
-                    value={dataSource ?? ""}
+                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.table_schema : ""}
                     id={`table_schema`}
                     label={"Table Schema"}
                     style={{ display: !dataSource ? "none" : "" }}

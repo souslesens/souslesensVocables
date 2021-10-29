@@ -15,7 +15,7 @@ var DataController = require("../bin/dataController.");
 var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
-var DictionariesManager = require("../bin/KG/DictionariesManager.");
+var DictionariesManager = require("../bin/KG/dictionariesManager.");
 
 const promiseFs = require("fs").promises;
 

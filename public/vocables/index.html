@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <title>SouslesensVocables</title>
-    <link rel="icon" href="../icons/souslesensIcon.png"/>
+    <link rel="icon" href="../icons/souslesensIcon.png" />
 
-   <script src="./js/external/jquery/jquery.min.js"></script>
+    <script src="./js/external/jquery/jquery.min.js"></script>
     <script src="./js/external/jquery/jquery-ui.min.js"></script>
-    <link href="./js/external/jquery/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./js/external/jquery/jquery-ui.min.css" rel="stylesheet" type="text/css" />
 
-  <!--  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <!--  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>-->
 
@@ -19,11 +20,11 @@
 
 
     <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
 
     <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
-    <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css"/>
+    <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
     <script src="./js/graph/visjsGraph2.js"></script>
     <script src="./js/graph/canvas2svg.js"></script>
     <script src="./js/graph/SVGexport.js"></script>
@@ -61,7 +62,7 @@
     <script src="js/tools/blender/owlEditor.js"></script>
 
 
-   <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
+    <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
 
     <script src="js/tools/KG/mappings/KGmappings.js"></script>
     <script src="js/tools/KG/mappings/KGmappingGraph.js"></script>
@@ -80,7 +81,7 @@
     <script src="js/tools/KG/KGcommon.js"></script>
     <script src="js/tools/KG/browser/KGbrowserGraph.js"></script>
     <script src="js/tools/KG/browser/KGbrowserQuery.js"></script>
-   <!-- <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>-->
+    <!-- <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>-->
     <script src="js/tools/KG/browser/KGbrowser.js"></script>
     <script src="js/tools/KG/browser/KGbrowserBI.js"></script>
     <script src="js/tools/KG/browser/KGbrowserDataTable.js"></script>
@@ -133,10 +134,10 @@
     <!--  <script src="js/authentification.js"></script>-->
 
     <link rel="stylesheet" type="text/css"
-          href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"/>
+        href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css" />
 
     <script type="text/javascript"
-            src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
+        src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"></script>
 
 
 
@@ -148,10 +149,10 @@
         var h
 
         $(function () {
-            MainController.initConfig(function(err) {
-                if(err)
-                  return  alert(err)
-             //   config = {loginMode: "none", appName: "VOCABLES"};
+            MainController.initConfig(function (err) {
+                if (err)
+                    return alert(err)
+                //   config = {loginMode: "none", appName: "VOCABLES"};
                 authentication.init()
 
                 w = $(document).width() - leftPanelWidth - 30;
@@ -164,28 +165,28 @@
                 $("#blendDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
-              //  $(".ui-accordion-content-active").height(h-100)
-              //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
+                //  $(".ui-accordion-content-active").height(h-100)
+                //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
 
 
                 //  $('.jstree-default').css("max-height",h-200)
                 $(".jstree").height(w - 100);
 
                 $("#accordion").accordion()
-                $("#accordion").accordion("option", {active: 0});
+                $("#accordion").accordion("option", { active: 0 });
                 $("#accordion").on("accordionbeforeactivate", function (event, ui) {
                     if (!KGmappings.checkMappingEditionSave())
                         return false;
                 })
                 $("#accordion").on("accordionactivate", function (event, ui) {
-                if (ui.newHeader.text() === "Admin") {
-                    $("#graphDiv").html(`
+                    if (ui.newHeader.text() === "Admin") {
+                        $("#graphDiv").html(`
                         <div id="mount-app-here"></div>
                     `);
-                    $.getScript("/mainapp.js");
-                } else {
-                    $("#graphDiv").html("...");
-                }
+                        $.getScript("/mainapp.js");
+                    } else {
+                        $("#graphDiv").html("...");
+                    }
 
                     if (false && ui.newPanel[0].id == "blenderPanelDiv") {
                         //Blender.initPanel();
@@ -226,11 +227,13 @@
 
 
         }
-        .jstree-icon{
-            width:15px !important;
+
+        .jstree-icon {
+            width: 15px !important;
         }
-        .jstree-ocl{
-            width:24px !important;
+
+        .jstree-ocl {
+            width: 24px !important;
         }
 
         #actionDiv {
@@ -258,8 +261,8 @@
 
         .jstree-default {
             min-height: 300px !important;
-           height: 600px ;
-          overflow: auto;
+            height: 600px;
+            overflow: auto;
         }
 
         .jstree-node {
@@ -268,10 +271,11 @@
 
         #currentSourceTreeDiv {
             overflow: auto;
-            height: 600px ;
+            height: 600px;
         }
-        .jstreeParent{
-            width:350px;
+
+        .jstreeParent {
+            width: 350px;
             height: 600px;
             overflow: auto;
             border: #6e2500 1px groove;
@@ -306,10 +310,10 @@
             //color: #6e2500;
             color: white;
             background-color: #00a37f;
-            padding:2px;
-            margin:2px;
+            padding: 2px;
+            margin: 2px;
 
-        // max-width: 1200 px;
+            // max-width: 1200 px;
 
         }
 
@@ -345,112 +349,117 @@
             margin: 2px;
 
         }
-        .mainDialogDiv{
+
+        .mainDialogDiv {
             background-color: #ddd;
         }
 
 
-        .td_title{
+        .td_title {
             padding: 3px;
             font-weight: bold;
         }
-        .td_value{
+
+        .td_value {
             padding: 3px;
         }
 
-        .jstree-contextmenu{
+        .jstree-contextmenu {
             z-index: 300 !important;
-          //  margin-left: -100px !important;
+            //  margin-left: -100px !important;
 
         }
-        .ui-dialog{
+
+        .ui-dialog {
             border-width: 5px !important;
             border-style: solid !important;
             border-color: #b8a587 !important;
         }
-
-
-
     </style>
 </head>
+
 <body>
-<div class='row'>
-
-</div>
-
-
-<div style="height: 20px;display: flex;    flex-flow: row;">
-    <div style="width:97%">
-        <table>
-            <tr>
-                <td>
-                    <!-- <button onclick="MainController.test()">T</button>-->
-                </td>
-                <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none;width: 15px; text-align: justify"></td>
-                <td><span class="messageDiv" id="messageDiv"></span></td>
-            </tr>
-        </table>
+    <div class='row'>
 
     </div>
-    <button style="justify-content: right" id="showBlenderButton" style="display: none" onclick="Blender.onLoaded()">Blender</button>
-    <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
-    <button style="justify-content: right" id="testButton" style="display: block" onclick="OwlEditor.loadUI()">test</button>
-    <button onclick="MainController.UI.copyCurrentQuery()">cpQy</button>
 
 
-</div>
+    <div style="height: 20px;display: flex;    flex-flow: row;">
+        <div style="width:97%">
+            <table>
+                <tr>
+                    <td>
+                        <!-- <button onclick="MainController.test()">T</button>-->
+                    </td>
+                    <td><img src="./images/waitAnimated.gif" id="waitImg"
+                            style="display: none;width: 15px; text-align: justify"></td>
+                    <td><span class="messageDiv" id="messageDiv"></span></td>
+                </tr>
+            </table>
 
-<div style="display: flex;flex-direction: row;justify-content:left">
-
-    <div id="leftPanelDiv" style='max-width: 400px;'>
-
-
-        <div id="accordion">
-
-            <h3><span class="title">Tools </span></h3>
-            <div style="margin:5px" class='max-height'>
-                <div class='max-height' id="toolsTreeDiv" class="jstree"></div>
-            </div>
+        </div>
+        <button style="justify-content: right" id="showBlenderButton" style="display: none"
+            onclick="Blender.onLoaded()">Blender</button>
+        <button style="justify-content: right" id="rightPanelToogleButton" style="display: none"
+            onclick="MainController.UI.toogleRightPanel()">R</button>
+        <button style="justify-content: right" id="testButton" style="display: block"
+            onclick="OwlEditor.loadUI()">test</button>
+        <button onclick="MainController.UI.copyCurrentQuery()">cpQy</button>
 
 
-            <h3><span class="title">Sources </span></h3>
-            <div id="sourcesPanel" style="margin:5px" class='max-height'>
-                <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
-                <div id="sourcesTreeDivContainer">
-                    <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+    </div>
+
+    <div style="display: flex;flex-direction: row;justify-content:left">
+
+        <div id="leftPanelDiv" style='max-width: 400px;'>
+
+
+            <div id="accordion">
+
+                <h3><span class="title">Tools </span></h3>
+                <div style="margin:5px" class='max-height'>
+                    <div class='max-height' id="toolsTreeDiv" class="jstree"></div>
                 </div>
-            </div>
 
-            <h3><span class="title">Admin</span></h3>
-            <div style="margin:5px" class='max-height'>
-                <div id="adminDiv" style="min-height: 50px"></div>
-            </div>
 
-            <h3><span class="title" id="sourcePanelLabel"> </span></h3>
-            <div style="margin:5px" class='max-height'>
-                <div id="actionDivContolPanelDiv"></div>
-                <div id="actionDiv" class="jstree"></div>
+                <h3><span class="title">Sources </span></h3>
+                <div id="sourcesPanel" style="margin:5px" class='max-height'>
+                    <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
+                    <div id="sourcesTreeDivContainer">
+                        <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+                    </div>
+                </div>
 
-            </div>
 
-       <!--     <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
+
+                <h3><span class="title" id="sourcePanelLabel"> </span></h3>
+                <div style="margin:5px" class='max-height'>
+                    <div id="actionDivContolPanelDiv"></div>
+                    <div id="actionDiv" class="jstree"></div>
+
+                </div>
+                <h3><span class="title">Admin</span></h3>
+                <div style="margin:5px" class='max-height'>
+                    <div id="adminDiv" style="min-height: 50px"></div>
+                </div>
+                <!--     <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
             <div id="blenderPanelDiv" class='max-height'>
 
             </div>-->
 
-        </div>
-      <!--  <div id="sparqlQueryDiv" style="height: 30px;">
+            </div>
+            <!--  <div id="sparqlQueryDiv" style="height: 30px;">
             <button onclick="MainController.UI.showCurrentQuery()">Q show</button>
             <button onclick="MainController.UI.copyCurrentQuery()">copy Query</button>
         </div>-->
-    </div>
-
-    <div id="centralPanelDiv" style="display: flex;flex-direction: row">
-        <div id="graphDiv">
-
         </div>
 
-     <!--   <div id="blendDiv">
+        <div id="centralPanelDiv" style="display: flex;flex-direction: row">
+            <div id="graphDiv">
+
+            </div>
+
+            <!--   <div id="blendDiv">
 
             <div id='Blender_collectionFilterContainerDiv' style='width:200px'></div>
             <div style='display: flex;flex-direction: row;background-color: #ccc;'>
@@ -467,31 +476,32 @@
         </div>-->
 
 
-    </div>
-    <div id="rightPanelDiv" style="display: flex;flex-direction: column;  ">
-    </div>
+        </div>
+        <div id="rightPanelDiv" style="display: flex;flex-direction: column;  ">
+        </div>
 
-</div>
-<div id="loginDiv"
-     style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
-    <div> login<input id="loginInput">
-        password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
+    </div>
+    <div id="loginDiv"
+        style="position: absolute;visibility: hidden;display: flex;justify-content:center;align-items: center">
+        <div> login<input id="loginInput">
+            password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13)
                               document.getElementById('loginButton').click()">
-        <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
-        <!--   <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>-->
+            <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
+            <!--   <button id="xxx" onclick="Tablette.updateCotesParTabletteZeros()">TEST boites</button>-->
 
-        <div id="loginMessage" style="margin: 20px; font-size: 14px; color:saddlebrown"></div>
+            <div id="loginMessage" style="margin: 20px; font-size: 14px; color:saddlebrown"></div>
+        </div>
     </div>
-</div>
 
-<div id="mainDialogDiv">
+    <div id="mainDialogDiv">
 
-</div>
+    </div>
 
-<div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"
-     style=" z-index:20;position:absolute;flex-direction:column;padding:5px;border-radius:5px;text-align:center;display: none;background-color: #ddd">
-</div>
+    <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"
+        style=" z-index:20;position:absolute;flex-direction:column;padding:5px;border-radius:5px;text-align:center;display: none;background-color: #ddd">
+    </div>
 
 
 </body>
+
 </html>

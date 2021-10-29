@@ -101,6 +101,7 @@ enum Type {
     UserUpdatedPredicates,
     UserClickedAddDataSource,
     UserUpdatedDataSource,
+    UserUpdatedsparql_server
 }
 
 enum Mode { Creation, Edition }
@@ -114,7 +115,7 @@ type Msg_ =
     | { type: Type.UserUpdatedPredicates, payload: { broaderPredicate: string, lang: string } }
     | { type: Type.UserClickedAddDataSource, payload: boolean }
     | { type: Type.UserUpdatedDataSource, payload: { type: string, table_schema: string, connection: string, dbName: string, local_dictionary: { table: string, labelColumn: string, idColumn: string } } }
-
+    | { type: Type.UserUpdatedsparql_server, payload: { url: string, method: string, headers: string[] } }
 
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
@@ -133,7 +134,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
 
         case Type.UserAddedGraphUri:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload.split(',') } }
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload.replace(/\s+/g, '').split(',') } }
 
         case Type.UserClickedAddDataSource:
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, dataSource: msg.payload ? { type: "", table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null } }
@@ -147,6 +148,8 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
         case Type.UserUpdatedDataSource:
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["dataSource"]: msg.payload } }
 
+        case Type.UserUpdatedsparql_server:
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["sparql_server"]: msg.payload } }
 
         case Type.ResetSource:
             switch (msg.payload) {
@@ -182,6 +185,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } })
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value })
 
+    const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+        update({
+            type: Type.UserUpdatedsparql_server,
+            payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, '').split(',') : event.target.value }
+        })
     const saveSources = () => {
 
         const updateSources = unwrappedSources.map(s => s.name === source.name ? sourceModel.sourceForm : s)
@@ -213,6 +221,27 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         value={Array.isArray(sourceModel.sourceForm.graphUri) ? sourceModel.sourceForm.graphUri.join() : ""}
                         id={`graphUris`}
                         label={"graph' Uris"}
+                        variant="standard" />
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleSparql_serverUpdate("method")}
+
+                        value={sourceModel.sourceForm.sparql_server.method}
+                        id={`sparql_server_Method`}
+                        label={"Sparql server method"}
+                        variant="standard" />
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleSparql_serverUpdate("url")}
+
+                        value={sourceModel.sourceForm.sparql_server.url}
+                        id={`sparql_server_url`}
+                        label={"Sparql server url"}
+                        variant="standard" />
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleSparql_serverUpdate("headers")}
+
+                        value={sourceModel.sourceForm.sparql_server.headers}
+                        id={`sparql_server_headers`}
+                        label={"Sparql server headers"}
                         variant="standard" />
                     </Grid>
                     <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("topClassFilter")}
@@ -308,14 +337,14 @@ const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.D
                     style={{ display: !dataSource ? "none" : "" }} />
                 </Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("dbName")}
-                    value={dataSource ?? ""}
+                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.dbName : ""}
                     id={`dbName`}
                     label={"Data Base's Name"}
                     variant="standard"
                     style={{ display: !dataSource ? "none" : "" }}
                 /></Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("table_schema")}
-                    value={dataSource ?? ""}
+                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.table_schema : ""}
                     id={`table_schema`}
                     label={"Table Schema"}
                     style={{ display: !dataSource ? "none" : "" }}

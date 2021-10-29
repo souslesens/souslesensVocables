@@ -28,6 +28,34 @@ services:
     networks:
       - backend
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: ${SA_PASSWORD:-superSecretP4ssword!}
+    volumes:
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/sqlserver:\
+      /var/opt/mssql"
+    networks:
+      - backend
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      discovery.type: single-node
+    volumes:
+      - "${DATA_ROOT_DIR:-/tmp}/vocables/elasticsearch/data:\
+      /usr/share/elasticsearch/data"
+    networks:
+      - backend
+
+  spacyserver:
+    image: neelkamath/spacy-server:2-en_core_web_sm
+    networks:
+      - backend
+
+
 networks:
   backend:
     driver: "bridge"

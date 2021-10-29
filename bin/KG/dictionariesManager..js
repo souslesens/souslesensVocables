@@ -113,6 +113,17 @@ var DictionariesManager = {
 
 
                 var mappings = {
+                    "settings": {
+                        "analysis": {
+                            "normalizer": {
+                                "lowercase_normalizer": {
+                                    "type": "custom",
+                                    "char_filter": [],
+                                    "filter": ["lowercase", "asciifolding"]
+                                }
+                            }
+                        }
+                    },
                         "mappings": {
                             [indexName]: {
                                 "properties": {
@@ -122,7 +133,8 @@ var DictionariesManager = {
                                         "fields": {
                                             "keyword": {
                                                 "type": "keyword",  // =========> store city.keyword as a keyword
-                                                "ignore_above": 256
+                                                "ignore_above": 256,
+                                                "normalizer": "lowercase_normalizer"
                                             }
                                         }
                                     },

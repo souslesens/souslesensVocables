@@ -127,13 +127,7 @@
 
 <div id="KGMappingAdvancedMappings_dictionaryMapping"
      style="display:flex;flex-direction:row;width:100%;margin:10px;padding :20px">
-    <div style="margin: 5px;padding :5px">
-        <select id="Standardizer_sourcesSelect"></select><button onclick="Standardizer.listSourceLabels()">List</button>
-        <button onclick="Standardizer.compareSource()">compare Source</button>
 
-        <br>
-        <div id="KGMappingAdvancedMappings_sourcesTree" class="jstree"></div>
-    </div>
 
 
     <div style="margin: 5px;padding :5px">
@@ -144,8 +138,8 @@
         Search <input id="KGadvancedMapping_searchColumnInput"
                       onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
         <br>
-        <div id="KGmapping_distinctColumnValuesContainer"
-             style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;overflow: auto"></div>
+        <div id="KGmapping_matrixContainer"
+             style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;width: 600px;overflow: auto"></div>
     </div>
     <div>
         <div id="KGadvancedMapping_mappingsMatrix" style="font-weight: bold"></div>

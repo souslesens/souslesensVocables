@@ -101,7 +101,7 @@ var Standardizer = (function () {
         $("#waitImg").css("display", "block")
         MainController.UI.message("Searching exact matches ")
         KGadvancedMapping.currentColumnValueDivIds = {}
-        $("#KGmapping_distinctColumnValuesContainer").html("")
+        $("#KGmapping_matrixContainer").html("")
         var text = $("#Standardizer_wordsTA").val()
         if (text == "")
             return alert("Enter text to standardize")
@@ -259,7 +259,7 @@ var Standardizer = (function () {
                     }
 
                     var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
-                    $("#KGmapping_distinctColumnValuesContainer").append(html)
+                    $("#KGmapping_matrixContainer").append(html)
 
 
                 })
@@ -298,7 +298,7 @@ var Standardizer = (function () {
                  })*/
 
             }
-            $("#KGmapping_distinctColumnValuesContainer").html(matrixHtml)
+            $("#KGmapping_matrixContainer").html(matrixHtml)
         })
 
 

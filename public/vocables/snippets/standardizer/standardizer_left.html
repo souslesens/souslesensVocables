@@ -10,13 +10,41 @@
 </style>
 
 
-<div>
+<div id="Standardizer_leftTab">
 
-    Paste here to standardize words
+
+    <ul>
+        <li><a href="#Standardizer_leftTab_text">Words</a></li>
+
+        <li><a href="#Standardizer_leftTab_source">Sources</a></li>
+        <!--   <li><a href="#KGqueryTab">Asset Q</a></li>-->
+
+    </ul>
+
+
+    <div id="Standardizer_leftTab_text">
+        Paste here to standardize words
+
+        <button onclick="Standardizer.initTextStandardize()">Standardize words</button>
+        <textarea id="Standardizer_wordsTA">
+</textarea>
+    </div>
+
+    <div id="Standardizer_leftTab_source">
+        <div style="margin: 5px;padding :5px">
+            <select id="Standardizer_sourcesSelect"></select>
+            <button onclick="Standardizer.listSourceLabels()">List</button>
+            <button onclick="Standardizer.compareSource()">compare Source</button>
+
+            <br>
+            <div id="KGMappingAdvancedMappings_sourcesTree" class="jstree"></div>
+        </div>
+    </div>
+
 
 </div>
 
+<script>
 
-<button onclick="Standardizer.getElasticSearchExactMatches()">Standardize words</button>
-<textarea id="Standardizer_wordsTA">
-</textarea>
+    $("#Standardizer_leftTab").tabs({});
+</script>

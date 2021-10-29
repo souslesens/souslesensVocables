@@ -92,18 +92,14 @@ var Standardizer = (function () {
     }
 
 
-    self.getElasticSearchExactMatches = function (words,callback) {
+    self.getElasticSearchExactMatches = function (words, from, size, callback) {
 
         var mode = $("#KGadvancedMapping_queryTypeSelect").val()
         $("#waitImg").css("display", "block")
-        MainController.UI.message("Searching exact matches ")
+        //   MainController.UI.message("Searching exact matches ")
         KGadvancedMapping.currentColumnValueDivIds = {}
 
-        $("#KGmapping_distinctColumnValuesContainer").html("")
-        var text = $("#Standardizer_wordsTA").val()
-        if (text == "")
-            return alert("Enter text to standardize")
-        var words = text.split("\n")
+        var indexes = self.getSelectedIndexes()
         var entitiesMap = {};
         var count = 0
 
@@ -116,7 +112,7 @@ var Standardizer = (function () {
                         "must": [
                             {
                                 "term": {
-                                    "label.keyword": word,
+                                    "label.keyword": word.toLowerCase(),
 
                                 }
                             }
@@ -146,8 +142,8 @@ var Standardizer = (function () {
 
             var query = {
                 "query": queryObj,
-                "from": 0,
-                "size": 10000,
+                "from": from,
+                "size": size,
                 "_source": {
                     "excludes": [
                         "attachment.content"
@@ -163,6 +159,7 @@ var Standardizer = (function () {
         self.entitiesMap = {}
         var bulQueryStr = ""
         var slices = common.array.slice(words, 100)
+        var allResults = []
         async.eachSeries(slices, function (slice, callbackEach) {
             slice.forEach(function (word) {
                 var wordQuery = self.getWordBulkQuery(word, mode, indexes)
@@ -170,21 +167,19 @@ var Standardizer = (function () {
             })
             ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
                 if (err)
-                    console.log(err)
-
-                matrixHtml += self.processResult(slice, result, indexes)
+                    return callbackEach(err)
+                allResults = allResults.concat(result)
                 callbackEach();
             })
 
 
         }, function (err) {
-            if (err)
-                return alert(err);
-            $("#KGmapping_distinctColumnValuesContainer").html(matrixHtml)
+            callback(err, allResults);
+
         })
     }
 
-    self.getSelectedIndexes=function(){
+    self.getSelectedIndexes = function () {
         var sources = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
         var indexes = []
         sources.forEach(function (source) {
@@ -195,22 +190,17 @@ var Standardizer = (function () {
         return indexes;
     }
 
-    self.initMatrix=function(){
-        matrixHtml = "<div class='matrix'>"
-        //titre des colonnes
-        if (self.mode == "matrix") {
+    self.initMatrix = function (indexes) {    //titre des colonnes
+        var html = "<div class='matrix'>"
+        html += "<div class='matrixRow'>"
+        html += "<div class='matrixRowTitle'></div>"
+        indexes.forEach(function (index) {
+            html += "<div class='matrixColTitle'>" + index + "&nbsp;&nbsp;</div>"
+        })
+        html += "<div style='width:50px'></div>"
+        html += "</div>"
 
-            //columns titles
-            showIndexColumns
-            matrixHtml += "<div class='matrixRow'>"
-            matrixHtml += "<div class='matrixRowTitle'></div>"
-            indexes.forEach(function (index) {
-                matrixHtml += "<div class='matrixColTitle'>" + index + "&nbsp;&nbsp;</div>"
-            })
-            matrixHtml += "<div style='width:50px'></div>"
-            matrixHtml += "</div>"
-
-        }
+        return html;
     }
 
     self.processResult = function (words, data, indexes) {
@@ -273,7 +263,7 @@ var Standardizer = (function () {
                 }
 
                 var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
-                $("#KGmapping_distinctColumnValuesContainer").append(html)
+                $("#KGmapping_matrixContainer").append(html)
 
 
             })
@@ -306,39 +296,70 @@ var Standardizer = (function () {
 
 
     }
+    self.initTextStandardize=function(){
+
+        $("#KGmapping_matrixContainer").html("")
+        var text = $("#Standardizer_wordsTA").val()
+        if (text == "")
+            return alert("Enter text to standardize")
+     var words = text.split("\n")
+        words.forEach(function(word){
+            word=word.trim()
+        })
+        self.currentTextWords=words
+        $("#Standardizer_leftTab_source").tabs("option", "active", 1);
+
+    }
 
 
+    self.compareText = function () {
 
 
-    self.compareSource=function() {
+        matrixHtml += self.processResult(slice, result, indexes)
+    }
+    self.compareSource = function () {
+        if (self.isWorking)
+            return alert(" busy !")
         var source = $("#Standardizer_sourcesSelect").val();
         if (!source || source == "")
             return alert("select a source");
-
+        var index = source.toLowerCase()
         var resultSize = 1
-        var size = 1000
+        var size = 200;
+        var from = offset;
         var offset = 0
+        var totalProcessed = 0
+        var indexes = self.getSelectedIndexes()
+        var html = self.initMatrix(indexes)
+        $("#KGmapping_matrixContainer").html(html)
         async.whilst(function (test) {
             return resultSize > 0
 
         }, function (callbackWhilst) {
 
-            self.listSourceLabels(offset, size, function (err, hits) {
+            self.listSourceLabels(index, offset, size, function (err, hits) {
                 if (err)
                     return callbackWhilst(err)
-                resultSize = hits.size
+                resultSize = hits.length
                 var words = []
                 hits.forEach(function (hit) {
                     words.push(hit._source.label);
                 })
-                self.getElasticSearchExactMatches(words, function (err, result) {
+                self.getElasticSearchExactMatches(words, from, size, function (err, result) {
+                    var html = self.processResult(words, result, indexes)
+                    MainController.UI.message(" processed items: " + (totalProcessed++))
+                    $("#KGmapping_matrixContainer").append(html)
+                    from+=size;
                     callbackWhilst()
                 })
 
 
             })
         }, function (err) {
-
+            self.isWorking = null;
+            if (err)
+                return alert(err)
+            MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
         })
     }
 
@@ -529,15 +550,16 @@ var Standardizer = (function () {
 
     }
 
-    self.listSourceLabels = function (from,size,callback) {
-        if(!from)
-            from=0
-        if(!size)
-            size=1000
-
-        var source = $("#Standardizer_sourcesSelect").val();
-        if (!source || source == "")
-            return alert("select a source");
+    self.listSourceLabels = function (source, from, size, callback) {
+        if (!from)
+            from = 0
+        if (!size)
+            size = 1000
+        if (!source) {
+            source = $("#Standardizer_sourcesSelect").val();
+            if (!source || source == "")
+                return alert("select a source");
+        }
 
 
         var queryObj = {"match_all": {}}
@@ -552,18 +574,18 @@ var Standardizer = (function () {
                     "attachment.content"
                 ]
             }
-            ,"sort": {
-            "label": {"order": "asc"}
-        }
+            , "sort": {
+                "label": {"order": "asc"}
+            }
         }
 
         var index = source.toLowerCase()
         ElasticSearchProxy.queryElastic(query, index, function (err, result) {
 
 
-            if(callback) {
+            if (callback) {
                 return callback(err, result.hits.hits)
-            }else {
+            } else {
 
                 if (err)
                     return alert(err)
@@ -609,7 +631,7 @@ var Standardizer = (function () {
             })
             if (data2.length == 0)
                 return callback();
-          //  MainController.UI.message("indexing " + data.length)
+            //  MainController.UI.message("indexing " + data.length)
             var options = {replaceIndex: true}
             var payload = {
                 dictionaries_indexSource: 1,

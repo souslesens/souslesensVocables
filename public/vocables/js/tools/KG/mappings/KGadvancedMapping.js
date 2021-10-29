@@ -252,7 +252,7 @@ var KGadvancedMapping = (function () {
                 }
 
                 var html = "<div onclick='KGadvancedMapping.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + value + sourcesHtml + "</div>";
-                $("#KGmapping_distinctColumnValuesContainer").append(html)
+                $("#KGmapping_matrixContainer").append(html)
 
 
             })
@@ -329,7 +329,7 @@ var KGadvancedMapping = (function () {
                 var x = $("#" + divId)
                 html += $("#" + divId)[0].outerHTML
             })
-            $("#KGmapping_distinctColumnValuesContainer").html(html);
+            $("#KGmapping_matrixContainer").html(html);
 
         }
 
@@ -490,8 +490,8 @@ var KGadvancedMapping = (function () {
                     ]
                 },
             }
-          //  var indexes = ["readi", "pca", "cfihos"]
-            var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
+         var indexes = ["readi", "pca", "cfihos"]
+         //   var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
             var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val()
             if (selectedSource != "all")
                 indexes = [selectedSource]

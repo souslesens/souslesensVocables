@@ -159,7 +159,7 @@ var Lineage_classes = (function () {
                 label: "generateDictionary",
                 action: function (e) {
 
-                    SourceBrowser.generateSourceDictionary(Lineage_common.currentSource)
+                    Standardizer.generateSourceDictionary(Lineage_common.currentSource)
 
                 }
             }
@@ -167,7 +167,7 @@ var Lineage_classes = (function () {
                 label: "generate Elastic Index",
                 action: function (e) {
 
-                    SourceBrowser.generateElasticIndex(Lineage_common.currentSource)
+                    Standardizer.generateElasticIndex(Lineage_common.currentSource)
 
                 }
             }

@@ -1,7 +1,7 @@
 var Standardizer = (function () {
     var self = {};
     self.matchCandidates = {}
-    var matrixHtml = ""
+
 
     self.onLoaded = function () {
         //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
@@ -25,19 +25,24 @@ var Standardizer = (function () {
             var w = $(document).width() - leftPanelWidth - 30;
             var h = $(document).height() - 20;
 
-            self.initSourcesIndexesList(function (err, sources) {
+            self.initSourcesIndexesList(function (err, indexes) {
                 if (err)
                     return MainController.UI.message(err)
-                MainController.UI.showSources("KGMappingAdvancedMappings_sourcesTree", true, sources);
-                sources.sort()
+                var indexesTreeData = []
+                indexes.forEach(function (item) {
+                    indexesTreeData.push({id: item, text: item, parent: "#"})
+                })
 
-                var candidateEntities = sources
+                var distinctSources = indexes
+                common.jstree.loadJsTree("KGMappingAdvancedMappings_sourcesTree", indexesTreeData, {withCheckboxes: 1});
+                //    var distinctSources = ["readi", "cfihos", "pca"]
+                var candidateEntities = distinctSources
                 candidateEntities.splice(0, 0, "all")
                 common.fillSelectOptions("KGadvancedMapping_filterCandidateMappingsSelect", candidateEntities, false)
 
 
                 var sortList = ["alphabetic", "candidates"]
-                sources.forEach(function (source) {
+                distinctSources.forEach(function (source) {
                     sortList.push({value: "_search_" + source, text: source})
                 })
 
@@ -45,7 +50,7 @@ var Standardizer = (function () {
                 common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value")
                 KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
 
-                common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
+                common.fillSelectOptions("Standardizer_sourcesSelect", indexes, true);
 
 
             })
@@ -64,19 +69,18 @@ var Standardizer = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (indexes, textStatus, jqXHR) {
+            success: function (data, textStatus, jqXHR) {
                 var sources = [];
-
                 for (var source in Config.sources) {
-
-
-                    indexes.forEach(function (index) {
-                        if (index == source.toLowerCase())
-                            sources.push(source);
-
-                    })
+                    sources.push(source.toLowerCase())
                 }
-                return callback(null, sources)
+                var indexes = []
+                data.forEach(function (item) {
+                    if (sources.indexOf(item) > -1) {
+                        indexes.push(item);
+                    }
+                })
+                return callback(null, indexes)
 
 
             }
@@ -92,31 +96,54 @@ var Standardizer = (function () {
     }
 
 
-    self.getElasticSearchExactMatches = function (words,callback) {
-
+    self.getElasticSearchExactMatches = function (words) {
         var mode = $("#KGadvancedMapping_queryTypeSelect").val()
         $("#waitImg").css("display", "block")
         MainController.UI.message("Searching exact matches ")
         KGadvancedMapping.currentColumnValueDivIds = {}
-
         $("#KGmapping_distinctColumnValuesContainer").html("")
         var text = $("#Standardizer_wordsTA").val()
         if (text == "")
             return alert("Enter text to standardize")
+
+
         var words = text.split("\n")
         var entitiesMap = {};
+        self.fuzzyMatchesMap = {}
         var count = 0
+        var matrixHtml = ""
 
-        self.getWordBulkQuery = function (word, mode, indexes) {
 
+        //titre des colonnes
+        if (self.mode == "matrix") {
+            var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
+            var matrixHtml = "<div class='matrix'>"
+            //columns titles
+            matrixHtml += "<div class='matrixRow'>"
+            matrixHtml += "<div class='matrixRowTitle'></div>"
+            indexes.forEach(function (index) {
+                matrixHtml += "<div class='matrixColTitle'>" + index + "&nbsp;&nbsp;</div>"
+            })
+            matrixHtml += "</div>"
+
+        }
+
+
+        async.eachSeries(words, function (word, callbackEach) {
+
+
+            self.fuzzyMatchesMap[word] = {entities: []}
+            word = word.toLowerCase().trim()
+            if ((count++) % 10 == 0)
+                MainController.UI.message("Searching exact matches " + count + "/" + words.length)
             var queryObj;
             if (!mode || mode == "exactMatch") {
                 queryObj = {
                     "bool": {
                         "must": [
                             {
-                                "term": {
-                                    "label.keyword": word,
+                                "match": {
+                                    "label": word,
 
                                 }
                             }
@@ -141,8 +168,6 @@ var Standardizer = (function () {
 
                 }
             }
-            var header = {"index": indexes}
-
 
             var query = {
                 "query": queryObj,
@@ -154,194 +179,130 @@ var Standardizer = (function () {
                     ]
                 },
             }
-            var str = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-            return str;
+            var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
+            /*  var indexes=[];
+              indexesArray.forEach(function(item){
+                  indexes.push(item)
+              })*/
+            //   var indexes = ["readi", "pca", "cfihos"]
 
-        }
-
-
-        self.entitiesMap = {}
-        var bulQueryStr = ""
-        var slices = common.array.slice(words, 100)
-        async.eachSeries(slices, function (slice, callbackEach) {
-            slice.forEach(function (word) {
-                var wordQuery = self.getWordBulkQuery(word, mode, indexes)
-                bulQueryStr += wordQuery;
-            })
-            ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
+            ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
                 if (err)
-                    console.log(err)
+                    return alert(err)
+                self.currentHits = result.hits.hits;
+                result.hits.hits.forEach(function (hit) {
 
-                matrixHtml += self.processResult(slice, result, indexes)
-                callbackEach();
+                    var entity = {
+                        index: hit._index,
+                        id: hit._source.subject,
+                        score: hit._score,
+                        label: hit._source.label,
+                        status: "exactMatch"
+                    }
+                    var key = entity.label.toLowerCase();
+                    if (key == word) {
+
+                        if (!entitiesMap[key]) {
+                            entitiesMap[key] = []
+                        }
+
+                        if (!entitiesMap[key][entity.index]) {
+                            entitiesMap[key][entity.index] = ""
+                        }
+
+                        entitiesMap[key][entity.index] = entity
+                    } else if (key.indexOf(word) > -1) {
+                      //  entitiesMap[key][entity.index] = entity
+                   //  self.fuzzyMatchesMap[key].entities.push(entity)
+                    }
+
+                })
+                self.entitiesMap = entitiesMap;
+                callbackEach()
             })
-
-
         }, function (err) {
-            if (err)
-                return alert(err);
+
+
+            if (self.mode == "normal") {
+
+                KGadvancedMapping.currentColumnValueDivIds = {}
+                var distinctSources = []
+                words.forEach(function (word) {
+                    word = word.toLowerCase().trim()
+                    var sourcesHtml = ""
+                    var id = "columnValue" + common.getRandomHexaId(5)
+                    KGadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
+                    var cssClass;
+
+
+                    if (entitiesMap[word]) {//exact match
+
+
+                        cssClass = "KGmapping_columnValues_referenceValue"
+                        for (var index in entitiesMap[word]) {
+                            KGadvancedMapping.currentColumnValueDivIds[id].indexData.push(entitiesMap[word])
+                            KGadvancedMapping.currentColumnValueDivIds[id].sources.push(index)
+
+                            if (index && distinctSources.indexOf(index) < 0)
+                                distinctSources.push(index)
+                            sourcesHtml += "&nbsp;<span class='KGmapping_distinctColumnValueSource' style='background-color:" + KGadvancedMapping.getSourceColor(index) + "'>" + index + "</span>";
+
+                        }
+                    } else {
+                        cssClass = "KGmapping_columnValues_hasCandidateValues"
+                    }
+
+
+                    if (cssClass && cssClass != "") {
+                        $("#KGmapping_columnValues option[value='" + word + "']").addClass(cssClass);
+
+                    }
+
+                    var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
+                    $("#KGmapping_distinctColumnValuesContainer").append(html)
+
+
+                })
+            } else if (self.mode == "matrix") {
+
+                words.forEach(function (Word) {
+                    var word=Word.toLowerCase()
+                    matrixHtml +="<div class='matrixRow'>"
+                    matrixHtml += "<div class='matrixRowTitle'>" + word  + "</div>"
+                    indexes.forEach(function (indexName) {
+                        var cellStr=""
+                        var specificClassStr=""
+                        if(self.entitiesMap[word]) {
+                            var entity = self.entitiesMap[word][indexName]
+                            if (entity) {
+                                cellStr = "X"
+                                specificClassStr="matrixCellExactMatch"
+                            }
+
+                        }
+
+                            matrixHtml += "<div class='matrixCell "+specificClassStr+"' >" + cellStr + "</div>"
+
+
+                    })
+                    matrixHtml +="</div>"
+
+
+
+                })
+
+
+                /* self.currentHits.forEach(function (index) {
+
+
+                 })*/
+
+            }
             $("#KGmapping_distinctColumnValuesContainer").html(matrixHtml)
         })
-    }
-
-    self.getSelectedIndexes=function(){
-        var sources = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
-        var indexes = []
-        sources.forEach(function (source) {
-            if (!Config.sources[source] || !Config.sources[source].schemaType)
-                return;
-            indexes.push(source.toLowerCase())
-        })
-        return indexes;
-    }
-
-    self.initMatrix=function(){
-        matrixHtml = "<div class='matrix'>"
-        //titre des colonnes
-        if (self.mode == "matrix") {
-
-            //columns titles
-            showIndexColumns
-            matrixHtml += "<div class='matrixRow'>"
-            matrixHtml += "<div class='matrixRowTitle'></div>"
-            indexes.forEach(function (index) {
-                matrixHtml += "<div class='matrixColTitle'>" + index + "&nbsp;&nbsp;</div>"
-            })
-            matrixHtml += "<div style='width:50px'></div>"
-            matrixHtml += "</div>"
-
-        }
-    }
-
-    self.processResult = function (words, data, indexes) {
-        var entitiesMap = []
-        words.forEach(function (word, index) {
-            if (!entitiesMap[word]) {
-                entitiesMap[word] = []
-            }
-            var hits = data[index].hits.hits
-
-
-            hits.forEach(function (hit) {
-
-                var entity = {
-                    index: hit._index,
-                    id: hit._source.id,
-                    score: hit._score,
-                    label: hit._source.label,
-                    status: "exactMatch"
-                }
-
-                entitiesMap[word][entity.index] = entity
-            })
-        })
-
-
-        if (self.mode == "normal") {
-
-            KGadvancedMapping.currentColumnValueDivIds = {}
-            var distinctSources = []
-            words.forEach(function (word) {
-                word = word.toLowerCase().trim()
-                var sourcesHtml = ""
-                var id = "columnValue" + common.getRandomHexaId(5)
-                KGadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
-                var cssClass;
-
-
-                if (entitiesMap[word]) {//exact match
-
-
-                    cssClass = "KGmapping_columnValues_referenceValue"
-                    for (var index in entitiesMap[word]) {
-                        KGadvancedMapping.currentColumnValueDivIds[id].indexData.push(entitiesMap[word])
-                        KGadvancedMapping.currentColumnValueDivIds[id].sources.push(index)
-
-                        if (index && distinctSources.indexOf(index) < 0)
-                            distinctSources.push(index)
-                        sourcesHtml += "&nbsp;<span class='KGmapping_distinctColumnValueSource' style='background-color:" + KGadvancedMapping.getSourceColor(index) + "'>" + index + "</span>";
-
-                    }
-                } else {
-                    cssClass = "KGmapping_columnValues_hasCandidateValues"
-                }
-
-
-                if (cssClass && cssClass != "") {
-                    $("#KGmapping_columnValues option[value='" + word + "']").addClass(cssClass);
-
-                }
-
-                var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
-                $("#KGmapping_distinctColumnValuesContainer").append(html)
-
-
-            })
-        } else if (self.mode == "matrix") {
-
-            var html = ""
-            for (var word in entitiesMap) {
-                html += "<div class='matrixRow'>"
-                html += "<div class='matrixRowTitle'>" + word + "</div>"
-                indexes.forEach(function (indexName) {
-                    var cellStr = ""
-                    var specificClassStr = ""
-                    if (entitiesMap[word][indexName]) {
-                        cellStr = " "
-                        specificClassStr = "matrixCellExactMatch"
-
-                    }
-
-                    html += "<div class='matrixCell " + specificClassStr + "' >" + cellStr + "</div>"
-
-
-                })
-                html += "</div>"
-
-            }
-            return html;
-
-
-        }
 
 
     }
-
-
-
-
-    self.compareSource=function() {
-        var source = $("#Standardizer_sourcesSelect").val();
-        if (!source || source == "")
-            return alert("select a source");
-
-        var resultSize = 1
-        var size = 1000
-        var offset = 0
-        async.whilst(function (test) {
-            return resultSize > 0
-
-        }, function (callbackWhilst) {
-
-            self.listSourceLabels(offset, size, function (err, hits) {
-                if (err)
-                    return callbackWhilst(err)
-                resultSize = hits.size
-                var words = []
-                hits.forEach(function (hit) {
-                    words.push(hit._source.label);
-                })
-                self.getElasticSearchExactMatches(words, function (err, result) {
-                    callbackWhilst()
-                })
-
-
-            })
-        }, function (err) {
-
-        })
-    }
-
 
     self.editCandidateValues = function (columnValueDivId, searchedText) {
         KGadvancedMapping.currentColumnValueDivId = columnValueDivId
@@ -529,12 +490,7 @@ var Standardizer = (function () {
 
     }
 
-    self.listSourceLabels = function (from,size,callback) {
-        if(!from)
-            from=0
-        if(!size)
-            size=1000
-
+    self.listSourceLabels = function () {
         var source = $("#Standardizer_sourcesSelect").val();
         if (!source || source == "")
             return alert("select a source");
@@ -545,116 +501,36 @@ var Standardizer = (function () {
 
         var query = {
             "query": queryObj,
-            "from": from,
-            "size": size,
+            "from": 0,
+            "size": 100,
             "_source": {
                 "excludes": [
                     "attachment.content"
                 ]
-            }
-            ,"sort": {
-            "label": {"order": "asc"}
-        }
+            },
         }
 
-        var index = source.toLowerCase()
-        ElasticSearchProxy.queryElastic(query, index, function (err, result) {
 
+        ElasticSearchProxy.queryElastic(query, source, function (err, result) {
+            if (err)
+                return alert(err)
+            self.currentHits = result.hits.hits;
+            var str = ""
+            result.hits.hits.forEach(function (hit) {
+                str += hit._source.label + "\n";
 
-            if(callback) {
-                return callback(err, result.hits.hits)
-            }else {
-
-                if (err)
-                    return alert(err)
-                var str = ""
-                if (!result.hits)
-                    return alert(JSON.stringify(result, null, 2))
-                result.hits.hits.forEach(function (hit) {
-                    str += hit._source.label + "\n";
-
-                })
-
-                $("#Standardizer_wordsTA").val(str)
-            }
+            })
+            $("#Standardizer_wordsTA").val(str)
         })
     }
 
 
-    self.generateSourceDictionary = function (sourceLabel) {
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, result) {
-                if (err)
-                    MainController.UI.message(err, true)
-
-            })
-        }
-    }
-
-    self.generateElasticIndex = function (sourceLabel, callback) {
-        var totalLines = 0
 
 
-        var processor = function (data, callback) {
-
-            var data2 = []
-            data.forEach(function (item) {
-                if (item.label) {
-                    data2.push({
-                        id: item.id.value,
-                        label: item.label.value,
-
-                    })
-                }
-            })
-            if (data2.length == 0)
-                return callback();
-          //  MainController.UI.message("indexing " + data.length)
-            var options = {replaceIndex: true}
-            var payload = {
-                dictionaries_indexSource: 1,
-                indexName: sourceLabel.toLowerCase(),
-                data: JSON.stringify(data2),
-                options: JSON.stringify(options)
-            }
-
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
-                success: function (data2, textStatus, jqXHR) {
-                    totalLines += data.length
-                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
-                    callback(null, data)
-                }
-                , error: function (err) {
-                    callback(err);
-
-                }
 
 
-            })
-
-        }
-
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
-
-            Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
-                if (err) {
-
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message(err, true)
-                }
 
 
-                if (callback)
-                    return callback();
-                MainController.UI.message("DONE " + sourceLabel, true)
-            })
-        }
-    }
 
 
     return self;

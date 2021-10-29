@@ -107,6 +107,57 @@ var DictionariesManager = {
 
                 },
 
+
+            //set mappings
+            function (callbackSeries) {
+
+
+                var mappings = {
+                        "mappings": {
+                            [indexName]: {
+                                "properties": {
+                                    "label": {
+                                        "type": "text",
+                                        "fielddata": true,
+                                        "fields": {
+                                            "keyword": {
+                                                "type": "keyword",  // =========> store city.keyword as a keyword
+                                                "ignore_above": 256
+                                            }
+                                        }
+                                    },
+                                    "id": {
+                                        "type": "text",
+                                        "fielddata": true,// ==========> Store city as text
+                                        "fields": {
+                                            "keyword": {
+                                                "type": "keyword",  // =========> store city.keyword as a keyword
+                                                "ignore_above": 256
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                }
+                var options = {
+                    method: 'PUT',
+                    json: mappings,
+                    encoding: null,
+                    timeout: 1000 * 3600 * 24 * 3, //3 days //Set your timeout value in milliseconds or 0 for unlimited
+                    headers: {
+                        'content-type': 'application/json'
+                    },
+                    url: elasticUrl + indexName
+                };
+                request(options, function (error, response, body) {
+                    if (error) {
+                        return callbackSeries(error)
+                    }
+                    return callbackSeries()
+                })
+            },
                 function (callbackSeries) {
                     var totalLines = 0;
                     var bulkStr = ""

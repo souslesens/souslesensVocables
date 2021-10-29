@@ -745,8 +745,9 @@ var Sparql_OWL = (function () {
                 "SELECT distinct * " + fromStr + " WHERE "
             if (options.selectGraph)
                 query += " graph ?g "
-            query += "{ ?id rdf:type ?type. "+
+            query += "{ ?id rdf:type <http://www.w3.org/2002/07/owl#Class>. "+
             " OPTIONAL {?id rdfs:label ?label}" +
+
             " }"
 
             var allData = []
@@ -762,7 +763,7 @@ var Sparql_OWL = (function () {
                 var limit = options.limit || Config.queryLimit;
                 query2 += " limit " + limitSize + " offset " + offset
 
-
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = self.sparql_url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
                     if (err)

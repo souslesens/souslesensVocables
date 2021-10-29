@@ -491,7 +491,7 @@ var KGadvancedMapping = (function () {
                 },
             }
           //  var indexes = ["readi", "pca", "cfihos"]
-            var indexes = $('#KGMappingAdvancedMappings_sources').jstree(true).get_checked();
+            var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
             var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val()
             if (selectedSource != "all")
                 indexes = [selectedSource]

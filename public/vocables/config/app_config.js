@@ -151,7 +151,7 @@ var Config = (function () {
         toolDescriptionImg: null
     }//"images/taxonomy.png"}
 
-
+    self.tools["admin"] = {label: "admin", multiSources: 1, controller: Admin, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     return self;
 

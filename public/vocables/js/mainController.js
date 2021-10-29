@@ -165,7 +165,7 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX, sources, types,callback) {
+        showSources: function (treeDiv, withCBX, sources, types,options,callback) {
             var treeData = [];
             var distinctNodes = {}
 

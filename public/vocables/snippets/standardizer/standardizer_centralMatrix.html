@@ -78,7 +78,7 @@
         flex-direction: column;
     / / justify-content: space-between;
       //  height: 100vh;
-        width: 500px;
+      width: 5000px;
         flex-wrap: wrap;
     }
 
@@ -91,17 +91,19 @@
     }
 
     .matrixCell {
-        width: 20px;
-        height: 20px;
+        width: 15px;
+        height: 15px;
         font-size: 12px;
         text-align: center;
-        border: #040e71 solid 1px;
+        border-left: #040e71 solid 1px;
+        border-bottom: #040e71 solid 1px;
+
 
     }
 
     .matrixColTitle {
-        width: 20px;
-        height: 120px;
+        width: 15px;
+        height: 115px;
         font-size: 12px;
         writing-mode:vertical-rl;
         text-align: end;
@@ -113,20 +115,42 @@
         font-size: 12px;
         width: 300px;
         overflow: hidden;
-
+        border-left: #040e71 solid 1px;
+        border-bottom: #040e71 solid 1px;
         text-align: center;
        // vertical-align: middle;
-        height: 20px;
+        height: 15px;
     }
     .matrixCellExactMatch{
         background-color: #00bb00;
+    }
+
+    .matrixWordNoMatch{
+        background-color: #f3dede;
+    }
+
+
+    #Standardizer_matrixCellDataDiv {
+        background: beige;
+        border: solid 1px brown;
+        margin: 3px;
+        padding: 5px ;
+
+    }
+
+    #Standardizer_matrixRankingDiv {
+        background: #f6ddd8;
+        border: solid 1px brown;
+        margin: 3px;
+        padding :5px ;
+    }
     }
 
 </style>
 
 
 <div id="KGMappingAdvancedMappings_dictionaryMapping"
-     style="display:flex;flex-direction:row;width:100%;margin:10px;padding :20px">
+     style="display:flex;flex-direction:row;width:100%;margin:10px;padding :15px">
 
 
 
@@ -139,7 +163,7 @@
                       onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
         <br>
         <div id="KGmapping_matrixContainer"
-             style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;width: 600px;overflow: auto"></div>
+             style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;width: 800px;overflow: auto"></div>
     </div>
     <div>
         <div id="KGadvancedMapping_mappingsMatrix" style="font-weight: bold"></div>
@@ -149,6 +173,10 @@
         <button onclick="Standardizer.exportMappings()"> Export mappings</button>
 
         <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
+
+
+        <div id="Standardizer_matrixCellDataDiv"></div>
+        <div id="Standardizer_matrixRankingDiv"></div>
     </div>
 </div>
 <script>

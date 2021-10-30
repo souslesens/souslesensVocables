@@ -338,7 +338,8 @@ var KGmappingData = (function () {
                     var point = {x: event.clientX - leftPanelWidth, y: event.clientY}
 
                     var html = "    <span class=\"popupMenuItem\" onclick=\"KGmappingData.menuActions.removeMapping();\"> remove Mapping</span>" +
-                        "<span class=\"popupMenuItem\" onclick=\"KGmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"
+                        "<span class=\"popupMenuItem\" onclick=\"KGmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"+
+                    "<span class=\"popupMenuItem\" onclick=\"KGadvancedMapping.findBestMatches();\"> find best matches</span>"
                     //   "<span class=\"popupMenuItem\" onclick=\"KGadvancedMapping.executeBulkMappingSequence();\">executeBulkMappingSequence</span>"
 
 

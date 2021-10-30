@@ -126,6 +126,49 @@ var KGadvancedMapping = (function () {
             })
         }
 
+        self.getColumnDistinctValues = function (columnClassId, callback) {
+            var obj = common.deconcatSQLTableColumn(KGmappingData.currentColumn)
+            var column = obj.column;
+            var table = "[" + KGmappingData.currentKGdataSource.dbName + "]." + obj.table;
+
+            var sqlQuery = " select count( distinct [" + column + "]) as count from " + table;
+            self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
+                if (err) {
+                    callback(err)
+                }
+
+                var count = data[0].count
+                if (count > Config.KG.maxDistinctValuesForAdvancedMapping)
+                    return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.KG.maxDistinctValuesForAdvancedMapping)
+
+                var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
+                if (KGmappingData.currentKGdataSource.type == "sql.sqlserver")
+                    sqlQuery = " select  distinct top(10000) [" + column + "] from " + table;
+
+                self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
+                    if (err) {
+                        callback(err)
+                    }
+
+                    if (data.length >= Config.KG.maxDistinctValuesForAdvancedMapping)
+                        callback(" too many distinct values :" + data.length)
+
+                    KGmappingData.currentColumnDistinctValues = [];
+                    var colName = common.deconcatSQLTableColumn(KGmappingData.currentColumn).column
+
+                    data.forEach(function (item) {
+                        if (item[colName])
+                            KGmappingData.currentColumnDistinctValues.push(item[colName])
+                    })
+                    callback(null, KGmappingData.currentColumnDistinctValues)
+
+
+                })
+
+
+            })
+        }
+
 
         self.showAdvancedMappingDialog = function (dictionary, columnClassId) {
             $("#waitImg").css("display", "block")
@@ -135,48 +178,13 @@ var KGadvancedMapping = (function () {
                 return;
             }
             KGadvancedMapping.loadReferenceDictionary(columnClassId, true, function (err, result) {
-                if (err)
-                    alert(err)
-                self.matchCandidates = {}
-                self.assignConditionalTypeOn = true;
-                self.mappedValues = {}
-                var obj = common.deconcatSQLTableColumn(KGmappingData.currentColumn)
-                var column = obj.column;
-                var table = "[" + KGmappingData.currentKGdataSource.dbName + "]." + obj.table;
+                    if (err)
+                        alert(err)
 
-                var sqlQuery = " select count( distinct [" + column + "]) as count from " + table;
-                self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
-                    if (err) {
-                        alert(err.responseText)
-                        return MainController.UI.message(err.responseText)
-                    }
+                    self.getColumnDistinctValues(columnClassId, function (err, result) {
 
-                    var count = data[0].count
-                    if (count > Config.KG.maxDistinctValuesForAdvancedMapping)
-                        return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.KG.maxDistinctValuesForAdvancedMapping)
-
-                    var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
-                    if (KGmappingData.currentKGdataSource.type == "sql.sqlserver")
-                        sqlQuery = " select  distinct top(10000) [" + column + "] from " + table;
-
-                    self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
-                        if (err) {
-                            alert(err.responseText)
-                            return MainController.UI.message(err.responseText)
-                        }
-
-                        if (data.length >= Config.KG.maxDistinctValuesForAdvancedMapping)
-                            return alert(" too many distinct values :" + data.length)
-
-                        KGmappingData.currentColumnDistinctValues = [];
-                        var colName = common.deconcatSQLTableColumn(KGmappingData.currentColumn).column
-
-                        data.forEach(function (item) {
-                            if (item[colName])
-                                KGmappingData.currentColumnDistinctValues.push(item[colName])
-                        })
-
-
+                        if (err)
+                            return alert(err)
                         $("#KGmappings_AdvancedMappingDialogDiv").load("snippets/KG/KGmappingAdvancedMappingDialog.html");
                         $("#KGmappings_AdvancedMappingDialogDiv").dialog("open")
 
@@ -188,10 +196,8 @@ var KGadvancedMapping = (function () {
 
 
                     })
-
-
-                })
-            })
+                }
+            )
         }
         self.getSourceColor = function (source) {
             if (!sourceColors[source])
@@ -446,7 +452,7 @@ var KGadvancedMapping = (function () {
                             {
                                 "query_string": {
                                     "query": expression,
-                                  //  "default_field": "attachment.content",
+                                    //  "default_field": "attachment.content",
                                     "default_operator": "OR"
                                 }
                             }
@@ -470,7 +476,7 @@ var KGadvancedMapping = (function () {
                             {
                                 "query_string": {
                                     "query": expression,
-                                   // "default_field": "attachment.content",
+                                    // "default_field": "attachment.content",
                                     "default_operator": "AND"
                                 }
                             }
@@ -490,8 +496,8 @@ var KGadvancedMapping = (function () {
                     ]
                 },
             }
-         var indexes = ["readi", "pca", "cfihos"]
-         //   var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
+            var indexes = ["readi", "pca", "cfihos"]
+            //   var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
             var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val()
             if (selectedSource != "all")
                 indexes = [selectedSource]
@@ -685,12 +691,12 @@ var KGadvancedMapping = (function () {
                 var obj = self.currentColumnValueDivIds[id]
                 var entities = obj.entities;
                 var term = obj.value
-                var line = {term: term, entities: {},isCandidate:obj.isCandidate}
-                if( entities) {
-                   for(var key in  entities){
+                var line = {term: term, entities: {}, isCandidate: obj.isCandidate}
+                if (entities) {
+                    for (var key in entities) {
                         if (columns.indexOf(key) < 0)
                             columns.push(key)
-                       line.entities=entities
+                        line.entities = entities
 
                     }
                 }
@@ -703,7 +709,7 @@ var KGadvancedMapping = (function () {
             dataTableCols.push({title: "source_label", "defaultContent": ""})
             dataTableCols.push({title: "isONE_MODELcandidate", "defaultContent": ""})
 
-           columns.forEach(function(col){
+            columns.forEach(function (col) {
                 dataTableCols.push({title: col + "_label", "defaultContent": ""})
                 dataTableCols.push({title: col + " _uri", "defaultContent": ""})
             })
@@ -711,7 +717,7 @@ var KGadvancedMapping = (function () {
             var dataTableRows = []
             data.forEach(function (item) {
                 var line = [item.term]
-                if(item.isCandidate)
+                if (item.isCandidate)
                     line.push("X");
                 else
                     line.push("");
@@ -728,10 +734,10 @@ var KGadvancedMapping = (function () {
                 dataTableRows.push(line)
             })
 
-            dataTableRows.sort(function(a,b){
-               if(a[0]>b[0])
-                   return 1
-                if(b[0]>a[0])
+            dataTableRows.sort(function (a, b) {
+                if (a[0] > b[0])
+                    return 1
+                if (b[0] > a[0])
                     return -1
                 return 0;
             })
@@ -761,8 +767,61 @@ var KGadvancedMapping = (function () {
         }
 
 
+        self.findBestMatches = function () {
+            if (!KGmappingData.currentColumn)
+                return alert("no column selected")
+            var words = [];
+            var indexes = []
+            async.series([
+                function (callbackSeries) {
+                    KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
+                        if (err)
+                            return  callbackSeries(err)
+                        words = result;
+                        callbackSeries();
+                    })
+                }
+                , function (callbackSeries) {
+                    Standardizer.initSourcesIndexesList({schemaType: "OWL"}, function (err, result) {
+                        if (err)
+                            return  callbackSeries(err)
+                        result.forEach(function(item){
+                            indexes.push(item.toLowerCase())
+                        })
+
+                        callbackSeries();
+                    })
+                }
+                ,  function (callbackSeries) {
+                    var resultSize = 1
+                    var size = 200;
+                    var offset = 0
+                    var totalProcessed = 0
+                    async.whilst(function (test) {
+                        return resultSize > 0
+
+                    }, function (callbackWhilst) {
+                        Standardizer.getElasticSearchExactMatches(words, indexes, offset, size, function (err, result) {
+                            if (err)
+                                return callbackSeries(err)
+                            resultSize += result.length;
+                            offset += result.length
+                            callbackWhilst()
+                        })
+                    })
+                }
+            ])
+
+
+
+
+
+        }
+
+
         return self;
 
 
     }
-)()
+)
+()

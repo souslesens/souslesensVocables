@@ -1,9 +1,9 @@
-const httpProxy = require("../../bin/httpProxy.");
+const httpProxy = require("./httpProxy.");
 const rdfParser = require("rdf-parse").default;
 var fs = require("fs");
 var path = require("path");
 const async = require("async");
-var util = require("../../bin/util.");
+var util = require("./util.");
 const N3 = require("n3");
 const { DataFactory } = N3;
 const { namedNode, literal, defaultGraph, quad } = DataFactory;
@@ -11,11 +11,11 @@ var graphUrisMap = {};
 
 var sparql_server_url = "http://51.178.139.80:8890/sparql";
 
-var OneModelManager = {
+var RDF_IO = {
     getGraphUri: function (sourceLabel) {
         if (graphUrisMap[sourceLabel]) return graphUrisMap[sourceLabel];
         //"D:\\GitHub\\souslesensVocables\\public\\vocables\\config"
-        var sourcesFilePath = path.join(__dirname, "../../config/sources.json");
+        var sourcesFilePath = path.join(__dirname, "../config/sources.json");
         sourcesFilePath = path.resolve(sourcesFilePath);
         try {
             var str = fs.readFileSync(sourcesFilePath);
@@ -29,7 +29,7 @@ var OneModelManager = {
     },
 
     getOntology: function (sourceLabel, callback) {
-        var graphUri = OneModelManager.getGraphUri(sourceLabel);
+        var graphUri = RDF_IO.getGraphUri(sourceLabel);
         if (graphUri.indexOf("http") != 0) return callback(null, "ERROR reading graphUri :" + sourceLabel + "  " + graphUri);
 
         var query = "select  ?s ?p ?o  from <" + graphUri + ">  WHERE { ?s ?p ?o  } order by ?s";
@@ -52,6 +52,9 @@ var OneModelManager = {
             });
 
             var blanknodesMap = {};
+
+            if(typeof result ==="string")
+                result=JSON.parse(result);
 
             result.results.bindings.forEach(function (item) {
                 var object;
@@ -86,7 +89,7 @@ var OneModelManager = {
             [
                 // read triples
                 function (callbackSeries) {
-                    OneModelManager.rdfXmlToNt(filePath, function (err, result) {
+                    RDF_IO.rdfXmlToNt(filePath, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -177,13 +180,13 @@ var OneModelManager = {
     },
 };
 
-module.exports = OneModelManager;
+module.exports = RDF_IO;
 
-//OneModelManager.uploadOntologyFromOwlFile("http://data.total.com/resource/one-model/ontology/0.2/","D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")
-//OneModelManager.uploadOntologyFromOwlFile("http://data.total.com/resource/sil/ontology/0.1/","D:\\NLP\\ontologies\\OntoSIL\\SIL.owl-ttl.owl")
+//RDF_IO.uploadOntologyFromOwlFile("http://data.total.com/resource/one-model/ontology/0.2/","D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")
+//RDF_IO.uploadOntologyFromOwlFile("http://data.total.com/resource/sil/ontology/0.1/","D:\\NLP\\ontologies\\OntoSIL\\SIL.owl-ttl.owl")
 
-//OneModelManager.getOntology("http://data.total.com/resource/one-model/ontology/0.2/> from <http://standards.iso.org/iso/15926/part14/",function(err, result){
-/*OneModelManager.getOntology("http://data.total.com/resource/one-model/ontology/0.2/", function (err, result) {
+//RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/> from <http://standards.iso.org/iso/15926/part14/",function(err, result){
+/*RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/", function (err, result) {
 
 })*/
-//OneModelManager.getGraphUri("ISO_15926-part-14")
+//RDF_IO.getGraphUri("ISO_15926-part-14")

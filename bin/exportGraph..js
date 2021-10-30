@@ -13,7 +13,14 @@ var fs = require("fs");
 var httpProxy = require("./httpProxy.");
 var util = require("./util.");
 var exportGraph = {
-    execute: function (serverUrl, graphUri, filePath) {
+
+
+
+
+
+
+
+    execute: function (serverUrl, graphUri, filePath, callback) {
         var limit = 2000;
         var resultSize = 100;
         var offset = 0;
@@ -35,11 +42,15 @@ var exportGraph = {
                     params: { query: query2 },
                     headers: {
                         Accept: "application/sparql-results+json",
-                        "Content-Type": "application/x-www-form-urlencoded",
+                      "Content-Type": "application/x-www-form-urlencoded",
                     },
                 };
                 httpProxy.post(body.url, body.headers, body.params, function (err, result) {
                     if (err) return callbackWhilst(err);
+
+
+                    if(typeof result ==="string")
+                        result=JSON.parse(result);
 
                     offset += result.results.bindings.length;
                     resultSize = result.results.bindings.length;
@@ -59,6 +70,10 @@ var exportGraph = {
             },
 
             function (err) {
+                if(callback){
+                    return callback(err, str)
+                }
+
                 if (err) return console.log(err);
                 fs.writeFileSync(filePath, str);
             }
@@ -100,8 +115,7 @@ var filePath = "D:\\NLP\\rdfs\\IOGP-14224.nt";
 var graphUri = "http://souslesens.org/vocabulary/iec/";
 var filePath = "D:\\NLP\\rdfs\\IEC.nt";
 
-var graphUri = "http://sandbox.dexpi.org/informationmodel/";
-var filePath = "D:\\NLP\\rdfs\\DEXPI.nt";
+
 
 var graphUri = "http://standards.iso.org/iso/14224/";
 var filePath = "D:\\NLP\\rdfs\\14224.nt";
@@ -112,4 +126,7 @@ var filePath = "D:\\NLP\\rdfs\\14224_merged.nt";
 var graphUri = "http://data.total.com/resource/one-model/iogp_iso14224/";
 var filePath = "D:\\NLP\\rdfs\\14224_merged.nt";
 
-exportGraph.execute(serverUrl, graphUri, filePath);
+var graphUri = "http://sandbox.dexpi.org/informationmodel/";
+var filePath = "D:\\NLP\\rdfs\\DEXPI.nt";
+
+//exportGraph.execute(serverUrl, graphUri, filePath);

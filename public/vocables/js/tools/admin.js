@@ -5,7 +5,8 @@ var Admin=(function(){
 
 
     self.onLoaded = function () {
-    var html="<button onclick='Admin.refreshIndexes()'>refreshIndexes </button>"
+    var html="<button onclick='Admin.refreshIndexes()'>refreshIndexes </button>"+
+       " <button onclick='Admin.exportNT()'>export NT </button>"
         $("#sourceDivControlPanelDiv").html(html)
     }
 
@@ -35,6 +36,41 @@ var Admin=(function(){
            MainController.UI.message("ALL DONE", true)
 
        })
+
+
+
+
+    }
+
+    self.exportNT=function(){
+
+        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+if(sources.length!=1)
+    return alert("select a single source")
+
+        $("#waitImg").css("display", "block");
+        MainController.UI.message(sources[0]+" processing...")
+        $.ajax({
+            type: "GET",
+            url: "/ontology/"+sources[0],
+            dataType: "text/plain",
+            success: function (data2, textStatus, jqXHR) {
+               // no success see index.js
+
+            }
+            , error: function (err) {// bizarre !!!
+                download(err.responseText, sources[0]+".txt", "text/plain");
+               MainController.UI.message(sources[0]+" downloaded")
+
+
+            }
+
+
+        })
+
+
+
 
 
 

@@ -6,7 +6,8 @@ var Admin=(function(){
 
     self.onLoaded = function () {
     var html="<button onclick='Admin.refreshIndexes()'>refreshIndexes </button>"+
-       " <button onclick='Admin.exportNT()'>export NT </button>"
+       " <button onclick='Admin.exportNT()'>export NT </button>"+
+        " <button onclick='Admin.getClassesLineage()'>getLineage </button>"
         $("#sourceDivControlPanelDiv").html(html)
     }
 
@@ -75,6 +76,16 @@ if(sources.length!=1)
 
 
 
+    }
+    self.getClassesLineage=function(){
+        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+        if(sources.length!=1)
+            return alert("select a single source")
+
+        Sparql_OWL.getSourceTaxonomyAnClasses(sources[0],null,function(err, result){
+
+        })
     }
 
 

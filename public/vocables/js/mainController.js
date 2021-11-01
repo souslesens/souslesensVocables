@@ -165,7 +165,7 @@ var MainController = (function () {
         },
 
 
-        showSources: function (treeDiv, withCBX, sources, types,options,callback) {
+        showSources: function (treeDiv, withCBX, sources, types, options, callback) {
             var treeData = [];
             var distinctNodes = {}
 
@@ -174,8 +174,8 @@ var MainController = (function () {
 
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
 
-                if(!types  || ( types && types.indexOf(item)>-1))
-                treeData.push({id: item, text: item, parent: "#", type: item})
+                if (!types || (types && types.indexOf(item) > -1))
+                    treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
                 self.initControllers()
@@ -192,10 +192,9 @@ var MainController = (function () {
                 Config.sources[sourceLabel].name = sourceLabel;
 
 
+                var parent = Config.sources[sourceLabel].schemaType
 
-                var parent=Config.sources[sourceLabel].schemaType
-
-                var othersGroup="OTHERS"
+                var othersGroup = "OTHERS"
                 if (!types && !distinctGroups[othersGroup]) {
                     distinctGroups[othersGroup] = 1
                     treeData.push({
@@ -207,16 +206,15 @@ var MainController = (function () {
                 }
 
 
-
                 var group = Config.sources[sourceLabel].group
                 if (group) {
                     var subGroups = group.split("/")
                     subGroups.forEach(function (subGroup, index) {
 
-                        if(index>0)
-                            parent=subGroups[index-1]
+                        if (index > 0)
+                            parent = subGroups[index - 1]
                         if (!distinctGroups[subGroup]) {
-                            distinctGroups[subGroup]=1
+                            distinctGroups[subGroup] = 1
                             treeData.push({
                                 id: subGroup,
                                 text: subGroup,
@@ -224,16 +222,15 @@ var MainController = (function () {
                                 parent: parent,
                             })
                         }
-                        group=subGroup
+                        group = subGroup
                     })
 
-                }
-                else{
-                    group=othersGroup + "_" + parent
-                    if(types)
-                        group=   Config.sources[sourceLabel].schemaType
+                } else {
+                    group = othersGroup + "_" + parent
+                    if (types)
+                        group = Config.sources[sourceLabel].schemaType
                     else
-                        group=   Config.sources[sourceLabel].schemaType
+                        group = Config.sources[sourceLabel].schemaType
                 }
 
                 if (!distinctNodes[sourceLabel]) {
@@ -242,7 +239,7 @@ var MainController = (function () {
                     if (!Config.sources[sourceLabel].color)
                         Config.sources[sourceLabel].color = common.palette[index % common.palette.length];
                     //  console.log(JSON.stringify(jstreeData,null,2))
-                    if(!types  || types.indexOf(Config.sources[sourceLabel].schemaType)>-1) {
+                    if (!types || types.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
                         treeData.push({
                             id: sourceLabel,
                             text: sourceLabel,
@@ -288,12 +285,14 @@ var MainController = (function () {
                         }
                     }
                 },
-              /*  ondblclickFn:function(nodeId){
-                    var x=3
-                }*/
+                /*  ondblclickFn:function(nodeId){
+                      var x=3
+                  }*/
             }, function () {
-
-                $("#" + treeDiv).jstree(true).open_all(Config.preferredSchemaType);
+                var openedTypes = Config.preferredSchemaType
+                if (types)
+                    openedTypes = types
+                $("#" + treeDiv).jstree(true).open_all(openedTypes);
                 if (callback)
                     return callback()
 
@@ -461,12 +460,12 @@ var MainController = (function () {
         onAccordionChangePanel: function (panelLabel) {
 
 
-            if ( self.previousPanelLabel &&  self.previousPanelLabel == "toolPanelDiv") {
-               ;
+            if (self.previousPanelLabel && self.previousPanelLabel == "toolPanelDiv") {
+                ;
             } else {
-              //  $("#graphDiv").html("...");
+                //  $("#graphDiv").html("...");
             }
-            self.previousPanelLabel=panelLabel
+            self.previousPanelLabel = panelLabel
 
         },
 

@@ -772,48 +772,123 @@ var KGadvancedMapping = (function () {
                 return alert("no column selected")
             var words = [];
             var indexes = []
+            var indexClassMap = {}
             async.series([
-                function (callbackSeries) {
+                function (callbackSeries) {// get words
                     KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
                         if (err)
-                            return  callbackSeries(err)
+                            return callbackSeries(err)
                         words = result;
                         callbackSeries();
                     })
                 }
-                , function (callbackSeries) {
+                , function (callbackSeries) {//get indexes to compare
                     Standardizer.initSourcesIndexesList({schemaType: "OWL"}, function (err, result) {
                         if (err)
-                            return  callbackSeries(err)
-                        result.forEach(function(item){
+                            return callbackSeries(err)
+                        result.forEach(function (item) {
                             indexes.push(item.toLowerCase())
                         })
 
                         callbackSeries();
                     })
                 }
-                ,  function (callbackSeries) {
+                , function (callbackSeries) {//get indexes matches class map
+                    MainController.UI.message("matching " + words.length + "words")
                     var resultSize = 1
                     var size = 200;
                     var offset = 0
                     var totalProcessed = 0
-                    async.whilst(function (test) {
-                        return resultSize > 0
+                    var allResults = []
+                    var wordSlices = common.array.slice(words, size)
+                    async.eachSeries(wordSlices, function (slice, callbackEach) {
 
-                    }, function (callbackWhilst) {
-                        Standardizer.getElasticSearchExactMatches(words, indexes, offset, size, function (err, result) {
+                        Standardizer.getElasticSearchExactMatches(slice, indexes, 0, size, function (err, result) {
                             if (err)
-                                return callbackSeries(err)
-                            resultSize += result.length;
-                            offset += result.length
-                            callbackWhilst()
+                                return callbackEach(err)
+                            resultSize = result.length;
+                            offset += size
+                            allResults = allResults.concat(result);
+                            MainController.UI.message("matches found :" + allResults.length)
+                            callbackEach()
                         })
+                    }, function (err) {
+                        if (err)
+                            return callbackSeries(err)
+                        indexClassMap = Standardizer.getMatchesClassesByIndex(allResults)
+                        MainController.UI.message("", true)
+                        callbackSeries()
                     })
                 }
-            ])
+                , function (callbackSeries) {// get classes ancestors
+                    var visjsData = {edges: [], nodes: []}
+                    var existingNodes = {}
+                    for (var index in indexClassMap) {
+                        if (!existingNodes[index]) {
+                            existingNodes[index] = 1
+                            visjsData.nodes.push({
+                                id: index,
+                                label: index,
+                                shape:"rectangle"
+
+                            })
+                        }
+                        for (var classUri in indexClassMap[index]) {
+
+                            var parentsStr = indexClassMap[index][classUri].data.parents
+                            if(parentsStr) {
+                                var parents = parentsStr.split("|")
+                                parents.forEach(function (item, parentIndex) {
+                                    var parent;
+                                    if (parentIndex == 0)
+                                        parent = index;
+                                    else
+                                        parent = parents[parentIndex - 1]
+
+                                    if (!existingNodes[item]) {
+                                        existingNodes[item] = 1
+                                        visjsData.nodes.push({
+                                            id: item,
+                                            label: item,
+
+                                        })
+
+                                    }
+                                    var edgeId = parent + "_" + item
+                                    if (!existingNodes[edgeId]) {
+                                        existingNodes[edgeId] = 1
+                                        visjsData.edges.push({
+                                            from: item,
+                                            to: parent,
+
+                                        })
+                                    }
+                                })
+                            }
+                        }
+
+
+                    }
 
 
 
+                        var html = "<div id='bestMatchesGraphDiv' style='width:100%;height:100%'></div>"
+
+                        $("#mainDialogDiv").dialog("open");
+
+                        $("#mainDialogDiv").html(html)
+                        setTimeout(function () {
+                            visjsGraph.draw("bestMatchesGraphDiv", visjsData)
+                        },500)
+
+                        callbackSeries();
+
+
+
+                }
+            ], function (err) {
+                return "DONE"
+            })
 
 
         }

@@ -336,6 +336,21 @@ var Standardizer = (function () {
 
     }
 
+    self.getMatchesClassesByIndex = function (bulkResult) {
+        var indexClassMap = {}
+        bulkResult.forEach(function (item) {
+            var hits = item.hits.hits;
+            hits.forEach(function (hit) {
+                if (!indexClassMap[hit._index])
+                    indexClassMap[hit._index] = {}
+                if (!indexClassMap[hit._index][hit._source.id])
+                    indexClassMap[hit._index][hit._source.id] = {words: [],data:hit._source}
+                indexClassMap[hit._index][hit._source.id].words.push(hit._source.label)
+            })
+        })
+        return indexClassMap;
+    }
+
     self.showMatchesIndexRanking = function () {
         if (!self.matrixIndexRankingsMap)
             return;
@@ -413,6 +428,9 @@ var Standardizer = (function () {
         var offset = 0
         var totalProcessed = 0
         var indexes = self.getSelectedIndexes()
+        var p = indexes.indexOf(source.toLowerCase())
+        if (p > -1)// remove source from indexes to compare with
+            indexes.splice(p, 1)
         if (indexes.length == 0)
             return alert("select target Source of comparison")
         var html = self.initMatrix(indexes)
@@ -433,6 +451,9 @@ var Standardizer = (function () {
                 })
                 var indexes = self.getSelectedIndexes()
                 self.getElasticSearchExactMatches(words, indexes, 0, size, function (err, result) {
+                    if (err)
+                        return alert(err)
+                    //  self.getMatchesClassesByIndex(result)
                     var html = self.processResult(words, result, indexes)
                     totalProcessed += result.length;
                     MainController.UI.message(" processed items: " + (totalProcessed))
@@ -451,6 +472,7 @@ var Standardizer = (function () {
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
                 self.showMatchesIndexRanking()
+
             }, 500)
         })
     }
@@ -732,26 +754,17 @@ var Standardizer = (function () {
         var totalLines = 0
 
 
-        var processor = function (data, callback) {
+        var processor = function (data,replaceIndex, callback) {
 
-            var data2 = []
-            data.forEach(function (item) {
-                if (item.label) {
-                    data2.push({
-                        id: item.id.value,
-                        label: item.label.value,
 
-                    })
-                }
-            })
-            if (data2.length == 0)
+            if (data.length == 0)
                 return callback();
             //  MainController.UI.message("indexing " + data.length)
-            var options = {replaceIndex: true}
+            var options = {replaceIndex: replaceIndex}
             var payload = {
                 dictionaries_indexSource: 1,
                 indexName: sourceLabel.toLowerCase(),
-                data: JSON.stringify(data2),
+                data: JSON.stringify(data),
                 options: JSON.stringify(options)
             }
 
@@ -776,7 +789,38 @@ var Standardizer = (function () {
         }
 
         if (Config.sources[sourceLabel].schemaType == "OWL") {
+            Sparql_OWL.getSourceTaxonomyAnClasses(sourceLabel, null, function (err, result) {
 
+                if (err) {
+                    if (callback)
+                        return callback(err);
+                    MainController.UI.message(err, true)
+                }
+                var index=0
+                var classesArray=[];
+                for( var key in result.classesMap){
+                    classesArray.push(result.classesMap[key])
+                }
+               var slices =common.array.slice(classesArray,200)
+                async.eachSeries(slices,function(data, callbackEach){
+                    var replaceIndex=false
+                    if((index++)==0)
+                        replaceIndex=true;
+                    processor(data,replaceIndex, function(err, result){
+                        if(err)
+                            return callbackEach(err)
+                     //   MainController.UI.message("indexed "+data.length+" lines in "+sourceLabel)
+                        callbackEach();
+                    })
+                },function(err){
+                    if (callback)
+                        return callback(err);
+                    MainController.UI.message("DONE " + sourceLabel, true)
+                })
+
+            })
+
+            return;
             Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
                 if (err) {
 

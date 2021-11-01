@@ -49,6 +49,8 @@ var KGmappings = (function () {
                 if (err)
                     alert(err)
 
+
+
             })
             MainController.UI.openRightPanel()
             $("#actionDivContolPanelDiv").html("KG database &nbsp;<select onchange='KGmappingData.loadKG_SQLModel()' id=\"KGmappings_DatabaseSelect\"> </select>" +

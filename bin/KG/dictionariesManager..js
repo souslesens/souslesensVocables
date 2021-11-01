@@ -82,7 +82,9 @@ var DictionariesManager = {
 
 
 
-    , indexSource: function (indexName, data, options, callback) {
+    , indexSource: function (indexName, data, _options, callback) {
+        if(!_options)
+            _options={}
         var elasticUrl
         async.series([
 
@@ -91,7 +93,6 @@ var DictionariesManager = {
                 function (callbackSeries) {
 
                     ConfigManager.getGeneralConfig(function (err, config) {
-                        console.log("ee")
                         if (err)
                             return callbackSeries(err);
                         elasticUrl = config.ElasticSearch.url
@@ -101,6 +102,8 @@ var DictionariesManager = {
 
                 //delete index
                 function (callbackSeries) {
+            if(!_options.replaceIndex)
+               return callbackSeries();
                     ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, result) {
                         callbackSeries(err)
                     })
@@ -110,7 +113,8 @@ var DictionariesManager = {
 
             //set mappings
             function (callbackSeries) {
-
+                if(!_options.replaceIndex)
+                return callbackSeries();
 
                 var mappings = {
                     "settings": {
@@ -147,6 +151,9 @@ var DictionariesManager = {
                                                 "ignore_above": 256
                                             }
                                         }
+                                    },
+                                    "parents": {
+                                        "type": "text",
                                     }
                                 }
                             }

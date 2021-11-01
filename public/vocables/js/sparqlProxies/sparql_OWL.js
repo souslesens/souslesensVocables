@@ -561,7 +561,7 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph,options.withoutImports)
+            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
 
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -736,7 +736,137 @@ var Sparql_OWL = (function () {
 
             })
         }
-        self.getDictionary = function (sourceLabel, options, processor,callback) {
+
+        self.getSourceTaxonomyAnClasses = function (sourceLabel, options, callback) {
+            var rawData = []
+            var topClasses = []
+            var taxonomy = {}
+            var allClasses= {}
+            async.series([
+                function (callbackSeries) {//get topClasse
+                    Sparql_OWL.getTopConcepts(sourceLabel, {}, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        if (result.length == 0)
+                            return callbackSeries("no top classes found . cannot organize classes lineage")
+                        topClasses = result;
+                        callbackSeries()
+                    })
+                },
+
+                function (callbackSeries) {//get raw data subclasses
+                    if (!options)
+                        options = {}
+
+                    var resultSize = 1
+                    var limitSize = 2000
+                    var offset = 0
+                    var fromStr = Sparql_common.getFromStr(sourceLabel)
+                    var filterStr = ""
+                    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "SELECT distinct * " + fromStr + " WHERE {\n" +
+                        " ?sub rdfs:subClassOf+ ?obj .\n" +
+                        "   ?sub rdfs:label ?subLabel .\n" +
+                        "   ?obj rdfs:label ?objLabel .\n" +
+                        "   ?sub rdf:type owl:Class.\n" +
+                        " ?obj rdf:type owl:Class.\n" +
+                        "} "
+                    async.whilst(function (test) {
+                        return resultSize > 0
+
+                    }, function (callbackWhilst) {
+
+                        var query2 = "" + query;
+                        var limit = options.limit || Config.queryLimit;
+                        query2 += " limit " + limitSize + " offset " + offset
+
+                        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                        var url = self.sparql_url + "?format=json&query=";
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
+                            if (err)
+                                return callbackWhilst(err);
+                            result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
+                            rawData = rawData.concat(result)
+                            resultSize = result.length
+                            offset += limit
+                            callbackWhilst()
+                        })
+                    }, function (err) {
+                        callbackSeries()
+                    })
+
+                },
+                function (callbackSeries) {//process taxonomy
+
+
+                    topClasses.forEach(function (item) {
+                        taxonomy[item.topConcept.value] = {
+                            id: item.topConcept.value,
+                            label: item.topConceptLabel.value,
+                            children: {}
+                        }
+
+                    })
+
+                    if (true) {
+                        var count=0
+
+                        function recurseChildren(nodes) {
+                            for (var concept in nodes) {
+                                rawData.forEach(function (item) {
+
+                                    if (item.obj.value == concept) {
+                                        var parents=""
+                                        if(allClasses[item.obj.value])
+                                         parents= allClasses[item.obj.value].parents
+                                        else
+                                            parents=item.obj.value
+                                        parents+="|"+item.sub.value
+
+                                        var child = {id: item.sub.value, label: item.subLabel.value, parents:parents,children: {}}
+                                        nodes[concept].children[item.sub.value] = child
+                                        var classObj= {id: item.sub.value, label: item.subLabel.value, parents:parents}
+                                        allClasses[item.sub.value]=classObj;
+                                        count++
+                                        if(count%10==0)
+                                            console.log(count)
+
+
+
+
+
+
+                                    }
+                                })
+                                recurseChildren(nodes[concept].children)
+
+                            }
+                        }
+                    }
+
+
+                    recurseChildren(taxonomy)
+
+
+                    callbackSeries()
+                }
+
+            ], function (err) {
+                var x = allClasses
+                var y = taxonomy
+                return callback(err,{tree: taxonomy,classesMap:allClasses})
+
+            })
+
+
+        }
+
+
+        self.getDictionary = function (sourceLabel, options, processor, callback) {
+            if (!options)
+                options = {}
             var fromStr = Sparql_common.getFromStr(sourceLabel)
             var filterStr = ""
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -745,10 +875,10 @@ var Sparql_OWL = (function () {
                 "SELECT distinct * " + fromStr + " WHERE "
             if (options.selectGraph)
                 query += " graph ?g "
-            query += "{ ?id rdf:type <http://www.w3.org/2002/07/owl#Class>. "+
-            " OPTIONAL {?id rdfs:label ?label}" +
+            query += "{ ?id rdf:type <http://www.w3.org/2002/07/owl#Class>. " +
+                " OPTIONAL {?id rdfs:label ?label}" +
 
-            " }"
+                " }"
 
             var allData = []
             var resultSize = 1
@@ -769,16 +899,15 @@ var Sparql_OWL = (function () {
                     if (err)
                         return callbackWhilst(err);
                     result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
-                    resultSize=result.length
-                    offset+=limit
-                    if(processor) {
+                    resultSize = result.length
+                    offset += limit
+                    if (processor) {
                         processor(result, function (err, result) {
-                            if(err)
+                            if (err)
                                 return callbackWhilst(err)
                             callbackWhilst()
                         })
-                    }
-                    else {
+                    } else {
 
                         allData = allData.concat(result);
                         callbackWhilst()

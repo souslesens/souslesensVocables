@@ -151,7 +151,12 @@ var Config = (function () {
         toolDescriptionImg: null
     }//"images/taxonomy.png"}
 
-
+    self.tools["Config"] = {
+        label: "Config",
+        noSource: 1,
+        controller: Config,
+        toolDescriptionImg: null
+    }
 
     return self;
 

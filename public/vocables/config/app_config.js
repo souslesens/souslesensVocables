@@ -151,7 +151,14 @@ var Config = (function () {
         toolDescriptionImg: null
     }//"images/taxonomy.png"}
 
-    self.tools["admin"] = {label: "admin", multiSources: 1, controller: Admin, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["admin"] = {label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null}//"images/taxonomy.png"}
+
+    self.tools["Config"] = {
+        label: "Config",
+        noSource: 1,
+        controller: Config,
+        toolDescriptionImg: null
+    }
 
     return self;
 

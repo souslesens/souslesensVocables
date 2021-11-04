@@ -91,6 +91,9 @@
     <script src="js/tools/SQLquery.js"></script>
 
     <script src="js/tools/admin.js"></script>
+    <script src="js/tools/Config.js"></script>
+
+
 
 
 
@@ -179,17 +182,14 @@
                         return false;
                 })
                 $("#accordion").on("accordionactivate", function (event, ui) {
-                if (ui.newHeader.text() === "Admin") {
-                    $("#graphDiv").html(`
-                        <div id="mount-app-here"></div>
-                    `);
-                    $.getScript("/mainapp.js");
-                } else {
 
-                    MainController.UI.onAccordionChangePanel(ui.newPanel[0].id)
-                }
-
-
+/*
+                    if (false && ui.newPanel[0].id == "blenderPanelDiv") {
+                        //Blender.initPanel();
+                        MainController.UI.showInCentralPanelDiv("blendDiv")
+                    } else {
+                        MainController.UI.showInCentralPanelDiv("graphDiv")
+                    }*/
                 });
                 $("#mainDialogDiv").dialog({
                     autoOpen: false,
@@ -426,14 +426,9 @@
                 <div id="actionDivContolPanelDiv"></div>
                 <div id="actionDiv" class="jstree"></div>
 
-            </div>
 
-            <h3><span class="title">Admin</span></h3>
-            <div style="margin:5px" class='max-height'>
-                <div id="adminDiv" style="min-height: 50px"></div>
-            </div>
-
-       <!--     <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
+                </div>
+                <!--     <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
             <div id="blenderPanelDiv" class='max-height'>
 
             </div>-->

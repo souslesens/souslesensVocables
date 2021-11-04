@@ -314,12 +314,8 @@ var visjsGraph = (function () {
 
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
-                //   levelSeparation: 50,
-                //   nodeSpacing: 50,
-                //  levelSeparation: 200,
               sortMethod: "hubsize",
-              //  sortMethod:"directed",
-             //   shakeTowards:"roots"
+
             }
             shakeTowards:true
             self.currentContext.simulationTimeOut = 10000

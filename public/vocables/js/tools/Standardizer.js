@@ -167,6 +167,7 @@ var Standardizer = (function () {
         var allResults = []
         var totalProcessed = 0
         async.eachSeries(slices, function (wordSlice, callbackEach) {
+            bulQueryStr="";
             wordSlice.forEach(function (word) {
                 var wordQuery = self.getWordBulkQuery(word, mode, indexes)
                 bulQueryStr += wordQuery;
@@ -184,6 +185,57 @@ var Standardizer = (function () {
             callback(err, allResults);
 
         })
+    }
+    self.getClassesLabels = function (classUris, indexes, callback) {
+
+        var bulQueryStr = ""
+        var slices = common.array.slice(classUris, 100)
+        var allResults = []
+        var totalProcessed = 0
+        var size = 200
+       var  queryResultsSize=5000
+        var classesMap = {}
+        var  slices;
+        if(classUris)
+       slices = common.array.slice(classUris, size)
+        async.eachSeries(slices, function (urisSlice, callbackEach) {
+                var queryObj = {
+                    "terms": {
+                        "id.keyword": urisSlice,
+                    }
+                }
+                var query = {
+                    "query": queryObj,
+                    "from": 0,
+                    "size": queryResultsSize,
+                    "_source": {
+                        "excludes": [
+                            "attachment.content",
+                            "parents"
+                        ]
+                    },
+                }
+
+
+            ElasticSearchProxy.queryElastic(query,indexes, function (err, result) {
+                if (err)
+                    return callbackEach(err)
+
+                var hits=result.hits.hits
+if(hits.length>queryResultsSize)
+    if(!confirm("resut troncated > "+hits.length))
+        return callback("resut troncated")
+                hits.forEach(function(hit){
+                    classesMap[hit._source.id]=hit._source.label
+                })
+                callbackEach();
+            })
+        }, function (err) {
+            if (err)
+                return callback(err);
+            return callback(null, classesMap)
+        })
+
     }
 
     self.getSelectedIndexes = function () {
@@ -344,7 +396,7 @@ var Standardizer = (function () {
                 if (!indexClassMap[hit._index])
                     indexClassMap[hit._index] = {}
                 if (!indexClassMap[hit._index][hit._source.id])
-                    indexClassMap[hit._index][hit._source.id] = {words: [],data:hit._source}
+                    indexClassMap[hit._index][hit._source.id] = {words: [], data: hit._source}
                 indexClassMap[hit._index][hit._source.id].words.push(hit._source.label)
             })
         })
@@ -410,6 +462,11 @@ var Standardizer = (function () {
             if (err)
                 return alert(err)
             MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
+            setTimeout(function () {
+                $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
+                self.showMatchesIndexRanking()
+
+            }, 500)
         })
     }
 
@@ -754,7 +811,7 @@ var Standardizer = (function () {
         var totalLines = 0
 
 
-        var processor = function (data,replaceIndex, callback) {
+        var processor = function (data, replaceIndex, callback) {
 
 
             if (data.length == 0)
@@ -796,23 +853,23 @@ var Standardizer = (function () {
                         return callback(err);
                     MainController.UI.message(err, true)
                 }
-                var index=0
-                var classesArray=[];
-                for( var key in result.classesMap){
+                var index = 0
+                var classesArray = [];
+                for (var key in result.classesMap) {
                     classesArray.push(result.classesMap[key])
                 }
-               var slices =common.array.slice(classesArray,200)
-                async.eachSeries(slices,function(data, callbackEach){
-                    var replaceIndex=false
-                    if((index++)==0)
-                        replaceIndex=true;
-                    processor(data,replaceIndex, function(err, result){
-                        if(err)
+                var slices = common.array.slice(classesArray, 200)
+                async.eachSeries(slices, function (data, callbackEach) {
+                    var replaceIndex = false
+                    if ((index++) == 0)
+                        replaceIndex = true;
+                    processor(data, replaceIndex, function (err, result) {
+                        if (err)
                             return callbackEach(err)
-                     //   MainController.UI.message("indexed "+data.length+" lines in "+sourceLabel)
+                        //   MainController.UI.message("indexed "+data.length+" lines in "+sourceLabel)
                         callbackEach();
                     })
-                },function(err){
+                }, function (err) {
                     if (callback)
                         return callback(err);
                     MainController.UI.message("DONE " + sourceLabel, true)

@@ -772,13 +772,21 @@ var KGadvancedMapping = (function () {
                 return alert("no column selected")
             var words = [];
             var indexes = []
-            var indexClassMap = {}
+            self.classUriLabelMap = {}
+            var searchResultArray = []
+            var classUris = []
+            var nodes = {}
+            var orphans = []
+            var treemapData = {}
+            var distinctParentsMap = {}
+            var allWords
             async.series([
                 function (callbackSeries) {// get words
                     KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
                         if (err)
                             return callbackSeries(err)
                         words = result;
+                        allWords=JSON.parse(JSON.stringify(words))
                         callbackSeries();
                     })
                 }
@@ -799,90 +807,335 @@ var KGadvancedMapping = (function () {
                     var size = 200;
                     var offset = 0
                     var totalProcessed = 0
-                    var allResults = []
-                    var wordSlices = common.array.slice(words, size)
-                    async.eachSeries(wordSlices, function (slice, callbackEach) {
 
-                        Standardizer.getElasticSearchExactMatches(slice, indexes, 0, size, function (err, result) {
+
+                 /*   var wordSlices = common.array.slice(words, size)
+                    async.eachSeries(wordSlices, function (slice, callbackEach) {*/
+
+                        Standardizer.getElasticSearchExactMatches(words, indexes, 0, size, function (err, result) {
                             if (err)
-                                return callbackEach(err)
+                                return callbackSeries(err)
                             resultSize = result.length;
                             offset += size
-                            allResults = allResults.concat(result);
-                            MainController.UI.message("matches found :" + allResults.length)
-                            callbackEach()
+                            searchResultArray =  result;
+                            MainController.UI.message("matches found :" +  searchResultArray.length)
+                            callbackSeries()
                         })
-                    }, function (err) {
-                        if (err)
-                            return callbackSeries(err)
-                        indexClassMap = Standardizer.getMatchesClassesByIndex(allResults)
-                        MainController.UI.message("", true)
-                        callbackSeries()
-                    })
+                    /*   }, function (err) {
+                       if (err)
+                           return callbackSeries(err)
+                       searchResultArray = allResults;
+
+
+                       return callbackSeries()
+                      indexClassMap = Standardizer.getMatchesClassesByIndex(allResults)
+                          MainController.UI.message("", true)
+                          callbackSeries()*/
+                   // })
                 }
-                , function (callbackSeries) {// get classes ancestors
-                    var visjsData = {edges: [], nodes: []}
-                    var existingNodes = {}
-                    for (var index in indexClassMap) {
-                        if (!existingNodes[index]) {
-                            existingNodes[index] = 1
-                            visjsData.nodes.push({
-                                id: index,
-                                label: index,
-                                shape:"rectangle"
+                , function (callbackSeries) {// get labels and stats
 
-                            })
-                        }
-                        for (var classUri in indexClassMap[index]) {
+                    var indexes = []
+                    var distinctHits = []
 
-                            var parentsStr = indexClassMap[index][classUri].data.parents
-                            if(parentsStr) {
-                                var parents = parentsStr.split("|")
-                                parents.forEach(function (item, parentIndex) {
-                                    var parent;
-                                    if (parentIndex == 0)
-                                        parent = index;
-                                    else
-                                        parent = parents[parentIndex - 1]
+                    searchResultArray.forEach(function (item,itemIndex) {
+                        if (item.hits && item.hits.hits && item.hits.hits.length==0)
+                          orphans.push(allWords[itemIndex])
+                        var hits = item.hits.hits;
 
-                                    if (!existingNodes[item]) {
-                                        existingNodes[item] = 1
-                                        visjsData.nodes.push({
-                                            id: item,
-                                            label: item,
+                        hits.forEach(function (hit) {
 
-                                        })
+
+                            if(hit._source.id== "http://w3id.org/readi/rdl/CFIHOS-30000128")
+                                var x=3
+                            if (distinctHits.indexOf(hit._source.label) < 0)
+                                distinctHits.push(hit._source.label)
+
+                            if (indexes.indexOf(hit._index) < 0)
+                                indexes.push(hit._index)
+                            var parentsStr = hit._source.parents
+
+                            if (parentsStr) {
+
+                                var lastParent
+                                var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+
+                                if (!distinctParentsMap[parentsStr])
+                                    distinctParentsMap[parentsStr]=[]
+
+                                var ancestors=[]
+                                parents.forEach(function (itemParent, index) {
+                                    ancestors.push(itemParent)
+                                    if (classUris.indexOf(itemParent) < 0)
+                                        classUris.push(itemParent)
+                                    var parent = hit._index
+
+
+                                    if (index > 0)
+                                        parent = parents[index - 1]
+
+
+                                    if (!nodes[itemParent]) {
+                                        nodes[itemParent] = {
+                                            id: itemParent,
+                                            parent: parent,
+                                            index: hit._index,
+                                            classes: [],
+                                            ancestors:ancestors,
+                                            countChildren:0
+                                        }
+
 
                                     }
-                                    var edgeId = parent + "_" + item
-                                    if (!existingNodes[edgeId]) {
-                                        existingNodes[edgeId] = 1
-                                        visjsData.edges.push({
-                                            from: item,
-                                            to: parent,
+                                    lastParent = itemParent
 
-                                        })
-                                    }
                                 })
-                            }
-                        }
 
+
+                                if (nodes[lastParent].classes.indexOf(hit._source.id) < 0)
+                                    nodes[lastParent].classes.push(hit._source.id)
+                                classUris.push(hit._source.id)
+
+                            }
+                        })
+
+
+                    })
+                    var hierarchy={}
+                    for( var parent in nodes){
+                        if(nodes[parent].classes && nodes[parent].classes.length>0){
+                            nodes[parent].countChildren=nodes[parent].classes.length
+                            var ancestors=nodes[parent].ancestors
+                          for(var i=ancestors.length-2;i>=0;i--){
+                              nodes[ancestors[i]].countChildren+=nodes[ancestors[i+1]].countChildren
+
+                          }
+
+                        }
 
                     }
 
 
+                    callbackSeries()
+                }
 
-                        var html = "<div id='bestMatchesGraphDiv' style='width:100%;height:100%'></div>"
 
-                        $("#mainDialogDiv").dialog("open");
 
-                        $("#mainDialogDiv").html(html)
-                        setTimeout(function () {
-                            visjsGraph.draw("bestMatchesGraphDiv", visjsData)
-                        },500)
 
-                        callbackSeries();
+                , function (callbackSeries) { //get labels
+                    Standardizer.getClassesLabels(classUris, indexes, function (err, result) {
+                        self.classUriLabelMap = result;
+                        callbackSeries()
+                    })
+                }
 
+
+                , function (callbackSeries) {//get treemap data
+
+                    var hierarchy={name:"bestMatch",children:[]};
+                    var distinctNodes={}
+                    for( var parent in nodes){
+                            var ancestors=nodes[parent].ancestors
+                        var previousChildObj=null;
+                            for(var i=ancestors.length-1;i>=0;i--){
+                                var ancestorObj= nodes[ancestors[i]]
+                                var currentChildObj=distinctNodes[ancestorObj.id]
+                                if(!currentChildObj){
+                                    currentChildObj = {
+                                        name: self.classUriLabelMap[ancestorObj.id] ||  ancestorObj.id,
+                                        id: ancestorObj.id,
+                                        size: ancestorObj.countChildren,
+                                        children: []
+                                    }
+                                    distinctNodes[ancestorObj.id] = currentChildObj;
+                                }else {
+                                    currentChildObj.size += ancestorObj.size;
+                                }
+
+                                if(i==ancestors.length-1 && !previousChildObj)
+                                            previousChildObj=currentChildObj
+
+                                    else {
+                                            currentChildObj.children.push(JSON.parse(JSON.stringify(previousChildObj)))
+                                            previousChildObj =currentChildObj
+                                        }
+
+
+                                }
+
+
+
+                        hierarchy.children.push(previousChildObj)
+
+                        }
+
+
+
+                    return callbackSeries()
+                    var parentsToTree = function (array) {
+                        const nest = (items, id = null, link = 'id') =>
+                            items
+                                .filter(item => item[link] === id)
+                                .map(item => ({...item, children: nest(items, item.id)}));
+
+
+                        return nest(array)
+
+
+                    }
+                    var targetArray=[]
+                    var distinctPaths=[]
+                 for(var str  in   distinctParentsMap) {
+
+                     distinctPaths.forEach(function (path) {
+
+                         var parents = str.substring(0, parentsStr.length - 1).split("|")
+
+                     })
+
+                 }
+
+
+
+                        //console.log(JSON.stringify( distinctHits,null,2))
+                    callbackSeries()
+                }
+
+                , function (callbackSeries) { //draw graph
+
+                    var visjsData = {edges: [], nodes: []}
+                      visjsData.nodes.push({
+                           id: "#",
+                           label: "#",
+                           shape: "star"
+
+                       })
+                    var existingNodes = {}
+                    for (var key in nodes) {
+
+
+                        var node = nodes[key]
+
+                        var color = Lineage_classes.getSourceColor(node.index)
+
+                        if (!existingNodes[node.index]) {
+                            existingNodes[node.index] = 1
+                            visjsData.nodes.push({
+                                id: node.index,
+                                label: node.index,
+                                shape: "ellipse",
+                                color: color
+
+                            })
+                            var edgeId = node.index + "_#"
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    from: node.index,
+                                    to: "#",
+
+                                })
+                            }
+                        }
+
+                        if (!existingNodes[node.id]) {
+                            existingNodes[node.id] = 1
+                            visjsData.nodes.push({
+                                id: node.id,
+                                label: self.classUriLabelMap[node.id],
+                                color: color,
+                                shape:"dot",
+                                //  size: 8,
+
+                                data: {
+                                    id: node.id,
+                                    label: self.classUriLabelMap[node.id],
+                                    classes: node.classes,
+                                    countChildren: node.countChildren
+                                }
+                            })
+
+
+                            var edgeId = node.parent + "_" + node.id
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    from: node.id,
+                                    to: node.parent,
+
+                                })
+                            }
+
+
+                        }
+                    }
+
+                    visjsData.nodes.forEach(function (node) {
+
+                        if (node.data && node.data.classes && node.data.classes.length > 0) {
+                            var value = node.data.classes.length
+                            node.value = value
+                            node.shape = "square"
+                        } else {
+
+                            node.value = node.countChildren
+                          //  node.shape = "dot"
+                        }
+                    })
+
+
+                    var orphansNode = {
+                        id: "orphans",
+                        text: "orphans",
+                        shape: "square",
+                        color: "#ddd",
+                        size: 20,
+                        data: {
+                            id: "orphans",
+                            text: "orphans",
+                            words: orphans
+                        }
+
+                    }
+
+                    visjsData.nodes.push(orphansNode)
+
+
+                    var html = "<div style='display: flex;flex-direction:row';width:100%;height:100%>" +
+                        "<div id='bestMatchesGraphDiv' style='width:800px;height:800px'></div>" +
+                        "<div id='bestMatchesInfosDiv' style='width:200px;height:100%'></div>" +
+                        "</div>"
+
+                    $("#mainDialogDiv").dialog("open");
+
+                    $("#mainDialogDiv").html(html)
+                    setTimeout(function () {
+
+                        var options = {
+                            onclickFn: KGadvancedMapping.bestMatches.onGraphNodeClick,
+
+                            nodes: {
+
+                                    scaling: {
+                                    customScalingFunction: function (min, max, total, value) {
+                                        return value / total;
+                                    },
+                                    min: 5,
+                                        max: 150,
+                                },
+                            },
+                            layoutHierarchical : {
+                                direction: "UD",
+                                sortMethod: "hubsize",
+
+                            }
+                        }
+
+
+                        visjsGraph.draw("bestMatchesGraphDiv", visjsData, options)
+                    }, 500)
+
+                    callbackSeries();
 
 
                 }
@@ -890,6 +1143,31 @@ var KGadvancedMapping = (function () {
                 return "DONE"
             })
 
+
+        }
+        self.bestMatches = {
+            onGraphNodeClick: function (node, point, options) {
+                if(!node || !node.data)
+                    return;
+                var html = "<div><a target ='blank' href='" + node.data.id + "'>" + node.data.label + "</a></div>"
+                html += "<ul>"
+                if (node.data.classes) {
+                    node.data.classes.forEach(function (classUri) {
+                        var classLabel = self.classUriLabelMap[classUri]
+                        html += "<li><a target ='blank' href='" + classUri + "'>" + classLabel + "</a></li>"
+                    })
+                }
+
+                if (node.data.words) {
+                    node.data.words.forEach(function (word) {
+
+                        html += "<li>" + word + "</li>"
+                    })
+                }
+
+                html += "</ul>"
+                $("#bestMatchesInfosDiv").html(html)
+            }
 
         }
 

@@ -741,7 +741,8 @@ var Sparql_OWL = (function () {
             var rawData = []
             var topClasses = []
             var taxonomy = {}
-            var allClasses= {}
+
+            var allClassesMap = {}
             async.series([
                 function (callbackSeries) {//get topClasse
                     Sparql_OWL.getTopConcepts(sourceLabel, {}, function (err, result) {
@@ -757,7 +758,7 @@ var Sparql_OWL = (function () {
                 function (callbackSeries) {//get raw data subclasses
                     if (!options)
                         options = {}
-
+                    var totalCount = 0
                     var resultSize = 1
                     var limitSize = 2000
                     var offset = 0
@@ -779,7 +780,6 @@ var Sparql_OWL = (function () {
                     }, function (callbackWhilst) {
 
                         var query2 = "" + query;
-                        var limit = options.limit || Config.queryLimit;
                         query2 += " limit " + limitSize + " offset " + offset
 
                         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -790,73 +790,103 @@ var Sparql_OWL = (function () {
                             result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
                             rawData = rawData.concat(result)
                             resultSize = result.length
-                            offset += limit
+                            totalCount += result.length
+                            MainController.UI.message(sourceLabel+"retreived triples :"+totalCount)
+                            offset += limitSize
                             callbackWhilst()
                         })
                     }, function (err) {
+                        console.log(totalCount)
                         callbackSeries()
                     })
 
                 },
-                function (callbackSeries) {//process taxonomy
 
 
-                    topClasses.forEach(function (item) {
-                        taxonomy[item.topConcept.value] = {
-                            id: item.topConcept.value,
-                            label: item.topConceptLabel.value,
-                            children: {}
-                        }
-
-                    })
+                function (callbackSeries) {//set each class parent
 
                     if (true) {
-                        var count=0
-
-                        function recurseChildren(nodes) {
-                            for (var concept in nodes) {
-                                rawData.forEach(function (item) {
-
-                                    if (item.obj.value == concept) {
-                                        var parents=""
-                                        if(allClasses[item.obj.value])
-                                         parents= allClasses[item.obj.value].parents
-                                        else
-                                            parents=item.obj.value
-                                        parents+="|"+item.sub.value
-
-                                        var child = {id: item.sub.value, label: item.subLabel.value, parents:parents,children: {}}
-                                        nodes[concept].children[item.sub.value] = child
-                                        var classObj= {id: item.sub.value, label: item.subLabel.value, parents:parents}
-                                        allClasses[item.sub.value]=classObj;
-                                        count++
-                                        if(count%10==0)
-                                            console.log(count)
 
 
-
-
-
-
-                                    }
-                                })
-                                recurseChildren(nodes[concept].children)
-
+                        var parentChildrenMap = {}
+                        rawData.forEach(function (item) {
+                            if (!allClassesMap[item.sub.value]) {
+                                allClassesMap[item.sub.value] = {
+                                    id: item.sub.value,
+                                    label: item.subLabel.value,
+                                    children: [],
+                                    parents: ""
+                                }
                             }
+                            if (!parentChildrenMap[item.obj.value])
+                                parentChildrenMap[item.obj.value] = []
+                            parentChildrenMap[item.obj.value].push(item.sub.value)
+
+
+                        })
+
+
+                        var x = Object.keys(allClassesMap).length
+                        var y = Object.keys(parentChildrenMap).length
+
+
+                        taxonomy={
+                            id: sourceLabel,
+                            label:sourceLabel,
+                            children:[]
                         }
-                    }
+
+                        parentChildrenMap[sourceLabel]=[]
+
+                        topClasses.forEach(function (item) {
+                            parentChildrenMap[sourceLabel].push(item.topConcept.value)
 
 
-                    recurseChildren(taxonomy)
+                        })
 
+
+                        if (true) {
+                            var count = 0
+
+                            function recurseChildren(str, classId) {
+
+                                if (parentChildrenMap[classId] ) {
+                                    str+=classId + "|"
+                                    parentChildrenMap[classId].forEach(function (childId) {
+                                        if(allClassesMap[childId]){
+
+                                            allClassesMap[childId].parents=str
+                                        }
+                                       recurseChildren(str, childId)
+
+                                    })
+
+
+                                } else {
+
+                                }
+                            }
+
+                                recurseChildren("",sourceLabel)
+
+
+
+                          //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
+
+
+                        }}
+
+
+
+
+var x=allClassesMap
 
                     callbackSeries()
                 }
 
             ], function (err) {
-                var x = allClasses
-                var y = taxonomy
-                return callback(err,{tree: taxonomy,classesMap:allClasses})
+
+                return callback(err, {tree: taxonomy, classesMap: allClassesMap})
 
             })
 

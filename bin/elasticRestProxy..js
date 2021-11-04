@@ -48,7 +48,7 @@ var elasticRestProxy = {
             url: url,
         };
 
-        if (true) console.log(JSON.stringify(query, null, 2));
+     //   if (true) console.log(JSON.stringify(query, null, 2));
         request(options, function (error, response, body) {
             if (error) return callback(error);
 
@@ -76,7 +76,7 @@ var elasticRestProxy = {
             url: elasticUrl + "/_msearch",
         };
 
-        console.log(ndjson);
+     //   console.log(ndjson);
         request(options, function (error, response, body) {
             if (error) return callback(error);
             if (body.error && body.error.reason) return callback(body.error.reason);

@@ -53,8 +53,7 @@ var RDF_IO = {
 
             var blanknodesMap = {};
 
-            if(typeof result ==="string")
-                result=JSON.parse(result);
+            if (typeof result === "string") result = JSON.parse(result);
 
             result.results.bindings.forEach(function (item) {
                 var object;

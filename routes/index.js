@@ -105,8 +105,6 @@ router.post(
             });
         }
 
-
-
         if (req.body.tryLoginJSON) {
             authentication.authentify(req.body.login, req.body.password, function (err, result) {
                 processResponse(response, err, result);
@@ -282,7 +280,6 @@ router.post(
             });
         }
 
-
         if (req.body.KG_SaveMappings) {
             KGcontroller.saveMappings(req.body.KGsource, req.body.mappings, function (err, result) {
                 processResponse(response, err, result);
@@ -324,12 +321,10 @@ router.post(
         if (req.params.length == 0) return req.send("missing ontology label");
         var name = req.params[0];
         RDF_IO.getOntology(name, function (err, result) {
-            res.contentType('text/plain');
-            res.status(200).send(result)
-
+            res.contentType("text/plain");
+            res.status(200).send(result);
         });
-    }),
-
+    })
 );
 
 function processResponse(response, error, result) {

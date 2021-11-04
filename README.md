@@ -97,7 +97,7 @@ Copy `docker-compose.yaml` and `env.template` to your production server and crea
 ### Configuration
 
 
-Configuration is done threw environment variables. They can be overridden in the `.env` file.
+Configuration is done through environment variables. They can be overridden in the `.env` file.
 
 ```bash
 vim .env

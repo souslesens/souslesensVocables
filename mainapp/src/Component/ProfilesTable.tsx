@@ -9,6 +9,7 @@ import { defaultProfile, Profile, putProfiles } from '../Profile';
 import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
+import { MAX_PAGE_SIZE } from '@mui/x-data-grid';
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -95,7 +96,8 @@ enum Type {
     UserClickedModal,
     UserUpdatedField,
     ResetProfile,
-    UserClickedCheckAll
+    UserClickedCheckAll,
+    UserUpdatedBlenderLevel
 }
 
 enum Mode { Creation, Edition }
@@ -105,6 +107,7 @@ type Msg_ =
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
     | { type: Type.ResetProfile, payload: Mode }
     | { type: Type.UserClickedCheckAll, payload: { fieldname: string, value: boolean } }
+    | { type: Type.UserUpdatedBlenderLevel, payload: number }
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
     console.log(Type[msg.type], msg.payload)
@@ -122,6 +125,9 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
         case Type.UserClickedCheckAll:
             const _fieldToUpdate = msg.payload.fieldname
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [_fieldToUpdate]: msg.payload.value ? "ALL" : [] } }
+
+        case Type.UserUpdatedBlenderLevel:
+            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, ["blender"]: { contextMenuActionStartLevel: msg.payload } } }
 
         case Type.ResetProfile:
             switch (msg.payload) {
@@ -158,6 +164,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } })
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } })
+    const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) })
+
     const shouldDisplayMultiselect = () => Array.isArray(profileModel.profileForm.allowedTools)
     const saveProfiles = () => {
 
@@ -185,6 +193,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         value={profileModel.profileForm.name}
                         id={`name`}
                         label={"Name"}
+                        variant="standard" />
+                    <TextField fullWidth onChange={handleNewBlenderNumber}
+
+                        value={profileModel.profileForm.blender.contextMenuActionStartLevel.toString()}
+                        id={`blender`}
+                        label={"Blender Level"}
                         variant="standard" />
                     <FormControl>
                         <InputLabel id="allowedSourceSchemas-label">Allowed Source Schemas</InputLabel>

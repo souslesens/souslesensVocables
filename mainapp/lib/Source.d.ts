@@ -6,7 +6,7 @@ export declare type Source = {
     _type: string;
     type: string;
     graphUri: string[];
-    sparql_server: string;
+    sparql_server: SparqlServer;
     controller: string;
     topClassFilter: string;
     schemaType: string;
@@ -66,5 +66,10 @@ interface LocalDictionary {
     table: string;
     idColumn: string;
     labelColumn: string;
+}
+interface SparqlServer {
+    url: string;
+    method: string;
+    headers: string[];
 }
 export { getSources, defaultDataSource };

@@ -71,7 +71,7 @@ const decodeUser = (user: UserJSON): User => {
     // for now client generates ulid if user.key is null, it should be generated server-side
     // As users.json doesn't contain key field, we should check for the presence of the field instead of whether the field is null
     return {
-        id: user.id === null ? ulid() : user.id,
+        id: user.id ? user.id : ulid(),
         login: user.login,
         password: user.password,
         groups: user.groups,
@@ -80,7 +80,7 @@ const decodeUser = (user: UserJSON): User => {
     }
 }
 
-type UserJSON = { id: string, login: string, password: string, groups: string[] }
+type UserJSON = { id?: string, login: string, password: string, groups: string[] }
 
 type User = { id: string, _type: string, login: string, password: string, groups: string[] }
 

@@ -9,7 +9,7 @@ var logger = require("../bin/logger..js");
 var httpProxy = require("../bin/httpProxy.");
 var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.");
 
-var OneModelManager = require("../other/oneModel/OneModelManager.");
+var RDF_IO = require("../bin/RDF_IO.");
 var KGcontroller = require("../bin/KG/KGcontroller.");
 var DataController = require("../bin/dataController.");
 var KGbuilder = require("../bin/KG/KGbuilder.");
@@ -95,6 +95,12 @@ router.post(
 
         if (req.body.elasticSearch) {
             elasticRestProxy.executePostQuery(req.body.url, JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
+        if (req.body.executeMsearch) {
+            elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
                 processResponse(response, err, result);
             });
         }
@@ -269,10 +275,11 @@ router.post(
         }
 
         if (req.body.uploadOntologyFromOwlFile) {
-            OneModelManager.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+            RDF_IO.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
                 processResponse(response, err, result);
             });
         }
+
         if (req.body.KG_SaveMappings) {
             KGcontroller.saveMappings(req.body.KGsource, req.body.mappings, function (err, result) {
                 processResponse(response, err, result);
@@ -313,17 +320,9 @@ router.post(
     router.get("/ontology/*", function (req, res, next) {
         if (req.params.length == 0) return req.send("missing ontology label");
         var name = req.params[0];
-        OneModelManager.getOntology(name, function (err, result) {
-            //  res.setHeader('Content-type', "text:plain");
-            // response.send(JSON.stringify(resultObj));
-            res.send(result);
-        });
-    }),
-    router.get("/15926/part14/", function (req, res, next) {
-        OneModelManager.getOntology("http://standards.iso.org/iso/15926/part14/", function (err, result) {
-            //  res.setHeader('Content-type', "text:plain");
-            // response.send(JSON.stringify(resultObj));
-            res.send(result);
+        RDF_IO.getOntology(name, function (err, result) {
+            res.contentType("text/plain");
+            res.status(200).send(result);
         });
     })
 );

@@ -23,7 +23,7 @@ var Config = (function () {
     self.defaultNewUriRoot = "http://souslesens.org/resource/"
     self.loginMode = "json";
 
-   self.loginMode = "none";
+  self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}
@@ -150,6 +150,8 @@ var Config = (function () {
         controller: SQLquery,
         toolDescriptionImg: null
     }//"images/taxonomy.png"}
+
+    self.tools["admin"] = {label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["Config"] = {
         label: "Config",

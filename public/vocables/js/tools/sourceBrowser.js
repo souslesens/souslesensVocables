@@ -1019,71 +1019,7 @@ var SourceBrowser = (function () {
     }
 
 
-    self.generateSourceDictionary = function (sourceLabel) {
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, result) {
-                if (err)
-                    MainController.UI.message(err, true)
 
-            })
-        }
-    }
-
-    self.generateElasticIndex = function (sourceLabel) {
-        var totalLines = 0
-
-
-        var processor = function (data, callback) {
-            if (data.length == 0)
-                return callback();
-            var data2 = []
-            data.forEach(function (item) {
-                if (item.label) {
-                    data2.push({
-                        id: item.id.value,
-                        label: item.label.value,
-                        type: item.type.value
-                    })
-                }
-            })
-            MainController.UI.message("indexing " + data.length)
-            var options = {replaceIndex: true}
-            var payload = {
-                dictionaries_indexSource: 1,
-                indexName: sourceLabel.toLowerCase(),
-                data: JSON.stringify(data2),
-                options: JSON.stringify(options)
-            }
-
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
-                success: function (data2, textStatus, jqXHR) {
-                    totalLines += data.length
-                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
-                    callback(null, data)
-                }
-                , error: function (err) {
-                    callback(err);
-
-                }
-
-
-            })
-
-        }
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
-
-            Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
-                if (err)
-                    MainController.UI.message(err, true)
-
-                MainController.UI.message("DONE ", true)
-            })
-        }
-    }
 
 
 

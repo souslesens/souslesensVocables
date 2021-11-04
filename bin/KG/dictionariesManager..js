@@ -63,14 +63,14 @@ var DictionariesManager = {
         });
     },
 
-    indexSource: function (indexName, data, options, callback) {
+    indexSource: function (indexName, data, _options, callback) {
+        if (!_options) _options = {};
         var elasticUrl;
         async.series(
             [
                 //prepare payload
                 function (callbackSeries) {
                     ConfigManager.getGeneralConfig(function (err, config) {
-                        console.log("ee");
                         if (err) return callbackSeries(err);
                         elasticUrl = config.ElasticSearch.url;
                         callbackSeries();
@@ -79,11 +79,76 @@ var DictionariesManager = {
 
                 //delete index
                 function (callbackSeries) {
+                    if (!_options.replaceIndex) return callbackSeries();
                     ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, result) {
                         callbackSeries(err);
                     });
                 },
 
+                //set mappings
+                function (callbackSeries) {
+                    if (!_options.replaceIndex) return callbackSeries();
+
+                    var mappings = {
+                        settings: {
+                            analysis: {
+                                normalizer: {
+                                    lowercase_normalizer: {
+                                        type: "custom",
+                                        char_filter: [],
+                                        filter: ["lowercase", "asciifolding"],
+                                    },
+                                },
+                            },
+                        },
+                        mappings: {
+                            [indexName]: {
+                                properties: {
+                                    label: {
+                                        type: "text",
+                                        fielddata: true,
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword", // =========> store city.keyword as a keyword
+                                                ignore_above: 256,
+                                                normalizer: "lowercase_normalizer",
+                                            },
+                                        },
+                                    },
+                                    id: {
+                                        type: "text",
+                                        fielddata: true, // ==========> Store city as text
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword", // =========> store city.keyword as a keyword
+                                                ignore_above: 256,
+                                            },
+                                        },
+                                    },
+                                    parents: {
+                                        type: "text",
+                                    },
+                                },
+                            },
+                        },
+                    };
+                    var options = {
+                        method: "PUT",
+                        json: mappings,
+                        encoding: null,
+                        timeout: 1000 * 3600 * 24 * 3, //3 days //Set your timeout value in milliseconds or 0 for unlimited
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        url: elasticUrl + indexName,
+                    };
+                    request(options, function (error, response, body) {
+                        if (error) {
+                            return callbackSeries(error);
+                        }
+                        return callbackSeries();
+                    });
+                },
                 function (callbackSeries) {
                     var totalLines = 0;
                     var bulkStr = "";

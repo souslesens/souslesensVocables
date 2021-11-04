@@ -76,7 +76,7 @@ width: 300px
     <div style="margin: 5px;padding :5px">
     Sources
         <br>
-        <div id="KGMappingAdvancedMappings_sources" class="jstree"></div>
+        <div id="KGMappingAdvancedMappings_sourcesTree" class="jstree"></div>
     </div>
 
 
@@ -88,7 +88,7 @@ width: 300px
         Search <input id="KGadvancedMapping_searchColumnInput"
                       onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
         <br>
-        <div id="KGmapping_distinctColumnValuesContainer"
+        <div id="KGmapping_matrixContainer"
              style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;overflow: auto"></div>
     </div>
     <div>
@@ -119,6 +119,8 @@ width: 300px
         <button onclick="Standardizer.exportMappings()"> Export mappings</button>
 
         <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
+
+
     </div>
 </div>
 <script>

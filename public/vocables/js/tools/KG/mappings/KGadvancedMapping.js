@@ -126,6 +126,49 @@ var KGadvancedMapping = (function () {
             })
         }
 
+        self.getColumnDistinctValues = function (columnClassId, callback) {
+            var obj = common.deconcatSQLTableColumn(KGmappingData.currentColumn)
+            var column = obj.column;
+            var table = "[" + KGmappingData.currentKGdataSource.dbName + "]." + obj.table;
+
+            var sqlQuery = " select count( distinct [" + column + "]) as count from " + table;
+            self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
+                if (err) {
+                    callback(err)
+                }
+
+                var count = data[0].count
+                if (count > Config.KG.maxDistinctValuesForAdvancedMapping)
+                    return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.KG.maxDistinctValuesForAdvancedMapping)
+
+                var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
+                if (KGmappingData.currentKGdataSource.type == "sql.sqlserver")
+                    sqlQuery = " select  distinct top(10000) [" + column + "] from " + table;
+
+                self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
+                    if (err) {
+                        callback(err)
+                    }
+
+                    if (data.length >= Config.KG.maxDistinctValuesForAdvancedMapping)
+                        callback(" too many distinct values :" + data.length)
+
+                    KGmappingData.currentColumnDistinctValues = [];
+                    var colName = common.deconcatSQLTableColumn(KGmappingData.currentColumn).column
+
+                    data.forEach(function (item) {
+                        if (item[colName])
+                            KGmappingData.currentColumnDistinctValues.push(item[colName])
+                    })
+                    callback(null, KGmappingData.currentColumnDistinctValues)
+
+
+                })
+
+
+            })
+        }
+
 
         self.showAdvancedMappingDialog = function (dictionary, columnClassId) {
             $("#waitImg").css("display", "block")
@@ -135,48 +178,13 @@ var KGadvancedMapping = (function () {
                 return;
             }
             KGadvancedMapping.loadReferenceDictionary(columnClassId, true, function (err, result) {
-                if (err)
-                    alert(err)
-                self.matchCandidates = {}
-                self.assignConditionalTypeOn = true;
-                self.mappedValues = {}
-                var obj = common.deconcatSQLTableColumn(KGmappingData.currentColumn)
-                var column = obj.column;
-                var table = "[" + KGmappingData.currentKGdataSource.dbName + "]." + obj.table;
+                    if (err)
+                        alert(err)
 
-                var sqlQuery = " select count( distinct [" + column + "]) as count from " + table;
-                self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
-                    if (err) {
-                        alert(err.responseText)
-                        return MainController.UI.message(err.responseText)
-                    }
+                    self.getColumnDistinctValues(columnClassId, function (err, result) {
 
-                    var count = data[0].count
-                    if (count > Config.KG.maxDistinctValuesForAdvancedMapping)
-                        return alert("Too many distinct values for column " + column + " : " + count + " mapping impossible max :" + Config.KG.maxDistinctValuesForAdvancedMapping)
-
-                    var sqlQuery = " select distinct " + column + " from " + table + " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
-                    if (KGmappingData.currentKGdataSource.type == "sql.sqlserver")
-                        sqlQuery = " select  distinct top(10000) [" + column + "] from " + table;
-
-                    self.executeSqlserverQuery(sqlQuery, KGmappingData.currentKGdataSource, function (err, data) {
-                        if (err) {
-                            alert(err.responseText)
-                            return MainController.UI.message(err.responseText)
-                        }
-
-                        if (data.length >= Config.KG.maxDistinctValuesForAdvancedMapping)
-                            return alert(" too many distinct values :" + data.length)
-
-                        KGmappingData.currentColumnDistinctValues = [];
-                        var colName = common.deconcatSQLTableColumn(KGmappingData.currentColumn).column
-
-                        data.forEach(function (item) {
-                            if (item[colName])
-                                KGmappingData.currentColumnDistinctValues.push(item[colName])
-                        })
-
-
+                        if (err)
+                            return alert(err)
                         $("#KGmappings_AdvancedMappingDialogDiv").load("snippets/KG/KGmappingAdvancedMappingDialog.html");
                         $("#KGmappings_AdvancedMappingDialogDiv").dialog("open")
 
@@ -188,10 +196,8 @@ var KGadvancedMapping = (function () {
 
 
                     })
-
-
-                })
-            })
+                }
+            )
         }
         self.getSourceColor = function (source) {
             if (!sourceColors[source])
@@ -252,7 +258,7 @@ var KGadvancedMapping = (function () {
                 }
 
                 var html = "<div onclick='KGadvancedMapping.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + value + sourcesHtml + "</div>";
-                $("#KGmapping_distinctColumnValuesContainer").append(html)
+                $("#KGmapping_matrixContainer").append(html)
 
 
             })
@@ -329,7 +335,7 @@ var KGadvancedMapping = (function () {
                 var x = $("#" + divId)
                 html += $("#" + divId)[0].outerHTML
             })
-            $("#KGmapping_distinctColumnValuesContainer").html(html);
+            $("#KGmapping_matrixContainer").html(html);
 
         }
 
@@ -446,7 +452,7 @@ var KGadvancedMapping = (function () {
                             {
                                 "query_string": {
                                     "query": expression,
-                                  //  "default_field": "attachment.content",
+                                    //  "default_field": "attachment.content",
                                     "default_operator": "OR"
                                 }
                             }
@@ -470,7 +476,7 @@ var KGadvancedMapping = (function () {
                             {
                                 "query_string": {
                                     "query": expression,
-                                   // "default_field": "attachment.content",
+                                    // "default_field": "attachment.content",
                                     "default_operator": "AND"
                                 }
                             }
@@ -490,8 +496,8 @@ var KGadvancedMapping = (function () {
                     ]
                 },
             }
-          //  var indexes = ["readi", "pca", "cfihos"]
-            var indexes = $('#KGMappingAdvancedMappings_sources').jstree(true).get_checked();
+            var indexes = ["readi", "pca", "cfihos"]
+            //   var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
             var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val()
             if (selectedSource != "all")
                 indexes = [selectedSource]
@@ -685,12 +691,12 @@ var KGadvancedMapping = (function () {
                 var obj = self.currentColumnValueDivIds[id]
                 var entities = obj.entities;
                 var term = obj.value
-                var line = {term: term, entities: {},isCandidate:obj.isCandidate}
-                if( entities) {
-                   for(var key in  entities){
+                var line = {term: term, entities: {}, isCandidate: obj.isCandidate}
+                if (entities) {
+                    for (var key in entities) {
                         if (columns.indexOf(key) < 0)
                             columns.push(key)
-                       line.entities=entities
+                        line.entities = entities
 
                     }
                 }
@@ -703,7 +709,7 @@ var KGadvancedMapping = (function () {
             dataTableCols.push({title: "source_label", "defaultContent": ""})
             dataTableCols.push({title: "isONE_MODELcandidate", "defaultContent": ""})
 
-           columns.forEach(function(col){
+            columns.forEach(function (col) {
                 dataTableCols.push({title: col + "_label", "defaultContent": ""})
                 dataTableCols.push({title: col + " _uri", "defaultContent": ""})
             })
@@ -711,7 +717,7 @@ var KGadvancedMapping = (function () {
             var dataTableRows = []
             data.forEach(function (item) {
                 var line = [item.term]
-                if(item.isCandidate)
+                if (item.isCandidate)
                     line.push("X");
                 else
                     line.push("");
@@ -728,10 +734,10 @@ var KGadvancedMapping = (function () {
                 dataTableRows.push(line)
             })
 
-            dataTableRows.sort(function(a,b){
-               if(a[0]>b[0])
-                   return 1
-                if(b[0]>a[0])
+            dataTableRows.sort(function (a, b) {
+                if (a[0] > b[0])
+                    return 1
+                if (b[0] > a[0])
                     return -1
                 return 0;
             })
@@ -761,8 +767,414 @@ var KGadvancedMapping = (function () {
         }
 
 
+        self.findBestMatches = function () {
+            if (!KGmappingData.currentColumn)
+                return alert("no column selected")
+            var words = [];
+            var indexes = []
+            self.classUriLabelMap = {}
+            var searchResultArray = []
+            var classUris = []
+            var nodes = {}
+            var orphans = []
+            var treemapData = {}
+            var distinctParentsMap = {}
+            var allWords
+            async.series([
+                function (callbackSeries) {// get words
+                    KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        words = result;
+                        allWords=JSON.parse(JSON.stringify(words))
+                        callbackSeries();
+                    })
+                }
+                , function (callbackSeries) {//get indexes to compare
+                    Standardizer.initSourcesIndexesList({schemaType: "OWL"}, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        result.forEach(function (item) {
+                            indexes.push(item.toLowerCase())
+                        })
+
+                        callbackSeries();
+                    })
+                }
+                , function (callbackSeries) {//get indexes matches class map
+                    MainController.UI.message("matching " + words.length + "words")
+                    var resultSize = 1
+                    var size = 200;
+                    var offset = 0
+                    var totalProcessed = 0
+
+
+                 /*   var wordSlices = common.array.slice(words, size)
+                    async.eachSeries(wordSlices, function (slice, callbackEach) {*/
+
+                        Standardizer.getElasticSearchExactMatches(words, indexes, 0, size, function (err, result) {
+                            if (err)
+                                return callbackSeries(err)
+                            resultSize = result.length;
+                            offset += size
+                            searchResultArray =  result;
+                            MainController.UI.message("matches found :" +  searchResultArray.length)
+                            callbackSeries()
+                        })
+                    /*   }, function (err) {
+                       if (err)
+                           return callbackSeries(err)
+                       searchResultArray = allResults;
+
+
+                       return callbackSeries()
+                      indexClassMap = Standardizer.getMatchesClassesByIndex(allResults)
+                          MainController.UI.message("", true)
+                          callbackSeries()*/
+                   // })
+                }
+                , function (callbackSeries) {// get labels and stats
+
+                    var indexes = []
+                    var distinctHits = []
+
+                    searchResultArray.forEach(function (item,itemIndex) {
+                        if (item.hits && item.hits.hits && item.hits.hits.length==0)
+                          orphans.push(allWords[itemIndex])
+                        var hits = item.hits.hits;
+
+                        hits.forEach(function (hit) {
+
+
+                            if(hit._source.id== "http://w3id.org/readi/rdl/CFIHOS-30000128")
+                                var x=3
+                            if (distinctHits.indexOf(hit._source.label) < 0)
+                                distinctHits.push(hit._source.label)
+
+                            if (indexes.indexOf(hit._index) < 0)
+                                indexes.push(hit._index)
+                            var parentsStr = hit._source.parents
+
+                            if (parentsStr) {
+
+                                var lastParent
+                                var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+
+                                if (!distinctParentsMap[parentsStr])
+                                    distinctParentsMap[parentsStr]=[]
+
+                                var ancestors=[]
+                                parents.forEach(function (itemParent, index) {
+                                    ancestors.push(itemParent)
+                                    if (classUris.indexOf(itemParent) < 0)
+                                        classUris.push(itemParent)
+                                    var parent = hit._index
+
+
+                                    if (index > 0)
+                                        parent = parents[index - 1]
+
+
+                                    if (!nodes[itemParent]) {
+                                        nodes[itemParent] = {
+                                            id: itemParent,
+                                            parent: parent,
+                                            index: hit._index,
+                                            classes: [],
+                                            ancestors:ancestors,
+                                            countChildren:0
+                                        }
+
+
+                                    }
+                                    lastParent = itemParent
+
+                                })
+
+
+                                if (nodes[lastParent].classes.indexOf(hit._source.id) < 0)
+                                    nodes[lastParent].classes.push(hit._source.id)
+                                classUris.push(hit._source.id)
+
+                            }
+                        })
+
+
+                    })
+                    var hierarchy={}
+                    for( var parent in nodes){
+                        if(nodes[parent].classes && nodes[parent].classes.length>0){
+                            nodes[parent].countChildren=nodes[parent].classes.length
+                            var ancestors=nodes[parent].ancestors
+                          for(var i=ancestors.length-2;i>=0;i--){
+                              nodes[ancestors[i]].countChildren+=nodes[ancestors[i+1]].countChildren
+
+                          }
+
+                        }
+
+                    }
+
+
+                    callbackSeries()
+                }
+
+
+
+
+                , function (callbackSeries) { //get labels
+                    Standardizer.getClassesLabels(classUris, indexes, function (err, result) {
+                        self.classUriLabelMap = result;
+                        callbackSeries()
+                    })
+                }
+
+
+                , function (callbackSeries) {//get treemap data
+
+                    var hierarchy={name:"bestMatch",children:[]};
+                    var distinctNodes={}
+                    for( var parent in nodes){
+                            var ancestors=nodes[parent].ancestors
+                        var previousChildObj=null;
+                            for(var i=ancestors.length-1;i>=0;i--){
+                                var ancestorObj= nodes[ancestors[i]]
+                                var currentChildObj=distinctNodes[ancestorObj.id]
+                                if(!currentChildObj){
+                                    currentChildObj = {
+                                        name: self.classUriLabelMap[ancestorObj.id] ||  ancestorObj.id,
+                                        id: ancestorObj.id,
+                                        size: ancestorObj.countChildren,
+                                        children: []
+                                    }
+                                    distinctNodes[ancestorObj.id] = currentChildObj;
+                                }else {
+                                    currentChildObj.size += ancestorObj.size;
+                                }
+
+                                if(i==ancestors.length-1 && !previousChildObj)
+                                            previousChildObj=currentChildObj
+
+                                    else {
+                                            currentChildObj.children.push(JSON.parse(JSON.stringify(previousChildObj)))
+                                            previousChildObj =currentChildObj
+                                        }
+
+
+                                }
+
+
+
+                        hierarchy.children.push(previousChildObj)
+
+                        }
+
+
+
+                    return callbackSeries()
+                    var parentsToTree = function (array) {
+                        const nest = (items, id = null, link = 'id') =>
+                            items
+                                .filter(item => item[link] === id)
+                                .map(item => ({...item, children: nest(items, item.id)}));
+
+
+                        return nest(array)
+
+
+                    }
+                    var targetArray=[]
+                    var distinctPaths=[]
+                 for(var str  in   distinctParentsMap) {
+
+                     distinctPaths.forEach(function (path) {
+
+                         var parents = str.substring(0, parentsStr.length - 1).split("|")
+
+                     })
+
+                 }
+
+
+
+                        //console.log(JSON.stringify( distinctHits,null,2))
+                    callbackSeries()
+                }
+
+                , function (callbackSeries) { //draw graph
+
+                    var visjsData = {edges: [], nodes: []}
+                      visjsData.nodes.push({
+                           id: "#",
+                           label: "#",
+                           shape: "star"
+
+                       })
+                    var existingNodes = {}
+                    for (var key in nodes) {
+
+
+                        var node = nodes[key]
+
+                        var color = Lineage_classes.getSourceColor(node.index)
+
+                        if (!existingNodes[node.index]) {
+                            existingNodes[node.index] = 1
+                            visjsData.nodes.push({
+                                id: node.index,
+                                label: node.index,
+                                shape: "ellipse",
+                                color: color
+
+                            })
+                            var edgeId = node.index + "_#"
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    from: node.index,
+                                    to: "#",
+
+                                })
+                            }
+                        }
+
+                        if (!existingNodes[node.id]) {
+                            existingNodes[node.id] = 1
+                            visjsData.nodes.push({
+                                id: node.id,
+                                label: self.classUriLabelMap[node.id],
+                                color: color,
+                                shape:"dot",
+                                //  size: 8,
+
+                                data: {
+                                    id: node.id,
+                                    label: self.classUriLabelMap[node.id],
+                                    classes: node.classes,
+                                    countChildren: node.countChildren
+                                }
+                            })
+
+
+                            var edgeId = node.parent + "_" + node.id
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    from: node.id,
+                                    to: node.parent,
+
+                                })
+                            }
+
+
+                        }
+                    }
+
+                    visjsData.nodes.forEach(function (node) {
+
+                        if (node.data && node.data.classes && node.data.classes.length > 0) {
+                            var value = node.data.classes.length
+                            node.value = value
+                            node.shape = "square"
+                        } else {
+
+                            node.value = node.countChildren
+                          //  node.shape = "dot"
+                        }
+                    })
+
+
+                    var orphansNode = {
+                        id: "orphans",
+                        text: "orphans",
+                        shape: "square",
+                        color: "#ddd",
+                        size: 20,
+                        data: {
+                            id: "orphans",
+                            text: "orphans",
+                            words: orphans
+                        }
+
+                    }
+
+                    visjsData.nodes.push(orphansNode)
+
+
+                    var html = "<div style='display: flex;flex-direction:row';width:100%;height:100%>" +
+                        "<div id='bestMatchesGraphDiv' style='width:800px;height:800px'></div>" +
+                        "<div id='bestMatchesInfosDiv' style='width:200px;height:100%'></div>" +
+                        "</div>"
+
+                    $("#mainDialogDiv").dialog("open");
+
+                    $("#mainDialogDiv").html(html)
+                    setTimeout(function () {
+
+                        var options = {
+                            onclickFn: KGadvancedMapping.bestMatches.onGraphNodeClick,
+
+                            nodes: {
+
+                                    scaling: {
+                                    customScalingFunction: function (min, max, total, value) {
+                                        return value / total;
+                                    },
+                                    min: 5,
+                                        max: 150,
+                                },
+                            },
+                            layoutHierarchical : {
+                                direction: "UD",
+                                sortMethod: "hubsize",
+
+                            }
+                        }
+
+
+                        visjsGraph.draw("bestMatchesGraphDiv", visjsData, options)
+                    }, 500)
+
+                    callbackSeries();
+
+
+                }
+            ], function (err) {
+                return "DONE"
+            })
+
+
+        }
+        self.bestMatches = {
+            onGraphNodeClick: function (node, point, options) {
+                if(!node || !node.data)
+                    return;
+                var html = "<div><a target ='blank' href='" + node.data.id + "'>" + node.data.label + "</a></div>"
+                html += "<ul>"
+                if (node.data.classes) {
+                    node.data.classes.forEach(function (classUri) {
+                        var classLabel = self.classUriLabelMap[classUri]
+                        html += "<li><a target ='blank' href='" + classUri + "'>" + classLabel + "</a></li>"
+                    })
+                }
+
+                if (node.data.words) {
+                    node.data.words.forEach(function (word) {
+
+                        html += "<li>" + word + "</li>"
+                    })
+                }
+
+                html += "</ul>"
+                $("#bestMatchesInfosDiv").html(html)
+            }
+
+        }
+
+
         return self;
 
 
     }
-)()
+)
+()

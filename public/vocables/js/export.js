@@ -11,7 +11,7 @@ var Export = (function () {
         self.currentOptions = options || {}
 
         $("#mainDialogDiv").load("snippets/exportToTableDialog.html")
-        $("#mainDialogDiv").dialog("open")
+       C
         setTimeout(function () {
             $("#exportTable_tabs").tabs({});
 

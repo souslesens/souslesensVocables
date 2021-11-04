@@ -12,6 +12,30 @@ var OwlSchema = (function () {
     var self = {}
     self.currentSourceSchema = null;
 
+    self.schemasConfig= {
+        "SKOS": {
+            "sparql_url": "_default",
+            "graphUri": "http://www.w3.org/2004/02/skos/core/",
+            "label": "skos",
+            "isOntology": false,
+            "allSubclasses": true,
+            "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+            "labelProperty": "http://www.w3.org/2004/02/skos/core#prefLabel",
+            "newObject": {
+                "treeChildrenClasses": {
+                    "http://www.w3.org/2004/02/skos/core#Concept": "http://www.w3.org/2004/02/skos/core#Concept",
+                    "http://www.w3.org/2004/02/skos/core#ConceptScheme": "http://www.w3.org/2004/02/skos/core#Concept"
+                },
+
+                "treeParentProperty": "http://www.w3.org/2004/02/skos/core#broader",
+                "mandatoryProperties": [
+                    "http://www.w3.org/2004/02/skos/core#prefLabel"
+                ]
+            }
+        }
+    }
+
+
 
     self.setLabelsFromQueryResult = function (bindings) {
 
@@ -39,8 +63,7 @@ var OwlSchema = (function () {
 
 
         // only for SKOS by now
-        $.getJSON("config/schemas.json", function (json) {
-            self.schemasConfig = json;
+
             var sourceSchema = null;
 
                sourceSchema = self.schemasConfig[Config.sources[sourceLabel].schemaType];
@@ -69,7 +92,7 @@ var OwlSchema = (function () {
             self.currentSourceSchema = sourceSchema;
             return callback(null, self.currentSourceSchema);
 
-        })
+
     }
 
 

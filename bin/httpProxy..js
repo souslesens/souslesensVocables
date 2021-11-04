@@ -118,7 +118,7 @@ var httpProxy = {
 
                 var err = null;
                 try {
-                    var obj = JSON.parse(body);
+                    var body = JSON.parse(body);
                     //  return callback(null, obj);
                 } catch (e) {
                     console.log(body);

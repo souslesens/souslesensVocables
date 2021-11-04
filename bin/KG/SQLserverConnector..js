@@ -90,18 +90,12 @@ var SQLserverConnector = {
     connection: null,
 
     getConnection: function () {
-        if (SQLserverConnector.connection) return SQLserverConnector.connection;
-        else {
-            var mainConfig = ConfigManager.getGeneralConfig();
-            if (mainConfig) {
-                SQLserverConnector.connection = mainConfig.SQLserver;
-                return SQLserverConnector.connection;
-            }
-        }
+        return ConfigManager.config.SQLserver;
     },
 
     getData: function (dbName, query, callback) {
         var connection = SQLserverConnector.getConnection();
+        if (!connection) callback("no connection object");
         connection.database = dbName;
         sql.connect(connection, (err) => {
             if (err) return console.log(err); // ... error checks

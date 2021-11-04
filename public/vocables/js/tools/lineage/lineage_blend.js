@@ -44,14 +44,12 @@ var Lineage_blend = (function () {
         }else{
             $("#lineage_blendButtonsDiv").css('display','none')
         }
-
     }
 
 
 
 
     self.pasteAsSubClassOf = function () {
-
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
         if (!sourceNode || !targetNode)
@@ -62,10 +60,8 @@ var Lineage_blend = (function () {
         self.createRestriction(sourceNode.id,targetNode.id, propId, function(err, result) {
             if (err)
                 return alert(err);
-          //  return alert("DONE")
+            MainController.UI.message("restriction added",true)
         })
-
-
     }
 
     self.pasteAsSameAs = function (targetNode) {
@@ -79,10 +75,19 @@ var Lineage_blend = (function () {
         self.createRestriction(sourceNode.id,targetNode.id, propId, function(err, result) {
             if (err)
                 return alert(err);
-         //   return alert("DONE")
+          MainController.UI.message("restriction added",true)
         })
 
 
+    }
+
+    self.deleteRestriction = function (restrictionNode) {
+        if (confirm("delete selected restriction")){
+            Sparql_generic.deleteTriples(restrictionNode.data.source, restrictionNode.data.bNodeId, null, null, function (err, result) {
+                visjsGraph.data.edges.remove(restrictionNode.id)
+                MainController.UI.message("restriction removed", true)
+            })
+        }
     }
 
     self.createRestriction=function(souceNodeId,targetNodeId, propId, callback){

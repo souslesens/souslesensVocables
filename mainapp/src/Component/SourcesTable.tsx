@@ -59,7 +59,7 @@ const SourcesTable = () => {
                                                 {source.name}
                                             </TableCell>
                                             <TableCell>
-                                                {typeof source.graphUri === 'string' ? source.graphUri : source.graphUri.join(', ')}
+                                                {source.graphUri}
 
                                             </TableCell>
                                             <TableCell>
@@ -134,7 +134,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
 
         case Type.UserAddedGraphUri:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload.replace(/\s+/g, '').split(',') } }
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload } }
 
         case Type.UserClickedAddDataSource:
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, dataSource: msg.payload ? { type: "", table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null } }
@@ -218,7 +218,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                     </Grid>
                     <Grid item xs={6}><TextField fullWidth onChange={_handleFieldUpdate}
 
-                        value={Array.isArray(sourceModel.sourceForm.graphUri) ? sourceModel.sourceForm.graphUri.join() : ""}
+                        value={sourceModel.sourceForm.graphUri}
                         id={`graphUris`}
                         label={"graph' Uris"}
                         variant="standard" />

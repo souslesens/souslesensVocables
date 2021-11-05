@@ -31,7 +31,7 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         _type: 'source',
         id: source.id ? source.id : ulid(),
         type: source.type ? source.type : "missing type",
-        graphUri: source.graphUri ? source.graphUri : [],
+        graphUri: source.graphUri ? source.graphUri : "",
         sparql_server: source.sparql_server ? source.sparql_server : defaultSource("").sparql_server,
         controller: source.controller ? source.controller : "missing controller",
         topClassFilter: source.topClassFilter ? source.topClassFilter : "missing topClassFilter",
@@ -51,7 +51,7 @@ export type Source = {
     name: string;
     _type: string;
     type: string;
-    graphUri: string[];
+    graphUri: string;
     sparql_server: SparqlServer;
     controller: string;
     topClassFilter: string;
@@ -70,7 +70,7 @@ export const defaultSource = (id: string): Source => {
         _type: 'source',
         id: id,
         type: "",
-        graphUri: [],
+        graphUri: "",
         sparql_server: { url: "", method: "Post", headers: [] },
         editable: true,
         controller: "",
@@ -87,7 +87,7 @@ export const defaultSource = (id: string): Source => {
 interface SourceJson {
     id?: string;
     type?: string;
-    graphUri?: string[];
+    graphUri?: string;
     sparql_server?: SparqlServer;
     controller?: string;
     topClassFilter?: string;

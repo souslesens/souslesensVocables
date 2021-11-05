@@ -41,7 +41,8 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         isDraft: source.isDraft ? source.isDraft : true,
         editable: source.editable ? source.editable : true,
         color: source.color ? source.color : "default color",
-        predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates
+        predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
+        group: source.group ? source.group : ""
     }
     return decodedSource
 }
@@ -61,7 +62,8 @@ export type Source = {
     editable: boolean;
     color: string;
     isDraft: boolean;
-    predicates: { broaderPredicate: string, lang: string }
+    predicates: { broaderPredicate: string, lang: string };
+    group: string;
 }
 
 export const defaultSource = (id: string): Source => {
@@ -80,7 +82,8 @@ export const defaultSource = (id: string): Source => {
         schema: null,
         color: "",
         isDraft: true,
-        predicates: { broaderPredicate: "", lang: "" }
+        predicates: { broaderPredicate: "", lang: "" },
+        group: ""
     })
 };
 
@@ -97,7 +100,8 @@ interface SourceJson {
     dataSource?: null | DataSource;
     schema?: null;
     color?: string;
-    predicates?: { broaderPredicate: string, lang: string }
+    predicates?: { broaderPredicate: string, lang: string };
+    group?: string;
 }
 
 interface CommonSource {

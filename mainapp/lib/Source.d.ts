@@ -19,6 +19,7 @@ export declare type Source = {
         broaderPredicate: string;
         lang: string;
     };
+    group: string;
 };
 export declare const defaultSource: (id: string) => Source;
 interface CommonSource {

@@ -258,7 +258,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         label={"Controller"}
                         variant="standard" />
                     </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("group")}
 
+                        value={sourceModel.sourceForm.group}
+                        id={`group`}
+                        label={"Group"}
+                        variant="standard" />
+                    </Grid>
 
 
                     <Grid item xs={6}><FormControl>

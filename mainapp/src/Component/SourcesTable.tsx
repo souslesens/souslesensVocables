@@ -274,17 +274,18 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             value={sourceModel.sourceForm.imports}
                             label="imports-label"
                             fullWidth
+                            multiple
                             style={{ width: '400px' }}
 
                             renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
                             onChange={handleFieldUpdate("imports")}
                         >
-                            {schemaTypes.map(schemaType => <MenuItem
-                                key={schemaType}
-                                value={schemaType}
+                            {unwrappedSources.map(source => <MenuItem
+                                key={source.name}
+                                value={source.name}
 
                             >
-                                {schemaType}
+                                {source.name}
                             </MenuItem>)}
                         </Select>
                     </FormControl>

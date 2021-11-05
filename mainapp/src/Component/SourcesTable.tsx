@@ -266,7 +266,29 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         variant="standard" />
                     </Grid>
 
+                    <Grid item xs={6}><FormControl>
+                        <InputLabel id="imports-label">Imports</InputLabel>
+                        <Select
+                            labelId="imports-label"
+                            id="imports"
+                            value={sourceModel.sourceForm.imports}
+                            label="imports-label"
+                            fullWidth
+                            style={{ width: '400px' }}
 
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("imports")}
+                        >
+                            {schemaTypes.map(schemaType => <MenuItem
+                                key={schemaType}
+                                value={schemaType}
+
+                            >
+                                {schemaType}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    </Grid>
                     <Grid item xs={6}><FormControl>
                         <InputLabel id="schemaType-label">Schema's Type</InputLabel>
                         <Select

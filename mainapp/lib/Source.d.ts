@@ -20,6 +20,7 @@ export declare type Source = {
         lang: string;
     };
     group: string;
+    imports: string[];
 };
 export declare const defaultSource: (id: string) => Source;
 interface CommonSource {

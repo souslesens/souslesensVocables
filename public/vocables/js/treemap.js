@@ -1186,6 +1186,218 @@ var TreeMap=(function(){
         }
     ]
     }
+    self.treemapSLSV={
+        "name": "bestMatch",
+        "children": [
+            {
+                "name": "ISO_15926-PCA",
+                "id": "ISO_15926-PCA",
+                "size": null,
+                "children": [
+                    {
+                        "name": "individual",
+                        "id": "http://data.posccaesar.org/dm/Individual",
+                        "size": 9699389,
+                        "children": [
+                            {
+                                "name": "physical object",
+                                "id": "http://data.posccaesar.org/dm/PhysicalObject",
+                                "size": 33944,
+                                "children": [
+                                    {
+                                        "name": "RESISTOR",
+                                        "id": "http://data.posccaesar.org/rdl/RDS860174",
+                                        "size": 1,
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "CFIHOS_READI",
+                "id": "CFIHOS_READI",
+                "size": null,
+                "children": [
+                    {
+                        "name": "PhysicalObject",
+                        "id": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                        "size": 87159,
+                        "children": [
+                            {
+                                "name": "InanimatePhysicalObject",
+                                "id": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                "size": 7489,
+                                "children": [
+                                    {
+                                        "name": "Artefact",
+                                        "id": "http://w3id.org/readi/rdl/D101001053",
+                                        "size": 457,
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "CFIHOS_equipment",
+                "id": "CFIHOS_equipment",
+                "size": 0,
+                "children": [
+                    {
+                        "name": "Artefact",
+                        "id": "http://w3id.org/readi/rdl/D101001053",
+                        "size": 457,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "ONE-MODEL",
+                "id": "ONE-MODEL",
+                "size": null,
+                "children": [
+                    {
+                        "name": "http://standards.iso.org/iso/15926/part14/Object",
+                        "id": "http://standards.iso.org/iso/15926/part14/Object",
+                        "size": 2,
+                        "children": [
+                            {
+                                "name": "PhysicalObject",
+                                "id": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                                "size": 87159,
+                                "children": [
+                                    {
+                                        "name": "InanimatePhysicalObject",
+                                        "id": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                        "size": 7489,
+                                        "children": [
+                                            {
+                                                "name": "Artefact",
+                                                "id": "http://w3id.org/readi/rdl/D101001053",
+                                                "size": 457,
+                                                "children": [
+                                                    {
+                                                        "name": "transmitter",
+                                                        "id": "http://w3id.org/readi/rdl/CFIHOS-30000661",
+                                                        "size": 10,
+                                                        "children": []
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "ILAP",
+                "id": "ILAP",
+                "size": null,
+                "children": [
+                    {
+                        "name": "http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_E",
+                        "id": "http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_E",
+                        "size": 2,
+                        "children": [
+                            {
+                                "name": "Subsea equipment",
+                                "id": "http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EU",
+                                "size": 1,
+                                "children": [
+                                    {
+                                        "name": "Subsea equipment",
+                                        "id": "http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUU",
+                                        "size": 1,
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "ISO19008_COR",
+                "id": "ISO19008_COR",
+                "size": null,
+                "children": [
+                    {
+                        "name": "http://souslesens.org/iso19008/cor/E",
+                        "id": "http://souslesens.org/iso19008/cor/E",
+                        "size": 2,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "ONE_maintenance",
+                "id": "ONE_maintenance",
+                "size": null,
+                "children": [
+                    {
+                        "name": "http://souslesens.org/iso19008/pbs/A",
+                        "id": "http://souslesens.org/iso19008/pbs/A",
+                        "size": 1,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "ISO19008_PBS",
+                "id": "ISO19008_PBS",
+                "size": 0,
+                "children": [
+                    {
+                        "name": "http://souslesens.org/iso19008/pbs/A",
+                        "id": "http://souslesens.org/iso19008/pbs/A",
+                        "size": 1,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "http://souslesens.org/osdu/ontology/AbstractMaster",
+                "id": "http://souslesens.org/osdu/ontology/AbstractMaster",
+                "size": null,
+                "children": [
+                    {
+                        "name": "http://souslesens.org/osdu/ontology/Wel",
+                        "id": "http://souslesens.org/osdu/ontology/Wel",
+                        "size": 1,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "name": "FMEA",
+                "id": "FMEA",
+                "size": null,
+                "children": [
+                    {
+                        "name": "http://standards.iso.org/iso/15926/part14/Object",
+                        "id": "http://standards.iso.org/iso/15926/part14/Object",
+                        "size": 2,
+                        "children": [
+                            {
+                                "name": "FunctionalObject",
+                                "id": "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+                                "size": 2,
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
 
 
 

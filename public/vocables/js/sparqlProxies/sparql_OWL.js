@@ -231,8 +231,11 @@ var Sparql_OWL = (function () {
                 if (i == 1) {
 
                     query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
+
                     if (true || options.skipRestrictions) {
-                        query += " OPTIONAL {?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} "
+                      //  query += " OPTIONAL {?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} "
+                        //if  !broader 1 ok  if broader1 it has to be not a restriction
+                        query += " ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction) "
                     }
                     query += " OPTIONAL{?broader" + (i) + " rdfs:label ?broader" + (i) + "Label.}"
 

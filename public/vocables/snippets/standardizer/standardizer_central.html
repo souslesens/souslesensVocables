@@ -1,129 +1,213 @@
-
-
 <style>
     .KGmapping_conditionalMapping {
-border: #a1aec7 solid 1px;
-border-radius: 2px;
-background-color: #ddd;
-display: flex;
-justify-content: space-evenly;
-text-align: center;
-margin: 3px;
-padding: 2px;
-}
+        border: #a1aec7 solid 1px;
+        border-radius: 2px;
+        background-color: #ddd;
+        display: flex;
+        justify-content: space-evenly;
+        text-align: center;
+        margin: 3px;
+        padding: 2px;
+    }
 
-.KGmappingData_treeItem2 {
-font-weight: normal;
-}
+    .KGmappingData_treeItem2 {
+        font-weight: normal;
+    }
 
-.KGmapping_columnValues {
-background-color: #ee8577;
-}
+    .KGmapping_columnValues {
+        background-color: #ee8577;
+    }
 
-.KGmapping_columnValues_referenceValue {
-background-color: #77ee77;
-}
+    .KGmapping_columnValues_referenceValue {
+        background-color: #77ee77;
+    }
 
-.KGmapping_columnValues_hasCandidateValues {
-background-color: #eeb477;
-}
+    .KGmapping_columnValues_hasCandidateValues {
+        background-color: #eeb477;
+    }
 
-.KGmapping_columnValueSelected {
-background-color: #ddd;
+    .KGmapping_columnValueSelected {
+        background-color: #ddd;
 
-}
+    }
 
-.KGmapping_candidateEntity {
-margin: 3px;
-padding: 3px;
-justify-content: space-between;
-display: flex;
-border-radius: 3px;
-border: #6e2500 solid 1px;
-background-color: #ddd;
+    .KGmapping_candidateEntity {
+        margin: 3px;
+        padding: 3px;
+        justify-content: space-between;
+        display: flex;
+        border-radius: 3px;
+        border: #6e2500 solid 1px;
+        background-color: #ddd;
 
-}
+    }
 
-.KGmapping_distinctColumnValueSource {
-border-radius: 2px;
-border: #6e2500 solid 1px;
-margin: 1px;
-padding: 1px;
-width: 40px;
-}
+    .KGmapping_distinctColumnValueSource {
+        border-radius: 2px;
+        border: #6e2500 solid 1px;
+        margin: 1px;
+        padding: 1px;
+        width: 40px;
+    }
 
-.KGmapping_entitySource {
-border-radius: 2px;
-border: #6e2500 solid 1px;
-margin: 1px;
-padding: 1px;
-width: 40px;
-}
+    .KGmapping_entitySource {
+        border-radius: 2px;
+        border: #6e2500 solid 1px;
+        margin: 1px;
+        padding: 1px;
+        width: 40px;
+    }
 
-.KGmapping_columnValues_isCandidate {
-background-color: #77e0ee;
+    .KGmapping_columnValues_isCandidate {
+        background-color: #77e0ee;
 
-}
+    }
 
-.KGadvancedMapping_searchEntitiesInput {
-border: #6e2500 solid 2px;
-width: 300px
-}
+    .KGadvancedMapping_searchEntitiesInput {
+        border: #6e2500 solid 2px;
+        width: 300px
+    }
+
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .matrix {
+        display: flex;
+        flex-direction: column;
+    / / justify-content: space-between;
+    / / height: 100 vh;
+        width: 5000px;
+        flex-wrap: wrap;
+    }
+
+    .matrixRow {
+
+        display: flex;
+        flex-direction: row;
+
+
+    }
+
+    .matrixCell {
+        width: 15px;
+        height: 15px;
+        font-size: 12px;
+        text-align: center;
+        border-left: #040e71 solid 1px;
+        border-bottom: #040e71 solid 1px;
+
+
+    }
+
+    .matrixColTitle {
+        width: 15px;
+        height: 115px;
+        font-size: 12px;
+        writing-mode: vertical-rl;
+        text-align: end;
+    / / transform: rotate(- 90 deg);
+    }
+
+
+    .matrixRowTitle {
+        font-size: 12px;
+        width: 300px;
+        overflow: hidden;
+        border-left: #040e71 solid 1px;
+        border-bottom: #040e71 solid 1px;
+        text-align: center;
+    / / vertical-align: middle;
+        height: 15px;
+    }
+
+    .matrixCellExactMatch {
+        background-color: #00bb00;
+    }
+
+    .matrixWordNoMatch {
+        background-color: #f3dede;
+    }
+
+
+    #Standardizer_matrixCellDataDiv {
+        background: beige;
+        border: solid 1px brown;
+        margin: 3px;
+        padding: 5px;
+
+    }
+
+    #Standardizer_matrixRankingDiv {
+        background: #f6ddd8;
+        border: solid 1px brown;
+        margin: 3px;
+        padding: 5px;
+
+    }
+
+    .Standardizer_graph {
+        width: 960px;
+        height: 800px
+    }
+    #Standardizer_rightJstreeDiv{
+        width: 350px;
+        height: 800px
+    }
+
 </style>
 
+<div style="display: flex;flex-direction: row">
 
-<div id="KGMappingAdvancedMappings_dictionaryMapping" style="display:flex;flex-direction:row;width:100%;margin:10px;padding :20px">
-    <div style="margin: 5px;padding :5px">
-    Sources
-        <br>
-        <div id="KGMappingAdvancedMappings_sourcesTree" class="jstree"></div>
+    <div id="standardizerCentral_tabs" style="width:800px;height: 100%">
+        <ul>
+            <li><a href="#Standardizer_matrixTab">Matrix</a></li>
+            <li><a href="#Standardizer_sunburstTab">Sunburst</a></li>
+            <li><a href="#Standardizer_graphTab">Graph</a></li>
+
+        </ul>
+
+        <div id="Standardizer_matrixTab" style="display:flex;flex-direction:row;width:100%;margin:10px;padding :15px">
+
+
+            <div style="margin: 5px;padding :5px">
+
+                Search <input id="KGadvancedMapping_searchColumnInput"
+                              onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
+                <br>
+                <div id="KGmapping_matrixContainer"
+                     style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;width: 800px;overflow: auto"></div>
+            </div>
+            <div style="width:200px">
+                <div id="KGadvancedMapping_mappingsMatrix" style="font-weight: bold"></div>
+
+
+                <input type="checkbox" id="Standardizer_exportAncestorsCBX">ancestors
+                <button onclick="Standardizer.exportMappings()"> Export mappings</button>
+
+                <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
+
+                <div id="Standardizer_matrixRankingDiv"></div>
+                <div id="Standardizer_matrixCellDataDiv"></div>
+
+            </div>
+        </div>
+
+
+        <div id="Standardizer_sunburstTab">
+            <div id="Standardizer_sunburstDiv" class="Standardizer_graph"></div>
+
+        </div>
+
+        <div id="Standardizer_graphTab">
+            <div id="Standardizer_graphDiv" class="Standardizer_graph"></div>
+        </div>
+
     </div>
-
-
-    <div style="margin: 5px;padding :5px">
-        <!-- <select size="10" onclick="KGadvancedMapping.editCandidateValues($(this).val())" class="KGmapping_columnValues" style="max-width: 400px;height: 650px;overflow: auto"
-                 id="KGmapping_columnValues"></select>-->
-    <!--    Sort <select id="KGmapping_distinctColumnSortSelect"
-                     onchange="KGadvancedMapping.sortColumnValues($(this).val())"></select>-->
-        Search <input id="KGadvancedMapping_searchColumnInput"
-                      onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
-        <br>
-        <div id="KGmapping_matrixContainer"
-             style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;overflow: auto"></div>
-    </div>
-    <div>
-        <div id="KGadvancedMapping_editingColumnValue" style="font-weight: bold"></div>
-
-        search<input class="KGadvancedMapping_searchEntitiesInput" id="KGadvancedMapping_searchEntitiesInput"
-                     onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchEntities($(this).val())">
-        source <select id="KGadvancedMapping_filterCandidateMappingsSelect"
-                       onchange="KGadvancedMapping.editCandidateValues()"> </select>
-        <br><i>  mode:</i>
-        <select onchange="KGadvancedMapping.editCandidateValues()" id="KGadvancedMapping_queryTypeSelect">
-            <option value="machAnyWord"> match any word</option>
-            <option value="moreLikeThis"> more like this</option>
-            <option value="exactMatch"> exact match</option>
-
-        </select>
-        sort<select onchange="KGadvancedMapping.editCandidateValues()"
-                    id="KGadvancedMapping_sortCandidateMappingsSelect">
-        <option value="alphabetic"> search score</option>
-        <option value="alphabetic"> alphabetic</option>
-    </select>
-
-
-        <div id="KGadvancedMapping_dictionaryMappingContainerDiv"
-             style="display:flex;flex-direction: column;width: 500px;height: 580px;  margin: 10px;  background: beige;overflow: auto"></div>
-
-<input type="checkbox" id="Standardizer_exportAncestorsCBX">ancestors
-        <button onclick="Standardizer.exportMappings()"> Export mappings</button>
-
-        <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
-
+    <div style="width:350px;heigth:800px;overflow: auto;">
+        <div id="Standardizer_centralJstreeDiv"></div>
 
     </div>
 </div>
-<script>
 
-
-</script>

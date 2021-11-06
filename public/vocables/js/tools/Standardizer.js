@@ -2,24 +2,26 @@ var Standardizer = (function () {
     var self = {};
     self.matchCandidates = {}
     var matrixHtml = ""
+    self.mode="matrix"
 
     self.onLoaded = function () {
         //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
         $("#actionDiv").html("")
+
         $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html")
-        self.mode = "matrix"
+     /*   self.mode = "matrix"
 
         if (self.mode == "normal") {
             $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
 
         }
         if (self.mode == "matrix") {
-            $("#graphDiv").load("snippets/standardizer/standardizer_centralMatrix.html")
+            $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
 
-        }
+        }*/
 
 
-        $("#graphDiv").load("snippets/standardizer/standardizer_centralMatrix.html")
+        $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
         $("#accordion").accordion("option", {active: 2});
         setTimeout(function () {
             var w = $(document).width() - leftPanelWidth - 30;
@@ -49,6 +51,7 @@ var Standardizer = (function () {
 
 
             })
+            $("#standardizerCentral_tabs").tabs({});
             self.matchCandidates = {}
         }, 200)
     }
@@ -253,6 +256,7 @@ if(hits.length>queryResultsSize)
     }
 
     self.initMatrix = function (indexes) {    //titre des colonnes
+        self.currentWordsCount=0
         var html = "<div class='matrix'>"
         html += "<div class='matrixRow'>"
         html += "<div class='matrixRowTitle'></div>"
@@ -266,6 +270,7 @@ if(hits.length>queryResultsSize)
     }
 
     self.processResult = function (words, data, indexes) {
+
         var entitiesMap = []
         words.forEach(function (word, index) {
             if (!entitiesMap[word]) {
@@ -417,7 +422,8 @@ if(hits.length>queryResultsSize)
         })
         var html = "<B>Sources ranking</B><br><table>"
         array.forEach(function (item) {
-            html += "<tr><td>" + item.index + "</td><td> " + item.count + "</td></tr>"
+            var percent=Math.round(item.count/self.currentWordsCount*100)
+            html += "<tr><td>" + item.index + "</td><td> " + item.count + "</td><td>"+percent+"%</td></tr>"
         })
         html += "</table>"
 
@@ -444,10 +450,12 @@ if(hits.length>queryResultsSize)
             return alert("select target Source of comparison")
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
-
+        self.currentWordsCount=0
+        self.currentWords=words;
         var slices = common.array.slice(words, size)
         async.eachSeries(slices, function (words, callbackEach) {
             var indexes = self.getSelectedIndexes()
+            self.currentWordsCount+=words.length
             self.getElasticSearchExactMatches(words, indexes, 0, words.length, function (err, result) {
                 var html = self.processResult(words, result, indexes)
                 MainController.UI.message(" processed items: " + (totalProcessed++))
@@ -465,8 +473,10 @@ if(hits.length>queryResultsSize)
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
                 self.showMatchesIndexRanking()
+                self.drawBestMatches( self.currentWords,"Standardizer_sunburstDiv", "Standardizer_graphDiv","Standardizer_centralJstreeDiv" , function(err, result) {
 
-            }, 500)
+                })
+                }, 500)
         })
     }
 
@@ -492,6 +502,9 @@ if(hits.length>queryResultsSize)
             return alert("select target Source of comparison")
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
+
+        self.currentWordsCount=0
+       self.currentWords=[]
         async.whilst(function (test) {
             return resultSize > 0
 
@@ -501,10 +514,12 @@ if(hits.length>queryResultsSize)
                 if (err)
                     return callbackWhilst(err)
                 resultSize = hits.length
+                self.currentWordsCount+=hits.length
                 var words = []
                 offset += size
                 hits.forEach(function (hit) {
                     words.push(hit._source.label);
+                    self.currentWords.push(hit._source.label)
                 })
                 var indexes = self.getSelectedIndexes()
                 self.getElasticSearchExactMatches(words, indexes, 0, size, function (err, result) {
@@ -526,9 +541,18 @@ if(hits.length>queryResultsSize)
             if (err)
                 return alert(err)
             MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
+            MainController.UI. toogleRightPanel (true)
+            $("#rightPanelDiv").html("<div id='Standardizer_rightJstreeDiv'></div> ")
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
                 self.showMatchesIndexRanking()
+
+
+
+                self.drawBestMatches( self.currentWords,"Standardizer_sunburstDiv", "Standardizer_graphDiv","Standardizer_rightJstreeDiv" , function(err, result){
+
+
+                })
 
             }, 500)
         })
@@ -894,6 +918,397 @@ if(hits.length>queryResultsSize)
         }
     }
 
+
+
+    self.drawBestMatches = function (words,sunburstDivId,graphDivId,treeDivId,callback) {
+        if (!words)
+            return alert("no words input")
+        var indexes = []
+        self.classUriLabelMap = {}
+        var searchResultArray = []
+        var classUris = []
+        var nodes = {}
+        var orphans = []
+        var treemapData = {}
+        var distinctParentsMap = {}
+        var hierarchy={}
+
+        async.series([
+
+             function (callbackSeries) {//get indexes to compare
+                Standardizer.initSourcesIndexesList({schemaType: "OWL"}, function (err, result) {
+                    if (err)
+                        return callbackSeries(err)
+                    result.forEach(function (item) {
+                        indexes.push(item.toLowerCase())
+                    })
+
+                    callbackSeries();
+                })
+            }
+            , function (callbackSeries) {//get indexes matches class map
+                MainController.UI.message("matching " + words.length + "words")
+                var resultSize = 1
+                var size = 200;
+                var offset = 0
+                var totalProcessed = 0
+
+
+
+
+                Standardizer.getElasticSearchExactMatches(words, indexes, 0, size, function (err, result) {
+                    if (err)
+                        return callbackSeries(err)
+                    resultSize = result.length;
+                    offset += size
+                    searchResultArray = result;
+                    MainController.UI.message("matches found :" + searchResultArray.length)
+                    callbackSeries()
+                })
+
+            }
+            , function (callbackSeries) {//prepare data
+
+                var indexes = []
+                var distinctHits = []
+
+                searchResultArray.forEach(function (item, itemIndex) {
+                    if (item.hits && item.hits.hits && item.hits.hits.length == 0)
+                        orphans.push(words[itemIndex])
+                    var hits = item.hits.hits;
+
+                    hits.forEach(function (hit) {
+                        if (distinctHits.indexOf(hit._source.label) < 0)
+                            distinctHits.push(hit._source.label)
+
+                        if (indexes.indexOf(hit._index) < 0)
+                            indexes.push(hit._index)
+                        var parentsStr = hit._source.parents
+
+                        if (parentsStr) {
+
+                            var lastParent
+                            var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+
+                            if (!distinctParentsMap[parentsStr])
+                                distinctParentsMap[parentsStr] = []
+
+                            var ancestors = []
+                            parents.forEach(function (itemParent, index) {
+                                ancestors.push(itemParent)
+                                if (classUris.indexOf(itemParent) < 0)
+                                    classUris.push(itemParent)
+                                var parent = hit._index
+
+
+                                if (index > 0)
+                                    parent = parents[index - 1]
+                                else
+                                    parent = null
+
+                                if (!nodes[itemParent]) {
+                                    nodes[itemParent] = {
+                                        id: itemParent,
+                                        parent: parent,
+                                        index: hit._index,
+                                        classes: [],
+                                        ancestors: ancestors,
+                                        countChildren: 0
+                                    }
+
+
+                                }
+                                lastParent = itemParent
+
+                            })
+
+
+                            if (nodes[lastParent].classes.indexOf(hit._source.id) < 0)
+                                nodes[lastParent].classes.push(hit._source.id)
+                            classUris.push(hit._source.id)
+
+                        }
+                    })
+
+
+                })
+
+                callbackSeries()
+            }
+
+
+            , function (callbackSeries) { //get labels
+                Standardizer.getClassesLabels(classUris, indexes, function (err, result) {
+                    self.classUriLabelMap = result;
+                    callbackSeries()
+                })
+            }
+
+
+
+            //getGraph data and draw
+            , function (callbackSeries) {
+                if(!graphDivId)
+                    return callbackSeries()
+                var visjsData = {edges: [], nodes: []}
+                visjsData.nodes.push({
+                    id: "#",
+                    label: "#",
+                    shape: "star"
+
+                })
+                var existingNodes = {}
+                for (var key in nodes) {
+
+
+                    var node = nodes[key]
+
+                    var color = Lineage_classes.getSourceColor(node.index)
+
+                    if (!existingNodes[node.index]) {
+                        existingNodes[node.index] = 1
+                        visjsData.nodes.push({
+                            id: node.index,
+                            label: node.index,
+                            shape: "ellipse",
+                            color: color
+
+                        })
+                        var edgeId = node.index + "_#"
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                from: node.index,
+                                to: "#",
+
+                            })
+                        }
+                    }
+
+                    if (!existingNodes[node.id]) {
+                        existingNodes[node.id] = 1
+                        visjsData.nodes.push({
+                            id: node.id,
+                            label: self.classUriLabelMap[node.id],
+                            color: color,
+                            shape: "dot",
+                            //  size: 8,
+
+                            data: {
+                                id: node.id,
+                                label: self.classUriLabelMap[node.id],
+                                classes: node.classes,
+                                countChildren: node.countChildren
+                            }
+                        })
+
+
+                        var edgeId = node.parent + "_" + node.id
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                from: node.id,
+                                to: node.parent || node.index,
+
+                            })
+                        }
+
+
+                    }
+                }
+
+                visjsData.nodes.forEach(function (node) {
+                    if (node.data && node.data.classes && node.data.classes.length > 0) {
+                        var value = node.data.classes.length
+                        node.value = value
+                        node.shape = "square"
+                    } else {
+                        node.value = node.countChildren
+                    }
+                })
+                var orphansNode = {
+                    id: "orphans",
+                    text: "orphans",
+                    shape: "square",
+                    color: "#ddd",
+                    size: 20,
+                    data: {
+                        id: "orphans",
+                        text: "orphans",
+                        words: orphans
+                    }
+
+                }
+                var edgeId = "orphans" + "_#"
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1
+                    visjsData.edges.push({
+                        from:"orphans" ,
+                        to: "#",
+
+                    })
+                }
+                visjsData.nodes.push(orphansNode)
+                setTimeout(function () {
+                    var options = {
+                        onclickFn: Standardizer.bestMatches.onGraphNodeClick,
+
+                        nodes: {
+
+                            scaling: {
+                                customScalingFunction: function (min, max, total, value) {
+                                    return value / total;
+                                },
+                                min: 5,
+                                max: 150,
+                            },
+                        },
+                      /*  layoutHierarchical: {
+                            direction: "UD",
+                            sortMethod: "hubsize",
+
+                        }*/
+                    }
+
+
+                    visjsGraph.draw(graphDivId, visjsData, options)
+                }, 500)
+
+                callbackSeries();
+
+
+            },
+
+
+            //draw tree
+            function(callbackSeries){
+                if(!treeDivId)
+                    return callbackSeries()
+
+                var jstreeData=[];
+                var distinctNodes={}
+                for(var nodeId in nodes){
+                    var node=nodes[nodeId];
+                    if( !distinctNodes[node.index]) {
+                        distinctNodes[node.index] = 1
+                        jstreeData.push({
+                            id: node.index,
+                            text: node.index,
+                            parent: "#",
+                        })
+                    }
+
+                        if( !distinctNodes[node.id]) {
+                        distinctNodes[node.id] = 1
+
+                            var label=self.classUriLabelMap[node.id]
+                        jstreeData.push({
+                            id: node.id,
+                            text:label,
+                            parent: node.parent || node.index,
+                            data: {
+                                id: node.id,
+                                text: label,
+                            }
+
+                        })
+                    }
+
+
+                }
+                common.jstree.loadJsTree(treeDivId, jstreeData)
+            }
+
+
+            //get treemap data
+            , function (callbackSeries) {
+if(!sunburstDivId )
+    return callbackSeries()
+                function getUnflatten(arr,parentId){
+                    let output = []
+                    for(const obj of arr) {
+                        if (obj.parentId == parentId) {
+                            var children = getUnflatten(arr, obj.id)
+
+                            if (children.length) {
+                                obj.children = children
+                            }
+
+                            output.push(obj)
+                        }
+
+
+                    }
+                    return output
+                }
+
+                var array=[]
+                var root="indexes"
+                for (var nodeId in nodes) {
+                    var obj=nodes[nodeId];
+                    if(!obj.parent)
+                        obj.parentId=root;
+                    else
+                        obj.parentId=obj.parent;
+                    obj.name= self.classUriLabelMap[nodeId]
+
+                    array.push(obj)
+                    obj.classes.forEach(function(classId){
+                        array.push({id: classId, name: self.classUriLabelMap[classId],parentId:nodeId})
+                    })
+
+
+                }
+
+               hierarchy=getUnflatten(array,root)
+                hierarchy.push({name:"orphans",children:orphans})
+                var root={name:"matches",children:hierarchy}
+
+
+
+
+
+                return callbackSeries()
+            },
+            function(callbackSeries){
+                if(!sunburstDivId)
+                    return callbackSeries()
+                Sunburst.draw(sunburstDivId,root)
+                return callbackSeries()
+            }
+
+
+        ], function (err) {
+            return "DONE"
+        })
+
+
+    }
+    self.bestMatches = {
+        onGraphNodeClick: function (node, point, options) {
+            if (!node || !node.data)
+                return;
+            var html = "<div><a target ='blank' href='" + node.data.id + "'>" + node.data.label + "</a></div>"
+            html += "<ul>"
+            if (node.data.classes) {
+                node.data.classes.forEach(function (classUri) {
+                    var classLabel = self.classUriLabelMap[classUri]
+                    html += "<li><a target ='blank' href='" + classUri + "'>" + classLabel + "</a></li>"
+                })
+            }
+
+            if (node.data.words) {
+                node.data.words.forEach(function (word) {
+
+                    html += "<li>" + word + "</li>"
+                })
+            }
+
+            html += "</ul>"
+            $("#bestMatchesInfosDiv").html(html)
+        }
+
+    }
 
     return self;
 

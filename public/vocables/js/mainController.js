@@ -432,11 +432,11 @@ var MainController = (function () {
 
         updateActionDivLabel: function (html) {
             if (html)
-                $("#sourcePanelLabel").html(html)
+                $("#toolPanelLabel").html(html)
             if (self.currentSource)
-                $("#sourcePanelLabel").html(Config.tools[self.currentTool].label + " : " + self.currentSource)
+                $("#toolPanelLabel").html(Config.tools[self.currentTool].label + " : " + self.currentSource)
             else
-                $("#sourcePanelLabel").html(Config.tools[self.currentTool].label);
+                $("#toolPanelLabel").html(Config.tools[self.currentTool].label);
 
 
         },

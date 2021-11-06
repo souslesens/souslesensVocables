@@ -133,7 +133,8 @@
 
     <script src="js/elasticSearchProxy.js"></script>
 
-    <script src="js/treemap.js"></script>
+    <script src="js/external/d3/d3.v3.min.js"></script>
+    <script src="js/sunburst.js"></script>
 
 
     <!--  <script src="js/authentification.js"></script>-->
@@ -392,7 +393,7 @@
     <button style="justify-content: right" id="showBlenderButton" style="display: none" onclick="Blender.onLoaded()">Blender</button>
     <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
     <button style="justify-content: right" id="ontoEdit" style="display: block" onclick="OwlEditor.loadUI()">OntoEdit</button>
-    <button style="justify-content: right" id="testButton" style="display: block" onclick="TreeMap.draw2(TreeMap.flare2)">test</button>
+    <button style="justify-content: right" id="testButton" style="display: block" onclick="TreeMap.draw2(TreeMap.treemapSLSV)">test</button>
     <button onclick="MainController.UI.copyCurrentQuery()">cpQy</button>
 
 
@@ -414,14 +415,14 @@
             <h3><span class="title">Sources </span></h3>
             <div id="sourcesPanel" style="margin:5px" class='max-height'>
                 <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
-                <div id="sourcesTreeDivContainer">
-                    <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+                <div id="sourcesTreeDivContainer"  style="overflow: auto" class='XXXmax-height'>
+                    <div id="sourcesTreeDiv" class="jstree"></div>
                 </div>
             </div>
 
 
 
-            <h3><span class="title" id="sourcePanelLabel"> </span></h3>
+            <h3><span class="title" id="toolPanelLabel"> </span></h3>
             <div id="toolPanelDiv" style="margin:5px" class='max-height'>
                 <div id="actionDivContolPanelDiv"></div>
                 <div id="actionDiv" class="jstree"></div>

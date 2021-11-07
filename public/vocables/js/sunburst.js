@@ -3,17 +3,16 @@ var Sunburst = (function () {
 
     var self = {}
 
-    self.draw = function (divId,root) {
+    self.draw = function (divId, root, options) {
 
         var svg = d3.select("svg");
         svg.selectAll("*").remove();
-        $("#"+divId).html("")
+        $("#" + divId).html("")
 
         var width = 960,
             height = 700,
             radius = Math.min(width, height) / 2,
             color = d3.scale.category10();
-
 
 
         var svg = d3.select("body").append("svg")
@@ -25,15 +24,25 @@ var Sunburst = (function () {
         var partition = d3.layout.partition()
             .sort(null)
             .size([2 * Math.PI, radius * radius])
-            .value(function(d) { return 1; });
+            .value(function (d) {
+                return 1;
+            });
 
         var arc = d3.svg.arc()
-            .startAngle(function(d) { return d.x; })
-            .endAngle(function(d) { return d.x + d.dx; })
-            .innerRadius(function(d) { return Math.sqrt(d.y); })
-            .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+            .startAngle(function (d) {
+                return d.x;
+            })
+            .endAngle(function (d) {
+                return d.x + d.dx;
+            })
+            .innerRadius(function (d) {
+                return Math.sqrt(d.y);
+            })
+            .outerRadius(function (d) {
+                return Math.sqrt(d.y + d.dy);
+            });
 
-        var svg = d3.select("#"+divId).append("svg")
+        var svg = d3.select("#" + divId).append("svg")
             .attr("width", width)
             .attr("height", height)
             .append("g")
@@ -48,7 +57,8 @@ var Sunburst = (function () {
             .attr("d", arc)
             .style("stroke", "#fff")
             .style("fill", function (d) {
-
+                if (!d.children && d.parent)
+                    return "#ddd"
                 return color(
                     (d.children ? d : d.parent).index);
             })
@@ -77,7 +87,7 @@ var Sunburst = (function () {
         });
 
 
-        var tooltip = d3.select("#"+divId)
+        var tooltip = d3.select("#" + divId)
             .append("div")
             .attr("id", "tooltip")
             .style("position", "absolute")
@@ -90,9 +100,6 @@ var Sunburst = (function () {
             height = 700,
             radius = Math.min(width, height) / 2,
             color = d3.scale.category10()
-
-
-
 
 
         // Stash the old values for transition.
@@ -113,6 +120,9 @@ var Sunburst = (function () {
         }
 
         function onClick(d) {
+            if (options && options.onNodeClick) {
+                options.onNodeClick(d)
+            }
             // d3.select(this).attr("stroke","black")
             var text = d.name;
             tooltip.html(text);
@@ -135,9 +145,6 @@ var Sunburst = (function () {
 
         d3.select(self.frameElement).style("height", height + "px");
     }
-
-
-
 
 
     return self;

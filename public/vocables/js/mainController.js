@@ -156,6 +156,7 @@ var MainController = (function () {
     }
 
     self.UI = {
+        initialGraphDivWitdh: 0,
 
         configureUI: function () {
             if (Config.currentProfile.forbiddenTools.indexOf("BLENDER") > -1)
@@ -322,45 +323,50 @@ var MainController = (function () {
 
                 selectTreeNodeFn: function (evt, obj) {
 
-
-                    self.currentTool = obj.node.id;
-                    self.currentSource = null;
-                    MainController.initControllers()
-                    MainController.writeUserLog(authentication.currentUser, self.currentTool, "")
-                    Clipboard.clear();
-                    $("#accordion").accordion("option", {active: 1});
-                    $("#mainDialogDiv").dialog("close");
-                    var controller = Config.tools[self.currentTool].controller
-                    $("#currentSourceTreeDiv").html("")
-
-                    self.UI.updateActionDivLabel();
-                    SourceBrowser.targetDiv = "currentSourceTreeDiv"
-                    if (Config.tools[self.currentTool].noSource) {
-                        MainController.currentSource = null;
-                        MainController.UI.onSourceSelect();
-
-                    } else {
-                        MainController.UI.showSources("sourcesTreeDiv", obj.node.data.multiSources);
-                        if (Config.tools[self.currentTool].multiSources) {
-                            self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
-                            controller.onSourceSelect(self.currentSource)
-
-                        }
-                    }
-
-                    //   $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+                    self.UI.initTool(obj.node.id)
 
 
-                    if (controller.onLoaded)
-                        controller.onLoaded()
-                    if (Config.tools[self.currentTool].toolDescriptionImg) {
-                        $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>")
-                    } else
-                        $("#graphDiv").html(self.currentTool);
 
                 }
             })
 
+        }
+        , initTool: function (toolId) {
+            self.currentTool = toolId
+            var toolObj=Config.tools[toolId]
+            self.currentSource = null;
+            MainController.initControllers()
+            MainController.writeUserLog(authentication.currentUser, self.currentTool, "")
+            Clipboard.clear();
+            $("#accordion").accordion("option", {active: 1});
+            $("#mainDialogDiv").dialog("close");
+            var controller = Config.tools[self.currentTool].controller
+            $("#currentSourceTreeDiv").html("")
+
+            self.UI.updateActionDivLabel();
+            SourceBrowser.targetDiv = "currentSourceTreeDiv"
+            if (toolObj.noSource) {
+                MainController.currentSource = null;
+                MainController.UI.onSourceSelect();
+
+            } else {
+                MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
+                if (Config.tools[self.currentTool].multiSources) {
+                    self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
+                    controller.onSourceSelect(self.currentSource)
+
+                }
+            }
+
+            //   $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+
+
+            if (controller.onLoaded)
+                controller.onLoaded()
+            if (Config.tools[self.currentTool].toolDescriptionImg) {
+                $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>")
+            } else
+                $("#graphDiv").html(self.currentTool);
         }
 
         , getJstreeConceptsContextMenu: function () {
@@ -396,21 +402,22 @@ var MainController = (function () {
         toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display")
             Lineage_common.currentSource = null;
+
             if (!open && display == "flex") {//open->close
-                var w2 = $("#graphDiv").width() + rightPanelWidth
+                var w2 = self.UI.initialGraphDivWitdh + rightPanelWidth
                 $("#rightPanelDiv").css("display", "none")
-                $("#centralPanelDiv").width(w2)
-                $("#graphDiv").animate({width: w2})
+                $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh)
+                $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh})
                 setTimeout(function () {
                     visjsGraph.redraw()
                 }, 200)
 
 
             } else {//close->open
-                var w2 = $("#graphDiv").width() - rightPanelWidth
+
                 $("#rightPanelDiv").css("display", "flex")
-                $("#centralPanelDiv").width(w2)
-                $("#graphDiv").animate({width: w2})
+                $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
+                $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
                 setTimeout(function () {
                     visjsGraph.redraw()
                 }, 200)

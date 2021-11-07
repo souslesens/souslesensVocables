@@ -2,23 +2,24 @@ var Standardizer = (function () {
     var self = {};
     self.matchCandidates = {}
     var matrixHtml = ""
-    self.mode="matrix"
+    self.mode = "matrix";
+    self.indexSourcesMap={}
 
     self.onLoaded = function () {
         //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
         $("#actionDiv").html("")
 
         $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html")
-     /*   self.mode = "matrix"
+        /*   self.mode = "matrix"
 
-        if (self.mode == "normal") {
-            $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+           if (self.mode == "normal") {
+               $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
 
-        }
-        if (self.mode == "matrix") {
-            $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+           }
+           if (self.mode == "matrix") {
+               $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
 
-        }*/
+           }*/
 
 
         $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
@@ -73,13 +74,17 @@ var Standardizer = (function () {
                 var sources = [];
 
                 for (var source in Config.sources) {
+                    var sourceLabel=""+source
+
                     if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
                         ;
                     } else {
 
-                        indexes.forEach(function (index) {
-                            if (index == source.toLowerCase())
+                        indexes.forEach(function (indexName) {
+                            if (indexName == source.toLowerCase()) {
                                 sources.push(source);
+                                self.indexSourcesMap[indexName] = sourceLabel
+                            }
 
                         })
                     }
@@ -170,7 +175,7 @@ var Standardizer = (function () {
         var allResults = []
         var totalProcessed = 0
         async.eachSeries(slices, function (wordSlice, callbackEach) {
-            bulQueryStr="";
+            bulQueryStr = "";
             wordSlice.forEach(function (word) {
                 var wordQuery = self.getWordBulkQuery(word, mode, indexes)
                 bulQueryStr += wordQuery;
@@ -196,40 +201,40 @@ var Standardizer = (function () {
         var allResults = []
         var totalProcessed = 0
         var size = 200
-       var  queryResultsSize=5000
+        var queryResultsSize = 5000
         var classesMap = {}
-        var  slices;
-        if(classUris)
-       slices = common.array.slice(classUris, size)
+        var slices;
+        if (classUris)
+            slices = common.array.slice(classUris, size)
         async.eachSeries(slices, function (urisSlice, callbackEach) {
-                var queryObj = {
-                    "terms": {
-                        "id.keyword": urisSlice,
-                    }
+            var queryObj = {
+                "terms": {
+                    "id.keyword": urisSlice,
                 }
-                var query = {
-                    "query": queryObj,
-                    "from": 0,
-                    "size": queryResultsSize,
-                    "_source": {
-                        "excludes": [
-                            "attachment.content",
-                            "parents"
-                        ]
-                    },
-                }
+            }
+            var query = {
+                "query": queryObj,
+                "from": 0,
+                "size": queryResultsSize,
+                "_source": {
+                    "excludes": [
+                        "attachment.content",
+                        "parents"
+                    ]
+                },
+            }
 
 
-            ElasticSearchProxy.queryElastic(query,indexes, function (err, result) {
+            ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
                 if (err)
                     return callbackEach(err)
 
-                var hits=result.hits.hits
-if(hits.length>queryResultsSize)
-    if(!confirm("resut troncated > "+hits.length))
-        return callback("resut troncated")
-                hits.forEach(function(hit){
-                    classesMap[hit._source.id]=hit._source.label
+                var hits = result.hits.hits
+                if (hits.length > queryResultsSize)
+                    if (!confirm("resut troncated > " + hits.length))
+                        return callback("resut troncated")
+                hits.forEach(function (hit) {
+                    classesMap[hit._source.id] = hit._source.label
                 })
                 callbackEach();
             })
@@ -256,7 +261,7 @@ if(hits.length>queryResultsSize)
     }
 
     self.initMatrix = function (indexes) {    //titre des colonnes
-        self.currentWordsCount=0
+        self.currentWordsCount = 0
         var html = "<div class='matrix'>"
         html += "<div class='matrixRow'>"
         html += "<div class='matrixRowTitle'></div>"
@@ -269,7 +274,7 @@ if(hits.length>queryResultsSize)
         return html;
     }
 
-    self.processResult = function (words, data, indexes) {
+    self.processMatrixResult = function (words, data, indexes) {
 
         var entitiesMap = []
         words.forEach(function (word, index) {
@@ -422,8 +427,8 @@ if(hits.length>queryResultsSize)
         })
         var html = "<B>Sources ranking</B><br><table>"
         array.forEach(function (item) {
-            var percent=Math.round(item.count/self.currentWordsCount*100)
-            html += "<tr><td>" + item.index + "</td><td> " + item.count + "</td><td>"+percent+"%</td></tr>"
+            var percent = Math.round(item.count / self.currentWordsCount * 100)
+            html += "<tr><td>" + item.index + "</td><td> " + item.count + "</td><td>" + percent + "%</td></tr>"
         })
         html += "</table>"
 
@@ -450,14 +455,14 @@ if(hits.length>queryResultsSize)
             return alert("select target Source of comparison")
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
-        self.currentWordsCount=0
-        self.currentWords=words;
+        self.currentWordsCount = 0
+        self.currentWords = words;
         var slices = common.array.slice(words, size)
         async.eachSeries(slices, function (words, callbackEach) {
             var indexes = self.getSelectedIndexes()
-            self.currentWordsCount+=words.length
+            self.currentWordsCount += words.length
             self.getElasticSearchExactMatches(words, indexes, 0, words.length, function (err, result) {
-                var html = self.processResult(words, result, indexes)
+                var html = self.processMatrixResult(words, result, indexes)
                 MainController.UI.message(" processed items: " + (totalProcessed++))
                 $("#KGmapping_matrixContainer").append(html)
                 totalProcessed += result;
@@ -471,12 +476,12 @@ if(hits.length>queryResultsSize)
                 return alert(err)
             MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
             setTimeout(function () {
-                $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
+                $(".matrixCell").bind("click", Standardizer.bestMatches.onNodeClick)
                 self.showMatchesIndexRanking()
-                self.drawBestMatches( self.currentWords,"Standardizer_sunburstDiv", "Standardizer_graphDiv","Standardizer_centralJstreeDiv" , function(err, result) {
+                self.drawBestMatches(self.currentWords, indexes,"Standardizer_sunburstDiv", "Standardizer_graphDiv", "Standardizer_centralJstreeDiv", function (err, result) {
 
                 })
-                }, 500)
+            }, 500)
         })
     }
 
@@ -503,8 +508,8 @@ if(hits.length>queryResultsSize)
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
 
-        self.currentWordsCount=0
-       self.currentWords=[]
+        self.currentWordsCount = 0
+        self.currentWords = []
         async.whilst(function (test) {
             return resultSize > 0
 
@@ -514,7 +519,7 @@ if(hits.length>queryResultsSize)
                 if (err)
                     return callbackWhilst(err)
                 resultSize = hits.length
-                self.currentWordsCount+=hits.length
+                self.currentWordsCount += hits.length
                 var words = []
                 offset += size
                 hits.forEach(function (hit) {
@@ -526,7 +531,7 @@ if(hits.length>queryResultsSize)
                     if (err)
                         return alert(err)
                     //  self.getMatchesClassesByIndex(result)
-                    var html = self.processResult(words, result, indexes)
+                    var html = self.processMatrixResult(words, result, indexes)
                     totalProcessed += result.length;
                     MainController.UI.message(" processed items: " + (totalProcessed))
                     $("#KGmapping_matrixContainer").append(html)
@@ -541,15 +546,14 @@ if(hits.length>queryResultsSize)
             if (err)
                 return alert(err)
             MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
-            MainController.UI. toogleRightPanel (true)
-            $("#rightPanelDiv").html("<div id='Standardizer_rightJstreeDiv'></div> ")
+            MainController.UI.toogleRightPanel(true)
+            $("#rightPanelDiv").html("<div style='font-weight: bold'>Mapping taxonomy</div><div id='Standardizer_rightJstreeDiv'></div> ")
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
                 self.showMatchesIndexRanking()
 
 
-
-                self.drawBestMatches( self.currentWords,"Standardizer_sunburstDiv", "Standardizer_graphDiv","Standardizer_rightJstreeDiv" , function(err, result){
+                self.drawBestMatches(self.currentWords, indexes,"Standardizer_sunburstDiv", "Standardizer_graphDiv", "Standardizer_rightJstreeDiv", function (err, result) {
 
 
                 })
@@ -919,11 +923,10 @@ if(hits.length>queryResultsSize)
     }
 
 
-
-    self.drawBestMatches = function (words,sunburstDivId,graphDivId,treeDivId,callback) {
+    self.drawBestMatches = function (words,indexes, sunburstDivId, graphDivId, treeDivId, callback) {
         if (!words)
             return alert("no words input")
-        var indexes = []
+
         self.classUriLabelMap = {}
         var searchResultArray = []
         var classUris = []
@@ -931,11 +934,14 @@ if(hits.length>queryResultsSize)
         var orphans = []
         var treemapData = {}
         var distinctParentsMap = {}
-        var hierarchy={}
+        var hierarchy = {}
 
         async.series([
 
-             function (callbackSeries) {//get indexes to compare
+            function (callbackSeries) {//get indexes to compare
+            if(indexes){
+                return  callbackSeries();
+            }
                 Standardizer.initSourcesIndexesList({schemaType: "OWL"}, function (err, result) {
                     if (err)
                         return callbackSeries(err)
@@ -952,8 +958,6 @@ if(hits.length>queryResultsSize)
                 var size = 200;
                 var offset = 0
                 var totalProcessed = 0
-
-
 
 
                 Standardizer.getElasticSearchExactMatches(words, indexes, 0, size, function (err, result) {
@@ -984,7 +988,9 @@ if(hits.length>queryResultsSize)
                         if (indexes.indexOf(hit._index) < 0)
                             indexes.push(hit._index)
                         var parentsStr = hit._source.parents
-
+                        if(parentsStr && parentsStr.indexOf("http://souslesens.org/iso19008/sab/8")>-1)
+                            var x=3
+                        classUris.push(hit._source.id)
                         if (parentsStr) {
 
                             var lastParent
@@ -993,8 +999,11 @@ if(hits.length>queryResultsSize)
                             if (!distinctParentsMap[parentsStr])
                                 distinctParentsMap[parentsStr] = []
 
-                            var ancestors = []
+                            var ancestors = [];
+                            var path="";
                             parents.forEach(function (itemParent, index) {
+                               var parentPath=path
+                                path+=itemParent+"|"
                                 ancestors.push(itemParent)
                                 if (classUris.indexOf(itemParent) < 0)
                                     classUris.push(itemParent)
@@ -1009,6 +1018,8 @@ if(hits.length>queryResultsSize)
                                 if (!nodes[itemParent]) {
                                     nodes[itemParent] = {
                                         id: itemParent,
+                                        path:path,
+                                        parentPath:parentPath,
                                         parent: parent,
                                         index: hit._index,
                                         classes: [],
@@ -1023,9 +1034,10 @@ if(hits.length>queryResultsSize)
                             })
 
 
-                            if (nodes[lastParent].classes.indexOf(hit._source.id) < 0)
+                            if (nodes[lastParent].classes.indexOf(hit._source.id) < 0) {
                                 nodes[lastParent].classes.push(hit._source.id)
-                            classUris.push(hit._source.id)
+
+                            }
 
                         }
                     })
@@ -1048,7 +1060,7 @@ if(hits.length>queryResultsSize)
 
             //getGraph data and draw
             , function (callbackSeries) {
-                if(!graphDivId)
+                if (!graphDivId)
                     return callbackSeries()
                 var visjsData = {edges: [], nodes: []}
                 visjsData.nodes.push({
@@ -1143,7 +1155,7 @@ if(hits.length>queryResultsSize)
                 if (!existingNodes[edgeId]) {
                     existingNodes[edgeId] = 1
                     visjsData.edges.push({
-                        from:"orphans" ,
+                        from: "orphans",
                         to: "#",
 
                     })
@@ -1151,7 +1163,7 @@ if(hits.length>queryResultsSize)
                 visjsData.nodes.push(orphansNode)
                 setTimeout(function () {
                     var options = {
-                        onclickFn: Standardizer.bestMatches.onGraphNodeClick,
+                        onclickFn: Standardizer.bestMatches.onNodeClick,
 
                         nodes: {
 
@@ -1163,11 +1175,11 @@ if(hits.length>queryResultsSize)
                                 max: 150,
                             },
                         },
-                      /*  layoutHierarchical: {
-                            direction: "UD",
-                            sortMethod: "hubsize",
+                        /*  layoutHierarchical: {
+                              direction: "UD",
+                              sortMethod: "hubsize",
 
-                        }*/
+                          }*/
                     }
 
 
@@ -1181,52 +1193,116 @@ if(hits.length>queryResultsSize)
 
 
             //draw tree
-            function(callbackSeries){
-                if(!treeDivId)
+            function (callbackSeries) {
+                if (!treeDivId)
                     return callbackSeries()
 
-                var jstreeData=[];
-                var distinctNodes={}
-                for(var nodeId in nodes){
-                    var node=nodes[nodeId];
-                    if( !distinctNodes[node.index]) {
+                var jstreeData = [];
+                var distinctNodes = {}
+                for (var nodeId in nodes) {
+                    var node = nodes[nodeId];
+
+                   /* if (!distinctNodes[node.index]) {
                         distinctNodes[node.index] = 1
                         jstreeData.push({
                             id: node.index,
                             text: node.index,
                             parent: "#",
                         })
-                    }
+                    }*/
 
-                        if( !distinctNodes[node.id]) {
-                        distinctNodes[node.id] = 1
+                    if ( !distinctNodes[node.path]) {
+                        distinctNodes[node.path] = 1
+                        var parentPath=node.parentPath
+                        if( !parentPath || parentPath=="")
+                            parentPath="#"
 
-                            var label=self.classUriLabelMap[node.id]
+                        var label = self.classUriLabelMap[node.id]
+
+                        if(!label)
+                            var x=3
                         jstreeData.push({
-                            id: node.id,
-                            text:label,
-                            parent: node.parent || node.index,
+                            id: node.path,
+                            text: label || node.id,
+                            parent: parentPath,
                             data: {
                                 id: node.id,
                                 text: label,
+                                index: node.index
                             }
 
                         })
+
+                        if (node.classes) {
+
+                            node.classes.forEach(function (classId) {
+                                var classUniqueId=node.path+"_"+classId
+                                if(!distinctNodes[classUniqueId]) {
+                                    distinctNodes[classUniqueId] = 1
+                                    var label = self.classUriLabelMap[classId];
+                                    jstreeData.push({
+                                        id: classUniqueId,
+                                        text: label,
+                                        parent: nodeId,
+                                        data: {
+                                            id: classId,
+                                            text: label,
+                                            index: node.index
+                                        }
+
+                                    })
+                                }
+                            })
+                        }
                     }
 
 
                 }
-                common.jstree.loadJsTree(treeDivId, jstreeData)
+                jstreeData.push({
+                    id: "orphans",
+                    text: "Orphans",
+                    parent: "#",
+                    data: {
+                        id: orphans,
+                        text: orphans,
+
+                    }
+
+                })
+
+                orphans.forEach(function(orphan){
+                    jstreeData.push({
+                        id: orphan,
+                        text: orphan,
+                        parent: "orphans",
+                        data: {
+                            id: orphan,
+                            text: orphan,
+
+                        }
+
+                    })
+                })
+                var options = {
+                    selectTreeNodeFn: Standardizer.bestMatches.onTreeNodeClick
+                }
+                common.jstree.loadJsTree(treeDivId, jstreeData, options, function (err) {
+                    common.jstree.openNodeDescendants(treeDivId,"#",8)
+
+                })
+                callbackSeries()
             }
 
 
-            //get treemap data
+            //get sunburst data
             , function (callbackSeries) {
-if(!sunburstDivId )
-    return callbackSeries()
-                function getUnflatten(arr,parentId){
+                if (!sunburstDivId)
+                    return callbackSeries()
+
+
+                function getUnflatten(arr, parentId) {
                     let output = []
-                    for(const obj of arr) {
+                    for (const obj of arr) {
                         if (obj.parentId == parentId) {
                             var children = getUnflatten(arr, obj.id)
 
@@ -1242,38 +1318,40 @@ if(!sunburstDivId )
                     return output
                 }
 
-                var array=[]
-                var root="indexes"
+
+                var array = []
+                var root = "indexes"
                 for (var nodeId in nodes) {
-                    var obj=nodes[nodeId];
-                    if(!obj.parent)
-                        obj.parentId=root;
+                    var obj = nodes[nodeId];
+                    if (!obj.parent)
+                        obj.parentId = root;
                     else
-                        obj.parentId=obj.parent;
-                    obj.name= self.classUriLabelMap[nodeId]
+                        obj.parentId = obj.parent;
+                    obj.name = self.classUriLabelMap[nodeId]
 
                     array.push(obj)
-                    obj.classes.forEach(function(classId){
-                        array.push({id: classId, name: self.classUriLabelMap[classId],parentId:nodeId})
+                    obj.classes.forEach(function (classId) {
+                        array.push({id: classId, name: self.classUriLabelMap[classId], parentId: nodeId})
                     })
 
 
                 }
 
-               hierarchy=getUnflatten(array,root)
-                hierarchy.push({name:"orphans",children:orphans})
-                var root={name:"matches",children:hierarchy}
+                hierarchy = getUnflatten(array, root)
 
+                var orphanChildren=[];
+                orphans.forEach(function(orphan){
+                    orphanChildren.push({name:orphan,children:[]})
+                })
+                hierarchy.push({name: "orphans", children: orphanChildren})
+                var root = {name: "matches", children: hierarchy}
 
-
-
-
-                return callbackSeries()
-            },
-            function(callbackSeries){
-                if(!sunburstDivId)
+                if (!sunburstDivId)
                     return callbackSeries()
-                Sunburst.draw(sunburstDivId,root)
+                var options = {
+                    onNodeClick: Standardizer.bestMatches.onNodeClick
+                }
+                Sunburst.draw(sunburstDivId, root, options)
                 return callbackSeries()
             }
 
@@ -1285,7 +1363,15 @@ if(!sunburstDivId )
 
     }
     self.bestMatches = {
-        onGraphNodeClick: function (node, point, options) {
+        onNodeClick: function (node, point, options) {
+
+
+            if (node) {
+               // $("#Standardizer_rightJstreeDiv").jstree().show_node(node.id)
+                $("#Standardizer_rightJstreeDiv").jstree().open_node(node.id)
+            }
+
+            return;
             if (!node || !node.data)
                 return;
             var html = "<div><a target ='blank' href='" + node.data.id + "'>" + node.data.label + "</a></div>"
@@ -1306,6 +1392,13 @@ if(!sunburstDivId )
 
             html += "</ul>"
             $("#bestMatchesInfosDiv").html(html)
+        },
+
+        onTreeNodeClick: function (event, obj) {
+            var node = obj.node
+            var source= self.indexSourcesMap[node.data.index]
+            SourceBrowser.showNodeInfos(source,node.data.id,"mainDialogDiv")
+
         }
 
     }

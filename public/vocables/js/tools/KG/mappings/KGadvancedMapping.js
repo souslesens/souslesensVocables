@@ -770,9 +770,18 @@ var KGadvancedMapping = (function () {
         if (!KGmappingData.currentColumn)
             return alert("no column selected")
         KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
+            MainController.UI.initTool("Standardizer");
+            setTimeout(function(){
+                var str="";
+                result.forEach(function(item){
+                    str+=item+"\n"
+                })
+                $("#Standardizer_wordsTA").val(str)
+
+            },500)
             if (err)
                 return callback(err)
-            var html = "<div style='display: flex;flex-direction:row';width:100%;height:100%>" +
+        /*    var html = "<div style='display: flex;flex-direction:row';width:100%;height:100%>" +
                 "<div id='bestMatchesGraphDiv' style='width:800px;height:800px'></div>" +
                 "<div id='bestMatchesInfosDiv' style='width:200px;height:100%'></div>" +
                 "</div>"
@@ -787,7 +796,7 @@ var KGadvancedMapping = (function () {
                 callback(err, result);
             })
 
-            })
+            })*/
 
         })
     }

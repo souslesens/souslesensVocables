@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 var path = require("path");
-var passport = require('passport');
+var passport = require("passport");
 var serverParams = { routesRootUrl: "" };
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
 
 var elasticRestProxy = require("../bin/elasticRestProxy..js");
 var authentication = require("../bin/authentication..js");
@@ -20,31 +20,33 @@ var configManager = require("../bin/configManager.");
 var DictionariesManager = require("../bin/KG/dictionariesManager.");
 const promiseFs = require("fs").promises;
 
-
 /* GET home page. */
 router.get("/", ensureLoggedIn(), function (req, res, next) {
     res.redirect("vocables");
 });
 
 // Login route
-router.get('/login', function (req, res, next) {
-    res.render('login', {title: "souslesensVocables - Login"});
-})
+router.get("/login", function (req, res, next) {
+    res.render("login", { title: "souslesensVocables - Login" });
+});
 
 // auth route
-router.post('/auth/login', passport.authenticate('local', {
-  successRedirect: '/vocables',
-  failureRedirect: '/login',
-  failureMessage: true
-}));
+router.post(
+    "/auth/login",
+    passport.authenticate("local", {
+        successRedirect: "/vocables",
+        failureRedirect: "/login",
+        failureMessage: true,
+    })
+);
 
-router.get('/auth/check', function (req, res, next) {
-    console.log(req.user)
+router.get("/auth/check", function (req, res, next) {
+    console.log(req.user);
     res.send({
         logged: req.user ? true : false,
-        user: req.user
-    })
-})
+        user: req.user,
+    });
+});
 
 router.get("/users", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/users/users.json"));
@@ -103,7 +105,8 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
 });
 
 router.post(
-    serverParams.routesRootUrl + "/slsv", ensureLoggedIn(),
+    serverParams.routesRootUrl + "/slsv",
+    ensureLoggedIn(),
     function (req, response) {
         if (req.body.getGeneralConfig) {
             configManager.getGeneralConfig(function (err, result) {

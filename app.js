@@ -1,8 +1,8 @@
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
-var passport = require('passport');
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+var passport = require("passport");
+var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var bodyParser = require("body-parser");
@@ -18,21 +18,24 @@ var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(require('express-session')({
-    secret: 'SY4PDsioYAbndfU8SIuk',
-    resave: false, saveUninitialized: false,
-    cookie: {maxAge: 2629800000} // 1 month
-}));
+app.use(
+    require("express-session")({
+        secret: "SY4PDsioYAbndfU8SIuk",
+        resave: false,
+        saveUninitialized: false,
+        cookie: { maxAge: 2629800000 }, // 1 month
+    })
+);
 
-app.use(function(req, res, next) {
-  var msgs = req.session.messages || [];
-  res.locals.messages = msgs;
-  res.locals.hasMessages = !! msgs.length;
-  req.session.messages = [];
-  next();
+app.use(function (req, res, next) {
+    var msgs = req.session.messages || [];
+    res.locals.messages = msgs;
+    res.locals.hasMessages = !!msgs.length;
+    req.session.messages = [];
+    next();
 });
 app.use(passport.initialize());
-app.use(passport.authenticate('session'));
+app.use(passport.authenticate("session"));
 
 // Static dirs
 app.use(express.static(path.join(__dirname, "public")));

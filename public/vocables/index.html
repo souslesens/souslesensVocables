@@ -155,10 +155,11 @@
 
         $(function () {
             MainController.initConfig(function(err) {
+
+                authentication.init()
+
                 if(err)
                   return  alert(err)
-             //   config = {loginMode: "none", appName: "VOCABLES"};
-                authentication.init()
 
                 w = $(document).width() - leftPanelWidth - 30;
                 h = $(document).height() - 20;

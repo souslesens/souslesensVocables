@@ -16,6 +16,47 @@ var logger = require("./logger..js");
 //const bcrypt = require('bcrypt');
 var async = require("async");
 var saltRounds = 10;
+
+var passport = require('passport');
+var Strategy = require('passport-local');
+
+passport.use(new Strategy(
+  function(username, password, cb) {
+
+    var usersLocation = path.join(__dirname, "../config/users/users.json");
+    jsonFileStorage.retrieve(path.resolve(usersLocation), function (err, users) {
+         // console.log(users)
+        if (err) { return cb(err); }
+
+        var findUser = Object.keys(users).map(function(key, index) {
+          return {
+            login: users[key].login,
+            password: users[key].password,
+            groups: users[key].groups,
+          }
+        }).find(user => user.login == username)
+
+        if (!findUser) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+        if (findUser.password != password) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+
+        return cb(null, findUser);
+    });
+
+  }
+));
+
+passport.serializeUser(function(user, cb) {
+    process.nextTick(function() {
+      cb(null, { login: user.login, groups: user.groups });
+    });
+});
+
+passport.deserializeUser(function(user, cb) {
+    process.nextTick(function() {
+      return cb(null, user);
+    });
+});
+
 var authentication = {
     authentify: function (login, password, callback) {
         var usersLocation = "../config/users/users.json";

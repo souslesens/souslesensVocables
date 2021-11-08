@@ -1,7 +1,9 @@
 var express = require("express");
 var router = express.Router();
 var path = require("path");
+var passport = require('passport');
 var serverParams = { routesRootUrl: "" };
+var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
 var elasticRestProxy = require("../bin/elasticRestProxy..js");
 var authentication = require("../bin/authentication..js");
@@ -16,18 +18,38 @@ var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
 var DictionariesManager = require("../bin/KG/dictionariesManager.");
-
 const promiseFs = require("fs").promises;
 
+
 /* GET home page. */
-router.get("/", function (req, res, next) {
+router.get("/", ensureLoggedIn(), function (req, res, next) {
     res.redirect("vocables");
 });
 
-router.get("/users", function (req, res, next) {
+// Login route
+router.get('/login', function (req, res, next) {
+    res.render('login', {title: "souslesensVocables - Login"});
+})
+
+// auth route
+router.post('/auth/login', passport.authenticate('local', {
+  successRedirect: '/vocables',
+  failureRedirect: '/login',
+  failureMessage: true
+}));
+
+router.get('/auth/check', function (req, res, next) {
+    console.log(req.user)
+    res.send({
+        logged: req.user ? true : false,
+        user: req.user
+    })
+})
+
+router.get("/users", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/users/users.json"));
 });
-router.put("/users", async function (req, res, next) {
+router.put("/users", ensureLoggedIn(), async function (req, res, next) {
     try {
         await promiseFs.writeFile(path.join(__dirname, "/../config/users/users.json"), JSON.stringify(req.body, null, 2));
         res.sendFile(path.join(__dirname, "/../config/users/users.json"));
@@ -37,11 +59,11 @@ router.put("/users", async function (req, res, next) {
     }
 });
 
-router.get("/profiles", function (req, res, next) {
+router.get("/profiles", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/profiles.json"));
 });
 
-router.put("/profiles", async function (req, res, next) {
+router.put("/profiles", ensureLoggedIn(), async function (req, res, next) {
     try {
         await promiseFs.writeFile(path.join(__dirname, "/../config/profiles.json"), JSON.stringify(req.body, null, 2));
         res.sendFile(path.join(__dirname, "/../config/profiles.json"));
@@ -51,11 +73,11 @@ router.put("/profiles", async function (req, res, next) {
     }
 });
 
-router.get("/sources", function (req, res, next) {
+router.get("/sources", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/sources.json"));
 });
 
-router.put("/sources", async function (req, res, next) {
+router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
     try {
         await promiseFs.writeFile(path.join(__dirname, "/../config/sources.json"), JSON.stringify(req.body, null, 2));
         res.sendFile(path.join(__dirname, "/../config/sources.json"));
@@ -65,11 +87,7 @@ router.put("/sources", async function (req, res, next) {
     }
 });
 
-router.get("/", function (req, res, next) {
-    res.render("index", { title: "Express" });
-});
-
-router.post("/upload", function (req, response) {
+router.post("/upload", ensureLoggedIn(), function (req, response) {
     let sampleFile;
     let uploadPath;
 
@@ -85,7 +103,7 @@ router.post("/upload", function (req, response) {
 });
 
 router.post(
-    serverParams.routesRootUrl + "/slsv",
+    serverParams.routesRootUrl + "/slsv", ensureLoggedIn(),
     function (req, response) {
         if (req.body.getGeneralConfig) {
             configManager.getGeneralConfig(function (err, result) {
@@ -304,7 +322,7 @@ router.post(
         }
     },
 
-    router.get("/heatMap", function (req, res, next) {
+    router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);
 
         statistics.getEntitiesMatrix(null, elasticQuery, function (err, result) {
@@ -312,12 +330,12 @@ router.post(
         });
     }),
 
-    router.get("/httpProxy", function (req, res, next) {
+    router.get("/httpProxy", ensureLoggedIn(), function (req, res, next) {
         httpProxy.get(req.query, function (err, result) {
             processResponse(res, err, result);
         });
     }),
-    router.get("/ontology/*", function (req, res, next) {
+    router.get("/ontology/*", ensureLoggedIn(), function (req, res, next) {
         if (req.params.length == 0) return req.send("missing ontology label");
         var name = req.params[0];
         RDF_IO.getOntology(name, function (err, result) {

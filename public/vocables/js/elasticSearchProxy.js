@@ -72,6 +72,33 @@ var ElasticSearchProxy = (function () {
 
         }
 
+        self.analyzeSentence=function(sentence, callback){
+
+        var payload= {
+            analyzeSentence: sentence
+        }
+            $.ajax({
+                type: "POST",
+                url:Config.serverUrl,
+                data: payload,
+                dataType: "json",
+                success: function (data, textStatus, jqXHR) {
+                    var xx = data;
+                    callback(null, data)
+
+                }
+                , error: function (err) {
+
+                    console.log(err.responseText)
+                    if (callback) {
+                        return callback(err)
+                    }
+                    return (err);
+                }
+
+            });
+
+        }
 
         self.searchPlainText = function (options, callback) {
 

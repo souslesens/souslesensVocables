@@ -402,6 +402,7 @@ var MainController = (function () {
         toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display")
             Lineage_common.currentSource = null;
+            var currentCentralPanelWidth= $("#centralPanelDiv").width()
 
             if (!open && display == "flex") {//open->close
                 var w2 = self.UI.initialGraphDivWitdh + rightPanelWidth
@@ -413,14 +414,16 @@ var MainController = (function () {
                 }, 200)
 
 
-            } else {//close->open
+            } else {//close->open (if not allready opened)
+               if(currentCentralPanelWidth !=self.UI.initialGraphDivWitdh) {
 
-                $("#rightPanelDiv").css("display", "flex")
-                $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
-                $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
-                setTimeout(function () {
-                    visjsGraph.redraw()
-                }, 200)
+                   $("#rightPanelDiv").css("display", "flex")
+                   $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
+                   $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
+                   setTimeout(function () {
+                       visjsGraph.redraw()
+                   }, 200)
+               }
 
 
             }

@@ -561,11 +561,16 @@ var Sparql_OWL = (function () {
             }
 
             var filterStr = Sparql_common.setFilter("concept", ids);
-            self.graphUri = Config.sources[sourceLabel].graphUri;
-            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
+            var fromStr=""
+            if(sourceLabel) {
+                self.graphUri = Config.sources[sourceLabel].graphUri;
+                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
+            }else {
+                fromStr=""
 
+            }
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +

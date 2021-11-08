@@ -144,7 +144,7 @@ var elasticRestProxy = {
 
     analyzeSentence: function (sentence, callback) {
         var json = {
-            analyzer: "stop",
+            tokenizer: "classic",
             text: sentence,
         };
         var options = {

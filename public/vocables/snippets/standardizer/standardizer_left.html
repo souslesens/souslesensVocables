@@ -1,6 +1,6 @@
 <style>
 
-    #Standardizer_wordsTA {
+    .Standardizer_TA {
         width: 300px;
         height: 500px;
         overflow: auto;
@@ -14,7 +14,8 @@
 
 
     <ul>
-        <li><a href="#Standardizer_leftTab_text">Words</a></li>
+        <li><a href="#Standardizer_leftTab_words">Words</a></li>
+        <li><a href="#Standardizer_leftTab_text">text</a></li>
 
         <li><a href="#Standardizer_leftTab_source">Sources</a></li>
         <!--   <li><a href="#KGqueryTab">Asset Q</a></li>-->
@@ -22,18 +23,22 @@
     </ul>
 
 
-    <div id="Standardizer_leftTab_text">
+    <div id="Standardizer_leftTab_words">
         Paste here to standardize words
-        <textarea id="Standardizer_wordsTA">
-</textarea>
+        <textarea id="Standardizer_wordsTA" class="Standardizer_TA"></textarea>
+    </div>
+
+    <div id="Standardizer_leftTab_text">
+        Paste here text <button onclick="Standardizer.extractText()">extract nouns</button>
+        <textarea id="Standardizer_textTA" class="Standardizer_TA"></textarea>
     </div>
 
     <div id="Standardizer_leftTab_source">
         <div style="margin: -5px;padding :5px">
             <select id="Standardizer_sourcesSelect"></select>
-            <button onclick="Standardizer.listSourceLabels()">List</button>
+            <button onclick="Standardizer.listSourceLabels()">List</button> <br>
             <button onclick="Standardizer.compareSource()">Compare</button>
-            <br>
+
             <button onclick="Standardizer.compareWordsList()">Standardize words</button>
 
 

@@ -96,7 +96,7 @@ var Standardizer = (function () {
     }
 
 
-    self.getElasticSearchExactMatches = function (words) {
+    self.getElasticSearchMatches = function (words) {
         var mode = $("#KGadvancedMapping_queryTypeSelect").val()
         $("#waitImg").css("display", "block")
         MainController.UI.message("Searching exact matches ")

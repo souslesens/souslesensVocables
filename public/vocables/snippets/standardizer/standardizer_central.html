@@ -155,6 +155,11 @@
         width: 350px;
         height: 800px
     }
+    #Standardizer_connectionsDiv{
+        width: 500px;
+        height: 800px;
+        overflow: auto;
+    }
 
 </style>
 
@@ -165,6 +170,9 @@
             <li><a href="#Standardizer_matrixTab">Matrix</a></li>
             <li><a href="#Standardizer_sunburstTab">Sunburst</a></li>
             <li><a href="#Standardizer_graphTab">Graph</a></li>
+            <li><a href="#Standardizer_searchTab">Search</a></li>
+            <li><a href="#Standardizer_connectionsTab">Connections</a></li>
+
 
         </ul>
 
@@ -203,11 +211,22 @@
         <div id="Standardizer_graphTab">
             <div id="Standardizer_graphDiv" class="Standardizer_graph"></div>
         </div>
+        <div id="Standardizer_searchTab">
+            search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput"
+                         onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val())">
+            <div id="Standardizer_searchResulDiv"
+                 style="display:flex;flex-direction: column;width: 500px;height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
+
+        </div>
+        <div id="Standardizer_connectionsTab">
+            <button onclick="Standardizer.getConnections()">Get Connection</button><input type="checkbox" id="Standardizer_restrictionMode">filter targetClass
+            <div id="Standardizer_connectionsDiv"></div>
+        </div>
 
     </div>
-    <div style="width:350px;heigth:800px;overflow: auto;">
+  <!--  <div style="width:350px;heigth:800px;overflow: auto;">
         <div id="Standardizer_centralJstreeDiv"></div>
 
-    </div>
+    </div>-->
 </div>
 

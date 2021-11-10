@@ -181,7 +181,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
                         variant="standard" />
                     <TextField fullWidth onChange={handleFieldUpdate("password")}
 
-                        value=""
+                        value={userModel.userForm.password}
                         id={`password`}
                         type='password'
                         label={"Password"}

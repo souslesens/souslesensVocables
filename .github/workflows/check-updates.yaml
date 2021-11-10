@@ -26,6 +26,4 @@ jobs:
     - run: npm ci
     - run: cd mainapp && npm ci && cd ..
     - run: npm run build --if-present
-    # temporary fix for https://github.com/raineorshine/npm-check-updates/issues/990
-    - run: sed -i s@\.\./\.\./package\.json@\.\./\.\./\.\./package\.json@g node_modules/npm-check-updates/build/src/bin/cli.js
     - run: npm run ncu -- -e 2

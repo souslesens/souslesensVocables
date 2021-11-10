@@ -75,7 +75,7 @@ export const defaultSource = (id: string): Source => {
         id: id,
         type: "",
         graphUri: "",
-        sparql_server: { url: "", method: "Post", headers: [] },
+        sparql_server: { url: "_default", method: "Post", headers: [] },
         editable: true,
         controller: "",
         topClassFilter: "",

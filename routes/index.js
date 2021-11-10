@@ -62,11 +62,11 @@ router.get("/users", ensureLoggedIn(), function (req, res, next) {
 });
 router.put("/users", ensureLoggedIn(), async function (req, res, next) {
     // Hash password that are not hashed yet
-    Object.keys(req.body).forEach(function(key, index) {
-        if (!req.body[key].password.startsWith("$2b$") ) {
+    Object.keys(req.body).forEach(function (key, index) {
+        if (!req.body[key].password.startsWith("$2b$")) {
             req.body[key].password = bcrypt.hashSync(req.body[key].password, 10);
         }
-    })
+    });
     // Write the file
     try {
         await promiseFs.writeFile(path.join(__dirname, "/../config/users/users.json"), JSON.stringify(req.body, null, 2));

@@ -38,7 +38,7 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         schemaType: source.schemaType ? source.schemaType : "missing schema type",
         dataSource: source.dataSource ? source.dataSource : null,
         schema: source.schema ? source.schema : null,
-        isDraft: source.isDraft ? source.isDraft : true,
+        isDraft: source.isDraft ? source.isDraft : false,
         editable: source.editable ? source.editable : true,
         color: source.color ? source.color : "default color",
         predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
@@ -144,15 +144,15 @@ export type SkosSource = CommonSource & SkosSpecificSource
 export type _Source = Knowledge_GraphSource | SkosSource
 
 export interface DataSource {
-    type: string;
+    type: string[];
     connection: string;
     dbName: string;
     table_schema: string;
     local_dictionary: LocalDictionary;
 }
 
-const defaultDataSource = {
-    type: "",
+const defaultDataSource: DataSource = {
+    type: [],
     connection: "_default",
     dbName: "",
     table_schema: "",

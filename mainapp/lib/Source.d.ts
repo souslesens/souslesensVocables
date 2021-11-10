@@ -47,23 +47,13 @@ export declare type Knowledge_GraphSource = CommonSource & DataSource;
 export declare type SkosSource = CommonSource & SkosSpecificSource;
 export declare type _Source = Knowledge_GraphSource | SkosSource;
 export interface DataSource {
-    type: string;
+    type: string[];
     connection: string;
     dbName: string;
     table_schema: string;
     local_dictionary: LocalDictionary;
 }
-declare const defaultDataSource: {
-    type: string;
-    connection: string;
-    dbName: string;
-    table_schema: string;
-    local_dictionary: {
-        table: string;
-        idColumn: string;
-        labelColumn: string;
-    };
-};
+declare const defaultDataSource: DataSource;
 interface LocalDictionary {
     table: string;
     idColumn: string;

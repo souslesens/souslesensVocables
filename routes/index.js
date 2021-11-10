@@ -48,6 +48,14 @@ router.get("/auth/check", function (req, res, next) {
     });
 });
 
+router.get("/auth/logout", function (req, res, next) {
+    req.logout();
+    res.send({
+        logged: req.user ? true : false,
+        user: req.user,
+    });
+});
+
 router.get("/users", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/users/users.json"));
 });

@@ -42,6 +42,16 @@ var authentication = (function () {
         });
     }
 
+    self.logout = function () {
+        $.ajax({
+            type: "GET",
+            url: "/auth/logout",
+            success: function (data) {
+                location.href = '/login';
+            }
+        });
+    }
+
     self.doLogin = function (callback) {
         var login = $("#loginInput").val();
         var password = $("#passwordInput").val();

@@ -33,7 +33,7 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         type: source.type ? source.type : "missing type",
         graphUri: source.graphUri ? source.graphUri : "",
         sparql_server: source.sparql_server ? source.sparql_server : defaultSource("").sparql_server,
-        controller: source.controller ? source.controller : "missing controller",
+        controller: source.controller ? source.controller : controllerDefault(source.schemaType),
         topClassFilter: source.topClassFilter ? source.topClassFilter : "missing topClassFilter",
         schemaType: source.schemaType ? source.schemaType : "missing schema type",
         dataSource: source.dataSource ? source.dataSource : null,
@@ -46,6 +46,18 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         imports: source.imports ? source.imports : []
     }
     return decodedSource
+}
+
+function controllerDefault(schemaType: string | undefined): string {
+    if (schemaType === "OWL") {
+        return "Sparql_OWL"
+    } else if (schemaType === "SKOS") {
+        return "Sparql_SKOS"
+
+    } else {
+        return "default controller"
+    }
+
 }
 
 export type Source = {

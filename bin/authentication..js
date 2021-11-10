@@ -13,7 +13,7 @@ var jsonFileStorage = require("./jsonFileStorage.js");
 var path = require("path");
 var logger = require("./logger..js");
 //var mySqlProxy = require("./mySQLproxy..js");
-//const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt');
 var async = require("async");
 var saltRounds = 10;
 
@@ -42,8 +42,17 @@ passport.use(
             if (!findUser) {
                 return cb(null, false, { message: "Incorrect username or password." });
             }
-            if (findUser.password != password) {
-                return cb(null, false, { message: "Incorrect username or password." });
+
+            // Compare hash is password is hased
+            if (findUser.password.startsWith("$2b$")) {
+                if (!bcrypt.compareSync(password, findUser.password)) {
+                    return cb(null, false, { message: "Incorrect username or password." });
+                }
+            // plain text comparaison
+            } else {
+                if (findUser.password != password) {
+                    return cb(null, false, { message: "Incorrect username or password." });
+                }
             }
 
             return cb(null, findUser);

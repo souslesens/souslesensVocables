@@ -95,7 +95,7 @@ export const defaultSource = (id: string): Source => {
         dataSource: null,
         schema: null,
         color: "",
-        isDraft: true,
+        isDraft: false,
         predicates: { broaderPredicate: "", lang: "" },
         group: "",
         imports: []

@@ -220,6 +220,11 @@ var common = (function () {
                         // do stuff...
                     });
                 }
+                if(options.onHoverNode) {
+                    $('#' + jstreeDiv).on("hover_node.jstree", function (node) {
+                        options.onHoverNode(node)
+                    });
+                }
 
 
             },
@@ -329,8 +334,13 @@ var common = (function () {
             },
 
             setTreeParentDivDimensions: function (jstreeDiv) {
+               var parentDiv=  $("#" + jstreeDiv).parent()
+                if(!parentDiv)// || parentDiv.width)
+                   return
+
 //$("#"+jstreeDiv).addClass("jstreeParent")
                 var p = $("#" + jstreeDiv).offset();
+                var p2 = $("#" + jstreeDiv).position();
                 if (p.top > 200)//in case jstreeDiv in inactive tab
                     p.top = 200
                 var h = $(window).height() - p.top - 50
@@ -339,12 +349,18 @@ var common = (function () {
                     w = 380;
                 else
                     w = 340
-                $("#" + jstreeDiv).width(w)
+                parentDiv.width(w)
+                parentDiv.height(h)
+                parentDiv.css('overflow', 'auto')
+                parentDiv.css('margin-top', '5px')
+                if (false && p.left < 600)
+                    parentDiv.css('margin-left', '-25px')
+            /*    $("#" + jstreeDiv).width(w)
                 $("#" + jstreeDiv).height(h)
                 $("#" + jstreeDiv).css('overflow', 'auto')
                 $("#" + jstreeDiv).css('margin-top', '5px')
                 if (false && p.left < 600)
-                    $("#" + jstreeDiv).css('margin-left', '-25px')
+                    $("#" + jstreeDiv).css('margin-left', '-25px')*/
 
 
             },

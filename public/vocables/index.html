@@ -175,7 +175,7 @@
 
 
                 //  $('.jstree-default').css("max-height",h-200)
-                $(".jstree").height(w - 100);
+               // $(".jstree").height(w - 100);
 
                 $("#accordion").accordion()
                 $("#accordion").accordion("option", {active: 0});
@@ -214,6 +214,13 @@
             font-family: Arial;
             overflow: hidden;
         }
+        .jstreeContainer{
+            width:100%;
+            height: 100%;
+            overflow: auto;
+
+        }
+
 
 
         .jstreeXX {
@@ -257,8 +264,8 @@
 
         .jstree-default {
             min-height: 300px !important;
-           height: 600px ;
-          overflow: auto;
+        //   height: 600px ;
+        //  overflow: auto;
         }
 
         .jstree-node {
@@ -416,8 +423,8 @@
             <h3><span class="title">Sources </span></h3>
             <div id="sourcesPanel" style="margin:5px" class='max-height'>
                 <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
-                <div id="sourcesTreeDivContainer"  style="overflow: auto" class='XXXmax-height'>
-                    <div id="sourcesTreeDiv" class="jstree"></div>
+                <div id="sourcesTreeDivContainer"  style="overflow: auto;" class='jstreeContainer XXXmax-height'>
+                    <div id="sourcesTreeDiv"> </div>
                 </div>
             </div>
 

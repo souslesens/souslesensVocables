@@ -119,13 +119,20 @@ var Lineage_classes = (function () {
             var schemaType = Config.sources[sourceLabel].schemaType
             $("#GenericTools_searchSchemaType").val(schemaType)
 
+
             propertyColors = {}
 
             Lineage_common.currentSource = sourceLabel;
             MainController.currentSource = sourceLabel
 
+            setTimeout(function () {
 
+                   var wikiUrl=Config.wiki.url+"Source "+sourceLabel
+                var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
+                $("#lineage_sourceDescriptionDiv").html(str)
+            })
         }
+
 
 
         self.jstreeContextMenu = function () {
@@ -155,22 +162,15 @@ var Lineage_classes = (function () {
 
                 }
             }
-            items.generateDictionary = {
-                label: "generateDictionary",
+            items.wikiPage = {
+                label: "Wiki page",
                 action: function (e) {
 
-                    Standardizer.generateSourceDictionary(Lineage_common.currentSource)
+                    SourceBrowser.showWikiPage(Lineage_common.currentSource)
 
                 }
             }
-            items.generateElasticIndex = {
-                label: "generate Elastic Index",
-                action: function (e) {
 
-                    Standardizer.generateElasticIndex(Lineage_common.currentSource)
-
-                }
-            }
 
 
             return items;

@@ -22,9 +22,12 @@ var Sparql_OWL = (function () {
                 options = {}
             var fromStr = ""
 
+            options.showLimit=200
+
+
             var strFilterTopConcept;
             var topClassFilter = Config.sources[sourceLabel].topClassFilter
-            if (topClassFilter)
+            if (topClassFilter && topClassFilter!="" && topClassFilter!="_default")
                 strFilterTopConcept = topClassFilter;
             else
                 strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
@@ -41,7 +44,7 @@ var Sparql_OWL = (function () {
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
-                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {" +
+                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {?topConcept rdf:type owl:Class."+
                 strFilterTopConcept +
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
@@ -60,6 +63,10 @@ var Sparql_OWL = (function () {
                     return callback(err)
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {type: "http://www.w3.org/2002/07/owl#Class"})
+               if(result.results.bindings.length>options.showLimit) {
+              alert("too many nodes .cannot show all" + options.showLimit +"/"+ result.results.bindings.length)
+                   result.results.bindings=result.results.bindings.slice(0, options.showLimit)
+               }
                 return callback(null, result.results.bindings);
             })
         }
@@ -217,7 +224,8 @@ var Sparql_OWL = (function () {
                 " select distinct *  " + fromStr + "  WHERE {{"
 
 
-            query += "?concept rdf:type ?type. "
+         //   query += "?concept rdf:type ?type. "
+            query += "?concept rdf:type owl:Class. "
             if (words) {
                 query += " ?concept rdfs:label ?conceptLabel."
             } else {

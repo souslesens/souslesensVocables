@@ -30,6 +30,7 @@ var MainController = (function () {
                 //  Config.serverUrl = serverConfig.serverUrl
                 Config.default_lang = serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
+                Config.wiki = serverConfig.wiki
                 return callback()
             },
             error: function (err) {
@@ -208,6 +209,8 @@ var MainController = (function () {
 
 
                 var group = Config.sources[sourceLabel].group
+                if(sourceLabel.indexOf("CFIHOS_READI-REMOTE")>-1)
+                    var x=3
                 if (group) {
                     var subGroups = group.split("/")
                     subGroups.forEach(function (subGroup, index) {
@@ -257,6 +260,7 @@ var MainController = (function () {
                 contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
                 withCheckboxes: withCBX,
 
+
                 selectTreeNodeFn: function (evt, obj) {
                     $("#mainDialogDiv").dialog("close");
                     if (obj.node.parent == "#") {//first level group by schema type
@@ -293,7 +297,8 @@ var MainController = (function () {
                 var openedTypes = Config.preferredSchemaType
                 if (types)
                     openedTypes = types
-                $("#" + treeDiv).jstree(true).open_all(openedTypes);
+              //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
+                $("#" + treeDiv).jstree(true).open(openedTypes);
                 if (callback)
                     return callback()
 
@@ -326,14 +331,13 @@ var MainController = (function () {
                     self.UI.initTool(obj.node.id)
 
 
-
                 }
             })
 
         }
         , initTool: function (toolId) {
             self.currentTool = toolId
-            var toolObj=Config.tools[toolId]
+            var toolObj = Config.tools[toolId]
             self.currentSource = null;
             MainController.initControllers()
             MainController.writeUserLog(authentication.currentUser, self.currentTool, "")
@@ -402,7 +406,7 @@ var MainController = (function () {
         toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display")
             Lineage_common.currentSource = null;
-            var currentCentralPanelWidth= $("#centralPanelDiv").width()
+            var currentCentralPanelWidth = $("#centralPanelDiv").width()
 
             if (!open && display == "flex") {//open->close
                 var w2 = self.UI.initialGraphDivWitdh + rightPanelWidth
@@ -415,15 +419,15 @@ var MainController = (function () {
 
 
             } else {//close->open (if not allready opened)
-               if(currentCentralPanelWidth !=self.UI.initialGraphDivWitdh) {
+                if (currentCentralPanelWidth != self.UI.initialGraphDivWitdh) {
 
-                   $("#rightPanelDiv").css("display", "flex")
-                   $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
-                   $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
-                   setTimeout(function () {
-                       visjsGraph.redraw()
-                   }, 200)
-               }
+                    $("#rightPanelDiv").css("display", "flex")
+                    $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
+                    $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
+                    setTimeout(function () {
+                        visjsGraph.redraw()
+                    }, 200)
+                }
 
 
             }

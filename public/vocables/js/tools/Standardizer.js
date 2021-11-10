@@ -22,7 +22,7 @@ var Standardizer = (function () {
            }*/
 
         MainController.UI.toogleRightPanel(true)
-        $("#rightPanelDiv").html("<div style='font-weight: bold'>Mapping taxonomy</div><div id='Standardizer_rightJstreeDiv'></div> ")
+        $("#rightPanelDiv").html("<div style='font-weight: bold'>Mapping taxonomy</div><div><div id='Standardizer_rightJstreeDiv'></div></div> ")
 
         $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
         $("#accordion").accordion("option", {active: 2});

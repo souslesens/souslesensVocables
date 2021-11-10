@@ -1019,6 +1019,13 @@ var SourceBrowser = (function () {
     }
 
 
+    self.showWikiPage=function(sourceLabel){
+        var wikiUrl= Config.wiki.url+"Source "+sourceLabel
+       // var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
+        window.open(wikiUrl, '_blank');
+    }
+
+
 
 
 

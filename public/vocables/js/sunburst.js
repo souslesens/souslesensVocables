@@ -57,7 +57,7 @@ var Sunburst = (function () {
             .attr("d", arc)
             .style("stroke", "#fff")
             .style("fill", function (d) {
-                if (!d.children && d.parent)
+                if (!d.children && !d.parent)
                     return "#ddd"
                 return color(
                     (d.children ? d : d.parent).index);

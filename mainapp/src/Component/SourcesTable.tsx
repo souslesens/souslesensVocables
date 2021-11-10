@@ -251,12 +251,29 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         label={"Top Class filter"}
                         variant="standard" />
                     </Grid>
-                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("controller")}
 
-                        value={sourceModel.sourceForm.controller}
-                        id={`controller`}
-                        label={"Controller"}
-                        variant="standard" />
+                    <Grid item xs={6}><FormControl>
+                        <InputLabel id="controller">Controller</InputLabel>
+                        <Select
+                            labelId="controller"
+                            id="controller-select"
+                            value={sourceModel.sourceForm.controller}
+                            label="select-controller"
+                            fullWidth
+                            style={{ width: '400px' }}
+
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("controller")}
+                        >
+                            {["Sparql_OWL", "Sparql_SKOS", "Sparql_INDIVIDUALS"].map(schemaType => <MenuItem
+                                key={schemaType}
+                                value={schemaType}
+
+                            >
+                                {schemaType}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
                     </Grid>
                     <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("group")}
 

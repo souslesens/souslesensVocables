@@ -26,6 +26,7 @@
 
     <div id="Standardizer_leftTab_words">
         Paste here to standardize words
+        <button onclick="Standardizer.compareWordsList()">Standardize words</button>
         <textarea id="Standardizer_wordsTA" class="Standardizer_TA"></textarea>
     </div>
 
@@ -36,16 +37,16 @@
 
     <div id="Standardizer_leftTab_source">
         <div style="margin: -5px;padding :5px">
-            <select id="Standardizer_sourcesSelect"></select>
+          <!--  <select id="Standardizer_sourcesSelect"></select>
             <button onclick="Standardizer.listSourceLabels()">List</button> <br>
-            <button onclick="Standardizer.compareSource()">Compare</button>
+            <button onclick="Standardizer.compareSource()">Compare</button>-->
 
-            <button onclick="Standardizer.compareWordsList()">Standardize words</button>
+
 
 
             <br>
             <div class="jstreeContainer" >
-                <div id="KGMappingAdvancedMappings_sourcesTree"></div>
+                <div id="Standardizer_sourcesTree"></div>
             </div>
         </div>
     </div>

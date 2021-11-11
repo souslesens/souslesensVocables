@@ -168,6 +168,8 @@ var MainController = (function () {
 
 
         showSources: function (treeDiv, withCBX, sources, types, options, callback) {
+            if(!options)
+                options={}
             var treeData = [];
             var distinctNodes = {}
 
@@ -255,13 +257,16 @@ var MainController = (function () {
 
 
             })
+            var jstreeOptions=options
+            if(!jstreeOptions.contextMenu)
+                jstreeOptions.contextMenu= MainController.UI.getJstreeConceptsContextMenu()
+            if(withCBX)
+                jstreeOptions.withCheckboxes=withCBX
 
-            common.jstree.loadJsTree(treeDiv, treeData, {
-                contextMenu: MainController.UI.getJstreeConceptsContextMenu(),
-                withCheckboxes: withCBX,
-
-
-                selectTreeNodeFn: function (evt, obj) {
+            if(!jstreeOptions.selectTreeNodeFn)
+                jstreeOptions.selectTreeNodeFn= function (evt, obj) {
+                if(! Config.sources[obj.node.id])
+                    return;
                     $("#mainDialogDiv").dialog("close");
                     if (obj.node.parent == "#") {//first level group by schema type
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
@@ -279,26 +284,26 @@ var MainController = (function () {
                         MainController.UI.onSourceSelect()
                     }
 
-                },
-                onOpenNodeFn: function (evt, obj) {
-                    if (obj.node.parent == "#") {//first level group by schema type
-                        if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
-                            if (obj.node.id == "KNOWLEDGE_GRAPH")
-                                MainController.currentSchemaType = "OWL"
-                            else
-                                MainController.currentSchemaType = obj.node.id;
-                        }
+                }
+            if(!jstreeOptions.onOpenNodeFn)
+                if(!jstreeOptions.onOpenNodeFn)
+                    jstreeOptions.onOpenNodeFn= function (evt, obj) {
+                if (obj.node.parent == "#") {//first level group by schema type
+                    if (Config.currentProfile.allowedSourceSchemas.indexOf(obj.node.id) > -1) {//schemaTypeNode
+                        if (obj.node.id == "KNOWLEDGE_GRAPH")
+                            MainController.currentSchemaType = "OWL"
+                        else
+                            MainController.currentSchemaType = obj.node.id;
                     }
-                },
-                /*  ondblclickFn:function(nodeId){
-                      var x=3
-                  }*/
-            }, function () {
+                }
+            },
+
+            common.jstree.loadJsTree(treeDiv, treeData, options ,function () {
                 var openedTypes = Config.preferredSchemaType
                 if (types)
                     openedTypes = types
               //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
-                $("#" + treeDiv).jstree(true).open(openedTypes);
+                $("#" + treeDiv).jstree(true).open_node(openedTypes);
                 if (callback)
                     return callback()
 
@@ -357,6 +362,7 @@ var MainController = (function () {
                 MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
                 if (Config.tools[self.currentTool].multiSources) {
                     self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources")
+                    if(controller.onSourceSelect)
                     controller.onSourceSelect(self.currentSource)
 
                 }
@@ -391,7 +397,8 @@ var MainController = (function () {
             self.UI.updateActionDivLabel();
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource)
             var controller = Config.tools[self.currentTool].controller
-            controller.onSourceSelect(self.currentSource)
+            if(controller.onSourceSelect)
+                controller.onSourceSelect(self.currentSource)
 
 
         },

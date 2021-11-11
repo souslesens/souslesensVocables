@@ -259,7 +259,9 @@ var visjsGraph = (function () {
             if (!$("#graphButtons").length) {
 
                 var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                  " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                 // " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                    " <div> <B>Graph</B> </div><div><button onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+
                     "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
                     "<option >standard</option>" +

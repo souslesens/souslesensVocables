@@ -21,9 +21,9 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/"
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/"
-    self.loginMode = "json";
+ self.loginMode = "json";
 
-  self.loginMode = "none";
+   self.loginMode = "none";
 
     self.appName = "VOCABLES";
     self.debug = {query: 1}
@@ -119,7 +119,7 @@ var Config = (function () {
     self.tools["ancestors"] = {label: "Genealogy", multiSources: 1, controller: Genealogy, toolDescriptionImg: null}//"images/taxonomy.png"}
 
 
-    self.tools["lineage"] = {label: "Lineage", noSource: 1, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
+    self.tools["lineage"] = {label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null}//"images/taxonomy.png"}
 
     self.tools["SPARQL"] = {
         label: "SPARQL endpoint",

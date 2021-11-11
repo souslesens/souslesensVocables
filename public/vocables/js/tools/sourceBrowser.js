@@ -68,17 +68,17 @@ var SourceBrowser = (function () {
 
     }
 
-    self.copyNode = function (event,node) {
-        if(!node)
-            node=self.currentTreeNode;
-        if(!node)
-            node= self.currentGraphNode
-        if(!node)
+    self.copyNode = function (event, node) {
+        if (!node)
+            node = self.currentTreeNode;
+        if (!node)
+            node = self.currentGraphNode
+        if (!node)
             return;
         Clipboard.copy({
                 type: "node",
-                id:node.data.id,
-                label:node.data.label,
+                id: node.data.id,
+                label: node.data.label,
                 source: node.data.source,
                 data: node.data
             },
@@ -264,11 +264,20 @@ var SourceBrowser = (function () {
             }
 
         }
-        if(authentication.currentUser.groupes.indexOf("admin") > -1) {
+        items.toDataTable = {
+            label: "export to Table",
+            action: function (e) {// pb avec source
+                Export.exportTeeToDataTable()
+
+            }
+
+        }
+        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             items = Lineage_blend.addBlendJstreeMenuItems(items);
         }
         return items;
     }
+
 
     self.openTreeNode = function (divId, sourceLabel, node, options) {
         if (!options)
@@ -418,12 +427,12 @@ var SourceBrowser = (function () {
                 if (err) {
                     MainController.UI.message(err.responseText)
                     var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
-                    jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel}})
+                    jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel,id: sourceLabel, label: text}})
                 } else {
 
                     var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
 
-                    jstreeData.push({id: sourceLabel, text: text, parent: "#", type: type, data: {source: sourceLabel}})
+                    jstreeData.push({id: sourceLabel, text: text, parent: "#", type: type, data:  {source: sourceLabel,id: sourceLabel, label: text}})
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1
@@ -679,7 +688,6 @@ var SourceBrowser = (function () {
                         var str = "<button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
 
                     }
-
 
 
                     str += "</div>"
@@ -1019,23 +1027,11 @@ var SourceBrowser = (function () {
     }
 
 
-    self.showWikiPage=function(sourceLabel){
-        var wikiUrl= Config.wiki.url+"Source "+sourceLabel
-       // var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
+    self.showWikiPage = function (sourceLabel) {
+        var wikiUrl = Config.wiki.url + "Source " + sourceLabel
+        // var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
         window.open(wikiUrl, '_blank');
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     return self;

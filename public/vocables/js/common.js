@@ -211,8 +211,8 @@ var common = (function () {
                         });
                     }
                 }
-                if(options.ondblclickFn) {
-                    $('#' + jstreeDiv+ ' a').on('dblclick', function (e) {
+                if (options.ondblclickFn) {
+                    $('#' + jstreeDiv + ' a').on('dblclick', function (e) {
                         var node = $(e.target).closest("li");
                         var type = node.attr('rel');
                         var item = node[0].id;
@@ -220,7 +220,7 @@ var common = (function () {
                         // do stuff...
                     });
                 }
-                if(options.onHoverNode) {
+                if (options.onHoverNode) {
                     $('#' + jstreeDiv).on("hover_node.jstree", function (node) {
                         options.onHoverNode(node)
                     });
@@ -334,9 +334,9 @@ var common = (function () {
             },
 
             setTreeParentDivDimensions: function (jstreeDiv) {
-               var parentDiv=  $("#" + jstreeDiv).parent()
-                if(!parentDiv)// || parentDiv.width)
-                   return
+                var parentDiv = $("#" + jstreeDiv).parent()
+                if (!parentDiv)// || parentDiv.width)
+                    return
 
 //$("#"+jstreeDiv).addClass("jstreeParent")
                 var p = $("#" + jstreeDiv).offset();
@@ -355,12 +355,12 @@ var common = (function () {
                 parentDiv.css('margin-top', '5px')
                 if (false && p.left < 600)
                     parentDiv.css('margin-left', '-25px')
-            /*    $("#" + jstreeDiv).width(w)
-                $("#" + jstreeDiv).height(h)
-                $("#" + jstreeDiv).css('overflow', 'auto')
-                $("#" + jstreeDiv).css('margin-top', '5px')
-                if (false && p.left < 600)
-                    $("#" + jstreeDiv).css('margin-left', '-25px')*/
+                /*    $("#" + jstreeDiv).width(w)
+                    $("#" + jstreeDiv).height(h)
+                    $("#" + jstreeDiv).css('overflow', 'auto')
+                    $("#" + jstreeDiv).css('margin-top', '5px')
+                    if (false && p.left < 600)
+                        $("#" + jstreeDiv).css('margin-left', '-25px')*/
 
 
             },
@@ -389,6 +389,10 @@ var common = (function () {
             openNode: function (jstreeDiv, nodeId) {
                 $("#" + jstreeDiv).jstree().open_node(nodeId)
             }
+
+
+
+
         }
 
 

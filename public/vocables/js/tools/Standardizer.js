@@ -5,6 +5,9 @@ var Standardizer = (function () {
     self.mode = "matrix";
     self.indexSourcesMap = {}
 
+    self.onSourceSelect=function(){
+
+    }
     self.onLoaded = function () {
         //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
         $("#actionDiv").html("")
@@ -33,7 +36,12 @@ var Standardizer = (function () {
             self.initSourcesIndexesList(null, function (err, sources) {
                 if (err)
                     return MainController.UI.message(err)
-                MainController.UI.showSources("KGMappingAdvancedMappings_sourcesTree", true, sources);
+
+                var options={
+                    contextMenu:Standardizer.getSourcesJstreeContextMenu(),
+                    selectTreeNodeFn:Standardizer.onselectSourcesTreeNodeFn
+                }
+                MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL"],options );
                 sources.sort()
 
                 var candidateEntities = sources
@@ -50,7 +58,7 @@ var Standardizer = (function () {
                 common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value")
                 KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
 
-                common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
+             //   common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
 
 
             })
@@ -249,9 +257,10 @@ var Standardizer = (function () {
     }
 
     self.getSelectedIndexes = function () {
-        var sources = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
+        var sources = $('#Standardizer_sourcesTree').jstree(true).get_checked();
         var indexes = []
-        var sourceIndex = $("#Standardizer_sourcesSelect").val();
+      //  var sourceIndex = $("#Standardizer_sourcesSelect").val();
+        var sourceIndex = self.currentSource;
 
         sources.forEach(function (source) {
             if (!Config.sources[source] || !Config.sources[source].schemaType)
@@ -488,11 +497,11 @@ var Standardizer = (function () {
     }
 
 
-    self.compareSource = function () {
+    self.compareSource = function (source) {
         if (self.isWorking)
             return alert(" busy !")
         self.matrixDivsMap = {}
-        var source = $("#Standardizer_sourcesSelect").val();
+     //   var source = $("#Standardizer_sourcesSelect").val();
         if (!source || source == "")
             return alert("select a source");
         var index = source.toLowerCase()
@@ -779,7 +788,8 @@ var Standardizer = (function () {
         if (!size)
             size = 1000
         if (!source) {
-            source = $("#Standardizer_sourcesSelect").val();
+         //   source = $("#Standardizer_sourcesSelect").val();
+            source=self.currentSource
             if (!source || source == "")
                 return alert("select a source");
         }
@@ -1544,6 +1554,22 @@ var Standardizer = (function () {
             $("#Standardizer_connectionsDiv").html(html)
         })
     }
+
+    self.getSourcesJstreeContextMenu=function(){
+        var items = {}
+
+
+        items.nodeInfos = {
+            label: "Compare",
+            action: function (e) {// pb avec source
+                Standardizer.compareSource(self.currentSource)
+            }
+        }
+        return items;
+    }
+      self.onselectSourcesTreeNodeFn=function(event,obj){
+          self.currentSource=obj.node.id
+      }
 
     return self;
 })

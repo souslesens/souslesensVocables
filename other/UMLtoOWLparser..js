@@ -15,7 +15,7 @@ var currentParent;
 var currentAttr;
 var currentX;
 
-var parseOSDU = function (sourcePath, targetPath,callback) {
+var parseOSDU = function (sourcePath, targetPath, callback) {
     var saxStream = sax.createStream(false);
     var distinctNodeNames = {};
     var distinctAttrNames = {};
@@ -152,7 +152,7 @@ var parseOSDU = function (sourcePath, targetPath,callback) {
         fs.writeFileSync(targetPath + "Nodes.csv", JSON.stringify(distinctNodeNames, null, 2));
 
         fs.writeFileSync(targetPath, JSON.stringify(json, null, 2));
-        callback()
+        callback();
     });
     fs.createReadStream(sourcePath).pipe(saxStream);
 };
@@ -468,15 +468,6 @@ var graphUri = "http://souslesens.org/pdms/ontology/";
 var sourcePath = "D:\\NLP\\ontologies\\OSDU\\OSDU.xmi";
 var graphUri = "http://souslesens.org/osduX/ontology/";
 
-
-
-
-
-
-
-
-
-
 var sourcePath = "D:\\NLP\\ontologies\\workOrder\\sappm.xml";
 var graphUri = "http://souslesens.org/workorder/sappm/";
 
@@ -486,13 +477,11 @@ var graphUri = "http://souslesens.org/workorder/myroute/";
 var sourcePath = "D:\\NLP\\ontologies\\workOrder\\maintenance&inspection.xml";
 var graphUri = "http://souslesens.org/workorder/maintenance_inspection/";
 
-
 var sourcePath = "D:\\NLP\\ontologies\\workOrder\\logistics&operationalsupport.xml";
 var graphUri = "http://souslesens.org/workorder/logistics_operationalsupport/";
 
 var jsonPath = sourcePath + ".json";
 
-parseOSDU(sourcePath, jsonPath,function(){
+parseOSDU(sourcePath, jsonPath, function () {
     buildOwl(jsonPath, graphUri);
 });
-

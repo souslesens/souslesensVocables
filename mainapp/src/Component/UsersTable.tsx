@@ -183,6 +183,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
                         value={userModel.userForm.password}
                         id={`password`}
+                        type='password'
                         label={"Password"}
                         variant="standard" />
                     <FormControl>

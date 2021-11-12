@@ -7,48 +7,50 @@ var Export = (function () {
     self.currentSource = null
 
 
-    self.exportGraphToDataTable=function(){
-        var nodes=visjsGraph.data.nodes.get()
-        var edges=visjsGraph.data.edges.get();
+    self.exportGraphToDataTable = function () {
+        var nodes = visjsGraph.data.nodes.get()
+        var edges = visjsGraph.data.edges.get();
 
-        var root={}
+        var root = {}
 
-        var nodesFromMap={}
-        edges.forEach(function(edge){
-            if(!nodesFromMap[edge.from])
-                nodesFromMap[edge.from]=[]
+        var nodesFromMap = {}
+        edges.forEach(function (edge) {
+            if (!nodesFromMap[edge.from])
+                nodesFromMap[edge.from] = []
             nodesFromMap[edge.from].push(edge)
 
         })
 
-        var topNodes=[]
-        var nodesMap={}
-        nodes.forEach(function(node){
-        if(node.id.indexOf("_cluster")>-1) {
-            node.data.cluster.forEach(function (item, index) {
+        var topNodes = []
+        var nodesMap = {}
+        nodes.forEach(function (node) {
+            if (node.id.indexOf("_cluster") > -1) {
+                node.data.cluster.forEach(function (item, index) {
 
-                nodesFromMap[item.child]=[{from:item.child,to:item.concept}]
-                var toClusterParent=nodesFromMap[node.id]
-                nodesFromMap[item.concept].push(toClusterParent)
-                delete  nodesFromMap[node.id]
-            })
+                    nodesFromMap[item.child] = [{from: item.child, to: item.concept}]
+                    var toClusterParent = nodesFromMap[node.id]
+                    nodesFromMap[item.concept].push(toClusterParent)
+                    delete nodesFromMap[node.id]
+                })
 
-        }
-            nodesMap[node.id]=node
-            if(!nodesFromMap[node.id])
+            }
+            nodesMap[node.id] = node
+            if (!nodesFromMap[node.id])
                 topNodes.push(node)
         })
-        var uniqueNodes={}
-        function  recurse(node){
+        var uniqueNodes = {}
 
+        function recurse(node) {
 
-            edges.forEach(function(edge) {
+            if (!node.id)
+                return
+            edges.forEach(function (edge) {
 
-                if(edge.to==node.id){
-                    if(!node.children)
-                        node.children=[]
-                    if(!uniqueNodes[edge.from]) {
-                        uniqueNodes[edge.from]=1
+                if (edge.to == node.id) {
+                    if (!node.children)
+                        node.children = []
+                    if (!uniqueNodes[edge.from]) {
+                        uniqueNodes[edge.from] = 1
                         node.children.push(nodesMap[edge.from])
                         recurse(nodesMap[edge.from], node.children)
 
@@ -60,22 +62,22 @@ var Export = (function () {
         }
 
 
-
-        var tree={id:"#",children:[]}
-        topNodes.forEach(function(node){
-          recurse(node);
+        var tree = {id: "#", children: []}
+        topNodes.forEach(function (node) {
+            recurse(node);
             tree.children.push(node)
 
 
         })
 
-        var result=[]
+        var result = []
+
         function flat(data, prev = '') {
             if (Array.isArray(data)) {
                 data.forEach(e => flat(e, prev))
             } else {
                 prev = prev + (prev.length ? '|' : '') + data.id;
-                if (!data.children ||!data.children.length) {
+                if (!data.children || !data.children.length) {
                     // result.push(prev)
                     result.push(prev.split('|'))//.map(Number))
                 } else
@@ -84,32 +86,8 @@ var Export = (function () {
         }
 
         flat(tree)
-        var flatNodesArray=result;
-
-
-        var cols = [];
-        var dataSet = [];
-        var colsMax=0
-        flatNodesArray.forEach(function(item) {
-            var line = []
-            item.forEach(function (id) {
-                var obj = nodesMap[id]
-                if(obj && obj.data) {
-                    line.push(obj.data.id)
-                    line.push(obj.data.label)
-                }
-
-            })
-            colsMax=Math.max(colsMax,line.length)
-            dataSet.push(line)
-        })
-
-        for(var i=0;i<colsMax/2;i++){
-            cols.push({title:"Uri_"+i, defaultContent: ""})
-            cols.push({title:"Label_"+i, defaultContent: ""})
-        }
-
-        self.showDataTable(cols,dataSet)
+        var data = self.prepareDataSet(result,nodesMap);
+        self.showDataTable(data.cols, data.dataSet)
 
 
     }
@@ -119,10 +97,10 @@ var Export = (function () {
         if (!jstreeDiv)
             jstreeDiv = SourceBrowser.currentTargetDiv
         if (!nodeId)
-            nodeId =SourceBrowser.currentTreeNode?SourceBrowser.currentTreeNode.id : "#"
+            nodeId = SourceBrowser.currentTreeNode ? SourceBrowser.currentTreeNode.id : "#"
         if (!nodeId)
-            nodeId ="#"
-      //  var data = common.jstree.toTableData(jstreeDiv,nodeId)
+            nodeId = "#"
+        //  var data = common.jstree.toTableData(jstreeDiv,nodeId)
 
         var tree = $('#' + jstreeDiv).jstree(true).get_json(nodeId, {flat: false});
         var nodesMap = {}
@@ -150,13 +128,17 @@ var Export = (function () {
         }
 
         flat(tree)
-        var nodesArray=result;
+      //  var nodesArray = result;
 
+        var data = self.prepareDataSet(result,nodesMap);
+        self.showDataTable(data.cols, data.dataSet)
+
+        return
 
         var cols = [];
         var dataSet = [];
-        var colsMax=0
-        nodesArray.forEach(function(item) {
+        var colsMax = 0
+        nodesArray.forEach(function (item) {
             var line = []
             item.forEach(function (id) {
                 var obj = nodesMap[id]
@@ -164,23 +146,56 @@ var Export = (function () {
                 line.push(obj.data.label)
 
             })
-            colsMax=Math.max(colsMax,line.length)
+            colsMax = Math.max(colsMax, line.length)
             dataSet.push(line)
         })
 
-        for(var i=0;i<colsMax/2;i++){
-            cols.push({title:"Uri_"+i, defaultContent: ""})
-            cols.push({title:"Label_"+i, defaultContent: ""})
+        for (var i = 0; i < colsMax / 2; i++) {
+            cols.push({title: "Uri_" + i, defaultContent: ""})
+            cols.push({title: "Label_" + i, defaultContent: ""})
         }
 
 
-        self.showDataTable(cols,dataSet)
+        self.showDataTable(cols, dataSet)
 
 
     }
 
+    self.prepareDataSet = function (flatNodesArray,nodesMap) {
 
 
+        var cols = [];
+        var dataSet = [];
+        var colsMax = 0
+        flatNodesArray.forEach(function (item) {
+            var line = []
+            var line2 = []
+            item.forEach(function (id) {
+                var obj = nodesMap[id]
+                if (obj && obj.data) {
+var label=obj.data.label
+                    if(label=='any'){
+                        label=obj.data.id
+                    }
+                    line.push(label)
+                    line2.push(obj.data.id)
+                }
+            })
+            colsMax = Math.max(colsMax, line.length)
+            line = line.concat(line2)
+
+            dataSet.push(line)
+
+        })
+
+        for (var i = 1; i <= colsMax; i++) {
+            cols.push({title: "Label_" + i, defaultContent: ""})
+        }
+        for (var i = 1; i <= colsMax; i++) {
+            cols.push({title: "Uri_" + i, defaultContent: ""})
+        }
+        return {cols:cols,dataSet:dataSet}
+    }
 
 
     self.showDataTable = function (cols, dataSet) {

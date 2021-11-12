@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  p
+  .modal-dialog
+      .modal-content
+        // Modal Header
+        .modal-header
+          h4#myModalLabel.modal-title
+            | Login
+        // Modal Body
+        .modal-body
+          form(role='form' method='POST' action='/auth/login')
+            div.form-group
+              label(for='username') Username:
+              input#username.form-control(type='text', placeholder='username' name='username', value="")
+            div.form-group
+              label(for='password') Password:
+              input#password.form-control(type='password', placeholder='password' name='password', value="")
+            button.btn.btn-primary(type="submit", name="asdf") Submit
+      if hasMessages
+        br
+        each msg in messages
+          div.alert.alert-danger(role="alert")= msg

@@ -489,6 +489,9 @@ var MainController = (function () {
         copyCurrentQuery: function () {
             common.copyTextToClipboard(Sparql_proxy.currentQuery)
 
+        },
+        logout: function () {
+            console.log("logout");
         }
     }
 

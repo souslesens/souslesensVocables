@@ -133,7 +133,8 @@
 
     <script src="js/elasticSearchProxy.js"></script>
 
-    <script src="js/treemap.js"></script>
+    <script src="js/external/d3/d3.v3.min.js"></script>
+    <script src="js/sunburst.js"></script>
 
 
     <!--  <script src="js/authentification.js"></script>-->
@@ -166,6 +167,7 @@
                 h = Math.min(h, 1000)
                 // $("#centralPanel").width(w)
                 $("#graphDiv").width(w)
+                MainController.UI.initialGraphDivWitdh=w
                 $("#graphDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
@@ -174,7 +176,7 @@
 
 
                 //  $('.jstree-default').css("max-height",h-200)
-                $(".jstree").height(w - 100);
+               // $(".jstree").height(w - 100);
 
                 $("#accordion").accordion()
                 $("#accordion").accordion("option", {active: 0});
@@ -213,6 +215,13 @@
             font-family: Arial;
             overflow: hidden;
         }
+        .jstreeContainer{
+            width:100%;
+            height: 100%;
+            overflow: auto;
+
+        }
+
 
 
         .jstreeXX {
@@ -243,7 +252,7 @@
         }
 
         .ui-accordion-content-active {
-            margin-left: -30px !important;
+            margin-left: -10px !important;
             overflow: hidden;
 
 
@@ -256,8 +265,8 @@
 
         .jstree-default {
             min-height: 300px !important;
-           height: 600px ;
-          overflow: auto;
+        //   height: 600px ;
+        //  overflow: auto;
         }
 
         .jstree-node {
@@ -366,6 +375,9 @@
             border-style: solid !important;
             border-color: #b8a587 !important;
         }
+        .ui-widget-content{
+            padding:5px !important;
+        }
 
 
 
@@ -393,7 +405,7 @@
     <button style="justify-content: right" id="showBlenderButton" style="display: none" onclick="Blender.onLoaded()">Blender</button>
     <button style="justify-content: right" id="rightPanelToogleButton" style="display: none" onclick="MainController.UI.toogleRightPanel()">R</button>
     <button style="justify-content: right" id="ontoEdit" style="display: block" onclick="OwlEditor.loadUI()">OntoEdit</button>
-    <button style="justify-content: right" id="testButton" style="display: block" onclick="TreeMap.draw2(TreeMap.flare2)">test</button>
+    <button style="justify-content: right" id="testButton" style="display: block" onclick="TreeMap.draw2(TreeMap.treemapSLSV)">test</button>
     <button onclick="MainController.UI.copyCurrentQuery()">cpQy</button>
     <span style='margin-right:1px; display:inline-block;'>&nbsp;</span>
     <button onclick="authentication.logout()">Logout</button>
@@ -417,14 +429,14 @@
             <h3><span class="title">Sources </span></h3>
             <div id="sourcesPanel" style="margin:5px" class='max-height'>
                 <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
-                <div id="sourcesTreeDivContainer">
-                    <div class='max-height' id="sourcesTreeDiv" class="jstree"></div>
+                <div id="sourcesTreeDivContainer"  style="overflow: auto;" class='jstreeContainer XXXmax-height'>
+                    <div id="sourcesTreeDiv"> </div>
                 </div>
             </div>
 
 
 
-            <h3><span class="title" id="sourcePanelLabel"> </span></h3>
+            <h3><span class="title" id="toolPanelLabel"> </span></h3>
             <div id="toolPanelDiv" style="margin:5px" class='max-height'>
                 <div id="actionDivContolPanelDiv"></div>
                 <div id="actionDiv" class="jstree"></div>

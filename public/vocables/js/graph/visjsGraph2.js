@@ -252,14 +252,16 @@ var visjsGraph = (function () {
 
         var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button onclick='visjsGraph.saveGraph()'>Save </button>" +
             "Load<select style='width: 100px' id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>" +
-            "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>addToCurrentGraph</div>"
+            "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>add</div><div id='VisJsGraph_message'></div>"
 
 
         if (true) {
             if (!$("#graphButtons").length) {
 
                 var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                  " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                 // " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                    " <div> <B>Graph</B> </div><div><button onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+
                     "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
                     "<option >standard</option>" +
@@ -826,6 +828,10 @@ var visjsGraph = (function () {
 
     }
 
+    self.message=function (message){
+        $("#VisJsGraph_message").html(message)
+    }
+
     self.loadGraph = function (fileName) {
         if (!self.currentContext)
             return;
@@ -839,6 +845,8 @@ var visjsGraph = (function () {
             dir: "graphs",
             fileName: fileName
         }
+
+        self.message("Loading Graph...")
         $.ajax({
             type: "POST",
             url: Config.serverUrl,
@@ -873,6 +881,7 @@ var visjsGraph = (function () {
                 if (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0) {
                     self.data.nodes.add(visjsData.nodes)
                     self.data.edges.add(visjsData.edges)
+                    self.message("")
 
                 } else {
                     //functions
@@ -883,6 +892,7 @@ var visjsGraph = (function () {
                         }
                     }
                     self.draw(context.divId, visjsData, context.options, context.callback)
+                    self.message("")
                 }
 
 

@@ -476,11 +476,11 @@ var KGbrowserGraph = (function () {
                 }
                 var from = objId
                 var to = self.currentGraphNode.data.id;
-                if (self.currentExpandingNode.data.inverse == "true") {
+             /*   if (self.currentExpandingNode.data.inverse == "true") {
                     var from = self.currentGraphNode.data.id;
                     var to = objId
 
-                }
+                }*/
                 var edgeId = from + "_" + to;
 
                 if (!existingNodes[edgeId]) {

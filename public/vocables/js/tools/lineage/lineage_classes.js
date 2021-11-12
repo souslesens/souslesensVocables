@@ -34,12 +34,13 @@ var Lineage_classes = (function () {
         self.maxChildrenDrawn = 30;
         self.soucesLevelMap = {}
         self.mainSource = null;
-        self.isLoaded=false
+        self.isLoaded = false
+        self.currentExpandLevel = 1
 
         self.onLoaded = function () {
-            if(self.isLoaded)
+            if (self.isLoaded)
                 return;
-            self.isLoaded=true
+            self.isLoaded = true
             $("#sourceDivControlPanelDiv").html("")
             Lineage_common.currentSource = null;
             MainController.UI.message("");
@@ -127,12 +128,11 @@ var Lineage_classes = (function () {
 
             setTimeout(function () {
 
-                   var wikiUrl=Config.wiki.url+"Source "+sourceLabel
+                var wikiUrl = Config.wiki.url + "Source " + sourceLabel
                 var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
                 $("#lineage_sourceDescriptionDiv").html(str)
             })
         }
-
 
 
         self.jstreeContextMenu = function () {
@@ -172,7 +172,6 @@ var Lineage_classes = (function () {
             }
 
 
-
             return items;
 
         }
@@ -203,7 +202,7 @@ var Lineage_classes = (function () {
 
 
         self.drawTopConcepts = function (source, addToGraph) {
-
+            self.currentExpandLevel = 1
             if (!addToGraph) {
                 self.initUI();
 
@@ -213,7 +212,7 @@ var Lineage_classes = (function () {
                     return;
             }
 
-            if(! Config.sources[source])
+            if (!Config.sources[source])
                 return
             Lineage_common.currentSource = source;
             self.soucesLevelMap[source] = {children: 0}
@@ -239,21 +238,26 @@ var Lineage_classes = (function () {
                 shape: "box",
                 size: Lineage_classes.defaultShapeSize,
                 color: self.getSourceColor(source),
+                level: 1,
 
             }
             visjsData.nodes.push(sourceNode)
             if (imports) {
+
                 imports.forEach(function (importedSource) {
                     var graphUri = Config.sources[importedSource].graphUri
                     var color = self.getSourceColor(importedSource)
                     if (!graphUri)
                         return;
+
                     var importedSourceNode = {
                         id: importedSource,
                         label: importedSource,
                         shape: "box",
+                        level: 1,
                         size: Lineage_classes.defaultShapeSize,
                         color: color
+
                     }
                     importGraphUrisMap[graphUri] = importedSource
 
@@ -279,7 +283,7 @@ var Lineage_classes = (function () {
             if (imports)
                 allSources = allSources.concat(imports)
 
-
+            self.currentExpandLevel += 1
             async.eachSeries(allSources, function (source, callbackEach) {
                 var depth = parseInt($("#Lineage_topDepth").val())
                 var sourceConfig = Config.sources[source]
@@ -312,6 +316,7 @@ var Lineage_classes = (function () {
                                 shape: shape,
                                 color: self.getSourceColor(source, item.topConcept.value),
                                 size: Lineage_classes.defaultShapeSize,
+                                level: self.currentExpandLevel,
                                 data: {
                                     source: source,
                                     label: item.topConceptLabel.value,
@@ -396,10 +401,9 @@ var Lineage_classes = (function () {
             if (source == "")
                 return alert("select a source");
             var sourceNodes = self.getGraphIdsFromSource(source)
-            self.addChildrenToGraph(source,sourceNodes)
+            self.addChildrenToGraph(source, sourceNodes)
 
         }
-
 
 
         self.listClusterToClipboard = function (clusterNode) {
@@ -446,23 +450,25 @@ var Lineage_classes = (function () {
             }
 
             var color = self.getSourceColor(clusterNode.data.source)
-            var visjsData={nodes:[],edges:[]}
-            var existingNodes=visjsGraph.getExistingIdsMap()
-            clusterNode.data.cluster.forEach(function(item){
-                if(!existingNodes[item.child]){
-                    existingNodes[item.child]=1
+            var visjsData = {nodes: [], edges: []}
+            var existingNodes = visjsGraph.getExistingIdsMap()
+            clusterNode.data.cluster.forEach(function (item) {
+                if (!existingNodes[item.child]) {
+                    existingNodes[item.child] = 1
                     visjsData.nodes.push({
-                        id:item.child,
-                        label:item.childLabel,
+                        id: item.child,
+                        label: item.childLabel,
                         shape: Lineage_classes.defaultShape,
                         size: Lineage_classes.defaultShapeSize,
                         color: color,
-                        data:{ id:item.child,
-                            label:item.childLabel,
-                        source:clusterNode.data.source}
+                        data: {
+                            id: item.child,
+                            label: item.childLabel,
+                            source: clusterNode.data.source
+                        }
                     })
 
-                    var edgeId=item.child+"_"+item.concept;
+                    var edgeId = item.child + "_" + item.concept;
                     visjsData.edges.push({
                         id: edgeId,
                         from: item.child,
@@ -485,7 +491,7 @@ var Lineage_classes = (function () {
         }
 
 
-        self.drawSimilarsNodes = function (similarType,node, sources, descendantsAlso) {
+        self.drawSimilarsNodes = function (similarType, node, sources, descendantsAlso) {
             MainController.UI.message("")
             //    $("#Lineage_toSource").val("")
 
@@ -811,7 +817,6 @@ var Lineage_classes = (function () {
         }
 
 
-
         self.graphNodeNeighborhood = function (nodeData, propFilter) {
             /*    var sourceOptions=Config.sources[Lineage_common.currentSource].options;
                 if(sourceOptions && sourceOptions.graphPropertiesFilterRegex)
@@ -1033,7 +1038,7 @@ var Lineage_classes = (function () {
 
         }
 
-        self.addParentsToGraph = function (source,nodeIds) {
+        self.addParentsToGraph = function (source, nodeIds) {
 
             if (!nodeIds) {
                 if (!source)
@@ -1045,78 +1050,68 @@ var Lineage_classes = (function () {
             }
             MainController.UI.message("");
 
-        //    var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
+            //    var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
 
 
-          var sources=[source]
+            var sources = [source]
 
 
+            Sparql_generic.getNodeParents(source, null, nodeIds, 2, {exactMatch: 1}, function (err, result) {
+                    if (err)
+                        return callbackEach(err)
+                    var map = [];
+                    var ids = [];
 
-                    Sparql_generic.getNodeParents(source, null, nodeIds, 2, {exactMatch: 1}, function (err, result) {
-                        if (err)
-                            return callbackEach(err)
-                        var map = [];
-                        var ids = [];
+                    if (result.length == 0) {
 
-                        if (result.length == 0) {
+                        $("#waitImg").css("display", "none");
+                        return MainController.UI.message("No data found")
 
-                            $("#waitImg").css("display", "none");
-                            return MainController.UI.message("No data found")
+                    }
 
+                    var color = self.getSourceColor(source)
+
+                    var existingNodes = visjsGraph.getExistingIdsMap()
+                    var visjsData = {nodes: [], edges: []}
+                    var shape = self.defaultShape
+                    result.forEach(function (item) {
+                        if (item.broader1) {
+                            if (!existingNodes[item.broader1.value]) {
+                                existingNodes[item.broader1.value] = 1
+                                var node = {
+                                    id: item.broader1.value,
+                                    label: item.broader1Label.value,
+                                    shape: shape,
+                                    color: self.getSourceColor(source, item.broader1.value),
+                                    size: Lineage_classes.defaultShapeSize,
+                                    data: {
+                                        source: source,
+                                        label: item.broader1Label.value,
+                                        id: item.broader1.value
+                                    },
+                                }
+                                visjsData.nodes.push(node)
+                            }
+                            //link node to source
+
+                            if (item.broader1.value != source) {
+                                var edgeId = item.concept.value + "_" + item.broader1.value
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    var edge = {
+                                        id: edgeId,
+                                        from: item.concept.value,
+                                        to: item.broader1.value
+                                    }
+                                    visjsData.edges.push(edge)
+                                }
+                            }
                         }
 
-                        var color = self.getSourceColor(source)
 
-                        var existingNodes = visjsGraph.getExistingIdsMap()
-                        var visjsData = {nodes: [], edges: []}
-                        var shape = self.defaultShape
-                        result.forEach(function (item) {
-                            if (item.broader1) {
-                                if (!existingNodes[item.broader1.value]) {
-                                    existingNodes[item.broader1.value] = 1
-                                    var node = {
-                                        id: item.broader1.value,
-                                        label: item.broader1Label.value,
-                                        shape: shape,
-                                        color: self.getSourceColor(source, item.broader1.value),
-                                        size: Lineage_classes.defaultShapeSize,
-                                        data: {
-                                            source: source,
-                                            label: item.broader1Label.value,
-                                            id: item.broader1.value
-                                        },
-                                    }
-                                    visjsData.nodes.push(node)
-                                }
-                                //link node to source
-
-                                if (item.broader1.value != source) {
-                                    var edgeId = item.concept.value + "_" + item.broader1.value
-                                        if (!existingNodes[edgeId]) {
-                                            existingNodes[edgeId] = 1
-                                            var edge = {
-                                                id: edgeId,
-                                                from: item.concept.value,
-                                                to: item.broader1.value
-                                            }
-                                            visjsData.edges.push(edge)
-                                        }
-                                    }
-                                }
-
-
-
-
-
-
-
-
-                        })
-                        visjsGraph.data.nodes.add(visjsData.nodes)
-                        visjsGraph.data.edges.add(visjsData.edges)
-
-
-
+                    })
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
 
 
                 }, function (err) {
@@ -1130,7 +1125,7 @@ var Lineage_classes = (function () {
             )
 
         }
-        self.addChildrenToGraph = function ( source,nodeIds) {
+        self.addChildrenToGraph = function (source, nodeIds) {
             var parentIds
             if (!source) {
                 if (Lineage_common.currentSource)
@@ -1176,7 +1171,12 @@ var Lineage_classes = (function () {
 
                     if (!map[item.concept.value])
                         map[item.concept.value] = []
-                    map[item.concept.value].push({concept:item.concept.value, conceptLabel:item.conceptLabel.value,child:item.child1.value,childLabel:item.child1Label.value})
+                    map[item.concept.value].push({
+                        concept: item.concept.value,
+                        conceptLabel: item.conceptLabel.value,
+                        child: item.child1.value,
+                        childLabel: item.child1Label.value
+                    })
                     ids.push(item.child1.value)
 
 
@@ -1185,7 +1185,7 @@ var Lineage_classes = (function () {
 
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 var visjsData = {nodes: [], edges: []}
-
+                self.currentExpandLevel += 1
                 var expandedLevel = []
                 for (var key in map) {
 
@@ -1204,6 +1204,7 @@ var Lineage_classes = (function () {
                                 size: Lineage_classes.defaultShapeSize,
                                 value: map[key].length,
                                 color: color,
+                                level: self.currentExpandLevel,
                                 data: {
                                     cluster: map[key],
                                     id: key + "_cluster",
@@ -1263,6 +1264,7 @@ var Lineage_classes = (function () {
                                     label: item.childLabel,
                                     shape: shape,
                                     size: shapeSize,
+                                    level: self.currentExpandLevel,
                                     color: self.getSourceColor(nodeSource, item.id),
 
                                     data: data
@@ -1318,7 +1320,7 @@ var Lineage_classes = (function () {
             if (!options) {
                 options = {}
             }
-
+            self.currentExpandLevel += 1
             if (!propertyId) {
                 //  propertyId = $("#lineage_individualsPropertiesSelect").val()
                 propertyId = $("#lineage_individualsPropertiesTree").jstree(true).get_selected()
@@ -1380,6 +1382,7 @@ var Lineage_classes = (function () {
                             label: item.subjectLabel.value,
                             font: {color: color},
                             shape: "dot",
+                            level: self.currentExpandLevel,
                             size: Lineage_classes.defaultShapeSize,
                             color: "#ddd",
                             data: {source: source}
@@ -1399,6 +1402,7 @@ var Lineage_classes = (function () {
                             label: item.objectLabel.value,
                             font: {color: color},
                             shape: "dot",
+                            level: self.currentExpandLevel,
                             size: Lineage_classes.defaultShapeSize,
                             color: "#ddd",
                             data: {source: source}
@@ -1449,7 +1453,7 @@ var Lineage_classes = (function () {
 
         }
 
-        self.drawObjectProperties = function (source,classIds, descendantsAlso) {
+        self.drawObjectProperties = function (source, classIds, descendantsAlso) {
             if (!classIds) {
                 if (!source)
                     source = Lineage_common.currentSource
@@ -1472,7 +1476,7 @@ var Lineage_classes = (function () {
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 var color = self.getSourceColor(source)
-
+                self.currentExpandLevel += 1
                 result.forEach(function (item) {
 
                     if (!item.range) {
@@ -1489,6 +1493,7 @@ var Lineage_classes = (function () {
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: self.getSourceColor(source, item.range.value),
+                            level:  self.currentExpandLevel,
                             data: {
                                 source: source,
                                 id: item.range.value,
@@ -1542,12 +1547,11 @@ var Lineage_classes = (function () {
                 $("#waitImg").css("display", "none");
 
 
-
             })
 
         }
 
-        self.drawRestrictions = function (source,classIds, descendants) {
+        self.drawRestrictions = function (source, classIds, descendants) {
 
             if (!classIds) {
                 if (!source)
@@ -1571,20 +1575,20 @@ var Lineage_classes = (function () {
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 var color = self.getSourceColor(source)
                 //  console.log(JSON.stringify(result, null, 2))
+               self.currentExpandLevel+=1
                 result.forEach(function (item) {
-                    var shape= Lineage_classes.defaultShape;
-                    var size=Lineage_classes.defaultShapeSize
+                    var shape = Lineage_classes.defaultShape;
+                    var size = Lineage_classes.defaultShapeSize
                     var color
                     var size = Lineage_classes.defaultShapeSize
                     if (!item.value) {
                         color = "#ddd"
                         item.value = {value: "?_" + item.prop.value}
                         item.valueLabel = {value: "any"}
-                        shape="text"
+                        shape = "text"
                         size = 3
-                    }
-                    else{
-                        color =self.getSourceColor(source, item.value.value);
+                    } else {
+                        color = self.getSourceColor(source, item.value.value);
                     }
                     if (!item.valueLabel) {
                         item.valueLabel = {value: ""}
@@ -1598,6 +1602,7 @@ var Lineage_classes = (function () {
                             shape: shape,
                             size: size,
                             color: color,
+                            level:  self.currentExpandLevel,
                             data: {
                                 source: source,
                                 id: item.value.value,
@@ -1614,10 +1619,10 @@ var Lineage_classes = (function () {
 
                         visjsData.edges.push({
                             id: edgeId,
-                            from:item.value.value,
-                            to: item.concept.value ,
+                            from: item.value.value,
+                            to: item.concept.value,
                             label: "<i>" + item.propLabel.value + "</i>",
-                            data: {propertyId: item.prop.value,  bNodeId:item.node.value, source: source},
+                            data: {propertyId: item.prop.value, bNodeId: item.node.value, source: source},
                             font: {multi: true, size: 10},
                             // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
                             //   physics:false,
@@ -1741,7 +1746,7 @@ var Lineage_classes = (function () {
             })
         }
 
-        self.removeLastChildrenFromGraph = function (nodeId) {
+        self.collapseNode = function (nodeId) {
 
 
             if (nodeId) {
@@ -2051,7 +2056,7 @@ var Lineage_classes = (function () {
                     }
                 }
                 if (options.dbleClick) {
-                    Lineage_classes.addChildrenToGraph( self.currentGraphNode.data.source,[self.currentGraphNode.id],)
+                    Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],)
                 }
 
 
@@ -2059,18 +2064,18 @@ var Lineage_classes = (function () {
 
             expand: function () {
 
-                Lineage_classes.addChildrenToGraph( self.currentGraphNode.data.source,[self.currentGraphNode.id],)
+                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],)
             },
             drawParents: function () {
-                Lineage_classes.addParentsToGraph( self.currentGraphNode.data.source,[self.currentGraphNode.id])
+                Lineage_classes.addParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id])
             },
 
             drawSimilars: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
-                Lineage_classes.drawSimilarsNodes( "label",self.currentGraphNode.data.source,self.currentGraphNode.id, descendantsAlso)
+                Lineage_classes.drawSimilarsNodes("label", self.currentGraphNode.data.source, self.currentGraphNode.id, descendantsAlso)
             },
             collapse: function () {
-                Lineage_classes.removeLastChildrenFromGraph(self.currentGraphNode.id)
+                Lineage_classes.collapseNode(self.currentGraphNode.id)
             }
             , openCluster: function () {
                 Lineage_classes.openCluster(self.currentGraphNode)
@@ -2107,11 +2112,11 @@ var Lineage_classes = (function () {
             },
             showObjectProperties: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
-                Lineage_classes.drawObjectProperties(self.currentGraphNode.data.source,[self.currentGraphNode.id], descendantsAlso)
+                Lineage_classes.drawObjectProperties(self.currentGraphNode.data.source, [self.currentGraphNode.id], descendantsAlso)
             },
             showRestrictions: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
-                Lineage_classes.drawRestrictions(self.currentGraphNode.data.source,self.currentGraphNode.data.id, descendantsAlso)
+                Lineage_classes.drawRestrictions(self.currentGraphNode.data.source, self.currentGraphNode.data.id, descendantsAlso)
             },
 
             showIndividuals: function () {

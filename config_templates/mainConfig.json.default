@@ -1,5 +1,5 @@
 {
-
+  "disableAuth": false,
   "serverUrl" :"../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
 

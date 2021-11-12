@@ -1,5 +1,6 @@
 var express = require("express");
 const bcrypt = require("bcrypt");
+var fs = require("fs");
 var router = express.Router();
 var path = require("path");
 var passport = require("passport");
@@ -21,41 +22,72 @@ var configManager = require("../bin/configManager.");
 var DictionariesManager = require("../bin/KG/dictionariesManager.");
 const promiseFs = require("fs").promises;
 
+var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
+var str = fs.readFileSync(mainConfigFilePath);
+var config = JSON.parse("" + str);
+
 /* GET home page. */
 router.get("/", ensureLoggedIn(), function (req, res, next) {
     res.redirect("vocables");
 });
 
-// Login route
-router.get("/login", function (req, res, next) {
-    res.render("login", { title: "souslesensVocables - Login" });
-});
-
-// auth route
-router.post(
-    "/auth/login",
-    passport.authenticate("local", {
-        successRedirect: "/vocables",
-        failureRedirect: "/login",
-        failureMessage: true,
-    })
-);
-
-router.get("/auth/check", function (req, res, next) {
-    console.log(req.user);
-    res.send({
-        logged: req.user ? true : false,
-        user: req.user,
+if (!config.disableAuth) {
+    // Login route
+    router.get("/login", function (req, res, next) {
+        res.render("login", { title: "souslesensVocables - Login" });
     });
-});
-
-router.get("/auth/logout", function (req, res, next) {
-    req.logout();
-    res.send({
-        logged: req.user ? true : false,
-        user: req.user,
+    // auth route
+    router.post(
+        "/auth/login",
+        passport.authenticate("local", {
+            successRedirect: "/vocables",
+            failureRedirect: "/login",
+            failureMessage: true,
+        })
+    );
+    router.get("/auth/check", function (req, res, next) {
+        res.send({
+            logged: req.user ? true : false,
+            user: req.user,
+        });
     });
-});
+    router.get("/auth/logout", function (req, res, next) {
+        req.logout();
+        res.send({
+            logged: req.user ? true : false,
+            user: req.user,
+        });
+    });
+} else {
+    ensureLoggedIn = function ensureLoggedIn(options) {
+      return function(req, res, next) {
+        next();
+      }
+    }
+    // Login route
+    router.get("/login", function (req, res, next) {
+        res.redirect("vocables");
+    });
+    router.get("/auth/check", function (req, res, next) {
+        res.send({
+            logged: true,
+            user: {
+                login: "admin",
+                groups: ["admin"]
+            },
+        });
+    });
+    router.get("/auth/logout", function (req, res, next) {
+        res.send({
+            logged: true,
+            user: {
+                login: "admin",
+                groups: ["admin"]
+            },
+        });
+    });
+}
+
 
 router.get("/users", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/users/users.json"));

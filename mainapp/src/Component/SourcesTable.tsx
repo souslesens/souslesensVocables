@@ -59,7 +59,7 @@ const SourcesTable = () => {
                                                 {source.name}
                                             </TableCell>
                                             <TableCell>
-                                                {typeof source.graphUri === 'string' ? source.graphUri : source.graphUri.join(', ')}
+                                                {source.graphUri}
 
                                             </TableCell>
                                             <TableCell>
@@ -114,7 +114,7 @@ type Msg_ =
     | { type: Type.UserClickedCheckBox, payload: { checkboxName: string, value: boolean } }
     | { type: Type.UserUpdatedPredicates, payload: { broaderPredicate: string, lang: string } }
     | { type: Type.UserClickedAddDataSource, payload: boolean }
-    | { type: Type.UserUpdatedDataSource, payload: { type: string, table_schema: string, connection: string, dbName: string, local_dictionary: { table: string, labelColumn: string, idColumn: string } } }
+    | { type: Type.UserUpdatedDataSource, payload: { type: string[], table_schema: string, connection: string, dbName: string, local_dictionary: { table: string, labelColumn: string, idColumn: string } } }
     | { type: Type.UserUpdatedsparql_server, payload: { url: string, method: string, headers: string[] } }
 
 
@@ -134,10 +134,10 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } }
 
         case Type.UserAddedGraphUri:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload.replace(/\s+/g, '').split(',') } }
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, graphUri: msg.payload } }
 
         case Type.UserClickedAddDataSource:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, dataSource: msg.payload ? { type: "", table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null } }
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, dataSource: msg.payload ? { type: [], table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null } }
 
         case Type.UserClickedCheckBox:
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [msg.payload.checkboxName]: msg.payload.value } }
@@ -218,7 +218,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                     </Grid>
                     <Grid item xs={6}><TextField fullWidth onChange={_handleFieldUpdate}
 
-                        value={Array.isArray(sourceModel.sourceForm.graphUri) ? sourceModel.sourceForm.graphUri.join() : ""}
+                        value={sourceModel.sourceForm.graphUri}
                         id={`graphUris`}
                         label={"graph' Uris"}
                         variant="standard" />
@@ -251,16 +251,62 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         label={"Top Class filter"}
                         variant="standard" />
                     </Grid>
-                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("controller")}
 
-                        value={sourceModel.sourceForm.controller}
-                        id={`controller`}
-                        label={"Controller"}
+                    <Grid item xs={6}><FormControl>
+                        <InputLabel id="controller">Controller</InputLabel>
+                        <Select
+                            labelId="controller"
+                            id="controller-select"
+                            value={sourceModel.sourceForm.controller}
+                            label="select-controller"
+                            fullWidth
+                            style={{ width: '400px' }}
+
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("controller")}
+                        >
+                            {["Sparql_OWL", "Sparql_SKOS", "Sparql_INDIVIDUALS"].map(schemaType => <MenuItem
+                                key={schemaType}
+                                value={schemaType}
+
+                            >
+                                {schemaType}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    </Grid>
+                    <Grid item xs={6}><TextField fullWidth onChange={handleFieldUpdate("group")}
+
+                        value={sourceModel.sourceForm.group}
+                        id={`group`}
+                        label={"Group"}
                         variant="standard" />
                     </Grid>
 
+                    <Grid item xs={6}><FormControl>
+                        <InputLabel id="imports-label">Imports</InputLabel>
+                        <Select
+                            labelId="imports-label"
+                            id="imports"
+                            value={sourceModel.sourceForm.imports}
+                            label="imports-label"
+                            fullWidth
+                            multiple
+                            style={{ width: '400px' }}
 
+                            renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                            onChange={handleFieldUpdate("imports")}
+                        >
+                            {unwrappedSources.map(source => <MenuItem
+                                key={source.name}
+                                value={source.name}
 
+                            >
+                                {source.name}
+                            </MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    </Grid>
                     <Grid item xs={6}><FormControl>
                         <InputLabel id="schemaType-label">Schema's Type</InputLabel>
                         <Select
@@ -299,7 +345,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.Dispatch<Msg_> }) => {
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } })
     const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } })
-    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedDataSource, payload: props.model.sourceForm.dataSource ? { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value } : { type: "string", table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } } })
+    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => props.update({ type: Type.UserUpdatedDataSource, payload: props.model.sourceForm.dataSource ? { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value } : { type: [], table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } } })
 
     const handleAddDataSource = (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked })
     const dataSource = props.model.sourceForm.dataSource
@@ -323,12 +369,31 @@ const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.D
         case "KNOWLEDGE_GRAPH":
             return ((<>
                 <Grid item xs={3}><FormControlLabel control={<Checkbox checked={props.model.sourceForm.dataSource ? true : false} onChange={handleAddDataSource} />} label="Do you want to add a data source ?" /></Grid>
-                <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("type")}
-                    value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : ""}
-                    id={`type`}
-                    label={"Data Source's type"}
-                    variant="standard"
-                    style={{ display: !dataSource ? "none" : "" }} /></Grid>
+
+                <Grid item xs={6}><FormControl>
+                    <InputLabel id="dataSource-type">DataSource's type</InputLabel>
+                    <Select
+                        labelId="dataSource-type"
+                        id="dataSource"
+                        value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : []}
+                        label="Data source's type"
+                        fullWidth
+                        multiple
+                        style={{ width: '400px' }}
+
+                        renderValue={(selected: string | string[]) => typeof selected === 'string' ? selected : selected.join(', ')}
+                        onChange={handleDataSourceUpdate("type")}
+                    >
+                        {["sql.sqlserver"].map(type => <MenuItem
+                            key={type}
+                            value={type}
+
+                        >
+                            {type}
+                        </MenuItem>)}
+                    </Select>
+                </FormControl>
+                </Grid>
                 <Grid item xs={6}><TextField fullWidth onChange={handleDataSourceUpdate("connection")}
                     value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.connection : ""}
                     id={`connection`}

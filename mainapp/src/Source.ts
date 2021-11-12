@@ -31,19 +31,33 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         _type: 'source',
         id: source.id ? source.id : ulid(),
         type: source.type ? source.type : "missing type",
-        graphUri: source.graphUri ? source.graphUri : [],
+        graphUri: source.graphUri ? source.graphUri : "",
         sparql_server: source.sparql_server ? source.sparql_server : defaultSource("").sparql_server,
-        controller: source.controller ? source.controller : "missing controller",
+        controller: source.controller ? source.controller : controllerDefault(source.schemaType),
         topClassFilter: source.topClassFilter ? source.topClassFilter : "missing topClassFilter",
         schemaType: source.schemaType ? source.schemaType : "missing schema type",
         dataSource: source.dataSource ? source.dataSource : null,
         schema: source.schema ? source.schema : null,
-        isDraft: source.isDraft ? source.isDraft : true,
+        isDraft: source.isDraft ? source.isDraft : false,
         editable: source.editable ? source.editable : true,
         color: source.color ? source.color : "default color",
-        predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates
+        predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
+        group: source.group ? source.group : "",
+        imports: source.imports ? source.imports : []
     }
     return decodedSource
+}
+
+function controllerDefault(schemaType: string | undefined): string {
+    if (schemaType === "OWL") {
+        return "Sparql_OWL"
+    } else if (schemaType === "SKOS") {
+        return "Sparql_SKOS"
+
+    } else {
+        return "default controller"
+    }
+
 }
 
 export type Source = {
@@ -51,7 +65,7 @@ export type Source = {
     name: string;
     _type: string;
     type: string;
-    graphUri: string[];
+    graphUri: string;
     sparql_server: SparqlServer;
     controller: string;
     topClassFilter: string;
@@ -61,7 +75,9 @@ export type Source = {
     editable: boolean;
     color: string;
     isDraft: boolean;
-    predicates: { broaderPredicate: string, lang: string }
+    predicates: { broaderPredicate: string, lang: string };
+    group: string;
+    imports: string[];
 }
 
 export const defaultSource = (id: string): Source => {
@@ -70,8 +86,8 @@ export const defaultSource = (id: string): Source => {
         _type: 'source',
         id: id,
         type: "",
-        graphUri: [],
-        sparql_server: { url: "", method: "Post", headers: [] },
+        graphUri: "",
+        sparql_server: { url: "_default", method: "Post", headers: [] },
         editable: true,
         controller: "",
         topClassFilter: "",
@@ -79,15 +95,17 @@ export const defaultSource = (id: string): Source => {
         dataSource: null,
         schema: null,
         color: "",
-        isDraft: true,
-        predicates: { broaderPredicate: "", lang: "" }
+        isDraft: false,
+        predicates: { broaderPredicate: "", lang: "" },
+        group: "",
+        imports: []
     })
 };
 
 interface SourceJson {
     id?: string;
     type?: string;
-    graphUri?: string[];
+    graphUri?: string;
     sparql_server?: SparqlServer;
     controller?: string;
     topClassFilter?: string;
@@ -97,7 +115,9 @@ interface SourceJson {
     dataSource?: null | DataSource;
     schema?: null;
     color?: string;
-    predicates?: { broaderPredicate: string, lang: string }
+    predicates?: { broaderPredicate: string, lang: string };
+    group?: string;
+    imports?: string[];
 }
 
 interface CommonSource {
@@ -124,15 +144,15 @@ export type SkosSource = CommonSource & SkosSpecificSource
 export type _Source = Knowledge_GraphSource | SkosSource
 
 export interface DataSource {
-    type: string;
+    type: string[];
     connection: string;
     dbName: string;
     table_schema: string;
     local_dictionary: LocalDictionary;
 }
 
-const defaultDataSource = {
-    type: "",
+const defaultDataSource: DataSource = {
+    type: [],
     connection: "_default",
     dbName: "",
     table_schema: "",

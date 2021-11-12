@@ -60,10 +60,10 @@ if (!config.disableAuth) {
     });
 } else {
     ensureLoggedIn = function ensureLoggedIn(options) {
-      return function(req, res, next) {
-        next();
-      }
-    }
+        return function (req, res, next) {
+            next();
+        };
+    };
     // Login route
     router.get("/login", function (req, res, next) {
         res.redirect("vocables");
@@ -73,7 +73,7 @@ if (!config.disableAuth) {
             logged: true,
             user: {
                 login: "admin",
-                groups: ["admin"]
+                groups: ["admin"],
             },
         });
     });
@@ -82,12 +82,11 @@ if (!config.disableAuth) {
             logged: true,
             user: {
                 login: "admin",
-                groups: ["admin"]
+                groups: ["admin"],
             },
         });
     });
 }
-
 
 router.get("/users", ensureLoggedIn(), function (req, res, next) {
     res.sendFile(path.join(__dirname, "/../config/users/users.json"));

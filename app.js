@@ -37,7 +37,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-
 var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
 var str = fs.readFileSync(mainConfigFilePath);
 var config = JSON.parse("" + str);
@@ -46,7 +45,6 @@ if (!config.disableAuth) {
     app.use(passport.initialize());
     app.use(passport.authenticate("session"));
 }
-
 
 // Static dirs
 app.use(express.static(path.join(__dirname, "public")));

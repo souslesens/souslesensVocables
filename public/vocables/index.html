@@ -156,10 +156,11 @@
 
         $(function () {
             MainController.initConfig(function(err) {
+
+                authentication.init()
+
                 if(err)
                   return  alert(err)
-             //   config = {loginMode: "none", appName: "VOCABLES"};
-                authentication.init()
 
                 w = $(document).width() - leftPanelWidth - 30;
                 h = $(document).height() - 20;
@@ -406,6 +407,8 @@
     <button style="justify-content: right" id="ontoEdit" style="display: block" onclick="OwlEditor.loadUI()">OntoEdit</button>
     <button style="justify-content: right" id="testButton" style="display: block" onclick="TreeMap.draw2(TreeMap.treemapSLSV)">test</button>
     <button onclick="MainController.UI.copyCurrentQuery()">cpQy</button>
+    <span style='margin-right:1px; display:inline-block;'>&nbsp;</span>
+    <button onclick="authentication.logout()">Logout</button>
 
 
 </div>

@@ -19,31 +19,37 @@ var authentication = (function () {
 
 
     self.init = function (activate) {
-        var url = window.location.host;
-        if (Config.loginMode != "none") {//  && url.indexOf("localhost")<0 && url.indexOf("127.0.0.1")<0){
+        // Redirect to login if user is not logged
+        $.ajax({
+            type: "GET",
+            url: "/auth/check",
+            success: function (data) {
+                if (!data.logged) {
+                    location.href = '/login';
+                } else {
+                    var url = window.location.host;
+                    authentication.currentUser = {
+                        identifiant: data.user.login,
+                        login: data.user.login,
+                        groupes: data.user.groups,
+                    }
+                    MainController.onAfterLogin()
+                    if (typeof sparql_abstract !== 'undefined')
+                    sparql_abstract.initSources()
 
-
-            $("#loginDiv").css("visibility", "visible");
-            $("#main").css("visibility", "hidden");
-            var width = $(window).width()
-            var height = $(window).height()
-            $("#loginDiv").width(width).height(height).css("background-color", "#e5ebea").css("top", "0px").css("left", "0");
-            ;
-            // $("#panels").css("display", "none")
-
-        } else {
-            authentication.currentUser = {
-                identifiant: "admin",
-                login: "none",
-                groupes: ["admin"]
+                }
             }
+        });
+    }
 
-            MainController.onAfterLogin()
-            if (typeof sparql_abstract !== 'undefined')
-            sparql_abstract.initSources()
-            //   mainController.init0();
-        }
-
+    self.logout = function () {
+        $.ajax({
+            type: "GET",
+            url: "/auth/logout",
+            success: function (data) {
+                location.href = '/login';
+            }
+        });
     }
 
     self.doLogin = function (callback) {

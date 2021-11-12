@@ -5,7 +5,7 @@ export declare type Source = {
     name: string;
     _type: string;
     type: string;
-    graphUri: string[];
+    graphUri: string;
     sparql_server: SparqlServer;
     controller: string;
     topClassFilter: string;
@@ -19,6 +19,8 @@ export declare type Source = {
         broaderPredicate: string;
         lang: string;
     };
+    group: string;
+    imports: string[];
 };
 export declare const defaultSource: (id: string) => Source;
 interface CommonSource {
@@ -45,23 +47,13 @@ export declare type Knowledge_GraphSource = CommonSource & DataSource;
 export declare type SkosSource = CommonSource & SkosSpecificSource;
 export declare type _Source = Knowledge_GraphSource | SkosSource;
 export interface DataSource {
-    type: string;
+    type: string[];
     connection: string;
     dbName: string;
     table_schema: string;
     local_dictionary: LocalDictionary;
 }
-declare const defaultDataSource: {
-    type: string;
-    connection: string;
-    dbName: string;
-    table_schema: string;
-    local_dictionary: {
-        table: string;
-        idColumn: string;
-        labelColumn: string;
-    };
-};
+declare const defaultDataSource: DataSource;
 interface LocalDictionary {
     table: string;
     idColumn: string;

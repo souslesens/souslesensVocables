@@ -1,5 +1,6 @@
 var createError = require("http-errors");
 var express = require("express");
+var fs = require("fs");
 var path = require("path");
 var passport = require("passport");
 var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
@@ -9,6 +10,7 @@ var bodyParser = require("body-parser");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var httpProxy = require("./bin/httpProxy.");
+var configManager = require("./bin/configManager.");
 
 const fileUpload = require("express-fileupload");
 
@@ -34,8 +36,15 @@ app.use(function (req, res, next) {
     req.session.messages = [];
     next();
 });
-app.use(passport.initialize());
-app.use(passport.authenticate("session"));
+
+var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
+var str = fs.readFileSync(mainConfigFilePath);
+var config = JSON.parse("" + str);
+
+if (!config.disableAuth) {
+    app.use(passport.initialize());
+    app.use(passport.authenticate("session"));
+}
 
 // Static dirs
 app.use(express.static(path.join(__dirname, "public")));

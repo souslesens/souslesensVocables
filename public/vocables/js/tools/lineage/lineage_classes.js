@@ -291,7 +291,7 @@ var Lineage_classes = (function () {
                 MainController.UI.message("loading source " + source)
                 Sparql_generic.getTopConcepts(source, null, function (err, result) {
                     if (err)
-                        callbackEach(err)
+                       return  callbackEach(err)
                     if (result.length == 0) {
                         $("#waitImg").css("display", "none");
                         return MainController.UI.message("No data found")
@@ -1774,7 +1774,7 @@ var Lineage_classes = (function () {
                 "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawSimilars();\"> Similars</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.collapse();\">Collapse</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showObjectProperties();\">ObjectProperties</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showRestrictions();\">sRestrictions</span>" +
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showRestrictions();\">Restrictions</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showIndividuals();\">Individuals</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">Neighborhood</span>"
 

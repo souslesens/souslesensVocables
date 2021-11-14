@@ -16,7 +16,7 @@ const async = require("async");
 var httpProxy = require("../httpProxy.");
 var sqlConnector = require("./KGSqlConnector.");
 var SQLserverConnector = require("./SQLserverConnector.");
-var socket = require("../../routes/socket.js");
+var socket = require("../socketManager.");
 
 var KGcontroller = require("./KGcontroller.");
 

@@ -6,9 +6,8 @@ var tika = new TikaClient("http://localhost:41000");
 const TikaServer = require("tika-server");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
-var socket = require("../socketManager.");
+var socket = require("../../routes/socket.js");
 const ConfigManager = require("../configManager.");
-var etl=require("etl")
 var async = require("async");
 //var annotatorLive = require('../annotatorLive.')
 
@@ -51,28 +50,7 @@ var DirContentAnnotator = {
         zipFile.mv(tempzip, function (err) {
             if (err) return callback(err);
             var rootFileName = null;
-
-
             fs.createReadStream(tempzip)
-                .pipe(unzipper.Parse())
-                .pipe(etl.map(entry => {
-                    var type = entry.type;
-                    if (type == "File") {
-                        var fileName = entry.path;
-                        var array = fileName.split("/");
-                        var tempFileName = uploadDirPath + array[array.length - 1];
-                        tempFileNames.push(tempFileName);
-                        fileNames.push(fileName);
-                        return entry
-                            .pipe(etl.toFile(tempFileName))
-                            .promise();
-                    }
-                    else
-                        entry.autodrain();
-                }))
-
-
-         /*   fs.createReadStream(tempzip)
                 .pipe(unzipper.Parse())
                 .on("entry", function (entry) {
                     var type = entry.type;
@@ -81,14 +59,10 @@ var DirContentAnnotator = {
                         var array = fileName.split("/");
                         var tempFileName = uploadDirPath + array[array.length - 1];
                         tempFileNames.push(tempFileName);
-                       const content =  entry.buffer();
-                        fs.writeFileSync(tempFileName, content);
-                       async function main() {
-                            const content = await entry.buffer();
-                            await
-                                fs.writeFileSync(tempFileName, content);
-                            entry.autodrain();
 
+                        async function main() {
+                            const content = await entry.buffer();
+                            await fs.writeFileSync(tempFileName, content);
                         }
 
                         main();
@@ -97,8 +71,7 @@ var DirContentAnnotator = {
                     } else {
                         entry.autodrain();
                     }
-                })*/
-
+                })
                 .on("finish", function () {
                     DirContentAnnotator.processZippedFiles(fileNames, corpusName, sources, options, function (err, result) {
                         callback(err, result);

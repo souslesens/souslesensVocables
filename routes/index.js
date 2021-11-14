@@ -136,6 +136,9 @@ router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
     }
 });
 
+
+
+
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     let sampleFile;
     let uploadPath;
@@ -150,6 +153,9 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
         });
     }
 });
+
+
+
 
 router.post(
     serverParams.routesRootUrl + "/slsv",
@@ -413,14 +419,14 @@ function processResponse(response, error, result) {
                 else error = JSON.stringify(error, null, 2);
             }
             console.log("ERROR !!" + error);
-            //   socket.message("ERROR !!" + error);
+
             return response.status(404).send({ ERROR: error });
         } else if (!result) {
             return response.send({ done: true });
         } else {
             if (typeof result == "string") {
                 resultObj = { result: result };
-                //  socket.message(resultObj);
+
                 response.send(JSON.stringify(resultObj));
             } else {
                 if (result.contentType && result.data) {

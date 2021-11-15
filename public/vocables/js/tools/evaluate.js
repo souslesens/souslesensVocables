@@ -59,8 +59,15 @@ var Evaluate = (function () {
 
             $("#mainDialogDiv").load("snippets/evaluate/annotateDialog.html");
             $("#mainDialogDiv").dialog("open");
+            var options={
+                contextMenu:function(){
+                },
+                selectTreeNodeFn:function(){
+                },
+
+            }
             setTimeout(function () {
-                MainController.UI.showSources("annotate_resourcesTreeDiv", true, null,null,{},function () {
+                MainController.UI.showSources("annotate_resourcesTreeDiv", true, null,null,options,function () {
                     $("#annotate_resourcesTreeDiv").jstree(true).open_all()
                 })
 

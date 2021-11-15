@@ -7,6 +7,105 @@ var Export = (function () {
     self.currentSource = null
 
 
+    self.exportGraphToDataTableFromLeaves = function () {
+        var nodes = visjsGraph.data.nodes.get()
+        var edges = visjsGraph.data.edges.get();
+
+        var root = {}
+
+        var nodesToMap = {}
+        edges.forEach(function (edge) {
+            if (!nodesToMap[edge.to])
+                nodesToMap[edge.to] = []
+            nodesToMap[edge.to].push(edge)
+
+        })
+
+        var topNodes = []
+        var leafNodes = []
+        var nodesMap = {}
+    nodes.forEach(function (node) {
+
+            nodesMap[node.id] = node
+            if (!nodesToMap[node.id])
+                leafNodes.push(node)
+        })
+        var uniqueNodes = {}
+
+        function recurse(node, ancestors,level) {
+
+            if (!node.id)
+                return
+
+
+            edges.forEach(function (edge) {
+
+                if (edge.from == node.id) {
+                    if (!ancestors["_" + level])
+                        ancestors["_" + level] = []
+
+                    ancestors["_" + level].push(edge.to)
+                    recurse(nodesMap[edge.to], ancestors, ++level)
+                }
+
+            })
+            return ancestors
+        }
+
+
+      //  var tree = {id: "#", children: []}
+        leafNodes.forEach(function (node) {
+           var leafAncestors= recurse(node, {},1);
+            node.ancestors=leafAncestors
+
+
+
+        })
+
+        var dataSet=[]
+        var colsCount=0
+        leafNodes.forEach(function(leafNode){
+            var lineLabels=[];
+            var lineIds=[];
+            lineLabels.push(leafNode.label || leafNode.id)
+            lineIds.push( leafNode.id)
+            for( var ancestorLevel in leafNode.ancestors){
+                var label=""
+                var id=""
+              leafNode.ancestors[ancestorLevel].forEach(function(item,index){
+                  if(index>0) {
+                      label += " , "
+                      id += " , "
+                  }
+                 label+=nodesMap[item].label || item
+                  id+=id
+                })
+
+
+                lineLabels.push(label)
+                lineIds.push( id)
+
+            }
+            var row=lineLabels.concat(lineIds)
+            colsCount=Math.max(colsCount, row.length)
+            dataSet.push(row)
+
+        })
+        var cols=[]
+        for (var i = 1; i <= colsCount; i++) {
+            cols.push({title: "Label_" + i, defaultContent: ""})
+        }
+        for (var i = 1; i <= colsCount; i++) {
+            cols.push({title: "Uri_" + i, defaultContent: ""})
+        }
+        self.showDataTable(cols, dataSet)
+
+
+
+    }
+
+
+
     self.exportGraphToDataTable = function () {
         var nodes = visjsGraph.data.nodes.get()
         var edges = visjsGraph.data.edges.get();
@@ -91,6 +190,7 @@ var Export = (function () {
 
 
     }
+
 
 
     self.exportTeeToDataTable = function (jstreeDiv, nodeId) {

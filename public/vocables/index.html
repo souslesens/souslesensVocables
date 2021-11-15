@@ -124,8 +124,14 @@
     <script src="js/sparqlProxies/sparql_NPD.js"></script>
 
     <script src="js/external/socket.io.js"></script>
-    <script src="js/socketProxy.js"></script>
 
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+    </script>
+    <script src="js/socketProxy.js"></script>
     <script src="js/export.js"></script>
     <script src="js/graphTraversal.js"></script>
     <script src="js/external/graph.js"></script>
@@ -158,6 +164,8 @@
             MainController.initConfig(function(err) {
 
                 authentication.init()
+
+              //  SocketProxy.init()
 
                 if(err)
                   return  alert(err)

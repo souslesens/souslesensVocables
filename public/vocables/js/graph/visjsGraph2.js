@@ -885,7 +885,9 @@ var visjsGraph = (function () {
 
                 } else {
                     //functions
-                    var context = data.context
+                    var context=JSON.parse(JSON.stringify(data.context).replace(/self./g,"Lineage_classes."))
+                  //  var context = data.context
+
                     for (var key in context.options) {
                         if (key.indexOf("Fn") > 0) {
                             context.options[key] = eval(key + "=" + context.options[key]);

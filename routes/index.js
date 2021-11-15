@@ -35,7 +35,7 @@ if (!config.disableAuth) {
     ensureLoggedIn = function ensureLoggedIn(options) {
         return function (req, res, next) {
             if (!req.isAuthenticated || !req.isAuthenticated()) {
-              return res.redirect(401, "/login");
+                return res.redirect(401, "/login");
             }
             next();
         };

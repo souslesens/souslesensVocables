@@ -5,7 +5,7 @@
 var SocketManager = {
     currentClient: {},
     initClientSocket: function (clientSocket) {
-        SocketManager.currentClient = clientSocket
+        SocketManager.currentClient = clientSocket;
     },
 
     message: function (channel, message) {
@@ -13,10 +13,9 @@ var SocketManager = {
         if (SocketManager.currentClient && SocketManager.currentClient.emit) {
             SocketManager.currentClient.emit(channel, message);
         }
-    }
-}
-module.exports = SocketManager
-
+    },
+};
+module.exports = SocketManager;
 
 /*
 var socket = (module.exports = {});

@@ -136,9 +136,6 @@ router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
     }
 });
 
-
-
-
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     let sampleFile;
     let uploadPath;
@@ -153,9 +150,6 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
         });
     }
 });
-
-
-
 
 router.post(
     serverParams.routesRootUrl + "/slsv",

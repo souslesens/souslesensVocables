@@ -41,7 +41,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-
 if (!config.disableAuth) {
     app.use(passport.initialize());
     app.use(passport.authenticate("session"));

@@ -25,7 +25,7 @@ var authentication = (function () {
             url: "/auth/check",
             success: function (data) {
                 if (!data.logged) {
-                    location.href = '/login';
+                    //location.href = '/login';
                 } else {
                     var url = window.location.host;
                     authentication.currentUser = {

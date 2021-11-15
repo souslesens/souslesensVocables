@@ -160,6 +160,13 @@
         var w
         var h
 
+        // Redirect 401 to login page
+        $(document).ajaxError(function (e, xhr, settings) {
+            if (xhr.status == 401) {
+               location.href = '/login';
+            }
+        });
+
         $(function () {
             MainController.initConfig(function(err) {
 
@@ -168,7 +175,7 @@
               //  SocketProxy.init()
 
                 if(err)
-                  return  alert(err)
+                  return console.error(err)
 
                 w = $(document).width() - leftPanelWidth - 30;
                 h = $(document).height() - 20;

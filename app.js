@@ -14,6 +14,10 @@ var configManager = require("./bin/configManager.");
 
 const fileUpload = require("express-fileupload");
 
+var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
+var str = fs.readFileSync(mainConfigFilePath);
+var config = JSON.parse("" + str);
+
 var app = express();
 
 // App middleware for authentication and session handling
@@ -22,10 +26,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(
     require("express-session")({
-        secret: "SY4PDsioYAbndfU8SIuk",
+        secret: config.cookieSecret ? config.cookieSecret : "S3cRet!",
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: 2629800000 }, // 1 month
+        cookie: { maxAge: config.cookieMaxAge ? config.cookieMaxAge : 2629800000 },
     })
 );
 
@@ -37,9 +41,6 @@ app.use(function (req, res, next) {
     next();
 });
 
-var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
 
 if (!config.disableAuth) {
     app.use(passport.initialize());

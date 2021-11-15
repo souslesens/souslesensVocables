@@ -34,7 +34,9 @@ router.get("/", ensureLoggedIn(), function (req, res, next) {
 if (!config.disableAuth) {
     ensureLoggedIn = function ensureLoggedIn(options) {
         return function (req, res, next) {
-            return res.redirect(401, "/login");
+            if (!req.isAuthenticated || !req.isAuthenticated()) {
+                return res.redirect(401, "/login");
+            }
             next();
         };
     };

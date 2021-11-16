@@ -11,12 +11,12 @@ var Sparql_common = (function () {
 
 
     var self = {};
+    self.withoutImports = false;
 
-
-    var checkClosingBrackets=function(str){
-        var c1=(str.match(/\(/g) || []).length
-        var c2=(str.match(/\)/g) || []).length
-        return c1==c2
+    var checkClosingBrackets = function (str) {
+        var c1 = (str.match(/\(/g) || []).length
+        var c2 = (str.match(/\)/g) || []).length
+        return c1 == c2
     }
 
     self.setFilter = function (varName, ids, words, options) {
@@ -29,15 +29,15 @@ var Sparql_common = (function () {
             return "";
 
         function formatWord(str) {
-           if(!checkClosingBrackets(str)){
-               str=str.replace(/[\(\)]/g,"")
-           }
-           return self.formatStringForTriple(str)
-         /*   var str = str.replace(/\\/g, "")
-            str = str.replace(/\(/gm, "")
-            str = str.replace(/\)/gm, "")
-            str = str.replace(/\[/gm, "")
-            str = str.replace(/\]/gm, "")*/
+            if (!checkClosingBrackets(str)) {
+                str = str.replace(/[\(\)]/g, "")
+            }
+            return self.formatStringForTriple(str)
+            /*   var str = str.replace(/\\/g, "")
+               str = str.replace(/\(/gm, "")
+               str = str.replace(/\)/gm, "")
+               str = str.replace(/\[/gm, "")
+               str = str.replace(/\]/gm, "")*/
 
             return str
         }
@@ -102,7 +102,7 @@ var Sparql_common = (function () {
                         if (id != "") {
                             if (conceptIdsStr != "")
                                 conceptIdsStr += ","
-                            if (id.indexOf("http") >-1 || id.indexOf("nodeID://")>-1)
+                            if (id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1)
                                 conceptIdsStr += "<" + id + ">"
                             else
                                 conceptIdsStr += id
@@ -113,7 +113,7 @@ var Sparql_common = (function () {
                 } else {
                     if (ids == null)
                         return "";
-                    if (ids.indexOf("http") >-1 || ids.indexOf("nodeID://")>-1)
+                    if (ids.indexOf("http") > -1 || ids.indexOf("nodeID://") > -1)
                         filters.push(" ?" + varName + " =<" + ids + ">");
                     else
                         filters.push(" ?" + varName + " =" + ids);
@@ -157,8 +157,6 @@ var Sparql_common = (function () {
     }
 
 
-
-
     self.formatString = function (str, forUri) {
         return self.formatStringForTriple(str, forUri);
     }
@@ -167,8 +165,8 @@ var Sparql_common = (function () {
     self.formatStringForTriple = function (str, forUri) {
         if (!str || !str.replace)
             return null;
-        if(str.indexOf('$')>-1)
-            var x=3
+        if (str.indexOf('$') > -1)
+            var x = 3
         str = str.trim()
         str = str.replace(/\\/gm, "")
         str = str.replace(/"/gm, "\\\"")
@@ -179,8 +177,8 @@ var Sparql_common = (function () {
         str = str.replace(/\r/gm, "")
         str = str.replace(/\t/gm, "\\\\t")
         str = str.replace(/\$/gm, "\\\$")
-     //   str = str.replace(/\(/gm, "\\\(")
-     //   str = str.replace(/\)/gm, "\\\)")
+        //   str = str.replace(/\(/gm, "\\\(")
+        //   str = str.replace(/\)/gm, "\\\)")
 
         str = str.replace(/\\xa0/gm, " ")
         str = str.replace(/'/gm, "\\\'")
@@ -218,12 +216,10 @@ var Sparql_common = (function () {
     }
 
 
-
-
-    self.getFromStr = function (source,named,withoutImports) {
-        var from=" FROM "
-        if(named)
-            from+=" NAMED"
+    self.getFromStr = function (source, named, withoutImports) {
+        var from = " FROM "
+        if (named)
+            from += " NAMED"
 
         var fromStr = ""
         var graphUris = Config.sources[source].graphUri
@@ -233,9 +229,11 @@ var Sparql_common = (function () {
             graphUris = [graphUris]
 
         graphUris.forEach(function (graphUri, index) {
-            fromStr += from+"  <" + graphUri + "> "
+            fromStr += from + "  <" + graphUri + "> "
         })
-        if(!withoutImports) {
+        if (!withoutImports)
+            withoutImports = self.withoutImports
+        if (!withoutImports) {
             var imports = Config.sources[source].imports;
             if (imports) {
                 imports.forEach(function (source2) {

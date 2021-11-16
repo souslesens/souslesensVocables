@@ -4,7 +4,7 @@ var fs = require("fs");
 var router = express.Router();
 var path = require("path");
 var passport = require("passport");
-var serverParams = { routesRootUrl: "" };
+var serverParams = {routesRootUrl: ""};
 var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
 
 var elasticRestProxy = require("../bin/elasticRestProxy..js");
@@ -42,7 +42,7 @@ if (!config.disableAuth) {
     };
     // Login route
     router.get("/login", function (req, res, next) {
-        res.render("login", { title: "souslesensVocables - Login" });
+        res.render("login", {title: "souslesensVocables - Login"});
     });
     // auth route
     router.post(
@@ -213,6 +213,11 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+        if (req.body.addImportToSource) {
+            configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
 
         if (req.body.KGmappingDictionary) {
             if (req.body.load)
@@ -278,7 +283,7 @@ router.post(
             req.body.infos += "," + ip;
 
             logger.info(req.body.infos);
-            processResponse(response, null, { done: 1 });
+            processResponse(response, null, {done: 1});
         }
         if (req.body.KGquery) {
             KGcontroller.KGquery(req, function (err, result) {
@@ -332,7 +337,7 @@ router.post(
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-                httpProxy.post(req.query.url, headers, { query: query }, function (err, result) {
+                httpProxy.post(req.query.url, headers, {query: query}, function (err, result) {
                     processResponse(response, err, result);
                 });
             } else if (req.query.method == "GET") {
@@ -378,7 +383,8 @@ router.post(
                 processResponse(response, err, result);
             });
         }
-    },
+    }
+    ,
 
     router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);
@@ -422,12 +428,12 @@ function processResponse(response, error, result) {
             }
             console.log("ERROR !!" + error);
 
-            return response.status(404).send({ ERROR: error });
+            return response.status(404).send({ERROR: error});
         } else if (!result) {
-            return response.send({ done: true });
+            return response.send({done: true});
         } else {
             if (typeof result == "string") {
-                resultObj = { result: result };
+                resultObj = {result: result};
 
                 response.send(JSON.stringify(resultObj));
             } else {

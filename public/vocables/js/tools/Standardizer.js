@@ -859,7 +859,7 @@ var Standardizer = (function () {
                 ]
             }
             , "sort": {
-                "label": {"order": "asc"}
+                "label.keyword": {"order": "asc"}
             }
         }
 

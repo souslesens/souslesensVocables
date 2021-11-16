@@ -151,6 +151,34 @@ var ConfigManager = {
         );
     },
 
+    addImportToSource:function(parentSource, importedSource,callback){
+
+        ConfigManager.getSources (null, function(err, sources){
+            if(err)
+                return callback(err);
+          if(!sources[parentSource])
+              return callback(err);
+
+          if(!sources[parentSource].imports)
+              sources[parentSource].imports=[]
+            sources[parentSource].imports.push(importedSource)
+            ConfigManager.saveSources(sources,function(err, result){
+                callback(err, result)
+            })
+
+
+
+        })
+
+
+    },
+    saveSources: function (sources, callback) {
+        var sourcesPath = path.join(__dirname, "../config/sources.json");
+        jsonFileStorage.store(path.resolve(sourcesPath), sources,function (err, message) {
+            callback(err, message);
+        });
+    },
+
   /*  getProfilesSourcesMatrix: function (callback) {
         ConfigManager.getProfiles(null, function (err, profiles) {
             if (err)

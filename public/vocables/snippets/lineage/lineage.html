@@ -56,6 +56,9 @@
 
   <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
         <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
+      <input type="checkbox"  checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX"> imports
+      <button onclick="Lineage_classes.initUI()">clear</button>
+
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
       <!--  <button class="lineage_button" onclick="Lineage_classes.collapseNode()">collapse</button>-->
 
@@ -64,7 +67,7 @@
         <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
       <button class="lineage_button" onclick="Lineage_classes.drawRestrictions()">Restrictions</button>
     <!--  <button class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
-    <button onclick="Lineage_classes.initUI()">clear</button>
+
 
     </div>
     <div class="lineage_actionDiv" style="display: flex;flex-direction: column;margin: 5px" id="lineage_blendDiv">
@@ -74,8 +77,8 @@
         <div> target node<div id="lineage_targetNodeDiv" style="background-color: #8792a2;font-weight: bold;text-align: center;"></div></div>
         <div id="lineage_blendButtonsDiv"  style="margin: 5px; display: none">
            <!-- <button  class='lineage_button' onclick="SourceBrowser.copyNode()">Copy node</button>-->
-            <button   class='lineage_button' onclick="Lineage_blend.pasteAsSameAs()">paste as SameAs</button>
-            <button  class='lineage_button' onclick="Lineage_blend.pasteAsSubClassOf()">paste as SubClassOf</button>
+         <!--   <button   class='lineage_button' onclick="Lineage_blend.pasteAsSameAs()">paste as SameAs</button>-->
+            <button  class='lineage_button' onclick="Lineage_blend.createRelation('sameAs')">Create relation SameAs</button>
 
         </div>
 

@@ -278,11 +278,11 @@ var Lineage_classes = (function () {
                 })
 
             }
-            var allSources = [source]
+            var allSources = []
 
             if (imports)
                 allSources = allSources.concat(imports)
-
+            allSources.push(source)
             self.currentExpandLevel += 1
             async.eachSeries(allSources, function (source, callbackEach) {
                 var depth = parseInt($("#Lineage_topDepth").val())
@@ -291,7 +291,7 @@ var Lineage_classes = (function () {
                 MainController.UI.message("loading source " + source)
                 Sparql_generic.getTopConcepts(source, null, function (err, result) {
                     if (err)
-                       return  callbackEach(err)
+                        return callbackEach(err)
                     if (result.length == 0) {
                         $("#waitImg").css("display", "none");
                         return MainController.UI.message("No data found")
@@ -1462,6 +1462,8 @@ var Lineage_classes = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
+            if(classIds="all")
+                classIds=null
 
 
             Sparql_OWL.getObjectProperties(source, classIds, {withoutImports: 1}, function (err, result) {
@@ -1493,7 +1495,7 @@ var Lineage_classes = (function () {
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: self.getSourceColor(source, item.range.value),
-                            level:  self.currentExpandLevel,
+                            level: self.currentExpandLevel,
                             data: {
                                 source: source,
                                 id: item.range.value,
@@ -1563,8 +1565,8 @@ var Lineage_classes = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
-            if(classIds=="all")
-                classIds=null
+            if (classIds == "all")
+                classIds = null
             MainController.UI.message("")
 
             Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1}, function (err, result) {
@@ -1577,12 +1579,12 @@ var Lineage_classes = (function () {
                 }
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = visjsGraph.getExistingIdsMap()
-              var isNewGraph=false;
-                if(Object.keys(existingNodes).length>0)
-                    isNewGraph=true
+                var isNewGraph = false;
+                if (Object.keys(existingNodes).length > 0)
+                    isNewGraph = true
                 var color = self.getSourceColor(source)
                 //  console.log(JSON.stringify(result, null, 2))
-               self.currentExpandLevel+=1
+                self.currentExpandLevel += 1
                 result.forEach(function (item) {
 
 
@@ -1597,7 +1599,7 @@ var Lineage_classes = (function () {
                             shape: shape,
                             size: size,
                             color: color,
-                            level:  self.currentExpandLevel,
+                            level: self.currentExpandLevel,
                             data: {
                                 source: source,
                                 id: item.concept.value,
@@ -1608,7 +1610,6 @@ var Lineage_classes = (function () {
                         })
 
                     }
-
 
 
                     var shape = Lineage_classes.defaultShape;
@@ -1636,7 +1637,7 @@ var Lineage_classes = (function () {
                             shape: shape,
                             size: size,
                             color: color,
-                            level:  self.currentExpandLevel,
+                            level: self.currentExpandLevel,
                             data: {
                                 source: source,
                                 id: item.value.value,

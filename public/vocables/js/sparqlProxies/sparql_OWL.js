@@ -22,12 +22,12 @@ var Sparql_OWL = (function () {
                 options = {}
             var fromStr = ""
 
-            options.showLimit=200
+            options.showLimit = 200
 
 
             var strFilterTopConcept;
             var topClassFilter = Config.sources[sourceLabel].topClassFilter
-            if (topClassFilter && topClassFilter!="" && topClassFilter!="_default")
+            if (topClassFilter && topClassFilter != "" && topClassFilter != "_default")
                 strFilterTopConcept = topClassFilter;
             else
                 strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
@@ -44,7 +44,7 @@ var Sparql_OWL = (function () {
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
-                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {?topConcept rdf:type owl:Class."+
+                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {?topConcept rdf:type owl:Class." +
                 strFilterTopConcept +
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
@@ -63,10 +63,10 @@ var Sparql_OWL = (function () {
                     return callback(err)
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {type: "http://www.w3.org/2002/07/owl#Class"})
-               if(result.results.bindings.length>options.showLimit) {
-              alert("too many nodes .cannot show all" + options.showLimit +"/"+ result.results.bindings.length)
-                   result.results.bindings=result.results.bindings.slice(0, options.showLimit)
-               }
+                if (result.results.bindings.length > options.showLimit) {
+                    alert("too many nodes .cannot show all" + options.showLimit + "/" + result.results.bindings.length)
+                    result.results.bindings = result.results.bindings.slice(0, options.showLimit)
+                }
                 return callback(null, result.results.bindings);
             })
         }
@@ -224,7 +224,7 @@ var Sparql_OWL = (function () {
                 " select distinct *  " + fromStr + "  WHERE {{"
 
 
-         //   query += "?concept rdf:type ?type. "
+            //   query += "?concept rdf:type ?type. "
             query += "?concept rdf:type owl:Class. "
             if (words) {
                 query += " ?concept rdfs:label ?conceptLabel."
@@ -241,7 +241,7 @@ var Sparql_OWL = (function () {
                     query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
 
                     if (true || options.skipRestrictions) {
-                      //  query += " OPTIONAL {?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} "
+                        //  query += " OPTIONAL {?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} "
                         //if  !broader 1 ok  if broader1 it has to be not a restriction
                         query += " ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction) "
                     }
@@ -570,13 +570,13 @@ var Sparql_OWL = (function () {
 
             var filterStr = Sparql_common.setFilter("concept", ids);
 
-            var fromStr=""
-            if(sourceLabel) {
+            var fromStr = ""
+            if (sourceLabel) {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
-            }else {
-                fromStr=""
+            } else {
+                fromStr = ""
 
             }
 
@@ -807,7 +807,7 @@ var Sparql_OWL = (function () {
                             rawData = rawData.concat(result)
                             resultSize = result.length
                             totalCount += result.length
-                            MainController.UI.message(sourceLabel+"retreived triples :"+totalCount)
+                            MainController.UI.message(sourceLabel + "retreived triples :" + totalCount)
                             offset += limitSize
                             callbackWhilst()
                         })
@@ -846,13 +846,13 @@ var Sparql_OWL = (function () {
                         var y = Object.keys(parentChildrenMap).length
 
 
-                        taxonomy={
+                        taxonomy = {
                             id: sourceLabel,
-                            label:sourceLabel,
-                            children:[]
+                            label: sourceLabel,
+                            children: []
                         }
 
-                        parentChildrenMap[sourceLabel]=[]
+                        parentChildrenMap[sourceLabel] = []
 
                         topClasses.forEach(function (item) {
                             parentChildrenMap[sourceLabel].push(item.topConcept.value)
@@ -866,14 +866,14 @@ var Sparql_OWL = (function () {
 
                             function recurseChildren(str, classId) {
 
-                                if (parentChildrenMap[classId] ) {
-                                    str+=classId + "|"
+                                if (parentChildrenMap[classId]) {
+                                    str += classId + "|"
                                     parentChildrenMap[classId].forEach(function (childId) {
-                                        if(allClassesMap[childId]){
+                                        if (allClassesMap[childId]) {
 
-                                            allClassesMap[childId].parents=str
+                                            allClassesMap[childId].parents = str
                                         }
-                                       recurseChildren(str, childId)
+                                        recurseChildren(str, childId)
 
                                     })
 
@@ -883,19 +883,17 @@ var Sparql_OWL = (function () {
                                 }
                             }
 
-                                recurseChildren("",sourceLabel)
+                            recurseChildren("", sourceLabel)
 
 
-
-                          //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
-
-
-                        }}
+                            //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
 
 
+                        }
+                    }
 
 
-var x=allClassesMap
+                    var x = allClassesMap
 
                     callbackSeries()
                 }
@@ -1005,8 +1003,28 @@ var x=allClassesMap
 
             }
         }
+
+
+        self.getSourceAllObjectProperties = function (sourceLabel, callback) {
+            var from = Sparql_common.getFromStr(sourceLabel)
+            var query =
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "select distinct * " + from + " WHERE {   {?prop ?p ?x OPTIONAL{?prop rdfs:label ?propLabel.} \n" +
+                "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }}  limit 10000"
+
+            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, {source:sourceLabel}, null,function (err, result) {
+                if (err)
+                    return alert(err)
+               return  callback(null,result)
+
+            })
+        }
         return self;
 
 
     }
+
 )()

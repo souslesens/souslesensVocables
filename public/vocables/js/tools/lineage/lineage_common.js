@@ -125,6 +125,11 @@ Lineage_common = (function () {
 
 
     }
+
+    self.onshowImportsCBXChange=function(cbx){
+        var checked=$(cbx).prop("checked")
+        Sparql_common.withoutImports=!checked
+    }
     return self;
 
 

@@ -181,8 +181,9 @@
 
             <div style="margin: 5px;padding :5px">
 
-                Search <input id="KGadvancedMapping_searchColumnInput"
-                              onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">
+              <!--  Search <input id="KGadvancedMapping_searchColumnInput"
+                              onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">-->
+                <button onclick="Standardizer.exportMatrix()">Export</button>
                 <br>
                 <div id="KGmapping_matrixContainer"
                      style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;width: 800px;overflow: auto"></div>

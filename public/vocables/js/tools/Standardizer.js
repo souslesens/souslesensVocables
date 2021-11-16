@@ -25,11 +25,15 @@ var Standardizer = (function () {
            }*/
 
         MainController.UI.toogleRightPanel(true)
-        $("#rightPanelDiv").html("<div style='font-weight: bold'>Mapping taxonomy</div><div><div id='Standardizer_rightJstreeDiv'></div></div> ")
+        $("#rightPanelDiv").html("<br><div style='font-weight: bold'>Mapping taxonomy" +
+           // "<button onClick=\"Export.exportTeeToDataTable('Standardizer_rightJstreeDiv','#')\">toTable</button></div>"+
+            "</div><div><div id='Standardizer_rightJstreeDiv'></div></div> ")
+        $("#graphDiv").html("")
 
-        $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
         $("#accordion").accordion("option", {active: 2});
         setTimeout(function () {
+            $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+
             var w = $(document).width() - leftPanelWidth - 30;
             var h = $(document).height() - 20;
 
@@ -62,7 +66,10 @@ var Standardizer = (function () {
 
 
             })
-            $("#standardizerCentral_tabs").tabs({});
+            setTimeout(function(){
+                $("#standardizerCentral_tabs").tabs({});
+            },200)
+
             self.matchCandidates = {}
         }, 200)
     }
@@ -83,22 +90,27 @@ var Standardizer = (function () {
             success: function (indexes, textStatus, jqXHR) {
                 var sources = [];
 
-                for (var source in Config.sources) {
-                    var sourceLabel = "" + source
 
-                    if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
-                        ;
-                    } else {
+                   Admin.showUserSources(function(userSources){
+                       userSources.forEach(function(source) {
+                           if (userSources.index)
+                               var sourceLabel = "" + source
 
-                        indexes.forEach(function (indexName) {
-                            if (indexName == source.toLowerCase()) {
-                                sources.push(source);
-                                self.indexSourcesMap[indexName] = sourceLabel
-                            }
+                           if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
+                               ;
+                           } else {
 
-                        })
-                    }
-                }
+                               indexes.forEach(function (indexName) {
+                                   if (indexName == source.toLowerCase()) {
+                                       sources.push(source);
+                                       self.indexSourcesMap[indexName] = sourceLabel
+                                   }
+
+                               })
+                           }
+                       })
+                })
+
                 return callback(null, sources)
 
 
@@ -360,8 +372,9 @@ var Standardizer = (function () {
                 var cellHtml = ""
                 var hasMatchesClass = false
 
-
+                self.matrixWordsMap.entities[word]=[]
                 indexes.forEach(function (indexName) {
+
                     var cellStr = ""
                     var specificClassStr = ""
                     var divId = common.getRandomHexaId(10)
@@ -382,6 +395,7 @@ var Standardizer = (function () {
                         self.matrixIndexRankingsMap[indexName] += 1
 
                     }
+                    self.matrixWordsMap.entities[word].push(entitiesMap[word][indexName] || null)
                     self.matrixDivsMap[divId].word = word
                     // self.matrixDivsMap[divId].index=indexName
 
@@ -406,6 +420,38 @@ var Standardizer = (function () {
 
         }
 
+
+    }
+    self.exportMatrix=function(){
+        var cols=[]
+
+        cols.push({title: "word", defaultContent: ""})
+        cols.push({title: "matches", defaultContent: ""})
+        self.matrixWordsMap.indexes.forEach(function(col){
+            cols.push({title: col, defaultContent: ""})
+
+        })
+
+
+        var dataSet=[]
+
+        for(var key in  self.matrixWordsMap.entities){
+            var line=[key]
+            var matchesCount=0
+            var obj=self.matrixWordsMap.entities[key]
+            obj.forEach(function(entity){
+                if(entity==null)
+                    line.push("")
+                else {
+                    line.push(entity.label + " __ " + entity.id)
+                    matchesCount+=1
+                }
+            })
+            line.splice(1,0,matchesCount)
+            dataSet.push(line)
+
+        }
+        Export.showDataTable( cols,dataSet)
 
     }
 
@@ -458,6 +504,7 @@ var Standardizer = (function () {
             word = word.trim()
         })
         self.matrixDivsMap = {}
+
         var resultSize = 1
         var size = 200;
         var totalProcessed = 0
@@ -471,6 +518,7 @@ var Standardizer = (function () {
         var slices = common.array.slice(words, size)
         async.eachSeries(slices, function (words, callbackEach) {
             var indexes = self.getSelectedIndexes()
+            self.matrixWordsMap = {indexes:indexes,entities:[]}
             self.currentWordsCount += words.length
             self.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
                 var html = self.processMatrixResult(words, result, indexes)
@@ -501,6 +549,7 @@ var Standardizer = (function () {
         if (self.isWorking)
             return alert(" busy !")
         self.matrixDivsMap = {}
+
      //   var source = $("#Standardizer_sourcesSelect").val();
         if (!source || source == "")
             return alert("select a source");
@@ -516,6 +565,8 @@ var Standardizer = (function () {
             indexes.splice(p, 1)
         if (indexes.length == 0)
             return alert("select target Source of comparison")
+
+        self.matrixWordsMap = {indexes:indexes,entities:[]}
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
 

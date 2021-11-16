@@ -7,19 +7,26 @@ var Export = (function () {
     self.currentSource = null
 
 
-    self.exportGraphToDataTableFromLeaves = function () {
+    self.exportGraphToDataTable = function () {
         var nodes = visjsGraph.data.nodes.get()
         var edges = visjsGraph.data.edges.get();
 
         var root = {}
 
         var nodesToMap = {}
+        var nodesFromMap = {}
         edges.forEach(function (edge) {
             if (!nodesToMap[edge.to])
                 nodesToMap[edge.to] = []
-            nodesToMap[edge.to].push(edge)
+                nodesToMap[edge.to].push(edge)
+
+          /*  if (!nodesFromMap[edge.from])
+                nodesFromMap[edge.from] = []
+            nodesFromMap[edge.from].push(edge)*/
+
 
         })
+
 
         var topNodes = []
         var leafNodes = []
@@ -27,8 +34,11 @@ var Export = (function () {
     nodes.forEach(function (node) {
 
             nodesMap[node.id] = node
-            if (!nodesToMap[node.id])
+            if (!nodesToMap[node.id]) {
+                if(!node.label)
+                    var x=3
                 leafNodes.push(node)
+            }
         })
         var uniqueNodes = {}
 
@@ -41,11 +51,19 @@ var Export = (function () {
             edges.forEach(function (edge) {
 
                 if (edge.from == node.id) {
-                    if (!ancestors["_" + level])
-                        ancestors["_" + level] = []
+                    var ok=true;
+                    for (var key in ancestors)
+                    if (ancestors[key ].indexOf(edge.to) >-1) {
+                        ok=false
+                    }
+                    if(ok){
+                        if (!ancestors["_" + level])
+                            ancestors["_" + level] = []
 
-                    ancestors["_" + level].push(edge.to)
-                    recurse(nodesMap[edge.to], ancestors, ++level)
+                        ancestors["_" + level].push(edge.to)
+                        console.log(nodesMap[edge.to].label)
+                        recurse(nodesMap[edge.to], ancestors, ++level)
+                    }
                 }
 
             })
@@ -67,37 +85,52 @@ var Export = (function () {
         leafNodes.forEach(function(leafNode){
             var lineLabels=[];
             var lineIds=[];
-            lineLabels.push(leafNode.label || leafNode.id)
+            var leafLabel=leafNode.id
+            if(leafLabel.indexOf("?_")==0)//datatype property
+                leafLabel=leafLabel.substring(leafLabel.lastIndexOf("/")+1)
+            else
+                leafLabel=leafNode.label || leafNode.id
+            lineLabels.push(leafLabel)
             lineIds.push( leafNode.id)
             for( var ancestorLevel in leafNode.ancestors){
-                var label=""
-                var id=""
+                var labels=""
+                var ids=""
               leafNode.ancestors[ancestorLevel].forEach(function(item,index){
                   if(index>0) {
-                      label += " , "
-                      id += " , "
+                      labels += " , "
+                      ids += " , "
                   }
-                 label+=nodesMap[item].label || item
-                  id+=id
+                  var label= item;
+                  if(nodesMap[item].data) {
+                      label = nodesMap[item].data.label || item
+
+                  }
+
+                 labels+=label
+                  ids+=item
                 })
 
 
-                lineLabels.push(label)
-                lineIds.push( id)
+                lineLabels.push(labels)
+               lineIds.push( ids)
 
             }
-            var row=lineLabels.concat(lineIds)
+            var row=lineLabels;//.concat(lineIds)
             colsCount=Math.max(colsCount, row.length)
             dataSet.push(row)
 
+        })
+
+        dataSet.sort(function(a,b){
+            return a.length-b.length
         })
         var cols=[]
         for (var i = 1; i <= colsCount; i++) {
             cols.push({title: "Label_" + i, defaultContent: ""})
         }
-        for (var i = 1; i <= colsCount; i++) {
+     /*   for (var i = 1; i <= colsCount; i++) {
             cols.push({title: "Uri_" + i, defaultContent: ""})
-        }
+        }*/
         self.showDataTable(cols, dataSet)
 
 
@@ -106,7 +139,7 @@ var Export = (function () {
 
 
 
-    self.exportGraphToDataTable = function () {
+    self.exportGraphToDataTableX = function () {
         var nodes = visjsGraph.data.nodes.get()
         var edges = visjsGraph.data.edges.get();
 
@@ -320,7 +353,8 @@ var label=obj.data.label
                         fieldSeparator: ';'
                     },
                     'copy'
-                ]
+                ],
+                order: []
 
 
             })

@@ -1540,7 +1540,9 @@ var Lineage_classes = (function () {
                     }
 
                 })
-
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    self.drawNewGraph(visjsData)
+                }
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
                 visjsGraph.network.fit()
@@ -1561,6 +1563,8 @@ var Lineage_classes = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
+            if(classIds=="all")
+                classIds=null
             MainController.UI.message("")
 
             Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1}, function (err, result) {
@@ -1573,14 +1577,44 @@ var Lineage_classes = (function () {
                 }
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = visjsGraph.getExistingIdsMap()
+              var isNewGraph=false;
+                if(Object.keys(existingNodes).length>0)
+                    isNewGraph=true
                 var color = self.getSourceColor(source)
                 //  console.log(JSON.stringify(result, null, 2))
                self.currentExpandLevel+=1
                 result.forEach(function (item) {
+
+
+                    if (!existingNodes[item.concept.value]) {
+                        existingNodes[item.concept.value] = 1;
+                        var color = self.getSourceColor(source)
+                        var shape = Lineage_classes.defaultShape;
+                        var size = Lineage_classes.defaultShapeSize
+                        visjsData.nodes.push({
+                            id: item.concept.value,
+                            label: item.conceptLabel.value,
+                            shape: shape,
+                            size: size,
+                            color: color,
+                            level:  self.currentExpandLevel,
+                            data: {
+                                source: source,
+                                id: item.concept.value,
+                                label: item.conceptLabel.value,
+                                varName: "value",
+
+                            }
+                        })
+
+                    }
+
+
+
                     var shape = Lineage_classes.defaultShape;
                     var size = Lineage_classes.defaultShapeSize
                     var color
-                    var size = Lineage_classes.defaultShapeSize
+
                     if (!item.value) {
                         color = "#ddd"
                         item.value = {value: "?_" + item.prop.value}
@@ -1641,9 +1675,13 @@ var Lineage_classes = (function () {
 
                 })
 
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-                visjsGraph.network.fit()
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    self.drawNewGraph(visjsData)
+                } else {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                    visjsGraph.network.fit()
+                }
                 $("#waitImg").css("display", "none");
 
             })

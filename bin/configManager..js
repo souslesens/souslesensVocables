@@ -52,6 +52,12 @@ var ConfigManager = {
             callback(err, profiles);
         });
     },
+    getUsers: function (options, callback) {
+        var profilesPath = path.join(__dirname, "../config/users.json");
+        jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
+            callback(err, profiles);
+        });
+    },
     getSources: function (options, callback) {
         var sourcesPath = path.join(__dirname, "../config/sources.json");
         jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
@@ -89,7 +95,7 @@ var ConfigManager = {
 
                                 graphUri: graphUri,
                                 schemaType: "SKOS",
-                                predicates: { lang: options.lang },
+                                predicates: {lang: options.lang},
                                 color: "#9edae3",
                             };
                         } else if (options.type == "OWL") {
@@ -143,6 +149,35 @@ var ConfigManager = {
             }
         );
     },
+
+  /*  getProfilesSourcesMatrix: function (callback) {
+        ConfigManager.getProfiles(null, function (err, profiles) {
+            if (err)
+                return callback(err)
+
+        })
+
+
+    }
+    ,
+    getUserSourcesMatrix: function () {
+        ConfigManager.getProfiles(null, function (err, profiles) {
+            if (err)
+                return callback(err)
+            ConfigManager.getUsers(null, function (err, profiles) {
+                if (err)
+                    return callback(err)
+
+            })
+        })
+
+
+    }*/
 };
 ConfigManager.getGeneralConfig();
 module.exports = ConfigManager;
+
+
+//ConfigManager.getProfilesSourcesMatrix()
+
+

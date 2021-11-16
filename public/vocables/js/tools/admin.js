@@ -7,7 +7,10 @@ var Admin=(function(){
     self.onLoaded = function () {
     var html="<button onclick='Admin.refreshIndexes()'>refreshIndexes </button>"+
        " <button onclick='Admin.exportNT()'>export NT </button>"+
-        " <button onclick='Admin.getClassesLineage()'>getLineage </button>"
+        " <button onclick='Admin.getClassesLineage()'>getLineage </button>"+
+        " <br><button onclick='Admin.showUserSources()'>showUserSources </button>"
+
+
         $("#sourceDivControlPanelDiv").html(html)
     }
 
@@ -90,6 +93,55 @@ if(sources.length!=1)
 
 
 
+    self.getUserAllowedSources=function(sourcesSelection) {
+        var sources=[]
+        Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
+            MainController.initControllers()
+            if (sourcesSelection && sourcesSelection.indexOf(sourceLabel) < 0)
+                return
+            if (Config.sources[sourceLabel].isDraft)
+                return;
+            if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
+                return;
+            if ((Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) || Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1)
+                return;
+            sources.push(sourceLabel)
+        })
+        return sources;
+
+    }
+    self.ShowProfilesSourcesMatrix=function(){
+
+
+    }
+
+    self.ShowUsersSourcesMatrix=function(){
+
+    }
+
+    self.showUserSources=function(callback) {
+        var str = "";
+var sources=[]
+        Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
+
+            if (false &&  Config.sources[sourceLabel].isDraft)
+                return;
+            if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
+                return;
+            if ((Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) || Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1)
+                return;
+            str += "<tr><td>"+sourceLabel + "</td><td>" + Config.sources[sourceLabel].group + "</td><td>" + Config.sources[sourceLabel].schemaType + "</td><td>" + Config.sources[sourceLabel].sparql_server.url +"</td><td>" + Config.sources[sourceLabel].graphUri + "</td></tr>"
+            sources.push(sourceLabel)
+
+
+        })
+
+        if(callback)
+            return callback(sources)
+        var html="<div style='width: 800px;height: 800px ; overflow: auto'><table>"+str+"</table></div>"
+        $("#graphDiv").html(html)
+
+    }
 
 
 

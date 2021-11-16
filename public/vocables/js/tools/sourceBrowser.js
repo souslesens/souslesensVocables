@@ -75,6 +75,7 @@ var SourceBrowser = (function () {
             node = self.currentGraphNode
         if (!node)
             return;
+        Lineage_blend.addNodeToAssociationNode(node)
         Clipboard.copy({
                 type: "node",
                 id: node.data.id,

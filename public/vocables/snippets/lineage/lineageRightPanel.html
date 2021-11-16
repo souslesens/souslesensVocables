@@ -22,7 +22,7 @@
             <li><a href="#Lineage_ClassesTab">Classes</a></li>
 
             <li><a href="#LineagePropertiesTab">Properties</a></li>
-         <!--   <li><a href="#KGqueryTab">Asset Q</a></li>-->
+          <!--  <li><a href="#LineageConstraintsTab">Constaints</a></li>-->
 
         </ul>
 
@@ -31,14 +31,9 @@
 
             <div id="GenericTools_searchAllDiv"  style="height: 50px"></div>
             <div id="Lineage_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd" ></div>
-            <!--div style="width: 360px;height: 500px"-->
             <div class="jstreeContainer" style="width:90%">
             <div  id="LineagejsTreeDiv"></div>
             </div>
-            <!--/div-->
-
-            <!--     <button onclick='Lineage_classes.drawCfihosQuantumMapping(null,"CFIHOS-ISO")'>cfihosQuantumMapping</button>-->
-
         </div>
 
 
@@ -52,23 +47,25 @@
             <div>
                 <input type='checkbox'  id='LineageProperties_allExactMatchSearchCBX'>Exact Match
 
-            <!--    <input type='checkbox' id='LineageProperties_searchInAllSources'>All sources--->
             </div>
-        <!--    <button onclick='Lineage_properties.drawRangeAndDomainsGraph()'>draw ranges and domains</button>
-
-            <button onclick='Lineage_properties.drawPredicateTriples()'>draw predicate triples</button>-->
             <div class="jstreeContainer" style="width:90%">
             <div class="jstree" id="Lineage_propertiesTree" ></div>
             </div>
-            <!--   range and domain <select id="Lineage_propertiesTree" onchange="Lineage_properties.drawGraph($(this).val())"> </select><br>--W
 
-                <div id="LineageProperties_propertyInfosDiv"></div>-->
 
         </div>
-    <!--    <div id="KGqueryTab">
+ <!--  <div id="LineageConstraintsTab">
+       <div>
+           <button onclick="Lineage_constraints.listAll()">List all</button>
+           <button onclick="Lineage_constraints.graphAll()">Graph all</button>
+           <button onclick="Lineage_constraints.export()">Export</button>
 
-        </div>-->
-    </div>
+       </div>
+       <div class="jstreeContainer" style="width:90%">
+           <div class="jstree" id="Lineage_constaintsTree" ></div>
+       </div>
+        </div>
+    </div>-->
 
 
 </div>

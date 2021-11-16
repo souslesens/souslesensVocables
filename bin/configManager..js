@@ -27,6 +27,7 @@ var ConfigManager = {
         var err = null;
         try {
             config = JSON.parse("" + str);
+            config.version = process.env.npm_package_version;
             console.log(config, null, 2);
             if (!config.data_dir) config.data_dir = path.join(__dirname, "../data/");
 

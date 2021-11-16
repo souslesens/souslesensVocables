@@ -32,6 +32,14 @@ router.get("/", ensureLoggedIn(), function (req, res, next) {
 });
 
 if (!config.disableAuth) {
+    ensureLoggedIn = function ensureLoggedIn(options) {
+        return function (req, res, next) {
+            if (!req.isAuthenticated || !req.isAuthenticated()) {
+                return res.redirect(401, "/login");
+            }
+            next();
+        };
+    };
     // Login route
     router.get("/login", function (req, res, next) {
         res.render("login", { title: "souslesensVocables - Login" });
@@ -136,9 +144,6 @@ router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
     }
 });
 
-
-
-
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     let sampleFile;
     let uploadPath;
@@ -153,9 +158,6 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
         });
     }
 });
-
-
-
 
 router.post(
     serverParams.routesRootUrl + "/slsv",

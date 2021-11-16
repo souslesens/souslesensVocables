@@ -8,7 +8,7 @@ var util = require("../util.");
 var httpProxy = require("../httpProxy.");
 var socket = require("../socketManager.");
 const ConfigManager = require("../configManager.");
-var etl=require("etl")
+var etl = require("etl");
 var async = require("async");
 //var annotatorLive = require('../annotatorLive.')
 
@@ -52,27 +52,23 @@ var DirContentAnnotator = {
             if (err) return callback(err);
             var rootFileName = null;
 
-
             fs.createReadStream(tempzip)
                 .pipe(unzipper.Parse())
-                .pipe(etl.map(entry => {
-                    var type = entry.type;
-                    if (type == "File") {
-                        var fileName = entry.path;
-                        var array = fileName.split("/");
-                        var tempFileName = uploadDirPath + array[array.length - 1];
-                        tempFileNames.push(tempFileName);
-                        fileNames.push(fileName);
-                        return entry
-                            .pipe(etl.toFile(tempFileName))
-                            .promise();
-                    }
-                    else
-                        entry.autodrain();
-                }))
+                .pipe(
+                    etl.map((entry) => {
+                        var type = entry.type;
+                        if (type == "File") {
+                            var fileName = entry.path;
+                            var array = fileName.split("/");
+                            var tempFileName = uploadDirPath + array[array.length - 1];
+                            tempFileNames.push(tempFileName);
+                            fileNames.push(fileName);
+                            return entry.pipe(etl.toFile(tempFileName)).promise();
+                        } else entry.autodrain();
+                    })
+                )
 
-
-         /*   fs.createReadStream(tempzip)
+                /*   fs.createReadStream(tempzip)
                 .pipe(unzipper.Parse())
                 .on("entry", function (entry) {
                     var type = entry.type;

@@ -1,6 +1,6 @@
 {
   "name": "souslesensvocables",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -15,8 +15,8 @@
     "prettier": "^2.4.1"
   },
   "dependencies": {
-    "@emotion/react": "^11.5.0",
-    "@emotion/styled": "^11.3.0",
+    "@emotion/react": "^11.6.0",
+    "@emotion/styled": "^11.6.0",
     "@futpib/tika-server-client": "0.0.5",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/types": "^5.1.0",
@@ -41,7 +41,7 @@
     "express-fileupload": "^1.2.1",
     "express-session": "^1.17.2",
     "html-entities": "^2.3.2",
-    "http-errors": "~1.8.0",
+    "http-errors": "~1.8.1",
     "iconv-lite": "^0.6.3",
     "imap": "^0.8.19",
     "inflected": "^2.1.0",
@@ -84,7 +84,7 @@
     "unzipper": "^0.10.11",
     "util": "^0.12.4",
     "winston": "^3.3.3",
-    "xlsx": "^0.17.3",
+    "xlsx": "^0.17.4",
     "xmldom": "^0.6.0",
     "xslt-processor": "^0.11.5"
   }

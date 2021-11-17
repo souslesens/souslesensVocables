@@ -1,6 +1,6 @@
 {
   "name": "souslesensvocables",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -9,7 +9,10 @@
     "format": "prettier -w --tab-width=4 --print-width=200 *.js {bin,data,other,routes,views,mainapp}/**/*.js",
     "ncu": "ncu",
     "lint": "prettier --check --tab-width=4 --print-width=200 *.js {bin,data,other,routes,views,mainapp}/**/*.js",
-    "ci": "npm run lint && npm run ncu"
+    "ci": "npm run lint && npm run ncu",
+    "patch": " npm version --no-git-tag-version --no-commit-hooks patch",
+    "minor": " npm version --no-git-tag-version --no-commit-hooks minor",
+    "major": " npm version --no-git-tag-version --no-commit-hooks major"
   },
   "devDependencies": {
     "prettier": "^2.4.1"
@@ -19,8 +22,8 @@
     "@emotion/styled": "^11.6.0",
     "@futpib/tika-server-client": "0.0.5",
     "@material-ui/icons": "^4.11.2",
-    "@material-ui/types": "^5.1.0",
-    "@mui/icons-material": "^5.1.0",
+    "@material-ui/types": "^5.1.8",
+    "@mui/icons-material": "^5.1.1",
     "@mui/x-data-grid": "^4.0.2",
     "@triply/yasgui": "^4.2.20",
     "async": "^3.2.2",
@@ -29,7 +32,7 @@
     "chardet": "^1.4.0",
     "connect-ensure-login": "^0.1.1",
     "constantinople": "^4.0.1",
-    "cookie-parser": "~1.4.5",
+    "cookie-parser": "~1.4.6",
     "csv-parser": "^3.0.0",
     "csvtojson": "^2.0.10",
     "debug": "~4.3.2",

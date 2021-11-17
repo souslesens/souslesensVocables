@@ -26,8 +26,7 @@ jobs:
           images: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.DOCKER_REGISTRY_PATH }}
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=schedule
-            type=ref,event=tag
+            type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}

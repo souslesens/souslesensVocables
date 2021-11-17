@@ -231,7 +231,7 @@ var Sparql_common = (function () {
         graphUris.forEach(function (graphUri, index) {
             fromStr += from + "  <" + graphUri + "> "
         })
-        if (!withoutImports)
+        if (withoutImports===undefined)
             withoutImports = self.withoutImports
         if (!withoutImports) {
             var imports = Config.sources[source].imports;

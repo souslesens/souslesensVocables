@@ -8,8 +8,8 @@
         max-height: 500px;
     }
 
-    .Lineage_propertiesTree{
-        width:inherit !important;
+    .Lineage_propertiesTree {
+        width: inherit !important;
     }
 
 </style>
@@ -22,52 +22,59 @@
             <li><a href="#Lineage_ClassesTab">Classes</a></li>
 
             <li><a href="#LineagePropertiesTab">Properties</a></li>
-          < <li><a href="#LineageRelationsTab">Relations</a></li>
+            <li><a href="#LineageRelationsTab">Relations</a></li>
 
         </ul>
 
 
-        <div class="" id="Lineage_ClassesTab" >
+        <div class="" id="Lineage_ClassesTab">
 
-            <div id="GenericTools_searchAllDiv"  style="height: 50px"></div>
-            <div id="Lineage_sourceLabelDiv" style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd" ></div>
+            <div id="GenericTools_searchAllDiv" style="height: 50px"></div>
+            <div id="Lineage_sourceLabelDiv"
+                 style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
             <div class="jstreeContainer" style="width:90%">
-            <div  id="LineagejsTreeDiv"></div>
+                <div id="LineagejsTreeDiv"></div>
             </div>
         </div>
-
 
 
         <div id="LineagePropertiesTab">
             <div>
                 <input id='LineageProperties_searchAllSourcesTermInput' style="width: 200px" value="">
-                <button id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>Search</button>
+                <button id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>
+                    Search
+                </button>
                 <button onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
             </div>
             <div>
-                <input type='checkbox'  id='LineageProperties_allExactMatchSearchCBX'>Exact Match
+                <input type='checkbox' id='LineageProperties_allExactMatchSearchCBX'>Exact Match
 
             </div>
             <div class="jstreeContainer" style="width:90%">
-            <div class="jstree" id="Lineage_propertiesTree" ></div>
+                <div class="jstree" id="Lineage_propertiesTree"></div>
             </div>
 
 
         </div>
- < <div id="LineageRelationsTab">
-       <div>
-          Properties <button onclick="Lineage_constraints.listAllProperties()">List all</button>
-           <button onclick="Lineage_constraints.graphAllProperties()">Graph all</button>
-           <button onclick="Lineage_constraints.exportProperties()">Export</button>
-<br>
-           Restrictions <button onclick="Lineage_constraints.listAllRestrictions()">List all</button>
-           <button onclick="Lineage_constraints.graphAllRestrictions()">Graph all</button>
-           <button onclick="Lineage_constraints.exportRestrictions()">Export</button>
+        <div id="LineageRelationsTab">
+            <div>
+                Properties
+                <button onclick="Lineage_relations.setAllProperties('jstree')">List all</button>
+                <button onclick="Lineage_relations.setAllProperties('visjs')">Graph all</button>
+                <button onclick="Lineage_relations.exportProperties()">Export</button>
+                <br>
+                Restrictions
+                <button onclick="Lineage_relations.listAllRestrictions()">List all</button>
+                <button onclick="Lineage_relations.graphAllRestrictions()">Graph all</button>
+                <button onclick="Lineage_relations.exportRestrictions()">Export</button>
 
-       </div>
-       <div class="jstreeContainer" style="width:90%">
-           <div class="jstree" id="Lineage_constaintsTree" ></div>
-       </div>
+            </div>
+          <!--  <div class="jstreeContainer" style="width:90%">
+                <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
+            </div>-->
+             <div class="jstreeContainer" style="width:90%">
+                  <div class="jstree" id="Lineage_relationsTree" ></div>
+              </div>
         </div>
     </div>
 
@@ -75,12 +82,12 @@
 </div>
 
 <script>
-    SourceBrowser.targetDiv="LineagejsTreeDiv"
+    SourceBrowser.targetDiv = "LineagejsTreeDiv"
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
-    setTimeout(function(){
-        $("#GenericTools_searchInAllSources").prop("checked",false)
-    },300)
- //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
+    setTimeout(function () {
+        $("#GenericTools_searchInAllSources").prop("checked", false)
+    }, 300)
+    //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
     $("#Lineage_RighPanelTabs").tabs()
 
 </script>

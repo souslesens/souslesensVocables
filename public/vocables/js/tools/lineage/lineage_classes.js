@@ -47,6 +47,7 @@ var Lineage_classes = (function () {
 
 
             MainController.UI.openRightPanel()
+            $("#actionDivContolPanelDiv").html("")
             $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
             //   MainController.UI.toogleRightPanel("open");
             $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")

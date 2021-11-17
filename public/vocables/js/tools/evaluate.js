@@ -132,6 +132,8 @@ var Evaluate = (function () {
             var sourceNodes = $("#annotate_resourcesTreeDiv").jstree(true).get_checked();
             var sources = {}
             sourceNodes.forEach(function (sourceLabel) {
+                if(!Config.sources[sourceLabel])
+                    return;
                 if (!Config.sources[sourceLabel].color)
                     Config.sources[sourceLabel].color = common.palette[Object.keys(sourceLabel).length];
                 var sourceObj = (Config.sources[sourceLabel])

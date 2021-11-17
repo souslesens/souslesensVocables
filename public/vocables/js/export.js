@@ -318,7 +318,7 @@ var Export = (function () {
         })
 
         for (var i = 1; i <= colsMax; i++) {
-            cols.push({title: "Label_" + i, defaultContent: ""})
+            cols.push({title: "Label_" + i, defaultContent: "", "width": "20%" })
         }
         for (var i = 1; i <= colsMax; i++) {
             cols.push({title: "Uri_" + i, defaultContent: ""})
@@ -327,21 +327,26 @@ var Export = (function () {
     }
 
 
-    self.showDataTable = function (div, cols, dataSet) {
+    self.showDataTable = function (div, cols, dataSet,buttons) {
         if (!div) {
 
             $('#mainDialogDiv').dialog("open")
             $('#mainDialogDiv').html("<table id='dataTableDiv'></table>");
             div = 'dataTableDiv'
+        }else{
+            $('#'+div).html("<table id='dataTableDiv'></table>");
         }
         setTimeout(function () {
-            $('#' + div).DataTable({
+
+            if(!buttons)
+                buttons='Bfrtip'
+            $('#dataTableDiv' ).DataTable({
                 data: dataSet,
                 columns: cols,
 
                 // async: false,
                 "pageLength": 10,
-                dom: 'Bfrtip',
+                dom: buttons,
                 /*buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'
                 ]*/
@@ -354,6 +359,9 @@ var Export = (function () {
                     },
                     'copy'
                 ],
+               /* 'columnDefs': [
+                    {'max-width': '20%', 'targets': 0}
+                ],*/
                 order: []
 
 

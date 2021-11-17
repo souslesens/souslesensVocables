@@ -726,10 +726,18 @@ var Standardizer = (function () {
 
     }
     self.onSunBurstClick = function (node) {
+        $("#Standardizer_matrixCellDataDiv").html("")
         if (node.parent && node.parent.name == "orphans")
             self.showFuzzyMatchSearch(node.name)
         else {
             if (node.parent && node.parent.ancestors) {
+                var cellData={
+                    index:node.parent.ancestors[0],
+                    name:node.name,
+                    uri:node.id
+
+                }
+                self.editCellData(cellData)
 
             }
         }
@@ -1863,7 +1871,7 @@ var Standardizer = (function () {
 
         }, function (err) {
             // $("#" + resultDiv).html(html)
-
+            $('#'+resultDiv).html();
             $('#'+resultDiv).html("<table id='dataTableDiv'></table>");
 
         setTimeout(function () {

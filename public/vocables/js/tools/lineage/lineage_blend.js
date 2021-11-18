@@ -31,15 +31,25 @@ var Lineage_blend = (function () {
     }
 
 
-    self.addNodeToAssociationNode = function (node) {
-        if (!self.currentAssociation || self.currentAssociation.length == 2) {
+    self.addNodeToAssociationNode = function (node,role) {
+        if(role=="source") {
+            self.currentAssociation = [node.data,[]]
+            $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
+            $("#lineage_targetNodeDiv").html("")
+        }
+        else  if(role=="target") {
+            self.currentAssociation[1]=node.data;
+            $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
+        }
+     /*   if (!self.currentAssociation || self.currentAssociation.length == 2) {
             self.currentAssociation = [node.data]
             $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
             $("#lineage_targetNodeDiv").html("")
         } else {
             self.currentAssociation.push(node.data);
             $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
-        }
+        }*/
+
         if (self.currentAssociation && self.currentAssociation.length == 2) {
             $("#lineage_blendButtonsDiv").css('display', 'block')
         } else {
@@ -67,10 +77,10 @@ var Lineage_blend = (function () {
                 if (imports || imports.indexOf(sourceNode.source) > -1) {
                     return callbackSeries()
                 }
-                if (!confirm("add  source " + sourceNode.source + " to imports of source " + Lineage_common.currentSource))
+                if (!confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
                     return callbackSeries("stop");
-                self.addImportToCurrentSource(Lineage_classes.mainSource, sourceNode.source, function (err, result) {
-                    Lineage_classes.registerSource(sourceNode.source);
+                self.addImportToCurrentSource(Lineage_classes.mainSource, targetNode.source, function (err, result) {
+                    Lineage_classes.registerSource(targetNode.source);
                     callbackSeries()
 
                 })
@@ -94,36 +104,7 @@ var Lineage_blend = (function () {
         ], function (err) {
 
         })
-        //add node source to imports if not exists
-      /*  if (sourceNode.source != Lineage_common.mainSource) {
-            var imports = Config.sources[Lineage_classes.mainSource].imports;
-            if (!imports || imports.indexOf(sourceNode.source) < 0) {
-                if (!confirm("add  source " + sourceNode.source + " to imports of source " + Lineage_common.currentSource))
-                    return;
-                self.addImportToCurrentSource(Lineage_classes.mainSource, sourceNode.source, function (err, result) {
-                    Lineage_classes.registerSource(sourceNode.source);
 
-
-                    return
-
-                    self.createProperty(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
-
-                        if (err)
-                            return alert(err);
-                        MainController.UI.message("restriction added", true)
-                    })
-
-                })
-            } else {
-                self.createProperty(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
-                    if (err)
-                        return alert(err);
-                    MainController.UI.message("restriction added", true)
-
-                })
-            }
-
-        }*/
 
 
     }
@@ -161,19 +142,20 @@ var Lineage_blend = (function () {
 
         triples.push({
             subject: propId,
-            predicate: "http://www.w3.org/2000/01/rdf-schema#range",
+            predicate: "http://www.w3.org/2000/01/rdf-schema#domain",
             object: souceNodeId
         })
         triples.push({
             subject: propId,
-            predicate: "http://www.w3.org/2000/01/rdf-schema#domain",
+            predicate: "http://www.w3.org/2000/01/rdf-schema#range",
             object: targetNodeId
         })
 
 
 
         Sparql_generic.insertTriples(source, triples, function (err, result) {
-            Lineage_classes.drawObjectProperties(null, false, Lineage_classes.mainSource)
+            self.addRelationToGraph(propId)
+           // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_classes.mainSource)
             callback(err, "DONE")
         })
     }
@@ -235,6 +217,86 @@ console.log(JSON.stringify(restrictionsTriples,null,2))
 
 
     }
+
+    self.addRelationToGraph=function(propUri){
+        var sourceNode = self.currentAssociation[0]
+        var targetNode = self.currentAssociation[1]
+
+        var existingNodes=visjsGraph.getExistingIdsMap();
+        var visjsData={nodes:[],edges:[]}
+
+        if (!existingNodes[sourceNode.id]) {
+            existingNodes[sourceNode.id] = 1;
+            visjsData.nodes.push({
+                id: sourceNode.id,
+                label: sourceNode.label,
+                shape: Lineage_classes.defaultShape,
+                size: Lineage_classes.defaultShapeSize,
+                color: Lineage_classes.getSourceColor(sourceNode.source),
+                level: Lineage_classes.currentExpandLevel,
+                data: {
+                    id: sourceNode.id,
+                    label: sourceNode.label,
+                    source:sourceNode.source
+                }
+            })
+
+        }
+
+
+        if (!existingNodes[targetNode.id]) {
+            existingNodes[targetNode.id] = 1;
+            visjsData.nodes.push({
+                id: targetNode.id,
+                label: targetNode.label,
+                shape: Lineage_classes.defaultShape,
+                size: Lineage_classes.defaultShapeSize,
+                color: Lineage_classes.getSourceColor(targetNode.source),
+                level: Lineage_classes.currentExpandLevel,
+                data: {
+                    id: targetNode.id,
+                    label: targetNode.label,
+                    source:targetNode.source
+                }
+            })
+
+        }
+
+        var edgeId=sourceNode.id+"_"+propUri+"_"+targetNode.id
+        if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1
+          var propLabel=Sparql_common.getLabelFromId(propUri)
+                visjsData.edges.push({
+                    id: edgeId,
+                    from: sourceNode.id,
+                    to:targetNode.id,
+                    label: "<i>" + propLabel + "</i>",
+                    data: {propertyId: propUri, source: Lineage_classes.mainSource},
+                    font: {multi: true, size: 10},
+                    // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
+                    //   physics:false,
+                    arrows: {
+                        from: {
+                            enabled: true,
+                            type: "bar",
+                            scaleFactor: 0.5
+                        },
+                    },
+                    dashes: true,
+                    color: Lineage_classes.objectPropertyColor
+
+                })
+
+        }
+        visjsGraph.data.nodes.add(visjsData.nodes)
+        visjsGraph.data.edges.add(visjsData.edges)
+        visjsGraph.network.fit()
+        $("#waitImg").css("display", "none");
+
+    }
+
+
+
 
 
     return self;

@@ -5,6 +5,7 @@ var Export = (function () {
     self.context = null;
     self.currentOptions = {};
     self.currentSource = null
+    self.dataTable
 
 
     self.exportGraphToDataTable = function () {
@@ -328,19 +329,23 @@ var Export = (function () {
 
 
     self.showDataTable = function (div, cols, dataSet,buttons) {
+        if ( self.dataTable){
+            self.dataTable.destroy();
+            $('#dataTableDiv').html("");
+        }
         if (!div) {
 
             $('#mainDialogDiv').dialog("open")
-            $('#mainDialogDiv').html("<table id='dataTableDiv'></table>");
+            $('#mainDialogDiv').html("<table id='dataTableDivExport'></table>");
             div = 'dataTableDiv'
         }else{
-            $('#'+div).html("<table id='dataTableDiv'></table>");
+            $('#'+div).html("<table id='dataTableDivExport'></table>");
         }
         setTimeout(function () {
 
             if(!buttons)
                 buttons='Bfrtip'
-            $('#dataTableDiv' ).DataTable({
+            self.dataTable= $('#dataTableDivExport' ).DataTable({
                 data: dataSet,
                 columns: cols,
 

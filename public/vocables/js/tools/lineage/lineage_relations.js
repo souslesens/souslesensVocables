@@ -23,14 +23,14 @@ Lineage_relations = (function () {
 
     }
 
-    self.setAllProperties = function (output) {
+    self.showAllProperties = function (output) {
         var relations = []
         var ids = []
         var labelsMap = {}
         var graphUriSourceMap = {}
         async.series([
             function (callbackSeries) {
-                Sparql_OWL.getSourceAllObjectProperties(Lineage_common.currentSource, function (err, result) {
+                Sparql_OWL.getSourceAllObjectProperties(Lineage_classes.mainSource,null,function (err, result) {
                     if (err)
                         return callbackSeries(err)
                     relations = result.results.bindings
@@ -46,7 +46,7 @@ Lineage_relations = (function () {
 
             // get graphUriSourceMap
             function (callbackSeries) {
-
+return callbackSeries()
                 var imports = Config.sources[Lineage_classes.mainSource].imports
                 if (!imports)
                     imports = []
@@ -62,6 +62,7 @@ Lineage_relations = (function () {
             },
             //getLabels and Sources
             function (callbackSeries) {
+                return callbackSeries()
                 var filter = Sparql_common.setFilter("concept", ids)
                 //   filter+=" filter (?p=rdf:type) "
                 var options = {
@@ -71,7 +72,7 @@ Lineage_relations = (function () {
                 }
                 Sparql_OWL.getItems(Lineage_common.currentSource, options, function (err, result) {
                     if (err)
-                        callbackSeries(err)
+                       return callbackSeries(err)
                     result.forEach(function (item) {
                         labelsMap[item.concept.value] = {
                             label: item.conceptLabel.value,
@@ -87,7 +88,7 @@ Lineage_relations = (function () {
             ,
             function (callbackSeries) {
 
-
+                return callbackSeries()
                 var jstreeData = [];
                 var visjsData = {nodes: [], edges: []}
                 var uniqueNodes = {}

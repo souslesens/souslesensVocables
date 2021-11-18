@@ -121,7 +121,9 @@ var Lineage_classes = (function () {
             var schemaType = Config.sources[sourceLabel].schemaType
             $("#GenericTools_searchSchemaType").val(schemaType)
 
-
+            $("#lineage_sourceNodeDiv").html("")
+            $("#lineage_targetNodeDiv").html("")
+          //  self.registerSource(sourceLabel)
             propertyColors = {}
 
             Lineage_common.currentSource = sourceLabel;
@@ -186,8 +188,10 @@ var Lineage_classes = (function () {
             if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
                 return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
             }
-            if (propertiesMap.event.altKey)
-                self.addArbitraryNodeToGraph(data)
+            if (propertiesMap.event.altKey) {
+                Lineage_blend.addNodeToAssociationNode(self.currentTreeNode,"target")
+                //   self.addArbitraryNodeToGraph(data)
+            }
             if (propertiesMap.event.ctrlKey)
                 SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
             SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
@@ -1463,8 +1467,8 @@ var Lineage_classes = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
-            if(classIds="all")
-                classIds=null
+            if (classIds = "all")
+                classIds = null
 
 
             Sparql_OWL.getObjectProperties(source, classIds, {withoutImports: 1}, function (err, result) {
@@ -2085,7 +2089,7 @@ var Lineage_classes = (function () {
                         Lineage_blend.deleteRestriction(node)
 
                     } else {//node
-                        Lineage_blend.addNodeToAssociationNode(node)
+                        Lineage_blend.addNodeToAssociationNode(node,"source")
                         return Clipboard.copy({
                             type: "lineage_node",
                             source: node.data.source,

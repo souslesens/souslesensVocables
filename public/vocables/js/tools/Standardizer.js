@@ -3,6 +3,7 @@ var Standardizer = (function () {
     self.matchCandidates = {}
     var matrixHtml = ""
     var maxCompareSource = 25
+    var maxWordsListLength=2000
     self.mode = "matrix";
     self.indexSourcesMap = {}
     self.currentAction = null;
@@ -31,9 +32,9 @@ var Standardizer = (function () {
 
         $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html")
 
-     /*   $("#rightPanelDiv").html("<br><div style='font-weight: bold'>Mapping taxonomy" +
-            // "<button onClick=\"Export.exportTeeToDataTable('Standardizer_rightJstreeDiv','#')\">toTable</button></div>"+
-            "</div><div><div id='Standardizer_rightJstreeDiv'></div></div> ")*/
+        /*   $("#rightPanelDiv").html("<br><div style='font-weight: bold'>Mapping taxonomy" +
+               // "<button onClick=\"Export.exportTeeToDataTable('Standardizer_rightJstreeDiv','#')\">toTable</button></div>"+
+               "</div><div><div id='Standardizer_rightJstreeDiv'></div></div> ")*/
         $("#graphDiv").html("")
 
         $("#accordion").accordion("option", {active: 2});
@@ -563,10 +564,15 @@ var Standardizer = (function () {
         var text = $("#Standardizer_wordsTA").val()
         if (text == "")
             return alert("Enter text to standardize")
-        var words = text.split("\n")
-        words.forEach(function (word) {
+        var words1 = text.split("\n")
+        var words = []
+        words1.forEach(function (word) {
             word = word.trim()
+            if (words.indexOf(word) < 0)
+                words.push(word)
         })
+        if(words.length>maxWordsListLength)
+            return alert(" too many words, max " +maxWordsListLength)
         self.matrixDivsMap = {}
 
         var resultSize = 1
@@ -590,9 +596,9 @@ var Standardizer = (function () {
             self.currentWordsCount += words.length
             self.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
                 var html = self.processMatrixResult(words, result, indexes)
-                MainController.UI.message(" processed items: " + (totalProcessed++))
+                MainController.UI.message(" processed items: " + (totalProcessed))
                 $("#KGmapping_matrixContainer").append(html)
-                totalProcessed += result;
+                totalProcessed += result.length;
                 searchResultArray = searchResultArray.concat(result)
                 callbackEach()
             })
@@ -602,7 +608,7 @@ var Standardizer = (function () {
             self.isWorking = null;
             if (err)
                 return alert(err)
-            MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
+            MainController.UI.message("DONE, total processed items: " + (totalProcessed),true)
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
                 $(".matrixWordNoMatch").bind("click", Standardizer.onMatrixWordNoMatchClick)
@@ -685,7 +691,7 @@ var Standardizer = (function () {
             self.isWorking = null;
             if (err)
                 return alert(err)
-            MainController.UI.message("DONE, total processed items: " + (totalProcessed++))
+            MainController.UI.message("DONE, total processed items: " + (totalProcessed++),true)
 
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
@@ -731,10 +737,10 @@ var Standardizer = (function () {
             self.showFuzzyMatchSearch(node.name)
         else {
             if (node.parent && node.parent.ancestors) {
-                var cellData={
-                    index:node.parent.ancestors[0],
-                    name:node.name,
-                    uri:node.id
+                var cellData = {
+                    index: node.parent.ancestors[0],
+                    name: node.name,
+                    uri: node.id
 
                 }
                 self.editCellData(cellData)
@@ -1776,16 +1782,15 @@ var Standardizer = (function () {
 
         if (!words || words == "")
             return alert(" no word Selected")
-        var searchType="fuzzyMatch"
+        var searchType = "fuzzyMatch"
 
         if (!Array.isArray(words)) {
-            if(words.match(/".*"/)){
-                searchType= "exactMatch"
-                words=words.replace(/"/g,"")
+            if (words.match(/".*"/)) {
+                searchType = "exactMatch"
+                words = words.replace(/"/g, "")
             }
             words = [words]
         }
-
 
 
         self.currentWordsCount = 0
@@ -1805,12 +1810,12 @@ var Standardizer = (function () {
                     return alert(err)
                 var entities = []
                 result.forEach(function (item) {
-                    if(! item.hits || !item.hits.hits)
+                    if (!item.hits || !item.hits.hits)
                         return;
                     item.hits.hits.forEach(function (hit) {
                         var entity = {
                             index: hit._index,
-                            id:  hit._source.id,
+                            id: hit._source.id,
                             score: hit._score,
                             term: hit._source.label
                         }
@@ -1823,28 +1828,31 @@ var Standardizer = (function () {
                     html = "No similar Match"
                 else {
 
-                    cols.push({title: "source", defaultContent: "",width:'50px', render: function (datum, type, row) {
-                        var indexStr= row[0];
-                        if(indexStr.length>15)
-                            indexStr=indexStr.substring(0,15)
-                            return "<span style='width:50px;background-color: " + Lineage_classes.getSourceColor(row[0]) + ";' class='standardizer_entitySource'>" +indexStr + "</span>"}})
-                    cols.push({title: "word", defaultContent: "",width:'150px'})
+                    cols.push({
+                        title: "source", defaultContent: "", width: '50px', render: function (datum, type, row) {
+                            var indexStr = row[0];
+                            if (indexStr.length > 15)
+                                indexStr = indexStr.substring(0, 15)
+                            return "<span style='width:50px;background-color: " + Lineage_classes.getSourceColor(row[0]) + ";' class='standardizer_entitySource'>" + indexStr + "</span>"
+                        }
+                    })
+                    cols.push({title: "word", defaultContent: "", width: '150px'})
                     cols.push({
                         title: "action", render: function (datum, type, row) {
 
-                            return "<button onclick='  SourceBrowser.showNodeInfos (\""+row[0]+"\",\"" + row[2]+ "\",\"mainDialogDiv\")'>infos</button>"
-                             //   "<button onclick='KGadvancedMapping.setAsMatchCandidate(\"" + row[2] + "\")'>Select</button></div>"
+                            return "<button onclick='  SourceBrowser.showNodeInfos (\"" + row[0] + "\",\"" + row[2] + "\",\"mainDialogDiv\")'>infos</button>"
+                            //   "<button onclick='KGadvancedMapping.setAsMatchCandidate(\"" + row[2] + "\")'>Select</button></div>"
                         },
-                        width:'50px'
+                        width: '50px'
                     })
 
 
                     entities.forEach(function (entity) {
                         var id = "dictionary" + common.getRandomHexaId(5)
                         self.currentdictionaryEntryEntities[id] = entity
-                        var source=Standardizer.indexSourcesMap[entity.index]
-                        if(source)
-                        dataSet.push([source, entity.term, entity.id])
+                        var source = Standardizer.indexSourcesMap[entity.index]
+                        if (source)
+                            dataSet.push([source, entity.term, entity.id])
 
                         if (false) {
 
@@ -1871,37 +1879,37 @@ var Standardizer = (function () {
 
         }, function (err) {
             // $("#" + resultDiv).html(html)
-            $('#'+resultDiv).html();
-            $('#'+resultDiv).html("<table id='dataTableDiv'></table>");
+            $('#' + resultDiv).html();
+            $('#' + resultDiv).html("<table id='dataTableDiv'></table>");
 
-        setTimeout(function () {
-
-
-             var   buttons='Bi'
-            $('#dataTableDiv' ).DataTable({
-                data: dataSet,
-                columns: cols,
-
-                // async: false,
-                "pageLength": 100,
-                dom: buttons,
-                buttons: [
-                    {
-                        extend: 'csvHtml5',
-                        text: 'Export CSV',
-                        fieldBoundary: '',
-                        fieldSeparator: ';'
-                    },
-
-                ],
-                order: []
+            setTimeout(function () {
 
 
-            })
+                var buttons = 'Bi'
+                $('#dataTableDiv').DataTable({
+                    data: dataSet,
+                    columns: cols,
+
+                    // async: false,
+                    "pageLength": 100,
+                    dom: buttons,
+                    buttons: [
+                        {
+                            extend: 'csvHtml5',
+                            text: 'Export CSV',
+                            fieldBoundary: '',
+                            fieldSeparator: ';'
+                        },
+
+                    ],
+                    order: []
 
 
-        }, 200)
-         //   Export.showDataTable(resultDiv, cols, dataSet,'Bi')
+                })
+
+
+            }, 200)
+            //   Export.showDataTable(resultDiv, cols, dataSet,'Bi')
         })
 
     }

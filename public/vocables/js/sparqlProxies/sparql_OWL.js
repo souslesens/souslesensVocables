@@ -1005,14 +1005,21 @@ var Sparql_OWL = (function () {
         }
 
 
-        self.getSourceAllObjectProperties = function (sourceLabel, callback) {
+        self.getSourceAllObjectProperties = function (sourceLabel,filterSource, callback) {
             var from = Sparql_common.getFromStr(sourceLabel)
+            var filterSourceGraphUriStr=""
+            if(filterSource) {
+                if(Config.sources[filterSource] && Config.sources[filterSource].graphUri) {
+                    var filterSourceGraphUri = Config.sources[filterSource].graphUri
+                    filterSourceGraphUriStr = " filter (?g=<"+filterSourceGraphUri+"> )"
+                }
+            }
             var query =
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "select distinct * " + from + " WHERE {   {?prop ?p ?x OPTIONAL{?prop rdfs:label ?propLabel.} \n" +
-                "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }}  limit 10000"
+                "select distinct * " + from + "   WHERE {{ ?domain rdfs:label ?domainLabel.  ?range rdfs:label ?rangeLabel. ?prop ?p ?x OPTIONAL{?prop rdfs:label ?propLabel.} \n" +
+                "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }"+filterSourceGraphUriStr+"}  limit 10000"
 
             var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {source:sourceLabel}, null,function (err, result) {

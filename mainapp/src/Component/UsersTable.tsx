@@ -12,7 +12,7 @@ import { ulid } from 'ulid';
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
-    const unwrappedSources = SRD.unwrap([], identity, model.users)
+    const unwrappedSources = SRD.unwrap([], (users => users.sort((x, y) => x.login.localeCompare(y.login))), model.users)
 
     const deleteUser = (user: User) => {
 

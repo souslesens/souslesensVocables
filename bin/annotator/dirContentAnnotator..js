@@ -63,13 +63,13 @@ var DirContentAnnotator = {
                             var tempFileName = uploadDirPath + array[array.length - 1];
                             tempFileNames.push(tempFileName);
                             fileNames.push(fileName);
-                            console.log(tempFileName)
+                            console.log(tempFileName);
 
-                            entry.pipe(etl.toFile(tempFileName)).promise(function(resolve,reject){
-                                var x=resolve
+                            entry.pipe(etl.toFile(tempFileName)).promise(function (resolve, reject) {
+                                var x = resolve;
                             });
 
-                            return
+                            return;
                         } else entry.autodrain();
                     })
                 )

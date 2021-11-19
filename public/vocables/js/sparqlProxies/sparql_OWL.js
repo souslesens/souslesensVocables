@@ -30,7 +30,7 @@ var Sparql_OWL = (function () {
             if (topClassFilter && topClassFilter != "" && topClassFilter != "_default")
                 strFilterTopConcept = topClassFilter;
             else
-                strFilterTopConcept = "?topConcept ?x ?y. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
+                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -1005,21 +1005,17 @@ var Sparql_OWL = (function () {
         }
 
 
-        self.getSourceAllObjectProperties = function (sourceLabel,filterSource, callback) {
+        self.getSourceAllObjectProperties = function (sourceLabel,options, callback) {
             var from = Sparql_common.getFromStr(sourceLabel)
-            var filterSourceGraphUriStr=""
-            if(filterSource) {
-                if(Config.sources[filterSource] && Config.sources[filterSource].graphUri) {
-                    var filterSourceGraphUri = Config.sources[filterSource].graphUri
-                    filterSourceGraphUriStr = " filter (?g=<"+filterSourceGraphUri+"> )"
-                }
-            }
+
             var query =
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct * " + from + "   WHERE {{ ?domain rdfs:label ?domainLabel.  ?range rdfs:label ?rangeLabel. ?prop ?p ?x OPTIONAL{?prop rdfs:label ?propLabel.} \n" +
-                "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }"+filterSourceGraphUriStr+"}  limit 10000"
+                "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }" +
+              //  " GRAPH ?g { ?domain rdfs:label ?domainLabel.?range rdfs:label ?domainLabel. }" +
+                "}  limit 10000"
 
             var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, {source:sourceLabel}, null,function (err, result) {

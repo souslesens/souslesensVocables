@@ -50,6 +50,7 @@ var Lineage_classes = (function () {
             $("#actionDivContolPanelDiv").html("")
             $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
             //   MainController.UI.toogleRightPanel("open");
+            $("#rightPanelDiv").html("")
             $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")
 
             //  $("#accordion").accordion("option", {active: 1});
@@ -123,7 +124,7 @@ var Lineage_classes = (function () {
 
             $("#lineage_sourceNodeDiv").html("")
             $("#lineage_targetNodeDiv").html("")
-          //  self.registerSource(sourceLabel)
+            //  self.registerSource(sourceLabel)
             propertyColors = {}
 
             Lineage_common.currentSource = sourceLabel;
@@ -189,7 +190,7 @@ var Lineage_classes = (function () {
                 return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
             }
             if (propertiesMap.event.altKey) {
-                Lineage_blend.addNodeToAssociationNode(self.currentTreeNode,"target")
+                Lineage_blend.addNodeToAssociationNode(self.currentTreeNode, "target")
                 //   self.addArbitraryNodeToGraph(data)
             }
             if (propertiesMap.event.ctrlKey)
@@ -209,6 +210,7 @@ var Lineage_classes = (function () {
         self.drawTopConcepts = function (source, addToGraph) {
             self.currentExpandLevel = 1
             if (!addToGraph) {
+                visjsGraph.clearGraph()
                 self.initUI();
 
                 if (!source)
@@ -220,7 +222,7 @@ var Lineage_classes = (function () {
             if (!Config.sources[source])
                 return
             Lineage_common.currentSource = source;
-            self.soucesLevelMap[source] = {children: 0}
+            self.soucesLevelMap[source] = {visible: true, children: 0}
 
             self.registerSource(source)
 
@@ -236,37 +238,45 @@ var Lineage_classes = (function () {
             var imports = Config.sources[source].imports;
             var importGraphUrisMap = {}
 
+            if (!existingNodes[source]) {
+                existingNodes[source]=1
+                var sourceNode = {
+                    id: source,
+                    label: source,
+                    shape: "box",
+                    size: Lineage_classes.defaultShapeSize,
+                    color: self.getSourceColor(source),
+                    data: {source: source},
+                    level: 1,
 
-            var sourceNode = {
-                id: source,
-                label: source,
-                shape: "box",
-                size: Lineage_classes.defaultShapeSize,
-                color: self.getSourceColor(source),
-                level: 1,
-
+                }
             }
             visjsData.nodes.push(sourceNode)
             if (imports) {
 
                 imports.forEach(function (importedSource) {
+                    self.soucesLevelMap[importedSource] = {visible: true, children: 0}
                     var graphUri = Config.sources[importedSource].graphUri
                     var color = self.getSourceColor(importedSource)
                     if (!graphUri)
                         return;
 
-                    var importedSourceNode = {
-                        id: importedSource,
-                        label: importedSource,
-                        shape: "box",
-                        level: 1,
-                        size: Lineage_classes.defaultShapeSize,
-                        color: color
+                    if (!existingNodes[importedSource]) {
+                        existingNodes[importedSource] = 1
+                        var importedSourceNode = {
+                            id: importedSource,
+                            label: importedSource,
+                            shape: "box",
+                            level: 1,
+                            size: Lineage_classes.defaultShapeSize,
+                            data: {source: importedSource},
+                            color: color
 
+                        }
+                        importGraphUrisMap[graphUri] = importedSource
+
+                        visjsData.nodes.push(importedSourceNode)
                     }
-                    importGraphUrisMap[graphUri] = importedSource
-
-                    visjsData.nodes.push(importedSourceNode)
 
 
                     var edgeId = importedSource + "_" + source
@@ -1055,9 +1065,6 @@ var Lineage_classes = (function () {
             }
             MainController.UI.message("");
 
-            //    var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
-
-
             var sources = [source]
 
 
@@ -1131,6 +1138,7 @@ var Lineage_classes = (function () {
 
         }
         self.addChildrenToGraph = function (source, nodeIds) {
+            self.showHideCurrentSourceNodes(true)
             var parentIds
             if (!source) {
                 if (Lineage_common.currentSource)
@@ -1146,11 +1154,15 @@ var Lineage_classes = (function () {
 
             } else {
 
-                var sourcesIdsMap = Lineage_classes.getGraphSourcesIdsMap(nodeIds)
-                parentIds = sourcesIdsMap[source]
-                if (!parentIds || parentIds.length == 0)
-                    return alert("select a source");//  return self.drawTopConcepts(source, true)
-                // parentIds = expandedLevels[source][expandedLevels[source].length - 1];
+
+                var parentIds = []
+                var nodes = visjsGraph.data.nodes.get();
+                nodes.forEach(function (node) {
+                    if (node.data && node.data.source == source && node.data.id && node.data.id != source) {
+                        parentIds.push(node.data.id)
+                    }
+                })
+
             }
             if (parentIds.length == 0)
                 return MainController.UI.message("no parent node selected")
@@ -2024,40 +2036,6 @@ var Lineage_classes = (function () {
             })
         }
 
-        /**
-         *
-         *  return a mpa of visjGraph ids for each source (key)
-         * @param nodeIds
-         * @returns {{}}
-         */
-        self.getGraphSourcesIdsMap = function (nodeIds) {
-            if (!visjsGraph.data || !visjsGraph.data.nodes)
-                return
-            var nodes = visjsGraph.data.nodes.get();
-            var sourcesIdsMap = {}
-            nodes.forEach(function (node) {
-                if (!nodeIds || nodeIds.indexOf(node.id) > -1) {
-                    if (node.data && node.data.source) {
-                        var source = node.data.source
-                        if (!source)
-                            return;
-                        if (!sourcesIdsMap[source]) {
-                            sourcesIdsMap[source] = []
-                        }
-                        sourcesIdsMap[source].push(node.id)
-                    } else {
-
-                        ;//  console.log ("no source ")
-                    }
-
-                }
-
-            })
-
-            return sourcesIdsMap;
-
-        }
-
 
         self.graphActions = {
 
@@ -2089,7 +2067,7 @@ var Lineage_classes = (function () {
                         Lineage_blend.deleteRestriction(node)
 
                     } else {//node
-                        Lineage_blend.addNodeToAssociationNode(node,"source")
+                        Lineage_blend.addNodeToAssociationNode(node, "source")
                         return Clipboard.copy({
                             type: "lineage_node",
                             source: node.data.source,
@@ -2213,6 +2191,8 @@ var Lineage_classes = (function () {
             var html = "<div  id='" + id + "' style='color: " + self.getSourceColor(source) + "'" +
                 " class='Lineage_sourceLabelDiv' " +
                 "onclick='Lineage_classes.setCurrentSource(\"" + encodeURIComponent(source) + "\")'>" + source + "</div>"
+
+
             $("#lineage_drawnSources").append(html)
             //  self.setCurrentSource(encodeURIComponent(source))
 
@@ -2226,7 +2206,36 @@ var Lineage_classes = (function () {
 
 
         }
-        self.drawGraph = function (typeId) {
+        self.showHideCurrentSourceNodes = function (show) {
+            if (Lineage_common.currentSource == Lineage_classes.mainSource)
+                return;
+            var visible
+            if (show)// force passage à visible
+                visible = false;
+            else
+                visible = self.soucesLevelMap[Lineage_common.currentSource].visible
+            if (visible)
+                self.soucesLevelMap[Lineage_common.currentSource].visible = false
+            else
+                self.soucesLevelMap[Lineage_common.currentSource].visible = true
+
+            var allNodes = visjsGraph.data.nodes.get();
+            var newNodes = []
+            allNodes.forEach(function (node) {
+                if (node && node.data && node.data.source == Lineage_common.currentSource)
+                    newNodes.push({id: node.id, hidden: visible})
+
+            })
+            visjsGraph.data.nodes.update(newNodes)
+
+            if (visible)
+                $("#Lineage_source_" + Lineage_common.currentSource).addClass("lineage_hiddenSource")
+            else
+                $("#Lineage_source_" + Lineage_common.currentSource).removeClass("lineage_hiddenSource")
+
+
+            if (!show)//
+                Lineage_classes.setCurrentSource(Lineage_classes.mainSource);
 
 
         }

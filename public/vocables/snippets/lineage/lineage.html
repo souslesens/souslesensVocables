@@ -11,6 +11,8 @@
         font-size: 14px;
         border: solid 1px black;
         border-radius: 5px;
+        font-weight: bold;
+        background: #eee;
       //  width:150px;
     }
 
@@ -32,6 +34,12 @@
         padding: 5px;
         border: solid 1px blue;
         border-radius: 3px;
+    }
+
+    .lineage_hiddenSource{
+        border-style: dashed;
+       opacity: 0.2;
+
     }
 
 
@@ -56,8 +64,9 @@
 
   <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
         <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
-      <input type="checkbox"  checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX"> imports
       <button onclick="Lineage_classes.initUI()">clear</button>
+      <button onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
+
 
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
       <!--  <button class="lineage_button" onclick="Lineage_classes.collapseNode()">collapse</button>-->

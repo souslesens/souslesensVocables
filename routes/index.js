@@ -213,6 +213,11 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+        if (req.body.addImportToSource) {
+            configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
 
         if (req.body.KGmappingDictionary) {
             if (req.body.load)
@@ -379,7 +384,6 @@ router.post(
             });
         }
     },
-
     router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);
 

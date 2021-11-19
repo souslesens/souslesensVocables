@@ -9,8 +9,10 @@ var Sunburst = (function () {
         svg.selectAll("*").remove();
         $("#" + divId).html("")
 
-        var width = 960,
-            height = 700,
+      /*  var width = 960,
+            height = 700,*/
+        var width = 760,
+            height = 500,
             radius = Math.min(width, height) / 2,
             color = d3.scale.category10();
 

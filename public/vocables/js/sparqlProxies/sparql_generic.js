@@ -385,11 +385,14 @@ var Sparql_generic = (function () {
 
 
             var objectStr = ""
+            var p;
             if (item.object.indexOf("_:b") == 0)
                 objectStr = "<" + item.object + ">"
-            else if (item.object.indexOf('http')==0 || item.valueType == "uri")
+            else if (item.object.indexOf('http') == 0 || item.valueType == "uri")
                 objectStr = "<" + item.object + ">"
-            else {
+            else if ((p = item.object.indexOf("^")) > 0) {//types
+                objectStr ="\"'" + item.object.substring(0, p) + "'" + item.object.substring(p)+"\""
+            } else {
                 var langStr = "";
                 if (item.lang)
                     langStr = "@" + item.lang
@@ -401,30 +404,29 @@ var Sparql_generic = (function () {
                 var predicate = item.predicate.substring(1)
                 return objectStr + ' <' + predicate + '> <' + item.subject + '>. ';
             } else
-                return  subjectStr + ' <' + item.predicate + '> ' + objectStr + '. ';
+                return subjectStr + ' <' + item.predicate + '> ' + objectStr + '. ';
 
 
+            /*   if (typeof item === "string")
+                   return item
 
-         /*   if (typeof item === "string")
-                return item
 
+               var valueStr = ""
+               if (item.valueType == "uri")
+                   valueStr = "<" + item.object + ">"
+               else {
+                   var langStr = "";
+                   if (item.lang)
+                       langStr = "@" + item.lang
+                   valueStr = "'" + item.object + "'" + langStr
+               }
 
-            var valueStr = ""
-            if (item.valueType == "uri")
-                valueStr = "<" + item.object + ">"
-            else {
-                var langStr = "";
-                if (item.lang)
-                    langStr = "@" + item.lang
-                valueStr = "'" + item.object + "'" + langStr
-            }
-
-            var p = item.predicate.indexOf("^")
-            if (p == 0) {
-                var predicate = item.predicate.substring(1)
-                return valueStr + ' <' + predicate + '> <' + item.subject + '>. ';
-            } else
-                return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';*/
+               var p = item.predicate.indexOf("^")
+               if (p == 0) {
+                   var predicate = item.predicate.substring(1)
+                   return valueStr + ' <' + predicate + '> <' + item.subject + '>. ';
+               } else
+                   return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';*/
         }
 
         self.insertTriples = function (sourceLabel, triples, callback) {
@@ -670,7 +672,7 @@ var Sparql_generic = (function () {
                             insertTriplesStr +
                             "  }"
 
-                       var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
+                        var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
                             return callbackEach(err);
                         })

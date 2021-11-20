@@ -273,9 +273,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-            items = Lineage_blend.addBlendJstreeMenuItems(items);
-        }
+
         return items;
     }
 

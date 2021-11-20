@@ -589,11 +589,23 @@ var Sparql_OWL = (function () {
             query += "{ ?concept rdfs:subClassOf ?node. " + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
-                " OPTIONAL {?concept rdfs:label ?conceptLabel}" +
-                "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "} }"
+                " OPTIONAL {?concept rdfs:label ?conceptLabel}"
+
+            if(options.someValuesFrom){
+                query+="?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
+            }
+
+            else if(options.allValuesFrom){
+                query+="?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
+            }
+            else if(options.aValueFrom){
+                query+="?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
+            }else{
+                query+=   "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
+                    "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
+                    "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}"
+            }
+                query+="} }"
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
@@ -1025,6 +1037,8 @@ var Sparql_OWL = (function () {
 
             })
         }
+
+
    /* self.getLabels = function (sourceLabel,ids, callback) {
         var from = Sparql_common.getFromStr(sourceLabel)
         var query =

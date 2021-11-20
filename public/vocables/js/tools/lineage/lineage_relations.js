@@ -3,6 +3,22 @@ Lineage_relations = (function () {
     var self = {}
     self.graphUriSourceMap = {}
 
+
+
+
+
+    self.init=function(){
+        Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {withoutImports: 0,someValuesFrom:1,listProperties:1}, function (err, result) {
+            if (err)
+                return callbackSeries(err)
+            relations = result
+
+            callbackSeries()
+        })
+
+
+    }
+
     self.listAllRestrictions = function () {
 
         Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {}, function (err, result) {
@@ -23,7 +39,7 @@ Lineage_relations = (function () {
 
     }
     self.getUriSource = function (uri) {
-        var source = "?"
+        var source = Lineage_classes.mainSource
         Object.keys(self.graphUriSourceMap).forEach(function (graphUri) {
 
             if (uri.indexOf(graphUri) == 0) {
@@ -34,32 +50,29 @@ Lineage_relations = (function () {
         return source
     }
 
-    self.showAllProperties = function (output) {
+    self.showRestrictions = function (output) {
+        var currentSource=Lineage_common.currentSource
         var relations = []
-        var ids = []
+
         var graphUriSourceMap = {}
         async.series([
             function (callbackSeries) {
-                Sparql_OWL.getSourceAllObjectProperties(Lineage_classes.mainSource, null, function (err, result) {
+              //  Sparql_OWL.getSourceAllObjectProperties(currentSource, null, function (err, result) {
+                Sparql_OWL.getObjectRestrictions(currentSource, null, {withoutImports: 0,someValuesFrom:1,listProperties:0}, function (err, result) {
                     if (err)
                         return callbackSeries(err)
-                    relations = result.results.bindings
-                    relations.forEach(function (item) {
-                        if (item.domain)
-                            ids.push(item.domain.value)
-                        if (item.range)
-                            ids.push(item.range.value)
-                    })
+                    relations = result
+
                     callbackSeries()
                 })
             },
 
             function (callbackSeries) {
             var sources
-                sources= Config.sources[Lineage_classes.mainSource].imports
+                sources= Config.sources[currentSource].imports
                 if(!sources)
                 sources=[]
-                sources.push(Lineage_classes.mainSource)
+                sources.push(currentSource)
                 sources.forEach(function(source){
                     if (Config.sources[source].schemaType == "OWL")
                         self.graphUriSourceMap[Config.sources[source].graphUri] = source
@@ -85,7 +98,7 @@ Lineage_relations = (function () {
                         var prop = item.prop.value
                         prop = Sparql_common.getLabelFromId(prop)
 
-                        var domainSource = self.getUriSource(item.domain.value)
+                        var domainSource = self.getUriSource(item.concept.value)
 
 
                         if (!existingNodes[domainSource]) {
@@ -104,16 +117,16 @@ Lineage_relations = (function () {
                             }
 
                         }
-                        if (item.domain && !existingNodes[item.domain.value] && existingNodes[domainSource]) {
-                            existingNodes[item.domain.value] = 1
+                        if (item.concept && !existingNodes[item.concept.value] && existingNodes[domainSource]) {
+                            existingNodes[item.concept.value] = 1
                             if (output == "jstree") {
                                 jstreeData.push({
-                                    id: item.domain.value,
-                                    text: item.domainLabel.value,
+                                    id: item.concept.value,
+                                    text: item.conceptLabel.value,
                                     parent: domainSource,
                                     data: {
-                                        id: item.domain.value,
-                                        text: item.domainLabel.value,
+                                        id: item.concept.value,
+                                        text: item.conceptLabel.value,
                                         source: domainSource,
                                     }
 
@@ -121,14 +134,14 @@ Lineage_relations = (function () {
 
                             } else if (output == "visjs") {
                                 visjsData.nodes.push({
-                                    id: item.domain.value,
-                                    label: item.domainLabel.value,
+                                    id: item.concept.value,
+                                    label: item.conceptLabel.value,
                                     shape: shape,
                                     size: size,
                                     color: Lineage_classes.getSourceColor(domainSource),
                                     data: {
-                                        id: item.domain.value,
-                                        label: item.domainLabel.value,
+                                        id: item.concept.value,
+                                        label: item.conceptLabel.value,
                                         source: domainSource
 
                                     }
@@ -137,49 +150,49 @@ Lineage_relations = (function () {
                         }
 
 
-                            var rangeSource = self.getUriSource(item.range.value)
+                            var rangeSource = self.getUriSource(item.value.value)
 
 
                             if (output == "jstree") {
-                                var nodeId = item.domain.value + "_" + prop + "_" + item.range.value
+                                var nodeId = item.concept.value + "_" + prop + "_" + item.value.value
                                 if (!existingNodes[nodeId]) {
                                     existingNodes[nodeId] = 1
                                     jstreeData.push({
                                         id: nodeId,
-                                        text: prop + "_" + rangeSource + "." + item.rangeLabel.value,
-                                        parent: item.domain.value,
+                                        text: prop + "_" + rangeSource + "." + item.valueLabel.value,
+                                        parent: item.concept.value,
                                         data: {
                                             id: nodeId,
-                                            label: prop + "_" + rangeSource + "." + item.rangeLabel.value,
+                                            label: prop + "_" + rangeSource + "." + item.valueLabel.value,
                                             source: rangeSource,
                                         }
                                     })
                                 }
                             } else if (output == "visjs") {
-                                if (!existingNodes[item.range.value]) {
-                                    existingNodes[item.range.value] = 1
+                                if (!existingNodes[item.value.value]) {
+                                    existingNodes[item.value.value] = 1
                                     visjsData.nodes.push({
-                                        id: item.range.value,
-                                        label: item.rangeLabel.value,
+                                        id: item.value.value,
+                                        label: item.valueLabel.value,
                                         shape: shape,
                                         size: size,
                                         color: Lineage_classes.getSourceColor(rangeSource),
                                         data: {
-                                            id: item.range.value,
-                                            label: item.rangeLabel.value,
+                                            id: item.value.value,
+                                            label: item.valueLabel.value,
                                             source: rangeSource
 
                                         }
                                     })
                                 }
-                                var propSource = self.getUriSource(prop)
-                                var edgeId = item.domain.value + "_" + prop + "_" + item.range.value
+                                var propSource = Lineage_classes.mainSource
+                                var edgeId = item.node.value
                                 if (!existingNodes[edgeId]) {
                                     existingNodes[edgeId] = 1
                                     visjsData.edges.push({
-                                        id: edgeId,
-                                        from: item.range.value,
-                                        to: item.domain.value,
+                                        id: item.node.value,
+                                        from: item.value.value,
+                                        to: item.concept.value,
                                         data: {propertyId: item.prop.value, source: propSource},
                                         arrows: {
                                             from: {
@@ -205,6 +218,7 @@ Lineage_relations = (function () {
                     visjsGraph.data.nodes.update(visjsData.nodes)
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {
+
                     Lineage_classes.drawNewGraph(visjsData)
                 }
 

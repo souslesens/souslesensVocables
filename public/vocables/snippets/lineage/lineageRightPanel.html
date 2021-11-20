@@ -57,25 +57,42 @@
 
         </div>
         <div id="LineageRelationsTab">
-            <input type="checkbox"  checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX"> imports
+            <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
+                   id="Lineage_classes_showImportsCBX"> imports
             <div>
-                Properties
-                <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
-                <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
-                <button onclick="Lineage_relations.exportProperties()">Export</button>
-                <br>
+                <!-- Properties
+                 <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
+                 <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
+                 <button onclick="Lineage_relations.exportProperties()">Export</button>
+                 <br>-->
+                <div> filters
+                    <div>
+                        Properties <select id="LineageRelations_propertiesSelect"></select>
+                    </div>
+                    <div>
+                        Status <select id="LineageRelations_statusSelect"></select>
+                    </div>
+                    <div>
+                        Provenance <select id="LineageRelations_provenanceSelect"></select>
+                    </div>
+                    <div>
+                        Creator <select id="LineageRelations_creatorSelect"></select>
+                    </div>
+
+                </div>
+
                 Restrictions
-                <button onclick="Lineage_relations.listAllRestrictions()">List all</button>
-                <button onclick="Lineage_relations.graphAllRestrictions()">Graph all</button>
+                <button onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
+                <button onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
                 <button onclick="Lineage_relations.exportRestrictions()">Export</button>
 
             </div>
-          <!--  <div class="jstreeContainer" style="width:90%">
-                <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
-            </div>-->
-             <div class="jstreeContainer" style="width:90%">
-                  <div class="jstree" id="Lineage_relationsTree" ></div>
-              </div>
+            <!--  <div class="jstreeContainer" style="width:90%">
+                  <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
+              </div>-->
+            <div class="jstreeContainer" style="width:90%">
+                <div class="jstree" id="Lineage_relationsTree"></div>
+            </div>
         </div>
     </div>
 

@@ -582,8 +582,12 @@ var Sparql_OWL = (function () {
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "SELECT * " + fromStr + " WHERE {"
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+            if (options.listPropertiesOnly)
+                query +="SELECT distinct ?prop ?propLabel "
+            else
+                query +="SELECT * "
+            query +="" + fromStr + " WHERE {"
             if (options.selectGraph)
                 query += " graph ?g "
             query += "{ ?concept rdfs:subClassOf ?node. " + filterStr +

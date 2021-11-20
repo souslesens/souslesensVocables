@@ -137,6 +137,8 @@ var Lineage_classes = (function () {
                 $("#lineage_sourceDescriptionDiv").html(str)
                 self.registerSourceImports(sourceLabel)
 
+                Lineage_relations.init()
+
 
             })
         }

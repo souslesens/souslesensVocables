@@ -54,7 +54,7 @@ var Lineage_blend = (function () {
                 if (type == 'sameAs') {
                     var propId = "http://www.w3.org/2002/07/owl#sameAs"
                     //  self.createPropertyRangeAndDomain(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
-                    self.createRestriction(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
+                    self.createRestriction(Lineage_classes.mainSource, sourceNode, targetNode, propId, function (err, result) {
                         if (err)
                             return alert(err);
                         callbackSeries()
@@ -107,12 +107,12 @@ var Lineage_blend = (function () {
     }
 
         ,
-        self.createRestriction = function (source, souceNodeId, targetNodeId, propId, callback) {
+        self.createRestriction = function (source, souceNode, targetNode, propId, callback) {
             var restrictionsTriples = []
-            var blankNode = "_:b" + common.getRandomHexaId(8)
+            var blankNode = "_:b" + common.getRandomHexaId(10)
 
             restrictionsTriples.push({
-                subject: souceNodeId,
+                subject: souceNode.id,
                 predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                 object: blankNode
             })
@@ -129,8 +129,21 @@ var Lineage_blend = (function () {
             restrictionsTriples.push({
                 subject: blankNode,
                 predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-                object: targetNodeId
+                object: targetNode.id
             })
+            restrictionsTriples.push({
+                subject: blankNode,
+                predicate: Config.sousLeSensVocablesGraphUri+"domainSourcelabel",
+                object: souceNode.source
+            })
+
+            restrictionsTriples.push({
+                subject: blankNode,
+                predicate: Config.sousLeSensVocablesGraphUri+"domainSourcelabel",
+                object: targetNode.source
+            })
+
+
             var metaDataTriples = self.getMetaDataRelationTriples(blankNode)
             restrictionsTriples = restrictionsTriples.concat(metaDataTriples)
             Sparql_generic.insertTriples(source, restrictionsTriples, function (err, result) {
@@ -246,7 +259,7 @@ var Lineage_blend = (function () {
         var metaDataTriples = []
 
         var login = authentication.currentUser.login;
-        var authorUri = Config.appGraphUri + "users/" + login
+        var authorUri = Config.sousLeSensVocablesGraphUri + "users/" + login
         var dateTime = common.dateToRDFString(new Date())+"^^xsd:dateTime"
         var status = "candidate"
         var provenance = "manual"
@@ -266,17 +279,18 @@ var Lineage_blend = (function () {
         metaDataTriples.push({
             subject: subjectUri,
             predicate: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-            object: Config.appGraphUri + "status/" + status
+            object: Config.sousLeSensVocablesGraphUri + "status/" + status
         })
         metaDataTriples.push({
             subject: subjectUri,
             predicate: "http://purl.org/dc/terms/provenance",
-            object: Config.appGraphUri + "provenance/" + provenance
+            object: Config.sousLeSensVocablesGraphUri + "provenance/" + provenance
         })
 
         return metaDataTriples
 
     }
+
 
 
     return self;

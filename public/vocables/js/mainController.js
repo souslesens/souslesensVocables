@@ -31,7 +31,7 @@ var MainController = (function () {
                 Config.default_lang = serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
                 Config.wiki = serverConfig.wiki
-                Config.appGraphUri = serverConfig.appGraphUri
+                Config.sousLeSensVocablesGraphUri = serverConfig.sousLeSensVocablesGraphUri
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);

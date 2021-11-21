@@ -356,6 +356,9 @@ var MainController = (function () {
             $("#mainDialogDiv").dialog("close");
             var controller = Config.tools[self.currentTool].controller
             $("#currentSourceTreeDiv").html("")
+            $("#sourceDivControlPanelDiv").html("")
+            $("#actionDivContolPanelDiv").html("")
+            $("#rightPanelDiv").html("")
 
             self.UI.updateActionDivLabel();
             SourceBrowser.targetDiv = "currentSourceTreeDiv"

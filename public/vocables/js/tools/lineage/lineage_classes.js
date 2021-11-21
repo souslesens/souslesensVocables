@@ -48,9 +48,10 @@ var Lineage_classes = (function () {
 
             MainController.UI.openRightPanel()
             $("#actionDivContolPanelDiv").html("")
+            $("#rightPanelDiv").html("")
             $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
             //   MainController.UI.toogleRightPanel("open");
-            $("#rightPanelDiv").html("")
+
             $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")
 
             //  $("#accordion").accordion("option", {active: 1});
@@ -304,7 +305,7 @@ var Lineage_classes = (function () {
             }
 
             self.currentExpandLevel += 1
-           allSources.push(mainSource)
+            allSources.push(mainSource)
             async.eachSeries(allSources, function (source, callbackEach) {
                 var depth = parseInt($("#Lineage_topDepth").val())
                 var sourceConfig = Config.sources[source]
@@ -1850,9 +1851,9 @@ var Lineage_classes = (function () {
 
             }
 
-          /*  if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].KGqueryController) {
-                html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties();\"> add to Asset Query</span>"
-            }*/
+            /*  if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].KGqueryController) {
+                  html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties();\"> add to Asset Query</span>"
+              }*/
             $("#graphPopupDiv").html(html);
 
         }
@@ -2192,7 +2193,8 @@ var Lineage_classes = (function () {
             var id = "Lineage_source_" + encodeURIComponent(source)
             if (document.getElementById(id) !== null)
                 return;
-
+            if (!self.soucesLevelMap[source])
+                self.soucesLevelMap[source] = {}
             expandedLevels[source] = []
             var html = "<div  id='" + id + "' style='color: " + self.getSourceColor(source) + "'" +
                 " class='Lineage_sourceLabelDiv' " +

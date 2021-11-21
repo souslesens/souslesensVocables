@@ -3,7 +3,7 @@ var Standardizer = (function () {
     self.matchCandidates = {}
     var matrixHtml = ""
     var maxCompareSource = 25
-    var maxWordsListLength=2000
+    var maxWordsListLength = 2000
     self.mode = "matrix";
     self.indexSourcesMap = {}
     self.currentAction = null;
@@ -571,8 +571,8 @@ var Standardizer = (function () {
             if (words.indexOf(word) < 0)
                 words.push(word)
         })
-        if(words.length>maxWordsListLength)
-            return alert(" too many words, max " +maxWordsListLength)
+        if (words.length > maxWordsListLength)
+            return alert(" too many words, max " + maxWordsListLength)
         self.matrixDivsMap = {}
 
         var resultSize = 1
@@ -608,7 +608,7 @@ var Standardizer = (function () {
             self.isWorking = null;
             if (err)
                 return alert(err)
-            MainController.UI.message("DONE, total processed items: " + (totalProcessed),true)
+            MainController.UI.message("DONE, total processed items: " + (totalProcessed), true)
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
                 $(".matrixWordNoMatch").bind("click", Standardizer.onMatrixWordNoMatchClick)
@@ -691,7 +691,7 @@ var Standardizer = (function () {
             self.isWorking = null;
             if (err)
                 return alert(err)
-            MainController.UI.message("DONE, total processed items: " + (totalProcessed++),true)
+            MainController.UI.message("DONE, total processed items: " + (totalProcessed++), true)
 
             setTimeout(function () {
                 $(".matrixCell").bind("click", Standardizer.onMatrixCellClick)
@@ -999,25 +999,30 @@ var Standardizer = (function () {
 
         var index = source.toLowerCase()
         ElasticSearchProxy.queryElastic(query, index, function (err, result) {
-
-
-            if (callback) {
-                return callback(err, result.hits.hits)
-            } else {
-
-                if (err)
+                if (err) {
+                    if (callback)
+                        return callback(err)
                     return alert(err)
-                var str = ""
-                if (!result.hits)
-                    return alert(JSON.stringify(result, null, 2))
-                result.hits.hits.forEach(function (hit) {
-                    str += hit._source.label + "\n";
+                }
 
-                })
+                if (callback) {
+                    return callback(null, result.hits ? result.hits.hits : [])
+                } else {
 
-                $("#Standardizer_wordsTA").val(str)
+                    if (err)
+                        return alert(err)
+                    var str = ""
+                    if (!result.hits)
+                        return alert(JSON.stringify(result, null, 2))
+                    result.hits.hits.forEach(function (hit) {
+                        str += hit._source.label + "\n";
+
+                    })
+
+                    $("#Standardizer_wordsTA").val(str)
+                }
             }
-        })
+        )
     }
 
 
@@ -1989,8 +1994,6 @@ var Standardizer = (function () {
     self.onselectSourcesTreeNodeFn = function (event, obj) {
         self.currentSource = obj.node.id
     }
-
-
 
 
     return self;

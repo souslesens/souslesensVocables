@@ -69,9 +69,12 @@ Lineage_relations = (function () {
         return source
     }
 
-    self.showRestrictions = function (output, relations) {
+    self.showRestrictions = function (output, relations, toLabelsMap) {
         var currentSource = Lineage_common.currentSource
-
+        var filter = ""
+        var propertyFilter = $("#LineageRelations_propertiesSelect").val()
+        if (propertyFilter && propertyFilter != "")
+            filter += " filter (?prop=<" + propertyFilter + ">)"
 
         var graphUriSourceMap = {}
         async.series([
@@ -84,13 +87,15 @@ Lineage_relations = (function () {
                 Sparql_OWL.getObjectRestrictions(currentSource, null, {
                     withoutImports: 0,
                     someValuesFrom: 1,
+                    filter: filter
 
                 }, function (err, result) {
                     if (err)
                         return callbackSeries(err)
                     relations = []
                     result.forEach(function (item) {
-                        var domain, range, domainLabel, rangeLabel, prop, propLabel, node
+                        var domain, range, domainLabel, rangeLabel, prop, propLabel, node, domainSourceLabel,
+                            rangeSourceLabel
                         if (item.concept)
                             domain = item.concept.value
                         if (item.value)
@@ -106,6 +111,13 @@ Lineage_relations = (function () {
                         if (item.node)
                             node = item.node.value
 
+                        if (item.domainSourceLabel) {
+                            domainSourceLabel = item.domainSourceLabel.value
+                        }
+                        if (item.rangeSourceLabel) {
+                            rangeSourceLabel = item.rangeSourceLabel.value
+                        }
+
                         relations.push({
 
                             domain: domain,
@@ -114,7 +126,9 @@ Lineage_relations = (function () {
                             rangeLabel: rangeLabel,
                             prop: prop,
                             propLabel: propLabel,
-                            node: node
+                            node: node,
+                            rangeSourceLabel: rangeSourceLabel,
+                            domainSourceLabel: domainSourceLabel
 
                         })
                     })
@@ -139,10 +153,23 @@ Lineage_relations = (function () {
 
             function (callbackSeries) {
 
-
+                var existingNodes = visjsGraph.getExistingIdsMap()
                 var jstreeData = [];
                 var visjsData = {nodes: [], edges: []}
-                var existingNodes = visjsGraph.getExistingIdsMap()
+                var sameAsLevel =1;
+                if (relations && toLabelsMap && output == "visjs") {// get ancestors first if called by projectCurrrentSourceOnSource
+                    visjsData = self.getRestrictionAncestorsVisjsData(relations, toLabelsMap, output)
+                    visjsData.nodes.forEach(function (node) {
+                        existingNodes[node.id] = 1
+                    })
+                    visjsData.edges.forEach(function (edge) {
+                        existingNodes[edge.id] = 1
+                    })
+                   sameAsLevel =visjsData.maxLevel+1;
+
+                }
+
+
 
                 var color;
                 var shape = Lineage_classes.defaultShape;
@@ -157,7 +184,16 @@ Lineage_relations = (function () {
                     else
                         prop = Sparql_common.getLabelFromId(prop)
 
-                    var domainSource = self.getUriSource(item.domain)
+                    var domainSource, rangeSource
+                    if (item.domainSourceLabel)
+                        domainSource = item.domainSourceLabel
+                    else
+                        domainSource = self.getUriSource(item.domain)
+
+                    if (item.rangeSourceLabel)
+                        rangeSource = item.rangeSourceLabel
+                    else
+                        rangeSource = self.getUriSource(item.range)
 
 
                     if (!existingNodes[domainSource]) {
@@ -176,13 +212,14 @@ Lineage_relations = (function () {
                         }
 
                     }
-                    if (item.concept && !existingNodes[item.domain] && existingNodes[domainSource]) {
+                    if (item.domain && !existingNodes[item.domain] && existingNodes[domainSource]) {
                         existingNodes[item.domain] = 1
                         if (output == "jstree") {
                             jstreeData.push({
                                 id: item.domain,
                                 text: item.domainLabel,
                                 parent: domainSource,
+
                                 data: {
                                     id: item.domain,
                                     text: item.domainLabel,
@@ -197,6 +234,7 @@ Lineage_relations = (function () {
                                 label: item.domainLabel,
                                 shape: shape,
                                 size: size,
+                                level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(domainSource),
                                 data: {
                                     id: item.domain,
@@ -207,9 +245,6 @@ Lineage_relations = (function () {
                             })
                         }
                     }
-
-
-                    var rangeSource = self.getUriSource(item.range)
 
 
                     if (output == "jstree") {
@@ -235,6 +270,7 @@ Lineage_relations = (function () {
                                 label: item.rangeLabel,
                                 shape: shape,
                                 size: size,
+                                level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(rangeSource),
                                 data: {
                                     id: item.range,
@@ -272,22 +308,122 @@ Lineage_relations = (function () {
                     }
 
 
+                    //********************************************
+
+
                 })
                 if (visjsGraph.data && visjsGraph.data.nodes) {
                     visjsGraph.data.nodes.update(visjsData.nodes)
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {
 
-                    Lineage_classes.drawNewGraph(visjsData)
+                    var options={layoutHierarchical:1}
+                    Lineage_classes.drawNewGraph(visjsData,options)
                 }
 
                 callbackSeries()
+            },
+            function (callbackSeries) {
+                //  self.showRestrictionAncestors(relations, toLabelsMap, output)
+                callbackSeries()
             }
         ], function (err) {
-
+            MainController.UI.message("DONE", true)
         })
 
 
+    }
+
+    self.getRestrictionAncestorsVisjsData = function (restrictions, labelsMap, output) {
+
+        var visjsData = {nodes: [], edges: []}
+        var existingNodes = visjsGraph.getExistingIdsMap()
+
+        var color;
+        var shape = Lineage_classes.defaultShape;
+        var size = Lineage_classes.defaultShapeSize
+
+        var maxLevel = 1
+        restrictions.forEach(function (restriction) {
+            var parentsArray = restriction.parents.split("|")
+            maxLevel = Math.max(maxLevel, parentsArray.length)
+
+            parentsArray.forEach(function (parentId, index) {
+                if (parentId == "http://souslesens.org/workorder/maintenance_inspection/Maintenance_Details")
+                    var x = 3
+
+                if (output == "jstree") {
+                    var nodeId = item.domain + "_" + prop + "_" + item.range
+                    if (!existingNodes[nodeId]) {
+                        existingNodes[nodeId] = 1
+                        jstreeData.push({
+                            id: nodeId,
+                            text: prop + "_" + rangeSource + "." + item.rangeLabel,
+                            parent: item.domain,
+                            data: {
+                                id: nodeId,
+                                label: prop + "_" + rangeSource + "." + item.rangeLabel,
+                                source: rangeSource,
+                            }
+                        })
+                    }
+                } else if (output == "visjs") {
+                    if (!existingNodes[parentId]) {
+                        existingNodes[parentId] = 1
+                        if (index == 0) {//source Node
+                            visjsData.nodes.push({
+                                id: parentId,
+                                label: parentId,
+                                shape: "box",
+                                level: index,
+
+                                color: Lineage_classes.getSourceColor(parentId),
+                                data: {
+                                    id: parentId,
+                                    label: parentId,
+                                    source: parentId
+
+                                }
+                            })
+                        } else {
+
+                            visjsData.nodes.push({
+                                id: parentId,
+                                label: labelsMap[parentId],
+                                shape: shape,
+                                size: size,
+                                level: index,
+                                color: Lineage_classes.getSourceColor(restriction.rangeSourceLabel),
+                                data: {
+                                    id: parentId,
+                                    label: labelsMap[parentId],
+                                    source: restriction.rangeSourceLabel
+
+                                }
+                            })
+                        }
+                    }
+                    if (index > 0) {
+                        var fromId = parentsArray[index - 1]
+                        var edgeId = parentId + "_" + fromId
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: parentId,
+                                to: fromId,
+
+                            })
+
+
+                        }
+                    }
+                }
+            })
+
+        })
+        visjsData.maxLevel = maxLevel
+        return visjsData;
     }
 
     self.graphAllProperties = function () {
@@ -302,7 +438,9 @@ Lineage_relations = (function () {
     }
 
 
-    self.showExactMatchSameAs = function () {
+    self.projectSameAsRestrictionsOnSource = function () {
+        if(!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked"))
+         Lineage_classes.initUI()
         var fromSource = Lineage_common.currentSource
         var toSource = $("#LineageRelations_setExactMatchSameAsSourceSelect").val()
         if (!fromSource)
@@ -313,74 +451,122 @@ Lineage_relations = (function () {
             return alert("the two sources are the same")
         var fromIndex = fromSource.toLowerCase()
         var toIndex = toSource.toLowerCase()
-        var resultSize = 1
-        var size = 200;
-        var from = offset;
-        var offset = 0
-        var totalProcessed = 0
+
 
         var restrictions = []
-        self.matrixWordsMap = {indexes: [toIndex], entities: []}
-
-        self.currentWordsCount = 0
         var fromClasses = []
-
+        var toLabelsMap = {}
         var wordsMap = {}
-        async.whilst(function (test) {
-            return resultSize > 0
+        async.series([
+            function (callbackSeries) {
+                var resultSize = 1
+                var size = 200;
+                var from = offset;
+                var offset = 0
+                var totalProcessed = 0
 
-        }, function (callbackWhilst) {
+                async.whilst(function (test) {
+                    return resultSize > 0
 
-            Standardizer.listSourceLabels(fromIndex, offset, size, function (err, hits) {
-                if (err)
-                    return callbackWhilst(err)
-                resultSize = hits.length
-                offset += size
+                }, function (callbackWhilst) {
+                    MainController.UI.message("searching labels in " + fromSource)
+                    Standardizer.listSourceLabels(fromIndex, offset, size, function (err, hits) {
+                        if (err)
+                            return callbackWhilst(err)
+                        resultSize = hits.length
+                        totalProcessed += resultSize
 
-                hits.forEach(function (hit) {
-                    wordsMap[hit._source.label] = {id: hit._source.id, label: hit._source.label, matches: []};
-                })
+                        offset += size
 
-
-                Standardizer.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
-                    if (err)
-                        return alert(err)
-                    var entities = []
-                    Object.keys(wordsMap).forEach(function (word, index) {
-
-                        if (!result[index] || !result[index].hits)
-                            return;
-                        var hits = result[index].hits.hits
-
-                        var sourceEntity = wordsMap[word]
                         hits.forEach(function (hit) {
-
-
-                            var entity = {
-                                domain: sourceEntity.id,
-                                domainLabel: sourceEntity.label,
-                                range: hit._source.id,
-                                rangeLabel: hit._source.label,
-                                prop: "http://www.w3.org/2002/07/owl#sameAs",
-                                propLabel: "sameAs",
-                                node: "_:b" + common.getRandomHexaId(10)
-                            }
-
-                            restrictions.push(entity)
+                            wordsMap[hit._source.label] = {id: hit._source.id, label: hit._source.label, matches: []};
                         })
 
 
+                        Standardizer.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
+                            if (err)
+                                return alert(err)
+                            var entities = []
+                            Object.keys(wordsMap).forEach(function (word, index) {
+
+                                if (!result[index] || !result[index].hits)
+                                    return;
+                                var hits = result[index].hits.hits
+
+                                var sourceEntity = wordsMap[word]
+                                hits.forEach(function (hit) {
+
+                                    if (sourceEntity.id == hit._source.id)
+                                        return;
+                                    var entity = {
+                                        domain: sourceEntity.id,
+                                        domainLabel: sourceEntity.label,
+                                        range: hit._source.id,
+                                        rangeLabel: hit._source.label,
+                                        prop: "http://www.w3.org/2002/07/owl#sameAs",
+                                        propLabel: "sameAs",
+                                        parents: hit._source.parents,
+                                        node: "_:b" + common.getRandomHexaId(10),
+                                        domainSourceLabel: fromSource,
+                                        rangeSourceLabel: toSource,
+                                    }
+                                    entity.parents += hit._source.id
+
+                                    restrictions.push(entity)
+                                    MainController.UI.message("Matching labels in " + toSource + " : " + restrictions.length)
+                                })
+
+
+                            })
+                            callbackWhilst()
+
+                        })
+
                     })
-                    callbackWhilst()
 
+
+                }, function (err) {
+
+                    callbackSeries(err);
                 })
+            },
+            // get target source labels and add them to restriction
+            function (callbackSeries) {
+                var resultSize = 1
+                var size = 200;
+                var from = offset;
+                var offset = 0
+                var totalProcessed = 0
+                async.whilst(function (test) {
+                        return resultSize > 0
+                    },
+                    function (callbackWhilst) {
+                        MainController.UI.message("searching labels in " + toSource)
+                        Standardizer.listSourceLabels(toIndex, offset, size, function (err, hits) {
+                            if (err)
+                                return callbackWhilst(err)
+                            resultSize = hits.length
+                            offset += size
 
-            })
-        }, function (err) {
+
+                            hits.forEach(function (hit) {
+                                toLabelsMap[hit._source.id] = hit._source.label
+
+                            })
+
+
+                            callbackWhilst()
+                        })
+
+                    }, function (err) {
+                        callbackSeries(err)
+                    })
+            }
+        ], function (err) {
             if (err)
                 return alert(err);
-            self.showRestrictions("visjs", restrictions)
-
+            MainController.UI.message("Drawing Graph")
+            self.showRestrictions("visjs", restrictions, toLabelsMap)
         })
     }
 

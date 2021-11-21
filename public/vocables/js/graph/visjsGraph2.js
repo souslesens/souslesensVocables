@@ -80,6 +80,8 @@ var visjsGraph = (function () {
                 hierarchical: _options.layoutHierarchical
             }
 
+        }else{
+            $("#visjsGraph_layoutSelect").val("")
         }
         if (_options.groups) {
             options.groups = _options.groups
@@ -262,7 +264,7 @@ var visjsGraph = (function () {
                  // " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
                     " <div> <B>Graph</B> </div><div><button onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
 
-                    "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
+                    "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
                     "<option >standard</option>" +
                     "<option>hierarchical vertical</option>" +
@@ -317,7 +319,13 @@ var visjsGraph = (function () {
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
               sortMethod: "hubsize",
-
+            }
+            self.currentContext.options.edges = {
+                smooth: {
+                    type: "cubicBezier",
+                    forceDirection: "vertical",
+                    roundness: 0.1,
+                },
             }
             shakeTowards:true
             self.currentContext.simulationTimeOut = 10000

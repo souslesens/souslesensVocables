@@ -570,6 +570,9 @@ var Sparql_OWL = (function () {
 
             var filterStr = Sparql_common.setFilter("concept", ids);
 
+
+
+
             var fromStr = ""
             if (sourceLabel) {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
@@ -609,6 +612,11 @@ var Sparql_OWL = (function () {
                     "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                     "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}"
             }
+
+            if(options.filter){
+                query+=" "+options.filter+ " "
+            }
+
                 query+="} }"
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit

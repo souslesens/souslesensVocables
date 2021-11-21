@@ -133,13 +133,13 @@ var Lineage_blend = (function () {
             })
             restrictionsTriples.push({
                 subject: blankNode,
-                predicate: Config.sousLeSensVocablesGraphUri+"domainSourcelabel",
+                predicate: Config.sousLeSensVocablesGraphUri+"domainSourceLabel",
                 object: souceNode.source
             })
 
             restrictionsTriples.push({
                 subject: blankNode,
-                predicate: Config.sousLeSensVocablesGraphUri+"domainSourcelabel",
+                predicate: Config.sousLeSensVocablesGraphUri+"rangeSourceLabel",
                 object: targetNode.source
             })
 

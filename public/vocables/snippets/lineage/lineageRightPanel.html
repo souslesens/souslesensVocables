@@ -57,46 +57,49 @@
 
         </div>
         <div id="LineageRelationsTab">
-            <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
-                   id="Lineage_classes_showImportsCBX"> imports
-            <div>
-                <!-- Properties
-                 <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
-                 <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
-                 <button onclick="Lineage_relations.exportProperties()">Export</button>
-                 <br>-->
-                <div> filters
-                    <div>
-                        Properties <select id="LineageRelations_propertiesSelect"></select>
+            <div class="lineage_actionDiv">
+                <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
+                       id="Lineage_classes_showImportsCBX"> imports
+                <div>
+                    <!-- Properties
+                     <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
+                     <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
+                     <button onclick="Lineage_relations.exportProperties()">Export</button>
+                     <br>-->
+                    <div> filters
+                        <div>
+                            Properties <select id="LineageRelations_propertiesSelect"></select>
+                        </div>
+                        <div>
+                            Status <select id="LineageRelations_statusSelect"></select>
+                        </div>
+                        <div>
+                            Provenance <select id="LineageRelations_provenanceSelect"></select>
+                        </div>
+                        <div>
+                            Creator <select id="LineageRelations_creatorSelect"></select>
+                        </div>
+
                     </div>
-                    <div>
-                        Status <select id="LineageRelations_statusSelect"></select>
-                    </div>
-                    <div>
-                        Provenance <select id="LineageRelations_provenanceSelect"></select>
-                    </div>
-                    <div>
-                        Creator <select id="LineageRelations_creatorSelect"></select>
-                    </div>
+
+                    Restrictions
+                    <button onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
+                    <button onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
+                    <button onclick="Lineage_relations.exportRestrictions()">Export</button>
 
                 </div>
 
-                Restrictions
-                <button onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
-                <button onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
-                <button onclick="Lineage_relations.exportRestrictions()">Export</button>
-
             </div>
-
-
-
-            <div>
-               nodes sameAs  <select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
-                <button onclick="Lineage_relations.showExactMatchSameAs()">Show</button>
+            <div class="lineage_actionDiv">
+                Project currentSource on source<br>
+                <select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
+                add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
+                <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show</button>
                 <button onclick="Lineage_relations.validateExactMatchSameAs()">Save</button>
                 <button onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>
 
             </div>
+
             <!--  <div class="jstreeContainer" style="width:90%">
                   <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
               </div>-->
@@ -114,8 +117,9 @@
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
     setTimeout(function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
+        $("#Lineage_RighPanelTabs").tabs()
     }, 300)
     //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
-    $("#Lineage_RighPanelTabs").tabs()
+
 
 </script>

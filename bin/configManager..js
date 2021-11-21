@@ -96,7 +96,7 @@ var ConfigManager = {
 
                                 graphUri: graphUri,
                                 schemaType: "SKOS",
-                                predicates: {lang: options.lang},
+                                predicates: { lang: options.lang },
                                 color: "#9edae3",
                             };
                         } else if (options.type == "OWL") {
@@ -151,35 +151,26 @@ var ConfigManager = {
         );
     },
 
-    addImportToSource:function(parentSource, importedSource,callback){
+    addImportToSource: function (parentSource, importedSource, callback) {
+        ConfigManager.getSources(null, function (err, sources) {
+            if (err) return callback(err);
+            if (!sources[parentSource]) return callback(err);
 
-        ConfigManager.getSources (null, function(err, sources){
-            if(err)
-                return callback(err);
-          if(!sources[parentSource])
-              return callback(err);
-
-          if(!sources[parentSource].imports)
-              sources[parentSource].imports=[]
-            sources[parentSource].imports.push(importedSource)
-            ConfigManager.saveSources(sources,function(err, result){
-                callback(err, result)
-            })
-
-
-
-        })
-
-
+            if (!sources[parentSource].imports) sources[parentSource].imports = [];
+            sources[parentSource].imports.push(importedSource);
+            ConfigManager.saveSources(sources, function (err, result) {
+                callback(err, result);
+            });
+        });
     },
     saveSources: function (sources, callback) {
         var sourcesPath = path.join(__dirname, "../config/sources.json");
-        jsonFileStorage.store(path.resolve(sourcesPath), sources,function (err, message) {
+        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, message) {
             callback(err, message);
         });
     },
 
-  /*  getProfilesSourcesMatrix: function (callback) {
+    /*  getProfilesSourcesMatrix: function (callback) {
         ConfigManager.getProfiles(null, function (err, profiles) {
             if (err)
                 return callback(err)
@@ -206,7 +197,4 @@ var ConfigManager = {
 ConfigManager.getGeneralConfig();
 module.exports = ConfigManager;
 
-
 //ConfigManager.getProfilesSourcesMatrix()
-
-

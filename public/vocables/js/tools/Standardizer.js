@@ -277,7 +277,7 @@ var Standardizer = (function () {
 
     }
 
-    self.getSelectedIndexes = function () {
+    self.getSelectedIndexes = function (excludeCurrentSource) {
         var sources = $('#Standardizer_sourcesTree').jstree(true).get_checked();
         var indexes = []
         //  var sourceIndex = $("#Standardizer_sourcesSelect").val();
@@ -286,7 +286,7 @@ var Standardizer = (function () {
         sources.forEach(function (source) {
             if (!Config.sources[source] || !Config.sources[source].schemaType)
                 return;
-            if (source != sourceIndex)
+            if (!excludeCurrentSource || source != sourceIndex)
                 indexes.push(source.toLowerCase())
         })
         return indexes;
@@ -639,7 +639,7 @@ var Standardizer = (function () {
         var from = offset;
         var offset = 0
         var totalProcessed = 0
-        var indexes = self.getSelectedIndexes()
+        var indexes = self.getSelectedIndexes(true)
         var p = indexes.indexOf(source.toLowerCase())
         if (p > -1)// remove source from indexes to compare with
             indexes.splice(p, 1)
@@ -671,7 +671,7 @@ var Standardizer = (function () {
                     allWords = allWords.concat(words)
                     self.currentWords.push(hit._source.label)
                 })
-                var indexes = self.getSelectedIndexes()
+                var indexes = self.getSelectedIndexes(true)
                 self.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                     if (err)
                         return alert(err)

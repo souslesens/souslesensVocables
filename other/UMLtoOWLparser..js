@@ -165,6 +165,8 @@ var buildOwl = function (jsonPath, graphUri) {
     var packages = {};
     json.classes.forEach(function (aClass) {
         var uri = graphUri + util.formatStringForTriple(aClass.id, true);
+        if(!aClass.name)
+           return console.log(JSON.stringify(aClass))
         var className = aClass.name.toLowerCase();
         if (!classesMap[className]) {
             classesMap[className] = uri;
@@ -224,6 +226,8 @@ var buildOwl = function (jsonPath, graphUri) {
     var propertiesMap = {};
     var blankNodeIndex = 0;
     json.classes.forEach(function (aClass) {
+        if(!aClass.name)
+            return console.log(JSON.stringify(aClass))
         var className = aClass.name.toLowerCase();
         var aClassUri = classesMap[className];
         aClass.attributes.forEach(function (attr) {
@@ -480,8 +484,11 @@ var graphUri = "http://souslesens.org/workorder/maintenance_inspection/";
 var sourcePath = "D:\\NLP\\ontologies\\workOrder\\logistics&operationalsupport.xml";
 var graphUri = "http://souslesens.org/workorder/logistics_operationalsupport/";
 
+var sourcePath = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS 1.5.xml";
+var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/";
+
 var jsonPath = sourcePath + ".json";
 
 parseOSDU(sourcePath, jsonPath, function () {
-    buildOwl(jsonPath, graphUri);
+   buildOwl(jsonPath, graphUri);
 });

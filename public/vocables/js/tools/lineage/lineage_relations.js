@@ -33,7 +33,7 @@ Lineage_relations = (function () {
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
-            self.initProjectedGraphs()
+           // self.initProjectedGraphs()
         })
 
 

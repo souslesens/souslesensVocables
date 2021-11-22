@@ -429,7 +429,7 @@ var Sparql_generic = (function () {
                    return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';*/
         }
 
-        self.insertTriples = function (sourceLabel, triples, callback) {
+        self.insertTriples = function (sourceLabel, triples,options, callback) {
             var graphUri = Config.sources[sourceLabel].graphUri
             if (Array.isArray(graphUri))
                 graphUri = graphUri[0]

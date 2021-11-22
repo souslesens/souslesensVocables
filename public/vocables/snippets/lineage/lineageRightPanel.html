@@ -95,9 +95,15 @@
                 <select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
                 add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
                 <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show</button>
-                <button onclick="Lineage_relations.validateExactMatchSameAs()">Save</button>
-                <button onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>
+                <button onclick="Lineage_relations.saveProjectedGraph()">Save</button>
+                <!--  <button onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>-->
 
+            </div>
+
+            <div class="lineage_actionDiv">
+                existing projected Graphs<br>
+               <!--   <select id="LineageRelations_projectedGraphsSelect" onclick="Lineage_relations.loadProjectedGraph($(this).val())"></select>-->
+                <div class="jstreeContainer"> <div id="LineageRelations_projectedGraphsTree" ></div></div>
             </div>
 
             <!--  <div class="jstreeContainer" style="width:90%">

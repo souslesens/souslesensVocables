@@ -136,7 +136,7 @@ var ExternalReferences = (function () {
                     )
 
                     var triple = {subject: Blender.currentTreeNode.data.id, predicate: "http://www.w3.org/2004/02/skos/core#narrowMatch", object: objectUri, valueType: "uri"};
-                    Sparql_generic.insertTriples(Blender.currentSource, [triple], function (err, result) {
+                    Sparql_generic.insertTriples(Blender.currentSource, [triple],null, function (err, result) {
                         callbackEach(err);
                     })
 

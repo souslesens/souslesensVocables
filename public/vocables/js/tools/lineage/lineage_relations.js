@@ -2,6 +2,7 @@ Lineage_relations = (function () {
 
     var self = {}
     self.graphUriSourceMap = {}
+    self.projectedGraphsMap = {}
 
 
     self.init = function () {
@@ -17,8 +18,8 @@ Lineage_relations = (function () {
         common.fillSelectOptions("LineageRelations_propertiesSelect", [], true)
         var statusList = ["candidate", " reference"]
         common.fillSelectOptions("LineageRelations_statusSelect", statusList, true)
-        var provenance = ["manual", " auto_exactMatch"]
-        common.fillSelectOptions("LineageRelations_provenanceSelect", provenance, true)
+        var provenances = ["manual", " auto_exactMatch"]
+        common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true)
         Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {
             withoutImports: 0,
             someValuesFrom: 1,
@@ -32,11 +33,15 @@ Lineage_relations = (function () {
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
-
+            self.initProjectedGraphs()
         })
 
 
     }
+
+
+
+
 
     self.listAllRestrictions = function () {
 
@@ -101,7 +106,7 @@ Lineage_relations = (function () {
                         if (item.value)
                             range = item.value.value
                         if (item.conceptLabel)
-                            domainLabel = item.conceptLabel
+                            domainLabel = item.conceptLabel.value
                         if (item.valueLabel)
                             rangeLabel = item.valueLabel.value
                         if (item.prop)
@@ -156,7 +161,7 @@ Lineage_relations = (function () {
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 var jstreeData = [];
                 var visjsData = {nodes: [], edges: []}
-                var sameAsLevel =1;
+                var sameAsLevel = 1;
                 if (relations && toLabelsMap && output == "visjs") {// get ancestors first if called by projectCurrrentSourceOnSource
                     visjsData = self.getRestrictionAncestorsVisjsData(relations, toLabelsMap, output)
                     visjsData.nodes.forEach(function (node) {
@@ -165,10 +170,9 @@ Lineage_relations = (function () {
                     visjsData.edges.forEach(function (edge) {
                         existingNodes[edge.id] = 1
                     })
-                   sameAsLevel =visjsData.maxLevel+1;
+                    sameAsLevel = visjsData.maxLevel + 1;
 
                 }
-
 
 
                 var color;
@@ -182,7 +186,7 @@ Lineage_relations = (function () {
                     if (item.propLabel)
                         prop = item.propLabel
                     else
-                        prop = Sparql_common.getLabelFromId(prop)
+                        prop = Sparql_common.getLabelFromURI(prop)
 
                     var domainSource, rangeSource
                     if (item.domainSourceLabel)
@@ -317,8 +321,8 @@ Lineage_relations = (function () {
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {
 
-                    var options={layoutHierarchical:1}
-                    Lineage_classes.drawNewGraph(visjsData,options)
+                    var options = {layoutHierarchical: 1}
+                    Lineage_classes.drawNewGraph(visjsData, options)
                 }
 
                 callbackSeries()
@@ -439,8 +443,8 @@ Lineage_relations = (function () {
 
 
     self.projectSameAsRestrictionsOnSource = function () {
-        if(!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked"))
-         Lineage_classes.initUI()
+        if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked"))
+            Lineage_classes.initUI()
         var fromSource = Lineage_common.currentSource
         var toSource = $("#LineageRelations_setExactMatchSameAsSourceSelect").val()
         if (!fromSource)
@@ -566,10 +570,102 @@ Lineage_relations = (function () {
             if (err)
                 return alert(err);
             MainController.UI.message("Drawing Graph")
+            self.projectedGraphData = restrictions
             self.showRestrictions("visjs", restrictions, toLabelsMap)
         })
     }
 
+    self.saveProjectedGraph = function () {
+        var version = prompt("graph version name")
+        if (!version || version == "")
+            return;
+        var triples = [];
+        var uniqueIds = {}
+        var imports = []
+        self.projectedGraphData.forEach(function (item) {
+
+            var parentsArray = item.parents.split("|")
+
+
+            parentsArray.forEach(function (parentId, index) {
+                if (index == 0) {
+                    if (!uniqueIds[parentId]) {
+                        uniqueIds[parentId] = 1
+                        imports.push(parentId)
+                    }
+                } else if (index == 1) {
+                    ;
+
+                } else {
+                    var id = parentId + "_" + parentsArray[index - 1]
+                    if (!uniqueIds[parentId]) {
+                        triples = triples.concat(Lineage_blend.getSubClassTriples(parentId, parentsArray[index - 1]))
+
+                    }
+
+                }
+            })
+            // leafNode create restrictions sameAs
+            var propId = "http://www.w3.org/2002/07/owl#sameAs"
+            var id = item.range + "_" + propId + "_" + item.domain
+            if (!uniqueIds[id]) {
+                uniqueIds[id] = 1
+                triples = triples.concat(Lineage_blend.getRestrictionTriples(item.range, item.domain, propId))
+            }
+
+        })
+
+
+        var graphUri = Config.sources[Lineage_classes.mainSource].graphUri + "projected/" + version + "/";
+
+        var graphMetaDataOptions = {label: "" + Lineage_classes.mainSource + " projected " + version, comment: ""}
+
+        var graphMetaData = Lineage_blend.getProjectedGraphMetaDataTriples(graphUri, imports, graphMetaDataOptions)
+        triples = triples.concat(graphMetaData)
+        var commonMetaData = Lineage_blend.getCommonMetaDataTriples(graphUri, "exactMatch_projection","draft")
+        triples = triples.concat(commonMetaData)
+
+        var insertTriplesStr = ""
+        triples.forEach(function (item, index) {
+
+            insertTriplesStr += Sparql_generic.triplesObjectToString(item);
+
+        })
+
+        var query = " WITH GRAPH  <" + graphUri + ">  " +
+            "INSERT DATA" +
+            "  {" +
+            insertTriplesStr +
+            "  }"
+
+
+        // console.log(query)
+        var url = Config.sources[Lineage_classes.mainSource].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: Lineage_classes.mainSource}, function (err, result) {
+            return  MainController.UI.message("Project Graph saved",true);
+        })
+    }
+
+
+    self.loadProjectedGraph = function (graphUri) {
+        //   var graphUri= $("#LineageRelations_projectedGraphsSelect").val()
+        var properties = self.projectedGraphs[graphUri]
+        var query = " WITH GRAPH  <" + graphUri + ">  " +
+            "INSERT DATA" +
+            "  {" +
+            insertTriplesStr +
+            "  }"
+
+
+        // console.log(query)
+        var url = Config.sources[Lineage_classes.mainSource].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: Lineage_classes.mainSource}, function (err, result) {
+
+        })
+
+    }
+
 
     return self;
+
 })()

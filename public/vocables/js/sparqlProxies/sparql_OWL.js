@@ -1051,6 +1051,26 @@ var Sparql_OWL = (function () {
         }
 
 
+        self.getGraphsByRegex=function(pattern,callback){
+            var query="SELECT * " +
+                "WHERE {" +
+                "  ?s <http://www.w3.org/2002/07/owl#versionIRI> ?graph. filter (regex(str(?graph),\""+pattern+"\"))" +
+                " ?graph ?p ?value."+
+                "}"
+
+            self.sparql_url = Config.default_sparql_url;
+            var url = self.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
+                if (err)
+                    return callback(err);
+             return callback(null, result.results.bindings)
+
+            })
+        }
+
+
+
+
    /* self.getLabels = function (sourceLabel,ids, callback) {
         var from = Sparql_common.getFromStr(sourceLabel)
         var query =

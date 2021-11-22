@@ -25,7 +25,7 @@ var Lineage_blend = (function () {
     }
 
 
-    self.createRelation = function (type) {
+    self.createRelation = function (type,addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
         if (!sourceNode || !targetNode)
@@ -40,9 +40,11 @@ var Lineage_blend = (function () {
                 if (imports || imports.indexOf(sourceNode.source) > -1) {
                     return callbackSeries()
                 }
-                if (!confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
+                if ( addImportToCurrentSource && !confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
                     return callbackSeries("stop");
+
                 self.addImportToCurrentSource(Lineage_classes.mainSource, targetNode.source, function (err, result) {
+
                     Lineage_classes.registerSource(targetNode.source);
                     callbackSeries()
 
@@ -54,13 +56,23 @@ var Lineage_blend = (function () {
                 if (type == 'sameAs') {
                     var propId = "http://www.w3.org/2002/07/owl#sameAs"
                     //  self.createPropertyRangeAndDomain(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
-                    self.createRestriction(Lineage_classes.mainSource, sourceNode, targetNode, propId, function (err, result) {
+
+                    var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, propId)
+                    var metadataOptions = {
+                        domainSourceLabel: sourceNode.source,
+                        rangeSourceLabel: targetNode.source,
+                    }
+                    var metaDataTriples = self.getCommonMetaDataTriples(restrictionTriples.blankNode, "manual","candidate", metadataOptions)
+                    restrictionTriples = restrictionTriples.concat(metaDataTriples)
+                    Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionTriples, null, function (err, result) {
                         if (err)
                             return alert(err);
+                        self.addRelationToGraph(propId)
+                        callback(err, "DONE")
                         callbackSeries()
                         MainController.UI.message("relation added", true)
-
                     })
+
                 }
 
             }
@@ -99,7 +111,7 @@ var Lineage_blend = (function () {
         })
 
 
-        Sparql_generic.insertTriples(source, triples, function (err, result) {
+        Sparql_generic.insertTriples(source, triples, null, function (err, result) {
             self.addRelationToGraph(propId)
             // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_classes.mainSource)
             callback(err, "DONE")
@@ -107,51 +119,45 @@ var Lineage_blend = (function () {
     }
 
         ,
-        self.createRestriction = function (source, souceNode, targetNode, propId, callback) {
-            var restrictionsTriples = []
-            var blankNode = "_:b" + common.getRandomHexaId(10)
-
-            restrictionsTriples.push({
-                subject: souceNode.id,
+        self.getSubClassTriples = function (souceNodeId, targetNodeId) {
+            var triples = []
+            triples.push({
+                subject: souceNodeId,
                 predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                object: blankNode
+                object: targetNodeId
             })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                object: "http://www.w3.org/2002/07/owl#Restriction"
-            })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: "http://www.w3.org/2002/07/owl#onProperty",
-                object: propId
-            })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
-                object: targetNode.id
-            })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: Config.sousLeSensVocablesGraphUri+"domainSourceLabel",
-                object: souceNode.source
-            })
-
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: Config.sousLeSensVocablesGraphUri+"rangeSourceLabel",
-                object: targetNode.source
-            })
-
-
-            var metaDataTriples = self.getMetaDataRelationTriples(blankNode)
-            restrictionsTriples = restrictionsTriples.concat(metaDataTriples)
-            Sparql_generic.insertTriples(source, restrictionsTriples, function (err, result) {
-                //  Lineage_classes.drawRestrictions(null, false, Lineage_classes.mainSource)
-                self.addRelationToGraph(propId)
-                callback(err, "DONE")
-            })
+            return triples;
         }
+
+    self.getRestrictionTriples = function (sourceNodeId, targetNodeId, propId) {
+        var restrictionsTriples = []
+        var blankNode = "_:b" + common.getRandomHexaId(10)
+
+        restrictionsTriples.push({
+            subject: sourceNodeId,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            object: blankNode
+        })
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            object: "http://www.w3.org/2002/07/owl#Restriction"
+        })
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: propId
+        })
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: targetNodeId
+        })
+
+        restrictionsTriples.blankNode = blankNode
+        return restrictionsTriples;
+    }
+
 
     self.addImportToCurrentSource = function (parentSource, importedSource, callback) {
         var payload = {
@@ -225,7 +231,7 @@ var Lineage_blend = (function () {
         var edgeId = sourceNode.id + "_" + propUri + "_" + targetNode.id
         if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1
-            var propLabel = Sparql_common.getLabelFromId(propUri)
+            var propLabel = Sparql_common.getLabelFromURI(propUri)
             visjsData.edges.push({
                 id: edgeId,
                 from: sourceNode.id,
@@ -255,14 +261,15 @@ var Lineage_blend = (function () {
 
     }
 
-    self.getMetaDataRelationTriples = function (subjectUri) {
+    self.getCommonMetaDataTriples = function (subjectUri, provenance,status, options) {
         var metaDataTriples = []
-
+        if(!options)
+            options={}
         var login = authentication.currentUser.login;
         var authorUri = Config.sousLeSensVocablesGraphUri + "users/" + login
-        var dateTime = common.dateToRDFString(new Date())+"^^xsd:dateTime"
-        var status = "candidate"
-        var provenance = "manual"
+        var dateTime = common.dateToRDFString(new Date()) + "^^xsd:dateTime"
+
+
 
         metaDataTriples.push({
             subject: subjectUri,
@@ -286,11 +293,55 @@ var Lineage_blend = (function () {
             predicate: "http://purl.org/dc/terms/provenance",
             object: Config.sousLeSensVocablesGraphUri + "provenance/" + provenance
         })
+        if (options) {
+            for (var key in options) {
+
+                metaDataTriples.push({
+                    subject: subjectUri,
+                    predicate: Config.sousLeSensVocablesGraphUri+"property#" + key,
+                    object: options[key]
+                })
+
+            }
+        }
 
         return metaDataTriples
 
     }
+    self.getProjectedGraphMetaDataTriples=function(graphUri,imports,options) {
+        var triples=[]
+        if(!options)
+            options={}
 
+        imports.forEach(function (importedSource) {
+            triples.push({
+                subject: graphUri,
+                predicate: Config.sousLeSensVocablesGraphUri + "property#import",
+                object: importedSource
+            })
+        })
+            triples.push({
+                subject: graphUri,
+                predicate: "http://www.w3.org/2002/07/owl#versionIRI",
+                object: graphUri
+            })
+
+            triples.push({
+                    subject: graphUri,
+                    predicate: "http://www.w3.org/2002/07/owl#versionInfo",
+                    object: "Revised " + common.dateToRDFString(new Date())
+                }
+            )
+            if(options.label) {
+                triples.push({
+                    subject: graphUri,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                    object: options.label
+                })
+            }
+
+        return triples
+    }
 
 
     return self;

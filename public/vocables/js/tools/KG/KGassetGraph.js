@@ -719,7 +719,7 @@ var KGassetGraph = (function () {
                         result.results.bindings.forEach(function (item) {
                             var label
                             if (!item.idLabel)
-                                label = Sparql_common.getLabelFromId(item.id.value)
+                                label = Sparql_common.getLabelFromURI(item.id.value)
                             else
                                 label = item.idLabel.value
 
@@ -732,7 +732,7 @@ var KGassetGraph = (function () {
                 }, function (err) {
                     ids.forEach(function (id) {
                         if (!model[id])
-                            model[id] = {label: Sparql_common.getLabelFromId(id)}
+                            model[id] = {label: Sparql_common.getLabelFromURI(id)}
                     })
 
                     assetGlobalModel.model = model

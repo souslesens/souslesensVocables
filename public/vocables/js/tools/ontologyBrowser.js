@@ -166,7 +166,7 @@ var h=$("#graphDiv").height();
                         existingVisjsIds[classId] = 1
                         visjsData.nodes.push({
                             id: SourceBrowser.currentTreeNode.data.id,
-                            label: Sparql_common.getLabelFromId(classId),
+                            label: Sparql_common.getLabelFromURI(classId),
                             shape: "box"
 
                         })
@@ -179,7 +179,7 @@ var h=$("#graphDiv").height();
                                 self.classColors[property.domain] = common.palette[Object.keys(self.classColors).length]
                             visjsData.nodes.push({
                                 id: property.domain,
-                                label: Sparql_common.getLabelFromId(property.domain),
+                                label: Sparql_common.getLabelFromURI(property.domain),
                                 shape: "box",
                                 color: self.classColors[property.domain],
                                 data: {}
@@ -189,7 +189,7 @@ var h=$("#graphDiv").height();
                                 id: edgeId,
                                 from: classId,
                                 to: property.domain,
-                                label: Sparql_common.getLabelFromId(key),
+                                label: Sparql_common.getLabelFromURI(key),
                                 data: {propertyId: key}
 
 
@@ -202,7 +202,7 @@ var h=$("#graphDiv").height();
                                 self.classColors[property.range] = common.palette[Object.keys(self.classColors).length]
                             visjsData.nodes.push({
                                 id: property.range,
-                                label: Sparql_common.getLabelFromId(property.range),
+                                label: Sparql_common.getLabelFromURI(property.range),
                                 shape: "box",
                                 color: self.classColors[property.range],
                                 data: {}
@@ -212,7 +212,7 @@ var h=$("#graphDiv").height();
                                 id: edgeId,
                                 from: classId,
                                 to: property.range,
-                                label: Sparql_common.getLabelFromId(key),
+                                label: Sparql_common.getLabelFromURI(key),
                                 data: {propertyId: key}
 
 
@@ -328,7 +328,7 @@ var h=$("#graphDiv").height();
 
                     if (existingItems.indexOf(id) < 0) {
                         existingItems.push(id)
-                        html += "<div class='OntologyBrowser_propertyDiv' onclick='OntologyBrowser.graphActions.addPropertyToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
+                        html += "<div class='OntologyBrowser_propertyDiv' onclick='OntologyBrowser.graphActions.addPropertyToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromURI(item.property.value) + "</div>"
                     }
 
                 })
@@ -353,7 +353,7 @@ var h=$("#graphDiv").height();
 
                         visjsData.nodes.push({
                             id: item.child1.value,
-                            label: Sparql_common.getLabelFromId(item.child1.value),
+                            label: Sparql_common.getLabelFromURI(item.child1.value),
                             shape: "dot",
                             color: OntologyBrowser.currentNode.color
                         })
@@ -385,7 +385,7 @@ var h=$("#graphDiv").height();
             if (existingNodes.indexOf(OntologyBrowser.currentNode.id) < 0) {
                 jstreeData.push({
                     id: OntologyBrowser.currentNode.id,
-                    text: Sparql_common.getLabelFromId(OntologyBrowser.currentNode.id),
+                    text: Sparql_common.getLabelFromURI(OntologyBrowser.currentNode.id),
                     parent: '#',
                     data: {
                         type: "Class",
@@ -404,7 +404,7 @@ var h=$("#graphDiv").height();
                 var propId = id.split("|")[1]
                 jstreeData.push({
                     id: id,
-                    text: Sparql_common.getLabelFromId(propId),
+                    text: Sparql_common.getLabelFromURI(propId),
                     parent: OntologyBrowser.currentNode.id,
                     data: {
 

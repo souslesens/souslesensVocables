@@ -866,12 +866,12 @@ var Lineage_classes = (function () {
                         if (item.propLabel)
                             propLabel = item.propLabel.value
                         else
-                            propLabel = Sparql_common.getLabelFromId(item.prop.value)
+                            propLabel = Sparql_common.getLabelFromURI(item.prop.value)
                         var rangeLabel
                         if (item.rangeLabel)
                             rangeLabel = item.rangeLabel.value
                         else
-                            rangeLabel = Sparql_common.getLabelFromId(item.range.value)
+                            rangeLabel = Sparql_common.getLabelFromURI(item.range.value)
                         labelStr += "<i>" + propLabel + " : </i>" + rangeLabel + "\n"
 
                     })
@@ -1011,7 +1011,7 @@ var Lineage_classes = (function () {
                             if (item.propLabel)
                                 propLabel = item.propLabel.value
                             else
-                                propLabel = Sparql_common.getLabelFromId(item.prop.value)
+                                propLabel = Sparql_common.getLabelFromURI(item.prop.value)
                             var edgeId = nodeData.id + "_" + item.value.value
                             var inverseEdgeId = item.value.value + "_" + nodeData.id
                             var arrows

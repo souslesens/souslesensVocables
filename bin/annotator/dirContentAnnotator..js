@@ -63,7 +63,7 @@ var DirContentAnnotator = {
                             var tempFileName = uploadDirPath + array[array.length - 1];
                             tempFileNames.push(tempFileName);
                             fileNames.push(fileName);
-                            console.log(tempFileName);
+                          //  console.log(tempFileName);
 
                             entry.pipe(etl.toFile(tempFileName)).promise(function (resolve, reject) {
                                 var x = resolve;
@@ -74,32 +74,6 @@ var DirContentAnnotator = {
                     })
                 )
 
-                /*   fs.createReadStream(tempzip)
-                .pipe(unzipper.Parse())
-                .on("entry", function (entry) {
-                    var type = entry.type;
-                    if (type == "File") {
-                        var fileName = entry.path;
-                        var array = fileName.split("/");
-                        var tempFileName = uploadDirPath + array[array.length - 1];
-                        tempFileNames.push(tempFileName);
-                       const content =  entry.buffer();
-                        fs.writeFileSync(tempFileName, content);
-                       async function main() {
-                            const content = await entry.buffer();
-                            await
-                                fs.writeFileSync(tempFileName, content);
-                            entry.autodrain();
-
-                        }
-
-                        main();
-
-                        fileNames.push(fileName);
-                    } else {
-                        entry.autodrain();
-                    }
-                })*/
 
                 .on("finish", function () {
                     DirContentAnnotator.processZippedFiles(fileNames, corpusName, sources, options, function (err, result) {

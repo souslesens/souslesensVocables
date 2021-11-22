@@ -766,7 +766,7 @@ var SourceBrowser = (function () {
                 if (item.propLabel) {
                     propName = item.propLabel.value
                 } else {
-                    propName = Sparql_common.getLabelFromId(item.prop.value)
+                    propName = Sparql_common.getLabelFromURI(item.prop.value)
                 }
 
                 var value = item.value.value;

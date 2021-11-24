@@ -1479,7 +1479,7 @@ var Lineage_classes = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
-            if (classIds = "all")
+            if (classIds == "all")
                 classIds = null
 
 

@@ -48,6 +48,7 @@ const UsersTable = () => {
                                 <Table sx={{ width: '100%' }}>
                                     <TableHead>
                                         <TableRow style={{ fontWeight: "bold" }}>
+                                        <TableCell style={{ fontWeight: 'bold' }}>Source</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>Name</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>groups</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
@@ -55,6 +56,9 @@ const UsersTable = () => {
                                     </TableHead>
                                     <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotUsers.map(user => {
                                         return (<TableRow key={user.id}>
+                                            <TableCell >
+                                                {user.source}
+                                            </TableCell>
                                             <TableCell >
                                                 {user.login}
                                             </TableCell>
@@ -65,7 +69,7 @@ const UsersTable = () => {
                                             <TableCell>
 
                                                 <Box sx={{ display: 'flex' }}><UserForm maybeuser={user} />
-                                                    <Button color='secondary' onClick={() => deleteUser(user)}>Delete</Button>
+                                                    <Button disabled={user.source == "json" ? false : true}  color='secondary' onClick={() => deleteUser(user)}>Delete</Button>
                                                 </Box>
                                             </TableCell>
 
@@ -178,14 +182,16 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
                         value={userModel.userForm.login}
                         id={`login`}
                         label={"Login"}
-                        variant="standard" />
+                        variant="standard"
+                        disabled={user.source == "json" ? false : true} />
                     <TextField fullWidth onChange={handleFieldUpdate("password")}
 
                         value={userModel.userForm.password}
                         id={`password`}
                         type='password'
                         label={"Password"}
-                        variant="standard" />
+                        variant="standard"
+                        disabled={user.source == "json" ? false : true} />
                     <FormControl>
                         <InputLabel id="select-groups-label">Groups</InputLabel>
                         <Select

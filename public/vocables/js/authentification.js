@@ -25,7 +25,7 @@ var authentication = (function () {
             url: "/auth/check",
             success: function (data) {
                 if (!data.logged) {
-                    //location.href = '/login';
+                    location.href = '/login';
                 } else {
                     var url = window.location.host;
                     authentication.currentUser = {
@@ -47,7 +47,11 @@ var authentication = (function () {
             type: "GET",
             url: "/auth/logout",
             success: function (data) {
-                location.href = '/login';
+                if (data.redirect) {
+                    location.href = data.redirect;
+                } else {
+                    location.href = '/login';
+                }
             }
         });
     }

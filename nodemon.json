@@ -1,7 +1,7 @@
 {
   "verbose": true,
   "ignore": [
-    "config", 
+    "config/users", 
     "config_templates",
     "mainapp",
     "public",

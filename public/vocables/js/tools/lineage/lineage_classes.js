@@ -39,7 +39,7 @@ var Lineage_classes = (function () {
 
         self.onLoaded = function () {
             if (self.isLoaded)
-                return;
+              ; // return;
             self.isLoaded = true
             $("#sourceDivControlPanelDiv").html("")
             Lineage_common.currentSource = null;
@@ -1486,7 +1486,7 @@ var Lineage_classes = (function () {
                 classIds = self.getGraphIdsFromSource(source)
 
             }
-            if (classIds = "all")
+            if (classIds == "all")
                 classIds = null
 
 
@@ -1591,6 +1591,7 @@ var Lineage_classes = (function () {
             }
             if (classIds == "all")
                 classIds = null
+
             MainController.UI.message("")
 
             Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1}, function (err, result) {

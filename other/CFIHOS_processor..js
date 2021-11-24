@@ -4,6 +4,7 @@ var csvCrawler = require('../bin/_csvCrawler.')
 var async = require('async')
 var util = require("../bin/util.")
 var httpProxy = require("../bin/httpProxy.")
+var UML2OWLparser=require("./UML2OWLparser")
 
 
 var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL"
@@ -48,8 +49,8 @@ var CFIHOS_processor = {
     },
 
 
-    processSubClasses: function (mappings) {
-        var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/"
+    processSubClasses: function (mappings,graphUri) {
+      //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
         var cfihosPrefix = "https://www.jip36-cfihos.org/vcabulary#"
         var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
         var propertiesTypeMap = {
@@ -59,7 +60,8 @@ var CFIHOS_processor = {
             "skos:definition": "string",
             "skos:notation": "string",
             "owl:comment": "string",
-            "cfihos:status": "string"
+            "cfihos:status": "string",
+            "rdf:type":"uri",
         }
 
 
@@ -83,11 +85,11 @@ var CFIHOS_processor = {
                             if (err)
                                 return callbackEachLookup(err)
                             var lookupLines = result.data[0]
-                            lookUpMap[lookup.field] = {}
+                            lookUpMap[lookup.name] = {}
                             lookupLines.forEach(function (line, index) {
                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn])
                                     return console.log("missing lookup line" + index + " " + lookupFilePath)
-                                lookUpMap[lookup.field][line[lookup.sourceColumn]] = line[lookup.targetColumn]
+                                lookUpMap[lookup.name][line[lookup.sourceColumn]] = line[lookup.targetColumn]
                             })
 
                             callbackEachLookup()
@@ -101,29 +103,73 @@ var CFIHOS_processor = {
 
                 //build triples
                 function (callbackSeries) {
+
+
+                    function getLookupValue(lookupSequence,value){
+
+                        var lookupItem=lookupSequence.split("|")
+                        var target=value
+                        lookupItem.forEach(function(lookupItem){
+                            if (lookUpMap[lookupItem]) {
+                                target = lookUpMap[lookupItem][target]
+                                if (!target) {
+                                    console.log("lookup value not found " + value + ": " )
+                                    return ""
+                                }
+                            }
+                            else
+                                return target
+                        })
+
+                        return target
+
+
+                    }
                     CFIHOS_processor.readCsv(filePath, function (err, result) {
                         if (err)
                             return callbackSeries(err)
 
                         var lines = result.data[0]
-                        lines.forEach(function (line) {
+                        lines.forEach(function (line, indexLine) {
+                            if( false && indexLine>2)
+                                return;
                             var hasDirectSuperClass = false
                             var subjectStr
                             mapping.tripleModels.forEach(function (item) {
-                                (item.p == "owl:comment")
-                                var x = 3
+
+
                                 if (line[item.s] && line[item.o]) {
+
+
+
+                                  subjectStr = line[item.s]
+                                    if(item.lookup_S) {
+                                        subjectStr = getLookupValue(item.lookup_S, subjectStr)
+                                        if(!subjectStr) {
+                                           // console.log(line[item.s])
+                                            return
+                                        }
+                                    }
+
+                                    subjectStr = "<" + graphUri +subjectStr + ">"
                                     var objectStr = line[item.o]
+
+                                    if(item.lookup_O) {
+                                        objectStr = getLookupValue(item.lookup_O, objectStr)
+                                        if(!objectStr) {
+                                           // console.log(line[item.o])
+                                            return
+                                        }
+                                    }
+
 
                                     if (line[item.p] == "rdfs:subClassOf")
                                         hasDirectSuperClass = true;
-
-
-                                    if (lookUpMap[item.o]) {
+                                 /*   if (lookUpMap[item.o]) {
                                         objectStr = lookUpMap[item.o][objectStr]
                                         if (!objectStr)
                                             console.log("lookup value not found " + item.o + ": " + line[item.o])
-                                    }
+                                    }*/
 
                                     if (propertiesTypeMap[item.p] == "string")
                                         objectStr = "'" + util.formatStringForTriple(objectStr) + "'"
@@ -131,6 +177,9 @@ var CFIHOS_processor = {
                                         objectStr = "<" + graphUri + objectStr + ">"
 
                                     if (item.p == "_restriction") {
+                                        if(!item.prop){
+                                            return callbackSeries("no prop defined for restriction")
+                                        }
                                         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
                                         triples.push({
@@ -141,7 +190,7 @@ var CFIHOS_processor = {
                                         triples.push({
                                             s: blankNode,
                                             p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                            o: "rdf:type",
+                                            o: "<"+item.prop+">" ,
                                         });
                                         triples.push({
                                             s: blankNode,
@@ -150,7 +199,7 @@ var CFIHOS_processor = {
                                         });
                                         triples.push({
                                             s: subjectStr,
-                                            p: "rdf:subClassOf",
+                                            p: "rdfs:subClassOf",
                                             o: blankNode,
                                         });
                                         objectStr = blankNode
@@ -160,8 +209,7 @@ var CFIHOS_processor = {
                                     // return console.log("missing type " + item.p)
 
 
-                                    subjectStr = "<" + graphUri + line[item.s] + ">"
-                                    triples.push({
+                                            triples.push({
                                         s: subjectStr,
                                         p: item.p,
                                         o: objectStr
@@ -169,12 +217,15 @@ var CFIHOS_processor = {
                                 }
 
                             })
-                            triples.push({
-                                s: subjectStr,
-                                p: "rdf:type",
-                                o: mapping.type
-                            })
-                            if (!hasDirectSuperClass && mapping.type == "Class") {
+                            if(mapping.type) {
+                                triples.push({
+                                    s: subjectStr,
+                                    p: "rdf:type",
+                                    o: mapping.type
+                                })
+                            }
+
+                            if ( mapping.topClass && !hasDirectSuperClass && mapping.type == "owl:Class") {
                                 triples.push({
                                     s: subjectStr,
                                     p: "rdfs:subClassOf",
@@ -256,15 +307,14 @@ mappingsMap = {
         fileName: "CFIHOS tag class v1.5.csv",
         lookups: [
             {
-                field: "parentTagClassName",
+                name: "parentTagClassName",
                 fileName: "CFIHOS tag class v1.5.csv",
                 sourceColumn: "tagClassName",
                 targetColumn: "cFIHOSUniqueId"
             }
         ],
-        tripleModels: [{s: "cFIHOSUniqueId", p: "rdfs:subClassOf", o: "parentTagClassName"},
+        tripleModels: [{s: "cFIHOSUniqueId", p: "rdfs:subClassOf", o: "parentTagClassName",lookup_O:"parentTagClassName"},
             {s: "cFIHOSUniqueId", p: "rdfs:label", o: "tagClassName"},
-            {s: "cFIHOSUniqueId", p: "rdfs:label", o: "owl:Class"},
             {s: "cFIHOSUniqueId", p: "skos:definition", o: "tagClassDefinition"},
             {s: "cFIHOSUniqueId", p: "cfihos:status", o: "status"},
 
@@ -296,6 +346,19 @@ mappingsMap = {
 
         ]
 
+    },
+    "QUALITATIVE_PROPERTY": {
+        type: "owl:Class",
+        topClass: "<https://www.jip36-cfihos.org/ontology/cfihos_1_5/QUALITATIVE_PROPERTY>",
+        fileName: "CFIHOS property picklist v1.5.csv",
+        lookups: [],
+        tripleModels: [
+            {s: "cFIHOSUniqueId", p: "rdfs:label", o: "picklistName"},
+            {s: "cFIHOSUniqueId", p: "cfihos:status", o: "status"},
+
+
+        ]
+
     }
 
     ,
@@ -304,18 +367,46 @@ mappingsMap = {
         topClass: "<https://www.jip36-cfihos.org/ontology/cfihos_1_5/EAID_D6FDC9AE_59DD_4d99_A4F3_6F8E2127FDB1>",
         fileName: "CFIHOS property picklist value v1.5.csv",
         lookups: [
-            {
-                field: "picklistName",
-                fileName: "CFIHOS property picklist v1.5.csv",
-                sourceColumn: "picklistName",
-                targetColumn: "cFIHOSUniqueId"
-            }
+            {    name:"property_picklistNameToPropertyId",
+                fileName: "CFIHOS tag class properties v1.5.csv",
+                sourceColumn: "tagPropertyName",
+                targetColumn: "tagPropertyCFIHOSUniqueId"
+            },
+
+
         ],
         tripleModels: [
             {s: "cFIHOSUniqueId", p: "rdfs:label", o: "picklistValue"},
-            {s: "cFIHOSUniqueId", p: "_restriction", o: "picklistName"},
+            {s: "picklistName", p: "_restriction", o: "cFIHOSUniqueId",lookup_S:"property_picklistNameToPropertyId",prop:"rdfs:range"},
             {s: "cFIHOSUniqueId", p: "cfihos:status", o: "status"},
             {s: "cFIHOSUniqueId", p: "owl:comment", o: "picklistValueDescription"},
+            {s: "cFIHOSUniqueId", p: "rdf:type", o: "picklistName",lookup_O:"property_picklistNameToPropertyId"},
+
+
+        ]
+
+    }
+    , "TAG_PROPERTIES": {
+        type: null,
+        fileName: "CFIHOS tag class properties v1.5.csv",
+        lookups: [
+            {    name:"tagClassNameToId",
+                fileName: "CFIHOS tag class v1.5.csv",
+                sourceColumn: "tagClassName",
+                targetColumn: "cFIHOSUniqueId"
+            },
+            {    name:"propertyNameToId",
+                fileName: "CFIHOS property v1.5.csv",
+                sourceColumn: "propertyName",
+                targetColumn: "cFIHOSUniqueId"
+            },
+        ],
+        tripleModels: [
+
+            {s: "tagPropertyCFIHOSUniqueId", p: "rdfs:label", o:  "tagPropertyName"},
+            {s: "tagClassName", p: "_restriction", o: "tagPropertyName",lookup_S:"tagClassNameToId",lookup_O:"propertyNameToId","prop":"http://standards.iso.org/iso/15926/part14/hasQuality"},
+            {s: "tagPropertyCFIHOSUniqueId", p: "cfihos:status", o: "status"},
+
 
 
         ]
@@ -325,7 +416,38 @@ mappingsMap = {
 }
 
 
-var mappings = [mappingsMap["PROPERTY_PICKLIST_VALUE"]]
+var mappingNames =["TAG_CLASS","QUANTITATIVE_PROPERTY","QUALITATIVE_PROPERTY","PROPERTY_PICKLIST_VALUE","TAG_PROPERTIES"]
 
 
-CFIHOS_processor.processSubClasses(mappings)
+var mappingNames =["PROPERTY_PICKLIST_VALUE"]
+var mappings=[]
+mappingNames.forEach(function(mappingName){
+    mappings.push(mappingsMap[mappingName])
+
+})
+
+
+var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/";
+
+if(true){
+
+    CFIHOS_processor.processSubClasses(mappings, graphUri)
+
+
+}
+
+
+if(false) {
+    var sourcePath = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS 1.5.xml";
+
+
+    var jsonPath = sourcePath + ".json";
+
+    UML2OWLparser.parseXMI(sourcePath, jsonPath, function () {
+        UML2OWLparser.buildOwl(jsonPath, graphUri, function (err, result) {
+            if (err)
+                return console.lg(err);
+            CFIHOS_processor.processSubClasses(mappings, graphUri)
+        });
+    });
+}

@@ -60,6 +60,14 @@
             <div class="lineage_actionDiv">
                 <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
                        id="Lineage_classes_showImportsCBX"> imports
+
+                Nodes Selection
+                <select id="LineageRelations_nodesSelectionSelect">
+                    <option value="alNodes">All Nodes</option>
+                    <option value="selectedNodeDescendants">Selected node descendants</option>
+                </select>
+
+
                 <div>
                     <!-- Properties
                      <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
@@ -103,8 +111,10 @@
 
             <div class="lineage_actionDiv">
                 existing projected Graphs<br>
-               <!--   <select id="LineageRelations_projectedGraphsSelect" onclick="Lineage_relations.loadProjectedGraph($(this).val())"></select>-->
-                <div class="jstreeContainer"> <div id="LineageRelations_projectedGraphsTree" ></div></div>
+                <!--   <select id="LineageRelations_projectedGraphsSelect" onclick="Lineage_relations.loadProjectedGraph($(this).val())"></select>-->
+                <div class="jstreeContainer">
+                    <div id="LineageRelations_projectedGraphsTree"></div>
+                </div>
             </div>
 
             <!--  <div class="jstreeContainer" style="width:90%">
@@ -124,7 +134,7 @@
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
     setTimeout(function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
-        $("#Lineage_RighPanelTabs").tabs()
+        // $("#Lineage_RighPanelTabs").tabs()
     }, 300)
     //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
 

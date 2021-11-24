@@ -33,14 +33,11 @@ Lineage_relations = (function () {
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
-           // self.initProjectedGraphs()
+            // self.initProjectedGraphs()
         })
 
 
     }
-
-
-
 
 
     self.listAllRestrictions = function () {
@@ -77,19 +74,53 @@ Lineage_relations = (function () {
     self.showRestrictions = function (output, relations, toLabelsMap) {
         var currentSource = Lineage_common.currentSource
         var filter = ""
+        var selectedNodes = null
         var propertyFilter = $("#LineageRelations_propertiesSelect").val()
         if (propertyFilter && propertyFilter != "")
             filter += " filter (?prop=<" + propertyFilter + ">)"
 
         var graphUriSourceMap = {}
         async.series([
+            //get nodes to map
+            function (callbackSeries) {
+                if (relations)
+                    return callbackSeries()
+
+                var selectionMode = $("#LineageRelations_nodesSelectionSelect").val()
+
+                if (selectionMode == "selectedNodeDescendants") {
+                    var selectedNode = Lineage_classes.currentGraphNode
+                    if (!selectedNode)
+                        return callbackSeries("no node selected on graph")
+                    if(Config.sources[selectedNode.id]){// selection of source in graph
+                        Lineage_classes.setCurrentSource(selectedNode.id)
+                        selectedNodes = null
+                        return callbackSeries()
+
+                    }
+                    selectedNodes=[selectedNode.id]
+                    Sparql_generic.getNodeChildren(Lineage_common.currentSource, null, selectedNode.id, 3, null, function (err, result) {
+                        if (err)
+                            callbackSeries(err)
+                        result.forEach(function (item) {
+                            selectedNodes.push(item.child1.value)
+                        })
+                        return callbackSeries()
+                    })
+
+                } else {
+                    selectedNodes = null
+                    return callbackSeries()
+                }
+
+            },
             function (callbackSeries) {
                 if (relations)
                     return callbackSeries()
                 else
                     relations = []
 
-                Sparql_OWL.getObjectRestrictions(currentSource, null, {
+                Sparql_OWL.getObjectRestrictions(currentSource, selectedNodes, {
                     withoutImports: 0,
                     someValuesFrom: 1,
                     filter: filter
@@ -352,6 +383,7 @@ Lineage_relations = (function () {
             var parentsArray = restriction.parents.split("|")
             maxLevel = Math.max(maxLevel, parentsArray.length)
 
+            var ancestorsSource = parentsArray[0]
             parentsArray.forEach(function (parentId, index) {
                 if (parentId == "http://souslesens.org/workorder/maintenance_inspection/Maintenance_Details")
                     var x = 3
@@ -381,7 +413,7 @@ Lineage_relations = (function () {
                                 shape: "box",
                                 level: index,
 
-                                color: Lineage_classes.getSourceColor(parentId),
+                                color: Lineage_classes.getSourceColor(ancestorsSource),
                                 data: {
                                     id: parentId,
                                     label: parentId,
@@ -622,7 +654,7 @@ Lineage_relations = (function () {
 
         var graphMetaData = Lineage_blend.getProjectedGraphMetaDataTriples(graphUri, imports, graphMetaDataOptions)
         triples = triples.concat(graphMetaData)
-        var commonMetaData = Lineage_blend.getCommonMetaDataTriples(graphUri, "exactMatch_projection","draft")
+        var commonMetaData = Lineage_blend.getCommonMetaDataTriples(graphUri, "exactMatch_projection", "draft")
         triples = triples.concat(commonMetaData)
 
         var insertTriplesStr = ""
@@ -642,7 +674,7 @@ Lineage_relations = (function () {
         // console.log(query)
         var url = Config.sources[Lineage_classes.mainSource].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: Lineage_classes.mainSource}, function (err, result) {
-            return  MainController.UI.message("Project Graph saved",true);
+            return MainController.UI.message("Project Graph saved", true);
         })
     }
 

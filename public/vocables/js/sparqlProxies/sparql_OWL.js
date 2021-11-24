@@ -593,7 +593,7 @@ var Sparql_OWL = (function () {
             query +="" + fromStr + " WHERE {"
             if (options.selectGraph)
                 query += " graph ?g "
-            query += "{ ?concept rdfs:subClassOf ?node. " + filterStr +
+            query += "{ ?concept rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
                 " OPTIONAL {?concept rdfs:label ?conceptLabel}"

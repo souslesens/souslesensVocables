@@ -35,14 +35,14 @@ var Standardizer = (function () {
         /*   $("#rightPanelDiv").html("<br><div style='font-weight: bold'>Mapping taxonomy" +
                // "<button onClick=\"Export.exportTeeToDataTable('Standardizer_rightJstreeDiv','#')\">toTable</button></div>"+
                "</div><div><div id='Standardizer_rightJstreeDiv'></div></div> ")*/
-        $("#graphDiv").html("")
 
-        $("#accordion").accordion("option", {active: 2});
-        setTimeout(function () {
+
+
+
+            $("#graphDiv").html("")
+
             $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
-
-            var w = $(document).width() - leftPanelWidth - 30;
-            var h = $(document).height() - 20;
+            $("#accordion").accordion("option", {active: 2});
 
             self.initSourcesIndexesList(null, function (err, sources) {
                 if (err)
@@ -68,17 +68,19 @@ var Standardizer = (function () {
 
                 common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value")
                 KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate
-
+                self.matchCandidates = {}
+                $("#standardizerCentral_tabs").tabs({});
                 //   common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
 
 
             })
-            setTimeout(function () {
-                $("#standardizerCentral_tabs").tabs({});
-            }, 200)
+        /*    setTimeout(function () {
 
-            self.matchCandidates = {}
-        }, 200)
+            }, 200)*/
+
+
+
+
     }
 
 

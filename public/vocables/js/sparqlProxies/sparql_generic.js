@@ -327,8 +327,10 @@ var Sparql_generic = (function () {
                 })
                 filterStr += ")"
 
+
                 var query = " select    distinct * " + sourceVariables.fromStr + "  WHERE {" +
                     "?subject ?prop ?value. FILTER (?subject in" + filterStr + ")} limit " + sliceSize + 1;
+                url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
                     if (err) {
                         return callbackEach(err);
@@ -347,7 +349,7 @@ var Sparql_generic = (function () {
 
         self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
             if (!subjectUri && !subjectUri && !subjectUri)
-                return call("no subject predicate and object filter : cannot delete")
+                return callback("no subject predicate and object filter : cannot delete")
 
 
             var filterStr = "";

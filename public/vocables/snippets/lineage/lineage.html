@@ -11,6 +11,8 @@
         font-size: 14px;
         border: solid 1px black;
         border-radius: 5px;
+        font-weight: bold;
+        background: #eee;
       //  width:150px;
     }
 
@@ -32,6 +34,12 @@
         padding: 5px;
         border: solid 1px blue;
         border-radius: 3px;
+    }
+
+    .lineage_hiddenSource{
+        border-style: dashed;
+       opacity: 0.2;
+
     }
 
 
@@ -56,6 +64,10 @@
 
   <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
         <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
+      <button onclick="Lineage_classes.initUI()">clear</button>
+      <button onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
+
+
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
       <!--  <button class="lineage_button" onclick="Lineage_classes.collapseNode()">collapse</button>-->
 
@@ -64,7 +76,7 @@
         <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
       <button class="lineage_button" onclick="Lineage_classes.drawRestrictions()">Restrictions</button>
     <!--  <button class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
-    <button onclick="Lineage_classes.initUI()">clear</button>
+
 
     </div>
     <div class="lineage_actionDiv" style="display: flex;flex-direction: column;margin: 5px" id="lineage_blendDiv">
@@ -74,8 +86,8 @@
         <div> target node<div id="lineage_targetNodeDiv" style="background-color: #8792a2;font-weight: bold;text-align: center;"></div></div>
         <div id="lineage_blendButtonsDiv"  style="margin: 5px; display: none">
            <!-- <button  class='lineage_button' onclick="SourceBrowser.copyNode()">Copy node</button>-->
-            <button   class='lineage_button' onclick="Lineage_blend.pasteAsSameAs()">paste as SameAs</button>
-            <button  class='lineage_button' onclick="Lineage_blend.pasteAsSubClassOf()">paste as SubClassOf</button>
+         <!--   <button   class='lineage_button' onclick="Lineage_blend.pasteAsSameAs()">paste as SameAs</button>-->
+            <button  class='lineage_button' onclick="Lineage_blend.createRelation('sameAs')">Create relation SameAs</button>
 
         </div>
 

@@ -463,7 +463,6 @@ var visjsGraph = (function () {
 
 
                     } else {
-                        self.labelsVisible = false;
                         node.label = null;
                         node.size = size;
                         node.font = {size: fontSize}

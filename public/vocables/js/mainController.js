@@ -186,6 +186,7 @@ var MainController = (function () {
                     treeData.push({id: item, text: item, parent: "#", type: item})
             })
             Object.keys(Config.sources).sort().forEach(function (sourceLabel, index) {
+
                 self.initControllers()
                 if (sources && sources.indexOf(sourceLabel) < 0)
                     return
@@ -198,7 +199,6 @@ var MainController = (function () {
 
 
                 Config.sources[sourceLabel].name = sourceLabel;
-
 
                 var parent = Config.sources[sourceLabel].schemaType
 

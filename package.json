@@ -12,9 +12,12 @@
     "ci": "npm run lint && npm run ncu",
     "patch": " npm version --no-git-tag-version --no-commit-hooks patch",
     "minor": " npm version --no-git-tag-version --no-commit-hooks minor",
-    "major": " npm version --no-git-tag-version --no-commit-hooks major"
+    "major": " npm version --no-git-tag-version --no-commit-hooks major",
+    "test": "cypress open"
+
   },
   "devDependencies": {
+    "cypress": "^9.0.0",
     "prettier": "^2.4.1"
   },
   "dependencies": {

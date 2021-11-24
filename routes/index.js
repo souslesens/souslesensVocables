@@ -174,11 +174,10 @@ router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
 });
 
 router.get("/config", ensureLoggedIn(), function (req, res, next) {
-
     res.send({
         auth: config.auth,
     });
-})
+});
 
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     let sampleFile;

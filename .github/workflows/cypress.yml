@@ -2,7 +2,7 @@ name: Cypress Tests
 
 on:
   push:
-    branches: [ cypress-users-ordination ]
+    branches: [ cypress-users-ordination-test ]
   pull_request:
     branches: [ master ]
 

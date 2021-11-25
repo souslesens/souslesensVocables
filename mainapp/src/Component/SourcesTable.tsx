@@ -8,7 +8,7 @@ import { Source, putSources, defaultSource, DataSource } from '../Source';
 import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel, MenuItem, Modal, Radio, Select, TextField } from '@material-ui/core';
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
-
+import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
@@ -65,7 +65,7 @@ const SourcesTable = () => {
                                             <TableCell>
 
                                                 <Box sx={{ display: 'flex' }}><SourceForm source={source} />
-                                                    <Button color='secondary' onClick={() => deleteSource(source)}>Delete</Button>
+                                                    <ButtonWithConfirmation label='Delete' msg={() => deleteSource(source)} />
                                                 </Box>
                                             </TableCell>
 

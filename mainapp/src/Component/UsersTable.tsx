@@ -171,8 +171,12 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const creationVariant = (edition: any, creation: any) => create ? creation : edition
 
+    const config = SRD.unwrap({auth: "json"}, identity, model.config);
+
+    const createEditButton = <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+
     return (<>
-        <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+        {create ? config.auth == "json" ? createEditButton : null : createEditButton}
         <Modal onClose={handleClose} open={userModel.modal}>
             <Box sx={style}>
                 <Stack spacing={4}>

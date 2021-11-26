@@ -70,6 +70,9 @@ const UsersTable = () => {
                                             .map(user => {
                                                 return (<TableRow key={user.id}>
                                                     <TableCell >
+                                                        {user.source}
+                                                    </TableCell>
+                                                    <TableCell >
                                                         {user.login}
                                                     </TableCell>
                                                     <TableCell>

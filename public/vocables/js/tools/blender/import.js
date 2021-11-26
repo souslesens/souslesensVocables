@@ -73,7 +73,7 @@ var Import = (function () {
 
         })
 
-        Sparql_generic.insertTriples(Blender.currentSource, triples, function (err, result) {
+        Sparql_generic.insertTriples(Blender.currentSource, triples, null,function (err, result) {
             if (err)
                 return $("#Import_MessageDiv").html(err)
             $("#Import_MessageDiv").html("imported " + words.length + " new nodes")

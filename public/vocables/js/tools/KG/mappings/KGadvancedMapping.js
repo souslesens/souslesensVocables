@@ -766,7 +766,7 @@ var KGadvancedMapping = (function () {
 
     }
 
-    self.drawBestMatches = function (callback) {
+    self.lookForBestMatches = function (callback) {
         if (!KGmappingData.currentColumn)
             return alert("no column selected")
         KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
@@ -781,22 +781,7 @@ var KGadvancedMapping = (function () {
             },500)
             if (err)
                 return callback(err)
-        /*    var html = "<div style='display: flex;flex-direction:row';width:100%;height:100%>" +
-                "<div id='bestMatchesGraphDiv' style='width:800px;height:800px'></div>" +
-                "<div id='bestMatchesInfosDiv' style='width:200px;height:100%'></div>" +
-                "</div>"
 
-            $("#mainDialogDiv").dialog("open");
-
-            $("#mainDialogDiv").html(html)
-            setTimeout(function(){
-            Standardizer.drawBestMatches(word,null,"bestMatchesGraphDiv",function(err, result) {
-
-
-                callback(err, result);
-            })
-
-            })*/
 
         })
     }

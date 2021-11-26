@@ -18,7 +18,7 @@
     "prettier": "^2.5.0"
   },
   "dependencies": {
-    "@emotion/react": "^11.6.0",
+    "@emotion/react": "^11.7.0",
     "@emotion/styled": "^11.6.0",
     "@futpib/tika-server-client": "0.0.5",
     "@material-ui/icons": "^4.11.2",

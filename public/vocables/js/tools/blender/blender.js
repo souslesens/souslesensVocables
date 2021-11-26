@@ -523,7 +523,7 @@ var Blender = (function () {
                             object: newParentId,
                             valueType: "uri"
                         }
-                        Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
+                        Sparql_generic.insertTriples(self.currentSource, [triple], null,function (err, result) {
                             if (err) {
                                 callback(err)
                             }
@@ -564,7 +564,7 @@ var Blender = (function () {
                                 object: nodeData.id,
                                 valueType: "uri"
                             }
-                            Sparql_generic.insertTriples(self.currentSource, [triple], function (err, result) {
+                            Sparql_generic.insertTriples(self.currentSource, [triple],null, function (err, result) {
                                 if (err) {
                                     callback(err)
                                 }

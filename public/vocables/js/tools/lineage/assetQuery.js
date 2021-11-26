@@ -308,7 +308,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         if (existingItems.indexOf(id) < 0) {
                             existingItems.push(id)
-                            html += "<div class='KGquery_propertyDiv' onclick='KGquery.graphActions.addPropertiesToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromId(item.property.value) + "</div>"
+                            html += "<div class='KGquery_propertyDiv' onclick='KGquery.graphActions.addPropertiesToTree($(this))' id='" + id + "'>" + Sparql_common.getLabelFromURI(item.property.value) + "</div>"
                         }
 
                     })
@@ -333,7 +333,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                             visjsData.nodes.push({
                                 id: item.child1.value,
-                                label: Sparql_common.getLabelFromId(item.child1.value),
+                                label: Sparql_common.getLabelFromURI(item.child1.value),
                                 shape: "dot",
                                 color: KGquery.currentProperty.color
                             })

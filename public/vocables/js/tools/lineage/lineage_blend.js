@@ -4,52 +4,15 @@ var Lineage_blend = (function () {
     var self = {}
 
 
-    self.addBlendJstreeMenuItems = function (items) {
-
-        items.PasteAs = {
-            label: "Paste as... ",
-            "action": false,
-            "submenu": {
-                PasteAsSubClassOf: {
-                    label: "SubClassOf",
-                    action: function () {
-                        Lineage_blend.createRelation(SourceBrowser.currentTreeNode.data)
-
-                    }
-                },
-                PasteAsSameAs: {
-                    label: "SameAs",
-                    action: function () {
-                        Lineage_blend.pasteAsSameAs(SourceBrowser.currentTreeNode.data)
-
-                    }
-                }
-            }
-        }
-        return items
-
-    }
-
-
-    self.addNodeToAssociationNode = function (node,role) {
-        if(role=="source") {
-            self.currentAssociation = [node.data,[]]
+    self.addNodeToAssociationNode = function (node, role) {
+        if (role == "source") {
+            self.currentAssociation = [node.data, []]
             $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
             $("#lineage_targetNodeDiv").html("")
-        }
-        else  if(role=="target") {
-            self.currentAssociation[1]=node.data;
+        } else if (role == "target") {
+            self.currentAssociation[1] = node.data;
             $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
         }
-     /*   if (!self.currentAssociation || self.currentAssociation.length == 2) {
-            self.currentAssociation = [node.data]
-            $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
-            $("#lineage_targetNodeDiv").html("")
-        } else {
-            self.currentAssociation.push(node.data);
-            $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
-        }*/
-
         if (self.currentAssociation && self.currentAssociation.length == 2) {
             $("#lineage_blendButtonsDiv").css('display', 'block')
         } else {
@@ -58,11 +21,17 @@ var Lineage_blend = (function () {
 
 
         $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
-        $("#GenericTools_searchInAllSources").prop("checked",true)
+        $("#GenericTools_searchInAllSources").prop("checked", true)
+    }
+
+    self.createRelations = function (type,relations,addImportToCurrentSource) {
+
     }
 
 
-    self.createRelation = function (type) {
+
+
+    self.createRelation = function (type,addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
         if (!sourceNode || !targetNode)
@@ -77,9 +46,11 @@ var Lineage_blend = (function () {
                 if (imports || imports.indexOf(sourceNode.source) > -1) {
                     return callbackSeries()
                 }
-                if (!confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
+                if ( addImportToCurrentSource && !confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
                     return callbackSeries("stop");
+
                 self.addImportToCurrentSource(Lineage_classes.mainSource, targetNode.source, function (err, result) {
+
                     Lineage_classes.registerSource(targetNode.source);
                     callbackSeries()
 
@@ -87,17 +58,28 @@ var Lineage_blend = (function () {
 
             }
 
-            ,    function (callbackSeries) {
+            , function (callbackSeries) {
                 if (type == 'sameAs') {
-                var propId = "http://www.w3.org/2002/07/owl#sameAs"
-                self.createPropertyRangeAndDomain(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
-                    if (err)
-                        return alert(err);
-                    callbackSeries()
-                    MainController.UI.message("relation added", true)
+                    var propId = "http://www.w3.org/2002/07/owl#sameAs"
+                    //  self.createPropertyRangeAndDomain(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
 
-                })
-            }
+                    var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, propId)
+                    var metadataOptions = {
+                        domainSourceLabel: sourceNode.source,
+                        rangeSourceLabel: targetNode.source,
+                    }
+                    var metaDataTriples = self.getCommonMetaDataTriples(restrictionTriples.blankNode, "manual","candidate", metadataOptions)
+                    restrictionTriples = restrictionTriples.concat(metaDataTriples)
+                    Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionTriples, null, function (err, result) {
+                        if (err)
+                            return alert(err);
+                        self.addRelationToGraph(propId)
+                        callback(err, "DONE")
+                        callbackSeries()
+                        MainController.UI.message("relation added", true)
+                    })
+
+                }
 
             }
 
@@ -106,25 +88,8 @@ var Lineage_blend = (function () {
         })
 
 
-
     }
 
-    self.pasteAsSameAs = function (targetNode) {
-        var sourceNode = self.currentClipboardNode
-        var targetNode = self.currentSelectedNode
-        if (!sourceNode || !targetNode)
-            return "copy a source node and select "
-        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as subClassOf " + targetNode.source + "." + targetNode.label + "?"))
-            return;
-        var propId = "http://www.w3.org/2002/07/owl#sameAs"
-        self.createRestriction(sourceNode.id, targetNode.id, propId, function (err, result) {
-            if (err)
-                return alert(err);
-            MainController.UI.message("restriction added", true)
-        })
-
-
-    }
 
     self.deleteRestriction = function (restrictionNode) {
         if (confirm("delete selected restriction")) {
@@ -152,46 +117,53 @@ var Lineage_blend = (function () {
         })
 
 
-
-        Sparql_generic.insertTriples(source, triples, function (err, result) {
+        Sparql_generic.insertTriples(source, triples, null, function (err, result) {
             self.addRelationToGraph(propId)
-           // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_classes.mainSource)
+            // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_classes.mainSource)
             callback(err, "DONE")
         })
     }
 
         ,
-        self.createRestriction = function (souceNodeId, targetNodeId, propId, callback) {
-            var restrictionsTriples = []
-            var blankNode = "_:b" + common.getRandomHexaId(8)
-
-            restrictionsTriples.push({
+        self.getSubClassTriples = function (souceNodeId, targetNodeId) {
+            var triples = []
+            triples.push({
                 subject: souceNodeId,
                 predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                object: blankNode
-            })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                object: "http://www.w3.org/2002/07/owl#Restriction"
-            })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: "http://www.w3.org/2002/07/owl#onProperty",
-                object: propId
-            })
-            restrictionsTriples.push({
-                subject: blankNode,
-                predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
                 object: targetNodeId
             })
-
-console.log(JSON.stringify(restrictionsTriples,null,2))
-            Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionsTriples, function (err, result) {
-                Lineage_classes.drawRestrictions(null, false, Lineage_classes.mainSource)
-                callback(err, "DONE")
-            })
+            return triples;
         }
+
+    self.getRestrictionTriples = function (sourceNodeId, targetNodeId, propId) {
+        var restrictionsTriples = []
+        var blankNode = "_:b" + common.getRandomHexaId(10)
+
+        restrictionsTriples.push({
+            subject: sourceNodeId,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            object: blankNode
+        })
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            object: "http://www.w3.org/2002/07/owl#Restriction"
+        })
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: propId
+        })
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: targetNodeId
+        })
+
+        restrictionsTriples.blankNode = blankNode
+        return restrictionsTriples;
+    }
+
 
     self.addImportToCurrentSource = function (parentSource, importedSource, callback) {
         var payload = {
@@ -218,12 +190,12 @@ console.log(JSON.stringify(restrictionsTriples,null,2))
 
     }
 
-    self.addRelationToGraph=function(propUri){
+    self.addRelationToGraph = function (propUri) {
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
 
-        var existingNodes=visjsGraph.getExistingIdsMap();
-        var visjsData={nodes:[],edges:[]}
+        var existingNodes = visjsGraph.getExistingIdsMap();
+        var visjsData = {nodes: [], edges: []}
 
         if (!existingNodes[sourceNode.id]) {
             existingNodes[sourceNode.id] = 1;
@@ -237,7 +209,7 @@ console.log(JSON.stringify(restrictionsTriples,null,2))
                 data: {
                     id: sourceNode.id,
                     label: sourceNode.label,
-                    source:sourceNode.source
+                    source: sourceNode.source
                 }
             })
 
@@ -256,36 +228,36 @@ console.log(JSON.stringify(restrictionsTriples,null,2))
                 data: {
                     id: targetNode.id,
                     label: targetNode.label,
-                    source:targetNode.source
+                    source: targetNode.source
                 }
             })
 
         }
 
-        var edgeId=sourceNode.id+"_"+propUri+"_"+targetNode.id
+        var edgeId = sourceNode.id + "_" + propUri + "_" + targetNode.id
         if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1
-          var propLabel=Sparql_common.getLabelFromId(propUri)
-                visjsData.edges.push({
-                    id: edgeId,
-                    from: sourceNode.id,
-                    to:targetNode.id,
-                    label: "<i>" + propLabel + "</i>",
-                    data: {propertyId: propUri, source: Lineage_classes.mainSource},
-                    font: {multi: true, size: 10},
-                    // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
-                    //   physics:false,
-                    arrows: {
-                        from: {
-                            enabled: true,
-                            type: "bar",
-                            scaleFactor: 0.5
-                        },
+            var propLabel = Sparql_common.getLabelFromURI(propUri)
+            visjsData.edges.push({
+                id: edgeId,
+                from: sourceNode.id,
+                to: targetNode.id,
+                label: "<i>" + propLabel + "</i>",
+                data: {propertyId: propUri, source: Lineage_classes.mainSource},
+                font: {multi: true, size: 10},
+                // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
+                //   physics:false,
+                arrows: {
+                    from: {
+                        enabled: true,
+                        type: "bar",
+                        scaleFactor: 0.5
                     },
-                    dashes: true,
-                    color: Lineage_classes.objectPropertyColor
+                },
+                dashes: true,
+                color: Lineage_classes.objectPropertyColor
 
-                })
+            })
 
         }
         visjsGraph.data.nodes.add(visjsData.nodes)
@@ -295,8 +267,87 @@ console.log(JSON.stringify(restrictionsTriples,null,2))
 
     }
 
+    self.getCommonMetaDataTriples = function (subjectUri, provenance,status, options) {
+        var metaDataTriples = []
+        if(!options)
+            options={}
+        var login = authentication.currentUser.login;
+        var authorUri = Config.sousLeSensVocablesGraphUri + "users/" + login
+        var dateTime = common.dateToRDFString(new Date()) + "^^xsd:dateTime"
 
 
+
+        metaDataTriples.push({
+            subject: subjectUri,
+            predicate: "http://purl.org/dc/terms/creator",
+            object: authorUri
+        })
+
+        metaDataTriples.push({
+            subject: subjectUri,
+            predicate: "purl.org/dc/terms/created",
+            object: dateTime
+        })
+
+        metaDataTriples.push({
+            subject: subjectUri,
+            predicate: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+            object: Config.sousLeSensVocablesGraphUri + "status/" + status
+        })
+        metaDataTriples.push({
+            subject: subjectUri,
+            predicate: "http://purl.org/dc/terms/provenance",
+            object: Config.sousLeSensVocablesGraphUri + "provenance/" + provenance
+        })
+        if (options) {
+            for (var key in options) {
+
+                metaDataTriples.push({
+                    subject: subjectUri,
+                    predicate: Config.sousLeSensVocablesGraphUri+"property#" + key,
+                    object: options[key]
+                })
+
+            }
+        }
+
+        return metaDataTriples
+
+    }
+    self.getProjectedGraphMetaDataTriples=function(graphUri,imports,options) {
+        var triples=[]
+        if(!options)
+            options={}
+
+        imports.forEach(function (importedSource) {
+            triples.push({
+                subject: graphUri,
+                predicate: Config.sousLeSensVocablesGraphUri + "property#import",
+                object: importedSource
+            })
+        })
+            triples.push({
+                subject: graphUri,
+                predicate: "http://www.w3.org/2002/07/owl#versionIRI",
+                object: graphUri
+            })
+
+            triples.push({
+                    subject: graphUri,
+                    predicate: "http://www.w3.org/2002/07/owl#versionInfo",
+                    object: "Revised " + common.dateToRDFString(new Date())
+                }
+            )
+            if(options.label) {
+                triples.push({
+                    subject: graphUri,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                    object: options.label
+                })
+            }
+
+        return triples
+    }
 
 
     return self;

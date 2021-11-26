@@ -56,26 +56,79 @@
 
 
         </div>
-        <div id="LineageRelationsTab">
-            <input type="checkbox"  checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX"> imports
-            <div>
-                Properties
-                <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
-                <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
-                <button onclick="Lineage_relations.exportProperties()">Export</button>
-                <br>
-                Restrictions
-                <button onclick="Lineage_relations.listAllRestrictions()">List all</button>
-                <button onclick="Lineage_relations.graphAllRestrictions()">Graph all</button>
-                <button onclick="Lineage_relations.exportRestrictions()">Export</button>
+        <div id="LineageRelationsTab" style="display: flex;flex-direction: column;">
+            <div class="lineage_actionDiv">
+<div class="lineage_actionDiv_title">Selection</div>
+                <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
+                       id="Lineage_classes_showImportsCBX"> imports
+
+                Nodes Selection
+                <select  style="width:300px" id="LineageRelations_nodesSelectionSelect">
+                    <option value="allNodes">All Nodes</option>
+                    <option value="selectedNodeDescendants">Selected node descendants</option>
+                </select>
 
             </div>
-          <!--  <div class="jstreeContainer" style="width:90%">
-                <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
-            </div>-->
-             <div class="jstreeContainer" style="width:90%">
-                  <div class="jstree" id="Lineage_relationsTree" ></div>
-              </div>
+            <div> </div>
+            <div class="lineage_actionDiv">
+                <div class="lineage_actionDiv_title">Existing relations</div>
+                <div>
+                    <!-- Properties
+                     <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
+                     <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
+                     <button onclick="Lineage_relations.exportProperties()">Export</button>
+                     <br>-->
+                    <div> filters
+                        <div>
+                            Properties <select style="width:300px" id="LineageRelations_propertiesSelect"></select>
+                        </div>
+                        <div>
+                            Status <select  style="width:300px" id="LineageRelations_statusSelect"></select>
+                        </div>
+                        <div>
+                            Provenance <select style="width:300px" id="LineageRelations_provenanceSelect"></select>
+                        </div>
+                        <div>
+                            Creator <select style="width:300px" id="LineageRelations_creatorSelect"></select>
+                        </div>
+
+                    </div>
+
+                    Restrictions
+                    <button onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
+                    <button onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
+                    <button onclick="Lineage_relations.exportRestrictions()">Export</button>
+
+                </div>
+
+            </div>
+            <div> </div>
+            <div class="lineage_actionDiv">
+                <div class="lineage_actionDiv_title">Projection</div>
+                on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
+                add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
+                <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
+                <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
+                <button onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
+                <!--  <button onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>-->
+
+            </div>
+            <div> </div>
+            <div class="lineage_actionDiv">
+                <div class="lineage_actionDiv_title">ProjectedGraphs</div>
+
+                <!--   <select id="LineageRelations_projectedGraphsSelect" onclick="Lineage_relations.loadProjectedGraph($(this).val())"></select>-->
+                <div class="jstreeContainer">
+                    <div id="LineageRelations_projectedGraphsTree"></div>
+                </div>
+            </div>
+
+            <!--  <div class="jstreeContainer" style="width:90%">
+                  <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
+              </div>-->
+            <div class="jstreeContainer" style="width:90%">
+                <div class="jstree" id="Lineage_relationsTree"></div>
+            </div>
         </div>
     </div>
 
@@ -87,8 +140,9 @@
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
     setTimeout(function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
+        // $("#Lineage_RighPanelTabs").tabs()
     }, 300)
     //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
-    $("#Lineage_RighPanelTabs").tabs()
+
 
 </script>

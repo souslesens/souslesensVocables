@@ -570,6 +570,9 @@ var Sparql_OWL = (function () {
 
             var filterStr = Sparql_common.setFilter("concept", ids);
 
+
+
+
             var fromStr = ""
             if (sourceLabel) {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
@@ -582,18 +585,39 @@ var Sparql_OWL = (function () {
 
             var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "SELECT * " + fromStr + " WHERE {"
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+            if (options.listPropertiesOnly)
+                query +="SELECT distinct ?prop ?propLabel "
+            else
+                query +="SELECT * "
+            query +="" + fromStr + " WHERE {"
             if (options.selectGraph)
                 query += " graph ?g "
-            query += "{ ?concept rdfs:subClassOf ?node. " + filterStr +
+            query += "{ ?concept rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." + filterStr +
                 " ?node owl:onProperty ?prop ." +
                 " OPTIONAL {?prop rdfs:label ?propLabel}" +
-                " OPTIONAL {?concept rdfs:label ?conceptLabel}" +
-                "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-                "} }"
+                " OPTIONAL {?concept rdfs:label ?conceptLabel}"
+
+            if(options.someValuesFrom){
+                query+="?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
+            }
+
+            else if(options.allValuesFrom){
+                query+="?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
+            }
+            else if(options.aValueFrom){
+                query+="?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
+            }else{
+                query+=   "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
+                    "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
+                    "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}"
+            }
+
+            if(options.filter){
+                query+=" "+options.filter+ " "
+            }
+
+                query+="} }"
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit
 
@@ -1025,6 +1049,28 @@ var Sparql_OWL = (function () {
 
             })
         }
+
+
+        self.getGraphsByRegex=function(pattern,callback){
+            var query="SELECT * " +
+                "WHERE {" +
+                "  ?s <http://www.w3.org/2002/07/owl#versionIRI> ?graph. filter (regex(str(?graph),\""+pattern+"\"))" +
+                " ?graph ?p ?value."+
+                "}"
+
+            self.sparql_url = Config.default_sparql_url;
+            var url = self.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
+                if (err)
+                    return callback(err);
+             return callback(null, result.results.bindings)
+
+            })
+        }
+
+
+
+
    /* self.getLabels = function (sourceLabel,ids, callback) {
         var from = Sparql_common.getFromStr(sourceLabel)
         var query =

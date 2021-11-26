@@ -201,7 +201,7 @@ var Sparql_common = (function () {
         return str;
     }
 
-    self.getLabelFromId = function (id) {
+    self.getLabelFromURI = function (id) {
 
         if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id])
             return OwlSchema.currentSourceSchema.labelsMap[id];

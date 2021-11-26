@@ -273,9 +273,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-            items = Lineage_blend.addBlendJstreeMenuItems(items);
-        }
+
         return items;
     }
 
@@ -768,7 +766,7 @@ var SourceBrowser = (function () {
                 if (item.propLabel) {
                     propName = item.propLabel.value
                 } else {
-                    propName = Sparql_common.getLabelFromId(item.prop.value)
+                    propName = Sparql_common.getLabelFromURI(item.prop.value)
                 }
 
                 var value = item.value.value;

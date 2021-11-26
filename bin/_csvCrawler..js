@@ -1,6 +1,6 @@
 const async = require("async");
 const util = require("./util.");
-const socket = require("../routes/socket.js");
+const socket = require("./socketManager.");
 const request = require("request");
 const fs = require("fs");
 const csv = require("csv-parser");
@@ -149,7 +149,7 @@ var csvCrawler = {
                     })
 
                     .on("data", function (data) {
-                        if (linesCount++ % 1000 == 0) console.log(linesCount);
+                        //  if (linesCount++ % 1000 == 0) console.log(linesCount);
 
                         jsonDataFetch.push(data);
 

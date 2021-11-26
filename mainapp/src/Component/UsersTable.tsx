@@ -58,6 +58,7 @@ const UsersTable = () => {
                                 <Table sx={{ width: '100%' }}>
                                     <TableHead>
                                         <TableRow style={{ fontWeight: "bold" }}>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Source</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>Name</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>groups</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
@@ -79,7 +80,7 @@ const UsersTable = () => {
 
                                                         <Box sx={{ display: 'flex' }}>
                                                             <UserForm maybeuser={user} />
-                                                            <ButtonWithConfirmation label='Delete' msg={() => deleteUser(user)} />                                                </Box>
+                                                            <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label='Delete' msg={() => deleteUser(user)} />                                                </Box>
                                                     </TableCell>
 
                                                 </TableRow>);
@@ -181,8 +182,12 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const creationVariant = (edition: any, creation: any) => create ? creation : edition
 
+    const config = SRD.unwrap({ auth: "json" }, identity, model.config);
+
+    const createEditButton = <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+
     return (<>
-        <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
+        {create ? config.auth == "json" ? createEditButton : null : createEditButton}
         <Modal onClose={handleClose} open={userModel.modal}>
             <Box sx={style}>
                 <Stack spacing={4}>
@@ -192,14 +197,16 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
                         value={userModel.userForm.login}
                         id={`login`}
                         label={"Login"}
-                        variant="standard" />
+                        variant="standard"
+                        disabled={user.source == "json" ? false : true} />
                     <TextField fullWidth onChange={handleFieldUpdate("password")}
 
                         value={userModel.userForm.password}
                         id={`password`}
                         type='password'
                         label={"Password"}
-                        variant="standard" />
+                        variant="standard"
+                        disabled={user.source == "json" ? false : true} />
                     <FormControl>
                         <InputLabel id="select-groups-label">Groups</InputLabel>
                         <Select

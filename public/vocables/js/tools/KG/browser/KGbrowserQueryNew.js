@@ -395,7 +395,7 @@ var KGbrowserQuery = (function () {
                 if (existingNodes.indexOf(node.data.id) < 0) {
                     jstreeData.push({
                         id: typeId,
-                        text: Sparql_common.getLabelFromId(node.data.label),
+                        text: Sparql_common.getLabelFromURI(node.data.label),
                         parent: '#',
                         data: {
                             type: "type",
@@ -515,7 +515,7 @@ var KGbrowserQuery = (function () {
                             if (item[keyName + "Label"])
                                 label = item[keyName + "Label"].value
                             else
-                                label = Sparql_common.getLabelFromId(item[keyName].value)
+                                label = Sparql_common.getLabelFromURI(item[keyName].value)
                             jstreeData.push(
                                 {
                                     id: item[keyName].value,
@@ -877,7 +877,7 @@ var KGbrowserQuery = (function () {
                         for (var key in item) {
                             if (key != "count")
                                 if (!item[key + "Label"])
-                                    item[key + "Label"] = {value: Sparql_common.getLabelFromId(item[key].value)}
+                                    item[key + "Label"] = {value: Sparql_common.getLabelFromURI(item[key].value)}
 
                         }
                     })*/

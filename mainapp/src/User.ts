@@ -61,6 +61,7 @@ const encodeUser = (user: User): UserJSON => {
         login: user.login,
         password: user.password,
         groups: user.groups,
+        source: user.source,
         id: user.id,
 
     }
@@ -75,16 +76,17 @@ const decodeUser = (user: UserJSON): User => {
         login: user.login,
         password: user.password,
         groups: user.groups,
+        source: user.source ? user.source : 'json',
         _type: 'user'
 
     }
 }
 
-type UserJSON = { id?: string, login: string, password: string, groups: string[] }
+type UserJSON = { id?: string, login: string, password: string, groups: string[], source?: string }
 
-type User = { id: string, _type: string, login: string, password: string, groups: string[] }
+type User = { id: string, _type: string, login: string, password: string, groups: string[], source: string }
 
-const newUser = (key: string): User => { return ({ id: key, _type: 'user', login: '', password: '', groups: [] }) }
+const newUser = (key: string): User => { return ({ id: key, _type: 'user', login: '', password: '', groups: [], source: 'local' }) }
 
 
 

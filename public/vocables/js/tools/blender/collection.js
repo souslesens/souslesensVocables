@@ -322,7 +322,7 @@ var Collection = (function () {
                 triples.push({subject: collectionId, predicate: Collection.broaderProperty, object: item, valueType: "uri"})
             })
 
-            Sparql_generic.insertTriples(sourceLabel, triples, function (err, result) {
+            Sparql_generic.insertTriples(sourceLabel, triples, null,function (err, result) {
 
                 return callback(err, result)
             })

@@ -8,7 +8,7 @@ import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } f
 import { identity, style } from '../Utils';
 import { newUser, putUsers, User } from '../User';
 import { ulid } from 'ulid';
-
+import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
@@ -68,9 +68,9 @@ const UsersTable = () => {
                                             </TableCell>
                                             <TableCell>
 
-                                                <Box sx={{ display: 'flex' }}><UserForm maybeuser={user} />
-                                                    <Button disabled={user.source == "json" ? false : true}  color='secondary' onClick={() => deleteUser(user)}>Delete</Button>
-                                                </Box>
+                                                <Box sx={{ display: 'flex' }}>
+                                                    <UserForm maybeuser={user} />
+                                                    <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label='Delete' msg={() => deleteUser(user)} />                                                </Box>
                                             </TableCell>
 
                                         </TableRow>);
@@ -91,6 +91,7 @@ const UsersTable = () => {
 
     return (renderUsers)
 }
+
 
 type UserEditionState = { modal: boolean, userForm: User }
 

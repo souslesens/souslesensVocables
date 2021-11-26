@@ -10,7 +10,7 @@ import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel,
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
 import { MAX_PAGE_SIZE } from '@mui/x-data-grid';
-
+import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
@@ -65,8 +65,10 @@ const ProfilesTable = () => {
                                                 }
                                             </TableCell>
                                             <TableCell>
+
                                                 <ProfileForm profile={profile} />
-                                                <Button color="secondary" onClick={() => deleteProfile(profile)}>Delete</Button>
+                                                <ButtonWithConfirmation label='Delete' msg={() => deleteProfile(profile)} />
+
                                             </TableCell>
 
                                         </TableRow>);

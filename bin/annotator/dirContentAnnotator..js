@@ -44,7 +44,7 @@ var DirContentAnnotator = {
         console.log("uploadAndAnnotateCorpus 1");
         DirContentAnnotator.socket.message("unziping file " + zipFile.name + "(" + zipFile.size / 1000 + "ko)");
         var tempzip = uploadDirPath + "temp.zip";
-        jsonData = {sources: [], files: {}};
+        jsonData = { sources: [], files: {} };
         var entries = [];
         var fileNames = [];
         var tempFileNames = [];
@@ -73,7 +73,6 @@ var DirContentAnnotator = {
                         } else entry.autodrain();
                     })
                 )
-
 
                 .on("finish", function () {
                     DirContentAnnotator.processZippedFiles(fileNames, corpusName, sources, options, function (err, result) {
@@ -109,7 +108,7 @@ var DirContentAnnotator = {
                 var shortFileName = array[array.length - 1];
                 tempFileName = uploadDirPath + shortFileName;
 
-                jsonData.files[fileName] = {name: shortFileName};
+                jsonData.files[fileName] = { name: shortFileName };
 
                 var subjects = array.slice(0, array.length - 1);
                 jsonData.files[fileName].subjects = subjects;
@@ -135,7 +134,7 @@ var DirContentAnnotator = {
                                 };
 
                                 DirContentAnnotator.socket.message(shortFileName + "     extracting nouns ");
-                                httpProxy.post(spacyServerUrl, {"content-type": "application/jsonData"}, json, function (err, result) {
+                                httpProxy.post(spacyServerUrl, { "content-type": "application/jsonData" }, json, function (err, result) {
                                     if (err) {
                                         console.log(err);
                                         return callbackSeries(err);
@@ -233,7 +232,7 @@ var DirContentAnnotator = {
                         var url = source.sparql_server.url + "?format=json&query=";
                         var queryOptions = ""; // "&should-sponge=&format=application%2Fsparql-results%2BjsonData&timeout=20000&debug=off"
 
-                        var params = {query: query};
+                        var params = { query: query };
                         var headers = {
                             /* "Accept": "application/sparql-results+jsonData",
                      "Content-Type": "application/x-www-form-urlencoded",*/
@@ -374,11 +373,11 @@ var DirContentAnnotator = {
             for (var i = 0; i < files.length; i++) {
                 var fileName = parent + files[i];
                 var stats = fs.statSync(fileName);
-                var infos = {lastModified: stats.mtimeMs}; //fileInfos.getDirInfos(dir);
+                var infos = { lastModified: stats.mtimeMs }; //fileInfos.getDirInfos(dir);
 
                 if (stats.isDirectory()) {
                     dirFilesMap[fileName + "\\"] = [];
-                    dirsArray.push({type: "dir", name: files[i], parent: parent});
+                    dirsArray.push({ type: "dir", name: files[i], parent: parent });
                     recurse(fileName);
                 } else {
                     var p = fileName.lastIndexOf(".");
@@ -454,7 +453,7 @@ var DirContentAnnotator = {
                                         text: text,
                                     };
 
-                                    httpProxy.post(spacyServerUrl, {"content-type": "application/jsonData"}, jsonData, function (err, result) {
+                                    httpProxy.post(spacyServerUrl, { "content-type": "application/jsonData" }, jsonData, function (err, result) {
                                         if (err) {
                                             console.log(err);
                                             return callbackSeries(err);
@@ -505,7 +504,7 @@ var DirContentAnnotator = {
         async.eachSeries(
             data,
             function (fileObj, callbackEachDocument) {
-                if (!conceptsMap[fileObj.path]) conceptsMap[fileObj.path] = {subjects: fileObj.subjects, sources: {}};
+                if (!conceptsMap[fileObj.path]) conceptsMap[fileObj.path] = { subjects: fileObj.subjects, sources: {} };
 
                 var allWords = [];
                 var matchingWords = [];
@@ -548,7 +547,7 @@ var DirContentAnnotator = {
                                 var url = source.sparql_server.url;
                                 var queryOptions = ""; // "&should-sponge=&format=application%2Fsparql-results%2BjsonData&timeout=20000&debug=off"
 
-                                var params = {query: query};
+                                var params = { query: query };
                                 var headers = {
                                     Accept: "application/sparql-results+jsonData",
                                     "Content-Type": "application/x-www-form-urlencoded",
@@ -669,7 +668,7 @@ var DirContentAnnotator = {
 
                     // for the last subject attach file and nouns
                     if (index == fileObj.subjects.length - 1) {
-                        if (!subjectsMap[subject]) subjectsMap[subject] = {files: []};
+                        if (!subjectsMap[subject]) subjectsMap[subject] = { files: [] };
                         var fileName = path.basename(key);
 
                         subjectsMap[subject].files.push({
@@ -687,7 +686,7 @@ var DirContentAnnotator = {
             var children = parents[node.text];
             if (children) {
                 children.forEach(function (child) {
-                    var childObj = {text: child, children: [], data: {}};
+                    var childObj = { text: child, children: [], data: {} };
                     if (subjectsMap[child]) childObj.data = subjectsMap[child];
                     node.children.push(childObj);
                     recurse(childObj);
@@ -695,7 +694,7 @@ var DirContentAnnotator = {
             }
         }
 
-        var rootNode = {text: corpusName, children: []};
+        var rootNode = { text: corpusName, children: [] };
         recurse(rootNode);
         var x = rootNode;
 
@@ -722,7 +721,7 @@ var DirContentAnnotator = {
         recurseJstree(rootNode);
 
         if (callback) {
-            return callback(null, {jstreeData: jstreeData, sources: data.sources});
+            return callback(null, { jstreeData: jstreeData, sources: data.sources });
         } else {
             var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.jsonData");
             storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.jsonData";
@@ -730,47 +729,43 @@ var DirContentAnnotator = {
         }
     },
 
-    SpacyExtract: function (text,types, options, callback) {
+    SpacyExtract: function (text, types, options, callback) {
         if (!options) {
-            options = {}
+            options = {};
         }
-
 
         var json = {
             text: text,
         };
 
         DirContentAnnotator.socket.message(+"     extracting nouns ");
-        httpProxy.post(spacyServerUrl, {"content-type": "application/jsonData"}, json, function (err, result) {
+        httpProxy.post(spacyServerUrl, { "content-type": "application/jsonData" }, json, function (err, result) {
             if (err) {
                 console.log(err);
                 return callback(err);
             }
-            var tokens = []
+            var tokens = [];
             result.data.forEach(function (sentence) {
                 sentence.tags.forEach(function (item) {
                     if (item.text.length > 2)
                         if (types.indexOf(item.tag) > -1) {
                             //item.tag.indexOf("NN")>-1) {
                             var token = Inflector.singularize(item.text.toLowerCase());
-                            tokens.push(token)
+                            tokens.push(token);
                         }
-                })
-            })
+                });
+            });
             if (options.composedWords_2) {
-                var tokens_2=[]
-                tokens.forEach(function(token,index){
-                    if(index>0)
-                        tokens_2.push(tokens[index-1]+" "+token)
-
-                })
-                tokens=tokens.concat(tokens_2)
+                var tokens_2 = [];
+                tokens.forEach(function (token, index) {
+                    if (index > 0) tokens_2.push(tokens[index - 1] + " " + token);
+                });
+                tokens = tokens.concat(tokens_2);
             }
 
-            return callback(null, tokens)
-
-        })
-    }
+            return callback(null, tokens);
+        });
+    },
 };
 DirContentAnnotator.init();
 module.exports = DirContentAnnotator;
@@ -778,8 +773,7 @@ if (false) {
     DirContentAnnotator.getDirContent("D:\\NLP\\ontologies");
 }
 if (false) {
-    DirContentAnnotator.parseDocumentsDir("D:\\Total\\2020\\_testAnnotator", "test", function (err, result) {
-    });
+    DirContentAnnotator.parseDocumentsDir("D:\\Total\\2020\\_testAnnotator", "test", function (err, result) {});
 }
 
 var sources = {
@@ -802,13 +796,11 @@ var sources = {
 };
 
 if (false) {
-    DirContentAnnotator.annotateParsedDocuments("test", [sources["Total-CTG"]], {}, function (err, result) {
-    });
+    DirContentAnnotator.annotateParsedDocuments("test", [sources["Total-CTG"]], {}, function (err, result) {});
 }
 
 if (false) {
-    DirContentAnnotator.getConceptsSubjectsTree("test", function (err, result) {
-    });
+    DirContentAnnotator.getConceptsSubjectsTree("test", function (err, result) {});
 }
 
 //  DirContentAnnotator.startTikaServer()
@@ -822,9 +814,8 @@ if (false) {
     DirContentAnnotator.getAnnotatedCorpusList();
 }
 
-if( false){
-    var text="The distance between the pump and driver shaft ends (distance between shaft ends, or DBSE) shall begreater than the seal cartridge length for all pumps other than OH type or at least 125 mm (5 in) and shallpermit removal of the coupling, bearing housing, bearings, seal and rotor, as applicable, without disturbingthe driver, driver coupling hub, pump coupling hub or the suction and discharge piping. For Types BB and VSpumps, this dimension, DBSE, shall always be greater than the total seal length, l, listed in Table 7, and shallbe included on the pump data sheet (Annex N)."
-    DirContentAnnotator.SpacyExtract(text,["NN"],{"composedWords_2":1},function(err, result){
-
-    })
+if (false) {
+    var text =
+        "The distance between the pump and driver shaft ends (distance between shaft ends, or DBSE) shall begreater than the seal cartridge length for all pumps other than OH type or at least 125 mm (5 in) and shallpermit removal of the coupling, bearing housing, bearings, seal and rotor, as applicable, without disturbingthe driver, driver coupling hub, pump coupling hub or the suction and discharge piping. For Types BB and VSpumps, this dimension, DBSE, shall always be greater than the total seal length, l, listed in Table 7, and shallbe included on the pump data sheet (Annex N).";
+    DirContentAnnotator.SpacyExtract(text, ["NN"], { composedWords_2: 1 }, function (err, result) {});
 }

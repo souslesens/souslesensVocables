@@ -128,10 +128,9 @@ var DictionariesManager = {
                                     parents: {
                                         type: "text",
                                     },
-                                    owlType:{
+                                    owlType: {
                                         type: "keyword",
-
-                                    }
+                                    },
                                 },
                             },
                         },
@@ -158,8 +157,7 @@ var DictionariesManager = {
                     var bulkStr = "";
 
                     data.forEach(function (item, indexedLine) {
-                        if(_options.owlType)
-                            item.owlType=_options.owlType
+                        if (_options.owlType) item.owlType = _options.owlType;
                         var lineContent = "";
                         var id = "R" + util.getRandomHexaId(10);
                         bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";

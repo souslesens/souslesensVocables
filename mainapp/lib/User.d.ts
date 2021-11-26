@@ -11,6 +11,7 @@ declare type User = {
     login: string;
     password: string;
     groups: string[];
+    source: string;
 };
 declare const newUser: (key: string) => User;
 export { getUsers, newUser, restoreUsers, saveUser, deleteUser, putUsers, User };

@@ -3,10 +3,12 @@ import { RD } from 'srd';
 import { User as User } from './User';
 import { Profile } from './Profile';
 import { Source } from "./Source";
+import { Config } from "./Config";
 declare type Model = {
     users: RD<string, User[]>;
     profiles: RD<string, Profile[]>;
     sources: RD<string, Source[]>;
+    config: RD<string, Config>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
 };
@@ -29,6 +31,9 @@ declare type Msg = {
 } | {
     type: 'ServerRespondedWithSources';
     payload: RD<string, Source[]>;
+} | {
+    type: 'ServerRespondedWithConfig';
+    payload: RD<string, Config>;
 } | {
     type: 'UserUpdatedField';
     payload: UpadtedFieldPayload;

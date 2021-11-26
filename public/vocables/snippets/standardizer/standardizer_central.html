@@ -129,6 +129,9 @@
     .matrixWordNoMatch {
         background-color: #f3dede;
     }
+    .matrixWordFuzzyMatch {
+        background-color: #6ca6b8;
+    }
 
 
 
@@ -195,7 +198,9 @@
 
                 <!--  Search <input id="KGadvancedMapping_searchColumnInput"
                                 onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">-->
-                <button onclick="Standardizer.exportMatrix()">Export</button>
+                <button onclick="Standardizer.exportExactMatchMatrix()">Export exact matches</button>
+                <button onclick="Standardizer.exportFuzzyMatches()">Export fuzzy matches</button>
+                <button onclick="Standardizer.createSameAsRelations()">Create sameAs relations</button>
 
                 <br>
                 <div id="KGmapping_matrixContainer"

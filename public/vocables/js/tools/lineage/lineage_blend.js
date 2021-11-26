@@ -24,6 +24,12 @@ var Lineage_blend = (function () {
         $("#GenericTools_searchInAllSources").prop("checked", true)
     }
 
+    self.createRelations = function (type,relations,addImportToCurrentSource) {
+
+    }
+
+
+
 
     self.createRelation = function (type,addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]

@@ -35,6 +35,10 @@
         border: solid 1px blue;
         border-radius: 3px;
     }
+    .lineage_actionDiv_title {
+      font-weight: bold;
+        font-size: larger;
+    }
 
     .lineage_hiddenSource{
         border-style: dashed;
@@ -63,11 +67,9 @@
 <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
 
   <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
-        <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
-      <button onclick="Lineage_classes.initUI()">clear</button>
-      <button onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
 
-
+      <div class="lineage_actionDiv">
+          <button onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
         <button class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
       <!--  <button class="lineage_button" onclick="Lineage_classes.collapseNode()">collapse</button>-->
 
@@ -76,7 +78,14 @@
         <button class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
       <button class="lineage_button" onclick="Lineage_classes.drawRestrictions()">Restrictions</button>
     <!--  <button class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
+      </div>
+      <div class="lineage_actionDiv">
+          <button onclick="Lineage_classes.initUI()">Clear all</button>
+          <button onclick="Lineage_classes.clearLastAddedNodes()">Clear last</button>
+          <button onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
 
+
+      </div>
 
     </div>
     <div class="lineage_actionDiv" style="display: flex;flex-direction: column;margin: 5px" id="lineage_blendDiv">

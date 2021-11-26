@@ -136,7 +136,8 @@ var CFIHOS_processor = {
                             var hasDirectSuperClass = false
                             var subjectStr
                             mapping.tripleModels.forEach(function (item) {
-
+                                if (item.p== "rdfs:subClassOf")
+                                    hasDirectSuperClass = true;
 
                                 if (line[item.s] && line[item.o]) {
 
@@ -163,13 +164,7 @@ var CFIHOS_processor = {
                                     }
 
 
-                                    if (line[item.p] == "rdfs:subClassOf")
-                                        hasDirectSuperClass = true;
-                                 /*   if (lookUpMap[item.o]) {
-                                        objectStr = lookUpMap[item.o][objectStr]
-                                        if (!objectStr)
-                                            console.log("lookup value not found " + item.o + ": " + line[item.o])
-                                    }*/
+
 
                                     if (propertiesTypeMap[item.p] == "string")
                                         objectStr = "'" + util.formatStringForTriple(objectStr) + "'"
@@ -313,7 +308,8 @@ mappingsMap = {
                 targetColumn: "cFIHOSUniqueId"
             }
         ],
-        tripleModels: [{s: "cFIHOSUniqueId", p: "rdfs:subClassOf", o: "parentTagClassName",lookup_O:"parentTagClassName"},
+        tripleModels: [
+            {s: "cFIHOSUniqueId", p: "rdfs:subClassOf", o: "parentTagClassName",lookup_O:"parentTagClassName"},
             {s: "cFIHOSUniqueId", p: "rdfs:label", o: "tagClassName"},
             {s: "cFIHOSUniqueId", p: "skos:definition", o: "tagClassDefinition"},
             {s: "cFIHOSUniqueId", p: "cfihos:status", o: "status"},
@@ -419,7 +415,7 @@ mappingsMap = {
 var mappingNames =["TAG_CLASS","QUANTITATIVE_PROPERTY","QUALITATIVE_PROPERTY","PROPERTY_PICKLIST_VALUE","TAG_PROPERTIES"]
 
 
-var mappingNames =["PROPERTY_PICKLIST_VALUE"]
+//var mappingNames =["TAG_CLASS"]
 var mappings=[]
 mappingNames.forEach(function(mappingName){
     mappings.push(mappingsMap[mappingName])
@@ -429,7 +425,7 @@ mappingNames.forEach(function(mappingName){
 
 var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/";
 
-if(true){
+if(false){
 
     CFIHOS_processor.processSubClasses(mappings, graphUri)
 
@@ -437,7 +433,7 @@ if(true){
 }
 
 
-if(false) {
+if(true) {
     var sourcePath = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS 1.5.xml";
 
 

@@ -137,7 +137,7 @@ var Lineage_classes = (function () {
                 var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
                 $("#lineage_sourceDescriptionDiv").html(str)
                 self.registerSourceImports(sourceLabel)
-
+                self.initUI();
                 Lineage_relations.init()
 
 
@@ -213,23 +213,33 @@ var Lineage_classes = (function () {
             // $("#Lineage_toSource").val("")
         }
 
+        self.clearLastAddedNodes=function(){
+var nodes= visjsGraph.lastAddedNodes
+            if(nodes && nodes.length>0)
+                visjsGraph.data.nodes.remove(nodes)
+        }
 
-        self.drawTopConcepts = function (mainSource, addToGraph) {
+
+        self.drawTopConcepts = function (source) {
             self.currentExpandLevel = 1
-            if (!addToGraph) {
-                visjsGraph.clearGraph()
-                self.initUI();
 
-                if (!mainSource)
-                    mainSource = MainController.currentSource
-                if (!mainSource)
+
+
+                if (!source)
+                    source = Lineage_common.currentSource
+                if (!source)
+                    source = self.mainSource
+                if (!source)
                     return;
+
+            if (source==self.mainSource) {
+                self.initUI();
             }
 
-            if (!Config.sources[mainSource])
+            if (!Config.sources[source])
                 return
-            Lineage_common.currentSource = mainSource;
-            self.soucesLevelMap[mainSource] = {visible: true, children: 0}
+          //  Lineage_common.currentSource = source;
+            self.soucesLevelMap[source] = {visible: true, children: 0}
 
             var allSources = []
 
@@ -239,18 +249,18 @@ var Lineage_classes = (function () {
 
             var visjsData = {nodes: [], edges: []}
             var existingNodes = visjsGraph.getExistingIdsMap();
-            var imports = Config.sources[mainSource].imports;
+            var imports = Config.sources[source].imports;
             var importGraphUrisMap = {}
 
-            if (!existingNodes[mainSource]) {
-                existingNodes[mainSource] = 1
+            if (!existingNodes[source]) {
+                existingNodes[source] = 1
                 var sourceNode = {
-                    id: mainSource,
-                    label: mainSource,
+                    id: source,
+                    label: source,
                     shape: "box",
                     size: Lineage_classes.defaultShapeSize,
-                    color: self.getSourceColor(mainSource),
-                    data: {source: mainSource},
+                    color: self.getSourceColor(source),
+                    data: {source: source},
                     level: 1,
 
                 }
@@ -286,13 +296,13 @@ var Lineage_classes = (function () {
                     }
 
 
-                    var edgeId = importedSource + "_" + mainSource
+                    var edgeId = importedSource + "_" + source
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1
                         var edge = {
                             id: edgeId,
                             from: importedSource,
-                            to: mainSource,
+                            to: source,
                             arrows: " middle",
                             color: color,
                             width: 6
@@ -305,7 +315,7 @@ var Lineage_classes = (function () {
             }
 
             self.currentExpandLevel += 1
-            allSources.push(mainSource)
+            allSources.push(source)
             async.eachSeries(allSources, function (source, callbackEach) {
                 var depth = parseInt($("#Lineage_topDepth").val())
                 var sourceConfig = Config.sources[source]
@@ -371,8 +381,17 @@ var Lineage_classes = (function () {
             }, function (err, result) {
                 if (err)
                     return alert(err);
-                MainController.UI.message("", true)
-                self.drawNewGraph(visjsData);
+             //   MainController.UI.message("", true)
+              //  self.drawNewGraph(visjsData);
+                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    self.drawNewGraph(visjsData)
+                } else {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                    visjsGraph.network.fit()
+                }
+                $("#waitImg").css("display", "none");
+
             })
 
 

@@ -109,7 +109,7 @@ var DictionariesManager = {
                                         fielddata: true,
                                         fields: {
                                             keyword: {
-                                                type: "keyword", // =========> store city.keyword as a keyword
+                                                type: "keyword",
                                                 ignore_above: 256,
                                                 normalizer: "lowercase_normalizer",
                                             },
@@ -117,10 +117,10 @@ var DictionariesManager = {
                                     },
                                     id: {
                                         type: "text",
-                                        fielddata: true, // ==========> Store city as text
+                                        fielddata: true,
                                         fields: {
                                             keyword: {
-                                                type: "keyword", // =========> store city.keyword as a keyword
+                                                type: "keyword",
                                                 ignore_above: 256,
                                             },
                                         },
@@ -128,6 +128,10 @@ var DictionariesManager = {
                                     parents: {
                                         type: "text",
                                     },
+                                    owlType:{
+                                        type: "keyword",
+
+                                    }
                                 },
                             },
                         },
@@ -154,6 +158,8 @@ var DictionariesManager = {
                     var bulkStr = "";
 
                     data.forEach(function (item, indexedLine) {
+                        if(_options.owlType)
+                            item.owlType=_options.owlType
                         var lineContent = "";
                         var id = "R" + util.getRandomHexaId(10);
                         bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";

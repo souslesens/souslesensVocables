@@ -3,7 +3,7 @@ Lineage_relations = (function () {
     var self = {}
     self.graphUriSourceMap = {}
     self.projectedGraphsMap = {}
-
+    self.maxRelationToDraw=1000
 
     self.init = function () {
         var sources = []
@@ -71,13 +71,140 @@ Lineage_relations = (function () {
         return source
     }
 
-    self.showRestrictions = function (output, relations, toLabelsMap) {
-        var currentSource = Lineage_common.currentSource
+    self.getFromSourceSelection = function (callback) {
+        var selectionMode = $("#LineageRelations_nodesSelectionSelect").val()
+        var selectedNodes
+        if (selectionMode == "selectedNodeDescendants") {
+            var selectedNode = Lineage_classes.currentGraphNode
+            if (!selectedNode)
+                return callback("no node selected on graph")
+            if (Config.sources[selectedNode.id]) {// selection of source in graph
+                Lineage_classes.setCurrentSource(selectedNode.id)
+                selectedNodes = null
+                return callback(null,selectedNodes)
+
+            }
+           selectedNodes = [selectedNode.id]
+            Sparql_generic.getNodeChildren(Lineage_common.currentSource, null, selectedNode.id, 3, null, function (err, result) {
+                if (err)
+                    callback(err)
+                result.forEach(function (item) {
+                    selectedNodes.push(item.child1.value)
+                })
+                return callback(null,selectedNodes)
+            })
+
+        } else {
+            selectedNodes = null
+            return callback(null,selectedNodes)
+        }
+
+
+    }
+    self.getExistingRestrictions = function (currentSource, callback) {
+
+        function formatResult(result) {
+            restrictions=[]
+            result.forEach(function (item) {
+                var domain, range, domainLabel, rangeLabel, prop, propLabel, node, domainSourceLabel,
+                    rangeSourceLabel
+                if (item.concept)
+                    domain = item.concept.value
+                if (item.value)
+                    range = item.value.value
+                if (item.conceptLabel)
+                    domainLabel = item.conceptLabel.value
+                if (item.valueLabel)
+                    rangeLabel = item.valueLabel.value
+                if (item.prop)
+                    prop = item.prop.value
+                if (item.propLabel)
+                    propLabel = item.propLabel.value
+                if (item.node)
+                    node = item.node.value
+
+                if (item.domainSourceLabel) {
+                    domainSourceLabel = item.domainSourceLabel.value
+                }
+                if (item.rangeSourceLabel) {
+                    rangeSourceLabel = item.rangeSourceLabel.value
+                }
+
+                restrictions.push({
+
+                    domain: domain,
+                    domainLabel: domainLabel,
+                    range: range,
+                    rangeLabel: rangeLabel,
+                    prop: prop,
+                    propLabel: propLabel,
+                    node: node,
+                    rangeSourceLabel: rangeSourceLabel,
+                    domainSourceLabel: domainSourceLabel
+
+                })
+            })
+            return restrictions
+        }
+
+
+
+
+        var restrictions = []
         var filter = ""
-        var selectedNodes = null
         var propertyFilter = $("#LineageRelations_propertiesSelect").val()
         if (propertyFilter && propertyFilter != "")
             filter += " filter (?prop=<" + propertyFilter + ">)"
+        self.getFromSourceSelection(function (err, selectedNodes) {
+            if (err)
+                return callback(err)
+
+            if(selectedNodes==null){
+                Sparql_OWL.getObjectRestrictions(currentSource, null, {
+                    withoutImports: 0,
+                    someValuesFrom: 1,
+                    filter: filter
+
+                }, function (err, result) {
+                    if (err)
+                        return callback(err)
+                    restrictions=formatResult(result)
+                    callback(null,restrictions)
+
+                })
+
+            }else {
+
+
+                var slices = common.array.slice(selectedNodes, 200)
+                async.eachSeries(slices, function (slice, callbackEach) {
+                    Sparql_OWL.getObjectRestrictions(currentSource, slice, {
+                        withoutImports: 0,
+                        someValuesFrom: 1,
+                        filter: filter
+
+                    }, function (err, result) {
+                        if (err)
+                            return callbackEach(err)
+                        restrictions = restrictions.concat(formatResult(result))
+                        callbackEach()
+
+                    })
+
+
+                }, function (err) {
+                    callback(null, restrictions)
+                })
+            }
+        })
+    }
+
+
+
+    self.showRestrictions = function (output, relations, toLabelsMap) {
+        var currentSource = Lineage_common.currentSource
+        var selectedNodes = null
+
 
         var graphUriSourceMap = {}
         async.series([
@@ -85,94 +212,22 @@ Lineage_relations = (function () {
             function (callbackSeries) {
                 if (relations)
                     return callbackSeries()
-
-                var selectionMode = $("#LineageRelations_nodesSelectionSelect").val()
-
-                if (selectionMode == "selectedNodeDescendants") {
-                    var selectedNode = Lineage_classes.currentGraphNode
-                    if (!selectedNode)
-                        return callbackSeries("no node selected on graph")
-                    if(Config.sources[selectedNode.id]){// selection of source in graph
-                        Lineage_classes.setCurrentSource(selectedNode.id)
-                        selectedNodes = null
-                        return callbackSeries()
-
-                    }
-                    selectedNodes=[selectedNode.id]
-                    Sparql_generic.getNodeChildren(Lineage_common.currentSource, null, selectedNode.id, 3, null, function (err, result) {
-                        if (err)
-                            callbackSeries(err)
-                        result.forEach(function (item) {
-                            selectedNodes.push(item.child1.value)
-                        })
-                        return callbackSeries()
-                    })
-
-                } else {
-                    selectedNodes = null
-                    return callbackSeries()
-                }
-
-            },
-            function (callbackSeries) {
-                if (relations)
-                    return callbackSeries()
-                else
-                    relations = []
-
-                Sparql_OWL.getObjectRestrictions(currentSource, selectedNodes, {
-                    withoutImports: 0,
-                    someValuesFrom: 1,
-                    filter: filter
-
-                }, function (err, result) {
-                    if (err)
+                self.getExistingRestrictions(currentSource, function (err, restrictions) {
+                    if(err)
                         return callbackSeries(err)
-                    relations = []
-                    result.forEach(function (item) {
-                        var domain, range, domainLabel, rangeLabel, prop, propLabel, node, domainSourceLabel,
-                            rangeSourceLabel
-                        if (item.concept)
-                            domain = item.concept.value
-                        if (item.value)
-                            range = item.value.value
-                        if (item.conceptLabel)
-                            domainLabel = item.conceptLabel.value
-                        if (item.valueLabel)
-                            rangeLabel = item.valueLabel.value
-                        if (item.prop)
-                            prop = item.prop.value
-                        if (item.propLabel)
-                            propLabel = item.propLabel.value
-                        if (item.node)
-                            node = item.node.value
-
-                        if (item.domainSourceLabel) {
-                            domainSourceLabel = item.domainSourceLabel.value
-                        }
-                        if (item.rangeSourceLabel) {
-                            rangeSourceLabel = item.rangeSourceLabel.value
-                        }
-
-                        relations.push({
-
-                            domain: domain,
-                            domainLabel: domainLabel,
-                            range: range,
-                            rangeLabel: rangeLabel,
-                            prop: prop,
-                            propLabel: propLabel,
-                            node: node,
-                            rangeSourceLabel: rangeSourceLabel,
-                            domainSourceLabel: domainSourceLabel
-
-                        })
-                    })
-
-                    callbackSeries()
+                    relations=restrictions
+                    return callbackSeries()
                 })
             },
-
+             function (callbackSeries) {
+            if(!relations || relations.length==0)
+                return callbackSeries("no relations found")
+            if(relations.length>self.maxRelationToDraw)
+                return callbackSeries("Cannot draw : too many relations "+relations.length +" max "+self.maxRelationToDraw)
+                    else
+                return callbackSeries()
+             }
+,
             function (callbackSeries) {
                 var sources
                 sources = Config.sources[currentSource].imports
@@ -317,13 +372,15 @@ Lineage_relations = (function () {
                         }
                         var propSource = Lineage_classes.mainSource
                         var edgeId = item.node
+                        var edgeId = item.domain+"_"+item.prop+"_"+item.range
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
-                                id: item.node,
+                                id:edgeId,
                                 from: item.range,
                                 to: item.domain,
-                                data: {propertyId: item.prop, source: propSource},
+                                data: {id: item.node,propertyId: item.prop, source: propSource,  id:edgeId,
+                                    from: item.range},
                                 arrows: {
                                     from: {
                                         enabled: true,
@@ -363,6 +420,8 @@ Lineage_relations = (function () {
                 callbackSeries()
             }
         ], function (err) {
+            if(err)
+                return alert(err)
             MainController.UI.message("DONE", true)
         })
 
@@ -474,7 +533,9 @@ Lineage_relations = (function () {
     }
 
 
-    self.projectSameAsRestrictionsOnSource = function () {
+    self.projectSameAsRestrictionsOnSource = function (orphans) {
+        if(orphans)
+            return alert("Coming soon...")
         if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked"))
             Lineage_classes.initUI()
         var fromSource = Lineage_common.currentSource
@@ -493,7 +554,19 @@ Lineage_relations = (function () {
         var fromClasses = []
         var toLabelsMap = {}
         var wordsMap = {}
+        var fromNodesSelection = null
         async.series([
+            function (callbackSeries) {
+
+                self.getFromSourceSelection(function (err, result) {
+                    if (err)
+                        return callbackSeries(err)
+                    fromNodesSelection = result;
+                    callbackSeries()
+                })
+
+            }
+            ,
             function (callbackSeries) {
                 var resultSize = 1
                 var size = 200;
@@ -506,7 +579,7 @@ Lineage_relations = (function () {
 
                 }, function (callbackWhilst) {
                     MainController.UI.message("searching labels in " + fromSource)
-                    Standardizer.listSourceLabels(fromIndex, offset, size, function (err, hits) {
+                    Standardizer.listSourceLabels(fromIndex, offset, size, null, function (err, hits) {
                         if (err)
                             return callbackWhilst(err)
                         resultSize = hits.length
@@ -515,7 +588,12 @@ Lineage_relations = (function () {
                         offset += size
 
                         hits.forEach(function (hit) {
-                            wordsMap[hit._source.label] = {id: hit._source.id, label: hit._source.label, matches: []};
+                            if (!fromNodesSelection || fromNodesSelection.indexOf(hit._source.id) > -1)
+                                wordsMap[hit._source.label] = {
+                                    id: hit._source.id,
+                                    label: hit._source.label,
+                                    matches: []
+                                };
                         })
 
 
@@ -578,7 +656,7 @@ Lineage_relations = (function () {
                     },
                     function (callbackWhilst) {
                         MainController.UI.message("searching labels in " + toSource)
-                        Standardizer.listSourceLabels(toIndex, offset, size, function (err, hits) {
+                        Standardizer.listSourceLabels(toIndex, offset, size, null, function (err, hits) {
                             if (err)
                                 return callbackWhilst(err)
                             resultSize = hits.length
@@ -608,6 +686,7 @@ Lineage_relations = (function () {
     }
 
     self.saveProjectedGraph = function () {
+        return alert("coming soon...")
         var version = prompt("graph version name")
         if (!version || version == "")
             return;

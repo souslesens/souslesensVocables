@@ -56,18 +56,22 @@
 
 
         </div>
-        <div id="LineageRelationsTab">
+        <div id="LineageRelationsTab" style="display: flex;flex-direction: column;">
             <div class="lineage_actionDiv">
+<div class="lineage_actionDiv_title">Selection</div>
                 <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
                        id="Lineage_classes_showImportsCBX"> imports
 
                 Nodes Selection
-                <select id="LineageRelations_nodesSelectionSelect">
-                    <option value="alNodes">All Nodes</option>
+                <select  style="width:300px" id="LineageRelations_nodesSelectionSelect">
+                    <option value="allNodes">All Nodes</option>
                     <option value="selectedNodeDescendants">Selected node descendants</option>
                 </select>
 
-
+            </div>
+            <div> </div>
+            <div class="lineage_actionDiv">
+                <div class="lineage_actionDiv_title">Existing relations</div>
                 <div>
                     <!-- Properties
                      <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
@@ -76,16 +80,16 @@
                      <br>-->
                     <div> filters
                         <div>
-                            Properties <select id="LineageRelations_propertiesSelect"></select>
+                            Properties <select style="width:300px" id="LineageRelations_propertiesSelect"></select>
                         </div>
                         <div>
-                            Status <select id="LineageRelations_statusSelect"></select>
+                            Status <select  style="width:300px" id="LineageRelations_statusSelect"></select>
                         </div>
                         <div>
-                            Provenance <select id="LineageRelations_provenanceSelect"></select>
+                            Provenance <select style="width:300px" id="LineageRelations_provenanceSelect"></select>
                         </div>
                         <div>
-                            Creator <select id="LineageRelations_creatorSelect"></select>
+                            Creator <select style="width:300px" id="LineageRelations_creatorSelect"></select>
                         </div>
 
                     </div>
@@ -98,9 +102,10 @@
                 </div>
 
             </div>
+            <div> </div>
             <div class="lineage_actionDiv">
-                Project currentSource on source<br>
-                <select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
+                <div class="lineage_actionDiv_title">Projection</div>
+                on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
                 add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
                 <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
                 <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
@@ -108,9 +113,10 @@
                 <!--  <button onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>-->
 
             </div>
-
+            <div> </div>
             <div class="lineage_actionDiv">
-                existing projected Graphs<br>
+                <div class="lineage_actionDiv_title">ProjectedGraphs</div>
+
                 <!--   <select id="LineageRelations_projectedGraphsSelect" onclick="Lineage_relations.loadProjectedGraph($(this).val())"></select>-->
                 <div class="jstreeContainer">
                     <div id="LineageRelations_projectedGraphsTree"></div>

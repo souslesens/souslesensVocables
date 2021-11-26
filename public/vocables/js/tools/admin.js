@@ -18,10 +18,13 @@ var Admin=(function(){
 
     }
     self.refreshIndexes=function(){
+        var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+        if(!sources || sources.length==0)
+            return alert(" no source selected")
         if(!confirm("refresh selected indexes"))
             return;
          //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
-            var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+
 
        async.eachSeries(sources,function(source,callbackEach){
           if (!Config.sources[source] || !Config.sources[source].schemaType)

@@ -9,11 +9,11 @@ import { identity, style } from '../Utils';
 import { newUser, putUsers, User } from '../User';
 import { ulid } from 'ulid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
-
+import Autocomplete from '@mui/material/Autocomplete';
 const UsersTable = () => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.users)
-
+    const [filteringChars, setFilteringChars] = React.useState("")
     const deleteUser = (user: User) => {
 
         const updatedUsers = unwrappedSources.filter(prevUser => prevUser.id !== user.id);
@@ -43,38 +43,51 @@ const UsersTable = () => {
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack spacing={2}>
+                        <Autocomplete
+                            disablePortal
+                            id="search-users"
+                            options={gotUsers.map((user) => user.login)}
+                            sx={{ width: 300 }}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Search Users by login" />}
+                        />
                         <Box id="table-container" sx={{ justifyContent: 'center', display: 'flex', width: '600' }}>
                             <TableContainer sx={{ maxHeight: '400px' }} component={Paper}>
                                 <Table sx={{ width: '100%' }}>
                                     <TableHead>
                                         <TableRow style={{ fontWeight: "bold" }}>
-                                        <TableCell style={{ fontWeight: 'bold' }}>Source</TableCell>
+                                            <TableCell style={{ fontWeight: 'bold' }}>Source</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>Name</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>groups</TableCell>
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotUsers.map(user => {
-                                        return (<TableRow key={user.id}>
-                                            <TableCell >
-                                                {user.source}
-                                            </TableCell>
-                                            <TableCell >
-                                                {user.login}
-                                            </TableCell>
-                                            <TableCell>
-                                                {user.groups.join(', ')
-                                                }
-                                            </TableCell>
-                                            <TableCell>
+                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{
+                                        gotUsers
+                                            .filter(user => user.login.includes(filteringChars))
+                                            .map(user => {
+                                                return (<TableRow key={user.id}>
+                                                    <TableCell >
+                                                        {user.source}
+                                                    </TableCell>
+                                                    <TableCell >
+                                                        {user.login}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {user.groups.join(', ')
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell>
 
-                                                <Box sx={{ display: 'flex' }}>
-                                                    <UserForm maybeuser={user} />
-                                                    <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label='Delete' msg={() => deleteUser(user)} />                                                </Box>
-                                            </TableCell>
+                                                        <Box sx={{ display: 'flex' }}>
+                                                            <UserForm maybeuser={user} />
+                                                            <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label='Delete' msg={() => deleteUser(user)} />                                                </Box>
+                                                    </TableCell>
 
-                                        </TableRow>);
-                                    })}</TableBody>
+                                                </TableRow>);
+                                            })}</TableBody>
                                 </Table>
                             </TableContainer>
                         </Box>
@@ -172,7 +185,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const creationVariant = (edition: any, creation: any) => create ? creation : edition
 
-    const config = SRD.unwrap({auth: "json"}, identity, model.config);
+    const config = SRD.unwrap({ auth: "json" }, identity, model.config);
 
     const createEditButton = <Button color="primary" variant='contained' onClick={handleOpen}>{create ? "Create User" : "Edit"}</Button>
 

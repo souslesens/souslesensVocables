@@ -1,6 +1,6 @@
 {
   "name": "souslesensvocables",
-  "version": "0.2.3",
+  "version": "0.3.2",
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
@@ -15,7 +15,7 @@
     "major": " npm version --no-git-tag-version --no-commit-hooks major"
   },
   "devDependencies": {
-    "prettier": "^2.4.1"
+    "prettier": "^2.5.0"
   },
   "dependencies": {
     "@emotion/react": "^11.6.0",
@@ -23,7 +23,7 @@
     "@futpib/tika-server-client": "0.0.5",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/types": "^5.1.0",
-    "@mui/icons-material": "^5.1.1",
+    "@mui/icons-material": "^5.2.0",
     "@mui/x-data-grid": "^5.0.1",
     "@triply/yasgui": "^4.2.20",
     "async": "^3.2.2",

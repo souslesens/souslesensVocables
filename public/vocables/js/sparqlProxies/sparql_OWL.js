@@ -1069,6 +1069,40 @@ var Sparql_OWL = (function () {
         }
 
 
+        self.generateInverseRestrictions=function(source,propId,inversePropId,callback){
+            var filter="filter (?prop=<"+propId+">)"
+            self.getObjectRestrictions(source,null, {filter:filter},function(err, result){
+                if(err)
+                    return callback(err);
+                var triples=[]
+                result.forEach(function(item){
+                    if(item.value && item.concept )
+                    triples=triples.concat(Lineage_blend.getRestrictionTriples(item.value.value, item.concept.value,inversePropId))
+
+                })
+                var sliceSize=200
+                var slices=common.array.slice(triples,sliceSize)
+                async.eachSeries(slices,function(slice,callbackEach){
+                    Sparql_generic.insertTriples(source, slice, null, function (err, result) {
+                        if(err)
+                            return callbackEach(err);
+                        MainController.UI.message(sliceSize+"done ")
+                       callbackEach()
+                },function(err){
+                        if(err)
+                            return callback(err);
+                        callback(err, "DONE")
+                    })
+
+                })
+
+
+            })
+
+
+        }
+
+
 
 
    /* self.getLabels = function (sourceLabel,ids, callback) {

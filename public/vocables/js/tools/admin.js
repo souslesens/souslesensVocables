@@ -8,7 +8,10 @@ var Admin=(function(){
     var html="<button onclick='Admin.refreshIndexes()'>refreshIndexes </button>"+
        " <button onclick='Admin.exportNT()'>export NT </button>"+
         " <button onclick='Admin.getClassesLineage()'>getLineage </button>"+
-        " <br><button onclick='Admin.showUserSources()'>showUserSources </button>"
+        " <br><button onclick='Admin.showUserSources()'>showUserSources </button>"+
+        " <br><button onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>"
+
+
 
 
         $("#sourceDivControlPanelDiv").html(html)
@@ -145,6 +148,42 @@ var sources=[]
         $("#graphDiv").html(html)
 
     }
+
+    self.generateInverseRestrictionsDialog=function(){
+        var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+        if(sources.length!=1)
+            return alert("select a single source")
+        var html="<table>"
+        html+="<tr><td>propId</td><td><input id='admin_propId' style='witdth:250px'></td></tr>"
+        html+="<tr><td>inverse propId</td><td><input id='admin_inversePropId'  style='witdth:250px'></td></tr>"
+       html+="</table>"
+        html+="<button onclick='Admin.generateInverseRestrictions()'>Generate</button>"
+
+
+        $("#mainDialogDiv").html(html)
+        $("#mainDialogDiv").dialog("open")
+    }
+
+
+    self.generateInverseRestrictions=function(){
+        var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+        if(sources.length!=1)
+            return alert("select a single source")
+        var source=sources[0]
+        var propId=$("#admin_propId").val()
+        var inversePropId=$("#admin_inversePropId").val()
+        if( propId && inversePropId){
+            Sparql_OWL.generateInverseRestrictions(source,propId,inversePropId,function(err, result){
+                if(err)
+                    return alert(err)
+                MainController.UI.message(result+" restrictions created")
+            })
+
+        }else
+            alert( "missing propId or inversePropId")
+
+    }
+
 
 
 

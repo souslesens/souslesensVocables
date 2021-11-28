@@ -44,7 +44,7 @@ var processor = {
             "cfihos:status": "string",
             "rdf:type": "uri",
             "part14:functionalPartOf": "uri",
-            "part14:assembledPartOf":"uri",
+            "part14:assembledPartOf": "uri",
             "skos:prefLabel": "string",
         };
 
@@ -127,8 +127,10 @@ var processor = {
                                             }
                                             if (subjectStr.indexOf("http") == 0)
                                                 subjectStr = "<" + subjectStr + ">";
+                                            else if (subjectStr.indexOf(":") > -1)
+                                                subjectStr = subjectStr
                                             else
-                                                subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr,true) + ">";
+                                                subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
                                             var objectStr = line[item.o];
 
                                             if (item.lookup_O) {
@@ -143,15 +145,19 @@ var processor = {
                                             else if (propertiesTypeMap[item.p] == "uri") {
                                                 if (objectStr.indexOf("http") == 0)
                                                     objectStr = "<" + objectStr + ">";
+                                                else if (objectStr.indexOf(":") > -1)
+                                                    objectStr = objectStr
                                                 else
-                                                    objectStr = "<" + graphUri + util.formatStringForTriple(objectStr,true) + ">";
+                                                    objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                             }
                                             if (item.p == "_restriction") {
                                                 if (!item.prop) {
                                                     return callbackSeries("no prop defined for restriction");
                                                 }
                                                 var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-
+                                                var prop = item.prop;
+                                                if(prop.indexOf("http")==0)
+                                                  prop="<" + item.prop + ">"
                                                 triples.push({
                                                     s: blankNode,
                                                     p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -160,7 +166,7 @@ var processor = {
                                                 triples.push({
                                                     s: blankNode,
                                                     p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                                    o: "<" + item.prop + ">",
+                                                    o: prop,
                                                 });
                                                 triples.push({
                                                     s: blankNode,
@@ -242,9 +248,9 @@ var processor = {
         var insertTriplesStr = ""
         var totalTriples = 0
         triples.forEach(function (triple) {
-            var str= triple.s + " " + triple.p + " " + triple.o + ".";
-         //   console.log(str)
-            insertTriplesStr +=str
+            var str = triple.s + " " + triple.p + " " + triple.o + ".";
+            //   console.log(str)
+            insertTriplesStr += str
         });
 
         var queryGraph =
@@ -259,17 +265,29 @@ var processor = {
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
         // console.log(query)
 
-      //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
+        //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
         var params = {query: queryGraph};
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
             if (err) {
-var x=queryGraph
                 return callback(err);
             }
             totalTriples += triples.length;
             console.log(totalTriples);
             return callback(null, totalTriples);
+        })
+    }
+
+    , clearGraph: function (graphUri, sparqlServer, callback) {
+        var query = "clear graph   <" + graphUri + ">"
+        var params = {query: query};
+
+        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            return callback(null);
         })
     }
 };
@@ -298,7 +316,7 @@ mappingsMap = {
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
             {s: "id", p: "skos:prefLabel", o: "label1"},
             {s: "id", p: "rdfs:label", o: "label2"},
-            {s: "id", p:"_restriction" , o: "system",prop:"part14:functionalPartOf"},
+            {s: "id", p: "_restriction", o: "system", prop: "part14:functionalPartOf"},
 
         ],
     },
@@ -311,20 +329,34 @@ mappingsMap = {
             {s: "id", p: "rdfs:subClassOf", o: "superClass"},
             {s: "id", p: "skos:prefLabel", o: "label1"},
             {s: "id", p: "rdfs:label", o: "label2"},
-          //  {s: "id", p:"_restriction" , o: "system",prop:"part14:functionalPartOf"},
+            //  {s: "id", p:"_restriction" , o: "system",prop:"part14:functionalPartOf"},
 
         ],
     },
     CLASSES_5: {
         type: "owl:Class",
-        topClass: "<http://w3id.org/readi/rdl/D101001053>",
+        topClass: "<http://w3id.org/readi/z018-rdl/prod_COMP>",
         fileName: "D:\\NLP\\ontologies\\14224\\classes_5.txt",
         lookups: [],
         tripleModels: [
 
             {s: "id", p: "skos:prefLabel", o: "label1"},
             {s: "id", p: "rdfs:label", o: "label2"},
-            {s: "id", p:"_restriction" , o: "superClass",prop:"part14:assembledPartOf"},
+            {s: "id", p: "_restriction", o: "superClass", prop: "part14:assembledPartOf"},
+
+
+        ],
+    },
+    CLASSES_6: {
+        type: "owl:Class",
+        topClass: "<http://w3id.org/readi/z018-rdl/prod_COMP>",
+        fileName: "D:\\NLP\\ontologies\\14224\\classes_6.txt",
+        lookups: [],
+        tripleModels: [
+
+            {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdfs:label", o: "label2"},
+            {s: "id", p: "_restriction", o: "superClass", prop: "part14:assembledPartOf"},
 
 
         ],
@@ -332,8 +364,8 @@ mappingsMap = {
 }
 
 
-var mappingNames = ["SYSTEMS","CLASSES_3","CLASSES_4"];
-var mappingNames = ["CLASSES_5"];
+var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5"];
+//var mappingNames = ["CLASSES_5"];
 //var mappingNames = ["CLASSES_4"];
 //var mappingNames = ["CLASSES_3"]
 
@@ -346,8 +378,8 @@ mappingNames.forEach(function (mappingName) {
 var graphUri = "http://data.total.com/resource/tsf/iso_14224/";
 
 //processor.getDescription("D:\\NLP\\ontologies\\14224\\RDL_Structure_14224_import.txt");
-if( true) {
-    if(mappings.length==1)
+if (true) {
+    if (mappings.length == 1)
         return processor.processSubClasses(mappings, graphUri);
     var triples = [
         {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'"},
@@ -363,14 +395,24 @@ if( true) {
             s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
             p: "rdfs:subClassOf",
             o: "<http://w3id.org/readi/rdl/D101001053>"
+        },
+        {s: "<http://w3id.org/readi/z018-rdl/prod_COMP>", p: "rdfs:label", o: "'READI_COMPONENT'"},
+        {s: "<http://w3id.org/readi/z018-rdl/prod_COMP>", p: "rdf:type", o: "owl:Class"},
+        {
+            s: "<http://w3id.org/readi/z018-rdl/prod_COMP>",
+            p: "rdfs:subClassOf",
+            o: "<http://w3id.org/readi/rdl/D101001053>"
         }
     ]
 
-
-    processor.writeTriples(triples,graphUri,sparqlServerUrl,function (err, result){
-        if( err)
+    processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
+        if (err)
             return console.log(err);
-        processor.processSubClasses(mappings, graphUri);
+        processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, result) {
+            if (err)
+                return console.log(err);
+            processor.processSubClasses(mappings, graphUri);
+        })
     })
 
 }

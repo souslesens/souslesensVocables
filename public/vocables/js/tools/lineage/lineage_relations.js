@@ -67,7 +67,7 @@ Lineage_relations = (function () {
                 source = self.graphUriSourceMap[graphUri]
             }
         })
-        console.log(uri + "_" + source)
+       // console.log(uri + "_" + source)
         return source
     }
 

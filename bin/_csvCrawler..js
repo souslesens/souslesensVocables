@@ -149,7 +149,7 @@ var csvCrawler = {
                     })
 
                     .on("data", function (data) {
-                        //  if (linesCount++ % 1000 == 0) console.log(linesCount);
+
 
                         jsonDataFetch.push(data);
 

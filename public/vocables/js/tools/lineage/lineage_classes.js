@@ -39,7 +39,7 @@ var Lineage_classes = (function () {
 
         self.onLoaded = function () {
             if (self.isLoaded)
-              ; // return;
+                ; // return;
             self.isLoaded = true
             $("#sourceDivControlPanelDiv").html("")
             Lineage_common.currentSource = null;
@@ -213,9 +213,9 @@ var Lineage_classes = (function () {
             // $("#Lineage_toSource").val("")
         }
 
-        self.clearLastAddedNodes=function(){
-var nodes= visjsGraph.lastAddedNodes
-            if(nodes && nodes.length>0)
+        self.clearLastAddedNodes = function () {
+            var nodes = visjsGraph.lastAddedNodes
+            if (nodes && nodes.length > 0)
                 visjsGraph.data.nodes.remove(nodes)
         }
 
@@ -224,21 +224,20 @@ var nodes= visjsGraph.lastAddedNodes
             self.currentExpandLevel = 1
 
 
+            if (!source)
+                source = Lineage_common.currentSource
+            if (!source)
+                source = self.mainSource
+            if (!source)
+                return;
 
-                if (!source)
-                    source = Lineage_common.currentSource
-                if (!source)
-                    source = self.mainSource
-                if (!source)
-                    return;
-
-            if (source==self.mainSource) {
+            if (source == self.mainSource) {
                 self.initUI();
             }
 
             if (!Config.sources[source])
                 return
-          //  Lineage_common.currentSource = source;
+            //  Lineage_common.currentSource = source;
             self.soucesLevelMap[source] = {visible: true, children: 0}
 
             var allSources = []
@@ -381,8 +380,8 @@ var nodes= visjsGraph.lastAddedNodes
             }, function (err, result) {
                 if (err)
                     return alert(err);
-             //   MainController.UI.message("", true)
-              //  self.drawNewGraph(visjsData);
+                //   MainController.UI.message("", true)
+                //  self.drawNewGraph(visjsData);
                 if (!visjsGraph.data || !visjsGraph.data.nodes) {
                     self.drawNewGraph(visjsData)
                 } else {
@@ -1167,6 +1166,7 @@ var nodes= visjsGraph.lastAddedNodes
             self.showHideCurrentSourceNodes(true)
             var parentIds
             if (!source) {
+
                 if (Lineage_common.currentSource)
                     source = Lineage_common.currentSource;
                 else

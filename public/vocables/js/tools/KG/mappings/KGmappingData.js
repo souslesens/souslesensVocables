@@ -225,8 +225,8 @@ var KGmappingData = (function () {
             "SQL filter <textarea rows='5' cols=80' id='KGmapping_viewSQL'></textarea><br>" +
             "Comment<textarea rows='5' cols=80' id='KGmapping_viewComment'></textarea><br>" +
 
-            "<div><button onclick='KGmappingData.addFilteredViewToTable()'>OK</button>" +
-            "<button onclick=' $(\"#mainDialogDiv\").dialog(\"close\")'>Cancel</button></div>" +
+            "<div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGmappingData.addFilteredViewToTable()'>OK</button>" +
+            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=' $(\"#mainDialogDiv\").dialog(\"close\")'>Cancel</button></div>" +
             "</div>"
 
         $("#mainDialogDiv").html(html)
@@ -481,7 +481,7 @@ var KGmappingData = (function () {
             // var idEncoded=btoa(id.replace(/=/g,"^"))
             var html = "<div class='KGmapping_conditionalMapping' data='" + data + "' id='" + id + "'>" +
                 "" + conditionValue + " = " + ontologyNode.data.label +
-                "<button style='margin-left: 100px' onclick='KGmappingData.unAssignConditionalType(\"" + id + "\")'>X</button> " +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='margin-left: 100px' onclick='KGmappingData.unAssignConditionalType(\"" + id + "\")'>X</button> " +
                 "</div>" +
 
                 "</div>"

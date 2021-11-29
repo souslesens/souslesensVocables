@@ -112,7 +112,7 @@ var authentication = (function () {
                 if (err.responseJSON) {
                     if (err.responseJSON.ERROR == "changePassword") {
                         //    $("#loginMessage").html("le mot de passe doit être changé (<a href='htmlSnippets/changerMotDePasse.html'>cliquer ici</a>)");
-                        $("#loginMessage").html("le mot de passe doit être changé <button onclick=tools.execTool('changerMotDePasse')>OK</button>");
+                        $("#loginMessage").html("le mot de passe doit être changé <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=tools.execTool('changerMotDePasse')>OK</button>");
                         self.currentUser = user;
                         mainController.init0();
 

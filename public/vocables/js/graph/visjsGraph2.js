@@ -261,7 +261,7 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button onclick='visjsGraph.saveGraph()'>Save </button>" +
+        var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.saveGraph()'>Save </button>" +
             "Load<select style='width: 100px' id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>" +
             "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>add</div><div id='VisJsGraph_message'></div>"
 
@@ -270,8 +270,8 @@ var visjsGraph = (function () {
             if (!$("#graphButtons").length) {
 
                 var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                    // " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                    " <div> <B>Graph</B> </div><div><button onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+                    // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                    " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
 
                     "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
@@ -280,7 +280,7 @@ var visjsGraph = (function () {
                     "<option>hierarchical horizontal</option>" + "</select></div>";
 
 
-                html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button onclick='visjsGraph.searchNode()'>Search</button></div>"
+                html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
 
                 if (true)

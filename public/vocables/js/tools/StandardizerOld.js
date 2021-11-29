@@ -333,9 +333,9 @@ var Standardizer = (function () {
                     "<br>"
 
                 if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-                    html += "<button  onclick='Standardizer.removeAsReference(\"" + entity[source].id + "\")' >Remove</button>"
+                    html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary'  onclick='Standardizer.removeAsReference(\"" + entity[source].id + "\")' >Remove</button>"
                     if (entity[source].status == "CANDIDATE")
-                        html += "<button  onclick='Standardizer.setAsReference(\"" + entity[source].id + "\")' >Validate</button>"
+                        html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary'  onclick='Standardizer.setAsReference(\"" + entity[source].id + "\")' >Validate</button>"
                 }
                 html += "<hr>"
 

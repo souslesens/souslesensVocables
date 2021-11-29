@@ -414,7 +414,7 @@ var KGbrowserGraph = (function () {
                     self.currentExpandingNode.targeNodes[item.obj.value] = item
                     targetNodes.push({id: item.obj.value, label: item.objLabel.value})
                 })
-                var html = "<button onclick='KGbrowserGraph.expandNode(\"all\")'>all</button> " +
+                var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGbrowserGraph.expandNode(\"all\")'>all</button> " +
                     "&nbsp;or filter <select id='KGbrowserGraph_filterTargetNodesSelect' onchange='KGbrowserGraph.expandNode($(this).val())'></select>"
                 $("#KGbrowser_expandNodeFilterDiv").html(html)
 

@@ -33,9 +33,19 @@ router.get("/", ensureLoggedIn(), function (req, res, next) {
 
 if (!config.disableAuth) {
     router.get("/auth/check", function (req, res, next) {
+        const auth =
+            config.auth == "keycloak"
+                ? {
+                      realm: config.keycloak.realm,
+                      clientID: config.keycloak.clientID,
+                      authServerURL: config.keycloak.authServerURL,
+                  }
+                : {};
         res.send({
             logged: req.user ? true : false,
             user: req.user,
+            authSource: config.auth,
+            auth: auth,
         });
     });
 
@@ -92,6 +102,8 @@ if (!config.disableAuth) {
             res.send({
                 logged: req.user ? true : false,
                 user: req.user,
+                authSource: null,
+                auth: {},
             });
         });
     }

@@ -313,7 +313,7 @@ var GraphHighlight = (function () {
                         }
                     }
                     visjsGraph.paintEdges(ids, self.currentColor, "#eee", radius);
-                    legendStr = "<button onclick=' $(\"#GraphHighlight_legendDiv\").html(\"\").css(\"visibility\", \"hidden\");'>X</button></button><span style='background-color: " + self.currentColor + ";'>&nbsp;&nbsp;&nbsp;</span></td><td>" + legendStr + "</td></tr>"
+                    legendStr = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=' $(\"#GraphHighlight_legendDiv\").html(\"\").css(\"visibility\", \"hidden\");'>X</button></button><span style='background-color: " + self.currentColor + ";'>&nbsp;&nbsp;&nbsp;</span></td><td>" + legendStr + "</td></tr>"
                     /*   $("#paintDiv").css("height", 100);
                        $("#paintDiv").html(legendStr);*/
                     $("#GraphHighlight_legendDiv").html(legendStr);

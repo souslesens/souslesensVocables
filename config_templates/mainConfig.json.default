@@ -4,6 +4,7 @@
   "default_sparql_url": "http://xxxxxx:8890/sparql",
   "disableAuth": false,
   "auth": "json",
+  "defaultGroups": [],
   "keycloak": {
     "realm": "master",
     "publicClient": false,

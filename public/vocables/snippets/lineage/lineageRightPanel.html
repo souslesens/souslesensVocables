@@ -41,10 +41,10 @@
         <div id="LineagePropertiesTab">
             <div>
                 <input id='LineageProperties_searchAllSourcesTermInput' style="width: 200px" value="">
-                <button id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>
                     Search
                 </button>
-                <button onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
             </div>
             <div>
                 <input type='checkbox' id='LineageProperties_allExactMatchSearchCBX'>Exact Match
@@ -74,9 +74,9 @@
                 <div class="lineage_actionDiv_title">Existing relations</div>
                 <div>
                     <!-- Properties
-                     <button onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
-                     <button onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
-                     <button onclick="Lineage_relations.exportProperties()">Export</button>
+                     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
+                     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
+                     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportProperties()">Export</button>
                      <br>-->
                     <div> filters
                         <div>
@@ -95,9 +95,9 @@
                     </div>
 
                     Restrictions
-                    <button onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
-                    <button onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
-                    <button onclick="Lineage_relations.exportRestrictions()">Export</button>
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportRestrictions()">Export</button>
 
                 </div>
 
@@ -107,10 +107,10 @@
                 <div class="lineage_actionDiv_title">Projection</div>
                 on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
                 add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
-                <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
-                <button onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
-                <button onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
-                <!--  <button onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>-->
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
+                <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>-->
 
             </div>
             <div> </div>

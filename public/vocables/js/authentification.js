@@ -33,6 +33,14 @@ var authentication = (function () {
                         login: data.user.login,
                         groupes: data.user.groups,
                     }
+                    $('#user-username').html(" " + authentication.currentUser.identifiant);
+                    if (data.authSource == "keycloak") {
+                      $('#manage-account').attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
+                    } else {
+                        console.log("hide account management");
+                        $("#manage-account-li").hide();
+                    }
+
                     MainController.onAfterLogin()
                     if (typeof sparql_abstract !== 'undefined')
                     sparql_abstract.initSources()
@@ -104,7 +112,7 @@ var authentication = (function () {
                 if (err.responseJSON) {
                     if (err.responseJSON.ERROR == "changePassword") {
                         //    $("#loginMessage").html("le mot de passe doit être changé (<a href='htmlSnippets/changerMotDePasse.html'>cliquer ici</a>)");
-                        $("#loginMessage").html("le mot de passe doit être changé <button onclick=tools.execTool('changerMotDePasse')>OK</button>");
+                        $("#loginMessage").html("le mot de passe doit être changé <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=tools.execTool('changerMotDePasse')>OK</button>");
                         self.currentUser = user;
                         mainController.init0();
 

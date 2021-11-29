@@ -19,7 +19,7 @@ var ChildHood = (function () {
 
 
     self.onSourceSelect = function () {
-        var html = "<button onclick='ChildHood.showActionPanel()'>OK</button>"
+        var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='ChildHood.showActionPanel()'>OK</button>"
         $("#sourceDivControlPanelDiv").html(html)
 
     }

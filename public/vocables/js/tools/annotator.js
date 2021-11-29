@@ -14,7 +14,7 @@ var Annotator = (function () {
         self.selectedSources;
 
         self.onLoaded = function () {
-            var html = "<button onclick='Annotator.showActionPanel()'>OK</button>"
+            var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Annotator.showActionPanel()'>OK</button>"
             $("#sourceDivControlPanelDiv").html(html)
 
         }

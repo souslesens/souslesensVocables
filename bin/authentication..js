@@ -78,13 +78,13 @@ if (config.auth == "keycloak") {
                     password: "",
                     source: "keycloak",
                     _type: "user",
-                    groups: [],
+                    groups: config.defaultGroups ? config.defaultGroups : [],
                 };
 
                 findUser = {
                     id: userUlid,
                     login: profile.username,
-                    groups: [],
+                    groups: config.defaultGroups ? config.defaultGroups : [],
                     source: "keycloak",
                 };
 

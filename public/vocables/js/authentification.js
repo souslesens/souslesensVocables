@@ -33,6 +33,14 @@ var authentication = (function () {
                         login: data.user.login,
                         groupes: data.user.groups,
                     }
+                    $('#user-username').html(" " + authentication.currentUser.identifiant);
+                    if (data.authSource == "keycloak") {
+                      $('#manage-account').attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
+                    } else {
+                        console.log("hide account management");
+                        $("#manage-account-li").hide();
+                    }
+
                     MainController.onAfterLogin()
                     if (typeof sparql_abstract !== 'undefined')
                     sparql_abstract.initSources()

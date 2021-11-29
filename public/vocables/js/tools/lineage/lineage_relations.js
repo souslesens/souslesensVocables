@@ -168,6 +168,7 @@ Lineage_relations = (function () {
                 }, function (err, result) {
                     if (err)
                         return callback(err)
+
                     restrictions=formatResult(result)
                     callback(null,restrictions)
 

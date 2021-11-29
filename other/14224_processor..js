@@ -34,6 +34,7 @@ var processor = {
     processSubClasses: function (mappings, graphUri) {
         //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
 
+        var existingNodes={}
         var propertiesTypeMap = {
             "rdfs:subClassOf": "uri",
             _restriction: "uri",
@@ -45,6 +46,8 @@ var processor = {
             "rdf:type": "uri",
             "part14:functionalPartOf": "uri",
             "part14:assembledPartOf": "uri",
+            "part14:hasFunctionalPart": "uri",
+            "part14:hasAssembledPart": "uri",
             "skos:prefLabel": "string",
         };
 
@@ -182,14 +185,18 @@ var processor = {
                                                 return;
                                             }
                                             // return console.log("missing type " + item.p)
-
-                                            triples.push({
-                                                s: subjectStr,
-                                                p: item.p,
-                                                o: objectStr,
-                                            });
+                                            if(!existingNodes[subjectStr]) {
+                                                triples.push({
+                                                    s: subjectStr,
+                                                    p: item.p,
+                                                    o: objectStr,
+                                                });
+                                            }
                                         }
                                     });
+
+                                 if(!existingNodes[subjectStr]){
+                                     existingNodes[subjectStr]=1
                                     if (mapping.type) {
                                         triples.push({
                                             s: subjectStr,
@@ -205,6 +212,7 @@ var processor = {
                                             o: mapping.topClass,
                                         });
                                     }
+                                 }
                                 });
 
                                 var x = triples;
@@ -270,6 +278,7 @@ var processor = {
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
             if (err) {
+                var x=queryGraph
                 return callback(err);
             }
             totalTriples += triples.length;
@@ -293,7 +302,7 @@ var processor = {
 };
 
 
-mappingsMap = {
+mappingsMapV0 = {
 
     SYSTEMS: {
         type: "owl:Class",
@@ -342,14 +351,14 @@ mappingsMap = {
 
             {s: "id", p: "skos:prefLabel", o: "label1"},
             {s: "id", p: "rdfs:label", o: "label2"},
-            {s: "id", p: "_restriction", o: "superClass", prop: "part14:assembledPartOf"},
+            {s: "id", p: "_restriction", o: "superClass", prop: "part14:functionalPartOf"},
 
 
         ],
     },
     CLASSES_6: {
         type: "owl:Class",
-        topClass: "<http://w3id.org/readi/z018-rdl/prod_COMP>",
+        topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
         fileName: "D:\\NLP\\ontologies\\14224\\classes_6.txt",
         lookups: [],
         tripleModels: [
@@ -362,9 +371,79 @@ mappingsMap = {
         ],
     },
 }
+mappingsMap = {
+
+    SYSTEMS: {
+        type: "owl:Class",
+        topClass: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
+        fileName: "D:\\NLP\\ontologies\\14224\\systems.txt",
+        lookups: [],
+        tripleModels: [
+            // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
+            {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdfs:label", o: "label2"},
+
+        ],
+    },
+    CLASSES_3: {
+        type: "owl:Class",
+        topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
+        fileName: "D:\\NLP\\ontologies\\14224\\classes_3.txt",
+        lookups: [],
+        tripleModels: [
+            // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
+            {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdfs:label", o: "label2"},
+            {s: "id", p: "_restriction", o: "system", prop: "part14:hasFunctionalPart"},
+
+        ],
+    },
+    CLASSES_4: {
+        type: "owl:Class",
+        topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
+        fileName: "D:\\NLP\\ontologies\\14224\\classes_4.txt",
+        lookups: [],
+        tripleModels: [
+            {s: "id", p: "rdfs:subClassOf", o: "superClass"},
+            {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdfs:label", o: "label2"},
+            //  {s: "id", p:"_restriction" , o: "system",prop:"part14:functionalPartOf"},
+
+        ],
+    },
+    CLASSES_5: {
+        type: "owl:Class",
+        topClass: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        fileName: "D:\\NLP\\ontologies\\14224\\classes_5.txt",
+        lookups: [],
+        tripleModels: [
+
+            {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdfs:label", o: "label2"},
+            {s: "id", p: "_restriction", o: "superClass", prop: "part14:hasFunctionalPart"},
 
 
-var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5"];
+        ],
+    },
+    CLASSES_6: {
+        type: "owl:Class",
+        topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
+        fileName: "D:\\NLP\\ontologies\\14224\\classes_6.txt",
+        lookups: [],
+        tripleModels: [
+
+            {s: "component", p: "skos:prefLabel", o: "componentCode"},
+            {s: "component", p: "rdfs:label", o: "label2"},
+            {s: "component", p: "_restriction", o: "superClass", prop: "part14:hasAssembledPart"},
+            {s: "component", p: "_restriction", o: "class4", prop: "part14:hasAssembledPart"},
+
+
+        ],
+    },
+}
+
+
+var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6"];
 //var mappingNames = ["CLASSES_5"];
 //var mappingNames = ["CLASSES_4"];
 //var mappingNames = ["CLASSES_3"]
@@ -396,12 +475,12 @@ if (true) {
             p: "rdfs:subClassOf",
             o: "<http://w3id.org/readi/rdl/D101001053>"
         },
-        {s: "<http://w3id.org/readi/z018-rdl/prod_COMP>", p: "rdfs:label", o: "'READI_COMPONENT'"},
-        {s: "<http://w3id.org/readi/z018-rdl/prod_COMP>", p: "rdf:type", o: "owl:Class"},
+        {s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>", p: "rdfs:label", o: "'PART_14_Functional_Object'"},
+        {s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>", p: "rdf:type", o: "owl:Class"},
         {
-            s: "<http://w3id.org/readi/z018-rdl/prod_COMP>",
+            s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
             p: "rdfs:subClassOf",
-            o: "<http://w3id.org/readi/rdl/D101001053>"
+            o: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>"
         }
     ]
 

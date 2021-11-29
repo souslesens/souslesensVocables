@@ -154,8 +154,8 @@ var sources=[]
         if(sources.length!=1)
             return alert("select a single source")
         var html="<table>"
-        html+="<tr><td>propId</td><td><input id='admin_propId' style='witdth:250px'></td></tr>"
-        html+="<tr><td>inverse propId</td><td><input id='admin_inversePropId'  style='witdth:250px'></td></tr>"
+        html+="<tr><td>propId</td><td><input id='admin_propId' style='width:400px'></td></tr>"
+        html+="<tr><td>inverse propId</td><td><input id='admin_inversePropId'  style='width:400px'></td></tr>"
        html+="</table>"
         html+="<button onclick='Admin.generateInverseRestrictions()'>Generate</button>"
 

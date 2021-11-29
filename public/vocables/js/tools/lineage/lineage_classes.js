@@ -1613,9 +1613,12 @@ var Lineage_classes = (function () {
 
             MainController.UI.message("")
 
-            Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1}, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1,addInverseRestrictions:1}, function (err, result) {
+
                 if (err)
                     return MainController.UI.message(err)
+
+
                 if (result.length == 0) {
                     $("#waitImg").css("display", "none");
                     return MainController.UI.message("No data found")
@@ -1730,6 +1733,7 @@ var Lineage_classes = (function () {
                 $("#waitImg").css("display", "none");
 
             })
+
 
         }
 

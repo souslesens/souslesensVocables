@@ -631,7 +631,6 @@ var Lineage_classes = (function () {
                 },
                 function (callbackSeries) {
 
-
                     async.eachSeries(sources, function (source, callbackEachSource) {
 
                         async.eachSeries(slices, function (items, callbackEachSlice) {
@@ -754,7 +753,6 @@ var Lineage_classes = (function () {
 
 
                         }
-
 
                         visjsGraph.data.nodes.add(visjsData.nodes)
                         visjsGraph.data.edges.add(visjsData.edges)
@@ -961,10 +959,17 @@ var Lineage_classes = (function () {
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select * " + fromStr + " where {";
-            if (propFilter == "outcoming")
-                query += "<" + nodeData.id + "> ?prop ?value.  ";
+
+            if (propFilter == "outcoming" || propFilter == "all")
+                query += "?ids ?prop ?value.  ";
+            // query += "<" + nodeData.id + "> ?prop ?value.  ";
             else if (propFilter == "incoming")
-                query += " ?value ?prop  <" + nodeData.id + ">.  ";
+                query += " ?value ?prop ?ids.  ";
+            var ids = [nodeData.id]
+
+           ids= visjsGraph.getNodeDescendantIds(nodeData.id, true)
+            var filter = Sparql_common.setFilter("ids", ids)
+            query += filter
 
             query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
             query += "}"
@@ -973,7 +978,7 @@ var Lineage_classes = (function () {
                 if (err) {
                     return MainController.UI.message(err);
                 }
-
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "value"])
                 var data = result.results.bindings
                 if (data.length == 0) {
                     $("#waitImg").css('display', 'none')
@@ -1003,7 +1008,7 @@ var Lineage_classes = (function () {
                 }
                 var distinctProps = {}
                 data.forEach(function (item) {
-                    if (item.valueLabel) {
+                    if (true) {
                         if (!distinctProps[item.prop.value])
                             distinctProps[item.prop.value] = 1
                         if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
@@ -1043,7 +1048,7 @@ var Lineage_classes = (function () {
                                 }
                             if (propFilter == "incoming")
                                 arrows = {
-                                    from: {
+                                    to: {
                                         enabled: true,
                                         type: Lineage_classes.defaultEdgeArrowType,
                                         scaleFactor: 0.5
@@ -1073,6 +1078,10 @@ var Lineage_classes = (function () {
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {
                     Lineage_classes.drawNewGraph(visjsData)
+                }
+                if (propFilter == "all") {
+                    self.graphNodeNeighborhood(nodeData, "incoming")
+                    self.drawRestrictions(common.currentSource,ids,true)
                 }
             })
 
@@ -1509,7 +1518,10 @@ var Lineage_classes = (function () {
                 classIds = null
 
 
-            Sparql_OWL.getObjectProperties(source, classIds, {withoutImports: 1}, function (err, result) {
+            Sparql_OWL.getObjectProperties(source, classIds, {
+                withoutImports: 1,
+                addInverseRestrictions: 1
+            }, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
                 if (result.length == 0) {
@@ -1613,7 +1625,10 @@ var Lineage_classes = (function () {
 
             MainController.UI.message("")
 
-            Sparql_OWL.getObjectRestrictions(source, classIds, {withoutImports: 1,addInverseRestrictions:1}, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(source, classIds, {
+                withoutImports: 1,
+                addInverseRestrictions: 1
+            }, function (err, result) {
 
                 if (err)
                     return MainController.UI.message(err)
@@ -2091,7 +2106,11 @@ var Lineage_classes = (function () {
                 self.currentGraphNode = node;
 
                 if (options.ctrlKey) {
-                    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+                    if (options.shiftKey) {
+                        Lineage_classes.graphActions.graphNodeNeighborhood("all")
+                    } else {
+                        SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+                    }
                 }
                 if (options && options.altKey) {
                     if (node.fromNode && node.toNode && node.data) {//edge

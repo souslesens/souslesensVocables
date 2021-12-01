@@ -507,6 +507,8 @@ var Sparql_OWL = (function () {
             var filterStr = "";
             if (ids)
                 filterStr = Sparql_common.setFilter("domain", ids);
+            if (options.inverseRestriction)
+                filterStr = Sparql_common.setFilter("range", ids);
             if (options.propIds)
                 filterStr = Sparql_common.setFilter("prop", options.propIds);
             if (options.subPropIds)
@@ -559,6 +561,19 @@ var Sparql_OWL = (function () {
                     return callback(err)
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
+                if (options.addInverseRestrictions) {
+                    delete options.addInverseRestrictions
+                    options.inverseRestriction = true
+                    self.getObjectProperties  (sourceLabel, ids, options,function (err, resultInverse) {
+                        result =  result.results.bindings.concat( resultInverse)
+                        return callback(null, result)
+                    })
+
+                } else {
+
+                    return callback(null, result.results.bindings)
+                }
+
                 return callback(null, result.results.bindings)
 
             })
@@ -634,7 +649,7 @@ var Sparql_OWL = (function () {
 
                 if (options.addInverseRestrictions) {
                     delete options.addInverseRestrictions
-                    options.inverseRestrcition = true
+                    options.inverseRestriction = true
                     self.getObjectRestrictions(sourceLabel, ids, options, function (err, resultInverse) {
                         result =  result.results.bindings.concat( resultInverse)
                         return callback(null, result)

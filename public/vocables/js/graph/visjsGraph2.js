@@ -575,8 +575,11 @@ var visjsGraph = (function () {
         function recurse(nodeId) {
             allEdges.forEach(function (edge) {
                 if (edge.from == nodeId) {
-                    nodes.push(edge.to)
-                    recurse(edge.to)
+
+                    if(true || nodes.indexOf(edge.to)<0) {
+                        nodes.push(edge.to)
+                        recurse(edge.to)
+                    }
                 }
                 /* if(includeParents && edge.to == nodeId){
                      nodes.push(edge.from)

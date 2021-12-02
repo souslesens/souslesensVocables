@@ -128,13 +128,13 @@ var processor = {
 
                                         if (item.s_type == "fixed")
                                             subjectStr = item.s;
-                                       else if (item.s.match(/.*:.*|http.*/))
+                                       else if (item.s.match(/.+:.+|http.+/))
                                             subjectStr = item.s;
                                         else
                                             subjectStr = line[item.s];
                                         if (item.o_type == "fixed")
                                             objectStr = item.o;
-                                       else if (item.o.match(/.*:.*|http.*/))
+                                       else if (item.o.match(/.+:.+|http.+/))
                                             objectStr = item.o;
                                         else
                                             objectStr = line[item.o];

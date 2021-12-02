@@ -99,7 +99,8 @@ var Sparql_common = (function () {
                         return ""
                     var conceptIdsStr = ""
                     ids.forEach(function (id, index) {
-                        if(id.indexOf("http")!=0)
+                      //  if(id.indexOf("http")!=0)
+                       if (!id.match(/.+:.+|http.+/))
                             return
                         if (id != "") {
                             if (conceptIdsStr != "")

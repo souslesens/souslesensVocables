@@ -571,12 +571,13 @@ var visjsGraph = (function () {
         if (includeParents)
             nodes = nodeIds
         var allEdges = self.data.edges.get();
-
+var allNodes={}
         function recurse(nodeId) {
             allEdges.forEach(function (edge) {
                 if (edge.from == nodeId) {
 
-                    if(true || nodes.indexOf(edge.to)<0) {
+                    if(!allNodes[edge.to]) {
+                        allNodes[edge.to]=1
                         nodes.push(edge.to)
                         recurse(edge.to)
                     }

@@ -21,7 +21,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          check-node-version: npm --version && node --version
-          install: cd mainapp && npm ci && cd ..
+          install: cd mainapp && npm ci --production=false && cd ..
           build: npm run build
           start: npm start

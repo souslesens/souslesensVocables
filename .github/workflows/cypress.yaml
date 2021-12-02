@@ -9,6 +9,8 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: dev
     strategy:
       matrix:
         node-version: [16.x]
@@ -21,6 +23,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          install: cd mainapp && npm ci --production=false && cd ..
+          install: cd mainapp && npm ci && cd ..
           build: npm run build
           start: npm start

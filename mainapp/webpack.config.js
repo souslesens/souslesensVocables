@@ -27,6 +27,7 @@ module.exports = {
         ],
     },
     devServer: {
+        inline: false,
         contentBase: "build",
         compress: true,
         historyApiFallback: {

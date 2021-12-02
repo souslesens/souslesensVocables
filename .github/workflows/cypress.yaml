@@ -16,8 +16,11 @@ jobs:
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
+        env:
+          DEBUG: '@cypress/github-action'
+          NODE_ENV: dev
         uses: cypress-io/github-action@v2
         with:
-          install: cd mainapp && npm ci --production=false && cd ..
+          install: cd mainapp && npm ci && cd ..
           build: npm run build
           start: npm start

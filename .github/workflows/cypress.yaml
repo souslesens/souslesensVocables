@@ -2,7 +2,7 @@ name: Cypress Tests
 
 on: 
   push:
-    branches: [ cypress-users-ordination-test ]
+    branches: [ cypress-users-ordination-test, cypress-users-ordination ]
   pull_request:
     branches: [ master ]
 
@@ -21,5 +21,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
+          install: cd mainapp && npm ci --production=false && cd ..
           build: npm run build
           start: npm start

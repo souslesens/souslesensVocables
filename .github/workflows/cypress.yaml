@@ -18,7 +18,5 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
-        working-directory: ./mainapp
-        run: |
-          npm run build && cd .. && npm start
-        
+        with:
+          -start: npm start

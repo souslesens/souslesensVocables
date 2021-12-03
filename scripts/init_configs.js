@@ -3,7 +3,7 @@ const fs = require('fs');
 
 
 // Create configs dir if not exists
-fs.mkdirSync('config/users', options={"recursive": true})
+fs.mkdirSync('config/users', options = { "recursive": true })
 
 
 // config/users/users.json
@@ -40,8 +40,8 @@ if (!fs.existsSync(blenderSourcesPath)) {
 
 
 // config/mainConfig.json
-const mainConfigPath = "config/mainConfig.json"
-const mainConfigTemplatePath = "config_templates/mainConfig.json.default"
+const mainConfigPath = "../config/mainConfig.json"
+const mainConfigTemplatePath = "../config_templates/mainConfig.json.default"
 
 // Create a config file if not already exists
 if (!fs.existsSync(mainConfigPath)) {
@@ -103,5 +103,5 @@ const sourcesTemplatePath = "config_templates/sources.json.default"
 if (!fs.existsSync(sourcesPath)) {
   fs.readFile(sourcesTemplatePath, (err, data) => {
     fs.writeFileSync(sourcesPath, JSON.stringify(JSON.parse(data), null, 2));
-  });  
+  });
 }

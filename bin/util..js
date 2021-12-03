@@ -205,22 +205,30 @@ var util = {
     getCsvFileSeparator: function (file, callback) {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         var separator = ",";
+        var line=""
+        var separators = [",", "\t", ";"];
         readStream
             .on("data", function (chunk) {
-                var separators = [",", "\t", ";"];
-                var p = chunk.indexOf("\n");
-                if (p < 0) p = chunk.indexOf("\r");
-                if (p < 0) {
-                    readStream.destroy();
-                    console.log("no line break or return in file");
-                    return null;
-                }
-                var firstLine = chunk.substring(0, p);
-                for (var k = 0; k < separators.length; k++) {
-                    if (firstLine.indexOf(separators[k]) > 0) callback(separators[k]);
-                }
+                line+=chunk
 
-                readStream.destroy();
+var match=null
+                if((match=line.match(/[\n\r]/))) {
+
+                 /*   var p = line.indexOf("\n");
+                    if (p < 0) p = chunk.indexOf("\r");
+                    if (p < 0) {
+                        readStream.destroy();
+                        console.log("no line break or return in file");
+                        return null;*/
+
+                   var firstLine = line.substring(0, match.index);
+                    for (var k = 0; k < separators.length; k++) {
+                        if (firstLine.indexOf(separators[k])>-1)
+                            callback(separators[k]);
+                    }
+
+                    readStream.destroy();
+                }
             })
             .on("end", function () {
                 var xx = 3;

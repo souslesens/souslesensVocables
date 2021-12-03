@@ -34,6 +34,7 @@
     "constantinople": "^4.0.1",
     "cookie-parser": "~1.4.6",
     "csv-parser": "^3.0.0",
+    "csv2sql-lite": "^0.0.6",
     "csvtojson": "^2.0.10",
     "debug": "~4.3.2",
     "dijkstra-short-path": "^1.0.3",

@@ -58,7 +58,7 @@ var TE_14224_browser = (function () {
                            return callbackEach()
 
                         var html="<div class='TE_114224_browser_leftPanelClassDiv'>"
-                            html+="<div>"+superClass.label+"</div>"
+                            html+="<div  class='TE_114224_browser_title'>"+superClass.label+"</div>"
                             html+="<div class='TE_114224_browser_leftPanelTreeContainer'>"
                             html+="<div id='TE_114224_browser_tree_"+superClass.label+"'>"
                             html+="</div>"
@@ -91,8 +91,9 @@ var TE_14224_browser = (function () {
                         $("#TE_114224_browser_filtersContainerDiv").html(htmlTotal)
                         setTimeout(function(){
 
+                            var options={withCheckboxes:1}
                             for(var key in treesData){
-                                common.jstree.loadJsTree(key,treesData[key])
+                                common.jstree.loadJsTree(key,treesData[key],options)
 
                             }
 

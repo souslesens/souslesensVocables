@@ -137,8 +137,10 @@ var Lineage_classes = (function () {
                 var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
                 $("#lineage_sourceDescriptionDiv").html(str)
                 self.registerSourceImports(sourceLabel)
-                self.initUI();
-                Lineage_relations.init()
+              if(!self.mainSource) {
+                  self.initUI();
+                  Lineage_relations.init()
+              }
 
 
             })
@@ -967,7 +969,7 @@ var Lineage_classes = (function () {
                 query += " ?value ?prop ?ids.  ";
             var ids = [nodeData.id]
 
-           ids= visjsGraph.getNodeDescendantIds(nodeData.id, true)
+        //   ids= visjsGraph.getNodeDescendantIds(nodeData.id, true)
             var filter = Sparql_common.setFilter("ids", ids)
             query += filter
 
@@ -997,6 +999,7 @@ var Lineage_classes = (function () {
                         size: Lineage_classes.defaultShapeSize,
                         color: Lineage_classes.getSourceColor(Lineage_common.currentSource, nodeData.id),
                         font: {multi: true, size: 10},
+                        level:5,
                         data: {
                             source: Lineage_common.currentSource,
                             id: nodeData.id,
@@ -1011,7 +1014,8 @@ var Lineage_classes = (function () {
                     if (true) {
                         if (!distinctProps[item.prop.value])
                             distinctProps[item.prop.value] = 1
-                        if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
+                        if(!item.prop.value.match(/rdf|owl|skos/)){
+                       // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
                             //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
                             if (!existingIds[item.value.value]) {
                                 existingIds[item.value.value] = 1
@@ -1022,6 +1026,7 @@ var Lineage_classes = (function () {
                                     color: Lineage_classes.getSourceColor(Lineage_common.currentSource, item.value.value),
                                     size: Lineage_classes.defaultShapeSize,
                                     font: {multi: true, size: 10},
+                                    level:5,
                                     data: {
                                         source: Lineage_common.currentSource,
                                         id: item.value.value,
@@ -1081,7 +1086,7 @@ var Lineage_classes = (function () {
                 }
                 if (propFilter == "all") {
                     self.graphNodeNeighborhood(nodeData, "incoming")
-                    self.drawRestrictions(common.currentSource,ids,true)
+                    self.drawRestrictions(Lineage_common.currentSource,ids,true)
                 }
             })
 

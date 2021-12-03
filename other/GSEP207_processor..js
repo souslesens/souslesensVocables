@@ -1,22 +1,49 @@
 var processor=require("./CsvTripleBuilder.")
-var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
+
+var x=[
+    "classFamily",
+    "classDescription",
+    "subClass",
+    "subClassDescription",
+    "fLRecommended",
+    "eQManagement",
+    "classType",
+    "owner",
+    "equipmentCategory",
+    "fAMERelevant",
+    "subseaApplicable",
+    "catISO14224",
+    "action2021"
+]
 mappingsMap = {
 
-    SYSTEMS: {
+    CLASSES: {
         type: "owl:Class",
-        topClass: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
-        fileName: "D:\\NLP\\ontologies\\14224\\systems.txt",
+        topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
+        fileName: "D:\\NLP\\ontologies\\MIE\\GSEP207classes.txt",
         lookups: [],
         transform: {
-            label2: function (value) {
-                return "Syst-" + value
+            catISO14224: function (value) {
+                return "http://data.total.com/resource/tsf/iso_14224/" + value;
             }
         },
         tripleModels: [
-            // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            {s: "id", p: "skos:prefLabel", o: "label1"},
-            {s: "id", p: "rdfs:label", o: "label2"},
+            {s: "classFamily", p: "rdfs:label", o: "classDescription"},
+            {s: "subClass", p: "rdfs:subClassOf", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
+            {s: "classFamily", p: "rdf:type", o: "owl:Class"},
+
+            {s: "subClass", p: "rdfs:subClassOf", o: "classFamily"},
+            {s: "subClass", p: "rdfs:label", o: "subClassDescription"},
+            {s: "subClass",p: "_restriction",  o: "catISO14224",prop: "owl:sameAs"},
+
+
+            {s: "subClass", p: "_restriction", o: "owner",prop: "part14:interestOf"},
+            {s: "owner", p: "rdfs:label", o: "owner"},
+            {s: "owner", p: "rdf:type", o: "owl:Class"},
+            {s: "owner", p: "rdfs:subClassOf", o: "http://w3id.org/readi/z018-rdl/Discipline"},
+
+
 
         ],
     },
@@ -173,32 +200,9 @@ mappingsMap = {
             {s: "pickList", p: "rdf:type", o: "owl:Class"},
 
 
-            /*    {s: "clauseId", p: " \"req:REQ_0021\"", o: "physicalQuantity"},// if physicalQuantity
-                {s: "clauseId", p: "rdf:type", o: "part14:PhysicalQuantity"},
-                {s: "clauseId", p: "rdfs:label", o: "pickList"},// if physicalQuantity
-                {s: "clauseId", p: "rdf:type", o: "part14:Quality"},
-                {s: "clauseId", p: "rdfs:label", o: "datataype"}, // if physicalQuantity
-                {s: "clauseId", p: "rdf:type", o: "part14:Quality"},
 
 
 
-                {s: "reqId", p: "_restriction", o: "clauseId", prop: "https://w3id.org/requirement-ontology/rdl/REQ_0018"},
-                {s: "reqId", p: "rdf:type", o:"priority"},
-
-                {s: "reqId", p: "req:REQ_0022", o: "http://data.total.com/resource/tsf/iso_14224/"},//posited by
-                {s: "clauseId", p: "owl:comment", o: "description"},
-                {s: "clauseId", p: "req:REQ_0021", o: "equipmentId"},//scope
-                {s: "clauseId", p: "req:REQ_0020", o: "physicalQuantity"},//demand
-                {s: "clauseId", p: "req:REQ_0020", o: "pickList"},//demand
-                {s: "clauseId", p: "req:REQ_0020", o: "datataype"},//demand
-
-
-                {s: "physicalQuantity", p: "rdfs:label", o: "physicalQuantity"},
-                {s: "physicalQuantity", p: "rdf:type", o: "part14:PhysicalQuantity"},
-                {s: "pickList", p: "rdfs:label", o: "pickList"},
-                {s: "pickList", p: "rdf:type", o: "part14:Quality"},
-                {s: "datataype", p: "rdfs:label", o: "datataype"},
-                {s: "datataype", p: "rdf:type", o: "part14:Quality"},*/
 
 
         ],
@@ -208,23 +212,19 @@ mappingsMap = {
 }
 
 
-var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6c"];
-//var mappingNames = ["CLASSES_5"];
-//var mappingNames = ["CLASSES_4"];
-//var mappingNames = ["CLASSES_3"]
+var mappingNames = ["CLASSES", ];
 
-//var mappingNames = ["QUALITIES"]
 //var mappingNames = ["CLASSES_6c",];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
 });
 
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/";
-//processor.getDescription("D:\\NLP\\ontologies\\14224\\RDL_Structure_14224_import.txt");
+
+var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
+
 if (true) {
-    if (mappings.length == 1)
+    if (mappings.length == 0)
         return processor.processSubClasses(mappings, graphUri);
     var triples = [
         {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'"},
@@ -273,15 +273,34 @@ if (true) {
 
 
 
+        {
+            s:   "<http://w3id.org/readi/z018-rdl/Discipline>",
+            p: "rdfs:label",
+            o: "'Discipline'"
+        },
+
+        {s:   "<http://w3id.org/readi/z018-rdl/Discipline>", p: "rdf:type", o: "owl:Class"},
+        {
+            s:   "<http://w3id.org/readi/z018-rdl/Discipline>",
+            p: "rdfs:subClassOf",
+            o:   "<http://w3id.org/readi/z018-rdl/Discipline>"
+        },
+
+
+
+
+
     ]
 
+ //   var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
+    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
     processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
         if (err)
             return console.log(err);
         processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, result) {
             if (err)
                 return console.log(err);
-            processor.processSubClasses(mappings, graphUri);
+            processor.processSubClasses(mappings, graphUri,sparqlServerUrl);
         })
     })
 

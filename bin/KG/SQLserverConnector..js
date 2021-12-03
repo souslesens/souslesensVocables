@@ -102,7 +102,8 @@ var SQLserverConnector = {
 
             // Query
             //console.log(query)
-            new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
+         //   new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
+            new sql.Request().query(query, (err, result) => {
                 if (err) return callback(err);
 
                 return callback(null, result.recordset);

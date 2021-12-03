@@ -9,18 +9,16 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
+
       - name: Cypress run
-        env:
-          DEBUG: '@cypress/github-action'
-          NODE_ENV: dev
         uses: cypress-io/github-action@v2
-        with:
-          install: cd mainapp && npm ci && cd ..
-          build: npm run build
-          start: npm start
+        working-directory: ./mainapp
+        run: |
+          npm run build && cd .. && npm start
+        

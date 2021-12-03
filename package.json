@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "build": "cd mainapp && npm run build",
+    "build:ci": "cd mainapp && npm run build",
     "dev": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
     "format": "prettier -w --tab-width=4 --print-width=200 *.js {bin,data,other,routes,views,mainapp}/**/*.js",
     "ncu": "ncu",
@@ -14,7 +14,6 @@
     "minor": " npm version --no-git-tag-version --no-commit-hooks minor",
     "major": " npm version --no-git-tag-version --no-commit-hooks major",
     "test": "cypress open"
-
   },
   "devDependencies": {
     "cypress": "^9.0.0",

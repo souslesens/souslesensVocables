@@ -17,7 +17,7 @@ jobs:
       # and run all Cypress tests
       - name: Build mainapp
         working-directory: ./mainapp
-        run: npm run build 
+        run: npm ci && npm run build 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:

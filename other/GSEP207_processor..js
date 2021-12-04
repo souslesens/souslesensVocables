@@ -32,15 +32,20 @@ mappingsMap = {
             {s: "classFamily", p: "rdfs:label", o: "classDescription"},
             {s: "subClass", p: "rdfs:subClassOf", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
             {s: "classFamily", p: "rdf:type", o: "owl:Class"},
+            {s: "subClass", p:"rdf:type", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
 
             {s: "subClass", p: "rdfs:subClassOf", o: "classFamily"},
+            {s: "subClass", p: "rdf:type", o: "owl:Class"},
+            {s: "subClass", p: "rdf:type", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
             {s: "subClass", p: "rdfs:label", o: "subClassDescription"},
-            {s: "subClass",p: "_restriction",  o: "catISO14224",prop: "owl:sameAs"},
+           // {s: "subClass",p: "_restriction",  o: "catISO14224",prop: "owl:sameAs"},
+            {s: "subClass", p:"owl:sameAs",  o: "catISO14224"},
 
 
             {s: "subClass", p: "_restriction", o: "owner",prop: "part14:interestOf"},
             {s: "owner", p: "rdfs:label", o: "owner"},
             {s: "owner", p: "rdf:type", o: "owl:Class"},
+            {s: "owner", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/Discipline"},
             {s: "owner", p: "rdfs:subClassOf", o: "http://w3id.org/readi/z018-rdl/Discipline"},
 
 

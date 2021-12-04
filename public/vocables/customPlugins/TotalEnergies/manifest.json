@@ -1,0 +1,16 @@
+{
+  "uri_icons": {
+    "http://w3id.org/readi/rdl/CFIHOS-30000311": "icons/artefact.png",
+    "http://w3id.org/readi/z018-rdl/Discipline": "icons/discipline.png"
+  },
+  "tools": [
+   {
+      "label": "TE_14224_browser",
+      "noSource": 1,
+      "controller": "TE_14224_browser",
+      "toolDescriptionImg": null
+    }
+
+
+  ]
+}

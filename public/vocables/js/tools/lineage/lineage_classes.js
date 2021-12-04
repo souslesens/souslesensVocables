@@ -16,7 +16,7 @@ var Lineage_classes = (function () {
 
 
         var self = {}
-        self.maxClusterOpeningLength = 200
+        self.showLimit = 200
 
         var graphContext = {}
         self.propertyColors = {}
@@ -37,10 +37,14 @@ var Lineage_classes = (function () {
         self.isLoaded = false
         self.currentExpandLevel = 1
 
+
         self.onLoaded = function () {
             if (self.isLoaded)
                 ; // return;
             self.isLoaded = true
+
+
+
             $("#sourceDivControlPanelDiv").html("")
             Lineage_common.currentSource = null;
             MainController.UI.message("");
@@ -222,6 +226,12 @@ var Lineage_classes = (function () {
         }
 
 
+
+
+
+
+
+
         self.drawTopConcepts = function (source) {
             self.currentExpandLevel = 1
 
@@ -265,6 +275,7 @@ var Lineage_classes = (function () {
                     level: 1,
 
                 }
+
             }
             visjsData.nodes.push(sourceNode)
             if (imports) {
@@ -329,6 +340,10 @@ var Lineage_classes = (function () {
                         $("#waitImg").css("display", "none");
                         return MainController.UI.message("No data found")
 
+                    }
+                    if (result.length > self.showLimit) {
+                       $("#graphDiv").html("<div style='margin:10px'><span style='font-weight: bold;color:saddlebrown'> too may nodes ("+result.length+")  .Cannot display the graph, </span><i>select and graph a node or a property to start graph exploration</i></div>")
+                        return;
                     }
                     var ids = []
                     result.forEach(function (item) {
@@ -486,7 +501,7 @@ var Lineage_classes = (function () {
 
         self.openCluster = function (clusterNode) {
             MainController.UI.message("")
-            if (clusterNode.data.cluster.length > self.maxClusterOpeningLength) {
+            if (clusterNode.data.cluster.length > self.showLimit) {
                 self.listClusterToClipboard(clusterNode)
                 return alert("cluster content copied to clipboard( too large to draw)")
             }
@@ -1014,7 +1029,7 @@ var Lineage_classes = (function () {
                     if (true) {
                         if (!distinctProps[item.prop.value])
                             distinctProps[item.prop.value] = 1
-                        if(!item.prop.value.match(/rdf|owl|skos/)){
+                        if( !item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs")>-1){
                        // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
                             //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
                             if (!existingIds[item.value.value]) {
@@ -1033,6 +1048,7 @@ var Lineage_classes = (function () {
                                         label: item.valueLabel.value,
                                     }
                                 }
+
                                 visjsData.nodes.push(node)
                             }
                             var propLabel
@@ -1087,6 +1103,7 @@ var Lineage_classes = (function () {
                 if (propFilter == "all") {
                     self.graphNodeNeighborhood(nodeData, "incoming")
                     self.drawRestrictions(Lineage_common.currentSource,ids,true)
+
                 }
             })
 
@@ -1141,6 +1158,7 @@ var Lineage_classes = (function () {
                                         id: item.broader1.value
                                     },
                                 }
+
                                 visjsData.nodes.push(node)
                             }
                             //link node to source
@@ -1171,7 +1189,7 @@ var Lineage_classes = (function () {
                         return MainController.UI.message("No data found")
 
                     visjsGraph.network.fit()
-                    return MainController.UI.message("")
+                    return MainController.UI.message("",true)
                 }
             )
 
@@ -1615,7 +1633,7 @@ var Lineage_classes = (function () {
 
         }
 
-        self.drawRestrictions = function (source, classIds, descendants) {
+        self.drawRestrictions = function (source, classIds, descendants,withoutImports) {
 
             if (!classIds) {
                 if (!source)
@@ -1631,7 +1649,7 @@ var Lineage_classes = (function () {
             MainController.UI.message("")
 
             Sparql_OWL.getObjectRestrictions(source, classIds, {
-                withoutImports: 1,
+                withoutImports: withoutImports || self.withoutImports,
                 addInverseRestrictions: 1
             }, function (err, result) {
 
@@ -1652,13 +1670,14 @@ var Lineage_classes = (function () {
                 var color = self.getSourceColor(source)
                 //  console.log(JSON.stringify(result, null, 2))
                 self.currentExpandLevel += 1
+
+
                 result.forEach(function (item) {
 
 
                     if (!existingNodes[item.concept.value]) {
                         existingNodes[item.concept.value] = 1;
                         var color = self.getSourceColor(source)
-                        var shape = Lineage_classes.defaultShape;
                         var size = Lineage_classes.defaultShapeSize
                         visjsData.nodes.push({
                             id: item.concept.value,
@@ -1750,6 +1769,7 @@ var Lineage_classes = (function () {
                     visjsGraph.data.edges.add(visjsData.edges)
                     visjsGraph.network.fit()
                 }
+              CustomPluginController.setGraphNodesIcons()
                 $("#waitImg").css("display", "none");
 
             })
@@ -1888,7 +1908,7 @@ var Lineage_classes = (function () {
 
             if (node.id && node.id.indexOf("_cluster") > 0) {
                 var html = ""
-                if (node.data.cluster.length <= Lineage_classes.maxClusterOpeningLength)
+                if (node.data.cluster.length <= Lineage_classes.showLimit)
                     html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> Open cluster</span>"
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterContent();\"> list cluster content</span>"
                 html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>"

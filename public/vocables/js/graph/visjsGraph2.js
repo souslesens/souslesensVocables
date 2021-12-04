@@ -296,6 +296,7 @@ var visjsGraph = (function () {
         }
         setTimeout(function () {
             self.listSavedGraphs()
+            CustomPluginController.setGraphNodesIcons()
         }, 500)
 
         if (callback) {

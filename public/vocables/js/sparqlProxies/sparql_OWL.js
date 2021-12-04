@@ -22,7 +22,7 @@ var Sparql_OWL = (function () {
                 options = {}
             var fromStr = ""
 
-            options.showLimit = 200
+
 
 
             var strFilterTopConcept;
@@ -63,11 +63,7 @@ var Sparql_OWL = (function () {
                     return callback(err)
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", {type: "http://www.w3.org/2002/07/owl#Class"})
-                if (result.results.bindings.length > options.showLimit) {
-                  if( !confirm("too many nodes .show first nodes ?" +result.results.bindings.length  + "/" + options.showLimit))
-                      return
-                    result.results.bindings = result.results.bindings.slice(0, options.showLimit)
-                }
+
                 return callback(null, result.results.bindings);
             })
         }
@@ -201,7 +197,19 @@ var Sparql_OWL = (function () {
 
             })
         }
+        /**
+         *
+         * limit at 4 ancestorsDepth when imports
+         *
+         * */
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+
+            if(Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length>0){ //limit at 4 ancestorsDepth when imports
+                ancestorsDepth=4
+            }
+
+
+
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
             if (!options)
@@ -629,6 +637,7 @@ var Sparql_OWL = (function () {
                     "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}"
             }
 
+
             if (options.filter) {
                 query += " " + options.filter + " "
             }
@@ -751,6 +760,36 @@ var Sparql_OWL = (function () {
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"])
                 return callback(null, result.results.bindings);
+            })
+        }
+
+
+        self.getNodesTypes=function(source,ids,callback){
+            var slices=common.array.slice(ids,200)
+            var allData=[]
+            async.eachSeries(slices, function(slice, callbackEach){
+
+            var filterStr=Sparql_common.setFilter("concept",slice)
+                var query =
+                    " select  distinct *   WHERE { " +
+                    " ?concept rdf:type ?type. " +
+                    filterStr+
+                    " }"
+
+                query += " limit " + 10000+ " ";
+               var url = self.sparql_url
+                Sparql_proxy.querySPARQL_GET_proxy( url, query,null, null, function (err, result) {
+
+
+                    if (err) {
+                        return callbackEach(err)
+                    }
+                    allData=allData.concat(result.results.bindings)
+                    callbackEach()
+                })
+
+            },function(err){
+                return callback(err,allData)
             })
         }
 

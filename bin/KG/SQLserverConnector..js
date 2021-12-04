@@ -95,15 +95,16 @@ var SQLserverConnector = {
 
     getData: function (dbName, query, callback) {
         var connection = SQLserverConnector.getConnection();
-        if (!connection) callback("no connection object");
+        if (!connection)
+           return callback("no connection object");
         connection.database = dbName;
         sql.connect(connection, (err) => {
             if (err) return console.log(err); // ... error checks
 
             // Query
             //console.log(query)
-         //   new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
-            new sql.Request().query(query, (err, result) => {
+            new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
+          //  new sql.Request().query(query, (err, result) => {
                 if (err) return callback(err);
 
                 return callback(null, result.recordset);

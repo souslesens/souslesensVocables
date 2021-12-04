@@ -159,6 +159,8 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
     }
 });
 
+
+
 router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
@@ -409,6 +411,14 @@ router.post(
             res.contentType("text/plain");
             res.status(200).send(result);
         });
+    }),
+    router.get("/getJsonFile",ensureLoggedIn(), function (req, res, next) {
+      //  if (req.body.filePath){}
+        var filePath = req.query.filePath;
+        var realPath = path.join(__dirname, "../public/vocables/"+filePath);
+        var data=""+fs.readFileSync(realPath)
+        var json=JSON.parse(data)
+        processResponse(res, null, json);
     })
 );
 

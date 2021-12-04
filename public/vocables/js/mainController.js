@@ -142,8 +142,26 @@ var MainController = (function () {
                     if (Config.profiles[group])
                         return Config.currentProfile = Config.profiles[group]
                 })
-                MainController.UI.configureUI();
-                MainController.UI.showToolsList("toolsTreeDiv")
+
+
+                    async.series([
+                        function(callbackSeries) {
+                        if(!Config.currentProfile.customPlugins)
+                            return callbackSeries();
+                            CustomPluginController.init(Config.currentProfile.customPlugins, function (err, result) {
+                                callbackSeries()
+                            })
+                        },
+                        function(callbackSeries) {
+                            MainController.UI.showToolsList("toolsTreeDiv")
+                            callbackSeries()
+                        }
+
+                    ],function(err){
+
+                        MainController.UI.configureUI();
+                    })
+
             })
         })
 

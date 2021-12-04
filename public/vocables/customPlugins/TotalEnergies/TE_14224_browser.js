@@ -7,18 +7,110 @@ var TE_14224_browser = (function () {
 
         }
         self.onLoaded = function () {
+
             $("#actionDiv").html("")
-            $("#actionDivContolPanelDiv").load("tools_private/TotalEnergies/snippets/leftPanel.html")
+            $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/snippets/leftPanel.html")
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
-            $("#rightPanelDiv").load("tools_private/TotalEnergies/snippets/rightPanel.html")
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html")
 
 
             $("#graphDiv").html("")
             // $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
             $("#accordion").accordion("option", {active: 2});
 
+
             $("#sourcesTreeDiv").html("");
+
+           var table="girassol_fl"
+            self.getFunctionalLocations(table)
+
+        }
+        self.getFunctionalLocations=function(table){
+            var dataSource= {
+                "type": "sql.sqlserver",
+                "connection": "_default",
+                "dbName": "data14224",
+                "table_schema": "dbo"
+            }
+
+
+
+
+           var  limit =100000
+
+               var sqlQuery =  " select distinct functionalLocationCode from " + table ;
+
+
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: {
+                    KGquery: 1,
+                    getData: 1,
+                    dataSource: JSON.stringify(dataSource),
+                    sqlQuery: sqlQuery
+                },
+                dataType: "json",
+
+                success: function (data, textStatus, jqXHR) {
+                    alert ("aaa")
+debugger
+
+                    data=data.slice(3000)
+                  var x=data
+                    var jstreeData=[]
+
+                    return;
+                    data.forEach(function(item){
+                        var array=item.functionalLocationCode.split("/")
+                        var previousId;
+                        var all
+                        for(var i=0;1<3;i++){
+                            if(i=0)
+                            var parent="#"
+                            else
+                                parent=previousId
+                            var id=common.getRandomHexaId(10)
+                            previousId=id
+
+                            jstreeData.push({
+                                id:id,
+                                text:array[i],
+                                parent:parent
+
+
+                            })
+
+
+                        }
+
+
+                    })
+
+                   common.jstree.loadJsTree("TE_114224_browser_rightPanelTreeDiv",jstreeData);
+
+
+
+
+
+
+                }
+
+                , error: function (err) {
+                    var x=err
+                    alert(err)
+
+
+                }
+            })
+        }
+
+
+
+
+
+        self.xxx=function(){
             setTimeout(function () {
                     var levels = [
 
@@ -46,18 +138,18 @@ var TE_14224_browser = (function () {
 
 
                     ]
-                var index=0
+                    var index=0
                     var htmlTotal=""
-                var treesData={
+                    var treesData={
 
-                }
+                    }
                     async.eachSeries(superClasses, function (superClass, callbackEach) {
 
                         Sparql_OWL.getNodeChildren(self.mainSource,null,[superClass.uri],1,null, function(err, result){
-                       if(err)
-                           return callbackEach()
+                            if(err)
+                                return callbackEach()
 
-                        var html="<div class='TE_114224_browser_leftPanelClassDiv'>"
+                            var html="<div class='TE_114224_browser_leftPanelClassDiv'>"
                             html+="<div  class='TE_114224_browser_title'>"+superClass.label+"</div>"
                             html+="<div class='TE_114224_browser_leftPanelTreeContainer'>"
                             html+="<div id='TE_114224_browser_tree_"+superClass.label+"'>"
@@ -65,10 +157,10 @@ var TE_14224_browser = (function () {
                             html+="</div>"
                             html+="</div>"
                             htmlTotal+=html;
-                       var jstreeData=[]
+                            var jstreeData=[]
                             result.forEach(function(item){
                                 jstreeData.push({
-                                   id: item.child1.value,
+                                    id: item.child1.value,
                                     text: item.child1Label.value,
                                     parent:"#",
                                     data:{
@@ -81,13 +173,13 @@ var TE_14224_browser = (function () {
                             treesData["TE_114224_browser_tree_"+superClass.label] =jstreeData
 
 
-                        if(++ index>5)
-                           return callbackEach("stop")
-                        callbackEach()
+                            if(++ index>5)
+                                return callbackEach("stop")
+                            callbackEach()
                         })
                     }, function (err) {
                         if (err)
-                          ;//  return alert(err)
+                            ;//  return alert(err)
                         $("#TE_114224_browser_filtersContainerDiv").html(htmlTotal)
                         setTimeout(function(){
 
@@ -104,6 +196,7 @@ var TE_14224_browser = (function () {
 
                 }
                 , 200)
+
         }
 
         return self;

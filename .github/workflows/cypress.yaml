@@ -26,3 +26,5 @@ jobs:
           wait-on: 'http://localhost:3010'
           wait-on-timeout: 120
           config-file: 'cypress.json'
+          headless: true
+          browser: chrome

@@ -8,6 +8,7 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
       - name: Checkout
@@ -22,14 +23,14 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
-          DEBUG: '@cypress/github-action'
+          DEBUG: cypress:*
         with:
           build: npm start
-          wait-on: 'http://localhost:3010'
+          wait-on: "http://localhost:3010"
           wait-on-timeout: 120
-          config-file: 'cypress.json'
+          config-file: cypress.json
           headless: true
           browser: chrome
           spec: |
             cypress/integration/login.spec.js
-          runTests: false 
+          runTests: false

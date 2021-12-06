@@ -23,9 +23,9 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         env:
-          DEBUG: cypress:*
+          DEBUG: 'cypress:*'
         with:
-          build: npm start
+          start: npm start
           wait-on: "http://localhost:3010"
           wait-on-timeout: 120
           config-file: cypress.json

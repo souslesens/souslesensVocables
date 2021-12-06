@@ -3,7 +3,7 @@
   "version": "0.3.2",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "DEBUG=express:* node ./bin/www",
     "build:ci": "cd mainapp && npm run build",
     "dev": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
     "format": "prettier -w --tab-width=4 --print-width=200 *.js {bin,data,other,routes,views,mainapp}/**/*.js",

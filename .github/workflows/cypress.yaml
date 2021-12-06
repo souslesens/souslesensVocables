@@ -23,7 +23,6 @@ jobs:
         uses: cypress-io/github-action@v2
         env:
           DEBUG: '@cypress/github-action'
-          DEBUG: 'cypress:*'
         with:
           build: npm start
           wait-on: 'http://localhost:3010'

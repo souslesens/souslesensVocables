@@ -21,6 +21,9 @@ jobs:
         run: node scripts/init_configs.js 
       - name: Cypress run
         uses: cypress-io/github-action@v2
+        env:
+          DEBUG: '@cypress/github-action'
+          DEBUG: 'cypress:*'
         with:
           build: npm start
           wait-on: 'http://localhost:3010'
@@ -30,8 +33,4 @@ jobs:
           browser: chrome
           spec: |
             cypress/integration/login.spec.js
-<<<<<<< HEAD
-        env:
-=======
->>>>>>> c36f8352bee1b2ea76f53170686b41055373293c
-          DEBUG: '@cypress/github-action'
+       

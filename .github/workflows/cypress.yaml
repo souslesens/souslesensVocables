@@ -16,7 +16,9 @@ jobs:
       # and run all Cypress tests
       - name: Build mainapp
         working-directory: ./mainapp
-        run: node --version & npm ci && npm run build 
+        run: node & npm ci && npm run build
+      - name: Generates config
+        run: node scripts/init_configs.js 
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:

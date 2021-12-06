@@ -16,6 +16,7 @@ mappingsMap = {
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
             {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS"},
             {s: "id", p: "rdfs:label", o: "label2"},
 
         ],
@@ -33,6 +34,7 @@ mappingsMap = {
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
             {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdf:type", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
             {s: "id", p: "rdfs:label", o: "label2"},
             {s: "id", p: "_restriction", o: "system", prop: "part14:hasFunctionalPart"},
 
@@ -50,6 +52,7 @@ mappingsMap = {
         },
         tripleModels: [
             {s: "id", p: "rdfs:subClassOf", o: "superClass"},
+            {s: "id", p: "rdf:type", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
             {s: "id", p: "skos:prefLabel", o: "label1"},
             {s: "id", p: "rdfs:label", o: "label2"},
             //  {s: "id", p:"_restriction" , o: "system",prop:"part14:functionalPartOf"},
@@ -69,6 +72,7 @@ mappingsMap = {
         tripleModels: [
 
             {s: "id", p: "skos:prefLabel", o: "label1"},
+            {s: "id", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/FunctionalObject"},
             {s: "id", p: "rdfs:label", o: "label2"},
             {s: "id", p: "_restriction", o: "superClass", prop: "part14:hasFunctionalPart"},
 
@@ -89,6 +93,7 @@ mappingsMap = {
 
          {s: "rDLLibrary", p: "rdfs:label", o: "rDLDescriptionEN"},
              {s: "rDLLibrary", p: "skos:prefLabel", o: "rDLLibrary"},
+            {s: "rDLLibrary", p: "rdf:type", o: "http://w3id.org/readi/rdl/Z101001232"},
               {s: "rDLLibrary", p: "_restriction", o: "rDLParent", prop: "part14:concretizes"},
               {s: "rDLLibrary", p: "_restriction", o: "cLASSLink", prop: "part14:assembledPartOf"},
 
@@ -225,7 +230,7 @@ var graphUri = "http://data.total.com/resource/tsf/iso_14224/";
 //processor.getDescription("D:\\NLP\\ontologies\\14224\\RDL_Structure_14224_import.txt");
 if (true) {
     if (mappings.length == 1)
-        return processor.processSubClasses(mappings, graphUri);
+        return processor.processSubClasses(mappings, graphUri,sparqlServerUrl);
     var triples = [
         {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'"},
         {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdf:type", o: "owl:Class"},
@@ -274,16 +279,16 @@ if (true) {
 
 
     ]
-
     processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
         if (err)
             return console.log(err);
         processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, result) {
             if (err)
                 return console.log(err);
-            processor.processSubClasses(mappings, graphUri);
+            processor.processSubClasses(mappings, graphUri,sparqlServerUrl);
         })
     })
+
 
 }
 

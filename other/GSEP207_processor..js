@@ -25,7 +25,7 @@ mappingsMap = {
         lookups: [],
         transform: {
             catISO14224: function (value) {
-                return "http://data.total.com/resource/tsf/iso_14224/" + value;
+                return "http://data.total.com/resource/tsf/iso_14224/" + value.substring(3);
             }
         },
         tripleModels: [
@@ -40,7 +40,7 @@ mappingsMap = {
             {s: "subClass", p: "rdfs:label", o: "subClassDescription"},
            // {s: "subClass",p: "_restriction",  o: "catISO14224",prop: "owl:sameAs"},
             {s: "subClass", p:"owl:sameAs",  o: "catISO14224"},
-
+            {s: "catISO14224", p:"rdf:type",  o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
 
             {s: "subClass", p: "_restriction", o: "owner",prop: "part14:interestOf"},
             {s: "owner", p: "rdfs:label", o: "owner"},

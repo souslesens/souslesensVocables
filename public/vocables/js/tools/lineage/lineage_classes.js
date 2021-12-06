@@ -44,7 +44,6 @@ var Lineage_classes = (function () {
             self.isLoaded = true
 
 
-
             $("#sourceDivControlPanelDiv").html("")
             Lineage_common.currentSource = null;
             MainController.UI.message("");
@@ -141,13 +140,39 @@ var Lineage_classes = (function () {
                 var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
                 $("#lineage_sourceDescriptionDiv").html(str)
                 self.registerSourceImports(sourceLabel)
-              if(!self.mainSource) {
-                  self.initUI();
-                  Lineage_relations.init()
-              }
+                if (!self.mainSource) {
+                    self.initUI();
+                    Lineage_relations.init()
+                }
 
 
             })
+        }
+
+
+        self.onGraphOrTreeNodeClick = function (node, nodeEvent,options) {
+            if(!options)
+                options={}
+
+            if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
+                if(options.callee=="Graph")
+                    Lineage_classes.graphActions.graphNodeNeighborhood("all")
+                else  if(options.callee=="Tree")
+                    Lineage_classes.addArbitraryNodeToGraph(node.data)
+            } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
+                Lineage_blend.addNodeToAssociationNode(node, "source")
+            } else if (!nodeEvent.ctrlKey && nodeEvent.altKey) {
+                Lineage_blend.addNodeToAssociationNode(node, "target")
+            } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
+                Lineage_blend.deleteRestriction(node)
+            } else if (nodeEvent.ctrlKey) {
+                SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+            } else
+                return nodeEvent;
+
+            return null;
+
+
         }
 
 
@@ -193,21 +218,23 @@ var Lineage_classes = (function () {
         }
 
 
+
         self.selectTreeNodeFn = function (event, propertiesMap) {
             SourceBrowser.currentTreeNode = propertiesMap.node;
             self.currentTreeNode = propertiesMap.node;
             var data = propertiesMap.node.data;
 
-            if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
-                return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
+            if( self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event,{callee:"Tree"})!=null){
+                if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
+                    return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
+                }else
+                    return SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
             }
-            if (propertiesMap.event.altKey) {
-                Lineage_blend.addNodeToAssociationNode(self.currentTreeNode, "target")
-                //   self.addArbitraryNodeToGraph(data)
-            }
-            if (propertiesMap.event.ctrlKey)
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
-            SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
+            setTimeout(function(){
+                SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
+            },200)
+
+
         }
         self.initUI = function () {
             MainController.UI.message("")
@@ -224,12 +251,6 @@ var Lineage_classes = (function () {
             if (nodes && nodes.length > 0)
                 visjsGraph.data.nodes.remove(nodes)
         }
-
-
-
-
-
-
 
 
         self.drawTopConcepts = function (source) {
@@ -342,7 +363,7 @@ var Lineage_classes = (function () {
 
                     }
                     if (result.length > self.showLimit) {
-                       $("#graphDiv").html("<div style='margin:10px'><span style='font-weight: bold;color:saddlebrown'> too may nodes ("+result.length+")  .Cannot display the graph, </span><i>select and graph a node or a property to start graph exploration</i></div>")
+                        $("#graphDiv").html("<div style='margin:10px'><span style='font-weight: bold;color:saddlebrown'> too may nodes (" + result.length + ")  .Cannot display the graph, </span><i>select and graph a node or a property to start graph exploration</i></div>")
                         return;
                     }
                     var ids = []
@@ -984,7 +1005,7 @@ var Lineage_classes = (function () {
                 query += " ?value ?prop ?ids.  ";
             var ids = [nodeData.id]
 
-        //   ids= visjsGraph.getNodeDescendantIds(nodeData.id, true)
+            //   ids= visjsGraph.getNodeDescendantIds(nodeData.id, true)
             var filter = Sparql_common.setFilter("ids", ids)
             query += filter
 
@@ -1014,7 +1035,7 @@ var Lineage_classes = (function () {
                         size: Lineage_classes.defaultShapeSize,
                         color: Lineage_classes.getSourceColor(Lineage_common.currentSource, nodeData.id),
                         font: {multi: true, size: 10},
-                        level:5,
+                        level: 5,
                         data: {
                             source: Lineage_common.currentSource,
                             id: nodeData.id,
@@ -1029,8 +1050,8 @@ var Lineage_classes = (function () {
                     if (true) {
                         if (!distinctProps[item.prop.value])
                             distinctProps[item.prop.value] = 1
-                        if( !item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs")>-1){
-                       // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
+                        if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1) {
+                            // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
                             //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
                             if (!existingIds[item.value.value]) {
                                 existingIds[item.value.value] = 1
@@ -1041,7 +1062,7 @@ var Lineage_classes = (function () {
                                     color: Lineage_classes.getSourceColor(Lineage_common.currentSource, item.value.value),
                                     size: Lineage_classes.defaultShapeSize,
                                     font: {multi: true, size: 10},
-                                    level:5,
+                                    level: 5,
                                     data: {
                                         source: Lineage_common.currentSource,
                                         id: item.value.value,
@@ -1102,7 +1123,7 @@ var Lineage_classes = (function () {
                 }
                 if (propFilter == "all") {
                     self.graphNodeNeighborhood(nodeData, "incoming")
-                    self.drawRestrictions(Lineage_common.currentSource,ids,true)
+                    self.drawRestrictions(Lineage_common.currentSource, ids, true)
 
                 }
             })
@@ -1189,7 +1210,7 @@ var Lineage_classes = (function () {
                         return MainController.UI.message("No data found")
 
                     visjsGraph.network.fit()
-                    return MainController.UI.message("",true)
+                    return MainController.UI.message("", true)
                 }
             )
 
@@ -1633,7 +1654,7 @@ var Lineage_classes = (function () {
 
         }
 
-        self.drawRestrictions = function (source, classIds, descendants,withoutImports) {
+        self.drawRestrictions = function (source, classIds, descendants, withoutImports) {
 
             if (!classIds) {
                 if (!source)
@@ -1769,7 +1790,7 @@ var Lineage_classes = (function () {
                     visjsGraph.data.edges.add(visjsData.edges)
                     visjsGraph.network.fit()
                 }
-              CustomPluginController.setGraphNodesIcons()
+                CustomPluginController.setGraphNodesIcons()
                 $("#waitImg").css("display", "none");
 
             })
@@ -2130,28 +2151,31 @@ var Lineage_classes = (function () {
 
                 self.currentGraphNode = node;
 
-                if (options.ctrlKey) {
-                    if (options.shiftKey) {
-                        Lineage_classes.graphActions.graphNodeNeighborhood("all")
-                    } else {
-                        SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
-                    }
-                }
-                if (options && options.altKey) {
-                    if (node.fromNode && node.toNode && node.data) {//edge
-                        Lineage_blend.deleteRestriction(node)
+              self.onGraphOrTreeNodeClick(node,options,{callee:"Graph"})
 
-                    } else {//node
-                        Lineage_blend.addNodeToAssociationNode(node, "source")
-                        return Clipboard.copy({
-                            type: "lineage_node",
-                            source: node.data.source,
-                            id: node.id,
-                            label: node.label,
-                            initialShape: node.shape
-                        }, "_visjsNode", options)
-                    }
-                }
+              /*  if (options.ctrlKey && options.shiftKey) {
+                    Lineage_classes.graphActions.graphNodeNeighborhood("all")
+                } else if (options.ctrlKey && options.altKey) {
+                    Lineage_blend.addNodeToAssociationNode(node, "source")
+                } else if (!options.ctrlKey && options.altKey) {
+                    Lineage_blend.addNodeToAssociationNode(node, "target")
+                } else if (options.shiftKey && options.altKey) {
+                    Lineage_blend.deleteRestriction(node)
+                } else if (options.ctrlKey) {
+
+                  SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+
+                }*/
+
+                /*  return Clipboard.copy({
+                      type: "lineage_node",
+                      source: node.data.source,
+                      id: node.id,
+                      label: node.label,
+                      initialShape: node.shape
+                  }, "_visjsNode", options)
+              }*
+          }*/
                 if (options.dbleClick) {
                     Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],)
                 }

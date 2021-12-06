@@ -769,12 +769,13 @@ var Sparql_OWL = (function () {
             var allData=[]
             async.eachSeries(slices, function(slice, callbackEach){
 
+                var fromStr=Sparql_common.getFromStr(source,false,false)
             var filterStr=Sparql_common.setFilter("concept",slice)
                 var query =
-                    " select  distinct *   WHERE { " +
+                    " select  distinct *   WHERE { GRAPH ?g{ " +
                     " ?concept rdf:type ?type. " +
                     filterStr+
-                    " }"
+                    " }}"
 
                 query += " limit " + 10000+ " ";
                var url = self.sparql_url

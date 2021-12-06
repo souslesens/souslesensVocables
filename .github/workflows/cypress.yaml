@@ -22,8 +22,6 @@ jobs:
         run: node scripts/init_configs.js 
       - name: Cypress run
         uses: cypress-io/github-action@v2
-        env:
-          DEBUG: 'cypress:*'
         with:
           start: npm start
           wait-on: "http://localhost:3010"

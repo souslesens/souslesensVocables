@@ -28,3 +28,5 @@ jobs:
           config-file: 'cypress.json'
           headless: true
           browser: chrome
+          spec: |
+            cypress/integration/login.spec.js

@@ -32,4 +32,4 @@ jobs:
           browser: chrome
           spec: |
             cypress/integration/login.spec.js
-       
+          runTests: false 

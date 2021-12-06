@@ -30,5 +30,8 @@ jobs:
           browser: chrome
           spec: |
             cypress/integration/login.spec.js
+<<<<<<< HEAD
         env:
+=======
+>>>>>>> c36f8352bee1b2ea76f53170686b41055373293c
           DEBUG: '@cypress/github-action'

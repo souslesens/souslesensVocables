@@ -56,7 +56,8 @@ var CustomPluginController = (function () {
             return;
         //  var nodes=visjsGraph.data.nodes.get();
         var newNodes = []
-        var path = self.rootDir + self.pluginDir + "/"
+        self.path = self.rootDir + self.pluginDir + "/"
+
         var nodeIds = visjsGraph.data.nodes.getIds();
         /*     nodeIds.forEach(function(nodeId){
                  for (var key in  Lineage_classes.sourcesGraphUriMap){
@@ -87,7 +88,7 @@ var CustomPluginController = (function () {
 
 
                     if (self.typeUrisIcons[item.type.value]) {
-                        newNode.image = path + self.typeUrisIcons[item.type.value];
+                        newNode.image = self.path + self.typeUrisIcons[item.type.value];
                         newNode.shape = "circularImage";
                        // newNode.shape = "image";
                         newNode.size = 10;

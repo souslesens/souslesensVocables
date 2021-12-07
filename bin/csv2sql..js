@@ -1,8 +1,6 @@
 //const writer = require('csv-to-sql-script');
 
-var input = 'D:\\NLP\\ontologies\\14224\\girassolExtract.csv';
-var input = 'D:\\NLP\\ontologies\\14224\\girassol.csv';
-const output = input+'.sql';
+
 const fs=require('fs')
 var csvCrawler = require("../bin/_csvCrawler.");
 const util=require("./util.")
@@ -32,8 +30,13 @@ Csv2Sql= {
             result.headers.forEach(function (header) {
                 if (header != "")
                     if (!fields[header]) {
+                        if(header=="catalogProfile")
+                            var x=3
                         result.data.forEach(function (slice) {
+
                             slice.forEach(function (line) {
+                                if (fields[header])
+                                    return
                             if (util.isFloat(line[header]))
                                 fields[header] = {type: "float"};
                             else if (util.isInt(line[header]))
@@ -65,6 +68,7 @@ Csv2Sql= {
 var sqlSrt="CREATE TABLE "+tableName+" ("
             var length=256//(fields[header].length+5)
             result.headers.forEach(function(header) {
+
                 if(header=="")
                     return
                 sqlSrt +=fields[header].colName
@@ -130,8 +134,13 @@ callback(null,{createSql:sqlSrt,fieldsDecription:fields})
                         if (headerIndex > 0)
                             insertStr += ","
                         var value = line[header];
+                        if(!value)
+                            value=''
                         if (fields[header].type == "string")
                             value = "'" + value.replace(/'/g,"_") + "'"
+                        if(!value)
+                            value=null
+
                         insertStr += value
                     })
                     insertStr += "),"
@@ -159,8 +168,16 @@ callback(null,{createSql:sqlSrt,fieldsDecription:fields})
     }
 
 }
+var input = 'D:\\NLP\\ontologies\\14224\\girassolExtract.csv';
+var input = 'D:\\NLP\\ontologies\\14224\\data\\girassol.csv';
 
-var tableName="xxx"
+var tableName="girassol"
+
+
+var input = 'D:\\NLP\\ontologies\\14224\\data\\absheron.txt';
+var tableName="absheron"
+
+
 Csv2Sql.getColumns(input,tableName,function(err,result){
 
     var createSql=result.createSql

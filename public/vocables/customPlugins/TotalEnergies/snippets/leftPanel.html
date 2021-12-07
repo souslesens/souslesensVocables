@@ -23,21 +23,33 @@
 
 <div style="width:400px">
     14224 Browser
+    <div>
+        Asset <select onchange="TE_14224_browser.loadAsset($(this).val())">
+        <option></option>
+        <option>girassol</option>
+        <option>absheron</option>
+    </select>
 
-    <div  id="TE_114224_browser_filtersContainerDiv" style="display: flex;flex-direction: column; ">
+    </div>
+    <div id="TE_114224_browser_assetPanelTreeContainer">
+        <div id="TE_114224_browser_assetPanelTreeDiv"></div>
+    </div>
+ 
+
+  <!--  <div  id="TE_114224_browser_filtersContainerDiv" style="display: flex;flex-direction: column; ">
 
 
 
-       <!-- <div>
+     <div>
             Level <select id="TE_114224_browser_levelsSelect" size="8">
         </select>
         </div>
         <div>
             <input id="TE_114224_browser_wordInput" style="width: 300px"><button onclick="TE_14224_browser.Search()"></button>
-        </div>-->
+        </div>
 
 
-    </div>
+    </div>-->
 
 
 </div>

@@ -151,6 +151,8 @@ var Lineage_classes = (function () {
 
 
         self.onGraphOrTreeNodeClick = function (node, nodeEvent,options) {
+            if(!Config.sources[node.data.source])
+                return;
             if(!options)
                 options={}
 
@@ -1200,8 +1202,13 @@ var Lineage_classes = (function () {
 
 
                     })
+
+                if (visjsGraph.data && visjsGraph.data.nodes) {
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
+                } else {
+                    Lineage_classes.drawNewGraph(visjsData)
+                }
 
 
                 }, function (err) {

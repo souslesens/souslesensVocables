@@ -161,6 +161,14 @@ var Config = (function () {
     }
 
 
+    self.tools["TE_14224_browser"] = {
+        "label": "TE_14224_browser",
+        "noSource": 1,
+        "controller": TE_14224_browser,
+        "toolDescriptionImg": null
+    }
+
+
 
     return self;
 

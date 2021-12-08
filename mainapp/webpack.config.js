@@ -1,7 +1,8 @@
 const path = require("path");
-const isProd = process.env.NODE_ENV === "production";
+const mode = process.env.NODE_ENV ? process.env.NODE_ENV : 'production'
 
 module.exports = {
+    mode: mode,
     entry: {
         mainapp: "./src/index.tsx",
     },
@@ -22,11 +23,12 @@ module.exports = {
                 test: /\.(ttf|eot|svg|woff(2)?|png|jpe?g|gif)(\?[a-z0-9=&.]+)?$/,
                 loader: "file-loader",
             },
-            { test: /\.css$/, loader: ["style-loader", "css-loader"] },
+            { test: /\.css$/, loader: "css-loader" },
             { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
         ],
     },
     devServer: {
+        inline: false,
         contentBase: "build",
         compress: true,
         historyApiFallback: {

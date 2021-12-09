@@ -41,9 +41,27 @@ if (!config.disableAuth) {
                       authServerURL: config.keycloak.authServerURL,
                   }
                 : {};
+
+        // get user from json to get groups
+        const usersLocation = path.join(__dirname, "../config/users/users.json");
+        let users = JSON.parse("" + fs.readFileSync(usersLocation));
+        let findUser = Object.keys(users)
+            .map(function (key, index) {
+                return {
+                    id: users[key].id,
+                    login: users[key].login,
+                    groups: users[key].groups,
+                    source: users[key].source,
+                };
+            })
+            .find((user) => user.login == req.user.login);
+
         res.send({
             logged: req.user ? true : false,
-            user: req.user,
+            user: {
+                login: findUser.login,
+                groups: findUser.groups,
+            },
             authSource: config.auth,
             auth: auth,
         });

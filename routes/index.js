@@ -60,7 +60,7 @@ if (!config.disableAuth) {
             logged: req.user ? true : false,
             user: {
                 login: findUser.login,
-                groups: findUser.groups
+                groups: findUser.groups,
             },
             authSource: config.auth,
             auth: auth,

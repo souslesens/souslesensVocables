@@ -149,17 +149,14 @@ var csvCrawler = {
                     })
 
                     .on("data", function (data) {
-
-                        var emptyLine=true
-                           for (var i = 0; i < headers.length; i++) {
-                           if (data[headers[i]]) {
-                               emptyLine = false
-                               break;
-                           }
-
-                       }
-                           if(emptyLine)
-                               return;
+                        var emptyLine = true;
+                        for (var i = 0; i < headers.length; i++) {
+                            if (data[headers[i]]) {
+                                emptyLine = false;
+                                break;
+                            }
+                        }
+                        if (emptyLine) return;
 
                         jsonDataFetch.push(data);
 

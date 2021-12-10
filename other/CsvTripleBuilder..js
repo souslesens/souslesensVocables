@@ -8,38 +8,33 @@ var UML2OWLparser = require("./UML2OWLparser");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
-
 var processor = {
     readCsv: function (filePath, callback) {
-        csvCrawler.readCsv({filePath: filePath}, 500000, function (err, result) {
-            if (err)
-                return callback(err);
+        csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
+            if (err) return callback(err);
             var data = result.data;
             var headers = result.headers;
-            console.log(filePath)
-            return callback(null, {headers: headers, data: data});
+            console.log(filePath);
+            return callback(null, { headers: headers, data: data });
         });
     },
 
     getDescription: function (filePath) {
         var descriptionMap = {};
 
-
         processor.readCsv(filePath, function (err, result) {
-                descriptionMap = {filePath: filePath, headers: result.headers, length: result.data[0].length};
+            descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
 
-                fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
-                //  console.log(JSON.stringify(descriptionMap,null,2))
-            }
-        );
+            fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
+            //  console.log(JSON.stringify(descriptionMap,null,2))
+        });
     },
 
-    processSubClasses: function (mappings, graphUri,sparqlServerUrl) {
+    processSubClasses: function (mappings, graphUri, sparqlServerUrl) {
         //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
 
-        var existingNodes = {}
+        var existingNodes = {};
         var propertiesTypeMap = {
-
             "rdfs:label": "string",
             "skos:definition": "string",
             "skos:notation": "string",
@@ -47,7 +42,6 @@ var processor = {
             "skos:prefLabel": "string",
             //   "cfihos:status": "string",
             "iso14224:priority": "string",
-
 
             "rdf:type": "uri",
             "part14:functionalPartOf": "uri",
@@ -59,8 +53,7 @@ var processor = {
             "req:REQ_0021": "uri",
             "req:REQ_0022": "uri",
             "rdfs:subClassOf": "uri",
-            "_restriction": "uri",
-
+            _restriction: "uri",
         };
 
         async.eachSeries(
@@ -75,8 +68,7 @@ var processor = {
                     [
                         // load Lookups
                         function (callbackSeries) {
-                            if (mapping.lookups.length == 0)
-                                return callbackSeries()
+                            if (mapping.lookups.length == 0) return callbackSeries();
 
                             async.eachSeries(
                                 mapping.lookups,
@@ -85,8 +77,7 @@ var processor = {
                                     var lookupFilePath = rootDir + path.sep + lookupFileName;
 
                                     processor.readCsv(lookupFilePath, function (err, result) {
-                                        if (err)
-                                            return callbackEachLookup(err);
+                                        if (err) return callbackEachLookup(err);
                                         var lookupLines = result.data[0];
                                         lookUpMap[lookup.name] = {};
                                         lookupLines.forEach(function (line, index) {
@@ -122,11 +113,10 @@ var processor = {
                             }
 
                             processor.readCsv(filePath, function (err, result) {
-                                if (err)
-                                    return callbackSeries(err);
+                                if (err) return callbackSeries(err);
 
                                 var lines = result.data[0];
-                                var emptyMappings=0
+                                var emptyMappings = 0;
                                 lines.forEach(function (line, indexLine) {
                                     if (false && indexLine > 2) return;
                                     var hasDirectSuperClass = false;
@@ -137,42 +127,29 @@ var processor = {
                                         subjectStr = null;
                                         objectStr = null;
 
-                                        if (item.s_type == "fixed")
-                                            subjectStr = item.s;
-                                       else if (item.s.match(/.+:.+|http.+/))
-                                            subjectStr = item.s;
-                                        else
-                                            subjectStr = line[item.s];
-                                        if (item.o_type == "fixed")
-                                            objectStr = item.o;
-                                       else if (item.o.match(/.+:.+|http.+/))
-                                            objectStr = item.o;
-                                        else
-                                            objectStr = line[item.o];
+                                        if (item.s_type == "fixed") subjectStr = item.s;
+                                        else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
+                                        else subjectStr = line[item.s];
+                                        if (item.o_type == "fixed") objectStr = item.o;
+                                        else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
+                                        else objectStr = line[item.o];
 
                                         if (item.p == "rdfs:subClassOf") hasDirectSuperClass = true;
 
+                                        if (!subjectStr || !objectStr) return;
 
-                                        if (!subjectStr ||!objectStr)
-                                            return;
-
-                                            if (item.lookup_S) {
-                                                subjectStr = getLookupValue(item.lookup_S, subjectStr);
-                                                if (!subjectStr) {
-                                                    // console.log(line[item.s])
-                                                    return;
-                                                }
+                                        if (item.lookup_S) {
+                                            subjectStr = getLookupValue(item.lookup_S, subjectStr);
+                                            if (!subjectStr) {
+                                                // console.log(line[item.s])
+                                                return;
                                             }
-                                        if (subjectStr.indexOf("http") == 0)
-                                            subjectStr = "<" + subjectStr + ">";
-                                        else if (subjectStr.indexOf(":") > -1)
-                                            subjectStr = subjectStr
-                                        else
-                                            subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        }
+                                        if (subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
+                                        else if (subjectStr.indexOf(":") > -1) subjectStr = subjectStr;
+                                        else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
 
-
-                                        if (!objectStr)
-                                            objectStr = line[item.o];
+                                        if (!objectStr) objectStr = line[item.o];
 
                                         if (item.lookup_O) {
                                             objectStr = getLookupValue(item.lookup_O, objectStr);
@@ -182,29 +159,22 @@ var processor = {
                                             }
                                         }
 
-                                        if (mapping.transform && mapping.transform[item.o])
-                                            objectStr = mapping.transform[item.o](objectStr)
+                                        if (mapping.transform && mapping.transform[item.o]) objectStr = mapping.transform[item.o](objectStr);
 
                                         if (propertiesTypeMap[item.p] == "string") {
-
                                             objectStr = "'" + util.formatStringForTriple(objectStr) + "'";
-                                        } else if (true ||  propertiesTypeMap[item.p] == "uri") {
-                                            if (objectStr.indexOf("http") == 0)
-                                                objectStr = "<" + objectStr + ">";
-                                            else if (objectStr.indexOf(":") > -1)
-                                                objectStr = objectStr
-                                            else
-                                                objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                        } else if (true || propertiesTypeMap[item.p] == "uri") {
+                                            if (objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
+                                            else if (objectStr.indexOf(":") > -1) objectStr = objectStr;
+                                            else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                         }
                                         if (item.p == "_restriction") {
-
                                             if (!item.prop) {
                                                 return callbackSeries("no prop defined for restriction");
                                             }
                                             var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                             var prop = item.prop;
-                                            if (prop.indexOf("http") == 0)
-                                                prop = "<" + item.prop + ">"
+                                            if (prop.indexOf("http") == 0) prop = "<" + item.prop + ">";
                                             triples.push({
                                                 s: blankNode,
                                                 p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -229,7 +199,6 @@ var processor = {
                                             return;
                                         }
                                         if (subjectStr && objectStr) {
-
                                             // return console.log("missing type " + item.p)
                                             if (!existingNodes[subjectStr + "_" + objectStr]) {
                                                 triples.push({
@@ -239,14 +208,12 @@ var processor = {
                                                 });
                                             }
                                         }
-
                                     });
-if(! subjectStr  ||   !objectStr ) {
-   console.log(subjectStr + "  " + objectStr)
-
-}
-                                    if ( subjectStr && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
-                                        existingNodes[subjectStr] = 1
+                                    if (!subjectStr || !objectStr) {
+                                        console.log(subjectStr + "  " + objectStr);
+                                    }
+                                    if (subjectStr && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
+                                        existingNodes[subjectStr] = 1;
                                         if (mapping.type) {
                                             triples.push({
                                                 s: subjectStr,
@@ -279,18 +246,15 @@ if(! subjectStr  ||   !objectStr ) {
                             async.eachSeries(
                                 slices,
                                 function (slice, callbackEach) {
-
                                     processor.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-                                        if (err)
-                                            return callbackEach(err);
+                                        if (err) return callbackEach(err);
                                         totalTriples += result;
 
                                         callbackEach();
-                                    })
-
+                                    });
                                 },
                                 function (err) {
-                                    console.log("------------" + filePath + " " + totalTriples)
+                                    console.log("------------" + filePath + " " + totalTriples);
                                     callbackSeries();
                                 }
                             );
@@ -301,17 +265,16 @@ if(! subjectStr  ||   !objectStr ) {
                     }
                 );
             },
-            function (err) {
-            }
+            function (err) {}
         );
     },
     writeTriples: function (triples, graphUri, sparqlServerUrl, callback) {
-        var insertTriplesStr = ""
-        var totalTriples = 0
+        var insertTriplesStr = "";
+        var totalTriples = 0;
         triples.forEach(function (triple) {
             var str = triple.s + " " + triple.p + " " + triple.o + ". ";
             //   console.log(str)
-            insertTriplesStr += str
+            insertTriplesStr += str;
         });
 
         var queryGraph =
@@ -321,8 +284,6 @@ if(! subjectStr  ||   !objectStr ) {
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
             "PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>" +
             "PREFIX req: <https://w3id.org/requirement-ontology/rdl/>" +
-
-
             "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>" +
             "";
 
@@ -330,25 +291,22 @@ if(! subjectStr  ||   !objectStr ) {
         // console.log(query)
 
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
-        var params = {query: queryGraph};
+        var params = { query: queryGraph };
 
-    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-        if (err) {
-            var x = queryGraph
-            return callback(err);
-        }
-        totalTriples += triples.length;
-        console.log(totalTriples);
-        return callback(null, totalTriples);
-    })
+        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+            if (err) {
+                var x = queryGraph;
+                return callback(err);
+            }
+            totalTriples += triples.length;
+            console.log(totalTriples);
+            return callback(null, totalTriples);
+        });
+    },
 
-
-
-    }
-
-    , clearGraph: function (graphUri, sparqlServerUrl, callback) {
-        var query = "clear graph   <" + graphUri + ">"
-        var params = {query: query};
+    clearGraph: function (graphUri, sparqlServerUrl, callback) {
+        var query = "clear graph   <" + graphUri + ">";
+        var params = { query: query };
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
             if (err) {
@@ -356,9 +314,8 @@ if(! subjectStr  ||   !objectStr ) {
             }
 
             return callback(null);
-        })
-    }
-}
+        });
+    },
+};
 
-module.exports=processor
-
+module.exports = processor;

@@ -40504,7 +40504,7 @@ var root = module.exports = function(yasr) {
     var $tryBtn = null;
     if (options.tryQueryLink) {
       var link = options.tryQueryLink();
-      $tryBtn = $("<button type='button'>", {
+      $tryBtn = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button'>", {
         class: "yasr_btn yasr_tryQuery"
       })
         .text("Try query in new browser window")
@@ -41741,7 +41741,7 @@ var YASR = function(parent, options, queryResults) {
 
         if (plugin.hideFromSelection) return;
         var name = plugin.name || pluginName;
-        var button = $("<button type='button' class='yasr_btn'></button>")
+        var button = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button' class='yasr_btn'></button>")
           .text(name)
           .addClass("select_" + pluginName)
           .click(function() {
@@ -41777,7 +41777,7 @@ var YASR = function(parent, options, queryResults) {
         }
         return url;
       };
-      var button = $("<button type='button' class='yasr_btn yasr_downloadIcon btn_icon'></button>")
+      var button = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button' class='yasr_btn yasr_downloadIcon btn_icon'></button>")
         .append(require("yasgui-utils").svg.getElement(require("./imgs.js").download))
         .click(function() {
           var currentPlugin = yasr.plugins[yasr.options.output];
@@ -41798,7 +41798,7 @@ var YASR = function(parent, options, queryResults) {
       yasr.header.append(button);
     };
     var drawFullscreenButton = function() {
-      var button = $("<button type='button' class='yasr_btn btn_fullscreen btn_icon'></button>")
+      var button = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button' class='yasr_btn btn_fullscreen btn_icon'></button>")
         .append(require("yasgui-utils").svg.getElement(require("./imgs.js").fullscreen))
         .click(function() {
           yasr.container.addClass("yasr_fullscreen");
@@ -41812,7 +41812,7 @@ var YASR = function(parent, options, queryResults) {
       yasr.header.append(button);
     };
     var drawSmallscreenButton = function() {
-      var button = $("<button type='button' class='yasr_btn btn_smallscreen btn_icon'></button>")
+      var button = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button' class='yasr_btn btn_smallscreen btn_icon'></button>")
         .append(require("yasgui-utils").svg.getElement(require("./imgs.js").smallscreen))
         .click(function() {
           yasr.container.removeClass("yasr_fullscreen");
@@ -41823,7 +41823,7 @@ var YASR = function(parent, options, queryResults) {
       yasr.header.append(button);
     };
     var drawEmbedButton = function() {
-      embedBtn = $("<button type='button'>", {
+      embedBtn = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button'>", {
         class: "yasr_btn yasr_embedBtn",
         title: "Get HTML snippet to embed results on a web page"
       })
@@ -42647,7 +42647,7 @@ var root = module.exports = function(yasr) {
         yasr.updateHeader();
       };
 
-      var openGchartBtn = $("<button type='button'>", {
+      var openGchartBtn = $("<button class='btn btn-sm my-1 py-0 btn-outline-primary' type='button'>", {
         class: "openPivotGchart yasr_btn"
       })
         .text("Chart Config")

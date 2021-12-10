@@ -56,26 +56,26 @@
     <span style="font:bold 14px Arial;">Blender</span>
 
 
-    <!--   <input id='GenericTools_searchTermInput'> <button onclick='Blender.searchTerm()'>Search</button>-->
+    <!--   <input id='GenericTools_searchTermInput'> <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Blender.searchTerm()'>Search</button>-->
 
 
     <div style="margin:5px;display: none;flex-direction: row;width: 100%;justify-content:center">
 
-        <button onclick="Blender.nodeEdition.createSchemeOrCollection('Scheme')">New scheme</button>
-        <button onclick="Blender.nodeEdition.createSchemeOrCollection('Collection')">New Collection</button>
-        <button onclick="Blender.copyGraph()">Save source</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.nodeEdition.createSchemeOrCollection('Scheme')">New scheme</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.nodeEdition.createSchemeOrCollection('Collection')">New Collection</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.copyGraph()">Save source</button>
     </div>
   <div>
         Select Resource <select onchange="Blender.onSourceSelect($(this).val())" id="Blender_SourcesSelect"></select>
   </div>
     <div id='Blender_createDeleteResourceDiv' style="margin:5px;">
-        <button onclick="Blender.sourcesManager.showCreateSourceDialog()">New resource...</button>
-        <button onclick="Blender.sourcesManager.deleteSource()">Delete resource</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.sourcesManager.showCreateSourceDialog()">New resource...</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.sourcesManager.deleteSource()">Delete resource</button>
     </div>
     <div id="Blender_currentFilterContainerDiv" style="padding: 2px">
         <div>Filter Collection <div id="Blender_currentFilterDiv" style="background-color: beige;padding: 2px"></div>
 
-              <button onclick="Blender.export()">Export...</button>
+              <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.export()">Export...</button>
 
     </div>
 
@@ -100,8 +100,8 @@
     </div>
     <div id="Blender_PopupEditDiv" style=" ">
         <div id="Blender_PopupEditButtonsDiv">
-            <button onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
-            <button onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.nodeEdition.saveEditingNode()">Save</button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Blender.nodeEdition.cancelEditingNode()">Cancel</button>
         </div>
 
         <div id="Blender_nodeEditionDiv" style="height:90%;overflow: auto"></div>

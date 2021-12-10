@@ -54,7 +54,7 @@
             <div id="KGbrowser_searchAllDiv" style="display: flex;flex-direction: column;height: 100px">
                 <div>
                     <input id='KGbrowser_searchTermInput' style="width: 200px" value="">
-                    <button id="KGbrowser_onSearchAllInput" onclick='KGbrowserQuery.searchTerm()'>Search</button>
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' id="KGbrowser_onSearchAllInput" onclick='KGbrowserQuery.searchTerm()'>Search</button>
                 </div>
 
                 <div>
@@ -106,8 +106,8 @@
             <input id="KGbrowserQueryParams_value" size="20" value="100"></div>
 
         <div>
-            <!--   <button onclick="KGbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
-            <!--   <button onclick=" KGbrowserQuery.listQueryParamsDialogFieldValues() ;$('#KGbrowserQueryParams_operator').val('=')">
+            <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.listQueryParamsDialogFieldValues()">List</button>-->
+            <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=" KGbrowserQuery.listQueryParamsDialogFieldValues() ;$('#KGbrowserQueryParams_operator').val('=')">
 
                    LIST </button>-->
             <select id="KGbrowserQueryParams_valuesSelect"
@@ -118,18 +118,18 @@
             predicate<select id="KGbrowserQueryParams_predicateSelect"></select>
         </div>
         <div>
-            <!--   <button onclick="KGbrowserQuery.onQueryParamsDialogValidate('union')">∪</button>
-               <button onclick="KGbrowserQuery.onQueryParamsDialogValidate('intersection')">∩</button>-->
-            <button onclick="KGbrowserQuery.onQueryParamsDialogValidate('union')">count</button>
+            <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.onQueryParamsDialogValidate('union')">∪</button>
+               <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.onQueryParamsDialogValidate('intersection')">∩</button>-->
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.onQueryParamsDialogValidate('union')">count</button>
             <select id="KGbrowserQueryParams_booleanSelect">
                 <option>only</option>
                 <option>OR</option>
                 <option>AND</option>
             </select>
 
-            <button onclick="KGbrowserQuery.onQueryParamsDialogCancel()">X</button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.onQueryParamsDialogCancel()">X</button>
 
-            <!-- <button onclick="KGbrowserBI.drawClasses()">BI</button>-->
+            <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserBI.drawClasses()">BI</button>-->
         </div>
 
 

@@ -6,13 +6,17 @@ import { User } from '../User';
 import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { defaultProfile, Profile, putProfiles } from '../Profile';
-import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
+import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField, TextFieldProps } from '@material-ui/core';
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
 import { MAX_PAGE_SIZE } from '@mui/x-data-grid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
+import Autocomplete from '@mui/material/Autocomplete';
+
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
+    const [filteringChars, setFilteringChars] = React.useState("")
+
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
 
     const deleteProfile = (profile: Profile) => {
@@ -23,7 +27,6 @@ const ProfilesTable = () => {
         putProfiles(updatedProfiles)
             .then((profiles) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(profiles) }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
-
 
     }
 
@@ -40,11 +43,21 @@ const ProfilesTable = () => {
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
 
                 </Box>,
-            success: (gotUsers: Profile[]) =>
+            success: (gotProfiles: Profile[]) =>
 
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
+                        <Autocomplete
+                            disablePortal
+                            id="filter profiles"
+                            options={gotProfiles.map((profile) => profile.name)}
+                            sx={{ width: 300 }}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Search Profiles by name" />}
+                        />
                         <Box sx={{ justifyContent: 'center', display: 'flex' }}>
                             <TableContainer sx={{ height: '400px' }} component={Paper}>
                                 <Table>
@@ -55,24 +68,27 @@ const ProfilesTable = () => {
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotUsers.map(profile => {
-                                        return (<TableRow key={profile.name}>
-                                            <TableCell>
-                                                {profile.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {profile.allowedSourceSchemas.join(', ')
-                                                }
-                                            </TableCell>
-                                            <TableCell>
+                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{
+                                        gotProfiles
+                                            .filter((profile) => profile.name.includes(filteringChars))
+                                            .map(profile => {
+                                                return (<TableRow key={profile.name}>
+                                                    <TableCell>
+                                                        {profile.name}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {profile.allowedSourceSchemas.join(', ')
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell>
 
-                                                <ProfileForm profile={profile} />
-                                                <ButtonWithConfirmation label='Delete' msg={() => deleteProfile(profile)} />
+                                                        <ProfileForm profile={profile} />
+                                                        <ButtonWithConfirmation label='Delete' msg={() => deleteProfile(profile)} />
 
-                                            </TableCell>
+                                                    </TableCell>
 
-                                        </TableRow>);
-                                    })}</TableBody>
+                                                </TableRow>);
+                                            })}</TableBody>
                                 </Table>
                             </TableContainer>
                         </Box>

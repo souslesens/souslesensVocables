@@ -5,14 +5,12 @@ var Admin=(function(){
 
 
     self.onLoaded = function () {
-    var html="<button onclick='Admin.refreshIndexes()'>refreshIndexes </button>"+
-       " <button onclick='Admin.exportNT()'>export NT </button>"+
-        " <button onclick='Admin.getClassesLineage()'>getLineage </button>"+
-        " <br><button onclick='Admin.showUserSources()'>showUserSources </button>"+
-        " <br><button onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>"
 
-
-
+    var html="<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>"+
+       " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportNT()'>export NT </button>"+
+        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>"+
+        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" + 
+        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>"
 
         $("#sourceDivControlPanelDiv").html(html)
     }

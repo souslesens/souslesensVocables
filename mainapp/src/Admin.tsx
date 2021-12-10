@@ -10,6 +10,7 @@ import { Profile } from './Profile';
 import SourcesTable from './Component/SourcesTable';
 import UsersTableBis from './Component/UsersTable';
 import { Source, getSources } from "./Source";
+import { Config, getConfig } from "./Config";
 
 
 
@@ -17,6 +18,7 @@ type Model = {
     users: RD<string, User[]>,
     profiles: RD<string, Profile[]>,
     sources: RD<string, Source[]>,
+    config: RD<string, Config>,
     isModalOpen: boolean,
     currentEditionTab: EditionTab
 }
@@ -51,6 +53,7 @@ const initialModel: Model =
     users: loading(),
     profiles: loading(),
     sources: loading(),
+    config: loading(),
     isModalOpen: false,
     currentEditionTab: 'ProfilesEdition'
 }
@@ -69,6 +72,7 @@ type Msg =
     { type: 'ServerRespondedWithUsers', payload: RD<string, User[]> }
     | { type: 'ServerRespondedWithProfiles', payload: RD<string, Profile[]> }
     | { type: 'ServerRespondedWithSources', payload: RD<string, Source[]> }
+    | { type: 'ServerRespondedWithConfig', payload: RD<string, Config> }
     | { type: 'UserUpdatedField', payload: UpadtedFieldPayload }
     | { type: 'UserClickedSaveChanges', payload: {} }
     | { type: 'UserChangedModalState', payload: boolean }
@@ -90,6 +94,9 @@ function update(model: Model, msg: Msg): Model {
 
         case 'ServerRespondedWithSources':
             return { ...model, sources: msg.payload }
+
+        case 'ServerRespondedWithConfig':
+            return { ...model, config: msg.payload }
 
         case 'UserClickedSaveChanges':
             return { ...model, isModalOpen: false }
@@ -136,6 +143,12 @@ const Admin = () => {
         getSources()
             .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
             .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }))
+    }, [])
+
+    React.useEffect(() => {
+        getConfig()
+            .then((config) => updateModel({ type: 'ServerRespondedWithConfig', payload: success(config) }))
+            .catch((err) => updateModel({ type: 'ServerRespondedWithConfig', payload: failure(err.msg) }))
     }, [])
 
     return <ModelContext.Provider value={{ model, updateModel }}>

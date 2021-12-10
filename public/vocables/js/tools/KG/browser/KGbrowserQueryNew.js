@@ -358,8 +358,8 @@ var KGbrowserQuery = (function () {
 
                         var html = "<div class='KGbrowser_filterDiv' id='" + filterId + "'>" +
                             "<input type='checkbox'  checked='checked' class='KGbrowser_graphFilterCBX'>G&nbsp;" +
-                            "<button title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
-                            "<button title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
+                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
                             "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
                         "</div>"
 

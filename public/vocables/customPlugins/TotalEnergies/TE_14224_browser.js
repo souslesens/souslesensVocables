@@ -1,7 +1,8 @@
 var TE_14224_browser = (function () {
 
         var self = {}
-
+        var source
+        var graphUri
         var assetTreeDistinctNodes = {}
         self.mainSource = "TSF_ISO_14224"
 
@@ -14,8 +15,8 @@ var TE_14224_browser = (function () {
             $("#actionDiv").html("")
             $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/snippets/leftPanel.html")
             MainController.UI.toogleRightPanel(true)
-            $("#assetPanelDiv").html("")
-            $("#assetPanelDiv").load("customPlugins/TotalEnergies/snippets/assetPanel.html")
+            $("#rightPanelDiv").html("")
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html")
 
 
             $("#graphDiv").html("")
@@ -24,7 +25,14 @@ var TE_14224_browser = (function () {
 
 
             $("#sourcesTreeDiv").html("");
+            source = "TSF_GS_EP-EXP_207_11"
+            graphUri = Config.sources[source].graphUri
+            Lineage_classes.mainSource = source
+            Lineage_common.currentSource = source
 
+            setTimeout(function () {
+                self.loadOntologytree()
+            }, 200)
 
         }
 
@@ -32,7 +40,15 @@ var TE_14224_browser = (function () {
             if (asset == "")
                 return;
             self.currenTable = asset
+            visjsGraph.clearGraph()
+            $("#graphDiv").html("")
             self.getFunctionalLocations(asset)
+        }
+
+
+        self.clearGraph = function () {
+            visjsGraph.clearGraph()
+            $("#graphDiv").html("")
         }
 
         self.getFunctionalLocations = function (table) {
@@ -58,8 +74,10 @@ var TE_14224_browser = (function () {
                             text: item.location1,
                             parent: "#",
                             data: {
+                                location: item.location1,
                                 id: item.location1,
                                 label: item.location1,
+                                type: "location",
                             }
 
 
@@ -72,8 +90,10 @@ var TE_14224_browser = (function () {
                             text: item.location2,
                             parent: item.location1,
                             data: {
+                                location: item.location1 + "/" + item.location2,
                                 id: item.location1 + "/" + item.location2,
                                 label: item.location2,
+                                type: "location",
                             }
 
 
@@ -101,7 +121,7 @@ var TE_14224_browser = (function () {
 
                     }
                     ,
-                    contextMenu: TE_14224_browser.getJstreeContextMenu()
+                    contextMenu: TE_14224_browser.getAssetJstreeContextMenu()
                 }
                 common.jstree.loadJsTree("TE_114224_browser_assetPanelTreeDiv", jstreeData, options);
             })
@@ -132,6 +152,7 @@ var TE_14224_browser = (function () {
                             data: {
                                 type: "location",
                                 id: nodeId + "/" + childId,
+                                location: nodeId + "/" + childId,
 
                                 text: childId,
 
@@ -382,13 +403,356 @@ var TE_14224_browser = (function () {
 
 
         }
-        self.getJstreeContextMenu = function () {
+
+
+        self.mapClassesTo14224 = function (node) {
+            var visjsData = {nodes: [], edges: []}
+            var assetNodeIds = []
+
+            async.series([
+
+                function (callbackSeries) {
+var assetClassColumn=""
+                    var samAs207Column = ""
+                    if (self.currenTable == "girassol") {
+                        samAs207Column = "className"
+                        assetClassColumn="description"
+                    }
+                    else if (self.currenTable == "absheron") {
+                        samAs207Column = "RDLRelation"
+                        assetClassColumn="functionalLocationDescription"
+                    }
+
+                    var sqlQuery = "select distinct location1,location2,location3,location4," + samAs207Column +","+assetClassColumn+ " from " + self.currenTable;
+                    //  var sqlQuery = " select distinct '" + node.data.id + "' as id ," + samAs207Column + " from " + self.currenTable;
+                    if (node.data.type == "location") {
+                        //    sqlQuery += " where parentFunctionalLocation = '" + node.id + "'"
+                        sqlQuery += " where   FunctionalLocationCode like'" + node.data.location + "%' ";
+
+                    } else if (node.data.type == "class") {
+                        sqlQuery += " where  className ='" + node.data.className + "' and   FunctionalLocationCode like'" + node.data.location + "%' ";
+
+                    } else if (node.data.type == "tag") {
+                        sqlQuery += " where  className ='" + node.data.className + "' " +
+                            "and   FunctionalLocationCode like'" + node.data.location + "%'" +
+                            " and tag='" + node.data.tag + "' ";
+
+
+                    }
+                    self.querySQLserver(sqlQuery, function (err, data) {
+
+
+                        if (err)
+                            return MainController.UI.message(err)
+
+                        var standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
+
+                        var visjsExistingNodes = visjsGraph.getExistingIdsMap();
+
+                        if (data.length > 0) {
+                            data.forEach(function (item) {
+                                if (item[samAs207Column] == '')
+                                    return;
+                                var uri = graphUri + item[samAs207Column].replace(/-/g, "_")
+                                var id = item.location1 + "/" + item.location2 + "/" + item.location3 + "/" + item.location4 + "/" + item[assetClassColumn]
+                                id = id.replace(/\/\//g, "")
+                                assetNodeIds.push({id: id})
+
+                                if (!visjsExistingNodes[uri]) {
+                                    visjsExistingNodes[uri] = 1
+                                    var node = {
+                                        id: uri,
+                                        label: item[assetClassColumn],
+
+                                        size: Lineage_classes.defaultShapeSize,
+                                        //  image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
+                                        //   shape: "circularImage",
+                                        shape: "dot",
+                                        size: 5,
+                                        borderWidth: 4,
+                                        shadow:true,
+                                        color: Lineage_classes.getSourceColor(self.currenTable),
+                                        data: {source: source, id: uri, label: item[assetClassColumn]},
+                                        level: 6,
+
+                                    }
+                                    visjsData.nodes.push(node)
+                                }
+
+                                var edgeId = uri + "_" + id
+                                if (!visjsExistingNodes[edgeId]) {
+                                    visjsExistingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: uri,
+                                        to: id,
+                                        //   label: "has14224Class"
+                                        dashes: true,
+                                        color: "red"
+
+
+                                    })
+
+
+                                }
+
+
+                                var array = id.split("/");
+                            //    array.push(item[assetClassColumn])
+
+                                var currentId = ""
+                                for (var i = 0; i < array.length; i++) {
+                                    var item = array[i];
+                                    var parent = null
+
+                                    if (i > 0) {
+                                        parent = currentId
+                                        currentId += "/"
+                                    }
+                                    currentId += item
+                                    var standardType
+                                    if (i < 4)
+                                        standardType = "http://standards.iso.org/iso/15926/part14/Location"
+                                    if (i == 4) {
+                                        standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
+                                    }
+                                    if (i == 5) {
+                                        standardType = "http://w3id.org/readi/rdl/D101001495"
+                                    }
+
+
+                                    if (!visjsExistingNodes[currentId]) {
+                                        visjsExistingNodes[currentId] = 1
+                                        var node = {
+                                            id: currentId,
+                                            label: item,
+
+                                            size: Lineage_classes.defaultShapeSize,
+                                            //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
+                                            //   shape: "circularImage",
+                                            shape: "square",
+                                            size: 5,
+                                            borderWidth: 4,
+                                            color: Lineage_classes.getSourceColor(self.currenTable),
+                                            data: {
+                                                source: "TE_14224_browser",
+                                                id: currentId,
+                                                label: item,
+                                                type: "assetNode"
+                                            },
+                                            level: i,
+
+                                        }
+                                        visjsData.nodes.push(node)
+
+                                    }
+                                    if (parent) {
+                                        var edgeId = currentId + "_" + parent
+                                        if (!visjsExistingNodes[edgeId]) {
+                                            visjsExistingNodes[edgeId] = 1
+                                            visjsData.edges.push({
+                                                id: edgeId,
+                                                from: currentId,
+                                                to: parent
+
+                                            })
+
+
+                                        }
+                                    }
+                                }
+
+
+                            })
+
+                            callbackSeries();
+                            //   Lineage_classes.addParentsToGraph(source, ids)
+
+                        }
+
+                    })
+
+                },
+                function (callbackSeries) {
+                    return callbackSeries()
+                    self.graphNodeAndparents(assetNodeIds, function (err, result) {
+                        if (err)
+                            return callbackSeries()
+                        visjsData.nodes = visjsData.nodes.concat(result.nodes)
+                        visjsData.edges = visjsData.edges.concat(result.nodes)
+                        callbackSeries()
+                    })
+
+                },
+            ], function (err) {
+                if (visjsGraph.data && visjsGraph.data.nodes) {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                } else {
+                    self.drawNewGraph(visjsData)
+                }
+
+            })
+        }
+
+
+        self.graphNodeAndparents = function (nodes, callback) {
+
+
+            if (!Array.isArray(nodes)) {
+                nodes = [nodes]
+            }
+            var visjsData = {nodes: [], edges: []}
+            var visjsExistingNodes = visjsGraph.getExistingIdsMap();
+
+            nodes.forEach(function (nodeobj) {
+
+                var array = nodeobj.id.split("/");
+
+                var currentId = ""
+                for (var i = 0; i < array.length; i++) {
+                    var item = array[i];
+                    var parent = null
+
+                    if (i > 0) {
+                        parent = currentId
+                        currentId += "/"
+                    }
+                    currentId += item
+                    var standardType
+                    if (i < 4)
+                        standardType = "http://standards.iso.org/iso/15926/part14/Location"
+                    if (i == 4) {
+                        standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
+                    }
+                    if (i == 5) {
+                        standardType = "http://w3id.org/readi/rdl/D101001495"
+                    }
+
+
+                    if (!visjsExistingNodes[currentId]) {
+                        visjsExistingNodes[currentId] = 1
+                        var node = {
+                            id: currentId,
+                            label: item,
+
+                            size: Lineage_classes.defaultShapeSize,
+                            //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
+                            //   shape: "circularImage",
+                            shape: "square",
+                            size: 5,
+                            borderWidth: 4,
+                            color: Lineage_classes.getSourceColor(self.currenTable),
+                            data: {source: "TE_14224_browser", id: currentId, label: item, type: "assetNode"},
+                            level: i,
+
+                        }
+                        visjsData.nodes.push(node)
+
+                    }
+                    if (parent) {
+                        var edgeId = currentId + "_" + parent
+                        if (!visjsExistingNodes[edgeId]) {
+                            visjsExistingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: currentId,
+                                to: parent
+
+                            })
+
+
+                        }
+                    }
+                }
+            })
+
+            if (callback)
+                return callback(null, visjsData)
+
+            if (visjsGraph.data && visjsGraph.data.nodes) {
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+            } else {
+                self.drawNewGraph(visjsData, "hierarchical")
+            }
+
+
+        }
+
+
+        self.showAssetData=function(node){
+
+            var parent=node.data.path
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+        /**********************************************************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        self.drawNewGraph = function (visjsData, layout) {
+
+            var options = {
+                keepNodePositionOnDrag: true,
+                onclickFn: self.graphActions.onNodeClick,
+                onRightClickFn: self.graphActions.showGraphPopupMenu,
+                "physics": {
+                    "barnesHut": {
+                        "springLength": 0,
+                        "damping": 0.15
+                    },
+                    "minVelocity": 0.75,
+
+                },
+
+
+            }
+            if (layout == "hierarchical") {
+                // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
+                options.layoutHierarchical = {direction: "LR", sortMethod: "directed", levelSeparation: 100}
+
+            }
+            visjsGraph.draw("graphDiv", visjsData, options)
+            $("#waitImg").css("display", "none");
+        }
+
+        self.getAssetJstreeContextMenu = function () {
             var items = {}
 
-            items.graphNode = {
+            items.nodeInfos = {
+                label: "Node Infos",
+                action: function (e) {// pb avec source
+               if (self.currentTreeNode.data.type == "tag")
+                        self.showTagInfos(self.currentTreeNode)
+
+
+                }
+            }
+            items.graphNodeAndparents = {
                 label: "Graph Node",
                 action: function (e) {// pb avec source
-                    TE_14224_browser.graphNode(self.currentTreeNode)
+                    TE_14224_browser.graphNodeAndparents(self.currentTreeNode)
 
                 }
             }
@@ -403,180 +767,148 @@ var TE_14224_browser = (function () {
             return items;
         }
 
+        self.getOntologyJstreeContextMenu = function () {
+            var items = {}
 
-        self.mapClassesTo14224 = function (node) {
-            var samAs207Column = ""
-            if (self.currenTable == "girassol")
-                samAs207Column = "className"
-            else if (self.currenTable == "absheron")
-                samAs207Column = "RDLRelation"
+            items.nodeInfos = {
+                label: "Node Infos",
+                action: function (e) {
 
+                        SourceBrowser.showNodeInfos( self.mainSource,self.currentOntologyTreeNode.id,"mainDialogDiv")
 
-            var sqlQuery = " select distinct "+node.data.id+"az id ," + samAs207Column + " from " + self.currenTable;
-            if (node.data.type == "location") {
-                sqlQuery += " where parentFunctionalLocation = '" + node.id + "'"
-
-            } else if (node.data.type == "class") {
-                sqlQuery += " where  className ='" + node.data.className + "' and   FunctionalLocationCode like'" + node.data.location + "%' ";
-
-            } else if (node.data.type == "tag") {
-                sqlQuery += " where  className ='" + node.data.className + "' " +
-                    "and   FunctionalLocationCode like'" + node.data.location + "%'" +
-                    " and tag='" + node.data.tag + "' ";
-
-
-            }
-            self.querySQLserver(sqlQuery, function (err, data) {
-
-
-                if (err)
-                    return MainController.UI.message(err)
-                var ids = []
-                var source = "TSF_GS_EP-EXP_207_11"
-                var graphUri = Config.sources[source].graphUri
-                Lineage_common.mainSource = source
-                Lineage_common.currentSource=source
-                var standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
-
-                var visjsExistingNodes = visjsGraph.getExistingIdsMap();
-                var visjsData = {nodes: [], edges: []}
-                if (data.length > 0) {
-                    data.forEach(function (item) {
-                        if (item == '')
-                            return;
-                        var uri = graphUri + item[samAs207Column].replace(/-/g, "_")
-
-
-                        if (!visjsExistingNodes[uri]) {
-                            visjsExistingNodes[uri] = 1
-                            var node = {
-                                id: uri,
-                                label: item[samAs207Column],
-
-                                size: Lineage_classes.defaultShapeSize,
-                                image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
-                                shape: "circularImage",
-                                size: 10,
-                                borderWidth: 4,
-                                color: Lineage_classes.getSourceColor(self.currenTable),
-                                data: {source: source},
-                                level: i,
-
-                            }
-                            visjsData.nodes.push(node)
-                        }
-
-                        var edgeId = uri + "_" + item.id
-                        if (!visjsExistingNodes[edgeId]) {
-                            visjsExistingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: uri,
-                                to: item.id,
-                                label: "has14224Class"
-
-
-                            })
-
-
-                        }
-                    })
-                    if (visjsGraph.data && visjsGraph.data.nodes) {
-                        visjsGraph.data.nodes.add(visjsData.nodes)
-                        visjsGraph.data.edges.add(visjsData.edges)
-                    } else {
-                        Lineage_classes.drawNewGraph(visjsData)
-                    }
-
-                  //  Lineage_classes.addParentsToGraph(source, ids)
 
                 }
+            }
+            items.ShowAssetData = {
+                label: "Show Asset Data",
+                action: function (e) {
+                    TE_14224_browser.showAssetData(self.currentOntologyTreeNode)
 
-            })
+                }
+            }
 
+
+            return items;
         }
-        self.graphNode = function (node) {
-            var array = node.id.split("/");
 
-            var visjsData = {nodes: [], edges: []}
-            var visjsExistingNodes = visjsGraph.getExistingIdsMap();
 
-           /* if (!existingNodes[self.currenTable]) {
-                existingNodes[self.currenTable] = 1
-                var sourceNode = {
-                    id: self.currenTable,
-                    label: self.currenTable,
-                    shape: "box",
-                    size: Lineage_classes.defaultShapeSize,
-                    color: Lineage_classes.getSourceColor(self.currenTable),
-                    data: {source: self.currenTable},
-                    level: 1,
 
-                }
-                visjsData.nodes.push(sourceNode)
-            }*/
+        self.graphActions = {
+            onNodeClick: function (node, point, options) {
 
-            for (var i = 0; i < array.length; i++) {
-                var item = array[i];
-                var parent=null
+                if (!node)
+                    return;
+                if (node.data.type == "assetNode") {
 
-                if(i>0)
-                    parent = array[i - 1]
-                var standardType
-                if (i < 5)
-                    standardType = "http://standards.iso.org/iso/15926/part14/Location"
-                if (i == 5) {
-                    standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
-                }
-                if (i == 6) {
-                    standardType = "http://w3id.org/readi/rdl/D101001495"
+                } else {
+                    Lineage_classes.currentGraphNode = node
+                    Lineage_classes.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
                 }
 
-
-                if (!visjsExistingNodes[item]) {
-                    visjsExistingNodes[item] = 1
-                    var node = {
-                        id: item,
-                        label: item,
-
-                        size: Lineage_classes.defaultShapeSize,
-                        image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
-                        shape: "circularImage",
-                        size: 10,
-                        borderWidth: 4,
-                        color: Lineage_classes.getSourceColor(self.currenTable),
-                        data: {source: "SQL:" + self.currenTable},
-                        level: i,
-
-                    }
-                    visjsData.nodes.push(node)
-
-                }
-                if(parent) {
-                    var edgeId = item + "_" + parent
-                    if (!visjsExistingNodes[edgeId]) {
-                        visjsExistingNodes[edgeId] = 1
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item,
-                            to: parent
-
-                        })
-
-
-                    }
-                }
             }
+            , showGraphPopupMenu: function (node, point, options) {
 
-            if (visjsGraph.data && visjsGraph.data.nodes) {
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-            } else {
-                Lineage_classes.drawNewGraph(visjsData)
+                if (node.data.type == "assetNode") {
+                    if (!node)
+                        return;
+
+                    var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>"
+
+                    $("#graphPopupDiv").html(html);
+                    self.currentGraphNode = node;
+                    MainController.UI.showPopup(point, "graphPopupDiv")
+
+                } else {
+                    Lineage_classes.graphActions.showGraphPopupMenu(node, point, options)
+                }
+
+
             }
-
-
         }
+
+
+        self.loadOntologytree = function () {
+
+            var source = "TSF_GS_EP-EXP_207_11"
+            var topClasses = [{id:"http://w3id.org/readi/z018-rdl/prod_SYS",label:"SYSTEM"}]
+
+            var jstreeData = []
+            var existingNodes={}
+
+           async.eachSeries(topClasses,function (topClass,callbackEach) {
+                   jstreeData.push({
+                       id: topClass.id,
+                       text: topClass.label,
+                       parent: "#"
+
+                   })
+
+               Sparql_OWL.getNodeChildren(source, null, topClass.id, 2, null, function (err, result) {
+                   if (err)
+                       return callbackEach(err)
+                   result.forEach(function (item) {
+                       if(!existingNodes[item.concept.value]) {
+                           existingNodes[item.concept.value] = 1
+                           jstreeData.push({
+                               id: item.concept.value,
+                               text: item.conceptLabel.value,
+                               parent: topClass.id,
+                               data:{ id: item.concept.value,
+                                   label: item.conceptLabel.value,
+                                   type: "ontology"}
+
+                           })
+                       }
+                       if(!existingNodes[item.child1.value]) {
+                           existingNodes[item.child1.value] = 1
+                           jstreeData.push({
+                               id: item.child1.value,
+                               text: item.child1Label.value,
+                               parent: item.concept.value,
+                           data:{ id: item.child1.value,
+                               label: item.child1Label.value,
+                               path:item.child1.value+"/",
+                               type: "ontology"}
+
+                           })
+                       }
+                       if(item.child2 && !existingNodes[item.child2.value]) {
+                           existingNodes[item.child2.value] = 1
+                           jstreeData.push({
+                               id: item.child2.value,
+                               text: item.child2Label.value,
+                               parent: item.child1.value,
+                               data:{ id: item.child2.value,
+                                   label: item.child2Label.value,
+                                   path:item.child2.value+"/"+item.child2.value,
+                                   type: "ontology"}
+
+                           })
+                       }
+
+
+                   })
+                   callbackEach()
+               })
+
+
+
+                   }
+                   , function (err) {
+                       if (err)
+                           return MainController.UI.message(err)
+                   var options= {
+                       selectTreeNodeFn: function (event, obj) {
+                           self.currentOntologyTreeNode = obj.node
+                       }
+                       ,
+                       contextMenu: TE_14224_browser.getOntologyJstreeContextMenu()
+                   }
+                       common.jstree.loadJsTree("TE_114224_browser_ontologyPanelDiv", jstreeData,options)
+
+           })
+        }
+
 
 
         return self;

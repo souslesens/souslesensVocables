@@ -52,10 +52,10 @@ mappingsMap = {
 
         ],
     },
-    CLASSES_3: {
+    "SYSTEM": {
         type: "owl:Class",
-        topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
-        fileName: "D:\\NLP\\ontologies\\14224\\classes_3.txt",
+        topClass: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
+        fileName: "D:\\NLP\\ontologies\\MIE\\GS_EP_EXP_207_09_Systems_Units.txt",
         transform: {
             label2: function (value) {
                 return "Pack-" + value
@@ -64,9 +64,13 @@ mappingsMap = {
         lookups: [],
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            {s: "id", p: "skos:prefLabel", o: "label1"},
-            {s: "id", p: "rdfs:label", o: "label2"},
-            {s: "id", p: "_restriction", o: "system", prop: "part14:hasFunctionalPart"},
+            {s: "system", p: "rdfs:label", o: "system"},
+            {s: "system", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS"},
+            {s: "system", p: "rdfs:subClassOf", o: "http://w3id.org/readi/z018-rdl/prod_SYS"},
+            {s: "unit", p: "rdfs:label", o: "unitDescription"},
+            {s: "unit", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS"},
+           // {s: "unit", p: "rdfs:subClassOf", o: "http://w3id.org/readi/z018-rdl/prod_SYS"},
+            {s: "unit", p: "rdfs:subClassOf", o: "system"},
 
         ],
     },
@@ -217,7 +221,7 @@ mappingsMap = {
 }
 
 
-var mappingNames = ["CLASSES", ];
+var mappingNames = ["CLASSES","SYSTEM"];
 
 //var mappingNames = ["CLASSES_6c",];
 var mappings = [];
@@ -227,10 +231,10 @@ mappingNames.forEach(function (mappingName) {
 
 
 var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
-
+var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 if (true) {
-    if (mappings.length == 0)
-        return processor.processSubClasses(mappings, graphUri);
+    if (mappings.length == 1)
+        return processor.processSubClasses(mappings, graphUri,sparqlServerUrl);
     var triples = [
         {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'"},
         {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdf:type", o: "owl:Class"},
@@ -298,7 +302,7 @@ if (true) {
     ]
 
  //   var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
-    var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+
     processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
         if (err)
             return console.log(err);

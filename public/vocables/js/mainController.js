@@ -447,7 +447,7 @@ var MainController = (function () {
                 $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh)
                 $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh})
                 setTimeout(function () {
-                    visjsGraph.redraw()
+                  ;//  visjsGraph.redraw()
                 }, 200)
 
 
@@ -458,7 +458,7 @@ var MainController = (function () {
                     $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
                     $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
                     setTimeout(function () {
-                        visjsGraph.redraw()
+                      ;//  visjsGraph.redraw()
                     }, 200)
                 }
 

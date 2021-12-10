@@ -23,8 +23,6 @@ var Sparql_OWL = (function () {
             var fromStr = ""
 
 
-
-
             var strFilterTopConcept;
             var topClassFilter = Config.sources[sourceLabel].topClassFilter
             if (topClassFilter && topClassFilter != "" && topClassFilter != "_default")
@@ -204,10 +202,9 @@ var Sparql_OWL = (function () {
          * */
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
 
-            if(Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length>0){ //limit at 4 ancestorsDepth when imports
-                ancestorsDepth=4
+            if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) { //limit at 4 ancestorsDepth when imports
+                ancestorsDepth = 4
             }
-
 
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
@@ -572,8 +569,8 @@ var Sparql_OWL = (function () {
                 if (options.addInverseRestrictions) {
                     delete options.addInverseRestrictions
                     options.inverseRestriction = true
-                    self.getObjectProperties  (sourceLabel, ids, options,function (err, resultInverse) {
-                        result =  result.results.bindings.concat( resultInverse)
+                    self.getObjectProperties(sourceLabel, ids, options, function (err, resultInverse) {
+                        result = result.results.bindings.concat(resultInverse)
                         return callback(null, result)
                     })
 
@@ -660,7 +657,7 @@ var Sparql_OWL = (function () {
                     delete options.addInverseRestrictions
                     options.inverseRestriction = true
                     self.getObjectRestrictions(sourceLabel, ids, options, function (err, resultInverse) {
-                        result =  result.results.bindings.concat( resultInverse)
+                        result = result.results.bindings.concat(resultInverse)
                         return callback(null, result)
                     })
 
@@ -764,33 +761,34 @@ var Sparql_OWL = (function () {
         }
 
 
-        self.getNodesTypes=function(source,ids,callback){
-            var slices=common.array.slice(ids,200)
-            var allData=[]
-            async.eachSeries(slices, function(slice, callbackEach){
+        self.getNodesTypes = function (source, ids, callback) {
+            var slices = common.array.slice(ids, 200)
+            var allData = []
+            async.eachSeries(slices, function (slice, callbackEach) {
 
-                var fromStr=Sparql_common.getFromStr(source,false,false)
-            var filterStr=Sparql_common.setFilter("concept",slice)
+                var fromStr = Sparql_common.getFromStr(source, false, false)
+                var filterStr = Sparql_common.setFilter("concept", slice)
                 var query =
                     " select  distinct *   WHERE { GRAPH ?g{ " +
                     " ?concept rdf:type ?type. " +
-                    filterStr+
+                    filterStr +
                     " }}"
 
-                query += " limit " + 10000+ " ";
-               var url = self.sparql_url
-                Sparql_proxy.querySPARQL_GET_proxy( url, query,null, null, function (err, result) {
+                query += " limit " + 10000 + " ";
+                self.sparql_url =  Config.sources[source].sparql_server.url;
+                var url = self.sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: source}, function (err, result) {
 
 
                     if (err) {
                         return callbackEach(err)
                     }
-                    allData=allData.concat(result.results.bindings)
+                    allData = allData.concat(result.results.bindings)
                     callbackEach()
                 })
 
-            },function(err){
-                return callback(err,allData)
+            }, function (err) {
+                return callback(err, allData)
             })
         }
 
@@ -828,7 +826,7 @@ var Sparql_OWL = (function () {
             query += " }"
             query += "  limit " + limit
 
-
+            self.sparql_url =  Config.sources[sourceLabel].sparql_server.url;
             var url = self.sparql_url + "?format=json&query=";
             self.no_params = Config.sources[sourceLabel].sparql_server.no_params
             if (self.no_params)

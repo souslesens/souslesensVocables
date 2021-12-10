@@ -23,6 +23,7 @@ var Lineage_classes = (function () {
         self.defaultShape = "dot";
         self.defaultShapeSize = 5;
         self.orphanShape = "square";
+        self.nodeShadow=true;
         self.objectPropertyColor = "red"
         self.defaultEdgeArrowType = "triangle"
         self.defaultEdgeColor = "#aaa"
@@ -61,6 +62,10 @@ var Lineage_classes = (function () {
             $("#GenericTools_searchSchemaType").val("OWL")
 
             setTimeout(function () {
+
+
+               $( $("#Lineage_Tabs").find("li")[2]).hide();
+               $($("#Lineage_Tabs").find('#LineageRelationsTab')).hide();
 
                 $("#lineage_controlPanel0Div").css("display", "block")
                 $("#lineage_controlPanel1Div").css("display", "none")
@@ -118,10 +123,14 @@ var Lineage_classes = (function () {
             MainController.currentSource = sourceLabel
             if (!Lineage_common.currentSource) {
 
-                Lineage_classes.drawTopConcepts(sourceLabel)
+                Lineage_classes.drawTopConcepts(sourceLabel, function (err) {
+                    if (err)
+                        return MainController.UI.message(err)
+                    SourceBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
+                })
             }
             $("#Lineage_sourceLabelDiv").html(sourceLabel)
-            SourceBrowser.showThesaurusTopConcepts(sourceLabel, {targetDiv: "LineagejsTreeDiv"})
+
 
             var schemaType = Config.sources[sourceLabel].schemaType
             $("#GenericTools_searchSchemaType").val(schemaType)
@@ -150,16 +159,16 @@ var Lineage_classes = (function () {
         }
 
 
-        self.onGraphOrTreeNodeClick = function (node, nodeEvent,options) {
-            if(!Config.sources[node.data.source])
+        self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
+            if (!Config.sources[node.data.source])
                 return;
-            if(!options)
-                options={}
+            if (!options)
+                options = {}
 
             if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-                if(options.callee=="Graph")
+                if (options.callee == "Graph")
                     Lineage_classes.graphActions.graphNodeNeighborhood("all")
-                else  if(options.callee=="Tree")
+                else if (options.callee == "Tree")
                     Lineage_classes.addArbitraryNodeToGraph(node.data)
             } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
                 Lineage_blend.addNodeToAssociationNode(node, "source")
@@ -185,9 +194,12 @@ var Lineage_classes = (function () {
                 label: "draw taxonomy",
                 action: function (e) {// pb avec source
                     $("#Lineage_topClassesRadio").prop("checked", true)
-                    Lineage_classes.drawTopConcepts()
-                    //   self.showThesaurusTopConcepts()
-                    SourceBrowser.showThesaurusTopConcepts(Lineage_common.currentSource, {targetDiv: "LineagejsTreeDiv"})
+                    Lineage_classes.drawTopConcepts(null, function (err, result) {
+                        if (err)
+                            return MainController.UI.message(err)
+                        SourceBrowser.showThesaurusTopConcepts(Lineage_common.currentSource, {targetDiv: "LineagejsTreeDiv"})
+                        //   self.showThesaurusTopConcepts()
+                    })
 
                 }
             }
@@ -220,21 +232,20 @@ var Lineage_classes = (function () {
         }
 
 
-
         self.selectTreeNodeFn = function (event, propertiesMap) {
             SourceBrowser.currentTreeNode = propertiesMap.node;
             self.currentTreeNode = propertiesMap.node;
             var data = propertiesMap.node.data;
 
-            if( self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event,{callee:"Tree"})!=null){
+            if (self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event, {callee: "Tree"}) != null) {
                 if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
                     return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)
-                }else
-                    return SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                } else
+                    setTimeout(function () {
+                        SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
+                    }, 200)
+                // return SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
             }
-            setTimeout(function(){
-                SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
-            },200)
 
 
         }
@@ -255,7 +266,7 @@ var Lineage_classes = (function () {
         }
 
 
-        self.drawTopConcepts = function (source) {
+        self.drawTopConcepts = function (source, callback) {
             self.currentExpandLevel = 1
 
 
@@ -291,6 +302,7 @@ var Lineage_classes = (function () {
                 var sourceNode = {
                     id: source,
                     label: source,
+                   shadow:self.nodeShadow,
                     shape: "box",
                     size: Lineage_classes.defaultShapeSize,
                     color: self.getSourceColor(source),
@@ -318,6 +330,7 @@ var Lineage_classes = (function () {
                         var importedSourceNode = {
                             id: importedSource,
                             label: importedSource,
+                           shadow:self.nodeShadow,
                             shape: "box",
                             level: 1,
                             size: Lineage_classes.defaultShapeSize,
@@ -366,6 +379,8 @@ var Lineage_classes = (function () {
                     }
                     if (result.length > self.showLimit) {
                         $("#graphDiv").html("<div style='margin:10px'><span style='font-weight: bold;color:saddlebrown'> too may nodes (" + result.length + ")  .Cannot display the graph, </span><i>select and graph a node or a property to start graph exploration</i></div>")
+                        if (callback)
+                            return callback("too may nodes")
                         return;
                     }
                     var ids = []
@@ -384,6 +399,7 @@ var Lineage_classes = (function () {
                             var node = {
                                 id: item.topConcept.value,
                                 label: item.topConceptLabel.value,
+                               shadow:self.nodeShadow,
                                 shape: shape,
                                 color: self.getSourceColor(source, item.topConcept.value),
                                 size: Lineage_classes.defaultShapeSize,
@@ -418,8 +434,11 @@ var Lineage_classes = (function () {
 
                 })
             }, function (err, result) {
-                if (err)
+                if (err) {
+                    if (callback)
+                        return callback(err)
                     return alert(err);
+                }
                 //   MainController.UI.message("", true)
                 //  self.drawNewGraph(visjsData);
                 if (!visjsGraph.data || !visjsGraph.data.nodes) {
@@ -430,6 +449,9 @@ var Lineage_classes = (function () {
                     visjsGraph.network.fit()
                 }
                 $("#waitImg").css("display", "none");
+                if (callback)
+                    return callback()
+
 
             })
 
@@ -538,6 +560,7 @@ var Lineage_classes = (function () {
                     visjsData.nodes.push({
                         id: item.child,
                         label: item.childLabel,
+                       shadow:self.nodeShadow,
                         shape: Lineage_classes.defaultShape,
                         size: Lineage_classes.defaultShapeSize,
                         color: color,
@@ -742,6 +765,7 @@ var Lineage_classes = (function () {
                                             id: item.id,
                                             label: item.label,
                                             color: color,
+                                           shadow:self.nodeShadow,
                                             shape: "dot",
                                             size: Lineage_classes.defaultShapeSize,
                                             data: item
@@ -937,6 +961,7 @@ var Lineage_classes = (function () {
                         var node = {
                             id: nodeData.id,
                             label: nodeData.label,
+                           shadow:self.nodeShadow,
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: Lineage_classes.getSourceColor(Lineage_common.currentSource, nodeData.id),
@@ -957,6 +982,7 @@ var Lineage_classes = (function () {
                         var node = {
                             id: id,
                             label: labelStr,
+                           shadow:self.nodeShadow,
                             shape: "box",
 
                             color: color,
@@ -1033,6 +1059,7 @@ var Lineage_classes = (function () {
                     var node = {
                         id: nodeData.id,
                         label: nodeData.label,
+                       shadow:self.nodeShadow,
                         shape: Lineage_classes.defaultShape,
                         size: Lineage_classes.defaultShapeSize,
                         color: Lineage_classes.getSourceColor(Lineage_common.currentSource, nodeData.id),
@@ -1060,6 +1087,7 @@ var Lineage_classes = (function () {
                                 var node = {
                                     id: item.value.value,
                                     label: item.valueLabel.value,
+                                   shadow:self.nodeShadow,
                                     shape: "square",
                                     color: Lineage_classes.getSourceColor(Lineage_common.currentSource, item.value.value),
                                     size: Lineage_classes.defaultShapeSize,
@@ -1172,6 +1200,7 @@ var Lineage_classes = (function () {
                                 var node = {
                                     id: item.broader1.value,
                                     label: item.broader1Label.value,
+                                   shadow:self.nodeShadow,
                                     shape: shape,
                                     color: self.getSourceColor(source, item.broader1.value),
                                     size: Lineage_classes.defaultShapeSize,
@@ -1203,12 +1232,12 @@ var Lineage_classes = (function () {
 
                     })
 
-                if (visjsGraph.data && visjsGraph.data.nodes) {
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
-                } else {
-                    Lineage_classes.drawNewGraph(visjsData)
-                }
+                    if (visjsGraph.data && visjsGraph.data.nodes) {
+                        visjsGraph.data.nodes.add(visjsData.nodes)
+                        visjsGraph.data.edges.add(visjsData.edges)
+                    } else {
+                        Lineage_classes.drawNewGraph(visjsData)
+                    }
 
 
                 }, function (err) {
@@ -1303,6 +1332,7 @@ var Lineage_classes = (function () {
                             visjsData.nodes.push({
                                 id: key + "_cluster",
                                 label: map[key].length + "children",
+                               shadow:self.nodeShadow,
                                 shape: "star",
                                 size: Lineage_classes.defaultShapeSize,
                                 value: map[key].length,
@@ -1365,6 +1395,7 @@ var Lineage_classes = (function () {
                                 visjsData2.nodes.push({
                                     id: item.child,
                                     label: item.childLabel,
+                                   shadow:self.nodeShadow,
                                     shape: shape,
                                     size: shapeSize,
                                     level: self.currentExpandLevel,
@@ -1484,6 +1515,7 @@ var Lineage_classes = (function () {
                             id: item.subject.value,
                             label: item.subjectLabel.value,
                             font: {color: color},
+                           shadow:self.nodeShadow,
                             shape: "dot",
                             level: self.currentExpandLevel,
                             size: Lineage_classes.defaultShapeSize,
@@ -1504,6 +1536,7 @@ var Lineage_classes = (function () {
                             id: item.object.value,
                             label: item.objectLabel.value,
                             font: {color: color},
+                           shadow:self.nodeShadow,
                             shape: "dot",
                             level: self.currentExpandLevel,
                             size: Lineage_classes.defaultShapeSize,
@@ -1598,6 +1631,7 @@ var Lineage_classes = (function () {
                         visjsData.nodes.push({
                             id: item.range.value,
                             label: item.rangeLabel.value,
+                           shadow:self.nodeShadow,
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: self.getSourceColor(source, item.range.value),
@@ -1699,19 +1733,23 @@ var Lineage_classes = (function () {
                 //  console.log(JSON.stringify(result, null, 2))
                 self.currentExpandLevel += 1
 
-
+                var shape = Lineage_classes.defaultShape;
+                var size = Lineage_classes.defaultShapeSize
                 result.forEach(function (item) {
 
 
                     if (!existingNodes[item.concept.value]) {
                         existingNodes[item.concept.value] = 1;
                         var color = self.getSourceColor(source)
+
                         var size = Lineage_classes.defaultShapeSize
                         visjsData.nodes.push({
                             id: item.concept.value,
                             label: item.conceptLabel.value,
+                           shadow:self.nodeShadow,
                             shape: shape,
                             size: size,
+
                             color: color,
                             level: self.currentExpandLevel,
                             data: {
@@ -1726,10 +1764,8 @@ var Lineage_classes = (function () {
                     }
 
 
-                    var shape = Lineage_classes.defaultShape;
-                    var size = Lineage_classes.defaultShapeSize
                     var color
-
+                    var size = self.defaultShapeSize
                     if (!item.value) {
                         color = "#ddd"
                         item.value = {value: "?_" + item.prop.value}
@@ -1748,8 +1784,10 @@ var Lineage_classes = (function () {
                         visjsData.nodes.push({
                             id: item.value.value,
                             label: item.valueLabel.value,
+                           shadow:self.nodeShadow,
                             shape: shape,
                             size: size,
+
                             color: color,
                             level: self.currentExpandLevel,
                             data: {
@@ -1839,6 +1877,7 @@ var Lineage_classes = (function () {
                         visjsData.nodes.push({
                             id: item.node.value,
                             label: item.nodeLabel.value,
+                           shadow:self.nodeShadow,
                             shape: Lineage_classes.namedIndividualShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: color,
@@ -1858,6 +1897,7 @@ var Lineage_classes = (function () {
                         visjsData.nodes.push({
                             id: item.concept.value,
                             label: item.conceptLabel.value,
+                           shadow:self.nodeShadow,
                             shape: Lineage_classes.namedIndividualShape,
                             size: Lineage_classes.defaultShapeSize,
                             color: color,
@@ -1969,6 +2009,7 @@ var Lineage_classes = (function () {
                     return;
                 //  if (!node.data.initialParams) {
                 node.data.initialParams = {
+                   shadow:self.nodeShadow,
                     shape: node.shape,
                     size: node.size,
                 }
@@ -1983,7 +2024,7 @@ var Lineage_classes = (function () {
                     size = node.data.initialParams.size;
                     shape = node.data.initialParams.shape;
                 }
-                newNodes.push({id: node.id, size: size, shape: shape, font: font})
+                newNodes.push({id: node.id, size: size, shadow: self.nodeShadow, shape: shape, font: font})
                 //  newNodes.push({id: id, opacity:opacity})
             })
             visjsGraph.data.nodes.update(newNodes)
@@ -2021,6 +2062,7 @@ var Lineage_classes = (function () {
                             id: item.concept.value,
                             label: item.conceptLabel.value,
                             data: nodeData,
+                           shadow:self.nodeShadow,
                             shape: Lineage_classes.defaultShape,
                             color: self.getSourceColor(nodeData.source, item.concept.value),
                             size: Lineage_classes.defaultShapeSize
@@ -2041,6 +2083,7 @@ var Lineage_classes = (function () {
                                         label: item["broader" + i + "Label"].value,
                                         id: item["broader" + i].value
                                     },
+                                   shadow:self.nodeShadow,
                                     shape: Lineage_classes.defaultShape,
                                     color: color,
                                     size: Lineage_classes.defaultShapeSize
@@ -2158,21 +2201,21 @@ var Lineage_classes = (function () {
 
                 self.currentGraphNode = node;
 
-              self.onGraphOrTreeNodeClick(node,options,{callee:"Graph"})
+                self.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
 
-              /*  if (options.ctrlKey && options.shiftKey) {
-                    Lineage_classes.graphActions.graphNodeNeighborhood("all")
-                } else if (options.ctrlKey && options.altKey) {
-                    Lineage_blend.addNodeToAssociationNode(node, "source")
-                } else if (!options.ctrlKey && options.altKey) {
-                    Lineage_blend.addNodeToAssociationNode(node, "target")
-                } else if (options.shiftKey && options.altKey) {
-                    Lineage_blend.deleteRestriction(node)
-                } else if (options.ctrlKey) {
+                /*  if (options.ctrlKey && options.shiftKey) {
+                      Lineage_classes.graphActions.graphNodeNeighborhood("all")
+                  } else if (options.ctrlKey && options.altKey) {
+                      Lineage_blend.addNodeToAssociationNode(node, "source")
+                  } else if (!options.ctrlKey && options.altKey) {
+                      Lineage_blend.addNodeToAssociationNode(node, "target")
+                  } else if (options.shiftKey && options.altKey) {
+                      Lineage_blend.deleteRestriction(node)
+                  } else if (options.ctrlKey) {
 
-                  SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+                    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
 
-                }*/
+                  }*/
 
                 /*  return Clipboard.copy({
                       type: "lineage_node",

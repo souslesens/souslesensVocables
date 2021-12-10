@@ -53,7 +53,7 @@ var CustomPluginController = (function () {
 
     self.setGraphNodesIcons=function() {
         if (!self.pluginDir)
-            return;
+            self.pluginDir="TotalEnergies";
         //  var nodes=visjsGraph.data.nodes.get();
         var newNodes = []
         self.path = self.rootDir + self.pluginDir + "/"
@@ -75,8 +75,6 @@ var CustomPluginController = (function () {
                 if (err)
                     return console.log(err)
                 result.forEach(function (item) {
-                    if (item.concept.value.indexOf("14224") > -1)
-                        var x = 3
                     var newNode = {id: item.concept.value}
                     if (Lineage_classes.sourcesGraphUriMap[item.g.value]) {
                         var source = Lineage_classes.sourcesGraphUriMap[item.g.value].name

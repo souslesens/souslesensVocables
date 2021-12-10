@@ -10,6 +10,8 @@ var Lineage_blend = (function () {
             $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
             $("#lineage_targetNodeDiv").html("")
         } else if (role == "target") {
+            if(!self.currentAssociation)
+                return
             self.currentAssociation[1] = node.data;
             $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
         }

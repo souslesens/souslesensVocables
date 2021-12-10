@@ -95,15 +95,25 @@
     <script src="js/tools/admin.js"></script>
     <script src="js/tools/Config.js"></script>
 
-
-
-
-
-
-
-
-
     <script src="js/tools/ontologiesStats.js"></script>
+
+
+
+<!-----------private tools--------------->
+    <script src="js/customPluginController.js"></script>
+
+  <!--  <script src="customPlugins/TotalEnergies/TE_14224_browser.js"></script>-->
+
+
+
+
+
+
+
+
+
+
+
 
 
     <script src="config/app_config.js"></script>
@@ -424,12 +434,13 @@
         </table>
 
     </div>
-
     <div class="col text-end">
       <button onclick="Blender.onLoaded()" type="button" class="btn btn-sm py-0 btn-outline-primary">Blender</button>
+      <!--
       <button onclick="MainController.UI.toogleRightPanel()" type="button" class="btn btn-sm py-0 btn-outline-primary">R</button>
       <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>
       <button onclick="TreeMap.draw2(TreeMap.treemapSLSV)" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>
+  -->
       <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">cpQy</button>
 
       <a class="btn btn-sm py-0 btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">

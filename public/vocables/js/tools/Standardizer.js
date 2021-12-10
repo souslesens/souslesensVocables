@@ -623,11 +623,11 @@ var Standardizer = (function () {
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
         self.currentWordsCount = 0
-
+        self.matrixWordsMap = {indexes: indexes, entities: []}
         var slices = common.array.slice(words, size)
         async.eachSeries(slices, function (words, callbackEach) {
             var indexes = self.getSelectedIndexes()
-            self.matrixWordsMap = {indexes: indexes, entities: []}
+
             self.currentWordsCount += words.length
             self.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
                 var html = self.processMatrixResult(words, result, indexes)

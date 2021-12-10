@@ -225,26 +225,10 @@ var visjsGraph = (function () {
                         fixed = false;
 
                     newNodes.push({id: nodeId, fixed: fixed})
-                    /*   nodes.forEach(function (id) {
-                           var fixed = true;
-                           if (id == nodeId)
-                               fixed = true;
-                           newNodes.push({id: id, fixed: fixed})
 
-                       })*/
                     visjsGraph.data.nodes.update(newNodes)
 
-                    /*      var nodeId = params.nodes[0];
-                          var node = self.data.nodes.get(nodeId);
-                          node._graphPosition = params.pointer.DOM;
-                          var point = params.pointer.DOM;
-                          var newNode = {id: nodeId}
-                          newNode.fixed = {x: true, y: true}
-                          newNode.x = point.x;
-                          newNode.y = point.y;
-                          visjsGraph.network.stopSimulation();
-                          visjsGraph.simulationOn = false;*/
-                    //   visjsGraph.data.nodes.update(newNode);
+
 
                 }
             });
@@ -296,6 +280,7 @@ var visjsGraph = (function () {
         }
         setTimeout(function () {
             self.listSavedGraphs()
+     // CustomPluginController.setGraphNodesIcons()
         }, 500)
 
         if (callback) {
@@ -405,10 +390,7 @@ var visjsGraph = (function () {
 
 
     self.clearGraph = function () {// comment ca marche  bad doc???
-        /*  if (self.network)
-              self.network.destroy();
-          $("#graph_legendDiv").html("");
-          self.data = {};*/
+
         if (self.data && self.data.nodes) {
             self.data.nodes.remove(self.data.nodes.getIds())
             self.data.edges.remove(self.data.edges.getIds())
@@ -571,12 +553,16 @@ var visjsGraph = (function () {
         if (includeParents)
             nodes = nodeIds
         var allEdges = self.data.edges.get();
-
+var allNodes={}
         function recurse(nodeId) {
             allEdges.forEach(function (edge) {
                 if (edge.from == nodeId) {
-                    nodes.push(edge.to)
-                    recurse(edge.to)
+
+                    if(!allNodes[edge.to]) {
+                        allNodes[edge.to]=1
+                        nodes.push(edge.to)
+                        recurse(edge.to)
+                    }
                 }
                 /* if(includeParents && edge.to == nodeId){
                      nodes.push(edge.from)
@@ -747,23 +733,21 @@ var visjsGraph = (function () {
 
     }
     self.toSVG = function () {
-
         SVGexport.toSVG(self.network)
         self.redraw()
-
-
     }
+
     self.toGraphMl = function () {
         var visjsData = {
             nodes: visjsGraph.data.nodes.get(),
             edges: visjsGraph.data.edges.get(),
         }
-
         var xmlStr = GraphMlExport.VisjsDataToGraphMl(visjsData)
         common.copyTextToClipboard(xmlStr)
-
-
     }
+
+
+
     self.searchNode = function () {
         var word = $("#visjsGraph_searchInput").val()
         if (word == "")

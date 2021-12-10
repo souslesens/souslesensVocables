@@ -149,7 +149,14 @@ var csvCrawler = {
                     })
 
                     .on("data", function (data) {
-                        //  if (linesCount++ % 1000 == 0) console.log(linesCount);
+                        var emptyLine = true;
+                        for (var i = 0; i < headers.length; i++) {
+                            if (data[headers[i]]) {
+                                emptyLine = false;
+                                break;
+                            }
+                        }
+                        if (emptyLine) return;
 
                         jsonDataFetch.push(data);
 
@@ -164,6 +171,7 @@ var csvCrawler = {
                     })
                     .on("error", function (error) {
                         var x = error;
+                        return callback(error);
                     })
             );
         });

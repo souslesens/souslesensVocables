@@ -160,6 +160,10 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
+
+
+
+
     return self;
 
 })()

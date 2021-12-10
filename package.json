@@ -15,7 +15,7 @@
     "major": " npm version --no-git-tag-version --no-commit-hooks major"
   },
   "devDependencies": {
-    "prettier": "^2.5.0"
+    "prettier": "^2.5.1"
   },
   "dependencies": {
     "@emotion/react": "^11.7.0",
@@ -23,8 +23,8 @@
     "@futpib/tika-server-client": "0.0.5",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/types": "^5.1.8",
-    "@mui/icons-material": "^5.2.0",
-    "@mui/x-data-grid": "^5.0.1",
+    "@mui/icons-material": "^5.2.1",
+    "@mui/x-data-grid": "^5.2.0",
     "@triply/yasgui": "^4.2.20",
     "async": "^3.2.2",
     "base64-stream": "^1.0.0",
@@ -62,12 +62,12 @@
     "morgan": "~1.10.0",
     "mssql": "^7.3.0",
     "mysql": "^2.18.1",
-    "n3": "^1.11.2",
+    "n3": "^1.12.1",
     "ndjson": "^2.0.0",
     "node-schedule": "^2.1.0",
     "nodemon": "^2.0.15",
-    "npm": "^8.1.4",
-    "npm-check-updates": "^12.0.2",
+    "npm": "^8.3.0",
+    "npm-check-updates": "^12.0.3",
     "passport": "^0.5.0",
     "passport-keycloak-oauth2-oidc": "^1.0.5",
     "passport-local": "^1.0.0",

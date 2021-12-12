@@ -9,11 +9,12 @@ import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, 
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
-
+import Autocomplete from '@mui/material/Autocomplete';
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
 
+    const [filteringChars, setFilteringChars] = React.useState("")
     const deleteSource = (source: Source) => {
 
         const updatedSources = unwrappedSources.filter(prevSources => prevSources.id !== source.id);
@@ -43,7 +44,16 @@ const SourcesTable = () => {
                 <Box
                     sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
                     <Stack>
-                        <Box id="table-container" sx={{ justifyContent: 'center', height: '400px', display: 'flex' }}>
+                        <Autocomplete
+                            disablePortal
+                            id="search-sources"
+                            options={gotSources.map((source) => source.name)}
+                            sx={{ width: 300 }}
+                            onInputChange={(event, newInputValue) => {
+                                setFilteringChars(newInputValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
+                        />    <Box id="table-container" sx={{ justifyContent: 'center', height: '400px', display: 'flex' }}>
                             <TableContainer sx={{ height: '400px' }} component={Paper}>
                                 <Table>
                                     <TableHead>
@@ -53,24 +63,27 @@ const SourcesTable = () => {
                                             <TableCell style={{ fontWeight: 'bold' }}>Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{gotSources.map(source => {
-                                        return (<TableRow key={source.name}>
-                                            <TableCell >
-                                                {source.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {source.graphUri}
+                                    <TableBody sx={{ width: '100%', overflow: 'visible' }}>{
+                                        gotSources
+                                            .filter((source) => source.name.includes(filteringChars))
+                                            .map(source => {
+                                                return (<TableRow key={source.name}>
+                                                    <TableCell >
+                                                        {source.name}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {source.graphUri}
 
-                                            </TableCell>
-                                            <TableCell>
+                                                    </TableCell>
+                                                    <TableCell>
 
-                                                <Box sx={{ display: 'flex' }}><SourceForm source={source} />
-                                                    <ButtonWithConfirmation label='Delete' msg={() => deleteSource(source)} />
-                                                </Box>
-                                            </TableCell>
+                                                        <Box sx={{ display: 'flex' }}><SourceForm source={source} />
+                                                            <ButtonWithConfirmation label='Delete' msg={() => deleteSource(source)} />
+                                                        </Box>
+                                                    </TableCell>
 
-                                        </TableRow>);
-                                    })}</TableBody>
+                                                </TableRow>);
+                                            })}</TableBody>
                                 </Table>
                             </TableContainer>
                         </Box>

@@ -95,8 +95,8 @@ var Sunburst = (function () {
             .style("position", "absolute")
             .style("z-index", "10")
             .style("opacity", 0)
-            .style("left", "430px")
-            .style("top", "350px")
+            .style("left", "380px")
+            .style("top", "250px")
 
         var width = 960,
             height = 700,

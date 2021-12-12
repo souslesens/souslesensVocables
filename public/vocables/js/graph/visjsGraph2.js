@@ -225,26 +225,10 @@ var visjsGraph = (function () {
                         fixed = false;
 
                     newNodes.push({id: nodeId, fixed: fixed})
-                    /*   nodes.forEach(function (id) {
-                           var fixed = true;
-                           if (id == nodeId)
-                               fixed = true;
-                           newNodes.push({id: id, fixed: fixed})
 
-                       })*/
                     visjsGraph.data.nodes.update(newNodes)
 
-                    /*      var nodeId = params.nodes[0];
-                          var node = self.data.nodes.get(nodeId);
-                          node._graphPosition = params.pointer.DOM;
-                          var point = params.pointer.DOM;
-                          var newNode = {id: nodeId}
-                          newNode.fixed = {x: true, y: true}
-                          newNode.x = point.x;
-                          newNode.y = point.y;
-                          visjsGraph.network.stopSimulation();
-                          visjsGraph.simulationOn = false;*/
-                    //   visjsGraph.data.nodes.update(newNode);
+
 
                 }
             });
@@ -261,7 +245,7 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button onclick='visjsGraph.saveGraph()'>Save </button>" +
+        var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.saveGraph()'>Save </button>" +
             "Load<select style='width: 100px' id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>" +
             "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>add</div><div id='VisJsGraph_message'></div>"
 
@@ -270,8 +254,8 @@ var visjsGraph = (function () {
             if (!$("#graphButtons").length) {
 
                 var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                    // " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                    " <div> <B>Graph</B> </div><div><button onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+                    // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                    " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
 
                     "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
@@ -280,7 +264,7 @@ var visjsGraph = (function () {
                     "<option>hierarchical horizontal</option>" + "</select></div>";
 
 
-                html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button onclick='visjsGraph.searchNode()'>Search</button></div>"
+                html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
 
                 if (true)
@@ -296,6 +280,7 @@ var visjsGraph = (function () {
         }
         setTimeout(function () {
             self.listSavedGraphs()
+     // CustomPluginController.setGraphNodesIcons()
         }, 500)
 
         if (callback) {
@@ -405,10 +390,7 @@ var visjsGraph = (function () {
 
 
     self.clearGraph = function () {// comment ca marche  bad doc???
-        /*  if (self.network)
-              self.network.destroy();
-          $("#graph_legendDiv").html("");
-          self.data = {};*/
+
         if (self.data && self.data.nodes) {
             self.data.nodes.remove(self.data.nodes.getIds())
             self.data.edges.remove(self.data.edges.getIds())
@@ -571,12 +553,16 @@ var visjsGraph = (function () {
         if (includeParents)
             nodes = nodeIds
         var allEdges = self.data.edges.get();
-
+var allNodes={}
         function recurse(nodeId) {
             allEdges.forEach(function (edge) {
                 if (edge.from == nodeId) {
-                    nodes.push(edge.to)
-                    recurse(edge.to)
+
+                    if(!allNodes[edge.to]) {
+                        allNodes[edge.to]=1
+                        nodes.push(edge.to)
+                        recurse(edge.to)
+                    }
                 }
                 /* if(includeParents && edge.to == nodeId){
                      nodes.push(edge.from)
@@ -747,23 +733,21 @@ var visjsGraph = (function () {
 
     }
     self.toSVG = function () {
-
         SVGexport.toSVG(self.network)
         self.redraw()
-
-
     }
+
     self.toGraphMl = function () {
         var visjsData = {
             nodes: visjsGraph.data.nodes.get(),
             edges: visjsGraph.data.edges.get(),
         }
-
         var xmlStr = GraphMlExport.VisjsDataToGraphMl(visjsData)
         common.copyTextToClipboard(xmlStr)
-
-
     }
+
+
+
     self.searchNode = function () {
         var word = $("#visjsGraph_searchInput").val()
         if (word == "")

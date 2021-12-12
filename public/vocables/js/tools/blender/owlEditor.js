@@ -368,7 +368,7 @@ var OwlEditor = (function () {
 
 
                 }
-                inputHtml += "<button onclick=OwlEditor.onAddPropertyButton('" + rangeInpuId + "')>+</button>" +
+                inputHtml += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=OwlEditor.onAddPropertyButton('" + rangeInpuId + "')>+</button>" +
                     "</div>"
                 //
                 //
@@ -527,7 +527,7 @@ var OwlEditor = (function () {
             self.editingNodeMap[id] = {subjectData: subjectData, objectData: objectData, range: rangeId}
             var html = "<div class='OwlEditorItemPropertyValueDiv2' id='" + id + "'>" +
                 " <div class='OwlEditorItemPropertyValueDiv'>" + item.label + "</div>&nbsp;" +
-                "<button onclick='OwlEditor.deleteRange(\"" + id + "\")'>-</button>" +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='OwlEditor.deleteRange(\"" + id + "\")'>-</button>" +
                 "</div>"
 
             $("#OwlEditorItemPropertyDiv_" + rangeId).prepend(html)

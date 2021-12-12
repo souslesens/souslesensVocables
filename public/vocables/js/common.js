@@ -149,7 +149,9 @@ var common = (function () {
 
                         if (options.selectTreeNodeFn)
                             options.selectTreeNodeFn(evt, obj);
-                    }).on('open_node.jstree', function (evt, obj) {
+                    }).
+
+                on('open_node.jstree', function (evt, obj) {
                     self.jstree.setTreeAppearance()
                     if (options.onOpenNodeFn) {
                         options.onOpenNodeFn(evt, obj);

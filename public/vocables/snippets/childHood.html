@@ -11,7 +11,7 @@
 
 <div id="dialogDiv" style="display: flex;flex-direction: column">
     <input id="ChildHood_depth" value="2">
-        <button onclick="ChildHood.displayGraph('ancestors')">display ancestors Graph</button>&nbsp;
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="ChildHood.displayGraph('ancestors')">display ancestors Graph</button>&nbsp;
 </div>
 <div id="graphPopupDiv" onclick="Genealogy.graphActions.hidePopup();" style=" z-index:20;position:absolute;flex-direction:column;padding:5px;border-radius:5px;text-align:center;display: none;background-color: #ddd">
     <span class="popupMenuItem" onclick="Genealogy.graphActions.drawChildren();"> draw children</span>

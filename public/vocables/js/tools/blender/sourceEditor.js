@@ -62,8 +62,8 @@ var SourceEditor = (function () {
                 })
                 $("#graphDiv").load("snippets/sourceEditor.html")
                 $("#SourceEditor_NewObjectDiv").css("display", "none")
-                // $("#actionDivContolPanelDiv").html("<button onclick='SourceEditor.onAddNewObject()'>+</button>")
-                $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='SourceBrowser.searchTerm()'>Search</button>")
+                // $("#actionDivContolPanelDiv").html("<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceEditor.onAddNewObject()'>+</button>")
+                $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.searchTerm()'>Search</button>")
             })
         }
 
@@ -305,7 +305,7 @@ var SourceEditor = (function () {
                 html += "<tr class='SourceEditor_input_TR' id='SourceEditor_" + valueId + "'>" +
                     "<td><span>" + keyLabel + "</span></td>" +
                     "<td>" + langStr + "<input class='SourceEditor_value '  value='" + value.value + "'></td>" +
-                    "<td><button onclick='SourceEditor.deleteEditingValue(\"SourceEditor_" + valueId + "\")'>X</button></td>" +
+                    "<td><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceEditor.deleteEditingValue(\"SourceEditor_" + valueId + "\")'>X</button></td>" +
                     "</tr>"
             })
             var divId = "SourceEditor_" + keyLabel.replace(/ /g, "_") + "Div"

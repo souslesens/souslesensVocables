@@ -623,11 +623,11 @@ var Standardizer = (function () {
         var html = self.initMatrix(indexes)
         $("#KGmapping_matrixContainer").html(html)
         self.currentWordsCount = 0
-
+        self.matrixWordsMap = {indexes: indexes, entities: []}
         var slices = common.array.slice(words, size)
         async.eachSeries(slices, function (words, callbackEach) {
             var indexes = self.getSelectedIndexes()
-            self.matrixWordsMap = {indexes: indexes, entities: []}
+
             self.currentWordsCount += words.length
             self.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
                 var html = self.processMatrixResult(words, result, indexes)
@@ -847,9 +847,9 @@ var Standardizer = (function () {
                     "<br>"
 
                 if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-                    html += "<button  onclick='Standardizer.removeAsReference(\"" + entity[source].id + "\")' >Remove</button>"
+                    html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary'  onclick='Standardizer.removeAsReference(\"" + entity[source].id + "\")' >Remove</button>"
                     if (entity[source].status == "CANDIDATE")
-                        html += "<button  onclick='Standardizer.setAsReference(\"" + entity[source].id + "\")' >Validate</button>"
+                        html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary'  onclick='Standardizer.setAsReference(\"" + entity[source].id + "\")' >Validate</button>"
                 }
                 html += "<hr>"
 
@@ -1883,8 +1883,8 @@ var Standardizer = (function () {
                     cols.push({
                         title: "action", render: function (datum, type, row) {
 
-                            return "<button onclick='  SourceBrowser.showNodeInfos (\"" + row[0] + "\",\"" + row[2] + "\",\"mainDialogDiv\")'>I</button>" +
-                                "<button onclick='  Standardizer.selectAsFuzzyMatch (\"" + row[0] + "\",\"" + row[2] + "\")'>S</button>"
+                            return "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  SourceBrowser.showNodeInfos (\"" + row[0] + "\",\"" + row[2] + "\",\"mainDialogDiv\")'>I</button>" +
+                                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  Standardizer.selectAsFuzzyMatch (\"" + row[0] + "\",\"" + row[2] + "\")'>S</button>"
                         },
                         width: '50px'
                     })

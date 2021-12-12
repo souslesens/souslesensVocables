@@ -478,17 +478,17 @@ var Standardizer = (function () {
     }
 
     self.createSameAsRelations = function () {
-        var relations=[]
+        var relations = []
         self.fuzzyMatches.forEach(function (item) {
-            var from=self.currentWordsMap[item.word]
+            var from = self.currentWordsMap[item.word]
 
-            if(from){
+            if (from) {
                 relations.push({
                     to: {
 
-                       source: item.source,
-                       label: item.item.label,
-                       id: item.item.id,
+                        source: item.source,
+                        label: item.item.label,
+                        id: item.item.id,
                     }, from: {
                         source: from.source,
                         label: from.item.label,
@@ -599,7 +599,7 @@ var Standardizer = (function () {
             return alert("Enter text to standardize")
         var words1 = text.split("\n")
         var words = []
-        self.currentWordsMap={}
+        self.currentWordsMap = {}
         words1.forEach(function (word) {
             word = word.trim()
             if (words.indexOf(word) < 0)
@@ -649,6 +649,7 @@ var Standardizer = (function () {
                 $(".matrixWordNoMatch").bind("click", Standardizer.onMatrixWordNoMatchClick)
                 $(".matrixWordExactMatch").bind("click", Standardizer.onMatrixWordExactMatchClick)
                 self.showMatchesIndexRanking()
+                self.searchResultArray = searchResultArray
                 self.drawSunBurst(searchResultArray, words, {}, function (err) {
 
                 })
@@ -686,7 +687,7 @@ var Standardizer = (function () {
         self.currentWordsCount = 0
         var searchResultArray = []
         var allWords = []
-        self.currentWordsMap={}
+        self.currentWordsMap = {}
         async.whilst(function (test) {
             return resultSize > 0
 
@@ -702,8 +703,12 @@ var Standardizer = (function () {
                 hits.forEach(function (hit) {
                     words.push(hit._source.label);
                     allWords = allWords.concat(words)
-                    self.currentWordsMap[hit._source.label]={source: self.currentSource,id:hit._source.id,label:hit._source.label}
-                 //   self.currentWords.push(hit._source.label)
+                    self.currentWordsMap[hit._source.label] = {
+                        source: self.currentSource,
+                        id: hit._source.id,
+                        label: hit._source.label
+                    }
+                    //   self.currentWords.push(hit._source.label)
                 })
                 var indexes = self.getSelectedIndexes(true)
                 self.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
@@ -735,7 +740,7 @@ var Standardizer = (function () {
 
                 self.showMatchesIndexRanking()
 
-
+                self.searchResultArray = searchResultArray
                 self.drawSunBurst(searchResultArray, allWords, {}, function (err) {
 
                 })
@@ -1939,52 +1944,86 @@ var Standardizer = (function () {
 
 
     self.extractText = function () {
+        $("#Standardizer_wordsTA").val("")
         var text = $("#Standardizer_textTA").val();
         if (!text || text == "")
             return alert("enter a text")
 
-        var options={"composedWords_2":1}
+        var options = {"composedWords_2": 0}
+        var chunks = [];
+        var chunkSize = 5000
+        var currentChunk = ""
+        var currentIndex = 0
+        var textSize = text.length
+        while (currentChunk.length == "" || currentIndex < textSize) {
 
-        var payload={
-            SpacyExtract :1,
-            text :text,
-            options:JSON.stringify(options),
-            types:JSON.stringify(["NN"])
+            currentChunk = text.substring(currentIndex, currentIndex + chunkSize)
+            chunks.push(currentChunk)
+            currentIndex += chunkSize
+
+
         }
-        $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
-            dataType: "json",
-            success: function (tokens, textStatus, jqXHR) {
-                var str = ""
-              tokens.forEach(function (word) {
+        var allTokens = {};
+        var index = 0
+        async.eachSeries(chunks, function (chunk, callbackEach) {
 
-                        str += word + "\n"
+
+                var payload = {
+                    SpacyExtract: 1,
+                    text: chunk,
+                    options: JSON.stringify(options),
+                    types: JSON.stringify(["NN"])
+                }
+                $.ajax({
+                    type: "POST",
+                    url: Config.serverUrl,
+                    data: payload,
+                    dataType: "json",
+                    success: function (tokens, textStatus, jqXHR) {
+                        var percent = Math.round(((++index) * chunkSize / textSize) * 100)
+                        MainController.UI.message("extracting nouns : " + percent + "%", true)
+                        tokens.forEach(function (word) {
+                            if (!allTokens[word])
+                                allTokens[word] = 1
+
+                        })
+
+                        callbackEach();
+                    },
+                    error: function (err) {
+                        callbackEach(err);
+                    }
                 })
-                $("#Standardizer_wordsTA").val(str)
+            }, function (err) {
+                if (err)
+                    return alert(err)
 
-            },
-            error:function(err) {
-                return alert(err)
-            }
-            })
+                MainController.UI.message("extracted nouns : " + Object.keys(allTokens).length)
+                var str = ""
+                for (var word in allTokens) {
 
-            /*  ElasticSearchProxy.analyzeSentence(text, function (err, result) {
-            if (err)
-                return alert(err)
-            var str = ""
-            result.tokens.forEach(function (item) {
-
-                var word = item.token
-                if (word.length > 4) {
                     str += word + "\n"
                 }
-            })
-            $("#Standardizer_wordsTA").val(str)
+
+                $("#Standardizer_wordsTA").val(str)
+            }
+        )
+
+        /*  ElasticSearchProxy.analyzeSentence(text, function (err, result) {
+        if (err)
+            return alert(err)
+        var str = ""
+        result.tokens.forEach(function (item) {
+
+            var word = item.token
+            if (word.length > 4) {
+                str += word + "\n"
+            }
+        })
+        $("#Standardizer_wordsTA").val(str)
 
 
-        }) */
+    }) */
 
     }
 
@@ -2048,6 +2087,46 @@ var Standardizer = (function () {
     }
     self.onselectSourcesTreeNodeFn = function (event, obj) {
         self.currentSource = obj.node.id
+    }
+
+
+    self.showMatchesIntoLineage = function () {
+
+        var indexes = []
+        var classUrisByIndex = {}
+
+        self.searchResultArray.forEach(function (item, itemIndex) {
+            var hits = item.hits.hits;
+            if (hits.length == 0)
+                return
+            hits.forEach(function (hit) {
+                if (!classUrisByIndex[hit._index])
+                    classUrisByIndex[hit._index] = []
+                classUrisByIndex[hit._index].push(hit._source.id)
+            })
+        })
+
+        MainController.UI.initTool("lineage");
+        setTimeout(function () {
+            var i = 0;
+            async.eachSeries(Object.keys(classUrisByIndex), function (index, callbackEach) {
+
+                var source = self.indexSourcesMap[index]
+
+              if (i++ == 0)
+                    MainController.currentSource = source
+                MainController.UI.onSourceSelect()
+                Lineage_classes.addParentsToGraph(source, classUrisByIndex[index],function(err){
+                    if(err)
+                        return alert(err)
+                    callbackEach()
+                } )
+
+            })
+
+
+        }, 500)
+
     }
 
 

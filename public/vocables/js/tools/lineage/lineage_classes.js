@@ -1079,7 +1079,7 @@ var nodes= visjsGraph.lastAddedNodes
 
         }
 
-        self.addParentsToGraph = function (source, nodeIds) {
+        self.addParentsToGraph = function (source, nodeIds,callback) {
 
             if (!nodeIds) {
                 if (!source)
@@ -1154,10 +1154,15 @@ var nodes= visjsGraph.lastAddedNodes
 
                 }, function (err) {
                     $("#waitImg").css("display", "none");
-                    if (err)
+                    if (err) {
+                        if(callback)
+                            return callback(err)
                         return MainController.UI.message("No data found")
+                    }
+                visjsGraph.network.fit()
+                if(callback)
+                    return callback()
 
-                    visjsGraph.network.fit()
                     return MainController.UI.message("")
                 }
             )

@@ -121,7 +121,7 @@ enum Type {
 enum Mode { Creation, Edition }
 
 type Msg_ =
-    { type: Type.UserClickedModa    oad: boolean }
+    { type: Type.UserClickedModal, payload: boolean }
     | { type: Type.UserUpdatedField, payload: { fieldname: string, newValue: string } }
     | { type: Type.ResetProfile, payload: Mode }
     | { type: Type.UserClickedCheckAll, payload: { fieldname: string, value: boolean } }

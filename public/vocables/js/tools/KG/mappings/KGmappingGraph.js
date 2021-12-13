@@ -159,8 +159,8 @@ var KGmappingGraph = (function () {
                   "</table>" +
 
                   "</div>" +
-                  "<button onclick='KGmappingGraph.graphActions.setAssociation()'>OK</button>" +
-                  "<button onclick='KGmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
+                  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGmappingGraph.graphActions.setAssociation()'>OK</button>" +
+                  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
   $("#KGmappings_Tabs").tabs("option", "active", 3);
               $("#mainDialogDiv").html(html);*/
             $("#mainDialogDiv").load("snippets/KG/KGPropertyassocationDialog.html");

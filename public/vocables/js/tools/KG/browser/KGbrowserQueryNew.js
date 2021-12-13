@@ -358,8 +358,8 @@ var KGbrowserQuery = (function () {
 
                         var html = "<div class='KGbrowser_filterDiv' id='" + filterId + "'>" +
                             "<input type='checkbox'  checked='checked' class='KGbrowser_graphFilterCBX'>G&nbsp;" +
-                            "<button title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
-                            "<button title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
+                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' title='list content' onclick='KGbrowserQuery.graphActions.listFilter(\"" + filterId + "\")'>L</button>&nbsp;" +
+                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' title='remove filter' onclick='KGbrowserQuery.graphActions.removeFilter(\"" + filterId + "\")'>X</button>&nbsp;" +
                             "<span style='font-weight:bold;color:" + nodeData.color + "'>" + varName + "  " + filterLabel + " : " + nodeData.count
                         "</div>"
 
@@ -395,7 +395,7 @@ var KGbrowserQuery = (function () {
                 if (existingNodes.indexOf(node.data.id) < 0) {
                     jstreeData.push({
                         id: typeId,
-                        text: Sparql_common.getLabelFromId(node.data.label),
+                        text: Sparql_common.getLabelFromURI(node.data.label),
                         parent: '#',
                         data: {
                             type: "type",
@@ -515,7 +515,7 @@ var KGbrowserQuery = (function () {
                             if (item[keyName + "Label"])
                                 label = item[keyName + "Label"].value
                             else
-                                label = Sparql_common.getLabelFromId(item[keyName].value)
+                                label = Sparql_common.getLabelFromURI(item[keyName].value)
                             jstreeData.push(
                                 {
                                     id: item[keyName].value,
@@ -877,7 +877,7 @@ var KGbrowserQuery = (function () {
                         for (var key in item) {
                             if (key != "count")
                                 if (!item[key + "Label"])
-                                    item[key + "Label"] = {value: Sparql_common.getLabelFromId(item[key].value)}
+                                    item[key + "Label"] = {value: Sparql_common.getLabelFromURI(item[key].value)}
 
                         }
                     })*/

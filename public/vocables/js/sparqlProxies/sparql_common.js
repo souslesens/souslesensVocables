@@ -99,7 +99,10 @@ var Sparql_common = (function () {
                         return ""
                     var conceptIdsStr = ""
                     ids.forEach(function (id, index) {
-                        if(id.indexOf("http")!=0)
+                        if(!id.indexOf)
+                            var x=3
+                      //  if(id.indexOf("http")!=0)
+                       if (id.match && !id.match(/.+:.+|http.+/))
                             return
                         if (id != "") {
                             if (conceptIdsStr != "")
@@ -201,7 +204,7 @@ var Sparql_common = (function () {
         return str;
     }
 
-    self.getLabelFromId = function (id) {
+    self.getLabelFromURI = function (id) {
 
         if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id])
             return OwlSchema.currentSourceSchema.labelsMap[id];

@@ -149,7 +149,9 @@ var common = (function () {
 
                         if (options.selectTreeNodeFn)
                             options.selectTreeNodeFn(evt, obj);
-                    }).on('open_node.jstree', function (evt, obj) {
+                    }).
+
+                on('open_node.jstree', function (evt, obj) {
                     self.jstree.setTreeAppearance()
                     if (options.onOpenNodeFn) {
                         options.onOpenNodeFn(evt, obj);
@@ -788,6 +790,32 @@ var common = (function () {
                 return str
             }
 
+       // var dateTime='2000-01-15T00:00:00'
+
+        self.dateToRDFString = function (date) {
+            var str = ""
+            var dateArray = date.toLocaleString("en-US").split(' ')
+            if (date instanceof Date && isFinite(date)) {
+                var month = "" + (date.getMonth() + 1);
+                if (month.length == 1)
+                    month = "0" + month
+                var day = "" + date.getDate();
+                if (day.length == 1)
+                    day = "0" + day
+                var hour = "" + date.getHours();
+                if (day.hour == 1)
+                    hour = "0" + hour
+                var min = "" + date.getMinutes();
+                if (min.length == 1)
+                    min = "0" + min
+                var sec = "" + date.getSeconds();
+                if (sec.length == 1)
+                    sec = "0" + sec
+                str = date.getFullYear() + "-" + month + "-" + day + "T" + hour + ":" + min + ":" + sec;
+            } else
+                str = "";
+            return str
+        }
 
         self.isNumber = function (n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
@@ -881,3 +909,5 @@ var common = (function () {
 
     }
 )()
+
+common.dateToRDFString(new Date())

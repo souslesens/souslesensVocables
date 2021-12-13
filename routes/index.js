@@ -32,40 +32,99 @@ router.get("/", ensureLoggedIn(), function (req, res, next) {
 });
 
 if (!config.disableAuth) {
-    ensureLoggedIn = function ensureLoggedIn(options) {
-        return function (req, res, next) {
-            if (!req.isAuthenticated || !req.isAuthenticated()) {
-                return res.redirect(401, "/login");
-            }
-            next();
-        };
-    };
-    // Login route
-    router.get("/login", function (req, res, next) {
-        res.render("login", { title: "souslesensVocables - Login" });
-    });
-    // auth route
-    router.post(
-        "/auth/login",
-        passport.authenticate("local", {
-            successRedirect: "/vocables",
-            failureRedirect: "/login",
-            failureMessage: true,
-        })
-    );
     router.get("/auth/check", function (req, res, next) {
+        const auth =
+            config.auth == "keycloak"
+                ? {
+                      realm: config.keycloak.realm,
+                      clientID: config.keycloak.clientID,
+                      authServerURL: config.keycloak.authServerURL,
+                  }
+                : {};
+
+        // get user from json to get groups
+        const usersLocation = path.join(__dirname, "../config/users/users.json");
+        let users = JSON.parse("" + fs.readFileSync(usersLocation));
+        let findUser = Object.keys(users)
+            .map(function (key, index) {
+                return {
+                    id: users[key].id,
+                    login: users[key].login,
+                    groups: users[key].groups,
+                    source: users[key].source,
+                };
+            })
+            .find((user) => user.login == req.user.login);
+
         res.send({
             logged: req.user ? true : false,
-            user: req.user,
+            user: {
+                login: findUser.login,
+                groups: findUser.groups,
+            },
+            authSource: config.auth,
+            auth: auth,
         });
     });
-    router.get("/auth/logout", function (req, res, next) {
-        req.logout();
-        res.send({
-            logged: req.user ? true : false,
-            user: req.user,
+
+    if (config.auth == "keycloak") {
+        ensureLoggedIn = function ensureLoggedIn(options) {
+            passport.authenticate("keycloak", { failureRedirect: "/login" });
+            return function (req, res, next) {
+                if (!req.isAuthenticated || !req.isAuthenticated()) {
+                    return res.redirect(401, "/login");
+                }
+                next();
+            };
+        };
+
+        router.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
+
+        router.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
+
+        router.get("/auth/logout", function (req, res, next) {
+            req.logout();
+            res.send({
+                logged: req.user ? true : false,
+                user: req.user,
+                redirect: config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl,
+            });
         });
-    });
+
+        // Default login is json
+    } else {
+        ensureLoggedIn = function ensureLoggedIn(options) {
+            return function (req, res, next) {
+                if (!req.isAuthenticated || !req.isAuthenticated()) {
+                    return res.redirect(401, "/login");
+                }
+                next();
+            };
+        };
+
+        router.get("/login", function (req, res, next) {
+            res.render("login", { title: "souslesensVocables - Login" });
+        });
+
+        router.post(
+            "/auth/login",
+            passport.authenticate("local", {
+                successRedirect: "/vocables",
+                failureRedirect: "/login",
+                failureMessage: true,
+            })
+        );
+
+        router.get("/auth/logout", function (req, res, next) {
+            req.logout();
+            res.send({
+                logged: req.user ? true : false,
+                user: req.user,
+                authSource: null,
+                auth: {},
+            });
+        });
+    }
 } else {
     ensureLoggedIn = function ensureLoggedIn(options) {
         return function (req, res, next) {
@@ -102,7 +161,7 @@ router.get("/users", ensureLoggedIn(), function (req, res, next) {
 router.put("/users", ensureLoggedIn(), async function (req, res, next) {
     // Hash password that are not hashed yet
     Object.keys(req.body).forEach(function (key, index) {
-        if (!req.body[key].password.startsWith("$2b$")) {
+        if (req.body[key].password && !req.body[key].password.startsWith("$2b$")) {
             req.body[key].password = bcrypt.hashSync(req.body[key].password, 10);
         }
     });
@@ -142,6 +201,12 @@ router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
         res.sendStatus(500);
         console.log(err);
     }
+});
+
+router.get("/config", ensureLoggedIn(), function (req, res, next) {
+    res.send({
+        auth: config.auth,
+    });
 });
 
 router.post("/upload", ensureLoggedIn(), function (req, response) {
@@ -277,6 +342,11 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+        if (req.body.SpacyExtract) {
+            DirContentAnnotator.SpacyExtract(req.body.text, JSON.parse(req.body.types), JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
 
         if (req.body.writeUserLog) {
             var ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
@@ -404,6 +474,14 @@ router.post(
             res.contentType("text/plain");
             res.status(200).send(result);
         });
+    }),
+    router.get("/getJsonFile", ensureLoggedIn(), function (req, res, next) {
+        //  if (req.body.filePath){}
+        var filePath = req.query.filePath;
+        var realPath = path.join(__dirname, "../public/vocables/" + filePath);
+        var data = "" + fs.readFileSync(realPath);
+        var json = JSON.parse(data);
+        processResponse(res, null, json);
     })
 );
 

@@ -14,7 +14,7 @@ var Evaluate = (function () {
         self.copyTypeColors["altLabel"]="#bfb4a1";
 
         self.onSourceSelect = function () {
-            /*   var html = "<button onclick='Evaluate.showActionPanel()'>OK</button>"
+            /*   var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Evaluate.showActionPanel()'>OK</button>"
                $("#sourceDivControlPanelDiv").html(html)*/
 
         }
@@ -535,8 +535,8 @@ var Evaluate = (function () {
             var word = event.currentTarget.innerText
             var html = "<b>" + word + "</b>&nbsp;" +
                 "<div style='    font-style: italic;color: #37d237;' id='Evaluate_infosDiv'></div>"+
-                "<button style=' background-color: "+Evaluate.copyTypeColors["concept"]+"' onclick='Evaluate.copyWordToClipboard(\"" + word + "\",\"concept\")'>Copy as Concept</button>" +
-                "<button style=' background-color: "+Evaluate.copyTypeColors["altLabel"]+"' onclick='Evaluate.copyWordToClipboard(\"" + word + "\",\"altLabel\")'>Copy as AltLabel</button>" +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' style=' background-color: "+Evaluate.copyTypeColors["concept"]+"' onclick='Evaluate.copyWordToClipboard(\"" + word + "\",\"concept\")'>Copy as Concept</button>" +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' style=' background-color: "+Evaluate.copyTypeColors["altLabel"]+"' onclick='Evaluate.copyWordToClipboard(\"" + word + "\",\"altLabel\")'>Copy as AltLabel</button>" +
                 "<br><ul>"
             var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id)
 

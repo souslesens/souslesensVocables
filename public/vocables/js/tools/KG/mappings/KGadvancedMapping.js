@@ -418,9 +418,9 @@ var KGadvancedMapping = (function () {
                     "<br>"
 
                 if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-                    html += "<button  onclick='KGadvancedMapping.deleteItemFromReferenceDictionary(\"" + entity[source].id + "\")' >Delete</button>"
+                    html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary'  onclick='KGadvancedMapping.deleteItemFromReferenceDictionary(\"" + entity[source].id + "\")' >Delete</button>"
                     if (entity[source].status == "CANDIDATE")
-                        html += "<button  onclick='KGadvancedMapping.validateCandidateInReferenceDictionary(\"" + entity[source].id + "\")' >Validate</button>"
+                        html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary'  onclick='KGadvancedMapping.validateCandidateInReferenceDictionary(\"" + entity[source].id + "\")' >Validate</button>"
                 }
                 html += "<hr>"
 
@@ -532,8 +532,8 @@ var KGadvancedMapping = (function () {
                         "<span style='background-color: " + self.getSourceColor(entity.index) + "' class='KGmapping_entitySource'>" + entity.index + "</span>" +
                         entity.term +
                         "<div>" +
-                        "<button onclick='KGadvancedMapping.showEntityInfos(\"" + id + "\")'>infos</button>" +
-                        "<button onclick='KGadvancedMapping.setAsMatchCandidate(\"" + id + "\")'>Select</button></div>" +
+                        "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGadvancedMapping.showEntityInfos(\"" + id + "\")'>infos</button>" +
+                        "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGadvancedMapping.setAsMatchCandidate(\"" + id + "\")'>Select</button></div>" +
                         "</div>"
 
                 })
@@ -555,7 +555,7 @@ var KGadvancedMapping = (function () {
         $("#" + candidateId).addClass("KGmapping_columnValues_isCandidate")
 
 
-        var html = "<button onclick='KGadvancedMapping.removeMatchCandidate(\"" + self.currentColumnValueDivId + "\")'>-</button>"
+        var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGadvancedMapping.removeMatchCandidate(\"" + self.currentColumnValueDivId + "\")'>-</button>"
         $("#" + self.currentColumnValueDivId).prepend(html)
 
 
@@ -766,7 +766,7 @@ var KGadvancedMapping = (function () {
 
     }
 
-    self.drawBestMatches = function (callback) {
+    self.lookForBestMatches = function (callback) {
         if (!KGmappingData.currentColumn)
             return alert("no column selected")
         KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
@@ -781,22 +781,7 @@ var KGadvancedMapping = (function () {
             },500)
             if (err)
                 return callback(err)
-        /*    var html = "<div style='display: flex;flex-direction:row';width:100%;height:100%>" +
-                "<div id='bestMatchesGraphDiv' style='width:800px;height:800px'></div>" +
-                "<div id='bestMatchesInfosDiv' style='width:200px;height:100%'></div>" +
-                "</div>"
 
-            $("#mainDialogDiv").dialog("open");
-
-            $("#mainDialogDiv").html(html)
-            setTimeout(function(){
-            Standardizer.drawBestMatches(word,null,"bestMatchesGraphDiv",function(err, result) {
-
-
-                callback(err, result);
-            })
-
-            })*/
 
         })
     }

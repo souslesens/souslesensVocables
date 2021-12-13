@@ -129,6 +129,9 @@
     .matrixWordNoMatch {
         background-color: #f3dede;
     }
+    .matrixWordFuzzyMatch {
+        background-color: #6ca6b8;
+    }
 
 
 
@@ -158,6 +161,18 @@
     }
 
 
+    #KGmapping_matrixContainer {
+        border: solid 1px brown;
+        margin: 2px;
+        padding: 2px;
+        display: flex;
+        flex-direction: column;
+        height: 700px;
+        width: 1000px;
+        overflow: auto
+    }
+
+
 
 
 
@@ -183,10 +198,13 @@
 
                 <!--  Search <input id="KGadvancedMapping_searchColumnInput"
                                 onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">-->
-                <button onclick="Standardizer.exportMatrix()">Export</button>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.exportExactMatchMatrix()">Export exact matches</button>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.exportFuzzyMatches()">Export fuzzy matches</button>
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.createSameAsRelations()">Create sameAs relations</button>
+
                 <br>
                 <div id="KGmapping_matrixContainer"
-                     style="border: solid 1px brown;margin :2px; padding :2px;display:flex;flex-direction: column;height: 600px;width: 700px;overflow: auto"></div>
+                     style=""></div>
             </div>
 
         </div>
@@ -207,28 +225,17 @@
                  style="display:flex;flex-direction: column;width: 500px;height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
 
         </div>
-      <!--  <div id="Standardizer_connectionsTab">
-            <button onclick="Standardizer.getConnections()">Get Connection</button>
-            <input type="checkbox" id="Standardizer_restrictionMode">filter targetClass
-            <div id="Standardizer_connectionsDiv"></div>
-        </div>-->
+
 
     </div>
     <div style="width:300px">
         <div id="KGadvancedMapping_mappingsMatrix" style="font-weight: bold"></div>
 
 
-  <!--      <input type="checkbox" id="Standardizer_exportAncestorsCBX">ancestors
-        <button onclick="Standardizer.exportMappings()"> Export mappings</button>
-
-        <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>-->
 
 
 
     </div>
-    <!--  <div style="width:350px;heigth:800px;overflow: auto;">
-          <div id="Standardizer_centralJstreeDiv"></div>
 
-      </div>-->
 </div>
 

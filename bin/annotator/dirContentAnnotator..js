@@ -63,7 +63,7 @@ var DirContentAnnotator = {
                             var tempFileName = uploadDirPath + array[array.length - 1];
                             tempFileNames.push(tempFileName);
                             fileNames.push(fileName);
-                            console.log(tempFileName);
+                            //  console.log(tempFileName);
 
                             entry.pipe(etl.toFile(tempFileName)).promise(function (resolve, reject) {
                                 var x = resolve;
@@ -73,33 +73,6 @@ var DirContentAnnotator = {
                         } else entry.autodrain();
                     })
                 )
-
-                /*   fs.createReadStream(tempzip)
-                .pipe(unzipper.Parse())
-                .on("entry", function (entry) {
-                    var type = entry.type;
-                    if (type == "File") {
-                        var fileName = entry.path;
-                        var array = fileName.split("/");
-                        var tempFileName = uploadDirPath + array[array.length - 1];
-                        tempFileNames.push(tempFileName);
-                       const content =  entry.buffer();
-                        fs.writeFileSync(tempFileName, content);
-                       async function main() {
-                            const content = await entry.buffer();
-                            await
-                                fs.writeFileSync(tempFileName, content);
-                            entry.autodrain();
-
-                        }
-
-                        main();
-
-                        fileNames.push(fileName);
-                    } else {
-                        entry.autodrain();
-                    }
-                })*/
 
                 .on("finish", function () {
                     DirContentAnnotator.processZippedFiles(fileNames, corpusName, sources, options, function (err, result) {
@@ -755,6 +728,44 @@ var DirContentAnnotator = {
             fs.writeFileSync(storePath, JSON.stringify(jstreeData, null, 2));
         }
     },
+
+    SpacyExtract: function (text, types, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var json = {
+            text: text,
+        };
+
+        DirContentAnnotator.socket.message(+"     extracting nouns ");
+        httpProxy.post(spacyServerUrl, { "content-type": "application/jsonData" }, json, function (err, result) {
+            if (err) {
+                console.log(err);
+                return callback(err);
+            }
+            var tokens = [];
+            result.data.forEach(function (sentence) {
+                sentence.tags.forEach(function (item) {
+                    if (item.text.length > 2)
+                        if (types.indexOf(item.tag) > -1) {
+                            //item.tag.indexOf("NN")>-1) {
+                            var token = Inflector.singularize(item.text.toLowerCase());
+                            tokens.push(token);
+                        }
+                });
+            });
+            if (options.composedWords_2) {
+                var tokens_2 = [];
+                tokens.forEach(function (token, index) {
+                    if (index > 0) tokens_2.push(tokens[index - 1] + " " + token);
+                });
+                tokens = tokens.concat(tokens_2);
+            }
+
+            return callback(null, tokens);
+        });
+    },
 };
 DirContentAnnotator.init();
 module.exports = DirContentAnnotator;
@@ -801,4 +812,10 @@ if (false) {
 
 if (false) {
     DirContentAnnotator.getAnnotatedCorpusList();
+}
+
+if (false) {
+    var text =
+        "The distance between the pump and driver shaft ends (distance between shaft ends, or DBSE) shall begreater than the seal cartridge length for all pumps other than OH type or at least 125 mm (5 in) and shallpermit removal of the coupling, bearing housing, bearings, seal and rotor, as applicable, without disturbingthe driver, driver coupling hub, pump coupling hub or the suction and discharge piping. For Types BB and VSpumps, this dimension, DBSE, shall always be greater than the total seal length, l, listed in Table 7, and shallbe included on the pump data sheet (Annex N).";
+    DirContentAnnotator.SpacyExtract(text, ["NN"], { composedWords_2: 1 }, function (err, result) {});
 }

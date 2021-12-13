@@ -124,7 +124,7 @@ var Sparql_proxy = (function () {
             useProxy=true;
 
 
-        if (sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
+        if (sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
             payload.GET = true;
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim()

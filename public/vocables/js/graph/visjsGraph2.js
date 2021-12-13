@@ -48,9 +48,18 @@ var visjsGraph = (function () {
             self.simulationTimeOut = _options.simulationTimeOut
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
+
+        var nodesDataSet = new vis.DataSet(visjsData.nodes)
+        var edgesDataSet = new vis.DataSet(visjsData.edges)
+        nodesDataSet.on('*', function (event, properties, senderId) {
+            if(event=="add")
+                self.lastAddedNodes=properties.items
+           // console.log('add:', event, 'properties:', properties, 'senderId:', senderId);
+        });
+
         self.data = {
-            nodes: new vis.DataSet(visjsData.nodes),
-            edges: new vis.DataSet(visjsData.edges)
+            nodes: nodesDataSet,
+            edges: edgesDataSet
         };
         var options = {
             interaction: {hover: true},
@@ -80,6 +89,8 @@ var visjsGraph = (function () {
                 hierarchical: _options.layoutHierarchical
             }
 
+        } else {
+            $("#visjsGraph_layoutSelect").val("")
         }
         if (_options.groups) {
             options.groups = _options.groups
@@ -155,12 +166,12 @@ var visjsGraph = (function () {
             var point = params.pointer.DOM;
             self.context.currentNode = node;
             var options = {}
-          /*  var options = {
+            /*  var options = {
 
-                ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
-                altKey: (params.event.srcEvent.altKey ? 1 : 0),
-                shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
-            }*/
+                  ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
+                  altKey: (params.event.srcEvent.altKey ? 1 : 0),
+                  shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
+              }*/
             if (_options.onHoverNodeFn)
                 _options.onHoverNodeFn(node, point, options)
 
@@ -202,11 +213,11 @@ var visjsGraph = (function () {
             })
             .on("dragEnd", function (params) {
                 if (params.nodes.length == 1) {
-                   /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
-                        return;*/
+                    /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
+                         return;*/
 
                     var nodeId = params.nodes[0]
-                    self.lastMovedNode=nodeId
+                    self.lastMovedNode = nodeId
                     //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
                     var fixed = true;
@@ -214,26 +225,10 @@ var visjsGraph = (function () {
                         fixed = false;
 
                     newNodes.push({id: nodeId, fixed: fixed})
-                    /*   nodes.forEach(function (id) {
-                           var fixed = true;
-                           if (id == nodeId)
-                               fixed = true;
-                           newNodes.push({id: id, fixed: fixed})
 
-                       })*/
                     visjsGraph.data.nodes.update(newNodes)
 
-                    /*      var nodeId = params.nodes[0];
-                          var node = self.data.nodes.get(nodeId);
-                          node._graphPosition = params.pointer.DOM;
-                          var point = params.pointer.DOM;
-                          var newNode = {id: nodeId}
-                          newNode.fixed = {x: true, y: true}
-                          newNode.x = point.x;
-                          newNode.y = point.y;
-                          visjsGraph.network.stopSimulation();
-                          visjsGraph.simulationOn = false;*/
-                    //   visjsGraph.data.nodes.update(newNode);
+
 
                 }
             });
@@ -250,7 +245,7 @@ var visjsGraph = (function () {
               }, 3000)*/
 
 
-        var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button onclick='visjsGraph.saveGraph()'>Save </button>" +
+        var htmlPlus = "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.saveGraph()'>Save </button>" +
             "Load<select style='width: 100px' id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>" +
             "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>add</div><div id='VisJsGraph_message'></div>"
 
@@ -259,17 +254,17 @@ var visjsGraph = (function () {
             if (!$("#graphButtons").length) {
 
                 var html = "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                 // " <div> <B>Graph</B> </div><div><button onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                    " <div> <B>Graph</B> </div><div><button onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+                    // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                    " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
 
-                    "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
+                    "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
                     "<option ></option>" +
                     "<option >standard</option>" +
                     "<option>hierarchical vertical</option>" +
-                    "<option>hierarchical horizontal</option>" +   "</select></div>";
+                    "<option>hierarchical horizontal</option>" + "</select></div>";
 
 
-                html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button onclick='visjsGraph.searchNode()'>Search</button></div>"
+                html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
 
                 if (true)
@@ -285,6 +280,7 @@ var visjsGraph = (function () {
         }
         setTimeout(function () {
             self.listSavedGraphs()
+     // CustomPluginController.setGraphNodesIcons()
         }, 500)
 
         if (callback) {
@@ -302,22 +298,28 @@ var visjsGraph = (function () {
     }
     self.setLayout = function (layout) {
         if (layout == "hierarchical vertical") {
-            if(false && self.lastMovedNode) {
+            if (false && self.lastMovedNode) {
                 var newNodes = []
                 self.data.nodes.getIds().forEach(function (nodeId) {
                     var fixed = false
-                    if (nodeId ==self.lastMovedNode)
-                        fixed=true;
-                    newNodes.push({id:nodeId,x:{fixed:fixed},y:{fixed:fixed}})
-                        })
+                    if (nodeId == self.lastMovedNode)
+                        fixed = true;
+                    newNodes.push({id: nodeId, x: {fixed: fixed}, y: {fixed: fixed}})
+                })
                 self.data.nodes.update(newNodes)
             }
 
 
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
-              sortMethod: "hubsize",
-
+                sortMethod: "hubsize",
+            }
+            self.currentContext.options.edges = {
+                smooth: {
+                    type: "cubicBezier",
+                    forceDirection: "vertical",
+                    roundness: 0.1,
+                },
             }
             shakeTowards:true
             self.currentContext.simulationTimeOut = 10000
@@ -327,9 +329,9 @@ var visjsGraph = (function () {
         } else if (layout == "hierarchical horizontal") {
             self.currentContext.options.layoutHierarchical = {
                 direction: "LR",
-               sortMethod: "hubsize",
-              //  sortMethod:"directed",
-            //    shakeTowards:"roots",
+                sortMethod: "hubsize",
+                //  sortMethod:"directed",
+                //    shakeTowards:"roots",
                 //  sortMethod:"directed",
                 levelSeparation: 200,
                 //   parentCentralization: true,
@@ -388,10 +390,7 @@ var visjsGraph = (function () {
 
 
     self.clearGraph = function () {// comment ca marche  bad doc???
-        /*  if (self.network)
-              self.network.destroy();
-          $("#graph_legendDiv").html("");
-          self.data = {};*/
+
         if (self.data && self.data.nodes) {
             self.data.nodes.remove(self.data.nodes.getIds())
             self.data.edges.remove(self.data.edges.getIds())
@@ -554,12 +553,16 @@ var visjsGraph = (function () {
         if (includeParents)
             nodes = nodeIds
         var allEdges = self.data.edges.get();
-
+var allNodes={}
         function recurse(nodeId) {
             allEdges.forEach(function (edge) {
                 if (edge.from == nodeId) {
-                    nodes.push(edge.to)
-                    recurse(edge.to)
+
+                    if(!allNodes[edge.to]) {
+                        allNodes[edge.to]=1
+                        nodes.push(edge.to)
+                        recurse(edge.to)
+                    }
                 }
                 /* if(includeParents && edge.to == nodeId){
                      nodes.push(edge.from)
@@ -730,23 +733,21 @@ var visjsGraph = (function () {
 
     }
     self.toSVG = function () {
-
         SVGexport.toSVG(self.network)
         self.redraw()
-
-
     }
+
     self.toGraphMl = function () {
         var visjsData = {
             nodes: visjsGraph.data.nodes.get(),
             edges: visjsGraph.data.edges.get(),
         }
-
         var xmlStr = GraphMlExport.VisjsDataToGraphMl(visjsData)
         common.copyTextToClipboard(xmlStr)
-
-
     }
+
+
+
     self.searchNode = function () {
         var word = $("#visjsGraph_searchInput").val()
         if (word == "")
@@ -767,8 +768,8 @@ var visjsGraph = (function () {
             newNodes.push({id: node.id, shape: shape, size: size})
         })
         visjsGraph.data.nodes.update(newNodes)
-        matches.forEach(function (match,index) {
-            if(index==0) {
+        matches.forEach(function (match, index) {
+            if (index == 0) {
                 setTimeout(function () {
                     self.network.focus(match, {
                         scale: 1,
@@ -827,7 +828,7 @@ var visjsGraph = (function () {
 
     }
 
-    self.message=function (message){
+    self.message = function (message) {
         $("#VisJsGraph_message").html(message)
     }
 
@@ -884,8 +885,8 @@ var visjsGraph = (function () {
 
                 } else {
                     //functions
-                    var context=JSON.parse(JSON.stringify(data.context).replace(/self./g,"Lineage_classes."))
-                  //  var context = data.context
+                    var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_classes."))
+                    //  var context = data.context
 
                     for (var key in context.options) {
                         if (key.indexOf("Fn") > 0) {

@@ -1157,7 +1157,7 @@ KGbrowserCustom.initsuperClassesPalette()
                 if (existingNodes.indexOf(node.data.id) < 0) {
                     jstreeData.push({
                         id: typeId,
-                        text: Sparql_common.getLabelFromId(node.data.label),
+                        text: Sparql_common.getLabelFromURI(node.data.label),
                         parent: '#',
                         data: {
                             type: "type",

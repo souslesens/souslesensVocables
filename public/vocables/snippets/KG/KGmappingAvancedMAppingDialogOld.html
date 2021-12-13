@@ -47,15 +47,15 @@
             <i> create mapping by selecting a value on left list and then on right panel</i>
             <div id="KGadvancedMapping_manualMappingContainerDiv"
                  style="display:flex;flex-direction: column;width: 600px;min-height: 500px;  margin: 10px;  background: beige;overflow: auto"></div>
-            <button onclick="KGadvancedMapping.validateMapping('manualMapping')"> Save in dictionary</button>
-            <button onclick="KGmappingData.menuActions.validateConditionalTypeMappings()"> Assign conditional Types
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.validateMapping('manualMapping')"> Save in dictionary</button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGmappingData.menuActions.validateConditionalTypeMappings()"> Assign conditional Types
             </button>
-            <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
         </div>
     </div>
 
     <div id="KGMappingAdvancedMappings_automaticMapping" style="width:95%;">
-        <button onclick="KGadvancedMapping.setQuantumRdlMappingTree"> map with quantum RDL</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.setQuantumRdlMappingTree"> map with quantum RDL</button>
 
         <!--   type <select id="KGMappingAdvancedMappings_typeSelect">
            <option></option>
@@ -78,11 +78,11 @@
             <div id="advancedMappings_pickListMappingTree"  class="jstree"></div>
         </div>
 
-        <button onclick="KGadvancedMapping.validateMapping('automaticMapping')"> Save...</button>
-        <button onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.validateMapping('automaticMapping')"> Save...</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.cancelMapping()">Cancel</button>
 
-        <button onclick="KGadvancedMapping.exportTreeToCSV()">export CSV</button>
-        <button onclick="KGadvancedMapping.executeBulkMappingSequence()">executeBulkMappingSequence</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.exportTreeToCSV()">export CSV</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGadvancedMapping.executeBulkMappingSequence()">executeBulkMappingSequence</button>
 
 
     </div>

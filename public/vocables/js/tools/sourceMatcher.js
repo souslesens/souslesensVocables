@@ -16,8 +16,8 @@ var SourceMatcher = (function () {
         self.maxSourceDescendants = 500;
         self.onSourceSelect = function (sourceLabel) {
 
-            //  $("#actionDivContolPanelDiv").html("<button onclick='SourceMatcher.showcompareWithDialog()'>Compare with...</button>")
-            // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button onclick='SourceBrowser.searchTerm()'>Search</button>")
+            //  $("#actionDivContolPanelDiv").html("<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceMatcher.showcompareWithDialog()'>Compare with...</button>")
+            // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.searchTerm()'>Search</button>")
             $("#accordion").accordion("option", {active: 2});
             SourceBrowser.showThesaurusTopConcepts(sourceLabel)
 

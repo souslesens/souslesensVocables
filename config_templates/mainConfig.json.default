@@ -1,8 +1,17 @@
 {
-  "disableAuth": false,
+"souslesensUrl": "http://localhost:3010",
   "serverUrl" :"../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
-
+  "disableAuth": false,
+  "auth": "json",
+  "defaultGroups": [],
+  "keycloak": {
+    "realm": "master",
+    "publicClient": false,
+    "clientID": "xxx",
+    "clientSecret": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "authServerURL": "https://xxxx.fr/auth"
+  },
   "SQLserver": {
     "user": "",
     "password": "",

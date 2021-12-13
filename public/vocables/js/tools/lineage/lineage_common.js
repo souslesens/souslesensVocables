@@ -101,7 +101,7 @@ Lineage_common = (function () {
 
                 var message = ""
                 if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
-                    Sparql_generic.insertTriples(parentNode.data.source, triples, function (err, result) {
+                    Sparql_generic.insertTriples(parentNode.data.source, triples, null,function (err, result) {
                         if (err)
                             return MainController.UI.message(err);
                         nodeData.source = parentNode.data.source

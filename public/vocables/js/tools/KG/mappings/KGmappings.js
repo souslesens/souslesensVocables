@@ -54,10 +54,10 @@ var KGmappings = (function () {
             })
             MainController.UI.openRightPanel()
             $("#actionDivContolPanelDiv").html("KG database &nbsp;<select onchange='KGmappingData.loadKG_SQLModel()' id=\"KGmappings_DatabaseSelect\"> </select>" +
-                //  "<button onclick='TextAnnotator.init()'>text annotation</button>  "+
-                "<button onclick='KGassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  " +
-                "  <button onclick=\"KGassetGraph.drawClassesAndPropertiesGraph()\">Classes Graph</button>" +
-                "<button id='KGmappings_buildTriplesButton' onclick='KGbuild.initDialog()'>Build Triples</button>  "
+                //  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='TextAnnotator.init()'>text annotation</button>  "+
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGassetGraph.drawAssetTablesMappingsGraph()'>Mappings Graph</button>  " +
+                "  <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=\"KGassetGraph.drawClassesAndPropertiesGraph()\">Classes Graph</button>" +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' id='KGmappings_buildTriplesButton' onclick='KGbuild.initDialog()'>Build Triples</button>  "
 
 
             );

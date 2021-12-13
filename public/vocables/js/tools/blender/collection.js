@@ -193,7 +193,7 @@ var Collection = (function () {
         //  self.currentCollectionFilter.push(collection.id)
         self.currentCollectionFilter = collection.data.id;
 
-        var html = ("<div  class='blender_collectionFilter' >" + collection.text + "<button onclick='Collection.removeTaxonomyFilter()'>-</button></div>")
+        var html = ("<div  class='blender_collectionFilter' >" + collection.text + "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Collection.removeTaxonomyFilter()'>-</button></div>")
         $("#Blender_currentFilterDiv").append(html)
 
         if(Config.Blender.openTaxonomyTreeOnLoad){
@@ -322,7 +322,7 @@ var Collection = (function () {
                 triples.push({subject: collectionId, predicate: Collection.broaderProperty, object: item, valueType: "uri"})
             })
 
-            Sparql_generic.insertTriples(sourceLabel, triples, function (err, result) {
+            Sparql_generic.insertTriples(sourceLabel, triples, null,function (err, result) {
 
                 return callback(err, result)
             })

@@ -32,8 +32,8 @@ var SourceBrowser = (function () {
         self.showThesaurusTopConcepts(sourceLabel,)
         $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
             "<input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match" +
-            "<button onclick='SourceBrowser.searchTerm()'>Search</button>" +
-            "<button onclick='SourceBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>" +
+            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.searchTerm()'>Search</button>" +
+            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>" +
             "<div id='SourceBrowser_collectionDiv'>" +
             "Collection<select id='SourceBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
             "</div>")
@@ -273,9 +273,7 @@ var SourceBrowser = (function () {
             }
 
         }
-        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-            items = Lineage_blend.addBlendJstreeMenuItems(items);
-        }
+
         return items;
     }
 
@@ -686,7 +684,7 @@ var SourceBrowser = (function () {
                 function (callbackSeries) {
                     var str = "<div>"
                     if (self.visitedNodes.length > 1) {
-                        var str = "<button onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+                        var str = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
 
                     }
 
@@ -768,7 +766,7 @@ var SourceBrowser = (function () {
                 if (item.propLabel) {
                     propName = item.propLabel.value
                 } else {
-                    propName = Sparql_common.getLabelFromId(item.prop.value)
+                    propName = Sparql_common.getLabelFromURI(item.prop.value)
                 }
 
                 var value = item.value.value;

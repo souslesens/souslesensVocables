@@ -3,8 +3,8 @@
   "version": "0.3.2",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "build": "cd mainapp && npm run build",
+    "start": "DEBUG=cypress:* node ./bin/www",
+    "build:ci": "cd mainapp && npm run build",
     "dev": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
     "format": "prettier -w --tab-width=4 --print-width=200 *.js {bin,data,other,routes,views,mainapp}/**/*.js",
     "ncu": "ncu",
@@ -12,19 +12,15 @@
     "ci": "npm run lint && npm run ncu",
     "patch": " npm version --no-git-tag-version --no-commit-hooks patch",
     "minor": " npm version --no-git-tag-version --no-commit-hooks minor",
-    "major": " npm version --no-git-tag-version --no-commit-hooks major"
+    "major": " npm version --no-git-tag-version --no-commit-hooks major",
+    "test": "cypress open"
   },
   "devDependencies": {
+    "cypress": "^9.1.1",
     "prettier": "^2.5.1"
   },
   "dependencies": {
-    "@emotion/react": "^11.7.0",
-    "@emotion/styled": "^11.6.0",
     "@futpib/tika-server-client": "0.0.5",
-    "@material-ui/icons": "^4.11.2",
-    "@material-ui/types": "^5.1.8",
-    "@mui/icons-material": "^5.2.1",
-    "@mui/x-data-grid": "^5.2.0",
     "@triply/yasgui": "^4.2.20",
     "async": "^3.2.2",
     "base64-stream": "^1.0.0",
@@ -62,7 +58,7 @@
     "morgan": "~1.10.0",
     "mssql": "^7.3.0",
     "mysql": "^2.18.1",
-    "n3": "^1.12.1",
+    "n3": "^1.12.2",
     "ndjson": "^2.0.0",
     "node-schedule": "^2.1.0",
     "nodemon": "^2.0.15",

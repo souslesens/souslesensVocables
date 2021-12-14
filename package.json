@@ -39,6 +39,7 @@
     "etl": "^0.6.12",
     "express": "~4.17.1",
     "express-fileupload": "^1.2.1",
+    "express-openapi": "^10.0.0",
     "express-session": "^1.17.2",
     "html-entities": "^2.3.2",
     "http-errors": "~1.8.1",

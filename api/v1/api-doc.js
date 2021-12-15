@@ -32,6 +32,14 @@ const apiDoc = {
         }
       },
       required: []
+    },
+    AuthLogout: {
+      properties: {
+        redirect: {
+          type: 'string'
+        }
+      },
+      required: []
     }
   },
   paths: {}

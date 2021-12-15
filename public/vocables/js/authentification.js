@@ -53,13 +53,9 @@ var authentication = (function () {
     self.logout = function () {
         $.ajax({
             type: "GET",
-            url: "/auth/logout",
+            url: "/api/v1/auth/logout",
             success: function (data) {
-                if (data.redirect) {
-                    location.href = data.redirect;
-                } else {
-                    location.href = '/login';
-                }
+                location.href = data.redirect;
             }
         });
     }

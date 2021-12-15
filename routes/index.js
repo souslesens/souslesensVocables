@@ -46,15 +46,6 @@ if (!config.disableAuth) {
 
         router.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
 
-        router.get("/auth/logout", function (req, res, next) {
-            req.logout();
-            res.send({
-                logged: req.user ? true : false,
-                user: req.user,
-                redirect: config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl,
-            });
-        });
-
         // Default login is json
     } else {
         ensureLoggedIn = function ensureLoggedIn(options) {
@@ -78,16 +69,6 @@ if (!config.disableAuth) {
                 failureMessage: true,
             })
         );
-
-        router.get("/auth/logout", function (req, res, next) {
-            req.logout();
-            res.send({
-                logged: req.user ? true : false,
-                user: req.user,
-                authSource: null,
-                auth: {},
-            });
-        });
     }
 } else {
     ensureLoggedIn = function ensureLoggedIn(options) {
@@ -98,15 +79,6 @@ if (!config.disableAuth) {
     // Login route
     router.get("/login", function (req, res, next) {
         res.redirect("vocables");
-    });
-    router.get("/auth/logout", function (req, res, next) {
-        res.send({
-            logged: true,
-            user: {
-                login: "admin",
-                groups: ["admin"],
-            },
-        });
     });
 }
 

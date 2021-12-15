@@ -81,6 +81,7 @@
     "streams": "^0.1.0",
     "superagent": "^6.1.0",
     "superagent-proxy": "^3.0.0",
+    "swagger-ui-express": "^4.2.0",
     "tika-server": "^1.2.11",
     "ulid": "^2.3.0",
     "unzipper": "^0.10.11",

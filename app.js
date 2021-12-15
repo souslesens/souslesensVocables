@@ -8,11 +8,13 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var bodyParser = require("body-parser");
 var indexRouter = require("./routes/index");
-//var usersRouter = require("./routes/users");
 var httpProxy = require("./bin/httpProxy.");
 var configManager = require("./bin/configManager.");
 
 const fileUpload = require("express-fileupload");
+
+const openapi = require('express-openapi');
+const swaggerUi = require('swagger-ui-express');
 
 var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
 var str = fs.readFileSync(mainConfigFilePath);
@@ -73,8 +75,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// API
+openapi.initialize({
+  apiDoc: require('./api/v1/api-doc.js'),
+  app: app,
+  paths: './api/v1/paths'
+});
+
+// OpenAPI UI
+app.use(
+  "/api-documentation",
+  swaggerUi.serve,
+  swaggerUi.setup(null, {
+    swaggerOptions: {
+      url: "http://localhost:3010/api/v1/api-docs",
+    },
+  })
+);
+
+// main router
 app.use("/", indexRouter);
-//app.use("/users", usersRouter);
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

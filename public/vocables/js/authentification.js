@@ -22,7 +22,7 @@ var authentication = (function () {
         // Redirect to login if user is not logged
         $.ajax({
             type: "GET",
-            url: "/auth/check",
+            url: "/api/v1/auth/check",
             success: function (data) {
                 if (!data.logged) {
                     location.href = '/login';

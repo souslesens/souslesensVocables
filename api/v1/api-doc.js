@@ -15,6 +15,23 @@ const apiDoc = {
         }
       },
       required: []
+    },
+    AuthCheck: {
+      properties: {
+        logged: {
+          type: "boolean"
+        },
+        user: {
+          type: 'object'
+        },
+        authSource: {
+          type: 'string'
+        },
+        auth: {
+          type: 'object'
+        }
+      },
+      required: []
     }
   },
   paths: {}

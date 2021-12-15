@@ -25,45 +25,12 @@ const promiseFs = require("fs").promises;
 const config = require(path.resolve('config/mainConfig.json'));
 const users = require(path.resolve('config/users/users.json'));
 
-/* GET home page. */
+/* GET home page: redirect to /vocables */
 router.get("/", ensureLoggedIn(), function (req, res, next) {
     res.redirect("vocables");
 });
 
 if (!config.disableAuth) {
-    router.get("/auth/check", function (req, res, next) {
-        const auth =
-            config.auth == "keycloak"
-                ? {
-                      realm: config.keycloak.realm,
-                      clientID: config.keycloak.clientID,
-                      authServerURL: config.keycloak.authServerURL,
-                  }
-                : {};
-
-        // get user from json to get groups
-        let findUser = Object.keys(users)
-            .map(function (key, index) {
-                return {
-                    id: users[key].id,
-                    login: users[key].login,
-                    groups: users[key].groups,
-                    source: users[key].source,
-                };
-            })
-            .find((user) => user.login == req.user.login);
-
-        res.send({
-            logged: req.user ? true : false,
-            user: {
-                login: findUser.login,
-                groups: findUser.groups,
-            },
-            authSource: config.auth,
-            auth: auth,
-        });
-    });
-
     if (config.auth == "keycloak") {
         ensureLoggedIn = function ensureLoggedIn(options) {
             passport.authenticate("keycloak", { failureRedirect: "/login" });
@@ -131,15 +98,6 @@ if (!config.disableAuth) {
     // Login route
     router.get("/login", function (req, res, next) {
         res.redirect("vocables");
-    });
-    router.get("/auth/check", function (req, res, next) {
-        res.send({
-            logged: true,
-            user: {
-                login: "admin",
-                groups: ["admin"],
-            },
-        });
     });
     router.get("/auth/logout", function (req, res, next) {
         res.send({

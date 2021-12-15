@@ -22,9 +22,8 @@ var configManager = require("../bin/configManager.");
 var DictionariesManager = require("../bin/KG/dictionariesManager.");
 const promiseFs = require("fs").promises;
 
-var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
+const config = require(path.resolve('config/mainConfig.json'));
+const users = require(path.resolve('config/users/users.json'));
 
 /* GET home page. */
 router.get("/", ensureLoggedIn(), function (req, res, next) {
@@ -43,8 +42,6 @@ if (!config.disableAuth) {
                 : {};
 
         // get user from json to get groups
-        const usersLocation = path.join(__dirname, "../config/users/users.json");
-        let users = JSON.parse("" + fs.readFileSync(usersLocation));
         let findUser = Object.keys(users)
             .map(function (key, index) {
                 return {

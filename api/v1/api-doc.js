@@ -5,6 +5,11 @@ const apiDoc = {
     title: 'SouslesensVocables API',
     version: '1.0.0'
   },
+  securityDefinitions: {
+    loginScheme: {
+      type: 'basic'
+    },
+  },
   definitions: {
     Hello: {
       type: 'object',
@@ -40,10 +45,17 @@ const apiDoc = {
         }
       },
       required: []
+    },
+    Config: {
+      properties: {
+        auth: {
+          type: 'string'
+        }
+      },
+      required: []
     }
   },
   paths: {}
 };
 
 module.exports = apiDoc;
-

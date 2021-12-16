@@ -7,18 +7,15 @@ var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var bodyParser = require("body-parser");
-var indexRouter = require("./routes/index");
-var httpProxy = require("./bin/httpProxy.");
-var configManager = require("./bin/configManager.");
-
 const fileUpload = require("express-fileupload");
-
 const openapi = require('express-openapi');
 const swaggerUi = require('swagger-ui-express');
 
-var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
+var indexRouter = require(path.resolve("routes/index"));
+var httpProxy = require(path.resolve("bin/httpProxy."));
+var configManager = require(path.resolve("bin/configManager."));
+
+const config = require(path.resolve('config/mainConfig.json'));
 
 var app = express();
 
@@ -79,7 +76,21 @@ app.use(cookieParser());
 openapi.initialize({
   apiDoc: require('./api/v1/api-doc.js'),
   app: app,
-  paths: './api/v1/paths'
+  paths: './api/v1/paths',
+  securityHandlers: {
+    loginScheme: function(req, scopes, definition) {
+      if (!config.disableAuth) {
+        config.auth == 'keycloak' ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
+        if (!req.isAuthenticated || !req.isAuthenticated()) {
+          throw {
+            status: 401,
+            message: 'You must authenticate to access this ressource.'
+          };
+        }
+      }
+      return Promise.resolve(true);
+    }
+  }
 });
 
 // OpenAPI UI

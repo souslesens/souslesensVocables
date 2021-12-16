@@ -33,6 +33,15 @@ const apiDoc = {
       },
       required: []
     },
+    GetProfiles: {
+      type: 'object'
+      , properties: {}
+    },
+    GetSources: {
+      type: 'object'
+      , properties: {}
+    },
+
     AuthLogout: {
       properties: {
         redirect: {

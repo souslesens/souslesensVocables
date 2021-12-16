@@ -50,6 +50,22 @@ const apiDoc = {
       properties: {
         auth: {
           type: 'string'
+        },
+        default_lang: {
+          type: 'string'
+        },
+        default_sparql_url: {
+          type: 'string'
+        },
+        wiki: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string'
+            }          }
+        },
+        version: {
+          type: 'string'
         }
       },
       required: []

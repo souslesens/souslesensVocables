@@ -10,6 +10,10 @@ module.exports = function() {
 
     result = {
       auth: config.auth,
+      default_lang: config.default_lang,
+      default_sparql_url: config.default_sparql_url,
+      wiki: config.wiki,
+      version: process.env.npm_package_version
     }
 
     res.status(200).json(result);

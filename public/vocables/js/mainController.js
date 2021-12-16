@@ -18,20 +18,15 @@ var MainController = (function () {
 
     self.initConfig = function (callback) {
 
-        var payload = {
-            getGeneralConfig: 1,
-        }
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            type: "GET",
+            url: Config.apiUrl + "/config",
             dataType: "json",
             success: function (serverConfig, textStatus, jqXHR) {
                 //  Config.serverUrl = serverConfig.serverUrl
                 Config.default_lang = serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
                 Config.wiki = serverConfig.wiki
-                Config.sousLeSensVocablesGraphUri = serverConfig.sousLeSensVocablesGraphUri
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);

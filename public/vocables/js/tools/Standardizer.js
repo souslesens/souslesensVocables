@@ -2092,31 +2092,42 @@ var Standardizer = (function () {
 
     self.showMatchesIntoLineage = function () {
 
+        window.open(window.location.href+"?x=3","SLSV_lineage")
+        setTimeout(function(){
+
         var indexes = []
-        var classUrisByIndex = {}
+        var classUrisBySource = {}
 
         self.searchResultArray.forEach(function (item, itemIndex) {
             var hits = item.hits.hits;
             if (hits.length == 0)
                 return
             hits.forEach(function (hit) {
-                if (!classUrisByIndex[hit._index])
-                    classUrisByIndex[hit._index] = []
-                classUrisByIndex[hit._index].push(hit._source.id)
+                var source = self.indexSourcesMap[hit._index]
+                if (!classUrisBySource[source])
+                    classUrisBySource[source] = []
+                classUrisBySource[source].push(hit._source.id)
             })
         })
+
+
+                broadcastChannel.postMessage({showStandardizerResultsInLineage: classUrisBySource})
+
+        },500)
+
+        return
 
         MainController.UI.initTool("lineage");
         setTimeout(function () {
             var i = 0;
-            async.eachSeries(Object.keys(classUrisByIndex), function (index, callbackEach) {
+            async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
 
-                var source = self.indexSourcesMap[index]
+
 
               if (i++ == 0)
                     MainController.currentSource = source
                 MainController.UI.onSourceSelect()
-                Lineage_classes.addParentsToGraph(source, classUrisByIndex[index],function(err){
+                Lineage_classes.addParentsToGraph(source, classUrisBySource[index],function(err){
                     if(err)
                         return alert(err)
                     callbackEach()

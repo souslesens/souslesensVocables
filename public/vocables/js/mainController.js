@@ -180,6 +180,29 @@ var MainController = (function () {
     }
 
     self.UI = {
+
+        test:function(){
+
+          //  Orchestrator.createTab()
+           // broadcastChannel.postMessage("eeee")
+            broadcastChannel.postMessage({from:MainController.currentTool,to:"Lineage"});
+            return;
+
+
+
+
+
+            var variables = ""
+            for (var name in this) {
+              console.log(name+"  :  "+this[name])
+
+            }
+            console.log(variables)
+
+
+        },
+
+
         initialGraphDivWitdh: 0,
 
         configureUI: function () {
@@ -544,6 +567,7 @@ var MainController = (function () {
 
     self.test = function () {
 
+     //   bc.postMessage("bc")
 
     }
 

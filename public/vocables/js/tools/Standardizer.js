@@ -1326,14 +1326,88 @@ var Standardizer = (function () {
                     var options = {
                         onNodeClick: Standardizer.onSunBurstClick
                     }
+                    self.hierarchy = root
                     Sunburst.draw(sunburstDivId, root, options)
+                    return callbackSeries()
+                },
+
+            function (callbackSeries) {
+                return callbackSeries()
+//$("#standardizerCentral_tabs").tabs("active",2)
+
+            },
+
+                function (callbackSeries) {
+                    var visjsData = {nodes: [], edges: []}
+                    var maxlevels = 2;
+                    var existingNodes = {}
+                    var recurse = function (parent, level) {
+                        if (level > maxlevels)
+                            return;
+                        if(! parent.children)
+                            return;
+                        parent.children.forEach(function (item) {
+                            if (!existingNodes[item.id]) {
+                                existingNodes[item.id] = 1
+                                visjsData.nodes.push({
+                                    id: item.id,
+                                    label: item.name || item.id,
+                                    level: level,
+                                    color:Lineage_classes.getSourceColor(item.index),
+                                    shape: "box",
+                                    data: {
+                                        id: item.id,
+                                        text: item.name,
+                                    }
+                                })
+                                if (level > 0) {
+                                    var edgeId = item.id + "_" + parent.id
+                                    if (!existingNodes[edgeId]) {
+                                        existingNodes[edgeId] = 1
+                                        visjsData.edges.push({
+                                            id: edgeId,
+                                            from: item.id,
+                                            to: parent.id
+
+
+                                        })
+                                    }
+                                }
+
+
+                            }
+                            recurse(item,level+1)
+                        })
+
+
+
+                    }
+
+                    recurse(self.hierarchy,0)
+
+                    var options = {
+                        layoutHierarchical: {
+                            direction: "UD",
+                            sortMethod: "hubsize",
+
+
+                        }
+                    }
+
+
+                    visjsGraph.draw("Standardizer_ancestorsDiv", visjsData, options)
+
+
                     return callbackSeries()
                 }
 
+
             ],
+
             function (err) {
 
-            })
+            }
+        )
 
 
     }
@@ -2092,28 +2166,28 @@ var Standardizer = (function () {
 
     self.showMatchesIntoLineage = function () {
 
-        window.open(window.location.href+"?x=3","SLSV_lineage")
-        setTimeout(function(){
+        window.open(window.location.href + "?x=3", "SLSV_lineage")
+        setTimeout(function () {
 
-        var indexes = []
-        var classUrisBySource = {}
+            var indexes = []
+            var classUrisBySource = {}
 
-        self.searchResultArray.forEach(function (item, itemIndex) {
-            var hits = item.hits.hits;
-            if (hits.length == 0)
-                return
-            hits.forEach(function (hit) {
-                var source = self.indexSourcesMap[hit._index]
-                if (!classUrisBySource[source])
-                    classUrisBySource[source] = []
-                classUrisBySource[source].push(hit._source.id)
+            self.searchResultArray.forEach(function (item, itemIndex) {
+                var hits = item.hits.hits;
+                if (hits.length == 0)
+                    return
+                hits.forEach(function (hit) {
+                    var source = self.indexSourcesMap[hit._index]
+                    if (!classUrisBySource[source])
+                        classUrisBySource[source] = []
+                    classUrisBySource[source].push(hit._source.id)
+                })
             })
-        })
 
 
-                broadcastChannel.postMessage({showStandardizerResultsInLineage: classUrisBySource})
+            broadcastChannel.postMessage({showStandardizerResultsInLineage: classUrisBySource})
 
-        },500)
+        }, 500)
 
         return
 
@@ -2123,21 +2197,26 @@ var Standardizer = (function () {
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
 
 
-
-              if (i++ == 0)
+                if (i++ == 0)
                     MainController.currentSource = source
                 MainController.UI.onSourceSelect()
-                Lineage_classes.addParentsToGraph(source, classUrisBySource[index],function(err){
-                    if(err)
+                Lineage_classes.addParentsToGraph(source, classUrisBySource[index], function (err) {
+                    if (err)
                         return alert(err)
                     callbackEach()
-                } )
+                })
 
             })
 
 
         }, 500)
 
+    }
+
+    self.drawAncestors = function () {
+
+        self.searchResultArray.forEach(function (item, itemIndex) {
+        })
     }
 
 

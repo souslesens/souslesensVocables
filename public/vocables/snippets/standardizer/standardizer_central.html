@@ -172,6 +172,15 @@
         overflow: auto
     }
 
+    .Standardizer_ancestors{
+       /* display: flex;
+        flex-wrap:wrap;*/
+        width: 800px;
+        height: 800px;
+
+
+    }
+
 
 
 
@@ -184,7 +193,7 @@
         <ul>
             <li><a href="#Standardizer_matrixTab">Matrix</a></li>
             <li><a href="#Standardizer_sunburstTab">Sunburst</a></li>
-         <!--   <li><a href="#Standardizer_graphTab">Graph</a></li>-->
+          <li><a href="#Standardizer_ancestorsTab">Ancestors</a></li>
             <li><a href="#Standardizer_searchTab">Search</a></li>
           <!--  <li><a href="#Standardizer_connectionsTab">Connections</a></li>-->
 
@@ -220,9 +229,9 @@
 
         </div>
 
-      <!--  <div id="Standardizer_graphTab">
-            <div id="Standardizer_graphDiv" class="Standardizer_graph"></div>
-        </div>-->
+      <div id="Standardizer_ancestorsTab">
+            <div id="Standardizer_ancestorsDiv" class="Standardizer_ancestors"></div>
+        </div>
         <div id="Standardizer_searchTab">
             search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput"
                          onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv')">

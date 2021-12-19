@@ -386,7 +386,7 @@ var MainController = (function () {
             })
 
         }
-        , initTool: function (toolId) {
+        , initTool: function (toolId,callback) {
             self.currentTool = toolId
             var toolObj = Config.tools[toolId]
             self.currentSource = null;
@@ -421,7 +421,10 @@ var MainController = (function () {
 
 
             if (controller.onLoaded)
-                controller.onLoaded()
+                controller.onLoaded(function(err,result){
+                   if(callback)
+                        callback(err,result)
+                })
             if (Config.tools[self.currentTool].toolDescriptionImg) {
                 $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>")
             } else

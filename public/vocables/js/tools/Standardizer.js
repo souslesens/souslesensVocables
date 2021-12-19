@@ -12,7 +12,7 @@ var Standardizer = (function () {
     self.onSourceSelect = function () {
 
     }
-    self.onLoaded = function () {
+    self.onLoaded = function (callback) {
         $("#actionDiv").html("")
         $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html")
         MainController.UI.toogleRightPanel(true)
@@ -59,6 +59,8 @@ var Standardizer = (function () {
             $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
             setTimeout(function () {
                 $("#standardizerCentral_tabs").tabs({});
+                if(callback)
+                    callback()
             }, 200)
         }, 200)
 
@@ -1331,33 +1333,53 @@ var Standardizer = (function () {
                     return callbackSeries()
                 },
 
-            function (callbackSeries) {
-                return callbackSeries()
+                function (callbackSeries) {
+                    return callbackSeries()
 //$("#standardizerCentral_tabs").tabs("active",2)
 
-            },
+                },
+
 
                 function (callbackSeries) {
                     var visjsData = {nodes: [], edges: []}
                     var maxlevels = 2;
+                    maxlevels = parseInt($("#Standardizer_ancestorsMaxLevels").val())
                     var existingNodes = {}
                     var recurse = function (parent, level) {
                         if (level > maxlevels)
                             return;
-                        if(! parent.children)
+                        if (!parent.children)
                             return;
                         parent.children.forEach(function (item) {
                             if (!existingNodes[item.id]) {
                                 existingNodes[item.id] = 1
+
+                                var ancestorsLabel="";
+                                if(item.path) {
+                                    var ancestors = item.path.split("|");
+                                    ancestors.forEach(function (ancestor, index) {
+                                        if (index > 0)
+                                            ancestorsLabel += "/"
+                                        ancestorsLabel += Sparql_common.getLabelFromURI(ancestor)
+                                    })
+                                }
+                                else{
+                                    ancestorsLabel=item.name
+                                }
+
+
                                 visjsData.nodes.push({
                                     id: item.id,
-                                    label: item.name || item.id,
+                                    label: item.name || Sparql_common.getLabelFromURI(item.id),
                                     level: level,
-                                    color:Lineage_classes.getSourceColor(item.index),
+                                    color: Lineage_classes.getSourceColor(item.index),
                                     shape: "box",
                                     data: {
                                         id: item.id,
                                         text: item.name,
+                                        path:item.path,
+                                        ancestorsLabel:ancestorsLabel
+
                                     }
                                 })
                                 if (level > 0) {
@@ -1376,29 +1398,173 @@ var Standardizer = (function () {
 
 
                             }
-                            recurse(item,level+1)
+                            recurse(item, level + 1)
                         })
 
 
-
                     }
 
-                    recurse(self.hierarchy,0)
+                    recurse(self.hierarchy, 0)
 
-                    var options = {
-                        layoutHierarchical: {
-                            direction: "UD",
-                            sortMethod: "hubsize",
 
+                    if (true) {
+
+                        // add cluster nodes with  leafs linked to hierarchies
+
+                        var pairs = {}
+                        self.searchResultArray.forEach(function (item, itemIndex) {
+                            var hits = item.hits.hits;
+                            if (hits.length == 0)
+                                return;
+                            var commonNodes = []
+                            hits.forEach(function (hit) {
+                                var ancestors = hit._source.parents.split("|").reverse()
+                                var done = false
+                                ancestors.forEach(function (ancestor) {
+                                    if (!done) {
+                                        if (existingNodes[ancestor]) {
+                                            done = true
+                                            commonNodes.push(ancestor)
+                                        }
+                                    }
+
+                                })
+
+                            })
+
+                            if (commonNodes.length > 1) {
+                                commonNodes.forEach(function (node, index) {
+                                    if (index > 0) {
+                                        var id = commonNodes[index - 1] + "|" + node
+                                        if (!pairs[id])
+                                            pairs[id] = 0
+                                        pairs[id] += 1
+                                    }
+                                })
+                            }
+
+                        })
+                        for (var key in pairs) {
+
+                            if (false) {
+                                if (!existingNodes[key]) {
+                                    existingNodes[key] = 1
+                                    visjsData.nodes.push({
+                                        id: key,
+                                        label: "" + pairs[key],
+                                        shape: "circle",
+                                        value: pairs[key],
+                                        level: maxlevels + 1
+
+                                    })
+                                }
+                                var array = key.split(("|"))
+
+                                var edgeId = array[0] + "_" + key
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: key,
+                                        to: array[0]
+
+                                    })
+                                }
+                                var edgeId = array[1] + "_" + key
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: key,
+                                        to: array[1]
+
+                                    })
+                                }
+                            } else {
+                                var array = key.split(("|"))
+
+                                var edgeId = array[0] + "_" + array[1]
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: array[0],
+                                        to: array[1],
+                                        label: "" + pairs[key],
+                                        value: pairs[key]
+
+                                    })
+                                }
+
+
+                            }
 
                         }
+
+
                     }
 
 
-                    visjsGraph.draw("Standardizer_ancestorsDiv", visjsData, options)
+                    var html = ""
+                    var row0 = "<td>&nbsp;</td>"
+                    var nodesMap = {}
+                    visjsData.nodes.forEach(function (node) {
+                        nodesMap[node.id] = node
+                    })
+
+                    visjsData.edges.forEach(function (edgeH) {
+                        if (edgeH.value) {
+                            var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel  + "</td>"
+                            row0 += "<td class='Standardizer_ancestorsCooccurenceColHeader'>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
+                            visjsData.edges.forEach(function (edgeV) {
+                                if (edgeV.value) {
+                                    var value = ""
+                                    if (edgeV.from != edgeH.from && edgeV.to != edgeH.to) {
+                                        if (edgeV.from == edgeH.to || edgeV.to == edgeH.from)
+                                            value = edgeV.value
+                                    }
+
+                                    row += "<td class='Standardizer_ancestorsCooccurenceCell'>" + value + "</td>"
+                                }
+
+                            })
+                            row += "</tr>"
+                            html += row
+
+                        }
+                    })
+                    html = "<table>"+"<tr>" + row0 + "</tr>" + html
+                    html += "</table>"
 
 
-                    return callbackSeries()
+
+                    $("#Standardizer_ancestorsDiv").html(html)
+
+                    if (false) {
+
+                        var options = {
+                            edges: {
+                                smooth: {
+                                    type: "cubicBezier",
+                                    forceDirection: "vertical",
+
+                                    roundness: 0.4,
+                                }
+                            },
+                            layoutHierarchical: {
+                                direction: "LR",
+                                sortMethod: "hubsize",
+
+
+                            }
+                        }
+
+
+                        visjsGraph.draw("Standardizer_ancestorsDiv", visjsData, options)
+
+
+                        return callbackSeries()
+                    }
                 }
 
 

@@ -6,15 +6,18 @@ broadcastChannel.onmessage = function (ev) {
     if (ev.data.initStandardizerWords) {
         var data = ev.data.initStandardizerWords
 
-        MainController.UI.initTool("Standardizer");
-        setTimeout(function () {
+        MainController.UI.initTool("Standardizer",function(err,result) {
+            ;
+
+            //  setTimeout(function () {
             var str = "";
             data.forEach(function (item) {
                 str += item + "\n"
             })
             $("#Standardizer_wordsTA").val(str)
 
-        }, 500)
+            //  }, 500)
+        })
 
 
     }
@@ -23,11 +26,10 @@ broadcastChannel.onmessage = function (ev) {
     else if (ev.data.showStandardizerResultsInLineage) {
         var classUrisBySource = ev.data.showStandardizerResultsInLineage;
 
-        MainController.UI.initTool("lineage");
-        setTimeout(function () {
+        MainController.UI.initTool("lineage",function(err,result) {
+            //  setTimeout(function () {
             var i = 0;
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
-
 
 
                 if (i++ == 0)
@@ -40,7 +42,8 @@ broadcastChannel.onmessage = function (ev) {
                 })
 
             })
-        }, 500)
+            //   }, 500)
+        })
     }
 
 

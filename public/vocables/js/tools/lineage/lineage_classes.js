@@ -39,7 +39,7 @@ var Lineage_classes = (function () {
         self.currentExpandLevel = 1
 
 
-        self.onLoaded = function () {
+        self.onLoaded = function (callback) {
             if (self.isLoaded)
                 ; // return;
             self.isLoaded = true
@@ -104,6 +104,8 @@ var Lineage_classes = (function () {
                         self.sourcesGraphUriMap[graphUri] = Config.sources[sourceLabel]
                 }
                 $("#GenericTools_searchSchemaType").val("OWL")
+                if(callback)
+                    callback()
 
             }, 500)
 

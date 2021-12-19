@@ -32,7 +32,7 @@ var KGbrowser = (function () {
     }
 
 
-    self.onLoaded = function () {
+    self.onLoaded = function (callback) {
         $("#sourceDivControlPanelDiv").html("")
         MainController.UI.message("");
 KGbrowserCustom.initsuperClassesPalette()
@@ -52,7 +52,8 @@ KGbrowserCustom.initsuperClassesPalette()
             SourceBrowser.currentTargetDiv = "KGbrowserItemsjsTreeDiv"
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL")
        //     $("#KGbrowser_Tabs").tabs({})
-
+            if(callback)
+                callback()
 
         }, 1000)
     }

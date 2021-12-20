@@ -156,12 +156,6 @@ router.post(
             });
         }
 
-        if (req.body.tryLoginJSON) {
-            authentication.authentify(req.body.login, req.body.password, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.getProfiles) {
             configManager.getProfiles({}, function (err, result) {
                 processResponse(response, err, result);

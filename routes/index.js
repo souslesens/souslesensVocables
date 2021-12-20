@@ -188,13 +188,6 @@ router.post(
             });
         }
 
-        if (req.body.KGmappingDictionary) {
-            if (req.body.load)
-                configManager.getDictionary(req.body.load, function (err, result) {
-                    processResponse(response, err, result);
-                });
-        }
-
         if (req.body.httpProxy) {
             httpProxy.setProxyForServerDomain(req.headers.host);
 

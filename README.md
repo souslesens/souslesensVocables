@@ -77,6 +77,11 @@ You may also want to start the app in dev mode with `npm run dev`.
 !Caveats! Dev mode use nodemon to restart node when there is a change in file, including files within `config/`.
 When you write those files from the Admin interface, nodemon will restart and, for a short moment, you won't have access to the routes allowing you to write those files.
 
+### Test
+
+Run End-to-End testing with `npm run test`
+
+If you want to add tests, you can add files to `cypress/integration/`
 
 ```bash
 npm start

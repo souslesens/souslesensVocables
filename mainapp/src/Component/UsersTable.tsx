@@ -10,9 +10,10 @@ import { newUser, putUsers, User } from '../User';
 import { ulid } from 'ulid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 import Autocomplete from '@mui/material/Autocomplete';
+
 const UsersTable = () => {
     const { model, updateModel } = useModel();
-    const unwrappedSources = SRD.unwrap([], identity, model.users)
+    const unwrappedSources = SRD.unwrap([], (users => users.sort((x, y) => x.login.localeCompare(y.login))), model.users)
     const [filteringChars, setFilteringChars] = React.useState("")
     const deleteUser = (user: User) => {
 

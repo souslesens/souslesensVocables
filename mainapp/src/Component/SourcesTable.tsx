@@ -10,6 +10,7 @@ import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 import Autocomplete from '@mui/material/Autocomplete';
+
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources)

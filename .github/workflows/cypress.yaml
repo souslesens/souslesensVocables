@@ -1,0 +1,35 @@
+name: Cypress Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Install NPM dependencies, cache them correctly
+      # and run all Cypress tests
+      - name: Build mainapp
+        working-directory: ./mainapp
+        run: node & npm ci && npm run build
+      - name: Generates config
+        run: node scripts/init_configs.js 
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm start
+          wait-on: "http://localhost:3010"
+          wait-on-timeout: 120
+          config-file: cypress.json
+          headless: true
+          browser: chrome
+          spec: |
+            cypress/integration/login.spec.js
+          runTests: true

@@ -23,6 +23,7 @@ broadcastChannel.onmessage = function (ev) {
     }
 
 
+
     else if (ev.data.showStandardizerResultsInLineage) {
         var classUrisBySource = ev.data.showStandardizerResultsInLineage;
 
@@ -30,7 +31,6 @@ broadcastChannel.onmessage = function (ev) {
             //  setTimeout(function () {
             var i = 0;
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
-
 
                 if (i++ == 0)
                     MainController.currentSource = source

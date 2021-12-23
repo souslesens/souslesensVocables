@@ -113,8 +113,6 @@ var Lineage_classes = (function () {
 
 
         self.onSourceSelect = function (sourceLabel) {
-
-
             if (!sourceLabel)
                 return
 
@@ -375,7 +373,8 @@ var Lineage_classes = (function () {
                         return callbackEach(err)
                     if (result.length == 0) {
                         $("#waitImg").css("display", "none");
-                        return MainController.UI.message("No data found")
+                        return callbackEach()
+
 
                     }
                     if (result.length > self.showLimit) {
@@ -1285,7 +1284,7 @@ var Lineage_classes = (function () {
                 var parentIds = []
                 var nodes = visjsGraph.data.nodes.get();
                 nodes.forEach(function (node) {
-                    if (node.data && node.data.source == source && node.data.id && node.data.id != source) {
+                    if ((source== Lineage_classes.mainSource || node.data && node.data.source == source) && node.data.id && node.data.id != source) {
                         parentIds.push(node.data.id)
                     }
                 })
@@ -2366,6 +2365,10 @@ var Lineage_classes = (function () {
             var imports = Config.sources[sourceLabel].imports
             if (!imports)
                 imports = []
+
+
+
+
 
             imports.forEach(function (source) {
                 self.registerSource(source)

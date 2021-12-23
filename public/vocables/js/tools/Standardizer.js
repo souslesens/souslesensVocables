@@ -61,8 +61,8 @@ var Standardizer = (function () {
                 $("#standardizerCentral_tabs").tabs({});
                 if(callback)
                     callback()
-            }, 200)
-        }, 200)
+            }, 500)
+        }, 500)
 
 
     }
@@ -1345,26 +1345,31 @@ var Standardizer = (function () {
                     var maxlevels = 2;
                     maxlevels = parseInt($("#Standardizer_ancestorsMaxLevels").val())
                     var existingNodes = {}
+                    var y0=-200
+                    var yOffset=50;
+
                     var recurse = function (parent, level) {
                         if (level > maxlevels)
                             return;
                         if (!parent.children)
                             return;
+                        var y=  y0+(yOffset*level)
                         parent.children.forEach(function (item) {
+
                             if (!existingNodes[item.id]) {
                                 existingNodes[item.id] = 1
 
-                                var ancestorsLabel="";
-                                if(item.path) {
+                                var ancestorsLabel = "";
+                                if (item.path) {
                                     var ancestors = item.path.split("|");
                                     ancestors.forEach(function (ancestor, index) {
+
                                         if (index > 0)
                                             ancestorsLabel += "/"
                                         ancestorsLabel += Sparql_common.getLabelFromURI(ancestor)
                                     })
-                                }
-                                else{
-                                    ancestorsLabel=item.name
+                                } else {
+                                    ancestorsLabel = item.name
                                 }
 
 
@@ -1374,11 +1379,14 @@ var Standardizer = (function () {
                                     level: level,
                                     color: Lineage_classes.getSourceColor(item.index),
                                     shape: "box",
+                                  //  fixed:{x:false, y:true},
+
+                                   // y:  y,
                                     data: {
                                         id: item.id,
                                         text: item.name,
-                                        path:item.path,
-                                        ancestorsLabel:ancestorsLabel
+                                        path: item.path,
+                                        ancestorsLabel: ancestorsLabel
 
                                     }
                                 })
@@ -1444,17 +1452,23 @@ var Standardizer = (function () {
                             }
 
                         })
+                        var x=-100
+                        var xoffset=100
                         for (var key in pairs) {
 
-                            if (false) {
+                            if (true) {
                                 if (!existingNodes[key]) {
                                     existingNodes[key] = 1
+
                                     visjsData.nodes.push({
                                         id: key,
                                         label: "" + pairs[key],
                                         shape: "circle",
                                         value: pairs[key],
-                                        level: maxlevels + 1
+                                        level: maxlevels + 2,
+                                        fixed:{x:true, y:true},
+                                     //   y:0,
+                                     //   x:  (x+=xoffset)
 
                                     })
                                 }
@@ -1503,7 +1517,7 @@ var Standardizer = (function () {
 
 
                     }
-
+                    if (false) {
 
                     var html = ""
                     var row0 = "<td>&nbsp;</td>"
@@ -1514,7 +1528,7 @@ var Standardizer = (function () {
 
                     visjsData.edges.forEach(function (edgeH) {
                         if (edgeH.value) {
-                            var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel  + "</td>"
+                            var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
                             row0 += "<td class='Standardizer_ancestorsCooccurenceColHeader'>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
                             visjsData.edges.forEach(function (edgeV) {
                                 if (edgeV.value) {
@@ -1533,14 +1547,13 @@ var Standardizer = (function () {
 
                         }
                     })
-                    html = "<table>"+"<tr>" + row0 + "</tr>" + html
+                    html = "<table>" + "<tr>" + row0 + "</tr>" + html
                     html += "</table>"
 
 
-
                     $("#Standardizer_ancestorsDiv").html(html)
-
-                    if (false) {
+                }
+                   else {
 
                         var options = {
                             edges: {
@@ -1551,7 +1564,7 @@ var Standardizer = (function () {
                                     roundness: 0.4,
                                 }
                             },
-                            layoutHierarchical: {
+                          layoutHierarchical: {
                                 direction: "LR",
                                 sortMethod: "hubsize",
 

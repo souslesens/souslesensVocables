@@ -14,9 +14,9 @@ var winston = require("winston");
 
 const { createLogger, format, transports } = require("winston");
 const { combine, timestamp, json } = format;
-const config = require(path.resolve('config/mainConfig.json'));
+const config = require(path.resolve("config/mainConfig.json"));
 
-const logDir = config.logDir ? config.logDir : "log/souslesens"
+const logDir = config.logDir ? config.logDir : "log/souslesens";
 
 const ConfigManager = require("./configManager.");
 

@@ -5,7 +5,7 @@
   "disableAuth": false,
   "auth": "json",
   "defaultGroups": [],
-  "logDir": "log/souslesens",
+  "logDir": "logs",
   "keycloak": {
     "realm": "master",
     "publicClient": false,

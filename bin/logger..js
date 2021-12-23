@@ -16,6 +16,8 @@ const { createLogger, format, transports } = require("winston");
 const { combine, timestamp, json } = format;
 const config = require(path.resolve('config/mainConfig.json'));
 
+const logDir = config.logDir ? config.logDir : "log/souslesens"
+
 const logger = createLogger({
     level: "info",
 
@@ -34,8 +36,8 @@ const logger = createLogger({
         // - Write to all logs with level `info` and below to `combined.log`
         // - Write all logs error (and below) to `error.log`.
         //
-        new winston.transports.File({ filename: config.logDir + "/error.log", level: "error" }),
-        new winston.transports.File({ filename: config.logDir + "/vocables.log", level: "info" }),
+        new winston.transports.File({ filename: logDir + "/error.log", level: "error" }),
+        new winston.transports.File({ filename: logDir + "/vocables.log", level: "info" }),
     ],
 });
 

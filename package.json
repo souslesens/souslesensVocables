@@ -16,7 +16,7 @@
     "test": "cypress open"
   },
   "devDependencies": {
-    "cypress": "^9.1.1",
+    "cypress": "^9.2.0",
     "prettier": "^2.5.1"
   },
   "dependencies": {

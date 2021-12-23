@@ -172,6 +172,31 @@
         overflow: auto
     }
 
+    .Standardizer_ancestors{
+       /* display: flex;
+        flex-wrap:wrap;*/
+        width: 800px;
+        height: 800px;
+
+
+    }
+    .Standardizer_ancestorsCooccurenceCell{
+        width:15px;
+        border: brown 1px solid
+
+
+    }
+    .Standardizer_ancestorsCooccurenceColHeader{
+        writing-mode: vertical-rl;
+        width:15px;
+        font-size: 12px;
+        overflow: auto;
+
+
+    }
+
+
+
 
 
 
@@ -184,7 +209,7 @@
         <ul>
             <li><a href="#Standardizer_matrixTab">Matrix</a></li>
             <li><a href="#Standardizer_sunburstTab">Sunburst</a></li>
-         <!--   <li><a href="#Standardizer_graphTab">Graph</a></li>-->
+          <li><a href="#Standardizer_ancestorsTab">Ancestors</a></li>
             <li><a href="#Standardizer_searchTab">Search</a></li>
           <!--  <li><a href="#Standardizer_connectionsTab">Connections</a></li>-->
 
@@ -200,7 +225,12 @@
                                 onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())">-->
                 <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.exportExactMatchMatrix()">Export exact matches</button>
                 <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.exportFuzzyMatches()">Export fuzzy matches</button>
-                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.createSameAsRelations()">Create sameAs relations</button>
+                <!--<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.createSameAsRelations()">Create sameAs relations</button>-->
+
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.showMatchesIntoLineage()">showMatchesIntoLineage</button>
+
+
+
 
                 <br>
                 <div id="KGmapping_matrixContainer"
@@ -215,9 +245,10 @@
 
         </div>
 
-      <!--  <div id="Standardizer_graphTab">
-            <div id="Standardizer_graphDiv" class="Standardizer_graph"></div>
-        </div>-->
+      <div id="Standardizer_ancestorsTab">
+          depth<input id="Standardizer_ancestorsMaxLevels" value="2">
+            <div id="Standardizer_ancestorsDiv" class="Standardizer_ancestors"></div>
+        </div>
         <div id="Standardizer_searchTab">
             search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput"
                          onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv')">

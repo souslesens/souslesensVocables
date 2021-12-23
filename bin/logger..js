@@ -18,6 +18,31 @@ const config = require(path.resolve('config/mainConfig.json'));
 
 const logDir = config.logDir ? config.logDir : "log/souslesens"
 
+const ConfigManager = require("./configManager.");
+
+var logPaths = null;
+const getlogPaths = function () {
+    if (logPaths) return logPaths;
+    else {
+        // a refaire !!!!!!!!!!!!!!!!!!!!
+        var mainConfig = ConfigManager.getGeneralConfig();
+        if (!mainConfig) {
+            setTimeout(function () {
+                logPaths = mainConfig.logger;
+                return mainConfig.logger;
+            }, 500);
+        } else {
+            logPaths = mainConfig.logger;
+            return mainConfig.logger;
+        }
+    }
+};
+var errorsLogPath = "logs/error.log";
+var usersLogPath = "logs/vocables.log";
+
+/*var errorsLogPath = getlogPaths().errorsLogPath;
+var usersLogPath = getlogPaths().usersLogPath;*/
+
 const logger = createLogger({
     level: "info",
 
@@ -28,9 +53,8 @@ const logger = createLogger({
         json()
     ),
 
-    //  format: winston.format.json(),
-
     defaultMeta: { service: "user-navigation" },
+
     transports: [
         //
         // - Write to all logs with level `info` and below to `combined.log`
@@ -41,10 +65,6 @@ const logger = createLogger({
     ],
 });
 
-//
-// If we're not in production then log to the `console` with the format:
-// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-//
 if (process.env.NODE_ENV !== "production") {
     logger.add(
         new winston.transports.Console({

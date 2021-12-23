@@ -9,10 +9,14 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+var path = require("path");
 var winston = require("winston");
 
 const { createLogger, format, transports } = require("winston");
 const { combine, timestamp, json } = format;
+const config = require(path.resolve("config/mainConfig.json"));
+
+const logDir = config.logDir ? config.logDir : "log/souslesens";
 
 const ConfigManager = require("./configManager.");
 
@@ -50,7 +54,15 @@ const logger = createLogger({
     ),
 
     defaultMeta: { service: "user-navigation" },
-    transports: [new winston.transports.File({ filename: errorsLogPath, level: "error" }), new winston.transports.File({ filename: usersLogPath, level: "info" })],
+
+    transports: [
+        //
+        // - Write to all logs with level `info` and below to `combined.log`
+        // - Write all logs error (and below) to `error.log`.
+        //
+        new winston.transports.File({ filename: logDir + "/error.log", level: "error" }),
+        new winston.transports.File({ filename: logDir + "/vocables.log", level: "info" }),
+    ],
 });
 
 if (process.env.NODE_ENV !== "production") {

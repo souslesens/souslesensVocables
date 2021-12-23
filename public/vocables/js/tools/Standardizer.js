@@ -12,7 +12,7 @@ var Standardizer = (function () {
     self.onSourceSelect = function () {
 
     }
-    self.onLoaded = function () {
+    self.onLoaded = function (callback) {
         $("#actionDiv").html("")
         $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html")
         MainController.UI.toogleRightPanel(true)
@@ -59,8 +59,10 @@ var Standardizer = (function () {
             $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
             setTimeout(function () {
                 $("#standardizerCentral_tabs").tabs({});
-            }, 200)
-        }, 200)
+                if(callback)
+                    callback()
+            }, 500)
+        }, 500)
 
 
     }
@@ -1326,14 +1328,265 @@ var Standardizer = (function () {
                     var options = {
                         onNodeClick: Standardizer.onSunBurstClick
                     }
+                    self.hierarchy = root
                     Sunburst.draw(sunburstDivId, root, options)
                     return callbackSeries()
+                },
+
+                function (callbackSeries) {
+                    return callbackSeries()
+//$("#standardizerCentral_tabs").tabs("active",2)
+
+                },
+
+
+                function (callbackSeries) {
+                    var visjsData = {nodes: [], edges: []}
+                    var maxlevels = 2;
+                    maxlevels = parseInt($("#Standardizer_ancestorsMaxLevels").val())
+                    var existingNodes = {}
+                    var y0=-200
+                    var yOffset=50;
+
+                    var recurse = function (parent, level) {
+                        if (level > maxlevels)
+                            return;
+                        if (!parent.children)
+                            return;
+                        var y=  y0+(yOffset*level)
+                        parent.children.forEach(function (item) {
+
+                            if (!existingNodes[item.id]) {
+                                existingNodes[item.id] = 1
+
+                                var ancestorsLabel = "";
+                                if (item.path) {
+                                    var ancestors = item.path.split("|");
+                                    ancestors.forEach(function (ancestor, index) {
+
+                                        if (index > 0)
+                                            ancestorsLabel += "/"
+                                        ancestorsLabel += Sparql_common.getLabelFromURI(ancestor)
+                                    })
+                                } else {
+                                    ancestorsLabel = item.name
+                                }
+
+
+                                visjsData.nodes.push({
+                                    id: item.id,
+                                    label: item.name || Sparql_common.getLabelFromURI(item.id),
+                                    level: level,
+                                    color: Lineage_classes.getSourceColor(item.index),
+                                    shape: "box",
+                                  //  fixed:{x:false, y:true},
+
+                                   // y:  y,
+                                    data: {
+                                        id: item.id,
+                                        text: item.name,
+                                        path: item.path,
+                                        ancestorsLabel: ancestorsLabel
+
+                                    }
+                                })
+                                if (level > 0) {
+                                    var edgeId = item.id + "_" + parent.id
+                                    if (!existingNodes[edgeId]) {
+                                        existingNodes[edgeId] = 1
+                                        visjsData.edges.push({
+                                            id: edgeId,
+                                            from: item.id,
+                                            to: parent.id
+
+
+                                        })
+                                    }
+                                }
+
+
+                            }
+                            recurse(item, level + 1)
+                        })
+
+
+                    }
+
+                    recurse(self.hierarchy, 0)
+
+
+                    if (true) {
+
+                        // add cluster nodes with  leafs linked to hierarchies
+
+                        var pairs = {}
+                        self.searchResultArray.forEach(function (item, itemIndex) {
+                            var hits = item.hits.hits;
+                            if (hits.length == 0)
+                                return;
+                            var commonNodes = []
+                            hits.forEach(function (hit) {
+                                var ancestors = hit._source.parents.split("|").reverse()
+                                var done = false
+                                ancestors.forEach(function (ancestor) {
+                                    if (!done) {
+                                        if (existingNodes[ancestor]) {
+                                            done = true
+                                            commonNodes.push(ancestor)
+                                        }
+                                    }
+
+                                })
+
+                            })
+
+                            if (commonNodes.length > 1) {
+                                commonNodes.forEach(function (node, index) {
+                                    if (index > 0) {
+                                        var id = commonNodes[index - 1] + "|" + node
+                                        if (!pairs[id])
+                                            pairs[id] = 0
+                                        pairs[id] += 1
+                                    }
+                                })
+                            }
+
+                        })
+                        var x=-100
+                        var xoffset=100
+                        for (var key in pairs) {
+
+                            if (true) {
+                                if (!existingNodes[key]) {
+                                    existingNodes[key] = 1
+
+                                    visjsData.nodes.push({
+                                        id: key,
+                                        label: "" + pairs[key],
+                                        shape: "circle",
+                                        value: pairs[key],
+                                        level: maxlevels + 2,
+                                        fixed:{x:true, y:true},
+                                     //   y:0,
+                                     //   x:  (x+=xoffset)
+
+                                    })
+                                }
+                                var array = key.split(("|"))
+
+                                var edgeId = array[0] + "_" + key
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: key,
+                                        to: array[0]
+
+                                    })
+                                }
+                                var edgeId = array[1] + "_" + key
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: key,
+                                        to: array[1]
+
+                                    })
+                                }
+                            } else {
+                                var array = key.split(("|"))
+
+                                var edgeId = array[0] + "_" + array[1]
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: array[0],
+                                        to: array[1],
+                                        label: "" + pairs[key],
+                                        value: pairs[key]
+
+                                    })
+                                }
+
+
+                            }
+
+                        }
+
+
+                    }
+                    if (false) {
+
+                    var html = ""
+                    var row0 = "<td>&nbsp;</td>"
+                    var nodesMap = {}
+                    visjsData.nodes.forEach(function (node) {
+                        nodesMap[node.id] = node
+                    })
+
+                    visjsData.edges.forEach(function (edgeH) {
+                        if (edgeH.value) {
+                            var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
+                            row0 += "<td class='Standardizer_ancestorsCooccurenceColHeader'>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
+                            visjsData.edges.forEach(function (edgeV) {
+                                if (edgeV.value) {
+                                    var value = ""
+                                    if (edgeV.from != edgeH.from && edgeV.to != edgeH.to) {
+                                        if (edgeV.from == edgeH.to || edgeV.to == edgeH.from)
+                                            value = edgeV.value
+                                    }
+
+                                    row += "<td class='Standardizer_ancestorsCooccurenceCell'>" + value + "</td>"
+                                }
+
+                            })
+                            row += "</tr>"
+                            html += row
+
+                        }
+                    })
+                    html = "<table>" + "<tr>" + row0 + "</tr>" + html
+                    html += "</table>"
+
+
+                    $("#Standardizer_ancestorsDiv").html(html)
+                }
+                   else {
+
+                        var options = {
+                            edges: {
+                                smooth: {
+                                    type: "cubicBezier",
+                                    forceDirection: "vertical",
+
+                                    roundness: 0.4,
+                                }
+                            },
+                          layoutHierarchical: {
+                                direction: "LR",
+                                sortMethod: "hubsize",
+
+
+                            }
+                        }
+
+
+                        visjsGraph.draw("Standardizer_ancestorsDiv", visjsData, options)
+
+
+                        return callbackSeries()
+                    }
                 }
 
+
             ],
+
             function (err) {
 
-            })
+            }
+        )
 
 
     }
@@ -2092,41 +2345,57 @@ var Standardizer = (function () {
 
     self.showMatchesIntoLineage = function () {
 
-        var indexes = []
-        var classUrisByIndex = {}
+        window.open(window.location.href + "?x=3", "SLSV_lineage")
+        setTimeout(function () {
 
-        self.searchResultArray.forEach(function (item, itemIndex) {
-            var hits = item.hits.hits;
-            if (hits.length == 0)
-                return
-            hits.forEach(function (hit) {
-                if (!classUrisByIndex[hit._index])
-                    classUrisByIndex[hit._index] = []
-                classUrisByIndex[hit._index].push(hit._source.id)
+            var indexes = []
+            var classUrisBySource = {}
+
+            self.searchResultArray.forEach(function (item, itemIndex) {
+                var hits = item.hits.hits;
+                if (hits.length == 0)
+                    return
+                hits.forEach(function (hit) {
+                    var source = self.indexSourcesMap[hit._index]
+                    if (!classUrisBySource[source])
+                        classUrisBySource[source] = []
+                    classUrisBySource[source].push(hit._source.id)
+                })
             })
-        })
+
+
+            broadcastChannel.postMessage({showStandardizerResultsInLineage: classUrisBySource})
+
+        }, 500)
+
+        return
 
         MainController.UI.initTool("lineage");
         setTimeout(function () {
             var i = 0;
-            async.eachSeries(Object.keys(classUrisByIndex), function (index, callbackEach) {
+            async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
 
-                var source = self.indexSourcesMap[index]
 
-              if (i++ == 0)
+                if (i++ == 0)
                     MainController.currentSource = source
                 MainController.UI.onSourceSelect()
-                Lineage_classes.addParentsToGraph(source, classUrisByIndex[index],function(err){
-                    if(err)
+                Lineage_classes.addParentsToGraph(source, classUrisBySource[index], function (err) {
+                    if (err)
                         return alert(err)
                     callbackEach()
-                } )
+                })
 
             })
 
 
         }, 500)
 
+    }
+
+    self.drawAncestors = function () {
+
+        self.searchResultArray.forEach(function (item, itemIndex) {
+        })
     }
 
 

@@ -21,7 +21,7 @@ var Evaluate = (function () {
 
 
 
-        self.onLoaded = function () {
+        self.onLoaded = function (callback) {
             //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
             $("#actionDiv").html("")
             $("#actionDivContolPanelDiv").load("snippets/evaluate/evaluate_left.html")
@@ -42,7 +42,8 @@ var Evaluate = (function () {
 
                 common.fillSelectOptions("evaluate_sourceSelect", self.selectedSources, true)
                 self.initCorpusList();
-
+                if(callback)
+                    callback()
 
             }, 200)
         }

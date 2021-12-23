@@ -16,7 +16,7 @@
     "test": "cypress open"
   },
   "devDependencies": {
-    "cypress": "^9.1.1",
+    "cypress": "^9.2.0",
     "prettier": "^2.5.1"
   },
   "dependencies": {
@@ -46,7 +46,7 @@
     "imap": "^0.8.19",
     "inflected": "^2.1.0",
     "js2xmlparser": "^4.0.2",
-    "jsoneditor": "^9.5.8",
+    "jsoneditor": "^9.5.9",
     "latest": "^0.2.0",
     "lemmatizer": "0.0.1",
     "libmime": "^5.0.0",

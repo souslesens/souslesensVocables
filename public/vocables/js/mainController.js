@@ -60,6 +60,33 @@ var MainController = (function () {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
                         data[source].sparql_server.url = Config.default_sparql_url
                     }
+                    //manage imports that are not declared as sources in sources.json : create in memory sources
+                    if (data[source].imports) {
+                        var imports2 = []
+                        data[source].imports.forEach(function (item) {
+                            if (item.graphUri) {
+                                var importSourceName = Sparql_common.getLabelFromURI(item.graphUri)
+                                var sparqlEndpointUrl = item.sparql_server.url
+                                if (!item.sparql_server)
+                                    item.sparql_server = data[source].sparql_server
+                                else if (item.sparql_server.url == "_default") {
+                                    item.sparql_server.url = Config.default_sparql_url;
+                                }
+
+
+                                item.controller = data[source].controller
+                                if (!item.topClassFilter)
+                                    item.topClassFilter = data[source].topClassFilter
+                                data[importSourceName] = item;
+                                imports2.push(importSourceName)
+
+                            }
+                        })
+                        if (imports2.length > 0) {
+                            data[source].imports = imports2
+
+                        }
+                    }
                 }
                 Config.sources = data;
                 if (callback)
@@ -144,23 +171,23 @@ var MainController = (function () {
                 })
 
 
-                    async.series([
-                        function(callbackSeries) {
-                        if(!Config.currentProfile.customPlugins)
+                async.series([
+                    function (callbackSeries) {
+                        if (!Config.currentProfile.customPlugins)
                             return callbackSeries();
-                            CustomPluginController.init(Config.currentProfile.customPlugins, function (err, result) {
-                                callbackSeries()
-                            })
-                        },
-                        function(callbackSeries) {
-                            MainController.UI.showToolsList("toolsTreeDiv")
+                        CustomPluginController.init(Config.currentProfile.customPlugins, function (err, result) {
                             callbackSeries()
-                        }
+                        })
+                    },
+                    function (callbackSeries) {
+                        MainController.UI.showToolsList("toolsTreeDiv")
+                        callbackSeries()
+                    }
 
-                    ],function(err){
+                ], function (err) {
 
-                        MainController.UI.configureUI();
-                    })
+                    MainController.UI.configureUI();
+                })
 
             })
         })
@@ -180,6 +207,26 @@ var MainController = (function () {
     }
 
     self.UI = {
+
+        test: function () {
+
+            //  Orchestrator.createTab()
+            // broadcastChannel.postMessage("eeee")
+            broadcastChannel.postMessage({from: MainController.currentTool, to: "Lineage"});
+            return;
+
+
+            var variables = ""
+            for (var name in this) {
+                console.log(name + "  :  " + this[name])
+
+            }
+            console.log(variables)
+
+
+        },
+
+
         initialGraphDivWitdh: 0,
 
         configureUI: function () {
@@ -363,7 +410,7 @@ var MainController = (function () {
             })
 
         }
-        , initTool: function (toolId) {
+        , initTool: function (toolId, callback) {
             self.currentTool = toolId
             var toolObj = Config.tools[toolId]
             self.currentSource = null;
@@ -398,7 +445,10 @@ var MainController = (function () {
 
 
             if (controller.onLoaded)
-                controller.onLoaded()
+                controller.onLoaded(function (err, result) {
+                    if (callback)
+                        callback(err, result)
+                })
             if (Config.tools[self.currentTool].toolDescriptionImg) {
                 $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>")
             } else
@@ -447,7 +497,7 @@ var MainController = (function () {
                 $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh)
                 $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh})
                 setTimeout(function () {
-                  ;//  visjsGraph.redraw()
+                    ;//  visjsGraph.redraw()
                 }, 200)
 
 
@@ -458,7 +508,7 @@ var MainController = (function () {
                     $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
                     $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
                     setTimeout(function () {
-                      ;//  visjsGraph.redraw()
+                        ;//  visjsGraph.redraw()
                     }, 200)
                 }
 
@@ -544,6 +594,7 @@ var MainController = (function () {
 
     self.test = function () {
 
+        //   bc.postMessage("bc")
 
     }
 

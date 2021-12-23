@@ -9,10 +9,12 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+var path = require("path");
 var winston = require("winston");
 
 const { createLogger, format, transports } = require("winston");
 const { combine, timestamp, json } = format;
+const config = require(path.resolve('config/mainConfig.json'));
 
 const logger = createLogger({
     level: "info",
@@ -32,8 +34,8 @@ const logger = createLogger({
         // - Write to all logs with level `info` and below to `combined.log`
         // - Write all logs error (and below) to `error.log`.
         //
-        new winston.transports.File({ filename: "../logs/error.log", level: "error" }),
-        new winston.transports.File({ filename: "../logs/vocables.log", level: "info" }),
+        new winston.transports.File({ filename: config.logDir + "/error.log", level: "error" }),
+        new winston.transports.File({ filename: config.logDir + "/vocables.log", level: "info" }),
     ],
 });
 

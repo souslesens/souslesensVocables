@@ -9,8 +9,7 @@ const writeFile = util.promisify(fs.writeFile);
 module.exports = function () {
     let operations = {
         GET,
-        DELETE,
-        POST
+        DELETE
     };
 
     // function parseProfile(profile) {
@@ -52,36 +51,36 @@ module.exports = function () {
             }
         });
     }
-    async function POST(req, res, next) {
-        const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))
-        const oldProfiles = JSON.parse(profiles)
-        const profileToAdd = req.body
-        const notAlreadyCreated = !oldProfiles[req.params.id]
-        const newProfiles = { ...oldProfiles, ...profileToAdd }
-        const successfullyCreated = newProfiles[req.params.id]
+    // async function POST(req, res, next) {
+    //     const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))
+    //     const oldProfiles = JSON.parse(profiles)
+    //     const profileToAdd = req.body
+    //     const notAlreadyCreated = !oldProfiles[req.params.id]
+    //     const newProfiles = { ...oldProfiles, ...profileToAdd }
+    //     const successfullyCreated = newProfiles[req.params.id]
 
-        if (notAlreadyCreated && successfullyCreated) {
+    //     if (notAlreadyCreated && successfullyCreated) {
 
-            await writeFile(profilesJSON, JSON.stringify(remainingProfiles))
-                .catch(err => res.status(500).json({
-                    message: "I couldn't write profiles.json",
-                    error: err
-                }))
+    //         await writeFile(profilesJSON, JSON.stringify(remainingProfiles))
+    //             .catch(err => res.status(500).json({
+    //                 message: "I couldn't write profiles.json",
+    //                 error: err
+    //             }))
 
-            const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read profiles json" }))
-            res.status(200).json({
-                message: `${req.params.id} successfully created`,
-                profiles: JSON.parse(updatedProfiles)
-            })
+    //         const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read profiles json" }))
+    //         res.status(200).json({
+    //             message: `${req.params.id} successfully created`,
+    //             profiles: JSON.parse(updatedProfiles)
+    //         })
 
-        } else if (!req.params.id) {
-            res.status(500).json({ message: "I need a ressource ID to perform this request" })
+    //     } else if (!req.params.id) {
+    //         res.status(500).json({ message: "I need a ressource ID to perform this request" })
 
-        } else {
-            res.status(500).json({ message: `I couldn't delete ressource ${req.params.id}. Maybe it has been deleted already?` })
-        }
+    //     } else {
+    //         res.status(500).json({ message: `I couldn't delete ressource ${req.params.id}. Maybe it has been deleted already?` })
+    //     }
 
-    }
+    // }
 
     async function DELETE(req, res, next) {
         const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))

@@ -745,7 +745,7 @@ var SourceBrowser = (function () {
         var bindings = []
         var propertiesMap = {label: "", id: "", properties: {}};
         var blankNodes = []
-        Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true}, function (err, data) {
+        Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true,selectGraph:true}, function (err, data) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -753,7 +753,10 @@ var SourceBrowser = (function () {
                 $("#" + divId).dialog("open");
             }
             var type = null;
+            var graphUri="";
             data.forEach(function (item) {
+                if( item.g)
+                    graphUri=item.g.value
                 if (item.value.type == "bnode") {
                     return blankNodes.push(item.value.value)
                 }
@@ -815,6 +818,7 @@ var SourceBrowser = (function () {
             var str = "<div style='max-height:800px;overflow: auto'>" +
                 "<table class='infosTable'>"
             str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+            str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>"
             str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
 
 

@@ -161,12 +161,15 @@ var Sparql_OWL = (function () {
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-            fromStr = Sparql_common.getFromStr(sourceLabel)
+            fromStr = Sparql_common.getFromStr(sourceLabel,options.selectGraph)
 
 
             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
                 "select * " + fromStr +
-                " where {{<" + conceptId + "> ?prop ?value.  ";
+                " where {"
+               if(options.selectGraph)
+                   query+="graph ?g "
+            query+="{<" + conceptId + "> ?prop ?value.  ";
             if (options.getValuesLabels)
                 query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
             query += "}"

@@ -163,7 +163,8 @@ Lineage_relations = (function () {
                 Sparql_OWL.getObjectRestrictions(currentSource, null, {
                     withoutImports: 0,
                     someValuesFrom: 1,
-                    filter: filter
+                    filter: filter,
+                    selectGraph:true
 
                 }, function (err, result) {
                     if (err)
@@ -182,7 +183,8 @@ Lineage_relations = (function () {
                     Sparql_OWL.getObjectRestrictions(currentSource, slice, {
                         withoutImports: 0,
                         someValuesFrom: 1,
-                        filter: filter
+                        filter: filter,
+                        selectGraph:true
 
                     }, function (err, result) {
                         if (err)
@@ -393,7 +395,7 @@ Lineage_relations = (function () {
                                 font: {multi: true, size: 10},
 
                                 dashes: true,
-                                color: Lineage_classes.objectPropertyColor
+                                color: Lineage_classes.restrictionColor
                             })
 
 

@@ -122,7 +122,9 @@ Lineage_relations = (function () {
                     propLabel = item.propLabel.value
                 if (item.node)
                     node = item.node.value
-
+                if (item.g) {
+                    domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
+                }
                 if (item.domainSourceLabel) {
                     domainSourceLabel = item.domainSourceLabel.value
                 }
@@ -143,6 +145,11 @@ Lineage_relations = (function () {
                     domainSourceLabel: domainSourceLabel
 
                 })
+
+
+
+
+
             })
             return restrictions
         }

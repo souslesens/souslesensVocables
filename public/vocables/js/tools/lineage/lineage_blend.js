@@ -45,7 +45,7 @@ var Lineage_blend = (function () {
         async.series([
             function (callbackSeries) {
                 var imports = Config.sources[Lineage_classes.mainSource].imports;
-                if (imports || imports.indexOf(sourceNode.source) > -1) {
+                if (imports && imports.indexOf(sourceNode.source) > -1) {
                     return callbackSeries()
                 }
                 if ( addImportToCurrentSource && !confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))

@@ -171,11 +171,13 @@ var Lineage_classes = (function () {
                 else if (options.callee == "Tree")
                     Lineage_classes.addArbitraryNodeToGraph(node.data)
             } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
+                if(node.from){//edge
+                    Lineage_blend.deleteRestriction(node)
+                }else
                 Lineage_blend.addNodeToAssociationNode(node, "source")
-            } else if (!nodeEvent.ctrlKey && nodeEvent.altKey) {
-                Lineage_blend.addNodeToAssociationNode(node, "target")
             } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
-                Lineage_blend.deleteRestriction(node)
+                Lineage_blend.addNodeToAssociationNode(node, "target")
+
             } else if (nodeEvent.ctrlKey) {
                 SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
             } else

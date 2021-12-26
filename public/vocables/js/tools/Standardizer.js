@@ -120,97 +120,7 @@ var Standardizer = (function () {
     }
 
 
-    self.getElasticSearchMatches = function (words, indexes, mode, from, size, callback) {
 
-
-        $("#waitImg").css("display", "block")
-        //   MainController.UI.message("Searching exact matches ")
-        KGadvancedMapping.currentColumnValueDivIds = {}
-
-
-        var entitiesMap = {};
-        var count = 0
-
-        self.getWordBulkQuery = function (word, mode, indexes) {
-
-            var queryObj;
-            if (!mode || mode == "exactMatch") {
-                queryObj = {
-                    "bool": {
-                        "must": [
-                            {
-                                "term": {
-                                    "label.keyword": word.toLowerCase(),
-
-                                }
-                            }
-                        ]
-                    }
-                }
-            } else {
-                queryObj = {
-
-                    "bool": {
-                        "must": [
-                            {
-                                "query_string": {
-                                    "query": word,
-                                    "default_field": "label",
-                                    "default_operator": "OR"
-                                }
-                            }
-                        ]
-
-                    }
-
-                }
-            }
-            var header = {}
-            if (indexes)
-                header = {"index": indexes}
-
-
-            var query = {
-                "query": queryObj,
-                "from": from,
-                "size": size,
-                "_source": {
-                    "excludes": [
-                        "attachment.content"
-                    ]
-                },
-            }
-            var str = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-            return str;
-
-        }
-
-
-        self.entitiesMap = {}
-        var bulQueryStr = ""
-        var slices = common.array.slice(words, 100)
-        var allResults = []
-        var totalProcessed = 0
-        async.eachSeries(slices, function (wordSlice, callbackEach) {
-            bulQueryStr = "";
-            wordSlice.forEach(function (word) {
-                var wordQuery = self.getWordBulkQuery(word, mode, indexes)
-                bulQueryStr += wordQuery;
-            })
-            ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
-                if (err)
-                    return callbackEach(err)
-
-                allResults = allResults.concat(result)
-                callbackEach();
-            })
-
-
-        }, function (err) {
-            callback(err, allResults);
-
-        })
-    }
     self.getClassesLabels = function (classUris, indexes, callback) {
 
         var bulQueryStr = ""
@@ -631,7 +541,7 @@ var Standardizer = (function () {
             var indexes = self.getSelectedIndexes()
 
             self.currentWordsCount += words.length
-            self.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
+            SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
                 var html = self.processMatrixResult(words, result, indexes)
                 MainController.UI.message(" processed items: " + (totalProcessed))
                 $("#KGmapping_matrixContainer").append(html)
@@ -713,7 +623,7 @@ var Standardizer = (function () {
                     //   self.currentWords.push(hit._source.label)
                 })
                 var indexes = self.getSelectedIndexes(true)
-                self.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                     if (err)
                         return alert(err)
                     //  self.getMatchesClassesByIndex(result)
@@ -751,6 +661,8 @@ var Standardizer = (function () {
             }, 500)
         })
     }
+
+
 
 
     self.onMatrixCellClick = function (event) {
@@ -1637,7 +1549,7 @@ var Standardizer = (function () {
                 var totalProcessed = 0
 
 
-                Standardizer.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                     if (err)
                         return callbackSeries(err)
                     resultSize = result.length;
@@ -2099,7 +2011,7 @@ var Standardizer = (function () {
         var cols = [];
         async.eachSeries(slices, function (words, callbackEach) {
 
-            self.getElasticSearchMatches(words, indexes, searchType, 0, 10000, function (err, result) {
+            SearchUtil.getElasticSearchMatches(words, indexes, searchType, 0, 10000, function (err, result) {
                 if (err)
                     return alert(err)
                 var entities = []

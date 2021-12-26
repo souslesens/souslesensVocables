@@ -607,7 +607,7 @@ Lineage_relations = (function () {
                         })
 
 
-                        Standardizer.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
+                        SearchUtil.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
                             if (err)
                                 return alert(err)
                             var entities = []

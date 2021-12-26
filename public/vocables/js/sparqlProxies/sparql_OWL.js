@@ -656,21 +656,34 @@ var Sparql_OWL = (function () {
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "concept", "value"])
 
-                if (options.addInverseRestrictions) {
-                    delete options.addInverseRestrictions
-                    options.inverseRestriction = true
-                    self.getObjectRestrictions(sourceLabel, ids, options, function (err, resultInverse) {
-                        result = result.results.bindings.concat(resultInverse)
-                        return callback(null, result)
-                    })
-
-                } else {
-
                     return callback(null, result.results.bindings)
-                }
+
 
             })
         }
+
+        self.getInverseRestriction=function(sourceLabel,restrictionId,callback){
+            var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+                query += "SELECT distinct * where "
+
+                query += "{ graph ?g {?subject owl:inverseOf <"+restrictionId+">." +
+                    "?subject ?predicate ?object.}}"
+            self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+            var url = self.sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                if (err) {
+                    return callback(err)
+                }
+                return callback(null, result.results.bindings)
+            })
+        }
+
+
+
+
+
         self.getNamedIndividuals = function (sourceLabel, ids, options, callback) {
 
             if (!options) {

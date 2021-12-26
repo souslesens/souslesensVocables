@@ -7,13 +7,13 @@ var Lineage_blend = (function () {
     self.addNodeToAssociationNode = function (node, role) {
         if (role == "source") {
             self.currentAssociation = [node.data, []]
-            $("#lineage_sourceNodeDiv").html(node.data.source + "." + node.data.label)
+            $("#lineage_sourceNodeDiv").html("<span style='color:"+Lineage_classes.getSourceColor(node.data.source)+"'>"+node.data.source + "." + node.data.label+"</span>")
             $("#lineage_targetNodeDiv").html("")
         } else if (role == "target") {
-            if(!self.currentAssociation)
+            if (!self.currentAssociation)
                 return
             self.currentAssociation[1] = node.data;
-            $("#lineage_targetNodeDiv").html(node.data.source + "." + node.data.label)
+            $("#lineage_targetNodeDiv").html("<span style='color:"+Lineage_classes.getSourceColor(node.data.source)+"'>"+node.data.source + "." + node.data.label+"</span>")
         }
         if (self.currentAssociation && self.currentAssociation.length == 2) {
             $("#lineage_blendButtonsDiv").css('display', 'block')
@@ -24,31 +24,44 @@ var Lineage_blend = (function () {
 
         $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
         $("#GenericTools_searchInAllSources").prop("checked", true)
-    }
-
-    self.createRelations = function (type,relations,addImportToCurrentSource) {
 
     }
 
 
+    self.clearAssociationNodes = function () {
+        $("#lineage_sourceNodeDiv").html("")
+        $("#lineage_targetNodeDiv").html("")
+        self.currentAssociation = []
+    }
+
+    self.createRelations = function (type, relations, addImportToCurrentSource) {
+
+    }
 
 
-    self.createRelation = function (type,addImportToCurrentSource) {
+    self.createRelation = function (type, addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
+
         if (!sourceNode || !targetNode)
-            return "copy a source node and select "
+            return alert("select a source node and a target node ")
+
+        if (sourceNode == targetNode)
+            return "source node and target node must be distinct "
+
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as subClassOf " + targetNode.source + "." + targetNode.label + "?"))
             return;
 
 
+        var createSameAsInverse = $("#lineage_blendSameAsInverseCBX").prop("checked")
+        var propId=null;
         async.series([
             function (callbackSeries) {
                 var imports = Config.sources[Lineage_classes.mainSource].imports;
                 if (imports && imports.indexOf(sourceNode.source) > -1) {
                     return callbackSeries()
                 }
-                if ( addImportToCurrentSource && !confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
+                if (addImportToCurrentSource && !confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
                     return callbackSeries("stop");
 
                 self.addImportToCurrentSource(Lineage_classes.mainSource, targetNode.source, function (err, result) {
@@ -62,31 +75,62 @@ var Lineage_blend = (function () {
 
             , function (callbackSeries) {
                 if (type == 'sameAs') {
-                    var propId = "http://www.w3.org/2002/07/owl#sameAs"
-                    //  self.createPropertyRangeAndDomain(Lineage_classes.mainSource, sourceNode.id, targetNode.id, propId, function (err, result) {
+                  propId = "http://www.w3.org/2002/07/owl#sameAs"
 
                     var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, propId)
+                    var normalBlankNode=restrictionTriples.blankNode
                     var metadataOptions = {
                         domainSourceLabel: sourceNode.source,
                         rangeSourceLabel: targetNode.source,
                     }
-                    var metaDataTriples = self.getCommonMetaDataTriples(restrictionTriples.blankNode, "manual","candidate", metadataOptions)
+                    var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, "manual", "candidate", metadataOptions)
                     restrictionTriples = restrictionTriples.concat(metaDataTriples)
+
+
+                    if (createSameAsInverse) {
+                       var restrictionTriplesInverse = self.getRestrictionTriples(targetNode.id, sourceNode.id, propId)
+                        var inverseBlankNode=restrictionTriplesInverse.blankNode
+                        restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse)
+                        var inverseMetadataOptions = {
+                            domainSourceLabel: targetNode.source,
+                            rangeSourceLabel: sourceNode.source,
+                        }
+                        var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, "manual", "candidate", inverseMetadataOptions)
+                        restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples)
+
+                        restrictionTriples.push({
+                            subject:normalBlankNode ,
+                            predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                            object:inverseBlankNode
+                        })
+                        restrictionTriples.push({
+                            subject:inverseBlankNode ,
+                            predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                            object:normalBlankNode
+                        })
+
+
+                    }
+
+
+
                     Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionTriples, null, function (err, result) {
-                        if (err)
-                            return alert(err);
-                        self.addRelationToGraph(propId)
-                        callback(err, "DONE")
-                        callbackSeries()
-                        MainController.UI.message("relation added", true)
+
+                        callbackSeries(err)
+
                     })
 
+                } else {
+                    callbackSeries()
                 }
-
             }
 
-        ], function (err) {
 
+        ], function (err) {
+            if (err)
+                return alert(err);
+            self.addRelationToGraph(propId)
+            MainController.UI.message("relation added", true)
         })
 
 
@@ -95,10 +139,62 @@ var Lineage_blend = (function () {
 
     self.deleteRestriction = function (restrictionNode) {
         if (confirm("delete selected restriction")) {
-            Sparql_generic.deleteTriples(restrictionNode.data.source, restrictionNode.data.bNodeId, null, null, function (err, result) {
-                visjsGraph.data.edges.remove(restrictionNode.id)
+            var inverseRestriction = null;
+            async.series([
+
+
+                // delete restriction
+                function (callbackSeries) {
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, restrictionNode.data.id, null, null, function (err, result) {
+                        visjsGraph.data.edges.remove(restrictionNode.id)
+                        callbackSeries()
+                    })
+
+                },
+                function (callbackSeries) {
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, restrictionNode.data.id, function (err, result) {
+                        visjsGraph.data.edges.remove(restrictionNode.id)
+                        callbackSeries()
+                    })
+
+                },
+                // search if inverse exists
+                function (callbackSeries) {
+                    Sparql_OWL.getInverseRestriction(Lineage_classes.mainSource, restrictionNode.data.id, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        if (result.length == 0)
+                            return callbackSeries()
+                        inverseRestriction = result[0].subject.value
+                        callbackSeries()
+
+                    })
+                },
+                // delete inverse restriction
+                function (callbackSeries) {
+                    if (!inverseRestriction)
+                        return callbackSeries()
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, inverseRestriction, null, null, function (err, result) {
+                        visjsGraph.data.edges.remove(inverseRestriction)
+                        callbackSeries()
+                    })
+
+                },
+                function (callbackSeries) {
+                    if (!inverseRestriction)
+                        return callbackSeries()
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null,inverseRestriction, function (err, result) {
+                        visjsGraph.data.edges.remove(inverseRestriction)
+                        callbackSeries()
+                    })
+
+                },
+
+            ], function (err) {
                 MainController.UI.message("restriction removed", true)
             })
+
+
         }
     }
 
@@ -269,14 +365,13 @@ var Lineage_blend = (function () {
 
     }
 
-    self.getCommonMetaDataTriples = function (subjectUri, provenance,status, options) {
+    self.getCommonMetaDataTriples = function (subjectUri, provenance, status, options) {
         var metaDataTriples = []
-        if(!options)
-            options={}
+        if (!options)
+            options = {}
         var login = authentication.currentUser.login;
         var authorUri = Config.sousLeSensVocablesGraphUri + "users/" + login
         var dateTime = common.dateToRDFString(new Date()) + "^^xsd:dateTime"
-
 
 
         metaDataTriples.push({
@@ -306,7 +401,7 @@ var Lineage_blend = (function () {
 
                 metaDataTriples.push({
                     subject: subjectUri,
-                    predicate: Config.sousLeSensVocablesGraphUri+"property#" + key,
+                    predicate: Config.sousLeSensVocablesGraphUri + "property#" + key,
                     object: options[key]
                 })
 
@@ -316,10 +411,10 @@ var Lineage_blend = (function () {
         return metaDataTriples
 
     }
-    self.getProjectedGraphMetaDataTriples=function(graphUri,imports,options) {
-        var triples=[]
-        if(!options)
-            options={}
+    self.getProjectedGraphMetaDataTriples = function (graphUri, imports, options) {
+        var triples = []
+        if (!options)
+            options = {}
 
         imports.forEach(function (importedSource) {
             triples.push({
@@ -328,25 +423,25 @@ var Lineage_blend = (function () {
                 object: importedSource
             })
         })
+        triples.push({
+            subject: graphUri,
+            predicate: "http://www.w3.org/2002/07/owl#versionIRI",
+            object: graphUri
+        })
+
+        triples.push({
+                subject: graphUri,
+                predicate: "http://www.w3.org/2002/07/owl#versionInfo",
+                object: "Revised " + common.dateToRDFString(new Date())
+            }
+        )
+        if (options.label) {
             triples.push({
                 subject: graphUri,
-                predicate: "http://www.w3.org/2002/07/owl#versionIRI",
-                object: graphUri
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                object: options.label
             })
-
-            triples.push({
-                    subject: graphUri,
-                    predicate: "http://www.w3.org/2002/07/owl#versionInfo",
-                    object: "Revised " + common.dateToRDFString(new Date())
-                }
-            )
-            if(options.label) {
-                triples.push({
-                    subject: graphUri,
-                    predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                    object: options.label
-                })
-            }
+        }
 
         return triples
     }

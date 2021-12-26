@@ -173,8 +173,9 @@ var Lineage_classes = (function () {
             } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
                 if(node.from){//edge
                     Lineage_blend.deleteRestriction(node)
-                }else
-                Lineage_blend.addNodeToAssociationNode(node, "source")
+                }else {
+                    Lineage_blend.addNodeToAssociationNode(node, "source")
+                }
             } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
                 Lineage_blend.addNodeToAssociationNode(node, "target")
 
@@ -598,6 +599,11 @@ var Lineage_classes = (function () {
 
 
         self.drawSimilarsNodes = function (similarType, node, sources, descendantsAlso) {
+
+
+
+
+
             MainController.UI.message("")
             //    $("#Lineage_toSource").val("")
 
@@ -2210,8 +2216,11 @@ var Lineage_classes = (function () {
             },
 
             onNodeClick: function (node, point, options) {
-                if (!node)
-                    return MainController.UI.hidePopup("graphPopupDiv")
+                if (!node) {
+                    MainController.UI.hidePopup("graphPopupDiv")
+                    Lineage_blend.clearAssociationNodes()
+                    return
+                }
 
                 self.currentGraphNode = node;
 

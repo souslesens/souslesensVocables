@@ -7,13 +7,13 @@ var Lineage_blend = (function () {
     self.addNodeToAssociationNode = function (node, role) {
         if (role == "source") {
             self.currentAssociation = [node.data, []]
-            $("#lineage_sourceNodeDiv").html("<span style='color:"+Lineage_classes.getSourceColor(node.data.source)+"'>"+node.data.source + "." + node.data.label+"</span>")
+            $("#lineage_sourceNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
             $("#lineage_targetNodeDiv").html("")
         } else if (role == "target") {
             if (!self.currentAssociation)
                 return
             self.currentAssociation[1] = node.data;
-            $("#lineage_targetNodeDiv").html("<span style='color:"+Lineage_classes.getSourceColor(node.data.source)+"'>"+node.data.source + "." + node.data.label+"</span>")
+            $("#lineage_targetNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
         }
         if (self.currentAssociation && self.currentAssociation.length == 2) {
             $("#lineage_blendButtonsDiv").css('display', 'block')
@@ -34,10 +34,6 @@ var Lineage_blend = (function () {
         self.currentAssociation = []
     }
 
-    self.createRelations = function (type, relations, addImportToCurrentSource) {
-
-    }
-
 
     self.createRelation = function (type, addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]
@@ -53,8 +49,8 @@ var Lineage_blend = (function () {
             return;
 
 
-        var createSameAsInverse = $("#lineage_blendSameAsInverseCBX").prop("checked")
-        var propId=null;
+        var createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked")
+        var propId = null;
         async.series([
             function (callbackSeries) {
                 var imports = Config.sources[Lineage_classes.mainSource].imports;
@@ -74,11 +70,20 @@ var Lineage_blend = (function () {
             }
 
             , function (callbackSeries) {
+
+                var relations = {type: type, sourceNode: sourceNode, targetNode: targetNode}
+                self.createRelationTriples(relations, createInverseRelation, function (err, result) {
+                    callbackSeries(err)
+                })
+
+
+                return;
+
                 if (type == 'sameAs') {
-                  propId = "http://www.w3.org/2002/07/owl#sameAs"
+                    propId = "http://www.w3.org/2002/07/owl#sameAs"
 
                     var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, propId)
-                    var normalBlankNode=restrictionTriples.blankNode
+                    var normalBlankNode = restrictionTriples.blankNode
                     var metadataOptions = {
                         domainSourceLabel: sourceNode.source,
                         rangeSourceLabel: targetNode.source,
@@ -88,8 +93,8 @@ var Lineage_blend = (function () {
 
 
                     if (createSameAsInverse) {
-                       var restrictionTriplesInverse = self.getRestrictionTriples(targetNode.id, sourceNode.id, propId)
-                        var inverseBlankNode=restrictionTriplesInverse.blankNode
+                        var restrictionTriplesInverse = self.getRestrictionTriples(targetNode.id, sourceNode.id, propId)
+                        var inverseBlankNode = restrictionTriplesInverse.blankNode
                         restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse)
                         var inverseMetadataOptions = {
                             domainSourceLabel: targetNode.source,
@@ -99,19 +104,18 @@ var Lineage_blend = (function () {
                         restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples)
 
                         restrictionTriples.push({
-                            subject:normalBlankNode ,
+                            subject: normalBlankNode,
                             predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                            object:inverseBlankNode
+                            object: inverseBlankNode
                         })
                         restrictionTriples.push({
-                            subject:inverseBlankNode ,
+                            subject: inverseBlankNode,
                             predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                            object:normalBlankNode
+                            object: normalBlankNode
                         })
 
 
                     }
-
 
 
                     Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionTriples, null, function (err, result) {
@@ -134,6 +138,60 @@ var Lineage_blend = (function () {
         })
 
 
+    }
+
+
+    self.createRelationTriples = function (relations, createInverseRelation,callback) {
+        var allTriples=[]
+        relations.forEach(function (relation) {
+
+            if (relation.type == 'sameAs') {
+                var propId = "http://www.w3.org/2002/07/owl#sameAs"
+
+                var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId)
+                var normalBlankNode = restrictionTriples.blankNode
+                var metadataOptions = {
+                    domainSourceLabel: relation.sourceNode.source,
+                    rangeSourceLabel: relation.targetNode.source,
+                }
+                var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, "manual", "candidate", metadataOptions)
+                restrictionTriples = restrictionTriples.concat(metaDataTriples)
+
+
+                if (createInverseRelation) {
+                    var restrictionTriplesInverse = self.getRestrictionTriples(relation.targetNode.id, relation.sourceNode.id, propId)
+                    var inverseBlankNode = restrictionTriplesInverse.blankNode
+                    restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse)
+                    var inverseMetadataOptions = {
+                        domainSourceLabel: relation.targetNode.source,
+                        rangeSourceLabel: relation.sourceNode.source,
+                    }
+                    var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, "manual", "candidate", inverseMetadataOptions)
+                    restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples)
+
+                    restrictionTriples.push({
+                        subject: normalBlankNode,
+                        predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                        object: inverseBlankNode
+                    })
+                    restrictionTriples.push({
+                        subject: inverseBlankNode,
+                        predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                        object: normalBlankNode
+                    })
+
+
+                }
+
+                allTriples=allTriples.concat(restrictionTriples)
+            }
+        })
+
+
+        Sparql_generic.insertTriples(Lineage_classes.mainSource, allTriples, null, function (err, result) {
+            callback(err)
+
+        })
     }
 
 
@@ -183,7 +241,7 @@ var Lineage_blend = (function () {
                 function (callbackSeries) {
                     if (!inverseRestriction)
                         return callbackSeries()
-                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null,inverseRestriction, function (err, result) {
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, inverseRestriction, function (err, result) {
                         visjsGraph.data.edges.remove(inverseRestriction)
                         callbackSeries()
                     })
@@ -444,6 +502,36 @@ var Lineage_blend = (function () {
         }
 
         return triples
+    }
+
+    self.transformSameLabelsEdgesIntoSameAsRelations = function (callback) {
+        var edges = visjsGraph.data.edges.get()
+        var relations = [];
+        var sameLabelEdgeIds = []
+        edges.forEach(function (edge) {
+            if (edge.data && edge.data.type == "sameLabel") {
+                sameLabelEdgeIds.push(edge.id)
+                relations.push({
+                    type: "sameAs",
+                    sourceNode: {id: edge.data.from,source:edge.data.fromSource},
+                    targetNode: {id: edge.data.to,source:edge.data.toSource}
+
+                })
+            }
+        })
+        if (relations.length > 0) {
+            self.createRelationTriples(relations, true, function (err, result) {
+                if (err)
+                    return alert(err)
+                visjsGraph.data.edges.remove(sameLabelEdgeIds);
+                MainController.UI.message(relations.length +"  sameAs relations created",true)
+
+            })
+
+
+        }
+
+
     }
 
 

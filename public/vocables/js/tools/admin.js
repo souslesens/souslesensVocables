@@ -31,7 +31,7 @@ var Admin=(function(){
           if (!Config.sources[source] || !Config.sources[source].schemaType)
              return callbackEach();
            $("#waitImg").css("display", "block");
-           Standardizer.generateElasticIndex(source, function(err,result){
+           SearchUtil.generateElasticIndex(source, function(err,result){
 
                MainController.UI.message("DONE " + source, true)
                callbackEach(err,)

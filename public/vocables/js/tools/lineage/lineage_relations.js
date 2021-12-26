@@ -397,7 +397,11 @@ Lineage_relations = (function () {
                                         type: "bar",
                                         scaleFactor: 0.5
                                     },
+                                    length: 30,
                                 },
+
+                                width:3,
+
                                 label: "<i>" + prop + "</i>",
                                 font: {multi: true, size: 10},
 

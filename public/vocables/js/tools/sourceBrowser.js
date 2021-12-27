@@ -75,7 +75,7 @@ var SourceBrowser = (function () {
             node = self.currentGraphNode
         if (!node)
             return;
-       // Lineage_blend.addNodeToAssociationNode(node)
+        // Lineage_blend.addNodeToAssociationNode(node)
         Clipboard.copy({
                 type: "node",
                 id: node.data.id,
@@ -426,12 +426,23 @@ var SourceBrowser = (function () {
                 if (err) {
                     MainController.UI.message(err.responseText)
                     var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
-                    jstreeData.push({id: sourceLabel, text: text, parent: "#", data: {source: sourceLabel,id: sourceLabel, label: text}})
+                    jstreeData.push({
+                        id: sourceLabel,
+                        text: text,
+                        parent: "#",
+                        data: {source: sourceLabel, id: sourceLabel, label: text}
+                    })
                 } else {
 
                     var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
 
-                    jstreeData.push({id: sourceLabel, text: text, parent: "#", type: type, data:  {source: sourceLabel,id: sourceLabel, label: text}})
+                    jstreeData.push({
+                        id: sourceLabel,
+                        text: text,
+                        parent: "#",
+                        type: type,
+                        data: {source: sourceLabel, id: sourceLabel, label: text}
+                    })
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1
@@ -643,7 +654,10 @@ var SourceBrowser = (function () {
 
     }
 
+
     self.showNodeInfos = function (sourceLabel, nodeId, divId, options, callback) {
+        self.currentNodeId = nodeId;
+        self.currentSource = sourceLabel
         if (!options) {
             options = {}
         }
@@ -653,6 +667,7 @@ var SourceBrowser = (function () {
             self.visitedNodes = []
             self.visitedNodes.currentIndex = 0
         }
+
         var index = self.visitedNodes.indexOf(nodeId)
         if (index < 0) {
             self.visitedNodes.push(nodeId)
@@ -663,8 +678,8 @@ var SourceBrowser = (function () {
         }
 
 
-        self.currentNodeInfosSource = sourceLabel
-        self.currentNodeInfosDivId = divId
+        self.currentNodeIdInfosSource = sourceLabel
+        self.currentNodeIdInfosDivId = divId
 
 
         var type;
@@ -683,8 +698,17 @@ var SourceBrowser = (function () {
                 },
                 function (callbackSeries) {
                     var str = "<div>"
+                    if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+                        str +="<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>" +
+                        "<div id='sourceBrowser_addPropertyDiv' style='display:none'>" +
+                        "property<select id='sourceBrowser_addPropertyName'></select>" +
+                        "<input id='sourceBrowser_addPropertyValue'></input>" +
+                        "<button onclick='SourceBrowser.addProperty()'>add</button>" +
+                        "</div>"
+                    }
                     if (self.visitedNodes.length > 1) {
-                        var str = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
+                         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
+                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>"
 
                     }
 
@@ -745,7 +769,10 @@ var SourceBrowser = (function () {
         var bindings = []
         var propertiesMap = {label: "", id: "", properties: {}};
         var blankNodes = []
-        Sparql_generic.getNodeInfos(sourceLabel, nodeId, {getValuesLabels: true,selectGraph:true}, function (err, data) {
+        Sparql_generic.getNodeInfos(sourceLabel, nodeId, {
+            getValuesLabels: true,
+            selectGraph: true
+        }, function (err, data) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -753,10 +780,10 @@ var SourceBrowser = (function () {
                 $("#" + divId).dialog("open");
             }
             var type = null;
-            var graphUri="";
+            var graphUri = "";
             data.forEach(function (item) {
-                if( item.g)
-                    graphUri=item.g.value
+                if (item.g)
+                    graphUri = item.g.value
                 if (item.value.type == "bnode") {
                     return blankNodes.push(item.value.value)
                 }
@@ -1013,17 +1040,17 @@ var SourceBrowser = (function () {
 
 
     self.onClickLink = function (nodeId) {
-        self.showNodeInfos(self.currentNodeInfosSource, nodeId, self.currentNodeInfosDivId, {previousNode: true})
+        self.showNodeInfos(self.currentNodeIdInfosSource, nodeId, self.currentNodeIdInfosDivId, {previousNode: true})
     }
 
     self.showVisitedNode = function (direction) {
 
         if (direction > 0 && self.visitedNodes.currentIndex < (self.visitedNodes.length - 1)) {
             self.visitedNodes.currentIndex += 1
-            self.showNodeInfos(self.currentNodeInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeInfosDivId)
+            self.showNodeInfos(self.currentNodeIdInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeIdInfosDivId)
         } else if (direction < 0 && self.visitedNodes.currentIndex > 0) {
             self.visitedNodes.currentIndex -= 1;
-            self.showNodeInfos(self.currentNodeInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeInfosDivId)
+            self.showNodeInfos(self.currentNodeIdInfosSource, self.visitedNodes[self.visitedNodes.currentIndex], self.currentNodeIdInfosDivId)
         }
 
 
@@ -1034,6 +1061,43 @@ var SourceBrowser = (function () {
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel
         // var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
         window.open(wikiUrl, '_blank');
+    }
+
+
+    self.addProperty = function () {
+        var property = $("#sourceBrowser_addPropertyName").val()
+        var value = $("#sourceBrowser_addPropertyValue").val()
+        if (!property || !value)
+            return;
+
+        if (confirm("add property")) {
+            var triples = [{
+                subject: self.currentNodeId,
+                predicate: property,
+                object: value
+            }]
+            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
+                if (err)
+                    return alert(err);
+                self.showNodeInfos(self.currentSource, self.currentNodeId,"mainDialogDiv")
+            })
+
+        }
+
+    }
+    self.showAddPropertyDiv = function () {
+        $("#sourceBrowser_addPropertyDiv").css("display", "block")
+        var properties = [
+
+            {id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "comment"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "subClassOf"},
+            {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "type"},
+
+        ]
+        common.fillSelectOptions("sourceBrowser_addPropertyName", properties, true, "label", "id")
+
+
     }
 
 

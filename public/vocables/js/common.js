@@ -149,9 +149,7 @@ var common = (function () {
 
                         if (options.selectTreeNodeFn)
                             options.selectTreeNodeFn(evt, obj);
-                    }).
-
-                on('open_node.jstree', function (evt, obj) {
+                    }).on('open_node.jstree', function (evt, obj) {
                     self.jstree.setTreeAppearance()
                     if (options.onOpenNodeFn) {
                         options.onOpenNodeFn(evt, obj);
@@ -351,12 +349,13 @@ var common = (function () {
                 else
                     w = 340
                 parentDiv.width(w)
-               // parentDiv.height(h)
+
+                if (jstreeDiv == "LineagejsTreeDiv") // cannot do it generic !!!!!
+                    parentDiv.height(h)
                 parentDiv.css('overflow', 'auto')
                 parentDiv.css('margin-top', '5px')
                 if (false && p.left < 600)
                     parentDiv.css('margin-left', '-25px')
-
 
 
             },
@@ -385,8 +384,6 @@ var common = (function () {
             openNode: function (jstreeDiv, nodeId) {
                 $("#" + jstreeDiv).jstree().open_node(nodeId)
             }
-
-
 
 
         }
@@ -784,7 +781,7 @@ var common = (function () {
                 return str
             }
 
-       // var dateTime='2000-01-15T00:00:00'
+        // var dateTime='2000-01-15T00:00:00'
 
         self.dateToRDFString = function (date) {
             var str = ""

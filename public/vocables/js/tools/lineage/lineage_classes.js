@@ -1139,7 +1139,7 @@ var Lineage_classes = (function () {
                 var parentIds = []
                 var nodes = visjsGraph.data.nodes.get();
                 nodes.forEach(function (node) {
-                    if ((source == Lineage_classes.mainSource || node.data && node.data.source == source) && node.data.id && node.data.id != source) {
+                    if ((source == Lineage_common.currentSource || node.data && node.data.source == source) && node.data.id && node.data.id != source) {
                         parentIds.push(node.data.id)
                     }
                 })

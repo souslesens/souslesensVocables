@@ -3,7 +3,6 @@ var SearchUtil = (function () {
     var self = {}
 
 
-
     /**
      *
      *
@@ -14,8 +13,9 @@ var SearchUtil = (function () {
      * @param mode exactMatch or fuzzymatch
      * @param callback array of source objects containing each target sources object matches
      */
-    self.getSimilarLabelsBetweenSources = function (fromSource, toSources, labels, ids, mode, callback) {
-
+    self.getSimilarLabelsBetweenSources = function (fromSource, toSources, labels, ids, mode, options, callback) {
+        if (!options)
+            options = {}
         var resultSize = 1
         var size = 200;
         var from = offset;
@@ -24,28 +24,39 @@ var SearchUtil = (function () {
         var searchResultArray = []
         var allWords = []
 
+
         var indexes = null;
         var toSourcesIndexesMap = {}
-        if (toSources) {
-            indexes = []
-            if (!Array.isArray(toSources))
-                toSources = [toSources]
-            toSources.forEach(function (source) {
-                indexes.push(source.toLowerCase())
-                toSourcesIndexesMap[source.toLowerCase()] = source
-            })
-
-        }
-
         var words = []
         var allClassesArray = []
         var classesArray = []
+        var parentsMap = {}
         async.whilst(function (test) {
                 return resultSize > 0
 
             }, function (callbackWhilst) {
 
                 async.series([
+                        function (callbackSeries) {
+
+                            if (!toSources) {
+                                return callbackSeries()
+                            }
+                            Standardizer.initSourcesIndexesList(null, function (err, indexedSources) {
+                                if (err)
+                                    return callbackSeries(err)
+                                indexes = []
+                                if (!Array.isArray(toSources))
+                                    toSources = [toSources]
+                                toSources.forEach(function (source) {
+                                    if (indexedSources.indexOf(source) > -1)
+                                        indexes.push(source.toLowerCase())
+                                    toSourcesIndexesMap[source.toLowerCase()] = source
+                                })
+                                callbackSeries()
+                            })
+                        },
+
                         function (callbackSeries) {
                             if (!fromSource) {
                                 return callbackSeries()
@@ -93,17 +104,21 @@ var SearchUtil = (function () {
                                     matches: {},
                                 })
                             })
-                            resultSize=0
+                            resultSize = 0
                             callbackSeries()
                         }
                         ,
                         function (callbackSeries) {
-                            self.getElasticSearchMatches(words, indexes, mode, 0, words.length, function (err, result) {
+                            self.getElasticSearchMatches(words, indexes, mode, 0, 1000, function (err, result) {
                                 if (err)
                                     return callbackSeries(err)
                                 allWords = allWords.concat(words)
 
                                 result.forEach(function (item, index) {
+                                    if (item.error) {
+                                        classesArray[index].error = item.error;
+                                        return;
+                                    }
                                     var hits = item.hits.hits;
                                     var matches = {}
                                     hits.forEach(function (toHit) {
@@ -116,12 +131,61 @@ var SearchUtil = (function () {
                                             label: toHit._source.label,
                                             parents: toHit._source.parents
                                         })
+                                        if (toHit._source.parents && toHit._source.parents.split) {
+                                            var parentsArray = toHit._source.parents.split("|")
+                                            parentsArray.forEach(function (parent, indexParent) {
+                                                if (indexParent > 0 && !parentsMap[parent])
+                                                    parentsMap[parent] = {}
+                                            })
+                                        }
+
                                     })
                                     classesArray[index].matches = matches
                                 })
                                 allClassesArray = allClassesArray.concat(classesArray);
                                 callbackSeries()
                             })
+                        }
+
+
+                        //get parentsLabels
+                        , function (callbackSeries) {
+
+                            if (!options.parentlabels)
+                                return callbackSeries();
+
+                            var ids = Object.keys(parentsMap);
+
+                            var query = {
+                                "query":
+                                    {
+                                        "terms": {
+                                            "id.keyword": ids,
+
+                                        }
+                                    },
+                                "from": 0,
+                                "size": 1000,
+                                "_source": {
+                                    "excludes": [
+                                        "attachment.content",
+                                        "parents"
+                                    ]
+                                }
+
+                            }
+                            ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err)
+                                }
+                                result.hits.hits.forEach(function (hit) {
+                                    parentsMap[hit._source.id] = hit._source.label
+                                })
+                                allClassesArray.parentIdsLabelsMap = parentsMap
+                                return callbackSeries()
+                            })
+
+
                         }
 
                     ],

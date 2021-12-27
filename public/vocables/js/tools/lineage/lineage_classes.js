@@ -611,7 +611,7 @@ var Lineage_classes = (function () {
                 labelsMap[node.data.label] = node
             })
 
-            SearchUtil.getSimilarLabelsBetweenSources(fromSource, toSources, labels, ids, "exactMatch", function (err, result) {
+            SearchUtil.getSimilarLabelsBetweenSources(fromSource, toSources, labels, ids, "exactMatch", null,function (err, result) {
                 if (err)
                     return alert(err);
 
@@ -1117,7 +1117,7 @@ var Lineage_classes = (function () {
 
 
         }
-        self.addChildrenToGraph = function (source, nodeIds) {
+        self.addChildrenToGraph = function (source, nodeIds,options) {
             self.showHideCurrentSourceNodes(true)
             var parentIds
             if (!source) {
@@ -1149,10 +1149,14 @@ var Lineage_classes = (function () {
                 return MainController.UI.message("no parent node selected")
 
             MainController.UI.message("")
-            var options = {}
+          if(!options )
+              options= {}
             if (self.currentOwlType == "ObjectProperty")
                 options.owlType = "ObjectProperty"
-            Sparql_generic.getNodeChildren(source, null, parentIds, 1, {skipRestrictions: 1}, function (err, result) {
+            var depth=1;
+            if(options.depth)
+                depth=options.depth
+            Sparql_generic.getNodeChildren(source, null, parentIds, depth, {skipRestrictions: 1}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
                 var map = [];
@@ -2048,6 +2052,7 @@ var Lineage_classes = (function () {
         self.graphActions = {
 
             showGraphPopupMenu: function (node, point, event) {
+
                 if (node.from) {
                     self.currentGraphEdge = node;
                     if (!self.currentGraphEdge.data || !self.currentGraphEdge.data.propertyId)
@@ -2103,8 +2108,13 @@ var Lineage_classes = (function () {
             },
 
             expand: function () {
+                var depth=1;
+                if(graphContext.clickOptions.ctrlKey)
+                    depth=2
+                if( graphContext.clickOptions.ctrlKey &&graphContext.clickOptions.altKey)
+                    depth=3
 
-                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],)
+                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],{depth:depth})
             },
             drawParents: function () {
                 Lineage_classes.addParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id])

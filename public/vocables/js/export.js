@@ -36,8 +36,7 @@ var Export = (function () {
 
             nodesMap[node.id] = node
             if (!nodesToMap[node.id]) {
-                if (!node.label)
-                    var x = 3
+
                 leafNodes.push(node)
             }
         })
@@ -92,17 +91,29 @@ var Export = (function () {
                 leafLabel = leafNode.label || leafNode.id
             lineLabels.push(leafLabel)
             lineIds.push(leafNode.id)
+            var previousAncestorLevel=null
             for (var ancestorLevel in leafNode.ancestors) {
                 var labels = ""
                 var ids = ""
+                var propLabel=""
+               if(previousAncestorLevel){// search edge label
+                   edges.forEach(function(edge){
+                       if(edge.from==leafNode.ancestors[previousAncestorLevel] && edge.to==leafNode.ancestors[ancestorLevel])
+                       propLabel= "-["+edge.label+"]-"
+                   })
+               }
+                previousAncestorLevel=ancestorLevel
+
                 leafNode.ancestors[ancestorLevel].forEach(function (item, index) {
+
                     if (index > 0) {
                         labels += " , "
                         ids += " , "
+
                     }
                     var label = item;
                     if (nodesMap[item].data) {
-                        label = nodesMap[item].data.label || item
+                        label =propLabel+ nodesMap[item].data.label || item
 
                     }
 

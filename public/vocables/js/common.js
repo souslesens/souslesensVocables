@@ -340,7 +340,6 @@ var common = (function () {
                 if (!parentDiv)// || parentDiv.width)
                     return
 
-//$("#"+jstreeDiv).addClass("jstreeParent")
                 var p = $("#" + jstreeDiv).offset();
                 var p2 = $("#" + jstreeDiv).position();
                 if (p.top > 200)//in case jstreeDiv in inactive tab
@@ -352,17 +351,12 @@ var common = (function () {
                 else
                     w = 340
                 parentDiv.width(w)
-                parentDiv.height(h)
+               // parentDiv.height(h)
                 parentDiv.css('overflow', 'auto')
                 parentDiv.css('margin-top', '5px')
                 if (false && p.left < 600)
                     parentDiv.css('margin-left', '-25px')
-                /*    $("#" + jstreeDiv).width(w)
-                    $("#" + jstreeDiv).height(h)
-                    $("#" + jstreeDiv).css('overflow', 'auto')
-                    $("#" + jstreeDiv).css('margin-top', '5px')
-                    if (false && p.left < 600)
-                        $("#" + jstreeDiv).css('margin-left', '-25px')*/
+
 
 
             },

@@ -47,41 +47,16 @@ var OwlEditor = (function () {
 
 
     self.loadSources = function () {
-        var payload = {
-            getBlenderSources: 1,
-        }
-        $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
-            dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+      var sources=[]
+      for(var source in  Config.sources) {
+          if( Config.sources[source].editable)
+              sources.push(source)
+      }
+
+          common.fillSelectOptions("owlEditor_SourcesSelect",sources.sort(), true)
 
 
-                self.availableSources = [];
-                for (var key in data) {
-                    if (data[key].editable && data[key].schemaType == "OWL") {
-                        Config.sources[key] = data[key]
-                        if (!Config.sources[key].controllerName) {
-                            Config.sources[key].controllerName = "" + Config.sources[key].controller
-                            Config.sources[key].controller = eval(Config.sources[key].controller)
-                        }
-                        if (Config.sources[key].sparql_server.url == "_default")
-                            Config.sources[key].sparql_server.url = Config.default_sparql_url
 
-
-                        self.availableSources.push(key)
-                    }
-                }
-
-                common.fillSelectOptions("owlEditor_SourcesSelect", self.availableSources.sort(), true)
-
-            }
-            , error: function (err) {
-                alert("cannot load OWL Sources")
-                console.log(err);
-            }
-        })
 
 
     }

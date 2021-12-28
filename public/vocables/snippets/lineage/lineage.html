@@ -138,6 +138,18 @@
                     onclick="Lineage_blend.createRelation('sameAs',true)">Create relation SameAs
             </button>
             <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked"> Inverse also
+            <br>
+            <button id='lineage_blendToGraphButton' class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                 style="display:none"   onclick="Lineage_blend.importNodeInCurrentMainSource()">Import Node in main source
+            </button>
+
+            <br>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button' id="transformSameLabelsEdgesIntoSameAsRelationsButton"
+                    style="display: none"    onclick="Lineage_blend.transformSameLabelsEdgesIntoSameAsRelations()"> transform SameLabelsEdges Into SameAsRelations
+            </button>
+
+
+
 
 
 
@@ -191,9 +203,7 @@
             </table>
 
         </div>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button' id="transformSameLabelsEdgesIntoSameAsRelationsButton"
-                style="display: none"    onclick="Lineage_blend.transformSameLabelsEdgesIntoSameAsRelations()"> transform SameLabelsEdges Into SameAsRelations
-        </button>
+
 
 
     </div>

@@ -871,7 +871,7 @@ var Sparql_OWL = (function () {
                         if (err)
                             return callbackSeries(err)
                         if (result.length == 0)
-                            return callbackSeries("no top classes found . cannot organize classes lineage")
+                            return callbackSeries("no top classes found  in source"+sourceLabel+". cannot organize classes lineage")
                         topClasses = result;
                         callbackSeries()
                     })

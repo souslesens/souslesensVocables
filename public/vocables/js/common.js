@@ -134,14 +134,15 @@ var common = (function () {
 
 
                 }).on('loaded.jstree', function () {
-
-                    if (options.openAll)
-                        $('#' + jstreeDiv).jstree(true).open_all();
-                    self.jstree.setTreeAppearance()
-                    if (!options.doNotAdjustDimensions)
-                        common.jstree.setTreeParentDivDimensions(jstreeDiv)
-                    if (callback)
-                        callback();
+                  //  setTimeout(function () {
+                        if (options.openAll)
+                            $('#' + jstreeDiv).jstree(true).open_all();
+                        self.jstree.setTreeAppearance()
+                        if (!options.doNotAdjustDimensions)
+                            common.jstree.setTreeParentDivDimensions(jstreeDiv)
+                        if (callback)
+                            callback();
+                 //   }, 500)
 
 
                 }).on("select_node.jstree",

@@ -4,7 +4,7 @@ var Lineage_blend = (function () {
     var self = {}
 
 
-    self.addNodeToAssociationNode = function (node, role) {
+    self.addNodeToAssociationNode = function (node, role,allowAddToGraphButton) {
         if (role == "source") {
             self.currentAssociation = [node.data, []]
             $("#lineage_sourceNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
@@ -22,8 +22,16 @@ var Lineage_blend = (function () {
         }
 
 
-        $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
-        $("#GenericTools_searchInAllSources").prop("checked", true)
+       /* $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
+        $("#GenericTools_searchInAllSources").prop("checked", true)*/
+
+
+       if( allowAddToGraphButton){
+           $("#lineage_blendToGraphButton").css("display","block")
+
+        }else{
+           $("#lineage_blendToGraphButton").css("display","none")
+       }
 
     }
 
@@ -34,6 +42,21 @@ var Lineage_blend = (function () {
         self.currentAssociation = []
     }
 
+    self.manageImports=function(source,callback){
+
+        var imports = Config.sources[Lineage_classes.mainSource].imports.concat(Lineage_classes.mainSource);
+        if (imports && imports.indexOf(source) > -1) {
+            return callback()
+        }
+        if ( !confirm("add  source " + source + " to imports of source " + Lineage_common.currentSource))
+            return callback("stop");
+
+        self.addImportToCurrentSource(Lineage_classes.mainSource, source, function (err, result) {
+            Lineage_classes.registerSource(source);
+            callback()
+        })
+
+    }
 
     self.createRelation = function (type, addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]
@@ -45,28 +68,27 @@ var Lineage_blend = (function () {
         if (sourceNode == targetNode)
             return "source node and target node must be distinct "
 
-        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as subClassOf " + targetNode.source + "." + targetNode.label + "?"))
+        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as "+type+ " " + targetNode.source + "." + targetNode.label + "?"))
             return;
 
 
         var createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked")
         var propId = null;
+
         async.series([
             function (callbackSeries) {
-                var imports = Config.sources[Lineage_classes.mainSource].imports;
-                if (imports && imports.indexOf(sourceNode.source) > -1) {
-                    return callbackSeries()
-                }
-                if (addImportToCurrentSource && !confirm("add  source " + targetNode.source + " to imports of source " + Lineage_common.currentSource))
-                    return callbackSeries("stop");
-
-                self.addImportToCurrentSource(Lineage_classes.mainSource, targetNode.source, function (err, result) {
-
-                    Lineage_classes.registerSource(targetNode.source);
-                    callbackSeries()
-
+                if(!addImportToCurrentSource)
+                    return  callbackSeries()
+                self.manageImports(sourceNode.source,function(err, result){
+                    callbackSeries(err)
                 })
-
+            },
+            function (callbackSeries) {
+            if(!addImportToCurrentSource)
+                return  callbackSeries()
+                self.manageImports(targetNode.source,function(err, result){
+                    callbackSeries(err)
+                })
             }
 
             , function (callbackSeries) {
@@ -421,6 +443,38 @@ var Lineage_blend = (function () {
         visjsGraph.network.fit()
         $("#waitImg").css("display", "none");
 
+    }
+
+
+    self.importNodeInCurrentMainSource=function(){
+       var node= self.currentAssociation[0]
+        if(!node)
+            return
+        var existingNodes=visjsGraph.getExistingIdsMap()
+        if(existingNodes[node.id])
+            return alert( "node "+node.label+" already exists in graph ")
+       /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
+            return;*/
+        self.manageImports(node.source,function(err, result){
+            if(err)
+                return ""
+            var toGraphUri=Config.sources[Lineage_classes.mainSource].graphUri
+            Sparql_generic.copyNodes  (node.source, toGraphUri, [node.id], null,function(err,result){
+                if(err)
+                    return alert(err)
+                visjsGraph.data.nodes.push({
+                    id:node.id,
+                    label:node.label,
+                    color:Lineage_classes.getSourceColor(node.source),
+                    shape:"square",
+                    size:Lineage_classes.defaultShapeSize,
+                    data:node
+                })
+                visjsGraph.focusOnNode(node.id)
+
+            })
+
+        })
     }
 
     self.getCommonMetaDataTriples = function (subjectUri, provenance, status, options) {

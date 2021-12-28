@@ -63,7 +63,7 @@ var SourceBrowser = (function () {
                 self.editThesaurusConceptInfos(source, propertiesMap.node)
             }
             {
-                self.openTreeNode(self.currentTargetDiv, source, propertiesMap.node, {ctrlKey: propertiesMap.event.ctrlKey})
+
             }
 
         }
@@ -372,10 +372,13 @@ var SourceBrowser = (function () {
             }
 
 
+            $('#searchAllDialogDiv').dialog('close')
+
             var term = $("#GenericTools_searchAllSourcesTermInput").val()
+            var selectedSources = $('#searchAll_sourcesTree').jstree(true).get_checked();
 
             if (!term || term == "")
-                return
+                return alert(" enter a word ")
             var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
             var searchAllSources = $("#GenericTools_searchInAllSources").prop("checked")
 
@@ -383,7 +386,7 @@ var SourceBrowser = (function () {
 
             var schemaType = $("#GenericTools_searchSchemaType").val()
 
-            if (searchAllSources) {
+            if (searchAllSources || selectedSources.length > 0) {
                 for (var sourceLabel in Config.sources) {
 
                     if ((Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) || Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1)
@@ -391,7 +394,11 @@ var SourceBrowser = (function () {
                     else {
                         if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
                             if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                                searchedSources.push(sourceLabel)
+                                if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1)
+                                    searchedSources.push(sourceLabel)
+                                else
+                                    searchedSources.push(sourceLabel)
+
                         }
                     }
                 }
@@ -412,25 +419,114 @@ var SourceBrowser = (function () {
 
             var indexes
 
-            SearchUtil.getSimilarLabelsBetweenSources(null, searchedSources, [term], null, mode,{parentlabels:true}, function (err, result) {
+            SearchUtil.getSimilarLabelsBetweenSources(null, searchedSources, [term], null, mode, {parentlabels: true}, function (err, result) {
                 if (err)
                     return alert(err)
 
-                var existingNodes={}
-                var jstreeData=[]
+
+                var existingNodes = {}
+                var jstreeData = []
+                var parentIdsLabelsMap = result.parentIdsLabelsMap;
+
                 result.forEach(function (item) {
-                    var label = item.label
+                    var term = item.label.toLowerCase()
                     var matches = item.matches
                     for (var source in matches) {
+                        var items = matches[source]
+                        items.forEach(function (match) {
+                            /*   if(match.label.toLowerCase().indexOf(term)<0 )
+                                   return*/
 
-if(!existingNodes[item.id])
-    var x=2
+                            if (match.parents && match.parents.split) {
+
+                                var parentId = ""
+                                var parents = match.parents.split("|")
+                                var nodeId = ""
+                                parents.forEach(function (aClass, indexParent) {
+                                    if (aClass == "")
+                                        return
+
+                                    var label = parentIdsLabelsMap[aClass]
+                                    if (typeof label == "object")
+                                        label = Sparql_common.getLabelFromURI(aClass)
+                                    if (indexParent > 0) {
+                                        parentId += parents[indexParent - 1]
+                                    } else {
+                                        parentId = "#"
+                                        label = "<span class='searched_conceptSource'>" + source + "</span>"
+                                    }
+
+                                    nodeId = parentId + aClass
+
+
+                                    if (!existingNodes[nodeId]) {
+                                        existingNodes[nodeId] = 1;
+                                        jstreeData.push({
+                                            id: nodeId,
+                                            text: label,
+                                            parent: parentId,
+                                            data: {
+                                                id: aClass,
+                                                text: label,
+                                                source: source
+                                            }
+                                        })
+                                    }
+                                })
+
+                            } else {
+                                nodeId = source;
+                            }
+                            var leafId = nodeId + match.id
+                            if (!existingNodes[leafId]) {
+                                existingNodes[leafId] = 1;
+                                jstreeData.push({
+                                    id: leafId,
+                                    text: "<span class='searched_concept'>" + match.label + "</span>",
+                                    parent: nodeId,
+                                    data: {
+                                        id: match.id,
+                                        text: match.label,
+                                        source: source
+                                    }
+                                })
+                            }
+
+                        })
+
 
                     }
 
 
                 })
 
+                var jstreeOptions = {
+
+                    openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
+                        SourceBrowser.currentTreeNode = propertiesMap.node;
+
+                        if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
+                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, propertiesMap);
+
+
+                        self.editThesaurusConceptInfos(propertiesMap.node.data.source, propertiesMap.node)
+                    },
+                    contextMenu: function () {
+                        if (Config.tools[MainController.currentTool].controller.contextMenuFn)
+                            return Config.tools[MainController.currentTool].controller.contextMenuFn()
+                        else
+                            return self.getJstreeConceptsContextMenu()
+                    }
+                }
+
+                common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
+                setTimeout(function () {
+                    MainController.UI.updateActionDivLabel("Multi source search :" + term)
+                    MainController.UI.message("");
+                    $("#waitImg").css("display", "none");
+                    $('#' + self.currentTargetDiv).jstree(true).open_all();
+
+                }, 200)
 
             })
 
@@ -504,7 +600,8 @@ if(!existingNodes[item.id])
 
                 var jstreeOptions = {
 
-                    openAll: true, selectTreeNodeFn: function (event, propertiesMap) {
+                    openAll: true,
+                    selectTreeNodeFn: function (event, propertiesMap) {
                         SourceBrowser.currentTreeNode = propertiesMap.node;
 
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
@@ -732,7 +829,7 @@ if(!existingNodes[item.id])
                     },
                     function (callbackSeries) {
                         var str = "<div>"
-                        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+                        if (authentication.currentUser.groupes.indexOf("admin") && Config[MainController.currentSource].editable > -1) {
                             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>" +
                                 "<div id='sourceBrowser_addPropertyDiv' style='display:none'>" +
                                 "property<select id='sourceBrowser_addPropertyName'></select>" +
@@ -878,7 +975,7 @@ if(!existingNodes[item.id])
                 }
                 var str = "<div style='max-height:800px;overflow: auto'>" +
                     "<table class='infosTable'>"
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsv' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
                 str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>"
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
 
@@ -897,9 +994,9 @@ if(!existingNodes[item.id])
                         values.forEach(function (value, index) {
                             if (value.indexOf("http") == 0) {
                                 if (valueLabelsMap[value])
-                                    value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                    value = "<a target='_slsv' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
                                 else
-                                    value = "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                                    value = "<a target='_slsv' href='" + value + "'>" + value + "</a>"
                             }
                             if (index > 0)
                                 valuesStr += "<br>"
@@ -926,9 +1023,9 @@ if(!existingNodes[item.id])
                             values.forEach(function (value, index) {
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value])
-                                        value = "<a target='_blank' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                        value = "<a target='_slsv' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
                                     else
-                                        value += "<a target='_blank' href='" + value + "'>" + value + "</a>"
+                                        value += "<a target='_slsv' href='" + value + "'>" + value + "</a>"
                                 }
                                 if (index > 0)
                                     valuesStr += "<br>"
@@ -984,13 +1081,12 @@ if(!existingNodes[item.id])
                     str += "<tr class='infos_table'>"
 
                     var propStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>"
-                    //  var propStr = "<a target='_blank' href='" + item.prop.value + "'>" + item.propLabel.value + "</a>"
+
                     str += "<td class='detailsCellName'>" + propStr + "</td>"
 
                     var targetClassStr = "any"
                     if (item.value) {
                         var targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>"
-                        //  targetClassStr = "<a target='_blank' href='" + item.value.value + "'>" + item.valueLabel.value + "</a>"
                     }
                     str += "<td class='detailsCellValue'>" + targetClassStr + "</td>"
 
@@ -1033,7 +1129,6 @@ if(!existingNodes[item.id])
 
                     data.forEach(function (item) {
 
-                        //  var targetClassStr = "<a target='_blank' href='" + item.value.value + "'>" + item.valueLabel.value + "</a>"
                         var targetClassStr = "<span class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>"
                         str += "<tr><td>" + targetClassStr + "</td></tr>"
 
@@ -1093,8 +1188,7 @@ if(!existingNodes[item.id])
 
         self.showWikiPage = function (sourceLabel) {
             var wikiUrl = Config.wiki.url + "Source " + sourceLabel
-            // var str = "<a href='" + wikiUrl + "' target='_blank'>" + "Wiki page..." + "</a>"
-            window.open(wikiUrl, '_blank');
+            window.open(wikiUrl, '_slsv');
         }
 
 
@@ -1135,9 +1229,34 @@ if(!existingNodes[item.id])
         }
 
 
+        self.showSearchableSourcesTreeDialog = function () {
+            if (!self.searchableSourcesTreeIsInitialized) {
+
+                Standardizer.initSourcesIndexesList(null, function (err, sources) {
+                    if (err)
+                        return MainController.UI.message(err)
+
+                    $("#searchAllDialogDiv").dialog("open")
+                    var options = {
+                        selectTreeNodeFn: function () {
+                        }
+                    }
+                    self.searchableSourcesTreeIsInitialized = true;
+                    MainController.UI.showSources("searchAll_sourcesTree", true, sources, ["OWL"], options);
+
+
+                })
+            } else {
+                $("#searchAllDialogDiv").dialog("open")
+            }
+        }
+
+
         return self;
 
 
     }
+
+
 )
 ()

@@ -45,6 +45,7 @@ var SearchUtil = (function () {
                             Standardizer.initSourcesIndexesList(null, function (err, indexedSources) {
                                 if (err)
                                     return callbackSeries(err)
+
                                 indexes = []
                                 if (!Array.isArray(toSources))
                                     toSources = [toSources]

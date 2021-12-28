@@ -117,6 +117,11 @@ var Lineage_classes = (function () {
                 return
 
             self.mainSource = sourceLabel
+            if (authentication.currentUser.groupes.indexOf("admin") && Config[self.mainSource].editable > -1) {
+                $("#lineage_blendButtonsDiv").css("display", "block")
+            } else {
+                $("#lineage_blendButtonsDiv").css("display", "none")
+            }
             $("#accordion").accordion("option", {active: 2});
             MainController.currentSource = sourceLabel
             if (!Lineage_common.currentSource) {
@@ -174,13 +179,15 @@ var Lineage_classes = (function () {
                 if (node.from) {//edge
                     Lineage_blend.deleteRestriction(node)
                 } else {
-                    Lineage_blend.addNodeToAssociationNode(node, "source")
+                    Lineage_blend.addNodeToAssociationNode(node, "source", true)
                 }
             } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
                 Lineage_blend.addNodeToAssociationNode(node, "target")
 
             } else if (nodeEvent.ctrlKey) {
-                SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+                SourceBrowser.showNodeInfos(node.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+            } else if (nodeEvent.altKey && options.callee == "Tree") {
+                SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, node.data.source, node, {reopen: true})
             } else
                 return nodeEvent;
 
@@ -603,7 +610,7 @@ var Lineage_classes = (function () {
             var toSources = Lineage_common.currentSource;
             var nodes = visjsGraph.data.nodes.get()
             var labels = [];
-            var ids=null;
+            var ids = null;
             var labelsMap = {}
             nodes.forEach(function (node) {
                 if (node.data && node.data.label)
@@ -611,7 +618,7 @@ var Lineage_classes = (function () {
                 labelsMap[node.data.label] = node
             })
 
-            SearchUtil.getSimilarLabelsBetweenSources(fromSource, toSources, labels, ids, "exactMatch", null,function (err, result) {
+            SearchUtil.getSimilarLabelsBetweenSources(fromSource, toSources, labels, ids, "exactMatch", null, function (err, result) {
                 if (err)
                     return alert(err);
 
@@ -645,7 +652,7 @@ var Lineage_classes = (function () {
                                 })
                             }
 
-                            var edgeId = match.id + "_" + sourceNode.id+"_sameLabel";
+                            var edgeId = match.id + "_" + sourceNode.id + "_sameLabel";
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1
                                 visjsData.edges.push({
@@ -653,7 +660,7 @@ var Lineage_classes = (function () {
                                     from: match.id,
                                     to: sourceNode.data.id,
                                     color: "green",
-                                    width:3,
+                                    width: 3,
                                     arrows: {
                                         to: {
                                             enabled: true,
@@ -666,12 +673,12 @@ var Lineage_classes = (function () {
                                         length: 30,
 
                                     },
-                                    data:{
-                                        type:"sameLabel",
+                                    data: {
+                                        type: "sameLabel",
                                         from: match.id,
                                         to: sourceNode.id,
-                                        fromSource:source,
-                                        toSource:sourceNode.data.source,
+                                        fromSource: source,
+                                        toSource: sourceNode.data.source,
                                     }
 
                                 })
@@ -688,8 +695,7 @@ var Lineage_classes = (function () {
                     visjsGraph.data.edges.update(visjsData.edges)
                 }
             })
-            MainController.UI.message("",true)
-
+            MainController.UI.message("", true)
 
 
         }
@@ -1117,7 +1123,7 @@ var Lineage_classes = (function () {
 
 
         }
-        self.addChildrenToGraph = function (source, nodeIds,options) {
+        self.addChildrenToGraph = function (source, nodeIds, options) {
             self.showHideCurrentSourceNodes(true)
             var parentIds
             if (!source) {
@@ -1149,13 +1155,13 @@ var Lineage_classes = (function () {
                 return MainController.UI.message("no parent node selected")
 
             MainController.UI.message("")
-          if(!options )
-              options= {}
+            if (!options)
+                options = {}
             if (self.currentOwlType == "ObjectProperty")
                 options.owlType = "ObjectProperty"
-            var depth=1;
-            if(options.depth)
-                depth=options.depth
+            var depth = 1;
+            if (options.depth)
+                depth = options.depth
             Sparql_generic.getNodeChildren(source, null, parentIds, depth, {skipRestrictions: 1}, function (err, result) {
                 if (err)
                     return MainController.UI.message(err);
@@ -2108,13 +2114,13 @@ var Lineage_classes = (function () {
             },
 
             expand: function () {
-                var depth=1;
-                if(graphContext.clickOptions.ctrlKey)
-                    depth=2
-                if( graphContext.clickOptions.ctrlKey &&graphContext.clickOptions.altKey)
-                    depth=3
+                var depth = 1;
+                if (graphContext.clickOptions.ctrlKey)
+                    depth = 2
+                if (graphContext.clickOptions.ctrlKey && graphContext.clickOptions.altKey)
+                    depth = 3
 
-                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],{depth:depth})
+                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], {depth: depth})
             },
             drawParents: function () {
                 Lineage_classes.addParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id])

@@ -75,7 +75,8 @@ var OwlEditor = (function () {
             "owl:ObjectProperty": [],
             "owl:Restriction": []
         };
-        var imports =
+
+        MainController.UI.message("loading ontology : " +source)
             async.series([
                 //load Classes
                 function (callbackSeries) {
@@ -325,6 +326,7 @@ var OwlEditor = (function () {
                     inputHtml += "<input  class='newPropertyInput' id='" + rangeInpuId + "' value=''>"
                 } else {
                     inputHtml += "<select class='newPropertyInput' id='" + rangeInpuId + "' >"
+
                     inputHtml += "<option></option>"
 
 
@@ -340,6 +342,7 @@ var OwlEditor = (function () {
 
 
                     inputHtml += "</select>"
+                    inputHtml +="<input  class='newPropertyInput' id='" + rangeInpuId + "' value=''>"
 
 
                 }

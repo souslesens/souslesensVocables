@@ -56,13 +56,13 @@
 
     .lineage_actionDiv_legend td {
 
-         border: 1px solid #aaa;
-         font-size: 12px;
-         margin: 2px;
-         text-align: center;
-         padding: 2px;
-         font-style: italic;
-     }
+        border: 1px solid #aaa;
+        font-size: 12px;
+        margin: 2px;
+        text-align: center;
+        padding: 2px;
+        font-style: italic;
+    }
 
     }
 
@@ -135,22 +135,27 @@
         </div>
         <div id="lineage_blendButtonsDiv" style="margin: 5px; display: none">
             <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
-                    onclick="Lineage_blend.createRelation('sameAs',true)">Create relation SameAs
+                    onclick="Lineage_blend.createNode()">Create Node
             </button>
-            <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked"> Inverse also
+            <div id="lineage_createRelationButtonsDiv" style="margin: 5px; display: none">
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                        onclick="Lineage_blend.createRelation('sameAs',true)">Create relation SameAs
+                </button>
+                <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked"> Inverse also
+            </div>
             <br>
-            <button id='lineage_blendToGraphButton' class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
-                 style="display:none"   onclick="Lineage_blend.importNodeInCurrentMainSource()">Import Node in main source
+            <button id='lineage_blendToGraphButton' class='btn btn-sm my-1 py-0 btn-outline-primary'
+                    class='lineage_button'
+                    style="display:none" onclick="Lineage_blend.importNodeInCurrentMainSource()">Import Node in main
+                source
             </button>
 
             <br>
-            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button' id="transformSameLabelsEdgesIntoSameAsRelationsButton"
-                    style="display: none"    onclick="Lineage_blend.transformSameLabelsEdgesIntoSameAsRelations()"> transform SameLabelsEdges Into SameAsRelations
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                    id="transformSameLabelsEdgesIntoSameAsRelationsButton"
+                    style="display: none" onclick="Lineage_blend.transformSameLabelsEdgesIntoSameAsRelations()">
+                transform SameLabelsEdges Into SameAsRelations
             </button>
-
-
-
-
 
 
         </div>
@@ -203,7 +208,6 @@
             </table>
 
         </div>
-
 
 
     </div>

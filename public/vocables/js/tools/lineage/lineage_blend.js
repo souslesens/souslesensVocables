@@ -6,19 +6,21 @@ var Lineage_blend = (function () {
 
     self.addNodeToAssociationNode = function (node, role,allowAddToGraphButton) {
         if (role == "source") {
-            self.currentAssociation = [node.data, []]
+            self.currentAssociation = [node.data]
             $("#lineage_sourceNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
             $("#lineage_targetNodeDiv").html("")
         } else if (role == "target") {
             if (!self.currentAssociation)
                 return
-            self.currentAssociation[1] = node.data;
+            self.currentAssociation.push( node.data);
             $("#lineage_targetNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
         }
-        if (self.currentAssociation && self.currentAssociation.length == 2) {
-            $("#lineage_blendButtonsDiv").css('display', 'block')
-        } else {
-            $("#lineage_blendButtonsDiv").css('display', 'none')
+        if (authentication.currentUser.groupes.indexOf("admin")>-1 && Config.sources[Lineage_classes.mainSource].editable > -1) {
+            if (self.currentAssociation && self.currentAssociation.length == 2) {
+                $("#lineage_createRelationButtonsDiv").css('display', 'block')
+            } else {
+                $("#lineage_createRelationButtonsDiv").css('display', 'none')
+            }
         }
 
 
@@ -589,6 +591,12 @@ var Lineage_blend = (function () {
     }
 
 
+
+    self.createNode=function(){
+SourceBrowser.showNodeInfos(Lineage_classes.mainSource,null,'mainDialogDiv',null,function(err,result){
+
+})
+    }
     return self;
 
 })()

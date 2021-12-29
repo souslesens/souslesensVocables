@@ -60,7 +60,7 @@ Lineage_relations = (function () {
 
     }
     self.getUriSource = function (uri) {
-        var source = Lineage_classes.mainSource
+        var source = Lineage_common.currentSource
         Object.keys(self.graphUriSourceMap).forEach(function (graphUri) {
 
             if (uri.indexOf(graphUri) == 0) {
@@ -122,9 +122,9 @@ Lineage_relations = (function () {
                     propLabel = item.propLabel.value
                 if (item.node)
                     node = item.node.value
-                if (item.g) {
+               /* if (item.g) {
                     domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
-                }
+                }*/
                 if (item.domainSourceLabel) {
                     domainSourceLabel = item.domainSourceLabel.value
                 }

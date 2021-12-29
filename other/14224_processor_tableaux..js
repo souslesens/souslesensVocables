@@ -4,7 +4,7 @@ var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 mappingsMap = {
     failureMechanism: {
         type: "owl:Class",
-        topClass: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
+        topClass: "<http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337>",
         fileName: "D:\\NLP\\ontologies\\14224\\failureMechanism.txt",
         lookups: [],
         transform: {
@@ -14,7 +14,7 @@ mappingsMap = {
         },
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            { s: "id", p: "skos:prefLabel", o: "label1" },
+            { s: "typeCode", p: "skos:prefLabel", o: "label1" },
             { s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS" },
             { s: "id", p: "rdfs:label", o: "label2" },
         ],

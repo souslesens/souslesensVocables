@@ -325,12 +325,16 @@ var SourceBrowser = (function () {
 
 
         self.onNodeDetailsLangChange = function (property, lang) {
-            $('.detailsLangDiv_' + property).css('display', 'none')
-            if (!lang)
-                lang = $("#detailsLangSelect_" + property).val();
-            if ($("#detailsLangDiv_" + property + "_" + lang).html())
-                $("#detailsLangDiv_" + property + "_" + lang).css("display", "block");
+            try {
+                $('.detailsLangDiv_' + property).css('display', 'none')
+                if (!lang)
+                    lang = $("#detailsLangSelect_" + property).val();
+                if ($("#detailsLangDiv_" + property + "_" + lang).html())
+                    $("#detailsLangDiv_" + property + "_" + lang).css("display", "block");
 
+            }catch(err){
+                console.log(err)
+            }
         }
 
         self.searchTerm = function (sourceLabel, term, rootId, callback) {
@@ -375,7 +379,9 @@ var SourceBrowser = (function () {
             $('#searchAllDialogDiv').dialog('close')
 
             var term = $("#GenericTools_searchAllSourcesTermInput").val()
-            var selectedSources = $('#searchAll_sourcesTree').jstree(true).get_checked();
+            var selectedSources =[]
+            if( $('#searchAll_sourcesTree').jstree(true))
+                var selectedSources = $('#searchAll_sourcesTree').jstree(true).get_checked();
 
             if (!term || term == "")
                 return alert(" enter a word ")
@@ -829,7 +835,7 @@ var SourceBrowser = (function () {
                     },
                     function (callbackSeries) {
                         var str = "<div>"
-                        if (authentication.currentUser.groupes.indexOf("admin") && Config[MainController.currentSource].editable > -1) {
+                        if (authentication.currentUser.groupes.indexOf("admin")>-1 ){//&& Config[MainController.currentSource].editable > -1) {
                             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>" +
                                 "<div id='sourceBrowser_addPropertyDiv' style='display:none'>" +
                                 "property<select id='sourceBrowser_addPropertyName'></select>" +
@@ -975,7 +981,7 @@ var SourceBrowser = (function () {
                 }
                 var str = "<div style='max-height:800px;overflow: auto'>" +
                     "<table class='infosTable'>"
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsv' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsv2' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
                 str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>"
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
 
@@ -994,9 +1000,9 @@ var SourceBrowser = (function () {
                         values.forEach(function (value, index) {
                             if (value.indexOf("http") == 0) {
                                 if (valueLabelsMap[value])
-                                    value = "<a target='_slsv' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                    value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
                                 else
-                                    value = "<a target='_slsv' href='" + value + "'>" + value + "</a>"
+                                    value = "<a target='_slsv2' href='" + value + "'>" + value + "</a>"
                             }
                             if (index > 0)
                                 valuesStr += "<br>"
@@ -1023,9 +1029,9 @@ var SourceBrowser = (function () {
                             values.forEach(function (value, index) {
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value])
-                                        value = "<a target='_slsv' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                        value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
                                     else
-                                        value += "<a target='_slsv' href='" + value + "'>" + value + "</a>"
+                                        value += "<a target='_slsv2' href='" + value + "'>" + value + "</a>"
                                 }
                                 if (index > 0)
                                     valuesStr += "<br>"
@@ -1188,7 +1194,7 @@ var SourceBrowser = (function () {
 
         self.showWikiPage = function (sourceLabel) {
             var wikiUrl = Config.wiki.url + "Source " + sourceLabel
-            window.open(wikiUrl, '_slsv');
+            window.open(wikiUrl, '_slsv2');
         }
 
 
@@ -1197,13 +1203,28 @@ var SourceBrowser = (function () {
             var value = $("#sourceBrowser_addPropertyValue").val()
             if (!property || !value)
                 return;
-
             if (confirm("add property")) {
-                var triples = [{
+            var triples =[]
+            if( !self.currentNodeId){
+                self.currentNodeId=Config.sources[self.currentSource].graphUri+common.getRandomHexaId(10)
+
+                triples.push({
+                    subject: self.currentNodeId,
+                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                    object: "http://www.w3.org/2002/07/owl#Class"
+                })
+
+            }
+
+
+
+                triples.push({
                     subject: self.currentNodeId,
                     predicate: property,
                     object: value
-                }]
+                })
+
+
                 Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
                     if (err)
                         return alert(err);

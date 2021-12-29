@@ -117,7 +117,7 @@ var Lineage_classes = (function () {
                 return
 
             self.mainSource = sourceLabel
-            if (authentication.currentUser.groupes.indexOf("admin") && Config[self.mainSource].editable > -1) {
+            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.mainSource].editable > -1) {
                 $("#lineage_blendButtonsDiv").css("display", "block")
             } else {
                 $("#lineage_blendButtonsDiv").css("display", "none")
@@ -320,14 +320,13 @@ var Lineage_classes = (function () {
                     level: 1,
 
                 }
-
+                visjsData.nodes.push(sourceNode)
             }
-            visjsData.nodes.push(sourceNode)
             if (imports) {
 
                 imports.forEach(function (importedSource) {
-
-                    allSources.push(importedSource)
+                    if (false)
+                        allSources.push(importedSource)
 
                     self.soucesLevelMap[importedSource] = {visible: true, children: 0}
                     var graphUri = Config.sources[importedSource].graphUri
@@ -379,7 +378,8 @@ var Lineage_classes = (function () {
                 var sourceConfig = Config.sources[source]
 
                 MainController.UI.message("loading source " + source)
-                Sparql_generic.getTopConcepts(source, null, function (err, result) {
+                var options = {withoutImports: true}
+                Sparql_generic.getTopConcepts(source, options, function (err, result) {
                     if (err)
                         return callbackEach(err)
                     if (result.length == 0) {

@@ -34,7 +34,7 @@ var Sparql_OWL = (function () {
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-            fromStr = Sparql_common.getFromStr(sourceLabel)
+            fromStr = Sparql_common.getFromStr(sourceLabel,false,options.withoutImports)
 
             if (Config.sources[sourceLabel].topClass)
                 self.topClass = Config.sources[sourceLabel].topClass;

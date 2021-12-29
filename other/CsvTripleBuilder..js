@@ -174,7 +174,12 @@ var processor = {
                                             }
                                             var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                             var prop = item.prop;
-                                            if (prop.indexOf("http") == 0) prop = "<" + item.prop + ">";
+                                            if(prop.indexOf("$")==0)
+                                                prop=line[prop.substring(1)]
+                                            if (prop.indexOf("http") == 0)
+                                                prop = "<" + prop+ ">";
+
+
                                             triples.push({
                                                 s: blankNode,
                                                 p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -201,6 +206,7 @@ var processor = {
                                         if (subjectStr && objectStr) {
                                             // return console.log("missing type " + item.p)
                                             if (!existingNodes[subjectStr + "_" + objectStr]) {
+                                                existingNodes[subjectStr + "_" + objectStr]=1
                                                 triples.push({
                                                     s: subjectStr,
                                                     p: item.p,
@@ -209,11 +215,14 @@ var processor = {
                                             }
                                         }
                                     });
-                                    if (!subjectStr || !objectStr) {
-                                        console.log(subjectStr + "  " + objectStr);
+
+                                /*    var lastTriples=triples[triples.length-1]
+                                    var tripleHashcode=lastTriples.s+"_"+lastTriples.p+"_"+lastTriples.o
+                                    if (!lastTriples.s || !lastTriples.p || !lastTriples.o) {
+                                       return  console.log(subjectStr + "  " + objectStr);
                                     }
-                                    if (subjectStr && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
-                                        existingNodes[subjectStr] = 1;
+                                    if (lastTriples && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
+                                        existingNodes[subjectStr + "_" + objectStr]=1
                                         if (mapping.type) {
                                             triples.push({
                                                 s: subjectStr,
@@ -229,7 +238,7 @@ var processor = {
                                                 o: mapping.topClass,
                                             });
                                         }
-                                    }
+                                    }*/
                                     var x = triples;
                                 });
 

@@ -8,15 +8,41 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\failureMechanism.txt",
         lookups: [],
         transform: {
+
+        },
+        tripleModels: [
+            // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
+            { s: "typeCode", p: "rdfs:label", o: "type" },
+            { s: "typeCode", p: "skos:prefLabel", o: "typeCode" },
+            { s: "typeCode", p: "rdf:type", o: "owl:Class" },
+            { s: "typeCode", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337" },
+            { s: "subTypeCode", p: "rdfs:label", o: "subType" },
+            { s: "subTypeCode", p: "skos:prefLabel", o: "subTypeCode" },
+            { s: "subTypeCode", p: "rdf:type", o: "owl:Class" },
+            { s: "subTypeCode", p: "rdfs:subClassOf", o: "typeCode" },
+            { s: "subTypeCode", p: "owl:comment", o: "comment" },
+        ],
+    },
+
+
+    tsf_top_ontology: {
+        type: "owl:Class",
+        topClass: "<http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337>",
+        fileName: "D:\\NLP\\ontologies\\15926\\part 14\\restrictions.txt",
+        lookups: [],
+        transform: {
             label2: function (value) {
-                return "Syst-" + value;
+                if(value=="")
+                return "";
+                else
+                    return value
+
             },
         },
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            { s: "typeCode", p: "skos:prefLabel", o: "label1" },
-            { s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS" },
-            { s: "id", p: "rdfs:label", o: "label2" },
+            { s: "from", p: "_restriction", o: "to", prop: "$property" },
+
         ],
     },
 
@@ -197,16 +223,16 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_3"]
 
 //var mappingNames = ["QUALITIES"]
-//var mappingNames = ["CLASSES_6c",];
+var mappingNames = ["tsf_top_ontology",];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
 });
 
 var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/";
+var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
 //processor.getDescription("D:\\NLP\\ontologies\\14224\\RDL_Structure_14224_import.txt");
-if (true) {
+if (false) {
     if (mappings.length == 1) return processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
     var triples = [
         { s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'" },
@@ -258,7 +284,8 @@ if (true) {
     });
 }
 
-if (false) {
-    var mappingNames = ["CLASSES_4"];
-    processor.processSubClasses(mappings, graphUri);
+if (true) {
+    graphUri="http://data.total.com/resource/tsf/top_ontology/"
+
+    processor.processSubClasses(mappings, graphUri,sparqlServerUrl);
 }

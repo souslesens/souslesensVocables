@@ -332,7 +332,7 @@ var SourceBrowser = (function () {
                 if ($("#detailsLangDiv_" + property + "_" + lang).html())
                     $("#detailsLangDiv_" + property + "_" + lang).css("display", "block");
 
-            }catch(err){
+            } catch (err) {
                 console.log(err)
             }
         }
@@ -379,8 +379,8 @@ var SourceBrowser = (function () {
             $('#searchAllDialogDiv').dialog('close')
 
             var term = $("#GenericTools_searchAllSourcesTermInput").val()
-            var selectedSources =[]
-            if( $('#searchAll_sourcesTree').jstree(true))
+            var selectedSources = []
+            if ($('#searchAll_sourcesTree').jstree(true))
                 var selectedSources = $('#searchAll_sourcesTree').jstree(true).get_checked();
 
             if (!term || term == "")
@@ -835,7 +835,7 @@ var SourceBrowser = (function () {
                     },
                     function (callbackSeries) {
                         var str = "<div>"
-                        if (authentication.currentUser.groupes.indexOf("admin")>-1 ){//&& Config[MainController.currentSource].editable > -1) {
+                        if (authentication.currentUser.groupes.indexOf("admin") > -1) {//&& Config[MainController.currentSource].editable > -1) {
                             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>" +
                                 "<div id='sourceBrowser_addPropertyDiv' style='display:none'>" +
                                 "property<select id='sourceBrowser_addPropertyName'></select>" +
@@ -1204,18 +1204,17 @@ var SourceBrowser = (function () {
             if (!property || !value)
                 return;
             if (confirm("add property")) {
-            var triples =[]
-            if( !self.currentNodeId){
-                self.currentNodeId=Config.sources[self.currentSource].graphUri+common.getRandomHexaId(10)
+                var triples = []
+                if (!self.currentNodeId) {
+                    self.currentNodeId = Config.sources[self.currentSource].graphUri + common.getRandomHexaId(10)
 
-                triples.push({
-                    subject: self.currentNodeId,
-                    predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    object: "http://www.w3.org/2002/07/owl#Class"
-                })
+                    triples.push({
+                        subject: self.currentNodeId,
+                        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                        object: "http://www.w3.org/2002/07/owl#Class"
+                    })
 
-            }
-
+                }
 
 
                 triples.push({
@@ -1229,6 +1228,7 @@ var SourceBrowser = (function () {
                     if (err)
                         return alert(err);
                     self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv")
+                    self.isModified = true
                 })
 
             }

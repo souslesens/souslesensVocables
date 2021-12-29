@@ -328,43 +328,46 @@ var SearchUtil = (function () {
     }
 
 
+    self.indexData=function (indexName,data, replaceIndex, callback) {
+
+        var totalLines = 0
+        if (data.length == 0)
+            return callback();
+        //  MainController.UI.message("indexing " + data.length)
+        var options = {replaceIndex: replaceIndex, owlType: "Class"}
+        var payload = {
+            dictionaries_indexSource: 1,
+            indexName: indexName,
+            data: JSON.stringify(data),
+            options: JSON.stringify(options)
+        }
+
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (data2, textStatus, jqXHR) {
+
+                callback(null, data)
+            }
+            , error: function (err) {
+                callback(err);
+
+            }
+
+
+        })
+
+    }
+
+
+
     self.generateElasticIndex = function (sourceLabel, callback) {
         var totalLines = 0
 
 
-        var processor = function (data, replaceIndex, callback) {
 
-
-            if (data.length == 0)
-                return callback();
-            //  MainController.UI.message("indexing " + data.length)
-            var options = {replaceIndex: replaceIndex, owlType: "Class"}
-            var payload = {
-                dictionaries_indexSource: 1,
-                indexName: sourceLabel.toLowerCase(),
-                data: JSON.stringify(data),
-                options: JSON.stringify(options)
-            }
-
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
-                success: function (data2, textStatus, jqXHR) {
-                    totalLines += data.length
-                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
-                    callback(null, data)
-                }
-                , error: function (err) {
-                    callback(err);
-
-                }
-
-
-            })
-
-        }
 
         if (Config.sources[sourceLabel].schemaType == "OWL") {
             Sparql_OWL.getSourceTaxonomyAnClasses(sourceLabel, null, function (err, result) {
@@ -384,10 +387,11 @@ var SearchUtil = (function () {
                     var replaceIndex = false
                     if ((index++) == 0)
                         replaceIndex = true;
-                    processor(data, replaceIndex, function (err, result) {
+                    self.indexData(sourceLabel.toLowerCase(),data, replaceIndex, function (err, result) {
                         if (err)
                             return callbackEach(err)
-                        //   MainController.UI.message("indexed "+data.length+" lines in "+sourceLabel)
+                        totalLines += result.length
+                        MainController.UI.message("indexed " + totalLines + " in index " +sourceLabel.toLowerCase())
                         callbackEach();
                     })
                 }, function (err) {

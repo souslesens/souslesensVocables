@@ -353,6 +353,11 @@ var common = (function () {
 
                 if (jstreeDiv == "LineagejsTreeDiv") // cannot do it generic !!!!!
                     parentDiv.height(h)
+                if (jstreeDiv == "Lineage_propertiesTree")
+                    parentDiv.height(h)
+                if (jstreeDiv == "Blender_conceptTreeDiv")
+                    parentDiv.height(h)
+
                 parentDiv.css('overflow', 'auto')
                 parentDiv.css('margin-top', '5px')
                 if (false && p.left < 600)

@@ -90,7 +90,7 @@ if(sources.length!=1)
         if(sources.length!=1)
             return alert("select a single source")
 
-        Sparql_OWL.getSourceTaxonomyAnClasses(sources[0],null,function(err, result){
+        Sparql_generic.getSourceTaxonomy(sources[0],null,function(err, result){
 
         })
     }

@@ -751,6 +751,295 @@ var Sparql_generic = (function () {
 
         }
 
+
+        /**
+         * Obsolete
+         * replaced by getSourceTaxonomy
+         * taxonomy is not used
+         *
+         *
+         *
+         *
+         */
+        self.getSourceTaxonomyFromTop = function (sourceLabel, options, callback) {
+            var rawData = []
+            var topClasses = []
+            var taxonomy = {}
+
+            var allClassesMap = {}
+            async.series([
+                function (callbackSeries) {//get topClasse
+                    Sparql_OWL.getTopConcepts(sourceLabel, {}, function (err, result) {
+                        if (err)
+                            return callbackSeries(err)
+                        if (result.length == 0)
+                            return callbackSeries("no top classes found  in source" + sourceLabel + ". cannot organize classes lineage")
+                        topClasses = result;
+                        callbackSeries()
+                    })
+                },
+
+                function (callbackSeries) {//get raw data subclasses
+                    if (!options)
+                        options = {}
+                    var totalCount = 0
+                    var resultSize = 1
+                    var limitSize = 2000
+                    var offset = 0
+                    var fromStr = Sparql_common.getFromStr(sourceLabel)
+                    var filterStr = ""
+                    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                        "SELECT distinct * " + fromStr + " WHERE {\n" +
+                        " ?sub rdfs:subClassOf+ ?obj .\n" +
+                        "   ?sub rdfs:label ?subLabel .\n" +
+                        "   ?obj rdfs:label ?objLabel .\n" +
+                        "   ?sub rdf:type owl:Class.\n" +
+                        " ?obj rdf:type owl:Class.\n" +
+                        "} "
+                    async.whilst(function (test) {
+                        return resultSize > 0
+
+                    }, function (callbackWhilst) {
+
+                        var query2 = "" + query;
+                        query2 += " limit " + limitSize + " offset " + offset
+
+                        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                        var url = self.sparql_url + "?format=json&query=";
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
+                            if (err)
+                                return callbackWhilst(err);
+                            result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
+                            rawData = rawData.concat(result)
+                            resultSize = result.length
+                            totalCount += result.length
+                            MainController.UI.message(sourceLabel + "retreived triples :" + totalCount)
+                            offset += limitSize
+                            callbackWhilst()
+                        })
+                    }, function (err) {
+                        console.log(totalCount)
+                        callbackSeries()
+                    })
+
+                },
+
+
+                function (callbackSeries) {//set each class parent
+
+                    if (true) {
+
+
+                        var parentChildrenMap = {}
+                        rawData.forEach(function (item) {
+                            if (!allClassesMap[item.sub.value]) {
+                                allClassesMap[item.sub.value] = {
+                                    id: item.sub.value,
+                                    label: item.subLabel.value,
+                                    children: [],
+                                    parents: ""
+                                }
+                            }
+                            if (!parentChildrenMap[item.obj.value])
+                                parentChildrenMap[item.obj.value] = []
+                            parentChildrenMap[item.obj.value].push(item.sub.value)
+
+
+                        })
+
+
+                        var x = Object.keys(allClassesMap).length
+                        var y = Object.keys(parentChildrenMap).length
+
+
+                        taxonomy = {
+                            id: sourceLabel,
+                            label: sourceLabel,
+                            children: []
+                        }
+
+                        parentChildrenMap[sourceLabel] = []
+
+                        topClasses.forEach(function (item) {
+                            parentChildrenMap[sourceLabel].push(item.topConcept.value)
+
+
+                        })
+
+
+                        if (true) {
+                            var count = 0
+
+                            function recurseChildren(str, classId) {
+
+                                if (parentChildrenMap[classId]) {
+                                    str += classId + "|"
+                                    parentChildrenMap[classId].forEach(function (childId) {
+                                        if (allClassesMap[childId]) {
+
+                                            allClassesMap[childId].parents = str
+                                        }
+                                        recurseChildren(str, childId)
+
+                                    })
+
+
+                                } else {
+
+                                }
+                            }
+
+                            recurseChildren("", sourceLabel)
+
+
+                            //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
+
+
+                        }
+                    }
+
+
+                    var x = allClassesMap
+
+                    callbackSeries()
+                }
+
+            ], function (err) {
+
+                return callback(err, {tree: taxonomy, classesMap: allClassesMap})
+
+            })
+
+
+        }
+
+        self.getSourceTaxonomy = function (sourceLabel, options, callback) {
+            if (!options)
+                options = {}
+            var parentType = "rdfs:subClassOf"
+            var conceptType = "owl:Class"
+            if (Config.sources[sourceLabel].schemaType == "SKOS") {
+                parentType == "skos:broader"
+                conceptType:"skos:Concept"
+            } else if (options.parentType) {
+                parentType = options.parentType
+                if (parentType == "rdfs:subPropertyOf")
+                    conceptType:"owl:ObjectProperty"
+            }
+
+            var allClassesMap = {}
+            var allData = []
+            async.series([
+
+                function (callbackSeries) {//get raw data subclasses
+                    if (!options)
+                        options = {}
+                    var totalCount = 0
+                    var resultSize = 1
+                    var limitSize = 2000
+                    var offset = 0
+
+                    var fromStr = Sparql_common.getFromStr(sourceLabel)
+
+                    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "SELECT distinct * " +
+                        fromStr +
+                        " WHERE {" +
+                        "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel} " +
+                        "?concept rdf:type " + conceptType + ". " +
+                        "?parent rdf:type " + conceptType + ". "
+                    if (options.filter)
+                        query += " " + options.filter + " "
+
+                    query += "}"
+
+                    async.whilst(function (test) {
+                        return resultSize > 0
+
+                    }, function (callbackWhilst) {
+                        var query2 = "" + query;
+                        query2 += " limit " + limitSize + " offset " + offset
+
+                        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                        var url = self.sparql_url + "?format=json&query=";
+                        Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
+                            if (err)
+                                return callbackWhilst(err);
+                            result = result.results.bindings;
+                            allData = allData.concat(result)
+                            resultSize = result.length
+                            totalCount += result.length
+                            MainController.UI.message(sourceLabel + "retreived triples :" + totalCount)
+                            offset += limitSize
+                            callbackWhilst()
+                        })
+                    }, function (err) {
+                        callbackSeries()
+                    })
+
+
+                },
+                //format result
+                function (callbackSeries) {
+
+                    allData.forEach(function (item) {
+                        if (!allClassesMap[item.concept.value]) {
+                            allClassesMap[item.concept.value] = {
+                                id: item.concept.value,
+                                label: item.conceptLabel ? item.conceptLabel.value : null,
+                                parent: item.parent.value,
+                                parents: [],
+                                type: conceptType,
+                            }
+                        }
+                    })
+
+                    function recurse(nodeId, parents) {
+                        var obj = allClassesMap[nodeId]
+                        if (!obj)
+                            return;
+                        if (obj.parent && parents.indexOf(obj.parent) < 0) {
+                            parents.push(obj.parent)
+                            recurse(obj.parent, parents)
+
+                        }
+
+
+                    }
+
+                    // chain parents
+                    for (var key in allClassesMap) {
+                        recurse(key, allClassesMap[key].parents)
+                    }
+                    var x = allClassesMap
+                    //format parents
+                    for (var key in allClassesMap) {
+                        var obj = allClassesMap[key]
+                        var parentArray = obj.parents;
+                        parentArray.push(sourceLabel)
+                        parentArray = parentArray.reverse()
+                        var str = ""
+                        parentArray.forEach(function (parent, index) {
+                            if (index > 0)
+                                str += "|"
+                            str += parent;
+                        })
+                        delete allClassesMap[key].parent
+                        allClassesMap[key].parents = str;
+                    }
+                    callbackSeries()
+                }
+            ], function (err) {
+                return callback(err, {classesMap: allClassesMap})
+            })
+
+
+        }
+
         return self;
     }
 )

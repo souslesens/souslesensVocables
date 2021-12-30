@@ -370,7 +370,7 @@ var SearchUtil = (function () {
 
 
         if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_OWL.getSourceTaxonomyAnClasses(sourceLabel, null, function (err, result) {
+            Sparql_generic.getSourceTaxonomy(sourceLabel, null, function (err, result) {
 
                 if (err) {
                     if (callback)
@@ -382,7 +382,7 @@ var SearchUtil = (function () {
                 for (var key in result.classesMap) {
                     classesArray.push(result.classesMap[key])
                 }
-                var slices = common.array.slice(classesArray, 200)
+                var slices = common.array.slice(classesArray, 100)
                 async.eachSeries(slices, function (data, callbackEach) {
                     var replaceIndex = false
                     if ((index++) == 0)
@@ -417,6 +417,30 @@ var SearchUtil = (function () {
                 MainController.UI.message("DONE " + sourceLabel, true)
             })
         }
+    }
+
+    self.addObjectsToIndex=function(sourceLabel,ids,callback) {
+        var filter = " filter (?concept =<" + self.currentNodeId + ">) "
+        var filter=Sparql_common.setFilter("concept",ids)
+        Sparql_generic.getSourceTaxonomy(sourceLabel, {filter: filter}, function (err, result) {
+            var classesArray = []
+            for (var key in result.classesMap) {
+                classesArray.push(result.classesMap[key])
+            }
+            var slices = common.array.slice(classesArray, 100)
+            async.eachSeries(slices, function (data, callbackEach) {
+                var replaceIndex = false
+
+                self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                    if(err)
+                        return callbackEach(err)
+                    callbackEach()
+
+                })
+            },function(err){
+                return callback(err,"DONE")
+            })
+        })
     }
 
 

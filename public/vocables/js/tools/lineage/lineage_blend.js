@@ -4,36 +4,37 @@ var Lineage_blend = (function () {
     var self = {}
 
 
-    self.addNodeToAssociationNode = function (node, role,allowAddToGraphButton) {
+    self.addNodeToAssociationNode = function (node, role, allowAddToGraphButton) {
         if (role == "source") {
-            self.currentAssociation = [node.data]
+            self.currentAssociation = [node.data, ""]
             $("#lineage_sourceNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
             $("#lineage_targetNodeDiv").html("")
         } else if (role == "target") {
             if (!self.currentAssociation)
                 return
-            self.currentAssociation.push( node.data);
+            self.currentAssociation[1] = node.data;
             $("#lineage_targetNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
         }
-        if (authentication.currentUser.groupes.indexOf("admin")>-1 && Config.sources[Lineage_classes.mainSource].editable > -1) {
-            if (self.currentAssociation && self.currentAssociation.length == 2) {
+        if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource].editable > -1) {
+            if (self.currentAssociation && self.currentAssociation.length == 2 && self.currentAssociation[1]!=="") {
                 $("#lineage_createRelationButtonsDiv").css('display', 'block')
+                self.initAllowedPropertiesForRelation()
             } else {
                 $("#lineage_createRelationButtonsDiv").css('display', 'none')
             }
         }
 
 
-       /* $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
-        $("#GenericTools_searchInAllSources").prop("checked", true)*/
+        /* $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
+         $("#GenericTools_searchInAllSources").prop("checked", true)*/
 
 
-       if( allowAddToGraphButton){
-           $("#lineage_blendToGraphButton").css("display","block")
+        if (allowAddToGraphButton) {
+            $("#lineage_blendToGraphButton").css("display", "block")
 
-        }else{
-           $("#lineage_blendToGraphButton").css("display","none")
-       }
+        } else {
+            $("#lineage_blendToGraphButton").css("display", "none")
+        }
 
     }
 
@@ -42,15 +43,16 @@ var Lineage_blend = (function () {
         $("#lineage_sourceNodeDiv").html("")
         $("#lineage_targetNodeDiv").html("")
         self.currentAssociation = []
+        $("#lineage_createRelationButtonsDiv").css('display', 'none')
     }
 
-    self.manageImports=function(source,callback){
+    self.manageImports = function (source, callback) {
 
         var imports = Config.sources[Lineage_classes.mainSource].imports.concat(Lineage_classes.mainSource);
         if (imports && imports.indexOf(source) > -1) {
             return callback()
         }
-        if ( !confirm("add  source " + source + " to imports of source " + Lineage_common.currentSource))
+        if (!confirm("add  source " + source + " to imports of source " + Lineage_common.currentSource))
             return callback("stop");
 
         self.addImportToCurrentSource(Lineage_classes.mainSource, source, function (err, result) {
@@ -70,7 +72,7 @@ var Lineage_blend = (function () {
         if (sourceNode == targetNode)
             return "source node and target node must be distinct "
 
-        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as "+type+ " " + targetNode.source + "." + targetNode.label + "?"))
+        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?"))
             return;
 
 
@@ -79,16 +81,16 @@ var Lineage_blend = (function () {
 
         async.series([
             function (callbackSeries) {
-                if(!addImportToCurrentSource)
-                    return  callbackSeries()
-                self.manageImports(sourceNode.source,function(err, result){
+                if (!addImportToCurrentSource)
+                    return callbackSeries()
+                self.manageImports(sourceNode.source, function (err, result) {
                     callbackSeries(err)
                 })
             },
             function (callbackSeries) {
-            if(!addImportToCurrentSource)
-                return  callbackSeries()
-                self.manageImports(targetNode.source,function(err, result){
+                if (!addImportToCurrentSource)
+                    return callbackSeries()
+                self.manageImports(targetNode.source, function (err, result) {
                     callbackSeries(err)
                 })
             }
@@ -165,8 +167,10 @@ var Lineage_blend = (function () {
     }
 
 
-    self.createRelationTriples = function (relations, createInverseRelation,callback) {
-        var allTriples=[]
+    self.createRelationTriples = function (relations, createInverseRelation, callback) {
+        var allTriples = []
+        if (!Array.isArray(relations))
+            relations = [relations]
         relations.forEach(function (relation) {
 
             if (relation.type == 'sameAs') {
@@ -207,7 +211,7 @@ var Lineage_blend = (function () {
 
                 }
 
-                allTriples=allTriples.concat(restrictionTriples)
+                allTriples = allTriples.concat(restrictionTriples)
             }
         })
 
@@ -448,29 +452,29 @@ var Lineage_blend = (function () {
     }
 
 
-    self.importNodeInCurrentMainSource=function(){
-       var node= self.currentAssociation[0]
-        if(!node)
+    self.importNodeInCurrentMainSource = function () {
+        var node = self.currentAssociation[0]
+        if (!node)
             return
-        var existingNodes=visjsGraph.getExistingIdsMap()
-        if(existingNodes[node.id])
-            return alert( "node "+node.label+" already exists in graph ")
-       /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
-            return;*/
-        self.manageImports(node.source,function(err, result){
-            if(err)
+        var existingNodes = visjsGraph.getExistingIdsMap()
+        if (existingNodes[node.id])
+            return alert("node " + node.label + " already exists in graph ")
+        /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
+             return;*/
+        self.manageImports(node.source, function (err, result) {
+            if (err)
                 return ""
-            var toGraphUri=Config.sources[Lineage_classes.mainSource].graphUri
-            Sparql_generic.copyNodes  (node.source, toGraphUri, [node.id], null,function(err,result){
-                if(err)
+            var toGraphUri = Config.sources[Lineage_classes.mainSource].graphUri
+            Sparql_generic.copyNodes(node.source, toGraphUri, [node.id], null, function (err, result) {
+                if (err)
                     return alert(err)
                 visjsGraph.data.nodes.push({
-                    id:node.id,
-                    label:node.label,
-                    color:Lineage_classes.getSourceColor(node.source),
-                    shape:"square",
-                    size:Lineage_classes.defaultShapeSize,
-                    data:node
+                    id: node.id,
+                    label: node.label,
+                    color: Lineage_classes.getSourceColor(node.source),
+                    shape: "square",
+                    size: Lineage_classes.defaultShapeSize,
+                    data: node
                 })
                 visjsGraph.focusOnNode(node.id)
 
@@ -569,8 +573,8 @@ var Lineage_blend = (function () {
                 sameLabelEdgeIds.push(edge.id)
                 relations.push({
                     type: "sameAs",
-                    sourceNode: {id: edge.data.from,source:edge.data.fromSource},
-                    targetNode: {id: edge.data.to,source:edge.data.toSource}
+                    sourceNode: {id: edge.data.from, source: edge.data.fromSource},
+                    targetNode: {id: edge.data.to, source: edge.data.toSource}
 
                 })
             }
@@ -580,7 +584,7 @@ var Lineage_blend = (function () {
                 if (err)
                     return alert(err)
                 visjsGraph.data.edges.remove(sameLabelEdgeIds);
-                MainController.UI.message(relations.length +"  sameAs relations created",true)
+                MainController.UI.message(relations.length + "  sameAs relations created", true)
 
             })
 
@@ -591,12 +595,72 @@ var Lineage_blend = (function () {
     }
 
 
+    self.createNode = function () {
+        SourceBrowser.showNodeInfos(Lineage_classes.mainSource, null, 'mainDialogDiv', null, function (err, result) {
 
-    self.createNode=function(){
-SourceBrowser.showNodeInfos(Lineage_classes.mainSource,null,'mainDialogDiv',null,function(err,result){
-
-})
+        })
     }
+
+
+    self.initAllowedPropertiesForRelation = function () {
+        var fromNode = self.currentAssociation[0]
+        var toNode = self.currentAssociation[1]
+
+        var properties = Config.Lineage.basicObjectProperties
+        properties.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
+
+
+
+        self.getAssociationAllowedProperties(fromNode,toNode,function(err,result){
+
+        })
+/*
+        var words = [sourceNode.label, targetNode.label]
+        var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
+        SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
+            if (err)
+                return alert(err);
+            var xx = result
+
+        })*/
+
+    }
+
+
+    self.getAssociationAllowedProperties = function (fromNode, toNode,callback) {
+
+        var topOntology = "TSF_TOP_ONTOLOGY"
+
+        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "SELECT distinct " +
+            "?fromAncestor  ?toAncestor ?p ?pLabel " +
+            Sparql_common.getFromStr(fromNode.source, null, true) +
+            " " +
+            Sparql_common.getFromStr(toNode.source, null, true) +
+            " " +
+            Sparql_common.getFromStr(topOntology, null, false) +
+            " " +
+
+            "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://standards.iso.org/iso/15926/part14/\",\"i\"))" +
+            " {SELECT ?fromAncestor" +
+            "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
+            "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
+            "  }" +
+            "} limit 1000"
+
+        var sparql_url = Config.sources[topOntology].sparql_server.url;
+        var url = sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: topOntology}, function (err, result) {
+            if (err) {
+                return callback(err)
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["node", "concept"])
+            return callback(null, result.results.bindings)
+
+        })
+    }
+
+
     return self;
 
 })()

@@ -138,10 +138,15 @@
                     onclick="Lineage_blend.createNode()">Create Node
             </button>
             <div id="lineage_createRelationButtonsDiv" style="margin: 5px; display: none">
-                <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
-                        onclick="Lineage_blend.createRelation('sameAs',true)">Create relation SameAs
-                </button>
-                <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked"> Inverse also
+                <div style="border:solid 1px brown;padding:2px;margin:2px">
+                    Property
+                    <select id="lineage_createRelationPropertySelect" style="width:200px"></select><br>
+                    <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked"> +Inverse
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                            onclick="Lineage_blend.createRelation()">Create Relation
+                    </button>
+                </div>
+
             </div>
             <br>
             <button id='lineage_blendToGraphButton' class='btn btn-sm my-1 py-0 btn-outline-primary'

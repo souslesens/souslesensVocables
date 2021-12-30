@@ -307,20 +307,22 @@ var Lineage_classes = (function () {
             var imports = Config.sources[source].imports;
             var importGraphUrisMap = {}
 
-            if (!existingNodes[source]) {
-                existingNodes[source] = 1
-                var sourceNode = {
-                    id: source,
-                    label: source,
-                    shadow: self.nodeShadow,
-                    shape: "box",
-                    size: Lineage_classes.defaultShapeSize,
-                    color: self.getSourceColor(source),
-                    data: {source: source},
-                    level: 1,
+            if (Config.Lineage.showSourceNodesInGraph) {
+                if (!existingNodes[source]) {
+                    existingNodes[source] = 1
+                    var sourceNode = {
+                        id: source,
+                        label: source,
+                        shadow: self.nodeShadow,
+                        shape: "box",
+                        size: Lineage_classes.defaultShapeSize,
+                        color: self.getSourceColor(source),
+                        data: {source: source},
+                        level: 1,
 
+                    }
+                    visjsData.nodes.push(sourceNode)
                 }
-                visjsData.nodes.push(sourceNode)
             }
             if (imports) {
 
@@ -333,38 +335,39 @@ var Lineage_classes = (function () {
                     var color = self.getSourceColor(importedSource)
                     if (!graphUri)
                         return;
+                    if (Config.Lineage.showSourceNodesInGraph) {
+                        if (!existingNodes[importedSource]) {
+                            existingNodes[importedSource] = 1
+                            var importedSourceNode = {
+                                id: importedSource,
+                                label: importedSource,
+                                shadow: self.nodeShadow,
+                                shape: "box",
+                                level: 1,
+                                size: Lineage_classes.defaultShapeSize,
+                                data: {source: importedSource},
+                                color: color
 
-                    if (!existingNodes[importedSource]) {
-                        existingNodes[importedSource] = 1
-                        var importedSourceNode = {
-                            id: importedSource,
-                            label: importedSource,
-                            shadow: self.nodeShadow,
-                            shape: "box",
-                            level: 1,
-                            size: Lineage_classes.defaultShapeSize,
-                            data: {source: importedSource},
-                            color: color
+                            }
+                            importGraphUrisMap[graphUri] = importedSource
 
+                            visjsData.nodes.push(importedSourceNode)
                         }
-                        importGraphUrisMap[graphUri] = importedSource
-
-                        visjsData.nodes.push(importedSourceNode)
-                    }
 
 
-                    var edgeId = importedSource + "_" + source
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1
-                        var edge = {
-                            id: edgeId,
-                            from: importedSource,
-                            to: source,
-                            arrows: " middle",
-                            color: color,
-                            width: 6
+                        var edgeId = importedSource + "_" + source
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            var edge = {
+                                id: edgeId,
+                                from: importedSource,
+                                to: source,
+                                arrows: " middle",
+                                color: color,
+                                width: 6
+                            }
+                            visjsData.edges.push(edge)
                         }
-                        visjsData.edges.push(edge)
                     }
                     //  self.registerSource(importedSource)
                 })
@@ -425,16 +428,17 @@ var Lineage_classes = (function () {
 
                             //link node to source
 
-
-                            var edgeId = item.topConcept.value + "_" + source
-                            if (!existingNodes[edgeId]) {
-                                existingNodes[edgeId] = 1
-                                var edge = {
-                                    id: edgeId,
-                                    from: item.topConcept.value,
-                                    to: source
+                            if (Config.Lineage.showSourceNodesInGraph) {
+                                var edgeId = item.topConcept.value + "_" + source
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1
+                                    var edge = {
+                                        id: edgeId,
+                                        from: item.topConcept.value,
+                                        to: source
+                                    }
+                                    visjsData.edges.push(edge)
                                 }
-                                visjsData.edges.push(edge)
                             }
 
                         }
@@ -2253,6 +2257,10 @@ var Lineage_classes = (function () {
             $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv")
             $("#Lineage_source_" + sourceId).addClass("Lineage_selectedSourceDiv")
             Lineage_common.currentSource = encodeURIComponent(sourceId)
+           if(!self.soucesLevelMap[sourceId].topDone) {
+               self.soucesLevelMap[sourceId].topDone=1
+               self.drawTopConcepts(sourceId)
+           }
 
 
         }

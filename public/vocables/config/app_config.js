@@ -102,7 +102,28 @@ var Config = (function () {
 
         }
 
+    self.Lineage = {
+        showSourceNodesInGraph:false,
+        basicObjectProperties : [
+            {id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "comment"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "subClassOf"},
+            {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "type"},
 
+        ]
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*****************************************************************************/
     self.sources = {}
     self.tools = {};
 

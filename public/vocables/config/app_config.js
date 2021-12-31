@@ -105,10 +105,11 @@ var Config = (function () {
     self.Lineage = {
         showSourceNodesInGraph:false,
         basicObjectProperties : [
-            {id: "http://www.w3.org/2000/01/rdf-schema#label", label: "label"},
-            {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "comment"},
-            {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "subClassOf"},
-            {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "type"},
+            {id: "http://www.w3.org/2002/07/owl#sameAs", label: "owl:sameAs",type:"ObjectProperty"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#label", label: "rdfs:label",type:"dataTypeProperty"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment",type:"dataTypeProperty"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf",type:"ObjectProperty"},
+            {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type",type:"ObjectProperty"},
 
         ]
     }

@@ -65,6 +65,8 @@ var Lineage_blend = (function () {
     self.createRelation = function (type, addImportToCurrentSource) {
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
+        if(!type)
+            type=$("#lineage_createRelationPropertySelect").val()
 
         if (!sourceNode || !targetNode)
             return alert("select a source node and a target node ")
@@ -77,7 +79,11 @@ var Lineage_blend = (function () {
 
 
         var createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked")
-        var propId = null;
+
+
+        if( type!="http://www.w3.org/2002/07/owl#sameAs")
+            createInverseRelation=false;
+        var propId = type;
 
         async.series([
             function (callbackSeries) {
@@ -103,56 +109,6 @@ var Lineage_blend = (function () {
                 })
 
 
-                return;
-
-                if (type == 'sameAs') {
-                    propId = "http://www.w3.org/2002/07/owl#sameAs"
-
-                    var restrictionTriples = self.getRestrictionTriples(sourceNode.id, targetNode.id, propId)
-                    var normalBlankNode = restrictionTriples.blankNode
-                    var metadataOptions = {
-                        domainSourceLabel: sourceNode.source,
-                        rangeSourceLabel: targetNode.source,
-                    }
-                    var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, "manual", "candidate", metadataOptions)
-                    restrictionTriples = restrictionTriples.concat(metaDataTriples)
-
-
-                    if (createSameAsInverse) {
-                        var restrictionTriplesInverse = self.getRestrictionTriples(targetNode.id, sourceNode.id, propId)
-                        var inverseBlankNode = restrictionTriplesInverse.blankNode
-                        restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse)
-                        var inverseMetadataOptions = {
-                            domainSourceLabel: targetNode.source,
-                            rangeSourceLabel: sourceNode.source,
-                        }
-                        var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, "manual", "candidate", inverseMetadataOptions)
-                        restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples)
-
-                        restrictionTriples.push({
-                            subject: normalBlankNode,
-                            predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                            object: inverseBlankNode
-                        })
-                        restrictionTriples.push({
-                            subject: inverseBlankNode,
-                            predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                            object: normalBlankNode
-                        })
-
-
-                    }
-
-
-                    Sparql_generic.insertTriples(Lineage_classes.mainSource, restrictionTriples, null, function (err, result) {
-
-                        callbackSeries(err)
-
-                    })
-
-                } else {
-                    callbackSeries()
-                }
             }
 
 
@@ -173,8 +129,8 @@ var Lineage_blend = (function () {
             relations = [relations]
         relations.forEach(function (relation) {
 
-            if (relation.type == 'sameAs') {
-                var propId = "http://www.w3.org/2002/07/owl#sameAs"
+
+               var  propId=relation.type
 
                 var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId)
                 var normalBlankNode = restrictionTriples.blankNode
@@ -212,7 +168,7 @@ var Lineage_blend = (function () {
                 }
 
                 allTriples = allTriples.concat(restrictionTriples)
-            }
+
         })
 
 
@@ -572,7 +528,7 @@ var Lineage_blend = (function () {
             if (edge.data && edge.data.type == "sameLabel") {
                 sameLabelEdgeIds.push(edge.id)
                 relations.push({
-                    type: "sameAs",
+                    type: "http://www.w3.org/2002/07/owl#sameAs",
                     sourceNode: {id: edge.data.from, source: edge.data.fromSource},
                     targetNode: {id: edge.data.to, source: edge.data.toSource}
 
@@ -605,25 +561,50 @@ var Lineage_blend = (function () {
     self.initAllowedPropertiesForRelation = function () {
         var fromNode = self.currentAssociation[0]
         var toNode = self.currentAssociation[1]
+        var distinctProperties={}
+        var properties =[];
+        Config.Lineage.basicObjectProperties.forEach(function(item){
+            if(item.type=="ObjectProperty") {
+                properties.push(item)
+                distinctProperties[item.id]=1
+            }
+        })
 
-        var properties = Config.Lineage.basicObjectProperties
-        properties.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
+     //   properties.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
 
 
+        self.getAssociationAllowedProperties(fromNode, toNode, function (err, result) {
 
-        self.getAssociationAllowedProperties(fromNode,toNode,function(err,result){
+            if (err)
+                return alert(err)
+
+
+            result.forEach(function (item) {
+               if(!distinctProperties[item.id]){
+                   var prefix=''
+                   if(item.p.value.indexOf("part14")>-1)
+                       prefix="part14:"
+                    properties.push({
+                        id: item.p.value,
+                        label: prefix+(item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value))
+
+                    })
+                }
+
+            })
+
+            common.fillSelectOptions("lineage_createRelationPropertySelect", properties, false, "label", "id")
+            /*
+                    var words = [sourceNode.label, targetNode.label]
+                    var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
+                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
+                        if (err)
+                            return alert(err);
+                        var xx = result
+
+                    })*/
 
         })
-/*
-        var words = [sourceNode.label, targetNode.label]
-        var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
-        SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
-            if (err)
-                return alert(err);
-            var xx = result
-
-        })*/
-
     }
 
 
@@ -633,19 +614,40 @@ var Lineage_blend = (function () {
 
         var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "SELECT distinct " +
-            "?fromAncestor  ?toAncestor ?p ?pLabel " +
+            "?fromAncestor  ?toAncestor ?p ?pLabel  " +
             Sparql_common.getFromStr(fromNode.source, null, true) +
             " " +
             Sparql_common.getFromStr(toNode.source, null, true) +
             " " +
             Sparql_common.getFromStr(topOntology, null, false) +
             " " +
+         /*   "WHERE {" +
+            "?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
+            " optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
+            "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
+            " filter (?from=<"+fromNode.id+"\> )     }"+*/
 
-            "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://standards.iso.org/iso/15926/part14/\",\"i\"))" +
-            " {SELECT ?fromAncestor" +
+            " WHERE {{?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} \n" +
+            "   optional{ ?b owl:someValuesFrom ?toAncestor.  ?to rdfs:subClassOf+ ?toAncestor   filter( ?toAncestor!=owl:Thing  && ?to=<"+toNode.id+">)}\n" +
+            "     optional{ ?b owl:someValuesFrom ?toAncestor.  filter( ?toAncestor=owl:Thing)}\n" +
+            " filter(BOUND(?toAncestor))\n" +
+            "   \n" +
+            "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (?from=<"+fromNode.id+"> )     }}}\n" +
+            "  \n" +
+
+
+
+
+
+
+
+
+
+        /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://standards.iso.org/iso/15926/part14/\",\"i\"))" +
+            " {SELECT ?fromAncestor ?toAncestor ?from ?to" +
             "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
             "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
-            "  }" +
+            "  }" +*/
             "} limit 1000"
 
         var sparql_url = Config.sources[topOntology].sparql_server.url;
@@ -655,6 +657,9 @@ var Lineage_blend = (function () {
                 return callback(err)
             }
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["node", "concept"])
+
+
+
             return callback(null, result.results.bindings)
 
         })

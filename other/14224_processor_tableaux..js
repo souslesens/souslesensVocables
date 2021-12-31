@@ -28,7 +28,7 @@ mappingsMap = {
     tsf_top_ontology: {
         type: "owl:Class",
         topClass: "<http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337>",
-        fileName: "D:\\NLP\\ontologies\\15926\\part 14\\restrictions.txt",
+        fileName: "D:\\NLP\\ontologies\\15926\\part 14\\restrictionsAll.txt",
         lookups: [],
         transform: {
             label2: function (value) {

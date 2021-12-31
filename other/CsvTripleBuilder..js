@@ -130,13 +130,15 @@ var processor = {
                                         if (item.s_type == "fixed") subjectStr = item.s;
                                         else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
                                         else subjectStr = line[item.s];
-                                        if (item.o_type == "fixed") objectStr = item.o;
-                                        else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
+                                        if (item.o_type == "fixed")
+                                            objectStr = item.o;
+                                        else if (item.o.match(/.+:.+|http.+/))
+                                            objectStr = item.o;
                                         else objectStr = line[item.o];
 
                                         if (item.p == "rdfs:subClassOf") hasDirectSuperClass = true;
 
-                                        if (!subjectStr || !objectStr) return;
+                                        if (!subjectStr || (!objectStr && item.p!="_restriction") ) return;
 
                                         if (item.lookup_S) {
                                             subjectStr = getLookupValue(item.lookup_S, subjectStr);
@@ -145,11 +147,15 @@ var processor = {
                                                 return;
                                             }
                                         }
-                                        if (subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
-                                        else if (subjectStr.indexOf(":") > -1) subjectStr = subjectStr;
-                                        else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        if (subjectStr.indexOf("http") == 0)
+                                            subjectStr = "<" + subjectStr + ">";
+                                        else if (subjectStr.indexOf(":") > -1)
+                                            subjectStr = subjectStr;
+                                        else
+                                            subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
 
-                                        if (!objectStr) objectStr = line[item.o];
+                                        if (!objectStr)
+                                           var x=3;// objectStr = line[item.o];
 
                                         if (item.lookup_O) {
                                             objectStr = getLookupValue(item.lookup_O, objectStr);
@@ -164,8 +170,12 @@ var processor = {
                                         if (propertiesTypeMap[item.p] == "string") {
                                             objectStr = "'" + util.formatStringForTriple(objectStr) + "'";
                                         } else if (true || propertiesTypeMap[item.p] == "uri") {
-                                            if (objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
-                                            else if (objectStr.indexOf(":") > -1) objectStr = objectStr;
+                                            if (objectStr.indexOf("http") == 0)
+                                                objectStr = "<" + objectStr + ">";
+                                            else if (objectStr.indexOf(":") > -1)
+                                                objectStr = objectStr;
+                                            else if (objectStr=="")
+                                                objectStr="owl:Thing"
                                             else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                         }
                                         if (item.p == "_restriction") {
@@ -174,10 +184,10 @@ var processor = {
                                             }
                                             var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                             var prop = item.prop;
-                                            if(prop.indexOf("$")==0)
-                                                prop=line[prop.substring(1)]
+                                            if (prop.indexOf("$") == 0)
+                                                prop = line[prop.substring(1)]
                                             if (prop.indexOf("http") == 0)
-                                                prop = "<" + prop+ ">";
+                                                prop = "<" + prop + ">";
 
 
                                             triples.push({
@@ -190,11 +200,15 @@ var processor = {
                                                 p: "<http://www.w3.org/2002/07/owl#onProperty>",
                                                 o: prop,
                                             });
-                                            triples.push({
-                                                s: blankNode,
-                                                p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                                o: objectStr,
-                                            });
+                                            if (objectStr){
+                                                triples.push({
+                                                    s: blankNode,
+                                                    p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
+                                                    o: objectStr,
+                                                });
+                                        }else{
+                                                var x=5
+                                            }
                                             triples.push({
                                                 s: subjectStr,
                                                 p: "rdfs:subClassOf",

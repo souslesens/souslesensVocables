@@ -952,7 +952,7 @@ var SourceBrowser = (function () {
                        value = item.valueLabel.value;*/
 
                 if (!propertiesMap.properties[propName])
-                    propertiesMap.properties[propName] = {name: propName, langValues: {}}
+                    propertiesMap.properties[propName] = {name: propName, propUri:item.prop.value, langValues: {}}
 
                 if (item.value && item.value["xml:lang"]) {
                     if (!propertiesMap.properties[propName].langValues[item.value["xml:lang"]])
@@ -1001,19 +1001,28 @@ var SourceBrowser = (function () {
 
 
                 if (propertiesMap.properties[key].value) {
+
+
                     var values = propertiesMap.properties[key].value;
-                    str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name + "</td>"
+                    str += "<td class='detailsCellName'>" + propertiesMap.properties[key].name+ "</td>"
                     var valuesStr = ""
                     values.forEach(function (value, index) {
+                        var optionalStr=""
+                        if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.currentSource].editable > -1) {
+                            var propUri=propertiesMap.properties[key].propUri
+                            optionalStr="&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
+                                " onclick=SourceBrowser.deletePropertyValue('"+propUri+"','"+value+"')>X</button>"
+                        }
+
                         if (value.indexOf("http") == 0) {
                             if (valueLabelsMap[value])
-                                value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>"
+                                value = "<a target='_slsv2' href='" + value + "'>"  + valueLabelsMap[value] + "</a>"
                             else
                                 value = "<a target='_slsv2' href='" + value + "'>" + value + "</a>"
                         }
                         if (index > 0)
                             valuesStr += "<br>"
-                        valuesStr += value
+                        valuesStr +=value+optionalStr
                     })
                     str += "<td class='detailsCellValue'>" + valuesStr + "</td>"
                     str += "</tr>"
@@ -1252,6 +1261,19 @@ var SourceBrowser = (function () {
         var properties = Config.Lineage.basicObjectProperties
         common.fillSelectOptions("sourceBrowser_addPropertyName", properties, true, "label", "id")
 
+
+    }
+
+    self.deletePropertyValue=function(property,value){
+        if( confirm("delete property "+property)) {
+
+            Sparql_generic.deleteTriples(self.currentSource,self.currentNodeId,property, value,function(err, result){
+                if (err)
+                    return alert(err);
+                self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv")
+
+            })
+        }
 
     }
 

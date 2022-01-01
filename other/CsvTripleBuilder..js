@@ -10,12 +10,12 @@ var UML2OWLparser = require("./UML2OWLparser");
 
 var processor = {
     readCsv: function (filePath, callback) {
-        csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
+        csvCrawler.readCsv({filePath: filePath}, 500000, function (err, result) {
             if (err) return callback(err);
             var data = result.data;
             var headers = result.headers;
             console.log(filePath);
-            return callback(null, { headers: headers, data: data });
+            return callback(null, {headers: headers, data: data});
         });
     },
 
@@ -23,7 +23,7 @@ var processor = {
         var descriptionMap = {};
 
         processor.readCsv(filePath, function (err, result) {
-            descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
+            descriptionMap = {filePath: filePath, headers: result.headers, length: result.data[0].length};
 
             fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
             //  console.log(JSON.stringify(descriptionMap,null,2))
@@ -127,58 +127,68 @@ var processor = {
                                         subjectStr = null;
                                         objectStr = null;
 
-                                        if (item.s_type == "fixed") subjectStr = item.s;
-                                        else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
-                                        else subjectStr = line[item.s];
-                                        if (item.o_type == "fixed")
-                                            objectStr = item.o;
-                                        else if (item.o.match(/.+:.+|http.+/))
-                                            objectStr = item.o;
-                                        else objectStr = line[item.o];
 
-                                        if (item.p == "rdfs:subClassOf") hasDirectSuperClass = true;
-
-                                        if (!subjectStr || (!objectStr && item.p!="_restriction") ) return;
-
-                                        if (item.lookup_S) {
-                                            subjectStr = getLookupValue(item.lookup_S, subjectStr);
-                                            if (!subjectStr) {
-                                                // console.log(line[item.s])
-                                                return;
-                                            }
-                                        }
-                                        if (subjectStr.indexOf("http") == 0)
-                                            subjectStr = "<" + subjectStr + ">";
-                                        else if (subjectStr.indexOf(":") > -1)
-                                            subjectStr = subjectStr;
-                                        else
-                                            subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
-
-                                        if (!objectStr)
-                                           var x=3;// objectStr = line[item.o];
-
-                                        if (item.lookup_O) {
-                                            objectStr = getLookupValue(item.lookup_O, objectStr);
-                                            if (!objectStr) {
-                                                // console.log(line[item.o])
-                                                return;
-                                            }
+                                        //get value for Subject
+                                        {
+                                            if (item.s_type == "fixed")
+                                                subjectStr = item.s;
+                                            else if (mapping.transform && mapping.transform[item.s])
+                                                subjectStr = mapping.transform[item.s](line[item.s]);
+                                            else if (item.s.match(/.+:.+|http.+/))
+                                                subjectStr = item.s;
+                                            else if (item.lookup_S) {
+                                                subjectStr = getLookupValue(item.lookup_S, line[item.s]);
+                                                if (!subjectStr) {
+                                                    // console.log(line[item.s])
+                                                    return;
+                                                }
+                                            } else subjectStr = line[item.s];
                                         }
 
-                                        if (mapping.transform && mapping.transform[item.o]) objectStr = mapping.transform[item.o](objectStr);
+                                        //get value for Object
+                                        {
+                                            if (item.o_type == "fixed")
+                                                objectStr = item.o;
+                                            else if (mapping.transform && mapping.transform[item.o])
+                                                objectStr = mapping.transform[item.o](line[item.o]);
+                                            else if (item.o.match(/.+:.+|http.+/))
+                                                objectStr = item.o;
+                                            else if (item.lookup_O) {
+                                                objectStr = getLookupValue(item.lookup_O, objectStr);
+                                                if (!objectStr) {
+                                                    // console.log(line[item.o])
+                                                    return;
+                                                }
+                                            } else objectStr = line[item.o];
+                                        }
 
-                                        if (propertiesTypeMap[item.p] == "string") {
-                                            objectStr = "'" + util.formatStringForTriple(objectStr) + "'";
-                                        } else if (true || propertiesTypeMap[item.p] == "uri") {
+
+
+                                        //format subject
+                                        {
+                                            if (subjectStr.indexOf("http") == 0)
+                                                subjectStr = "<" + subjectStr + ">";
+                                            else if (subjectStr.indexOf(":") > -1)
+                                                subjectStr = subjectStr;
+                                            else
+                                                subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        }
+
+
+                                        //format object
+                                       {
                                             if (objectStr.indexOf("http") == 0)
                                                 objectStr = "<" + objectStr + ">";
                                             else if (objectStr.indexOf(":") > -1)
                                                 objectStr = objectStr;
-                                            else if (objectStr=="")
-                                                objectStr="owl:Thing"
-                                            else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                            else
+                                                objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                         }
-                                        if (item.p == "_restriction") {
+
+
+
+
+                                            if (item.p == "_restriction") {
                                             if (!item.prop) {
                                                 return callbackSeries("no prop defined for restriction");
                                             }
@@ -200,14 +210,14 @@ var processor = {
                                                 p: "<http://www.w3.org/2002/07/owl#onProperty>",
                                                 o: prop,
                                             });
-                                            if (objectStr){
+                                            if (objectStr) {
                                                 triples.push({
                                                     s: blankNode,
                                                     p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
                                                     o: objectStr,
                                                 });
-                                        }else{
-                                                var x=5
+                                            } else {
+                                                var x = 5
                                             }
                                             triples.push({
                                                 s: subjectStr,
@@ -217,42 +227,54 @@ var processor = {
                                             objectStr = blankNode;
                                             return;
                                         }
-                                        if (subjectStr && objectStr) {
-                                            // return console.log("missing type " + item.p)
-                                            if (!existingNodes[subjectStr + "_" + objectStr]) {
-                                                existingNodes[subjectStr + "_" + objectStr]=1
-                                                triples.push({
-                                                    s: subjectStr,
-                                                    p: item.p,
-                                                    o: objectStr,
-                                                });
+
+                                        //not restriction
+                                        else {
+
+                                                // get value for property
+                                                if (item.p.indexOf("$") == 0)
+                                                    item.p = line[item.p.substring(1)]
+
+                                                if (subjectStr && objectStr) {
+                                                // return console.log("missing type " + item.p)
+                                                if (!existingNodes[subjectStr + "_" + objectStr]) {
+                                                    existingNodes[subjectStr + "_" + objectStr] = 1
+                                                    triples.push({
+                                                        s: subjectStr,
+                                                        p: item.p,
+                                                        o: objectStr,
+                                                    });
+                                                }
                                             }
                                         }
+                                        /*  if (item.p == "rdfs:subClassOf")
+                                              hasDirectSuperClass = true;*/
                                     });
 
-                                /*    var lastTriples=triples[triples.length-1]
-                                    var tripleHashcode=lastTriples.s+"_"+lastTriples.p+"_"+lastTriples.o
-                                    if (!lastTriples.s || !lastTriples.p || !lastTriples.o) {
-                                       return  console.log(subjectStr + "  " + objectStr);
-                                    }
-                                    if (lastTriples && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
-                                        existingNodes[subjectStr + "_" + objectStr]=1
-                                        if (mapping.type) {
-                                            triples.push({
-                                                s: subjectStr,
-                                                p: "rdf:type",
-                                                o: mapping.type,
-                                            });
-                                        }
 
-                                        if (mapping.topClass && !hasDirectSuperClass && mapping.type == "owl:Class") {
-                                            triples.push({
-                                                s: subjectStr,
-                                                p: "rdfs:subClassOf",
-                                                o: mapping.topClass,
-                                            });
+                                    /*    var lastTriples=triples[triples.length-1]
+                                        var tripleHashcode=lastTriples.s+"_"+lastTriples.p+"_"+lastTriples.o
+                                        if (!lastTriples.s || !lastTriples.p || !lastTriples.o) {
+                                           return  console.log(subjectStr + "  " + objectStr);
                                         }
-                                    }*/
+                                        if (lastTriples && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
+                                            existingNodes[subjectStr + "_" + objectStr]=1
+                                            if (mapping.type) {
+                                                triples.push({
+                                                    s: subjectStr,
+                                                    p: "rdf:type",
+                                                    o: mapping.type,
+                                                });
+                                            }
+
+                                            if (mapping.topClass && !hasDirectSuperClass && mapping.type == "owl:Class") {
+                                                triples.push({
+                                                    s: subjectStr,
+                                                    p: "rdfs:subClassOf",
+                                                    o: mapping.topClass,
+                                                });
+                                            }
+                                        }*/
                                     var x = triples;
                                 });
 
@@ -288,7 +310,8 @@ var processor = {
                     }
                 );
             },
-            function (err) {}
+            function (err) {
+            }
         );
     },
     writeTriples: function (triples, graphUri, sparqlServerUrl, callback) {
@@ -314,7 +337,7 @@ var processor = {
         // console.log(query)
 
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
-        var params = { query: queryGraph };
+        var params = {query: queryGraph};
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
             if (err) {
@@ -329,7 +352,7 @@ var processor = {
 
     clearGraph: function (graphUri, sparqlServerUrl, callback) {
         var query = "clear graph   <" + graphUri + ">";
-        var params = { query: query };
+        var params = {query: query};
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
             if (err) {

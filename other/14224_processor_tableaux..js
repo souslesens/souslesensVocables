@@ -31,9 +31,17 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\15926\\part 14\\restrictionsAll.txt",
         lookups: [],
         transform: {
-            label2: function (value) {
+            from: function (value) {
+                console.log(value)
                 if(value=="")
-                return "";
+                    return "owl:Thing";
+                else
+                    return value
+
+            },
+            to: function (value) {
+                if(value=="")
+                return "owl:Thing";
                 else
                     return value
 

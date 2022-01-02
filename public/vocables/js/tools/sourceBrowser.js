@@ -46,21 +46,21 @@ var SourceBrowser = (function () {
 
         }
 
-        self.selectTreeNodeFn = function (event,) {
+        self.selectTreeNodeFn = function (event,obj) {
 
 
             var source;
-            if (self.propertiesMap.node.data && self.propertiesMap.node.data.source)
-                source = self.propertiesMap.node.data && self.propertiesMap.node.data.source // coming from search all sources
+            if (obj.node.data &&obj.node.data.source)
+                source = obj.node.data && obj.node.data.source // coming from search all sources
             else
                 source = MainController.currentSource// coming from  specific tool current surce
-            self.currentTreeNode = self.propertiesMap.node;
+            self.currentTreeNode =obj.node;
             if (self.propertiesMap.event.ctrlKey)
                 self.copyNode(self.propertiesMap.event);
 
 
             if (true || self.propertiesMap.event.ctrlKey) {
-                self.editThesaurusConceptInfos(source, self.propertiesMap.node)
+                self.editThesaurusConceptInfos(source, obj.node)
             }
             {
 
@@ -358,9 +358,9 @@ var SourceBrowser = (function () {
                     return $("#" + self.currentTargetDiv).html("No data found")
                 }
                 common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, {
-                    openAll: true, selectTreeNodeFn: function (event) {
+                    openAll: true, selectTreeNodeFn: function (event,obj) {
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, self.propertiesMap);
+                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event,obj);
                         self.editThesaurusConceptInfos(MainController.currentSource)
                     }, contextMenu: self.getJstreeConceptsContextMenu()
                 })
@@ -507,14 +507,14 @@ var SourceBrowser = (function () {
 
                 var jstreeOptions = {
 
-                    openAll: true, selectTreeNodeFn: function (event) {
-                        SourceBrowser.currentTreeNode = self.propertiesMap.node;
+                    openAll: true, selectTreeNodeFn: function (event,obj) {
+                        SourceBrowser.currentTreeNode = obj.node;
 
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, self.propertiesMap);
+                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
 
 
-                        self.editThesaurusConceptInfos(self.propertiesMap.node.data.source, self.propertiesMap.node)
+                        self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
                     },
                     contextMenu: function () {
                         if (Config.tools[MainController.currentTool].controller.contextMenuFn)
@@ -606,14 +606,14 @@ var SourceBrowser = (function () {
                 var jstreeOptions = {
 
                     openAll: true,
-                    selectTreeNodeFn: function (event) {
-                        SourceBrowser.currentTreeNode = self.propertiesMap.node;
+                    selectTreeNodeFn: function (event,obj) {
+                        SourceBrowser.currentTreeNode = obj.node;
 
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, self.propertiesMap);
+                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event,obj);
 
 
-                        self.editThesaurusConceptInfos(self.propertiesMap.node.data.source, self.propertiesMap.node)
+                        self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
                     },
                     contextMenu: function () {
                         if (Config.tools[MainController.currentTool].controller.contextMenuFn)
@@ -841,13 +841,12 @@ var SourceBrowser = (function () {
 
                             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>"
                             if (Config.sources[self.currentSource].editable) {//} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
-                                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>" +
-                                    "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>"
+                                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>"
                             }
                             str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
                                 "Property<select id='sourceBrowser_addPropertyName'></select>&nbsp;" +
-                                "Value=&nbsp;<input id='sourceBrowser_addPropertyValue' style='width:300px'></input>&nbsp;" +
-                                "<button onclick='SourceBrowser.addProperty()'>Add</button>"
+                                "Value=&nbsp;<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+                                "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>"
 
 
                             str += "</div>"
@@ -1261,7 +1260,23 @@ var SourceBrowser = (function () {
                     if (!self.newProperties)
                         self.newProperties = {};
                     self.newProperties[property] = value
-                    self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv")
+                    self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
+                    if(property=="http://www.w3.org/2000/01/rdf-schema#"){
+                        visjsGraph.data.nodes.push({
+                            id:self.currentNodeId,
+                            label:value,
+                            shape:Lineage_classes.defaultShape,
+                            size: Lineage_classes.defaultShapeSize,
+                            color:Lineage_classes.getSourceColor(self.currentSource),
+                            data:{  id:self.currentNodeId,
+                                label:value,
+                                source:self.currentSource
+                            }
+
+
+
+                        })
+                    }
                 })
 
             }
@@ -1297,8 +1312,10 @@ var SourceBrowser = (function () {
                     Sparql_generic.deleteTriples(null, null, self.currentNodeId, null, function (err, result) {
                         if (err)
                             return alert(err);
-                        MainController.UI.message("node deleted")
+
                         $("#" + self.divId).dialog("close")
+                      visjsGraph.data.nodes.remove(self.currentNodeId)
+                        MainController.UI.message("node deleted")
                     })
                 })
 

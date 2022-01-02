@@ -113,7 +113,11 @@ var processor = {
                             }
 
                             processor.readCsv(filePath, function (err, result) {
-                                if (err) return callbackSeries(err);
+                                if (err){
+                                    console.log(err)
+                                    return callbackSeries(err);
+
+                                }
 
                                 var lines = result.data[0];
                                 var emptyMappings = 0;
@@ -177,11 +181,19 @@ var processor = {
 
                                         //format object
                                        {
+                                           if( !objectStr || !objectStr.indexOf){
+                                               var x=line
+                                               var y=item
+
+                                           }
+
                                             if (objectStr.indexOf("http") == 0)
                                                 objectStr = "<" + objectStr + ">";
-                                            else if (objectStr.indexOf(":") > -1)
+                                            else if (objectStr.indexOf(" : ") > -1)
                                                 objectStr = objectStr;
-                                            else
+                                            else if (propertiesTypeMap[item.p]=="string"  || item.isString)
+                                                objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                else
                                                 objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                         }
 
@@ -311,6 +323,7 @@ var processor = {
                 );
             },
             function (err) {
+                console.log(err)
             }
         );
     },

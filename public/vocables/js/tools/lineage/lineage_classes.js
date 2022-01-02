@@ -185,7 +185,7 @@ var Lineage_classes = (function () {
                 Lineage_blend.addNodeToAssociationNode(node, "target")
 
             } else if (nodeEvent.ctrlKey) {
-                SourceBrowser.showNodeInfos(node.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
+                SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv", {resetVisited: 1})
             } else if (nodeEvent.altKey && options.callee == "Tree") {
                 SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, node.data.source, node, {reopen: true})
             } else

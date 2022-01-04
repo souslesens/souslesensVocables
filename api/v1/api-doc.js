@@ -69,6 +69,76 @@ const apiDoc = {
         }
       },
       required: []
+    },
+    Source: {
+      properties: {
+        name: {
+          type: 'string',
+        },
+        label: {
+          type: 'string',
+        },
+        _type: {
+          type: 'string',
+        },
+        id: {
+          type: 'string',
+        },
+        type: {
+          type: 'string',
+        },
+        graphUri: {
+          type: 'string',
+        },
+        sparql_server: {
+          type: 'object',
+          properties: {
+            url: {
+              type: 'string'
+            }          }
+        },
+        controller: {
+          type: 'string',
+        },
+        topClassFilter: {
+          type: 'string',
+        },
+        schemaType: {
+          type: 'string',
+        },
+        dataSource: {
+          type: 'string',
+        },
+        schema: {
+          type: 'string',
+        },
+        isDraft: {
+          type: 'boolean',
+        },
+        editable: {
+          type: 'boolean',
+        },
+        color: {
+          type: 'string',
+        },
+        predicates: {
+          type: 'object',
+          properties: {
+            broaderPredicate: {
+              type: 'string'
+            },
+            lang: {
+              type: 'string'
+            }
+          }
+        },
+        group: {
+          type: 'string',
+        },
+        imports: {
+          type: 'array',
+        }
+      }
     }
   },
   paths: {}

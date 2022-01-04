@@ -215,14 +215,6 @@ router.post(
             });
         }
 
-        if (req.body.annotateLive) {
-            var annotatorLive = require("../bin/annotatorLive.");
-            var sources = JSON.parse(req.body.sources);
-            annotatorLive.annotate(req.body.text, sources, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.getConceptsSubjectsTree) {
             DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
                 processResponse(response, err, result);

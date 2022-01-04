@@ -49,15 +49,14 @@ var Annotator = (function () {
                 sources.push(source)
             })
             var payload = {
-                annotateLive: 1,
                 text: text,
-                sources: JSON.stringify(sources)
+                sources: sources
             }
 
 
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: Config.apiUrl + "/annotate",
                 data: payload,
                 dataType: "json",
                 /* beforeSend: function(request) {

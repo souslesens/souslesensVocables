@@ -18,18 +18,18 @@ var DirContentAnnotator = require(path.resolve("bin/annotator/dirContentAnnotato
 var configManager = require(path.resolve("bin/configManager."));
 var DictionariesManager = require(path.resolve("bin/KG/dictionariesManager."));
 
-const config = require(path.resolve('config/mainConfig.json'));
-const users = require(path.resolve('config/users/users.json'));
+const config = require(path.resolve("config/mainConfig.json"));
+const users = require(path.resolve("config/users/users.json"));
 
 var router = express.Router();
 var serverParams = { routesRootUrl: "" };
 
 // ensureLoggedIn function
 // TODO: Remove this when the API is moved to OpenAPI as OpenApi uses securityHandlers
-// see : https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi#argssecurityhandlers 
+// see : https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi#argssecurityhandlers
 if (!config.disableAuth) {
     ensureLoggedIn = function ensureLoggedIn(options) {
-        config.auth == 'keycloak' ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
+        config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
         return function (req, res, next) {
             if (!req.isAuthenticated || !req.isAuthenticated()) {
                 return res.redirect(401, "/login");
@@ -143,7 +143,6 @@ router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
     function (req, response) {
-
         if (req.body.elasticSearch) {
             elasticRestProxy.executePostQuery(req.body.url, JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
                 processResponse(response, err, result);

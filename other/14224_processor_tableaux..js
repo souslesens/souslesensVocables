@@ -1,5 +1,7 @@
 var processor = require("./CsvTripleBuilder.");
+var util=require("../bin/util.")
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+
 
 mappingsMap = {
     failureMechanism: {
@@ -146,20 +148,38 @@ mappingsMap = {
                     return "failureMode_"+value
 
             },
+            System: function (value) {
+                if(value=="")
+                    return "";
+                else
+                    var x= "http://data.total.com/resource/tsf/iso_14224/"+ util.formatStringForTriple(value,true)
+                return x;
+
+            },
+            equipment: function (value) {
+                if(value=="")
+                    return "";
+                else
+                    return "http://data.total.com/resource/tsf/iso_14224/"+ util.formatStringForTriple(value,true)
+
+            },
 
         },
 
         tripleModels: [
 
-            { s: "Failure_mode_code", p: "rdfs:label", o: "Description" },
+          /*  { s: "Failure_mode_code", p: "rdfs:label", o: "Description" },
             { s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code" },
             { s: "Failure_mode_code", p: "rdf:type", o: "owl:Class" },
             { s: "Failure_mode_code", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/69a85b5298" },
-            { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true},
+            { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true},*/
             { s: "Failure_mode_code", p: "_restriction", o: "System", prop: "part14:dispositionOf" },
             { s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf" },
         ],
     },
+
+
+
 
     tsf_top_ontology: {
         type: "owl:Class",

@@ -724,6 +724,8 @@ Lineage_properties = (function () {
             }
 
         }
+
+
         self.searchAllSourcesTerm = function () {
 
             var term = $("#LineageProperties_searchAllSourcesTermInput").val()
@@ -748,13 +750,14 @@ Lineage_properties = (function () {
 
             async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
                 //  setTimeout(function () {
+
                 MainController.UI.message("searching in " + sourceLabel)
                 //  }, 100)
 
 
                 self.getPropertiesjsTreeData(sourceLabel, null, term, {exactMatch: exactMatch}, function (err, result) {
                     if (err)
-                        callbackEach(err);
+                      return  callbackEach(err);
 
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {

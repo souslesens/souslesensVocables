@@ -187,14 +187,14 @@ var Lineage_blend = (function () {
 
                 // delete restriction
                 function (callbackSeries) {
-                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, restrictionNode.data.id, null, null, function (err, result) {
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, restrictionNode.data.bNodeId, null, null, function (err, result) {
                         visjsGraph.data.edges.remove(restrictionNode.id)
                         callbackSeries()
                     })
 
                 },
                 function (callbackSeries) {
-                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, restrictionNode.data.id, function (err, result) {
+                    Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, restrictionNode.data.bNodeId, function (err, result) {
                         visjsGraph.data.edges.remove(restrictionNode.id)
                         callbackSeries()
                     })

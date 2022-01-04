@@ -368,9 +368,13 @@ var SearchUtil = (function () {
 
 
 
-
+var options={}
+        if($("#admin_refreshIndexWithImportCBX").prop("checked"))
+            options.withoutImports=false
+        else
+            options.withoutImports=true
         if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_generic.getSourceTaxonomy(sourceLabel, null, function (err, result) {
+            Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
 
                 if (err) {
                     if (callback)
@@ -380,6 +384,7 @@ var SearchUtil = (function () {
                 var index = 0
                 var classesArray = [];
                 for (var key in result.classesMap) {
+
                     classesArray.push(result.classesMap[key])
                 }
                 var slices = common.array.slice(classesArray, 100)

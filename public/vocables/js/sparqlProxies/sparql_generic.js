@@ -941,7 +941,7 @@ var Sparql_generic = (function () {
                     var limitSize = 2000
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel,false,options.withoutImports)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -949,9 +949,12 @@ var Sparql_generic = (function () {
                         "SELECT distinct * " +
                         fromStr +
                         " WHERE {" +
-                        "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel} " +
-                        "?concept rdf:type " + conceptType + ". " +
-                        "?parent rdf:type " + conceptType + ". "
+                     //   "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel.?parent rdf:type " + conceptType + ". } " +
+                        "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}. " +
+
+                        "?concept rdf:type " + conceptType + ". "
+                    query += "  FILTER (!isBlank(?parent)) "
+
                     if (options.filter)
                         query += " " + options.filter + " "
 

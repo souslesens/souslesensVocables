@@ -160,6 +160,7 @@ Lineage_relations = (function () {
         var restrictions = []
         var filter = ""
         var propertyFilter = $("#LineageRelations_propertiesSelect").val()
+        $("#LineageRelations_propertiesSelect").val("")
         if (propertyFilter && propertyFilter != "")
             filter += " filter (?prop=<" + propertyFilter + ">)"
         self.getFromSourceSelection(function (err, selectedNodes) {

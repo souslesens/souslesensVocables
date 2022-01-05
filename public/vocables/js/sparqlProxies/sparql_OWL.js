@@ -172,6 +172,9 @@ var Sparql_OWL = (function () {
             query += "{<" + conceptId + "> ?prop ?value.  ";
             if (options.getValuesLabels)
                 query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
+            if(true){
+                query += "  filter(not exists {?value rdf:type owl:Restriction})"
+            }
             query += "}"
 
             if (options.inverseProperties) {

@@ -137,7 +137,7 @@ var processor = {
                                             if (item.s_type == "fixed")
                                                 subjectStr = item.s;
                                             else if (mapping.transform && mapping.transform[item.s])
-                                                subjectStr = mapping.transform[item.s](line[item.s]);
+                                                subjectStr = mapping.transform[item.s](line[item.s],"s");
                                             else if (item.s.match(/.+:.+|http.+/))
                                                 subjectStr = item.s;
                                             else if (item.lookup_S) {
@@ -151,10 +151,12 @@ var processor = {
 
                                         //get value for Object
                                         {
+                                            if(item.p=="rdf:type")
+                                                var x=3
                                             if (item.o_type == "fixed")
                                                 objectStr = item.o;
                                             else if (mapping.transform && mapping.transform[item.o])
-                                                objectStr = mapping.transform[item.o](line[item.o]);
+                                                objectStr = mapping.transform[item.o](line[item.o],"o");
                                             else if (item.o.match(/.+:.+|http.+/))
                                                 objectStr = item.o;
                                             else if (item.lookup_O) {
@@ -189,7 +191,7 @@ var processor = {
 
                                             if (objectStr.indexOf("http") == 0)
                                                 objectStr = "<" + objectStr + ">";
-                                            else if (objectStr.indexOf(" : ") > -1)
+                                            else if (objectStr.indexOf(":") > -1)
                                                 objectStr = objectStr;
                                             else if (propertiesTypeMap[item.p]=="string"  || item.isString)
                                                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";

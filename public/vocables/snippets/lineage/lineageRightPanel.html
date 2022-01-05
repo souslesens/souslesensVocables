@@ -138,12 +138,11 @@
 
 <script>
     SourceBrowser.targetDiv = "LineagejsTreeDiv"
-    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
-    setTimeout(function () {
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html",function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
-        // $("#Lineage_RighPanelTabs").tabs()
-    }, 300)
-    //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
+
+    })
+
 
 
 </script>

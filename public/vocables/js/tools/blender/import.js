@@ -17,7 +17,6 @@ var Import = (function () {
     self.showImportNodesDialog = function (type) {
         Blender.nodeEdition.openDialog();
         $("#Blender_PopupEditDiv").load("snippets/blender/import.html")
-//$("#graphDiv").load("snippets/blender/import.html")
         self.currentType = type
 
     }

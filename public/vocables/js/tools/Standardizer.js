@@ -13,15 +13,26 @@ var Standardizer = (function () {
 
     }
     self.onLoaded = function (callback) {
+
         $("#actionDiv").html("")
-        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html")
+        $("#graphDiv").html("")
+        $("#graphDiv").load("snippets/standardizer/standardizer_central.html",function(){
+            $("#standardizerCentral_tabs").tabs({});;
+        })
+
+        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html",function(){
+            $("#Standardizer_leftTab").tabs({});
+        })
         MainController.UI.toogleRightPanel(true)
         $("#rightPanelDiv").html("")
-        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html")
+        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html",function() {
+
+        });
+
 
 
         $("#graphDiv").html("")
-        $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+
         $("#accordion").accordion("option", {active: 2});
 
         self.initSourcesIndexesList(null, function (err, sources) {
@@ -55,13 +66,16 @@ var Standardizer = (function () {
 
         })
         setTimeout(function () {
-            $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
+          /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
             $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
             setTimeout(function () {
                 $("#standardizerCentral_tabs").tabs({});
                 if(callback)
                     callback()
-            }, 500)
+            }, 500)*/
+
+            if(callback)
+                callback()
         }, 500)
 
 

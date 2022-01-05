@@ -51,63 +51,55 @@ var Lineage_classes = (function () {
 
             MainController.UI.openRightPanel()
 
-            $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
-            //   MainController.UI.toogleRightPanel("open");
+            $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html",function () {
+                $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html", function () {
 
-            $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html")
+                    $("#GenericTools_searchSchemaType").val("OWL")
 
-            //  $("#accordion").accordion("option", {active: 1});
-            $("#GenericTools_searchSchemaType").val("OWL")
-
-            setTimeout(function () {
-
-
-                /*     $( $("#Lineage_Tabs").find("li")[2]).hide();
-                     $($("#Lineage_Tabs").find('#LineageRelationsTab')).hide();*/
-
-                $("#lineage_controlPanel0Div").css("display", "block")
-                $("#lineage_controlPanel1Div").css("display", "none")
-                $("#GenericTools_onSearchCurrentSourceInput").css("display", "block")
+                    $("#lineage_controlPanel0Div").css("display", "block")
+                    $("#lineage_controlPanel1Div").css("display", "none")
+                    $("#GenericTools_onSearchCurrentSourceInput").css("display", "block")
 
 
-                var h1 = $("#sourceDivControlPanelDiv").height()
-                var h2 = $("#sourcesPanel").height()
-                //   $("#sourcesTreeDivContainer").height(h2 - h1)
-                var sourceLabels = []
-                SourceBrowser.currentTargetDiv = "LineagejsTreeDiv"
-                MainController.UI.showSources("sourcesTreeDiv", false)
+                    var h1 = $("#sourceDivControlPanelDiv").height()
+                    var h2 = $("#sourcesPanel").height()
+                    //   $("#sourcesTreeDivContainer").height(h2 - h1)
+                    var sourceLabels = []
+                    SourceBrowser.currentTargetDiv = "LineagejsTreeDiv"
+                    MainController.UI.showSources("sourcesTreeDiv", false)
 
-                for (var key in Config.sources) {
-                    if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1)
-                        sourceLabels.push(key)
-                }
-                sourceLabels.sort()
-                //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
-                $("#Lineage_Tabs").tabs({
-                    activate: function (e, ui) {
-                        self.currentOwlType = "Class"
-                        var divId = ui.newPanel.selector;
-                        if (divId == "#LineageTypesTab") {
-                            self.currentOwlType = "Type"
-                            Lineage_types.init()
-                        } else if (divId == "#LineagePropertiesTab") {
-                            self.currentOwlType = "ObjectProperty"
-                            Lineage_properties.init()
-                        }
+                    for (var key in Config.sources) {
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1)
+                            sourceLabels.push(key)
                     }
+                    sourceLabels.sort()
+                    //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
+                    $("#Lineage_Tabs").tabs({
+                        activate: function (e, ui) {
+                            self.currentOwlType = "Class"
+                            var divId = ui.newPanel.selector;
+                            if (divId == "#LineageTypesTab") {
+                                self.currentOwlType = "Type"
+                                Lineage_types.init()
+                            } else if (divId == "#LineagePropertiesTab") {
+                                self.currentOwlType = "ObjectProperty"
+                                Lineage_properties.init()
+                            }
+                        }
 
-                });
+                    });
 
-                for (var sourceLabel in Config.sources) {
-                    var graphUri = Config.sources[sourceLabel].graphUri
-                    if (graphUri && graphUri != "")
-                        self.sourcesGraphUriMap[graphUri] = Config.sources[sourceLabel]
-                }
-                $("#GenericTools_searchSchemaType").val("OWL")
-                if (callback)
-                    callback()
+                    for (var sourceLabel in Config.sources) {
+                        var graphUri = Config.sources[sourceLabel].graphUri
+                        if (graphUri && graphUri != "")
+                            self.sourcesGraphUriMap[graphUri] = Config.sources[sourceLabel]
+                    }
+                    $("#GenericTools_searchSchemaType").val("OWL")
+                    if (callback)
+                        callback()
 
-            }, 500)
+                })
+            })
 
         }
 
@@ -1946,6 +1938,8 @@ var Lineage_classes = (function () {
                 var nodesToDraw = []
                 var newNodeIds = []
                 var upperNodeIds = [];
+                if( !nodeData.label && nodeData.text)
+                    nodeData.label=nodeData.text
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 result.forEach(function (item) {
                     if (!existingNodes[item.concept.value]) {
@@ -2099,29 +2093,7 @@ var Lineage_classes = (function () {
 
                 self.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
 
-                /*  if (options.ctrlKey && options.shiftKey) {
-                      Lineage_classes.graphActions.graphNodeNeighborhood("all")
-                  } else if (options.ctrlKey && options.altKey) {
-                      Lineage_blend.addNodeToAssociationNode(node, "source")
-                  } else if (!options.ctrlKey && options.altKey) {
-                      Lineage_blend.addNodeToAssociationNode(node, "target")
-                  } else if (options.shiftKey && options.altKey) {
-                      Lineage_blend.deleteRestriction(node)
-                  } else if (options.ctrlKey) {
 
-                    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv", {resetVisited: 1})
-
-                  }*/
-
-                /*  return Clipboard.copy({
-                      type: "lineage_node",
-                      source: node.data.source,
-                      id: node.id,
-                      label: node.label,
-                      initialShape: node.shape
-                  }, "_visjsNode", options)
-              }*
-          }*/
                 if (options.dbleClick) {
                     if (node.data.cluster) {
                         Lineage_classes.openCluster(self.currentGraphNode)

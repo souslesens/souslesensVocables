@@ -270,7 +270,7 @@ var SearchUtil = (function () {
                             {
                                 "query_string": {
                                     "query": word,
-                                    "default_field": "label",
+                                    "default_field": "*",
                                     "default_operator": "OR"
                                 }
                             }
@@ -364,64 +364,64 @@ var SearchUtil = (function () {
 
 
     self.generateElasticIndex = function (sourceLabel, callback) {
-        var totalLines = 0
+
+       var withImports=$("#admin_refreshIndexWithImportCBX").prop("checked")
+        var sources = [sourceLabel]
+        if (withImports) {
+            sources = sources.concat(Config.sources[sourceLabel].imports || []);
+        }
 
 
+        var totalLinesAllsources = 0
+        async.eachSeries(sources, function (sourceLabel, callbackEachSource) {
+            var totalLines = 0
+            var options = {withoutImports:true}
 
-var options={}
-        if($("#admin_refreshIndexWithImportCBX").prop("checked"))
-            options.withoutImports=false
-        else
-            options.withoutImports=true
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
+        //    if (Config.sources[sourceLabel].schemaType == "OWL") {
+                Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
 
-                if (err) {
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message(err, true)
-                }
-                var index = 0
-                var classesArray = [];
-                for (var key in result.classesMap) {
+                    if (err) {
+                        return callbackEachSource(err);
+                        MainController.UI.message(err, true)
+                    }
+                    var index = 0
+                    var classesArray = [];
+                    for (var key in result.classesMap) {
 
-                    classesArray.push(result.classesMap[key])
-                }
-                var slices = common.array.slice(classesArray, 100)
-                async.eachSeries(slices, function (data, callbackEach) {
-                    var replaceIndex = false
-                    if ((index++) == 0)
-                        replaceIndex = true;
-                    self.indexData(sourceLabel.toLowerCase(),data, replaceIndex, function (err, result) {
-                        if (err)
-                            return callbackEach(err)
-                        totalLines += result.length
-                        MainController.UI.message("indexed " + totalLines + " in index " +sourceLabel.toLowerCase())
-                        callbackEach();
-                    })
-                }, function (err) {
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message("DONE " + sourceLabel, true)
+                        classesArray.push(result.classesMap[key])
+                    }
+                    var slices = common.array.slice(classesArray, 100)
+                    async.eachSeries(slices, function (data, callbackEach) {
+                        var replaceIndex = false
+                        if ((index++) == 0)
+                            replaceIndex = true;
+                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                            if (err)
+                                return callbackEach(err)
+                            if(!result)
+                                return callbackEach()
+                            totalLines += result.length
+                            totalLinesAllsources+=totalLines
+                            MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
+                            callbackEach();
+                        })
+                    }
+                        , function (err) {
+                            MainController.UI.message("DONE " + sourceLabel +" total indexed : "+totalLinesAllsources, true)
+                            return callbackEachSource(err);
+
+                        })
+
                 })
 
-            })
+           // }
+        }, function (err) {
 
-            return;
-            Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
-                if (err) {
+               MainController.UI.message("ALL DONE  total indexed : "+totalLinesAllsources)
+            if( callback)
+            return callback(err);
 
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message(err, true)
-                }
-
-
-                if (callback)
-                    return callback();
-                MainController.UI.message("DONE " + sourceLabel, true)
-            })
-        }
+        })
     }
 
     self.addObjectsToIndex=function(sourceLabel,ids,callback) {

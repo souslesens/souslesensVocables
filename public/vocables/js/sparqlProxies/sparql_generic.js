@@ -816,7 +816,7 @@ var Sparql_generic = (function () {
                             resultSize = result.length
                             totalCount += result.length
                             MainController.UI.message(sourceLabel + "retreived triples :" + totalCount)
-                            offset += limitSize
+                            offset += resultSize
                             callbackWhilst()
                         })
                     }, function (err) {
@@ -931,30 +931,35 @@ var Sparql_generic = (function () {
 
             var allClassesMap = {}
             var allData = []
+
+
             async.series([
+
 
                 function (callbackSeries) {//get raw data subclasses
                     if (!options)
                         options = {}
                     var totalCount = 0
                     var resultSize = 1
-                    var limitSize = 2000
+                    var limitSize = 500
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel,false,options.withoutImports)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel,false,true)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                         "SELECT distinct * " +
                         fromStr +
                         " WHERE {" +
                      //   "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel.?parent rdf:type " + conceptType + ". } " +
-                        "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}. " +
+                        "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
+                        "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
 
                         "?concept rdf:type " + conceptType + ". "
-                    query += "  FILTER (!isBlank(?parent)) "
-
+                 //   query += "  FILTER (!isBlank(?parent)) "
+                    query += "?parent rdf:type owl:Class."
                     if (options.filter)
                         query += " " + options.filter + " "
 
@@ -977,7 +982,7 @@ var Sparql_generic = (function () {
                             resultSize = result.length
                             totalCount += result.length
                             MainController.UI.message(sourceLabel + "retreived triples :" + totalCount)
-                            offset += limitSize
+                            offset += resultSize
                             callbackWhilst()
                         })
                     }, function (err) {
@@ -990,10 +995,13 @@ var Sparql_generic = (function () {
                 function (callbackSeries) {
 
                     allData.forEach(function (item) {
+                        if(item.concept.value="http://data.total.com/resource/tsf/iso_14224/VA_GA")
+                            var x=3
                         if (!allClassesMap[item.concept.value]) {
                             allClassesMap[item.concept.value] = {
                                 id: item.concept.value,
                                 label: item.conceptLabel ? item.conceptLabel.value : null,
+                                skoslabels:item.skosLabel ? item.skosLabel.value:null,
                                 parent: item.parent.value,
                                 parents: [],
                                 type: conceptType,

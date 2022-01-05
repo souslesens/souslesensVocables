@@ -14,14 +14,12 @@ var SourceBrowser = (function () {
 
 
         self.onLoaded = function () {
-            $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html");
-
-            setTimeout(function () {
-                // console.log(Config.currentProfile.allowedSourceSchemas[0])
+            $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html",function(){
                 $("#GenericTools_searchInAllSources").prop("checked", true)
                 $("#GenericTools_searchSchemaType").val(Config.currentProfile.allowedSourceSchemas[0])
 
-            }, 200)
+            });
+
 
         }
         self.onSourceSelect = function (sourceLabel) {

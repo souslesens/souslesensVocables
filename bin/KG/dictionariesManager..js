@@ -115,6 +115,10 @@ var DictionariesManager = {
                                             },
                                         },
                                     },
+                                    skoslabels: {
+                                        type: "text",
+                                    },
+
                                     id: {
                                         type: "text",
                                         fielddata: true,

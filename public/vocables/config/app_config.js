@@ -110,6 +110,7 @@ var Config = (function () {
             {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment",type:"dataTypeProperty"},
             {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf",type:"ObjectProperty"},
             {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type",type:"ObjectProperty"},
+            {id: "http://www.w3.org/2004/02/skos/core#", label: "skos:prefLabel",type:"dataTypeProperty"},
 
         ]
     }
@@ -179,6 +180,14 @@ var Config = (function () {
         label: "Config",
         noSource: 1,
         controller: Config,
+        toolDescriptionImg: null
+    }
+
+
+    self.tools["TE_14224_browser"] = {
+        label: "TE_14224_browser",
+        multiSources: 0,
+        controller: TE_14224_browser,
         toolDescriptionImg: null
     }
 

@@ -25,14 +25,11 @@ var Blender = (function () {
             MainController.UI.message("");
 
             MainController.UI.openRightPanel()
-            //    $("#accordion").accordion("option", {active: 2});
-            // $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html")
-            //  MainController.UI.toogleRightPanel("open");
-            $("#rightPanelDiv").load("snippets/blender/blender.html")
-
             if (!MainController.currentTool)
                 $("#graphDiv").html("")
-            setTimeout(function () {
+            $("#rightPanelDiv").load("snippets/blender/blender.html",function(){
+
+
 
 
                     var displayCreateDeleteResourceDiv = "none";
@@ -93,12 +90,10 @@ var Blender = (function () {
                     })
 
 
-                    //   $("#Blender_searchDiv").load("snippets/searchAll.html")
-                    //   SourceBrowser.currentTargetDiv = "Blender_conceptTreeDiv"
 
 
-                }, 200
-            )
+
+                } )
 
         }
 
@@ -1470,10 +1465,8 @@ var Blender = (function () {
             }
 
             , showCreateSourceDialog: function () {
-                $("#mainDialogDiv").load("snippets/blender/newSourceDialog.html");
+                $("#mainDialogDiv").load("snippets/blender/newSourceDialog.html",function () {
                 $("#mainDialogDiv").dialog("open");
-
-                setTimeout(function () {
                     var templatSources = [];
                     self.availableSources.forEach(function (source) {
                         if (Config.sources[source].isBlenderTemplate)
@@ -1481,7 +1474,7 @@ var Blender = (function () {
                     })
                     common.fillSelectOptions("blenderNewSource_referenceSourceSelect", templatSources.sort(), true)
 
-                }, 200)
+                })
 
 
             }

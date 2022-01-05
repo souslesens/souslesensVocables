@@ -24,11 +24,14 @@ var CustomPluginController = (function () {
                     if(data.tools){
                     async.eachSeries(  data.tools,function(tool,callbackEach) {
 
-                            $.getScript("customPlugins/TotalEnergies/TE_14224_browser.js", function (data, textStatus, jqxhr) {
-                               var script = document.createElement('script');
-                                script=eval(data);
-                                tool.controller=eval(tool.controller)
+                            $.getScript("customPlugins/"+self.pluginDir+"/"+tool.controller+".js", function (data, textStatus, jqxhr) {
                                 Config.tools[tool.label] = tool
+                            if( true) {
+                                var script = document.createElement('script');
+                                script = eval(data);
+                            }
+                                tool.controller=eval(tool.controller)
+
 
                            callbackEach()
 

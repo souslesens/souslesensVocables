@@ -16,7 +16,9 @@ var TE_14224_browser = (function () {
             $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/snippets/leftPanel.html")
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
-            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html")
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html",function(){
+                self.loadOntologytree()
+            })
 
 
             $("#graphDiv").html("")
@@ -30,9 +32,7 @@ var TE_14224_browser = (function () {
             Lineage_classes.mainSource = source
             Lineage_common.currentSource = source
 
-            setTimeout(function () {
-                self.loadOntologytree()
-            }, 200)
+
 
         }
 
@@ -531,8 +531,8 @@ var assetClassColumn=""
                                             //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
                                             //   shape: "circularImage",
                                             shape: "square",
-                                            size: 5,
-                                            borderWidth: 4,
+                                            size: 20,
+                                            borderWidth: 1,
                                             color: Lineage_classes.getSourceColor(self.currenTable),
                                             data: {
                                                 source: "TE_14224_browser",
@@ -640,8 +640,8 @@ var assetClassColumn=""
                             //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
                             //   shape: "circularImage",
                             shape: "square",
-                            size: 5,
-                            borderWidth: 4,
+                            size: 10,
+                            borderWidth: 1,
                             color: Lineage_classes.getSourceColor(self.currenTable),
                             data: {source: "TE_14224_browser", id: currentId, label: item, type: "assetNode"},
                             level: i,
@@ -773,6 +773,7 @@ var assetClassColumn=""
             items.nodeInfos = {
                 label: "Node Infos",
                 action: function (e) {
+                    var x=self.currentGraphNode
 
                         SourceBrowser.showNodeInfos( self.mainSource,self.currentOntologyTreeNode.id,"mainDialogDiv")
 
@@ -798,6 +799,7 @@ var assetClassColumn=""
 
                 if (!node)
                     return;
+                self.currentGraphNode=node
                 if (node.data.type == "assetNode") {
 
                 } else {
@@ -811,8 +813,8 @@ var assetClassColumn=""
                 if (node.data.type == "assetNode") {
                     if (!node)
                         return;
-
-                    var html = "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>"
+                    TE_14224_browser.showGraphPopupMenu()
+                    var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_14224_browser.showGraphPopupMenu();\"> Node infos</span>"
 
                     $("#graphPopupDiv").html(html);
                     self.currentGraphNode = node;
@@ -904,7 +906,7 @@ var assetClassColumn=""
                        ,
                        contextMenu: TE_14224_browser.getOntologyJstreeContextMenu()
                    }
-                       common.jstree.loadJsTree("TE_114224_browser_ontologyPanelDiv", jstreeData,options)
+                       common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData,options)
 
            })
         }

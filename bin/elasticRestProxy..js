@@ -78,9 +78,13 @@ var elasticRestProxy = {
 
         //   console.log(ndjson);
         request(options, function (error, response, body) {
-            if (error) return callback(error);
-            if (body.error && body.error.reason) return callback(body.error.reason);
+            if (error) {
+                return callback(error, null);
+            }
             var json = JSON.parse(response.body);
+            if (json.error && json.error.reason) {
+              return callback(json.error.reason, null);
+            }
             var responses = json.responses;
             var totalDocsAnnotated = 0;
             /*  responses.forEach(function (response, responseIndex) {

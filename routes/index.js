@@ -149,12 +149,6 @@ router.post(
             });
         }
 
-        if (req.body.executeMsearch) {
-            elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.getProfiles) {
             configManager.getProfiles({}, function (err, result) {
                 processResponse(response, err, result);

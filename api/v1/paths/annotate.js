@@ -8,7 +8,10 @@ module.exports = function() {
 
   function POST(req, res, next) {
     annotatorLive.annotate(req.body.text, req.body.sources, function (err, result) {
-        res.status(200).json(result);
+      if (err) {
+        return res.status(400).json({error: err})
+      }
+      return res.status(200).json(result);
     });
   }
 

@@ -202,12 +202,6 @@ router.post(
             }
         }
 
-        if (req.body.analyzeSentence) {
-            elasticRestProxy.analyzeSentence(req.body.analyzeSentence, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.getConceptsSubjectsTree) {
             DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
                 processResponse(response, err, result);

@@ -78,7 +78,7 @@ var ElasticSearchProxy = (function () {
         }
             $.ajax({
                 type: "POST",
-                url:Config.serverUrl,
+                url:Config.apiUrl + "/analyzesentence",
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {

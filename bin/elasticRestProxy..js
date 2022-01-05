@@ -147,6 +147,7 @@ var elasticRestProxy = {
     },
 
     analyzeSentence: function (sentence, callback) {
+        var elasticUrl = ConfigManager.config.ElasticSearch.url;
         var json = {
             tokenizer: "classic",
             text: sentence,

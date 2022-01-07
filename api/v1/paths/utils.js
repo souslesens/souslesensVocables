@@ -26,4 +26,33 @@ async function readRessource(pathToRessource, res) {
     catch (e) { throw `ERROR: ${e}` }
 
 }
-module.exports = { writeRessource, readRessource }
+function success(res, updatedRessources, msg) {
+    res.status(200).json({
+        message: msg,
+        ressources: updatedRessources
+    });
+}
+function ressourceCreated(res, updatedRessources) {
+    success(res, updatedRessources, 'ressource successfully created')
+}
+function ressourceUpdated(res, updatedRessources) {
+    success(res, updatedRessources, 'ressource successfully updated')
+}
+function ressourceDeleted(res, updatedRessources) {
+    success(res, updatedRessources, 'ressource successfully deleted')
+}
+function ressourceFetched(res, updatedRessources) {
+    success(res, updatedRessources, 'ressources successfully fetched')
+}
+
+function failure(res, code, errMsg) {
+    switch (code) {
+        case 400:
+            res.status(code).json({message: `Something is wrong with this request: ${errMsg}`})
+            break;
+        default:
+            res.status(500).json({message: `Something went wrong internally: ${errMsg}`})
+    }
+}
+
+module.exports = { writeRessource, failure,  ressourceFetched, readRessource, ressourceCreated, ressourceUpdated, ressourceDeleted }

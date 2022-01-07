@@ -51,7 +51,7 @@ var Lineage_classes = (function () {
 
             MainController.UI.openRightPanel()
 
-            $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html",function () {
+            $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html", function () {
                 $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html", function () {
 
                     $("#GenericTools_searchSchemaType").val("OWL")
@@ -1259,11 +1259,10 @@ var Lineage_classes = (function () {
                             var shapeSize = Lineage_classes.defaultShapeSize
 
 
-
                             expandedLevel.push(item.id)
 
                             for (var i = 1; i < 4; i++) {
-                                if(item["child" + i]) {
+                                if (item["child" + i]) {
                                     if (!existingIds[item["child" + i]]) {
                                         existingIds[item["child" + i]] = 1;
                                         visjsData2.nodes.push({
@@ -1283,12 +1282,12 @@ var Lineage_classes = (function () {
                                         })
                                     }
                                     var parent
-                                    if(i==1)
-                                        parent=item.concept;
+                                    if (i == 1)
+                                        parent = item.concept;
                                     else
-                                        parent= item["child" + (i-1)]
+                                        parent = item["child" + (i - 1)]
                                     var edgeId = item["child" + i] + "_" + parent
-                                    var inverseEdge =parent + "_" + item["child" + i]
+                                    var inverseEdge = parent + "_" + item["child" + i]
                                     if (!existingIds[edgeId] && !existingIds[inverseEdge]) {
                                         existingIds[edgeId] = 1
                                         visjsData2.edges.push({
@@ -1938,8 +1937,8 @@ var Lineage_classes = (function () {
                 var nodesToDraw = []
                 var newNodeIds = []
                 var upperNodeIds = [];
-                if( !nodeData.label && nodeData.text)
-                    nodeData.label=nodeData.text
+                if (!nodeData.label && nodeData.text)
+                    nodeData.label = nodeData.text
                 var existingNodes = visjsGraph.getExistingIdsMap()
                 result.forEach(function (item) {
                     if (!existingNodes[item.concept.value]) {
@@ -2294,26 +2293,109 @@ var Lineage_classes = (function () {
 
         }
 
-        self.colorGraphNodesByGraphUri = function () {
-            var existingNodes = visjsGraph.getExistingIdsMap();
-            var sourcesGraphUriMap = {}
-            for (var sourceLabel in Config.sources) {
-                sourcesGraphUriMap[Config.sources[sourceLabel].graphUri] = Config.sources[sourceLabel]
-            }
 
-            var newNodes = []
-            for (var nodeId in existingNodes) {
-                for (var graphUri in sourcesGraphUriMap) {
+        self.graphDecoration = {
+            showGraphDecorationDialog: function () {
+                $("#mainDialogDiv").load("snippets/lineage/graphDecoration.html", function () {
+                    $("#mainDialogDiv").dialog("open")
+                })
 
-                    if (nodeId.indexOf(graphUri) == 0) {
-                        var color = self.getSourceColor(sourcesGraphUriMap[graphUri].name)
-                        newNodes.push({id: nodeId, color: color})
+            },
+            listGraphNodeTypes: function (ids, callback) {
+
+                var sourceLabel = Lineage_classes.mainSource
+
+                if (!ids || ids.length == 0)
+                    return;
+                var strFrom = Sparql_common.getFromStr(sourceLabel, null, true)
+                var query =
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                    "SELECT distinct ?x ?type  " + strFrom + "  WHERE {\n" +
+                    "  ?x rdf:type ?type.\n" +
+                    "  filter (regex(str(?type),\"part14\") && ?type !=  <http://standards.iso.org/iso/15926/part14/Thing>)\n"
+                if (ids) {
+                    query += Sparql_common.setFilter("x", ids)
+                }
+
+                query += "}limit 100"
+
+                var sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                var url = sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                    if (err) {
+                        return callback(err)
                     }
 
-                }
+                    return callback(null, result.results.bindings)
+
+
+                })
+
+            }
+            , colorGraphNodesByType: function () {
+
+                var existingNodes = visjsGraph.getExistingIdsMap(true)
+                var ids = Object.keys(existingNodes);
+                self.graphDecoration.listGraphNodeTypes(ids, function (err, result) {
+                    if (err)
+                        return alert(err)
+                    var nodesTypesMap = {}
+                    var colorsMap = {}
+                    result.forEach(function (item) {
+
+if(item.x.value==	"http://data.total.com/resource/tsf/maintenance/romain_14224/VE")
+    var x=3
+                        if (!colorsMap[item.type.value])
+                            colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length]
+                        nodesTypesMap[item.x.value] = {type: item.type.value, color: colorsMap[item.type.value]}
+
+                    })
+                    var newNodes = []
+                    var neutralColor = "#ccc"
+                    var legendNodes=[]
+                    for (var nodeId in existingNodes) {
+                        if(nodeId.indexOf("legend_")==0)
+                            legendNodes.push(nodeId)
+                        else {
+                            var color = neutralColor;
+                            if (nodesTypesMap[nodeId])
+                                color = nodesTypesMap[nodeId].color
+
+                            newNodes.push({id: nodeId, color: color})
+
+                        }
+                    }
+
+                    visjsGraph.data.nodes.remove(legendNodes)
+                    visjsGraph.data.nodes.update(newNodes)
+
+
+                    var xOffset=-(visjsGraph.canvasDimension.w/2)+20
+                    var yOffset=-(visjsGraph.canvasDimension.h/2)+20
+                    var yStep=50
+                    var legendNodes=[]
+                    for( var type in colorsMap){
+                        legendNodes.push({
+                            id:"legend_"+type,
+                            label: Sparql_common.getLabelFromURI(type),
+                            shape:"dot",
+                            color:colorsMap[type],
+                            fixed:{x:true,y:true},
+                            x:xOffset,
+                            y:yOffset,
+                        })
+                        yOffset+=yStep
+
+                    }
+
+                    visjsGraph.data.nodes.add(legendNodes)
+                })
+
+
             }
 
-            visjsGraph.data.nodes.update(newNodes)
+
 
         }
 

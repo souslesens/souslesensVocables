@@ -113,7 +113,7 @@ var processor = {
                             }
 
                             processor.readCsv(filePath, function (err, result) {
-                                if (err){
+                                if (err) {
                                     console.log(err)
                                     return callbackSeries(err);
 
@@ -137,38 +137,47 @@ var processor = {
                                             if (item.s_type == "fixed")
                                                 subjectStr = item.s;
                                             else if (mapping.transform && mapping.transform[item.s])
-                                                subjectStr = mapping.transform[item.s](line[item.s],"s");
+                                                subjectStr = mapping.transform[item.s](line[item.s], "s", item.p);
                                             else if (item.s.match(/.+:.+|http.+/))
                                                 subjectStr = item.s;
                                             else if (item.lookup_S) {
                                                 subjectStr = getLookupValue(item.lookup_S, line[item.s]);
                                                 if (!subjectStr) {
-                                                    // console.log(line[item.s])
+                                                    console.log(line[item.s])
                                                     return;
                                                 }
                                             } else subjectStr = line[item.s];
+
+                                            if (!subjectStr) {
+                                                console.log(line[item.s])
+                                                return;
+                                            }
                                         }
 
                                         //get value for Object
                                         {
-                                            if(item.p=="rdf:type")
-                                                var x=3
+                                            if (item.p == "rdf:type")
+                                                var x = 3
                                             if (item.o_type == "fixed")
                                                 objectStr = item.o;
                                             else if (mapping.transform && mapping.transform[item.o])
-                                                objectStr = mapping.transform[item.o](line[item.o],"o");
+                                                objectStr = mapping.transform[item.o](line[item.o], "o", item.p);
                                             else if (item.o.match(/.+:.+|http.+/))
                                                 objectStr = item.o;
                                             else if (item.lookup_O) {
                                                 objectStr = getLookupValue(item.lookup_O, objectStr);
                                                 if (!objectStr) {
-                                                    // console.log(line[item.o])
+                                                    console.log(line[item.o])
                                                     return;
                                                 }
                                             } else objectStr = line[item.o];
+
+                                            if (!objectStr) {
+                                                console.log(line[item.o])
+                                                return;
+                                            }
+
                                         }
-
-
 
                                         //format subject
                                         {
@@ -182,27 +191,26 @@ var processor = {
 
 
                                         //format object
-                                       {
-                                           if( !objectStr || !objectStr.indexOf){
-                                               var x=line
-                                               var y=item
+                                        {
+                                            if (!objectStr || !objectStr.indexOf) {
+                                                var x = line
+                                                var y = item
 
-                                           }
+                                            }
 
                                             if (objectStr.indexOf("http") == 0)
                                                 objectStr = "<" + objectStr + ">";
-                                            else if (objectStr.indexOf(":") > -1)
+                                            else if (objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                                 objectStr = objectStr;
-                                            else if (propertiesTypeMap[item.p]=="string"  || item.isString)
+
+                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString)
                                                 objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                                else
+                                            else
                                                 objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                         }
 
 
-
-
-                                            if (item.p == "_restriction") {
+                                        if (item.p == "_restriction") {
                                             if (!item.prop) {
                                                 return callbackSeries("no prop defined for restriction");
                                             }
@@ -245,11 +253,11 @@ var processor = {
                                         //not restriction
                                         else {
 
-                                                // get value for property
-                                                if (item.p.indexOf("$") == 0)
-                                                    item.p = line[item.p.substring(1)]
+                                            // get value for property
+                                            if (item.p.indexOf("$") == 0)
+                                                item.p = line[item.p.substring(1)]
 
-                                                if (subjectStr && objectStr) {
+                                            if (subjectStr && objectStr) {
                                                 // return console.log("missing type " + item.p)
                                                 if (!existingNodes[subjectStr + "_" + objectStr]) {
                                                     existingNodes[subjectStr + "_" + objectStr] = 1
@@ -261,34 +269,10 @@ var processor = {
                                                 }
                                             }
                                         }
-                                        /*  if (item.p == "rdfs:subClassOf")
-                                              hasDirectSuperClass = true;*/
+
                                     });
 
 
-                                    /*    var lastTriples=triples[triples.length-1]
-                                        var tripleHashcode=lastTriples.s+"_"+lastTriples.p+"_"+lastTriples.o
-                                        if (!lastTriples.s || !lastTriples.p || !lastTriples.o) {
-                                           return  console.log(subjectStr + "  " + objectStr);
-                                        }
-                                        if (lastTriples && objectStr && !existingNodes[subjectStr + "_" + objectStr]) {
-                                            existingNodes[subjectStr + "_" + objectStr]=1
-                                            if (mapping.type) {
-                                                triples.push({
-                                                    s: subjectStr,
-                                                    p: "rdf:type",
-                                                    o: mapping.type,
-                                                });
-                                            }
-
-                                            if (mapping.topClass && !hasDirectSuperClass && mapping.type == "owl:Class") {
-                                                triples.push({
-                                                    s: subjectStr,
-                                                    p: "rdfs:subClassOf",
-                                                    o: mapping.topClass,
-                                                });
-                                            }
-                                        }*/
                                     var x = triples;
                                 });
 

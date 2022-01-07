@@ -115,6 +115,10 @@ var SearchUtil = (function () {
                                     return callbackSeries(err)
                                 allWords = allWords.concat(words)
 
+
+
+
+
                                 result.forEach(function (item, index) {
                                     if (item.error) {
                                         classesArray[index].error = item.error;
@@ -252,10 +256,16 @@ var SearchUtil = (function () {
             if (!mode || mode == "exactMatch") {
                 queryObj = {
                     "bool": {
-                        "must": [
+                        "should": [
                             {
                                 "term": {
                                     [field]: word.toLowerCase(),
+
+                                }
+                            },
+                            {
+                                "match": {
+                                    "skoslabels": word.toLowerCase(),
 
                                 }
                             }
@@ -293,7 +303,9 @@ var SearchUtil = (function () {
                     "excludes": [
                         "attachment.content"
                     ]
-                },
+               ,
+
+            }
             }
             var str = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
             return str;

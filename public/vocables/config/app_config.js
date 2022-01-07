@@ -110,7 +110,7 @@ var Config = (function () {
             {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment",type:"dataTypeProperty"},
             {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf",type:"ObjectProperty"},
             {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type",type:"ObjectProperty"},
-            {id: "http://www.w3.org/2004/02/skos/core#", label: "skos:prefLabel",type:"dataTypeProperty"},
+            {id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel",type:"dataTypeProperty"},
 
         ]
     }

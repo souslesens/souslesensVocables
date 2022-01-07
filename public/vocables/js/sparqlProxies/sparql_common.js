@@ -146,16 +146,30 @@ var Sparql_common = (function () {
 
     self.getUriFilter = function (varName, uri) {
         var filterStr = ""
+        var isLiteral=true
+
         if (Array.isArray(uri)) {
             var str = ""
             uri.forEach(function (item, index) {
                 if (index > 0)
                     str += ","
+                var isLiteral=true
+                if(item.indexOf("http")==0 || (item.indexOf(":")>0 && uri.indexOf(" ")<0))
+                    isLiteral=false
+                if(isLiteral)
+                    str += "'" + item + "'"
+                else
                 str += "<" + item + ">"
             })
             filterStr = "filter (?" + varName + " in (" + str + "))"
 
         } else {
+            var isLiteral=true
+            if(uri.indexOf("http")==0 || (uri.indexOf(":")>0 && uri.indexOf(" ")<0))
+                isLiteral=false
+            if(isLiteral)
+                filterStr += "filter( ?" + varName + "='" + uri + "')."
+            else
             filterStr += "filter( ?" + varName + "=<" + uri + ">)."
         }
         return filterStr;

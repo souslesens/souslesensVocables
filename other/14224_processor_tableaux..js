@@ -182,7 +182,7 @@ mappingsMap = {
                 }
 
             },
-            System: function (value) {
+            SystemXX: function (value) {
                 if (value == "")
                     return "";
                 else
@@ -190,7 +190,7 @@ mappingsMap = {
                 return x;
 
             },
-            equipment: function (value) {
+            equipmentXX: function (value) {
                 if (value == "")
                     return "";
                 else
@@ -203,14 +203,14 @@ mappingsMap = {
         tripleModels: [
 
 
-            {s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code"},
+         //   {s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code"},
             /*   { s: "Failure_mode_code", p: "rdfs:label", o: "Description" },
 
                      { s: "Failure_mode_code", p: "rdf:type", o: "owl:Class" },
                       { s: "Failure_mode_code", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/69a85b5298" },
-                      { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true},
+                      { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true},*/
                       { s: "Failure_mode_code", p: "_restriction", o: "System", prop: "part14:dispositionOf" },
-                      { s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf" },*/
+                      { s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf" },
         ],
     },
 
@@ -252,7 +252,7 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_3"]
 
 //var mappingNames = ["QUALITIES"]
-var mappingNames = ["failureCauses",];
+var mappingNames = ["failureMode",];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

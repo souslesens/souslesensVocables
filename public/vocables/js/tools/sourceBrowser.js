@@ -14,7 +14,7 @@ var SourceBrowser = (function () {
 
 
         self.onLoaded = function () {
-            $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html",function(){
+            $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
                 $("#GenericTools_searchInAllSources").prop("checked", true)
                 $("#GenericTools_searchSchemaType").val(Config.currentProfile.allowedSourceSchemas[0])
 
@@ -44,15 +44,15 @@ var SourceBrowser = (function () {
 
         }
 
-        self.selectTreeNodeFn = function (event,obj) {
+        self.selectTreeNodeFn = function (event, obj) {
 
 
             var source;
-            if (obj.node.data &&obj.node.data.source)
+            if (obj.node.data && obj.node.data.source)
                 source = obj.node.data && obj.node.data.source // coming from search all sources
             else
                 source = MainController.currentSource// coming from  specific tool current surce
-            self.currentTreeNode =obj.node;
+            self.currentTreeNode = obj.node;
             if (self.propertiesMap.event.ctrlKey)
                 self.copyNode(self.propertiesMap.event);
 
@@ -356,9 +356,9 @@ var SourceBrowser = (function () {
                     return $("#" + self.currentTargetDiv).html("No data found")
                 }
                 common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, {
-                    openAll: true, selectTreeNodeFn: function (event,obj) {
+                    openAll: true, selectTreeNodeFn: function (event, obj) {
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event,obj);
+                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
                         self.editThesaurusConceptInfos(MainController.currentSource)
                     }, contextMenu: self.getJstreeConceptsContextMenu()
                 })
@@ -436,6 +436,17 @@ var SourceBrowser = (function () {
                     var matches = item.matches
                     for (var source in matches) {
                         var items = matches[source]
+
+
+                        items.sort(function (a, b) {
+                          if(a.label>b.label)
+                              return 1
+                            if(b.label>a.label)
+                                return -1
+                            return 0;
+                        })
+
+
                         items.forEach(function (match) {
                             /*   if(match.label.toLowerCase().indexOf(term)<0 )
                                    return*/
@@ -505,7 +516,7 @@ var SourceBrowser = (function () {
 
                 var jstreeOptions = {
 
-                    openAll: true, selectTreeNodeFn: function (event,obj) {
+                    openAll: true, selectTreeNodeFn: function (event, obj) {
                         SourceBrowser.currentTreeNode = obj.node;
 
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
@@ -604,11 +615,11 @@ var SourceBrowser = (function () {
                 var jstreeOptions = {
 
                     openAll: true,
-                    selectTreeNodeFn: function (event,obj) {
+                    selectTreeNodeFn: function (event, obj) {
                         SourceBrowser.currentTreeNode = obj.node;
 
                         if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event,obj);
+                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
 
 
                         self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
@@ -1019,7 +1030,7 @@ var SourceBrowser = (function () {
                             if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.currentSource].editable > -1) {
                                 var propUri = self.propertiesMap.properties[key].propUri
                                 optionalStr = "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
-                                    " onclick=SourceBrowser.deletePropertyValue('" + propUri + "','" + value + "')>X</button>"
+                                    " onclick=\"SourceBrowser.deletePropertyValue('" + propUri + "','" + value + "')\">X</button>"
                             }
 
                             if (value.indexOf("http") == 0) {
@@ -1259,18 +1270,18 @@ var SourceBrowser = (function () {
                         self.newProperties = {};
                     self.newProperties[property] = value
                     self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
-                    if(property=="http://www.w3.org/2000/01/rdf-schema#"){
+                    if (property == "http://www.w3.org/2000/01/rdf-schema#") {
                         visjsGraph.data.nodes.push({
-                            id:self.currentNodeId,
-                            label:value,
-                            shape:Lineage_classes.defaultShape,
+                            id: self.currentNodeId,
+                            label: value,
+                            shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
-                            color:Lineage_classes.getSourceColor(self.currentSource),
-                            data:{  id:self.currentNodeId,
-                                label:value,
-                                source:self.currentSource
+                            color: Lineage_classes.getSourceColor(self.currentSource),
+                            data: {
+                                id: self.currentNodeId,
+                                label: value,
+                                source: self.currentSource
                             }
-
 
 
                         })
@@ -1312,7 +1323,7 @@ var SourceBrowser = (function () {
                             return alert(err);
 
                         $("#" + self.divId).dialog("close")
-                      visjsGraph.data.nodes.remove(self.currentNodeId)
+                        visjsGraph.data.nodes.remove(self.currentNodeId)
                         MainController.UI.message("node deleted")
                     })
                 })

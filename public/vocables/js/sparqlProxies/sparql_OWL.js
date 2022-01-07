@@ -173,7 +173,7 @@ var Sparql_OWL = (function () {
             if (options.getValuesLabels)
                 query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
             if(true){
-                query += "  filter(not exists {?value rdf:type owl:Restriction})"
+                query += "    filter( !isBlank(?value))"
             }
             query += "}"
 
@@ -1016,14 +1016,14 @@ var Sparql_OWL = (function () {
                     Sparql_generic.insertTriples(source, slice, null, function (err, result) {
                         if (err)
                             return callbackEach(err);
-                        MainController.UI.message((++totalItems) + " done ")
+                        MainController.UI.message((totalItems+=slice.length) + " done ")
                         callbackEach()
-                    }, function (err) {
-                        if (err)
-                            return callback(err);
-                        callback(err, totalItems)
                     })
 
+                }, function (err) {
+                    if (err)
+                        return callback(err);
+                    callback(err, totalItems)
                 })
 
 
@@ -1031,6 +1031,7 @@ var Sparql_OWL = (function () {
 
 
         }
+
 
 
         /* self.getLabels = function (sourceLabel,ids, callback) {

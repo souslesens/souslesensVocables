@@ -456,6 +456,35 @@ var Sparql_generic = (function () {
 
 
         self.update = function (sourceLabel, triples, callback) {
+
+
+            /*
+
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+with <http://data.total.com/resource/tsf/maintenance/romain_14224/>
+DELETE {
+   ?id rdfs:label ?oldLabel .
+ }
+INSERT {
+    ?id rdfs:label ?newLabel .
+}
+WHERE {
+   ?id rdfs:label ?oldLabel .
+      filter (regex(?oldLabel,"Class.*"))
+      bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
+   }
+
+
+
+
+             */
+
+
+         return
+
+
+
+
             var graphUri = Config.sources[sourceLabel].graphUri
             var deleteTriplesStr = "";
             var insertTriplesStr = "";
@@ -944,7 +973,7 @@ var Sparql_generic = (function () {
                     var limitSize = 500
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel,false,true)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel,false,false)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -954,12 +983,14 @@ var Sparql_generic = (function () {
                         fromStr +
                         " WHERE {" +
                      //   "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel.?parent rdf:type " + conceptType + ". } " +
-                        "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
+                     //   "  ?concept " + parentType + "+ ?anyParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
+                        "  ?concept " + parentType + " ?firstParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
                         "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
 
                         "?concept rdf:type " + conceptType + ". "
                  //   query += "  FILTER (!isBlank(?parent)) "
-                    query += "?parent rdf:type owl:Class."
+                    query += "?firstParent rdf:type owl:Class."
+                       // "?concept rdfs:subClassOf ?firstParent.?firstParent rdf:type owl:Class."
                     if (options.filter)
                         query += " " + options.filter + " "
 
@@ -970,10 +1001,10 @@ var Sparql_generic = (function () {
 
                     }, function (callbackWhilst) {
                         var query2 = "" + query;
-                        query2 += " limit " + limitSize + " offset " + offset
+                        query2 += " limit " + (limitSize+1) + " offset " + offset
 
                         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                        var url = self.sparql_url + "?format=json&query=";
+                        var url = self.sparql_url + "?format=json&timeout=20000&debug=onquery=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
                             if (err)
                                 return callbackWhilst(err);
@@ -982,7 +1013,7 @@ var Sparql_generic = (function () {
                             resultSize = result.length
                             totalCount += result.length
                             MainController.UI.message(sourceLabel + "retreived triples :" + totalCount)
-                            offset += resultSize
+                            offset += limitSize
                             callbackWhilst()
                         })
                     }, function (err) {
@@ -991,23 +1022,39 @@ var Sparql_generic = (function () {
 
 
                 },
+
+
                 //format result
                 function (callbackSeries) {
+                    var skosLabelsMap = {}
+                    allData.forEach(function (item) {
+                        if (!skosLabelsMap[item.concept.value])
+                            skosLabelsMap[item.concept.value] = ""
+                        if (item.skosLabel)
+                            if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0)
+                                skosLabelsMap[item.concept.value] += " " + item.skosLabel.value
+
+                    })
 
                     allData.forEach(function (item) {
-                        if(item.concept.value="http://data.total.com/resource/tsf/iso_14224/VA_GA")
-                            var x=3
+
                         if (!allClassesMap[item.concept.value]) {
                             allClassesMap[item.concept.value] = {
                                 id: item.concept.value,
                                 label: item.conceptLabel ? item.conceptLabel.value : null,
-                                skoslabels:item.skosLabel ? item.skosLabel.value:null,
-                                parent: item.parent.value,
+                                skoslabels: skosLabelsMap[item.concept.value],
+                                parent: item.firstParent.value,
                                 parents: [],
                                 type: conceptType,
                             }
                         }
                     })
+                    callbackSeries()
+                },
+
+
+                // set ancestors
+                function (callbackSeries) {
 
                     function recurse(nodeId, parents) {
                         var obj = allClassesMap[nodeId]
@@ -1024,6 +1071,8 @@ var Sparql_generic = (function () {
 
                     // chain parents
                     for (var key in allClassesMap) {
+                        if(key=="http://data.total.com/resource/tsf/maintenance/romain_14224/Well_Completion")
+                            var x=3
                         recurse(key, allClassesMap[key].parents)
                     }
                     var x = allClassesMap

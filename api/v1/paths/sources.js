@@ -1,8 +1,8 @@
 const path = require("path");
 const fs = require("fs")
-const sourcesJSON = path.resolve('config/sources.json');
+const profilesJSON = path.resolve('config/sources.json');
+exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
-const util = require('util');
 const { rest } = require("lodash");
 const { readRessource, writeRessource } = require("./utils");
 
@@ -13,43 +13,45 @@ module.exports = function () {
         PUT
     };
     function GET(req, res, next) {
-        fs.readFile(sourcesJSON, 'utf8', (err, data) => {
+        fs.readFile(profilesJSON, 'utf8', (err, data) => {
             if (err) {
-                res.status(500).json({ message: "I couldn't read sources.json" })
+                res.status(500).json({ message: "I couldn't read profiles.json" })
             } else {
-                const sources = JSON.parse(data);
-                res.status(200).json(sources)
+                const profiles = JSON.parse(data);
+                res.status(200).json(profiles)
             }
         });
     }
 
-    function PUT(req, res, next) {
-        //  const oldSources = await readRessource(sourcesJSON, res)
-        //  const updatedSource = req.body
-        //  const objectToUpdateKey = Object.keys(req.body)[0]
-        //  const updatedSources = { ...oldSources, [objectToUpdateKey]: updatedSource }
-        //  const savedSources = await writeRessource(sourcesJSON, updatedSources, res);
-        //
-        //  res.status(200).json({
-        //      message: 'ressource successfully created',
-        //      sources: JSON.parse(savedSources)
-        //  })
-        res.status(200)
+    async function PUT(req, res, next) {
+        const updatedProfile = req.body
+        try {
+            const objectToUpdateKey = Object.keys(req.body)[0]
+            const oldProfiles = await readRessource(profilesJSON, res)//.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));
+            const updatedProfiles = { ...oldProfiles, [objectToUpdateKey]: updatedProfile }
+            const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res)//.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
+            if (oldProfiles.hasOwnProperty(objectToUpdateKey)) {
+                res.status(200).json({
+                    message: 'ressource successfully updated',
+                    profiles: savedProfiles
+                })
+            } else { res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." }) }
+
+        } catch (e) { res.status(500) }
     }
 
     async function POST(req, res, next) {
-        const oldSources = await readRessource(sourcesJSON, res)
-        const sourceToAdd = req.body
-        //        const notAlreadyCreated = !oldSources[req.params.id]
-        const newSources = { ...oldSources, ...sourceToAdd }
-        //        const successfullyCreated = newSources[req.params.id]
-
-        const updated = await writeSources(sourcesJSON, newSources, res)
-
-        res.status(200).json({
-            message: `Ressource successfully created`,
-            sources: JSON.parse(updated)
-        })
+        const profileToAdd = req.body
+        //        const successfullyCreated = newProfiles[req.params.id]
+        try {
+            const oldProfiles = await readRessource(profilesJSON, res)
+            const profileDoesntExist = !oldProfiles.hasOwnProperty(Object.keys(profileToAdd)[0])
+            const newProfiles = { ...oldProfiles, ...profileToAdd }
+            const saved = await writeRessource(profilesJSON, newProfiles, res)
+            if (profileDoesntExist) {
+                res.status(200).json(saved)
+            } else { res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." }) }
+        } catch (e) { res.status(500) }
 
 
     }
@@ -74,7 +76,7 @@ module.exports = function () {
                 schema: {
                     type: 'object',
                     items: {
-                        $ref: '#/definitions/GetSources'
+                        $ref: '#/definitions/GetProfiles'
                     }
                 }
             },

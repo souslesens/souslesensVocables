@@ -62,7 +62,7 @@ Lineage_properties = (function () {
                     label: "graph Node",
                     action: function (e) {// pb avec source
                         self.drawProperty(self.currentTreeNode.data)
-                        //   Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
+                        //   Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
 
                     }
 

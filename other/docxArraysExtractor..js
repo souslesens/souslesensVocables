@@ -228,6 +228,6 @@ module.exports = docxArraysExtractor;
 var treeDirPath = "D:\\ATD_Baillet\\Search2021\\treeDirs.json";
 
 var openXmlFilePath = "D:\\NLP\\ontologies\\14224\\ISO14224_Datacollection-oilandgas\\word\\document.xml";
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
+//var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
 
 docxArraysExtractor.buildParts(treeDirPath, openXmlFilePath, function (err, result) {});

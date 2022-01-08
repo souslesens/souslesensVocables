@@ -1029,10 +1029,10 @@ WHERE {
                     var skosLabelsMap = {}
                     allData.forEach(function (item) {
                         if (!skosLabelsMap[item.concept.value])
-                            skosLabelsMap[item.concept.value] = ""
+                            skosLabelsMap[item.concept.value] =[]
                         if (item.skosLabel)
                             if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0)
-                                skosLabelsMap[item.concept.value] += " " + item.skosLabel.value
+                                skosLabelsMap[item.concept.value].push(item.skosLabel.value)
 
                     })
 

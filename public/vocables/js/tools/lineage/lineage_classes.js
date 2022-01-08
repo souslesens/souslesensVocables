@@ -95,6 +95,9 @@ var Lineage_classes = (function () {
                             self.sourcesGraphUriMap[graphUri] = Config.sources[sourceLabel]
                     }
                     $("#GenericTools_searchSchemaType").val("OWL")
+
+
+                    self.graphDecoration.init()
                     if (callback)
                         callback()
 
@@ -166,7 +169,7 @@ var Lineage_classes = (function () {
                 if (options.callee == "Graph")
                     Lineage_classes.graphActions.graphNodeNeighborhood("all")
                 else if (options.callee == "Tree")
-                    Lineage_classes.addArbitraryNodeToGraph(node.data)
+                    Lineage_classes.drawNodeAndParents(node.data)
             } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
                 if (node.from) {//edge
                     Lineage_blend.deleteRestriction(node)
@@ -616,7 +619,7 @@ var Lineage_classes = (function () {
                 labelsMap[node.data.label] = node
             })
 
-            SearchUtil.getSimilarLabelsBetweenSources(fromSource, toSources, labels, ids, "exactMatch", null, function (err, result) {
+            SearchUtil.getSimilarLabelsInSources(fromSource, toSources, labels, ids, "exactMatch", null, function (err, result) {
                 if (err)
                     return alert(err);
 
@@ -1913,7 +1916,7 @@ var Lineage_classes = (function () {
             visjsGraph.data.nodes.update(newNodes)
         }
 
-        self.addArbitraryNodeToGraph = function (nodeData) {
+        self.drawNodeAndParents = function (nodeData) {
             var existingNodes = visjsGraph.getExistingIdsMap()
             if (existingNodes[nodeData.id])
                 return self.zoomGraphOnNode(nodeData.id)
@@ -2286,15 +2289,36 @@ var Lineage_classes = (function () {
 
         }
 
-        self.onPlusButton = function () {
-            $("#mainDialogDiv").load("snippets/lineage/moreActions.html");
-            $("#mainDialogDiv").dialog("open")
 
 
+        self.showHideHelp=function(){
+           var display=$("#lineage_actionDiv_Keyslegend").css("display")
+            if(display=="none")
+                display="block"
+            else
+                display="none"
+            $("#lineage_actionDiv_Keyslegend").css("display",display)
         }
 
 
         self.graphDecoration = {
+
+            init: function () {
+
+                self.graphDecoration.operationsMap = {
+                    "colorNodesByTopType": Lineage_classes.graphDecoration.colorGraphNodesByType
+                }
+                var operations = Object.keys(self.graphDecoration.operationsMap)
+                common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true)
+
+            },
+            run: function (operation) {
+                $("#Lineage_classes_graphDecoration_operationSelect").val("")
+                self.graphDecoration.operationsMap[operation]()
+
+            },
+
+
             showGraphDecorationDialog: function () {
                 $("#mainDialogDiv").load("snippets/lineage/graphDecoration.html", function () {
                     $("#mainDialogDiv").dialog("open")
@@ -2312,13 +2336,13 @@ var Lineage_classes = (function () {
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
                     "SELECT distinct ?x ?type  " + strFrom + "  WHERE {\n" +
-                    "  ?x rdf:type ?type.\n" +
+                    "  ?x rdfs:subClass*/rdf:type ?type.\n" +
                     "  filter (regex(str(?type),\"part14\") && ?type !=  <http://standards.iso.org/iso/15926/part14/Thing>)\n"
                 if (ids) {
                     query += Sparql_common.setFilter("x", ids)
                 }
 
-                query += "}limit 100"
+                query += "}"
 
                 var sparql_url = Config.sources[sourceLabel].sparql_server.url;
                 var url = sparql_url + "?format=json&query=";
@@ -2344,23 +2368,27 @@ var Lineage_classes = (function () {
                     var colorsMap = {}
                     result.forEach(function (item) {
 
-if(item.x.value==	"http://data.total.com/resource/tsf/maintenance/romain_14224/VE")
-    var x=3
-                        if (!colorsMap[item.type.value])
+                        if (item.x.value == "http://data.total.com/resource/tsf/maintenance/romain_14224/VE")
+                            var x = 3
+                        if (!colorsMap[item.type.value]) {
                             colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length]
+                        }
                         nodesTypesMap[item.x.value] = {type: item.type.value, color: colorsMap[item.type.value]}
 
                     })
+                    console.log(JSON.stringify(nodesTypesMap, null, 2))
                     var newNodes = []
                     var neutralColor = "#ccc"
-                    var legendNodes=[]
+                    var legendNodes = []
                     for (var nodeId in existingNodes) {
-                        if(nodeId.indexOf("legend_")==0)
+                        if (nodeId.indexOf("legend_") == 0)
                             legendNodes.push(nodeId)
                         else {
                             var color = neutralColor;
                             if (nodesTypesMap[nodeId])
                                 color = nodesTypesMap[nodeId].color
+                            else
+                                console.log(nodeId)
 
                             newNodes.push({id: nodeId, color: color})
 
@@ -2371,30 +2399,32 @@ if(item.x.value==	"http://data.total.com/resource/tsf/maintenance/romain_14224/V
                     visjsGraph.data.nodes.update(newNodes)
 
 
-                    var xOffset=-(visjsGraph.canvasDimension.w/2)+20
-                    var yOffset=-(visjsGraph.canvasDimension.h/2)+20
-                    var yStep=50
-                    var legendNodes=[]
-                    for( var type in colorsMap){
-                        legendNodes.push({
-                            id:"legend_"+type,
+                    var xOffset = -(visjsGraph.canvasDimension.w / 2) + 20
+                    var yOffset = -(visjsGraph.canvasDimension.h / 2) + 20
+                    var yStep = 50
+                    var legendNodes = []
+                    var str=""
+                    for (var type in colorsMap) {
+                        str+="<div class='Lineage_sourceLabelDiv' style='background-color:"+colorsMap[type]+"'>"+Sparql_common.getLabelFromURI(type)+"</div>"
+
+                     /*   legendNodes.push({
+                            id: "legend_" + type,
                             label: Sparql_common.getLabelFromURI(type),
-                            shape:"dot",
-                            color:colorsMap[type],
-                            fixed:{x:true,y:true},
-                            x:xOffset,
-                            y:yOffset,
+                            shape: "dot",
+                            color: colorsMap[type],
+                            fixed: {x: true, y: true},
+                            x: xOffset,
+                            y: yOffset,
                         })
-                        yOffset+=yStep
+                        yOffset += yStep*/
 
                     }
-
-                    visjsGraph.data.nodes.add(legendNodes)
+$("#Lineage_classes_graphDecoration_legendDiv").html(str)
+                  //  visjsGraph.data.nodes.add(legendNodes)
                 })
 
 
-            }
-
+            },
 
 
         }

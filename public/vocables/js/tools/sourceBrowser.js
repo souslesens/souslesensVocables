@@ -162,7 +162,7 @@ var SourceBrowser = (function () {
                     label: "graph Node",
                     action: function (e) {// pb avec source
 
-                        Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
+                        Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
 
                     }
 
@@ -422,7 +422,7 @@ var SourceBrowser = (function () {
 
             var indexes
 
-            SearchUtil.getSimilarLabelsBetweenSources(null, searchedSources, [term], null, mode, {parentlabels: true}, function (err, result) {
+            SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, {parentlabels: true}, function (err, result) {
                 if (err)
                     return alert(err)
 

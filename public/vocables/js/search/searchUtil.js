@@ -13,7 +13,7 @@ var SearchUtil = (function () {
      * @param mode exactMatch or fuzzymatch
      * @param callback array of source objects containing each target sources object matches
      */
-    self.getSimilarLabelsBetweenSources = function (fromSource, toSources, labels, ids, mode, options, callback) {
+    self.getSimilarLabelsInSources = function (fromSource, toSources, labels, ids, mode, options, callback) {
         if (!options)
             options = {}
         var resultSize = 1
@@ -264,8 +264,8 @@ var SearchUtil = (function () {
                                 }
                             },
                             {
-                                "match": {
-                                    "skoslabels": word.toLowerCase(),
+                                "term": {
+                                    "skoslabels.keyword": word,
 
                                 }
                             }

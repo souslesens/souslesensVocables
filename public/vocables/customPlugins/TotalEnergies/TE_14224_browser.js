@@ -4,9 +4,12 @@ var TE_14224_browser = (function () {
         var source
         var graphUri
         var assetTreeDistinctNodes = {}
-        self.mainSource = "TSF_ISO_14224"
 
-        //self.graphUri = Config.sources[self.mainSource]
+
+
+        self.currentTable_14224Field;
+
+        //self.graphUri = Config.sources[self.referenceOntologySource]
         self.onSourceSelect = function () {
 
         }
@@ -16,7 +19,7 @@ var TE_14224_browser = (function () {
             $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/snippets/leftPanel.html")
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
-            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html",function(){
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html", function () {
                 self.loadOntologytree()
             })
 
@@ -29,10 +32,10 @@ var TE_14224_browser = (function () {
             $("#sourcesTreeDiv").html("");
             source = "TSF_GS_EP-EXP_207_11"
             source = "TSF_maintenance_ROMAIN_14224"
+            self.referenceOntologySource = source
             graphUri = Config.sources[source].graphUri
             Lineage_classes.mainSource = source
             Lineage_common.currentSource = source
-
 
 
         }
@@ -41,6 +44,16 @@ var TE_14224_browser = (function () {
             if (asset == "")
                 return;
             self.currenTable = asset
+
+            if (self.currenTable == "girassol") {
+                self.currentTable_14224Field = "className"
+
+            } else if (self.currenTable == "absheron") {
+                self.currentTable_14224Field = "RDLRelation"
+            } else {
+                self.currentTable_14224Field = null
+            }
+
             visjsGraph.clearGraph()
             $("#graphDiv").html("")
             self.getFunctionalLocations(asset)
@@ -115,7 +128,7 @@ var TE_14224_browser = (function () {
                             else if (self.currentTreeNode.data.type == "class")
                                 self.openTagTreeNode(self.currentTreeNode)
                             else if (self.currentTreeNode.data.type == "tag")
-                                self.showTagInfos(self.currentTreeNode)
+                              ;//  self.showTagInfos(self.currentTreeNode)
                         } else {
                             self.openFunctionalLocationTreeNode(self.currentTreeNode.data.id, level)
                         }
@@ -206,7 +219,7 @@ var TE_14224_browser = (function () {
 
             var limit = 100000
 
-            var sqlQuery = " select distinct tag from " + self.currenTable + " where  className ='" + node.data.className + "' and   FunctionalLocationCode like'" + node.data.location + "%' order by tag";
+            var sqlQuery = " select distinct tag," + self.currentTable_14224Field + " as mapping_14224 from " + self.currenTable + " where  className ='" + node.data.className + "' and   FunctionalLocationCode like'" + node.data.location + "%' order by tag";
 
 
             self.querySQLserver(sqlQuery, function (err, data) {
@@ -231,6 +244,7 @@ var TE_14224_browser = (function () {
                                 location: node.data.location,
                                 tag: childId,
                                 text: childId,
+                                mapping_14224: item["mapping_14224"]
 
                             }
                         })
@@ -276,7 +290,7 @@ var TE_14224_browser = (function () {
                     var treesData = {}
                     async.eachSeries(superClasses, function (superClass, callbackEach) {
 
-                        Sparql_OWL.getNodeChildren(self.mainSource, null, [superClass.uri], 1, null, function (err, result) {
+                        Sparql_OWL.getNodeChildren(self.referenceOntologySource, null, [superClass.uri], 1, null, function (err, result) {
                             if (err)
                                 return callbackEach()
 
@@ -410,21 +424,365 @@ var TE_14224_browser = (function () {
             var visjsData = {nodes: [], edges: []}
             var assetNodeIds = []
 
+            var word = node.data["mapping_14224"]
+            async.series([
+
+
+                function (callbackSeries) {
+
+                    SearchUtil.getSimilarLabelsInSources (null, self.referenceOntologySource.toLowerCase(), [word], null, "exactMatch", {parentlabels: true}, function(err,result){
+
+                          if( err)
+                              return alert(err)
+
+                        var ids=[]
+                        result.forEach(function (item) {
+                            for (var source in item.matches) {
+                                item.matches[source].forEach(function (match) {
+                                    ids.push(match.id)
+                                })
+                            }
+                            })
+
+                    var nodeData = {
+                        id: ids[0],
+                        source: self.referenceOntologySource
+                    }
+                          visjsGraph.clearGraph()
+                    Lineage_classes.drawNodeAndParents(nodeData)
+                    })
+                }
+            ], function (err) {
+
+            })
+
+        }
+
+
+        self.graphNodeAndparents = function (nodes, callback) {
+
+
+            if (!Array.isArray(nodes)) {
+                nodes = [nodes]
+            }
+            var visjsData = {nodes: [], edges: []}
+            var visjsExistingNodes = visjsGraph.getExistingIdsMap();
+
+            nodes.forEach(function (nodeobj) {
+
+                var array = nodeobj.id.split("/");
+
+                var currentId = ""
+                for (var i = 0; i < array.length; i++) {
+                    var item = array[i];
+                    var parent = null
+
+                    if (i > 0) {
+                        parent = currentId
+                        currentId += "/"
+                    }
+                    currentId += item
+                    var standardType
+                    if (i < 4)
+                        standardType = "http://standards.iso.org/iso/15926/part14/Location"
+                    if (i == 4) {
+                        standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
+                    }
+                    if (i == 5) {
+                        standardType = "http://w3id.org/readi/rdl/D101001495"
+                    }
+
+
+                    if (!visjsExistingNodes[currentId]) {
+                        visjsExistingNodes[currentId] = 1
+                        var node = {
+                            id: currentId,
+                            label: item,
+
+                            size: Lineage_classes.defaultShapeSize,
+                            //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
+                            //   shape: "circularImage",
+                            shape: "square",
+                            size: 10,
+                            borderWidth: 1,
+                            color: Lineage_classes.getSourceColor(self.currenTable),
+                            data: {source: "TE_14224_browser", id: currentId, label: item, type: "assetNode"},
+                            level: i,
+
+                        }
+                        visjsData.nodes.push(node)
+
+                    }
+                    if (parent) {
+                        var edgeId = currentId + "_" + parent
+                        if (!visjsExistingNodes[edgeId]) {
+                            visjsExistingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: currentId,
+                                to: parent
+
+                            })
+
+
+                        }
+                    }
+                }
+            })
+
+            if (callback)
+                return callback(null, visjsData)
+
+            if (visjsGraph.data && visjsGraph.data.nodes) {
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+            } else {
+                self.drawNewGraph(visjsData, "hierarchical")
+            }
+
+
+        }
+
+
+        self.showAssetData = function (node) {
+
+            var parent = node.data.path
+
+
+        }
+
+
+        /**********************************************************************************************************************************/
+
+
+        self.drawNewGraph = function (visjsData, layout) {
+
+            var options = {
+                keepNodePositionOnDrag: true,
+                onclickFn: self.graphActions.onNodeClick,
+                onRightClickFn: self.graphActions.showGraphPopupMenu,
+                "physics": {
+                    "barnesHut": {
+                        "springLength": 0,
+                        "damping": 0.15
+                    },
+                    "minVelocity": 0.75,
+
+                },
+
+
+            }
+            if (layout == "hierarchical") {
+                // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
+                options.layoutHierarchical = {direction: "LR", sortMethod: "directed", levelSeparation: 100}
+
+            }
+            visjsGraph.draw("graphDiv", visjsData, options)
+            $("#waitImg").css("display", "none");
+        }
+
+        self.getAssetJstreeContextMenu = function () {
+            var items = {}
+
+            items.nodeInfos = {
+                label: "Node Infos",
+                action: function (e) {// pb avec source
+                    if (self.currentTreeNode.data.type == "tag")
+                      self.showTagInfos(self.currentTreeNode)
+
+
+                }
+            }
+            items.graphNodeAndparents = {
+                label: "Graph Node",
+                action: function (e) {// pb avec source
+                    TE_14224_browser.graphNodeAndparents(self.currentTreeNode)
+
+                }
+            }
+            items.mapClassesTo14224 = {
+                label: "mapClassesTo14224",
+                action: function (e) {// pb avec source
+                    TE_14224_browser.mapClassesTo14224(self.currentTreeNode)
+
+                }
+            }
+
+            return items;
+        }
+
+        self.getOntologyJstreeContextMenu = function () {
+            var items = {}
+
+            items.nodeInfos = {
+                label: "Node Infos",
+                action: function (e) {
+                    var x = self.currentGraphNode
+
+                    SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode.id, "mainDialogDiv")
+
+
+                }
+            }
+            items.ShowAssetData = {
+                label: "Show Asset Data",
+                action: function (e) {
+                    TE_14224_browser.showAssetData(self.currentOntologyTreeNode)
+
+                }
+            }
+
+
+            return items;
+        }
+
+
+        self.graphActions = {
+            onNodeClick: function (node, point, options) {
+
+                if (!node)
+                    return;
+                self.currentGraphNode = node
+                if (node.data.type == "assetNode") {
+
+                } else {
+                    Lineage_classes.currentGraphNode = node
+                    Lineage_classes.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
+                }
+
+            }
+            , showGraphPopupMenu: function (node, point, options) {
+
+                if (node.data.type == "assetNode") {
+                    if (!node)
+                        return;
+                    TE_14224_browser.showGraphPopupMenu()
+                    var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_14224_browser.showGraphPopupMenu();\"> Node infos</span>"
+
+                    $("#graphPopupDiv").html(html);
+                    self.currentGraphNode = node;
+                    MainController.UI.showPopup(point, "graphPopupDiv")
+
+                } else {
+                    Lineage_classes.graphActions.showGraphPopupMenu(node, point, options)
+                }
+
+
+            }
+        }
+
+
+        self.loadOntologytree = function () {
+
+            //   var source = "TSF_GS_EP-EXP_207_11"
+            var topClasses = [{
+                id: "http://data.total.com/resource/tsf/maintenance/romain_14224/bad731c1e7",
+                label: "Failure"
+            },
+                {id: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fcb03c2dd", label: "maintenance"},
+                {id: "http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3", label: "O&G systems"}]
+
+            var jstreeData = []
+            var existingNodes = {}
+
+            async.eachSeries(topClasses, function (topClass, callbackEach) {
+                    jstreeData.push({
+                        id: topClass.id,
+                        text: topClass.label,
+                        parent: "#"
+
+                    })
+
+                    Sparql_OWL.getNodeChildren(source, null, topClass.id, 2, null, function (err, result) {
+                        if (err)
+                            return callbackEach(err)
+                        result.forEach(function (item) {
+                            if (!existingNodes[item.concept.value]) {
+                                existingNodes[item.concept.value] = 1
+                                jstreeData.push({
+                                    id: item.concept.value,
+                                    text: item.conceptLabel.value,
+                                    parent: topClass.id,
+                                    data: {
+                                        id: item.concept.value,
+                                        label: item.conceptLabel.value,
+                                        type: "ontology"
+                                    }
+
+                                })
+                            }
+                            if (!existingNodes[item.child1.value]) {
+                                existingNodes[item.child1.value] = 1
+                                jstreeData.push({
+                                    id: item.child1.value,
+                                    text: item.child1Label.value,
+                                    parent: item.concept.value,
+                                    data: {
+                                        id: item.child1.value,
+                                        label: item.child1Label.value,
+                                        path: item.child1.value + "/",
+                                        type: "ontology"
+                                    }
+
+                                })
+                            }
+                            if (item.child2 && !existingNodes[item.child2.value]) {
+                                existingNodes[item.child2.value] = 1
+                                jstreeData.push({
+                                    id: item.child2.value,
+                                    text: item.child2Label.value,
+                                    parent: item.child1.value,
+                                    data: {
+                                        id: item.child2.value,
+                                        label: item.child2Label.value,
+                                        path: item.child2.value + "/" + item.child2.value,
+                                        type: "ontology"
+                                    }
+
+                                })
+                            }
+
+
+                        })
+                        callbackEach()
+                    })
+
+
+                }
+                , function (err) {
+                    if (err)
+                        return MainController.UI.message(err)
+                    var options = {
+                        selectTreeNodeFn: function (event, obj) {
+                            self.currentOntologyTreeNode = obj.node
+                        }
+                        ,
+                        contextMenu: TE_14224_browser.getOntologyJstreeContextMenu()
+                    }
+                    common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options)
+
+                })
+        }
+
+
+        self.mapClassesTo14224Old = function (node) {
+            var visjsData = {nodes: [], edges: []}
+            var assetNodeIds = []
+
             async.series([
 
                 function (callbackSeries) {
-var assetClassColumn=""
+                    var assetClassColumn = ""
                     var samAs207Column = ""
                     if (self.currenTable == "girassol") {
                         samAs207Column = "className"
-                        assetClassColumn="description"
-                    }
-                    else if (self.currenTable == "absheron") {
+                        assetClassColumn = "description"
+                    } else if (self.currenTable == "absheron") {
                         samAs207Column = "RDLRelation"
-                        assetClassColumn="functionalLocationDescription"
+                        assetClassColumn = "functionalLocationDescription"
                     }
 
-                    var sqlQuery = "select distinct location1,location2,location3,location4," + samAs207Column +","+assetClassColumn+ " from " + self.currenTable;
+                    var sqlQuery = "select distinct location1,location2,location3,location4," + samAs207Column + "," + assetClassColumn + " from " + self.currenTable;
                     //  var sqlQuery = " select distinct '" + node.data.id + "' as id ," + samAs207Column + " from " + self.currenTable;
                     if (node.data.type == "location") {
                         //    sqlQuery += " where parentFunctionalLocation = '" + node.id + "'"
@@ -471,7 +829,7 @@ var assetClassColumn=""
                                         shape: "dot",
                                         size: 5,
                                         borderWidth: 4,
-                                        shadow:true,
+                                        shadow: true,
                                         color: Lineage_classes.getSourceColor(self.currenTable),
                                         data: {source: source, id: uri, label: item[assetClassColumn]},
                                         level: 6,
@@ -499,7 +857,7 @@ var assetClassColumn=""
 
 
                                 var array = id.split("/");
-                            //    array.push(item[assetClassColumn])
+                                //    array.push(item[assetClassColumn])
 
                                 var currentId = ""
                                 for (var i = 0; i < array.length; i++) {
@@ -595,325 +953,6 @@ var assetClassColumn=""
 
             })
         }
-
-
-        self.graphNodeAndparents = function (nodes, callback) {
-
-
-            if (!Array.isArray(nodes)) {
-                nodes = [nodes]
-            }
-            var visjsData = {nodes: [], edges: []}
-            var visjsExistingNodes = visjsGraph.getExistingIdsMap();
-
-            nodes.forEach(function (nodeobj) {
-
-                var array = nodeobj.id.split("/");
-
-                var currentId = ""
-                for (var i = 0; i < array.length; i++) {
-                    var item = array[i];
-                    var parent = null
-
-                    if (i > 0) {
-                        parent = currentId
-                        currentId += "/"
-                    }
-                    currentId += item
-                    var standardType
-                    if (i < 4)
-                        standardType = "http://standards.iso.org/iso/15926/part14/Location"
-                    if (i == 4) {
-                        standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
-                    }
-                    if (i == 5) {
-                        standardType = "http://w3id.org/readi/rdl/D101001495"
-                    }
-
-
-                    if (!visjsExistingNodes[currentId]) {
-                        visjsExistingNodes[currentId] = 1
-                        var node = {
-                            id: currentId,
-                            label: item,
-
-                            size: Lineage_classes.defaultShapeSize,
-                            //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
-                            //   shape: "circularImage",
-                            shape: "square",
-                            size: 10,
-                            borderWidth: 1,
-                            color: Lineage_classes.getSourceColor(self.currenTable),
-                            data: {source: "TE_14224_browser", id: currentId, label: item, type: "assetNode"},
-                            level: i,
-
-                        }
-                        visjsData.nodes.push(node)
-
-                    }
-                    if (parent) {
-                        var edgeId = currentId + "_" + parent
-                        if (!visjsExistingNodes[edgeId]) {
-                            visjsExistingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: currentId,
-                                to: parent
-
-                            })
-
-
-                        }
-                    }
-                }
-            })
-
-            if (callback)
-                return callback(null, visjsData)
-
-            if (visjsGraph.data && visjsGraph.data.nodes) {
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-            } else {
-                self.drawNewGraph(visjsData, "hierarchical")
-            }
-
-
-        }
-
-
-        self.showAssetData=function(node){
-
-            var parent=node.data.path
-
-
-        }
-
-
-
-
-
-
-
-
-
-
-        /**********************************************************************************************************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-      
-        self.drawNewGraph = function (visjsData, layout) {
-
-            var options = {
-                keepNodePositionOnDrag: true,
-                onclickFn: self.graphActions.onNodeClick,
-                onRightClickFn: self.graphActions.showGraphPopupMenu,
-                "physics": {
-                    "barnesHut": {
-                        "springLength": 0,
-                        "damping": 0.15
-                    },
-                    "minVelocity": 0.75,
-
-                },
-
-
-            }
-            if (layout == "hierarchical") {
-                // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
-                options.layoutHierarchical = {direction: "LR", sortMethod: "directed", levelSeparation: 100}
-
-            }
-            visjsGraph.draw("graphDiv", visjsData, options)
-            $("#waitImg").css("display", "none");
-        }
-
-        self.getAssetJstreeContextMenu = function () {
-            var items = {}
-
-            items.nodeInfos = {
-                label: "Node Infos",
-                action: function (e) {// pb avec source
-               if (self.currentTreeNode.data.type == "tag")
-                        self.showTagInfos(self.currentTreeNode)
-
-
-                }
-            }
-            items.graphNodeAndparents = {
-                label: "Graph Node",
-                action: function (e) {// pb avec source
-                    TE_14224_browser.graphNodeAndparents(self.currentTreeNode)
-
-                }
-            }
-            items.mapClassesTo14224 = {
-                label: "mapClassesTo14224",
-                action: function (e) {// pb avec source
-                    TE_14224_browser.mapClassesTo14224(self.currentTreeNode)
-
-                }
-            }
-
-            return items;
-        }
-
-        self.getOntologyJstreeContextMenu = function () {
-            var items = {}
-
-            items.nodeInfos = {
-                label: "Node Infos",
-                action: function (e) {
-                    var x=self.currentGraphNode
-
-                        SourceBrowser.showNodeInfos( self.mainSource,self.currentOntologyTreeNode.id,"mainDialogDiv")
-
-
-                }
-            }
-            items.ShowAssetData = {
-                label: "Show Asset Data",
-                action: function (e) {
-                    TE_14224_browser.showAssetData(self.currentOntologyTreeNode)
-
-                }
-            }
-
-
-            return items;
-        }
-
-
-
-        self.graphActions = {
-            onNodeClick: function (node, point, options) {
-
-                if (!node)
-                    return;
-                self.currentGraphNode=node
-                if (node.data.type == "assetNode") {
-
-                } else {
-                    Lineage_classes.currentGraphNode = node
-                    Lineage_classes.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
-                }
-
-            }
-            , showGraphPopupMenu: function (node, point, options) {
-
-                if (node.data.type == "assetNode") {
-                    if (!node)
-                        return;
-                    TE_14224_browser.showGraphPopupMenu()
-                    var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_14224_browser.showGraphPopupMenu();\"> Node infos</span>"
-
-                    $("#graphPopupDiv").html(html);
-                    self.currentGraphNode = node;
-                    MainController.UI.showPopup(point, "graphPopupDiv")
-
-                } else {
-                    Lineage_classes.graphActions.showGraphPopupMenu(node, point, options)
-                }
-
-
-            }
-        }
-
-
-        self.loadOntologytree = function () {
-
-         //   var source = "TSF_GS_EP-EXP_207_11"
-            var topClasses = [{id:"http://w3id.org/readi/z018-rdl/prod_SYS",label:"SYSTEM"}]
-
-            var jstreeData = []
-            var existingNodes={}
-
-           async.eachSeries(topClasses,function (topClass,callbackEach) {
-                   jstreeData.push({
-                       id: topClass.id,
-                       text: topClass.label,
-                       parent: "#"
-
-                   })
-
-               Sparql_OWL.getNodeChildren(source, null, topClass.id, 2, null, function (err, result) {
-                   if (err)
-                       return callbackEach(err)
-                   result.forEach(function (item) {
-                       if(!existingNodes[item.concept.value]) {
-                           existingNodes[item.concept.value] = 1
-                           jstreeData.push({
-                               id: item.concept.value,
-                               text: item.conceptLabel.value,
-                               parent: topClass.id,
-                               data:{ id: item.concept.value,
-                                   label: item.conceptLabel.value,
-                                   type: "ontology"}
-
-                           })
-                       }
-                       if(!existingNodes[item.child1.value]) {
-                           existingNodes[item.child1.value] = 1
-                           jstreeData.push({
-                               id: item.child1.value,
-                               text: item.child1Label.value,
-                               parent: item.concept.value,
-                           data:{ id: item.child1.value,
-                               label: item.child1Label.value,
-                               path:item.child1.value+"/",
-                               type: "ontology"}
-
-                           })
-                       }
-                       if(item.child2 && !existingNodes[item.child2.value]) {
-                           existingNodes[item.child2.value] = 1
-                           jstreeData.push({
-                               id: item.child2.value,
-                               text: item.child2Label.value,
-                               parent: item.child1.value,
-                               data:{ id: item.child2.value,
-                                   label: item.child2Label.value,
-                                   path:item.child2.value+"/"+item.child2.value,
-                                   type: "ontology"}
-
-                           })
-                       }
-
-
-                   })
-                   callbackEach()
-               })
-
-
-
-                   }
-                   , function (err) {
-                       if (err)
-                           return MainController.UI.message(err)
-                   var options= {
-                       selectTreeNodeFn: function (event, obj) {
-                           self.currentOntologyTreeNode = obj.node
-                       }
-                       ,
-                       contextMenu: TE_14224_browser.getOntologyJstreeContextMenu()
-                   }
-                       common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData,options)
-
-           })
-        }
-
-
-
         return self;
 
     }

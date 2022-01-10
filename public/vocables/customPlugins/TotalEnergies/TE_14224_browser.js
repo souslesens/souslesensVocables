@@ -6,7 +6,6 @@ var TE_14224_browser = (function () {
         var assetTreeDistinctNodes = {}
 
 
-
         self.currentTable_14224Field;
 
         //self.graphUri = Config.sources[self.referenceOntologySource]
@@ -128,7 +127,7 @@ var TE_14224_browser = (function () {
                             else if (self.currentTreeNode.data.type == "class")
                                 self.openTagTreeNode(self.currentTreeNode)
                             else if (self.currentTreeNode.data.type == "tag")
-                              ;//  self.showTagInfos(self.currentTreeNode)
+                                ;//  self.showTagInfos(self.currentTreeNode)
                         } else {
                             self.openFunctionalLocationTreeNode(self.currentTreeNode.data.id, level)
                         }
@@ -421,40 +420,138 @@ var TE_14224_browser = (function () {
 
 
         self.mapClassesTo14224 = function (node) {
-            var visjsData = {nodes: [], edges: []}
-            var assetNodeIds = []
 
-            var word = node.data["mapping_14224"]
+
+            var childrenMap = {}
+            //   childrenMap[node.data.id] = node.data
+            var visjsData = {nodes: [], edges: []}
+            var nodeData14224;
+            var allGraphIds = {}
+            var Iso14224AssetMap={}
             async.series([
 
+                    function (callbackSeries) {
+                        if (node.data.type != "location") {
+                            return callbackSeries()
+                        }
+                        var sqlQuery = " select distinct functionalLocationCode as id,className as className," + self.currentTable_14224Field + " as mapping_14224  from " + self.currenTable + "" +
+                            " where  FunctionalLocationCode like'" + node.data.id + "%' order by className";
 
-                function (callbackSeries) {
+                        self.querySQLserver(sqlQuery, function (err, data) {
+                            if (err)
+                                return callbackSeries(err)
+                            data.forEach(function (item) {
+                                childrenMap[item.id] = item
+                                Iso14224AssetMap[item.mapping_14224]=item.id
 
-                    SearchUtil.getSimilarLabelsInSources (null, self.referenceOntologySource.toLowerCase(), [word], null, "exactMatch", {parentlabels: true}, function(err,result){
 
-                          if( err)
-                              return alert(err)
+                            })
+                            callbackSeries()
+                        })
 
-                        var ids=[]
-                        result.forEach(function (item) {
-                            for (var source in item.matches) {
-                                item.matches[source].forEach(function (match) {
-                                    ids.push(match.id)
-                                })
-                            }
+                    },
+
+
+                    function (callbackSeries) {
+                        var words = []
+                        for (var key in childrenMap) {
+                            var word = childrenMap[key].mapping_14224;
+                            if (word)
+                                words.push(word)
+                        }
+
+
+                        SearchUtil.getSimilarLabelsInSources(null, self.referenceOntologySource.toLowerCase(), words, null, "exactMatch", {parentlabels: true}, function (err, result) {
+
+                            if (err)
+                                return alert(err)
+
+                            var ids = []
+                            result.forEach(function (item) {
+                                for (var source in item.matches) {
+                                    item.matches[source].forEach(function (match) {
+                                        ids.push(match.id)
+
+
+                                        var assetId=Iso14224AssetMap[item.id]
+                                        var edgeId = assetId + "_" + match.id
+                                        visjsData.edges.push({
+                                            id: edgeId,
+                                            from: assetId,
+                                            to: match.id
+                                        })
+                                    })
+                                }
                             })
 
-                    var nodeData = {
-                        id: ids[0],
-                        source: self.referenceOntologySource
-                    }
-                          visjsGraph.clearGraph()
-                    Lineage_classes.drawNodeAndParents(nodeData)
-                    })
-                }
-            ], function (err) {
 
-            })
+                            async.eachSeries(ids, function (id, callbackEach) {
+                                if (allGraphIds[id])
+                                    return callbackEach();
+                                allGraphIds[id] = 1
+                                nodeData14224 = {
+                                    id: id,
+                                    source: self.referenceOntologySource
+                                }
+                                Lineage_classes.drawNodeAndParents(nodeData14224, function (err, result) {
+                                    if (err)
+                                        return callbackSeries(err)
+
+
+                                    visjsData.nodes = common.concatArraysWithoutDuplicate(visjsData.nodes, result.nodes, "id")
+                                    visjsData.edges = common.concatArraysWithoutDuplicate(visjsData.edges, result.edges, "id")
+
+                                    callbackEach()
+                                })
+                            }, function (err) {
+                                callbackSeries()
+                            })
+                        })
+                    },
+
+                    function (callbackSeries) {
+                        //   return   callbackSeries();
+                        var assetObjs = []
+
+                        for (var key in childrenMap) {
+                            if (!allGraphIds[key]) {
+                                allGraphIds[key] = 1
+                                assetObjs.push(childrenMap[key])
+                            }
+                        }
+
+
+                        self.graphNodeAndparents(assetObjs, function (err, result) {
+                            if (err)
+                                return callbackSeries(err)
+                            visjsData.nodes = common.concatArraysWithoutDuplicate(visjsData.nodes, result.nodes, "id")
+                            visjsData.edges = common.concatArraysWithoutDuplicate(visjsData.edges, result.edges, "id")
+
+
+                            callbackSeries()
+                        })
+                    },
+
+
+
+                ]
+
+                , function (err) {
+                    if (err)
+                        alert(err)
+                    visjsData.nodes = common.unduplicateArray(visjsData.nodes, "id")
+                    visjsData.edges = common.unduplicateArray(visjsData.edges, "id")
+
+
+                    if (visjsGraph.data && visjsGraph.data.nodes) {
+                        visjsGraph.data.nodes.add(visjsData.nodes)
+                        visjsGraph.data.edges.add(visjsData.edges)
+                    } else {
+                        self.drawNewGraph(visjsData,)
+                    }
+
+                })
+
 
         }
 
@@ -537,7 +634,7 @@ var TE_14224_browser = (function () {
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
             } else {
-                self.drawNewGraph(visjsData, "hierarchical")
+                self.drawNewGraph(visjsData,)
             }
 
 
@@ -574,7 +671,7 @@ var TE_14224_browser = (function () {
             }
             if (layout == "hierarchical") {
                 // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
-                options.layoutHierarchical = {direction: "LR", sortMethod: "directed", levelSeparation: 100}
+                options.layoutHierarchical = {direction: "TD", sortMethod: "directed", levelSeparation: 50}
 
             }
             visjsGraph.draw("graphDiv", visjsData, options)
@@ -588,7 +685,7 @@ var TE_14224_browser = (function () {
                 label: "Node Infos",
                 action: function (e) {// pb avec source
                     if (self.currentTreeNode.data.type == "tag")
-                      self.showTagInfos(self.currentTreeNode)
+                        self.showTagInfos(self.currentTreeNode)
 
 
                 }

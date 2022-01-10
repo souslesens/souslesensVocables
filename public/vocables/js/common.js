@@ -541,7 +541,45 @@ var common = (function () {
             return array
         }
 
+
+
+
+        self.unduplicateArray=function(array,key){
+
+            var uniqueItems=[]
+            var uniqueIds={}
+            array.forEach(function(item){
+                if(!uniqueIds[item[key]]) {
+                    uniqueIds[item[key]] = 1
+                    uniqueItems.push(item)
+                }
+            })
+            return uniqueItems;
+
+
+
+        }
+
+
+
+
+    self.concatArraysWithoutDuplicateXX = function (array, addedArray, key) {
+        var filteredArray = []
+        result.nodes.forEach(function (item) {
+            var unique = true;
+            visjsData.nodes.forEach(function (item2) {
+                if (item2.id == item.id)
+                    unique = false
+
+            })
+            filteredNodes.push(item)
+        })
+    }
+
+
         self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
+            var filteredArray = JSON.parse(JSON.stringify(array))
+            var keyValues={}
             addedArray.forEach(function (addedItem) {
                 var refuse = false
                 array.forEach(function (item) {
@@ -553,9 +591,9 @@ var common = (function () {
 
                 })
                 if (!refuse)
-                    array.push(addedItem)
+                    filteredArray.push(addedItem)
             })
-            return array;
+            return filteredArray;
         }
 
 

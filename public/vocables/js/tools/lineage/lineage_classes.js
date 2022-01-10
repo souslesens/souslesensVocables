@@ -1916,7 +1916,7 @@ var Lineage_classes = (function () {
             visjsGraph.data.nodes.update(newNodes)
         }
 
-        self.drawNodeAndParents = function (nodeData) {
+        self.drawNodeAndParents = function (nodeData, callback) {
             var existingNodes = visjsGraph.getExistingIdsMap()
             if (existingNodes[nodeData.id])
                 return self.zoomGraphOnNode(nodeData.id)
@@ -1924,12 +1924,17 @@ var Lineage_classes = (function () {
             MainController.UI.message("")
             var ancestorsDepth = 7
             Sparql_generic.getNodeParents(nodeData.source, null, nodeData.id, ancestorsDepth, {skipRestrictions: 1}, function (err, result) {
-                if (err)
+                if (err) {
+                    if (callback)
+                        return callback(err)
                     return MainController.UI.message(err);
+                }
                 var map = [];
                 var ids = [];
 
                 if (result.length == 0) {
+                    if(callback)
+                        return callback("No data found")
                     $("#waitImg").css("display", "none");
                     return MainController.UI.message("No data found")
                 }
@@ -1951,6 +1956,7 @@ var Lineage_classes = (function () {
                             label: item.conceptLabel.value,
                             data: nodeData,
                             shadow: self.nodeShadow,
+                            level: ancestorsDepth,
                             shape: Lineage_classes.defaultShape,
                             color: self.getSourceColor(nodeData.source, item.concept.value),
                             size: Lineage_classes.defaultShapeSize
@@ -1974,6 +1980,7 @@ var Lineage_classes = (function () {
                                     shadow: self.nodeShadow,
                                     shape: Lineage_classes.defaultShape,
                                     color: color,
+                                    level: ancestorsDepth - i,
                                     size: Lineage_classes.defaultShapeSize
                                 })
                                 newNodeIds.push(item["broader" + i].value)
@@ -2046,6 +2053,8 @@ var Lineage_classes = (function () {
                     })
 
                 }
+                if (callback)
+                   return callback(null,visjsData)
 
                 self.registerSource(nodeData.source)
                 /*  expandedLevels[nodeData.source][expandedLevels[nodeData.source].length ].push(newNodeIds);*/
@@ -2059,6 +2068,7 @@ var Lineage_classes = (function () {
 
 
                 setTimeout(function () {
+
                     self.zoomGraphOnNode(nodeData.id)
                 }, 500)
                 $("#waitImg").css("display", "none");
@@ -2290,14 +2300,13 @@ var Lineage_classes = (function () {
         }
 
 
-
-        self.showHideHelp=function(){
-           var display=$("#lineage_actionDiv_Keyslegend").css("display")
-            if(display=="none")
-                display="block"
+        self.showHideHelp = function () {
+            var display = $("#lineage_actionDiv_Keyslegend").css("display")
+            if (display == "none")
+                display = "block"
             else
-                display="none"
-            $("#lineage_actionDiv_Keyslegend").css("display",display)
+                display = "none"
+            $("#lineage_actionDiv_Keyslegend").css("display", display)
         }
 
 
@@ -2403,24 +2412,24 @@ var Lineage_classes = (function () {
                     var yOffset = -(visjsGraph.canvasDimension.h / 2) + 20
                     var yStep = 50
                     var legendNodes = []
-                    var str=""
+                    var str = ""
                     for (var type in colorsMap) {
-                        str+="<div class='Lineage_sourceLabelDiv' style='background-color:"+colorsMap[type]+"'>"+Sparql_common.getLabelFromURI(type)+"</div>"
+                        str += "<div class='Lineage_sourceLabelDiv' style='background-color:" + colorsMap[type] + "'>" + Sparql_common.getLabelFromURI(type) + "</div>"
 
-                     /*   legendNodes.push({
-                            id: "legend_" + type,
-                            label: Sparql_common.getLabelFromURI(type),
-                            shape: "dot",
-                            color: colorsMap[type],
-                            fixed: {x: true, y: true},
-                            x: xOffset,
-                            y: yOffset,
-                        })
-                        yOffset += yStep*/
+                        /*   legendNodes.push({
+                               id: "legend_" + type,
+                               label: Sparql_common.getLabelFromURI(type),
+                               shape: "dot",
+                               color: colorsMap[type],
+                               fixed: {x: true, y: true},
+                               x: xOffset,
+                               y: yOffset,
+                           })
+                           yOffset += yStep*/
 
                     }
-$("#Lineage_classes_graphDecoration_legendDiv").html(str)
-                  //  visjsGraph.data.nodes.add(legendNodes)
+                    $("#Lineage_classes_graphDecoration_legendDiv").html(str)
+                    //  visjsGraph.data.nodes.add(legendNodes)
                 })
 
 

@@ -88,7 +88,7 @@ module.exports = function () {
             200: {
                 description: 'Profiles',
                 schema: {
-                    $ref: '#/definitions/GetProfiles'
+                    $ref: '#/definitions/Profile'
                 }
             },
         }

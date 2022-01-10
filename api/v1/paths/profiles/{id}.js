@@ -118,8 +118,8 @@ module.exports = function () {
         responses: {
             200: {
                 description: 'Profiles',
-                schema: {
-                    $ref: '#/definitions/GetProfiles'
+                 schema: {
+                    $ref: '#/definitions/Profile'
                 }
             },
         }

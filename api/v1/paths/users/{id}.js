@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs")
-const profilesJSON = path.resolve('config/sources.json');
+const profilesJSON = path.resolve('config/users/users.json');
 const _ = require("lodash")
 const util = require('util');
 const readFile = util.promisify(fs.readFile);
@@ -51,7 +51,7 @@ module.exports = function () {
             }
         });
     }
-        async function DELETE(req, res, next) {
+    async function DELETE(req, res, next) {
         const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))
         const oldProfiles = JSON.parse(profiles)
         const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles
@@ -88,7 +88,7 @@ module.exports = function () {
             200: {
                 description: 'Profiles',
                 schema: {
-                    $ref: '#/definitions/GetProfiles'
+                    $ref: '#/definitions/Profile'
                 }
             },
         }

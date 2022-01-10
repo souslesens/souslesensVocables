@@ -1,5 +1,9 @@
+
+
+
 const apiDoc = {
   swagger: '2.0',
+  paths: {},
   basePath: '/api/v1',
   info: {
     title: 'SouslesensVocables API',
@@ -33,13 +37,52 @@ const apiDoc = {
       },
       required: []
     },
-    GetProfiles: {
-      type: 'object'
-      , properties: {}
+    Profile: {
+      type: "object",
+      properties: {
+        allowedSourceSchemas: {
+          type: "array",
+          items: {
+            type: "string"
+          }
+        },
+        allowedSources: {
+          type: "string"
+        },
+        "forbiddenSources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowedTools": {
+          "type": "string"
+        },
+        "forbiddenTools": {
+          "type": "array",
+          "items": {}
+        },
+        "blender": {
+          "$ref": "#/definitions/Blender"
+        },
+      }
     },
     GetSources: {
       type: 'object'
       , properties: {}
+    },
+    "Blender": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contextMenuActionStartLevel": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "contextMenuActionStartLevel"
+      ],
+      "title": "Blender"
     },
 
     AuthLogout: {
@@ -50,9 +93,10 @@ const apiDoc = {
       },
       required: []
     }
-  },
-  paths: {}
+  }
+
 };
+
 
 module.exports = apiDoc;
 

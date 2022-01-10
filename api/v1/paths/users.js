@@ -18,7 +18,7 @@ module.exports = function () {
                 res.status(500).json({ message: "I couldn't read users.json" })
             } else {
                 const profiles = JSON.parse(data);
-                ressourceFetched(res, profiles )
+                ressourceFetched(res, profiles)
             }
         });
     }
@@ -28,9 +28,9 @@ module.exports = function () {
         try {
             const objectToUpdateKey = Object.keys(req.body)[0]
             const oldProfiles = await readRessource(profilesJSON, res)//.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));
-            const updatedProfiles = { ...oldProfiles, [objectToUpdateKey]: updatedProfile }
-            const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res)//.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
+            const updatedProfiles = { ...oldProfiles, ...updatedProfile }
             if (oldProfiles.hasOwnProperty(objectToUpdateKey)) {
+                const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res)//.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
                 ressourceUpdated(res, savedProfiles);
             } else { res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." }) }
 
@@ -46,7 +46,7 @@ module.exports = function () {
             const newProfiles = { ...oldProfiles, ...profileToAdd }
             const saved = await writeRessource(profilesJSON, newProfiles, res)
             if (profileDoesntExist) {
-                ressourceCreated(res, save)
+                ressourceCreated(res, saved)
             } else { res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." }) }
         } catch (e) { res.status(500) }
 
@@ -73,7 +73,7 @@ module.exports = function () {
                 schema: {
                     type: 'object',
                     items: {
-                        $ref: '#/definitions/GetProfiles'
+                        $ref: '#/definitions/Profile'
                     }
                 }
             },

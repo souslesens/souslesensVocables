@@ -4,7 +4,7 @@ const profilesJSON = path.resolve('config/sources.json');
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
 const { rest } = require("lodash");
-const { readRessource, writeRessource } = require("./utils");
+const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
 
 module.exports = function () {
     let operations = {
@@ -18,7 +18,7 @@ module.exports = function () {
                 res.status(500).json({ message: "I couldn't read profiles.json" })
             } else {
                 const profiles = JSON.parse(data);
-                res.status(200).json(profiles)
+                ressourceFetched(res, profiles)
             }
         });
     }
@@ -31,10 +31,7 @@ module.exports = function () {
             const updatedProfiles = { ...oldProfiles, [objectToUpdateKey]: updatedProfile }
             const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res)//.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
             if (oldProfiles.hasOwnProperty(objectToUpdateKey)) {
-                res.status(200).json({
-                    message: 'ressource successfully updated',
-                    profiles: savedProfiles
-                })
+                ressourceUpdated(res, savedProfiles)
             } else { res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." }) }
 
         } catch (e) { res.status(500) }
@@ -46,10 +43,11 @@ module.exports = function () {
         try {
             const oldProfiles = await readRessource(profilesJSON, res)
             const profileDoesntExist = !oldProfiles.hasOwnProperty(Object.keys(profileToAdd)[0])
-            const newProfiles = { ...oldProfiles, ...profileToAdd }
-            const saved = await writeRessource(profilesJSON, newProfiles, res)
+            const objectToCreateKey = req.body
+            const newProfiles = { ...oldProfiles, ...objectToCreateKey }
             if (profileDoesntExist) {
-                res.status(200).json(saved)
+                const saved = await writeRessource(profilesJSON, newProfiles, res)
+                ressourceCreated(res, saved)
             } else { res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." }) }
         } catch (e) { res.status(500) }
 
@@ -73,12 +71,7 @@ module.exports = function () {
         responses: {
             200: {
                 description: 'Welcome message',
-                schema: {
-                    type: 'object',
-                    items: {
-                        $ref: '#/definitions/GetProfiles'
-                    }
-                }
+                schema: {}
             },
             default: {
                 description: 'An error occurred',

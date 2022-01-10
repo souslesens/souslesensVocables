@@ -4,7 +4,7 @@ const profilesJSON = path.resolve('config/profiles.json');
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
 const { rest } = require("lodash");
-const { readRessource, writeRessource } = require("./utils");
+const { readRessource, writeRessource, ressourceFetched, ressourceUpdated } = require("./utils");
 
 module.exports = function () {
     let operations = {
@@ -18,7 +18,7 @@ module.exports = function () {
                 res.status(500).json({ message: "I couldn't read profiles.json" })
             } else {
                 const profiles = JSON.parse(data);
-                res.status(200).json(profiles)
+                ressourceFetched(res, profiles)
             }
         });
     }
@@ -31,10 +31,7 @@ module.exports = function () {
             const updatedProfiles = { ...oldProfiles, [objectToUpdateKey]: updatedProfile }
             const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res)//.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
             if (oldProfiles.hasOwnProperty(objectToUpdateKey)) {
-                res.status(200).json({
-                    message: 'ressource successfully updated',
-                    profiles: savedProfiles
-                })
+                ressourceUpdated(res, savedProfiles)
             } else { res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." }) }
 
         } catch (e) { res.status(500) }
@@ -60,34 +57,57 @@ module.exports = function () {
 
     // NOTE: We could also use a YAML string here.
     GET.apiDoc = {
-        summary: 'Returns hello world message.',
-        operationId: 'sayHello',
-        parameters: [
-            {
-                in: 'query',
-                name: 'name',
-                required: false,
-                type: 'string'
-            }
-        ],
+        summary: 'Returns dddprofiles',
+        operationId: 'getProfiles',
         responses: {
             200: {
-                description: 'Welcome message',
+                description: 'Profiles successfully fetched',
                 schema: {
-                    type: 'object',
-                    items: {
-                        $ref: '#/definitions/GetProfiles'
+
+                    properties: {
+                        message: { type: 'string' },
+                        ressources: {
+                            type: 'array',
+                            items: {
+                                $ref: '#/definitions/Profile'
+                            }
+                        }
                     }
                 }
             },
             default: {
                 description: 'An error occurred',
                 schema: {
-                    additionalProperties: true
+                    type: 'object',
+                    properties: { message: { type: "string" } }
                 }
             }
         }
     };
+    // PUT.apiDoc = {
+    //     summary: 'Returns profiles',
+    //     operationId: 'getProfiles',
+    //     parameters: [
+    //     ],
+    //     responses: {
+    //         200: {
+    //             description: 'Welcome message',
+    //             schema: {
+    //                 type: 'object',
+    //                 items: {
+    //                     $ref: '#/definitions/Profile'
+    //                 }
+    //             }
+    //         },
+    //         default: {
+    //             description: 'An error occurred',
+    //             schema: {
+    //                 additionalProperties: true
+    //             }
+    //         }
+    //     }
+    // };
+
 
 
     return operations;

@@ -9,7 +9,7 @@ const writeFile = util.promisify(fs.writeFile);
 
 async function writeRessource(pathToRessource, newRessource, res) {
     try {
-        const savedFile = await writeFile(pathToRessource, JSON.stringify(newRessource)).then(async () => await readFile(pathToRessource))
+        const savedFile = await writeFile(pathToRessource, JSON.stringify(newRessource, null, 2)).then(async () => await readFile(pathToRessource))
         return (JSON.parse(savedFile))
     }
     catch (error) {
@@ -48,11 +48,11 @@ function ressourceFetched(res, updatedRessources) {
 function failure(res, code, errMsg) {
     switch (code) {
         case 400:
-            res.status(code).json({message: `Something is wrong with this request: ${errMsg}`})
+            res.status(code).json({ message: `Something is wrong with this request: ${errMsg}` })
             break;
         default:
-            res.status(500).json({message: `Something went wrong internally: ${errMsg}`})
+            res.status(500).json({ message: `Something went wrong internally: ${errMsg}` })
     }
 }
 
-module.exports = { writeRessource, failure,  ressourceFetched, readRessource, ressourceCreated, ressourceUpdated, ressourceDeleted }
+module.exports = { writeRessource, failure, ressourceFetched, readRessource, ressourceCreated, ressourceUpdated, ressourceDeleted }

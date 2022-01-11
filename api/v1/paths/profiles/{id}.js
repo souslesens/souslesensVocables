@@ -111,14 +111,28 @@ module.exports = function () {
 
     }
     GET.apiDoc = {
-        summary: 'This ressource returns profiles list or a profile if an id is provided',
-        operationId: 'getProfiles',
+        summary: 'Get a specific profile',
+        operationId: 'getOneProfile',
         parameters: [
         ],
         responses: {
             200: {
                 description: 'Profiles',
-                 schema: {
+                schema: {
+                    $ref: '#/definitions/Profile'
+                }
+            },
+        }
+    };
+    DELETE.apiDoc = {
+        summary: 'Delete a specific profile',
+        operationId: 'DeleteOneProfile',
+        parameters: [
+        ],
+        responses: {
+            200: {
+                description: 'Profiles',
+                schema: {
                     $ref: '#/definitions/Profile'
                 }
             },

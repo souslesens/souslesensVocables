@@ -84,29 +84,53 @@ module.exports = function () {
             }
         }
     };
-    // PUT.apiDoc = {
-    //     summary: 'Returns profiles',
-    //     operationId: 'getProfiles',
-    //     parameters: [
-    //     ],
-    //     responses: {
-    //         200: {
-    //             description: 'Welcome message',
-    //             schema: {
-    //                 type: 'object',
-    //                 items: {
-    //                     $ref: '#/definitions/Profile'
-    //                 }
-    //             }
-    //         },
-    //         default: {
-    //             description: 'An error occurred',
-    //             schema: {
-    //                 additionalProperties: true
-    //             }
-    //         }
-    //     }
-    // };
+    PUT.apiDoc = {
+        summary: 'Update profiles one by one',
+        operationId: 'updateProfiles',
+        parameters: [
+        ],
+        responses: {
+            200: {
+                description: 'Profile successfully updated',
+                schema: {
+                    type: 'object',
+                    items: {
+                        $ref: '#/definitions/Profile'
+                    }
+                }
+            },
+            default: {
+                description: 'An error occurred',
+                schema: {
+                    additionalProperties: true
+                }
+            }
+        }
+    };
+
+    POST.apiDoc = {
+        summary: 'Create a new profile',
+        operationId: 'createProfile',
+        parameters: [
+        ],
+        responses: {
+            200: {
+                description: 'Profile successfully created',
+                schema: {
+                    type: 'object',
+                    items: {
+                        $ref: '#/definitions/Profile'
+                    }
+                }
+            },
+            default: {
+                description: 'An error occurred',
+                schema: {
+                    additionalProperties: true
+                }
+            }
+        }
+    };
 
 
 

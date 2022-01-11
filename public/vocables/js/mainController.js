@@ -106,12 +106,11 @@ var MainController = (function () {
 
     self.writeUserLog = function (user, tool, source) {
         var payload = {
-            writeUserLog: 1,
             infos: user.identifiant + "," + tool + "," + source
         }
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: Config.apiUrl + "/log",
             data: payload,
             dataType: "json",
 

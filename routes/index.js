@@ -202,13 +202,6 @@ router.post(
             }
         }
 
-        if (req.body.writeUserLog) {
-            var ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-            req.body.infos += "," + ip;
-
-            logger.info(req.body.infos);
-            processResponse(response, null, { done: 1 });
-        }
         if (req.body.KGquery) {
             KGcontroller.KGquery(req, function (err, result) {
                 processResponse(response, err, result);

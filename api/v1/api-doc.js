@@ -27,6 +27,19 @@ const apiDoc = {
       },
       required: []
     },
+    Users: {
+      type: "object"
+      , additionalProperties: { "$ref": "#/definitions/User" }
+    },
+    Profiles: {
+      type: "object"
+      , additionalProperties: { "$ref": "#/definitions/Profile" }
+    },
+    Sources: {
+      type: "object"
+      , additionalProperties: { "$ref": "#/definitions/Source" }
+    },
+
     User: {
       "type": "object",
       "additionalProperties": false,

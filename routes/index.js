@@ -202,12 +202,6 @@ router.post(
             }
         }
 
-        if (req.body.annotateAndStoreCorpus) {
-            DirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, JSON.parse(req.body.sources), req.body.corpusName, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.SpacyExtract) {
             DirContentAnnotator.SpacyExtract(req.body.text, JSON.parse(req.body.types), JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result);

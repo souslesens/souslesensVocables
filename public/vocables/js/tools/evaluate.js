@@ -99,17 +99,16 @@ var Evaluate = (function () {
                 return alert("enter corpus name)")
 
             var payload = {
-                annotateAndStoreCorpus: true,
                 corpusPath: corpusPath,
-                sources: JSON.stringify(sources),
+                sources: sources,
                 corpusName: corpusName,
-                options: JSON.stringify({})
+                options: {}
 
             }
             $("#annotate_waitImg").css("display", "block");
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: Config.apiUrl + "/annotator/corpus",
                 data: payload,
                 dataType: "json",
 
@@ -192,17 +191,16 @@ var Evaluate = (function () {
 
         /*
                     var payload = {
-                        annotateAndStoreCorpus: true,
                         corpusPath: corpusPath,
-                        sources: JSON.stringify(sources),
+                        sources: sources,
                         corpusName: corpusName,
-                        options: JSON.stringify({})
+                        options: {}
 
                     }
                     $("#annotate_waitImg").css("display", "block");
                     $.ajax({
                         type: "POST",
-                        url: Config.serverUrl,
+                        url: Config.apiUrl + "annotator/corpus",
                         data: payload,
                         dataType: "json",
 

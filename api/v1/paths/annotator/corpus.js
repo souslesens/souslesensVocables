@@ -3,7 +3,7 @@ const dirContentAnnotator = require(path.resolve("bin/annotator/dirContentAnnota
 
 module.exports = function() {
   let operations = {
-    GET
+    GET, POST
   };
 
   function GET(req, res, next) {
@@ -14,16 +14,26 @@ module.exports = function() {
       if (err) {
         return res.status(400).json({error: err})
       }
-        return  res.status(200).json(result)
+      return res.status(200).json(result)
+    });
+  }
+
+  function POST(req, res, next) {
+
+    dirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, req.body.sources, req.body.corpusName, req.body.options, function (err, result) {
+        if (err) {
+          return res.status(400).json({error: err})
+        }
+        return res.status(200).json(result)
     });
   }
 
   GET.apiDoc = {
 
     security: [{loginScheme: []}],
-    summary: 'Annotator corpus list',
-    description: "Annotator corpus list",
-    operationId: 'Annotator corpus list',
+    summary: 'Retrive annotate corpus list',
+    description: "Retrive annotate corpus list",
+    operationId: 'Retrive annotate corpus list',
     parameters: [
       {
         name: 'group',
@@ -39,6 +49,54 @@ module.exports = function() {
         description: 'Results',
         schema: {
           type: 'object',
+        }
+      },
+    }
+  }
+
+  POST.apiDoc = {
+
+    security: [{loginScheme: []}],
+    summary: 'Annotate corpus',
+    description: "Annotate corpus",
+    operationId: 'Annotate corpus',
+    parameters: [
+      {
+        name: 'body',
+        description: "body",
+        in: 'body',
+        schema: {
+          type: 'object',
+          properties: {
+            corpusPath: {
+              type: "string",
+            },
+            corpusName: {
+              type: "string",
+            },
+            options: {
+              type: 'object',
+              properties: {
+                exactMatch: {
+                  type: "boolean"
+                }
+              }
+            },
+            sources: {
+              type: "array",
+              items: {
+                $ref: "#/definitions/Source"
+              }
+            }
+          }
+        }
+      }
+    ],
+    responses: {
+      200: {
+        description: 'Results',
+        schema: {
+          type: 'string',
         }
       },
     }

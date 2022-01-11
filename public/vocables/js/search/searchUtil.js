@@ -39,20 +39,19 @@ var SearchUtil = (function () {
                 async.series([
                         function (callbackSeries) {
 
-                            if (!toSources) {
-                                return callbackSeries()
-                            }
+
                             Standardizer.initSourcesIndexesList(null, function (err, indexedSources) {
                                 if (err)
                                     return callbackSeries(err)
 
                                 indexes = []
-                                if (!Array.isArray(toSources))
+                                if (toSources && !Array.isArray(toSources))
                                     toSources = [toSources]
-                                toSources.forEach(function (source) {
-                                    if (indexedSources.indexOf(source) > -1)
+                                indexedSources.forEach(function (source) {
+                                    if (!toSources  || toSources.length==0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase())
-                                    toSourcesIndexesMap[source.toLowerCase()] = source
+                                        toSourcesIndexesMap[source.toLowerCase()] = source
+                                    }
                                 })
                                 callbackSeries()
                             })

@@ -207,11 +207,7 @@ router.post(
                 processResponse(response, err, result);
             });
         }
-        if (req.body.getAnnotatedCorpusList) {
-            DirContentAnnotator.getAnnotatedCorpusList(req.body.group, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
+
         if (req.body.SpacyExtract) {
             DirContentAnnotator.SpacyExtract(req.body.text, JSON.parse(req.body.types), JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result);

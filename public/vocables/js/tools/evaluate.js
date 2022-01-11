@@ -229,15 +229,9 @@ var Evaluate = (function () {
 
         self.initCorpusList = function () {
 
-
-            var payload = {
-                getAnnotatedCorpusList: 1,
-                group: "all",
-
-            }
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
+                type: "GET",
+                url: Config.apiUrl + "/annotator/corpus",
                 data: payload,
                 dataType: "json",
                 success: function (result, textStatus, jqXHR) {

@@ -12,27 +12,6 @@ module.exports = function () {
         DELETE
     };
 
-    // function parseProfile(profile) {
-
-    //     const mappedProfile = {
-    //         name: profile.name,
-    //         _type: 'profile',
-    //         id: ulid(),
-    //         allowedSourceSchemas: profile.allowedSourceSchemas,
-    //         allowedSources: profile.allowedSources,
-    //         forbiddenSources: profile.forbiddenSources,
-    //         allowedTools: profile.allowedTools,
-    //         forbiddenTools: profile.forbiddenTools,
-    //         blender: { contextMenuActionStartLevel: profile.blender.contextMenuActionStartLevel }
-    //     }
-    //     if (_.some(mappedProfile, _.isNil)) {
-    //         throw ('There is some null or undefined here. Check your data.')
-    //     }
-
-    //     return mappedProfile
-
-    // }
-
     function GET(req, res, next) {
         fs.readFile(profilesJSON, 'utf8', (err, data) => {
             if (err) {
@@ -51,37 +30,6 @@ module.exports = function () {
             }
         });
     }
-    // async function POST(req, res, next) {
-    //     const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))
-    //     const oldProfiles = JSON.parse(profiles)
-    //     const profileToAdd = req.body
-    //     const notAlreadyCreated = !oldProfiles[req.params.id]
-    //     const newProfiles = { ...oldProfiles, ...profileToAdd }
-    //     const successfullyCreated = newProfiles[req.params.id]
-
-    //     if (notAlreadyCreated && successfullyCreated) {
-
-    //         await writeFile(profilesJSON, JSON.stringify(remainingProfiles))
-    //             .catch(err => res.status(500).json({
-    //                 message: "I couldn't write profiles.json",
-    //                 error: err
-    //             }))
-
-    //         const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read profiles json" }))
-    //         res.status(200).json({
-    //             message: `${req.params.id} successfully created`,
-    //             profiles: JSON.parse(updatedProfiles)
-    //         })
-
-    //     } else if (!req.params.id) {
-    //         res.status(500).json({ message: "I need a ressource ID to perform this request" })
-
-    //     } else {
-    //         res.status(500).json({ message: `I couldn't delete ressource ${req.params.id}. Maybe it has been deleted already?` })
-    //     }
-
-    // }
-
     async function DELETE(req, res, next) {
         const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))
         const oldProfiles = JSON.parse(profiles)

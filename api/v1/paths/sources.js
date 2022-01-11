@@ -3,8 +3,8 @@ const fs = require("fs")
 const profilesJSON = path.resolve('config/sources.json');
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
-const { rest } = require("lodash");
-const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
+const { rest, get } = require("lodash");
+const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, responseSchema, ressourceFetched } = require("./utils");
 
 module.exports = function () {
     let operations = {
@@ -54,33 +54,26 @@ module.exports = function () {
 
     }
 
-
-
-    // NOTE: We could also use a YAML string here.
     GET.apiDoc = {
-        summary: 'Returns hello world message.',
-        operationId: 'sayHello',
-        parameters: [
-            {
-                in: 'query',
-                name: 'name',
-                required: false,
-                type: 'string'
-            }
-        ],
-        responses: {
-            200: {
-                description: 'Welcome message',
-                schema: {}
-            },
-            default: {
-                description: 'An error occurred',
-                schema: {
-                    additionalProperties: true
-                }
-            }
-        }
+        summary: 'Returns all sources',
+        operationId: 'getSources',
+        responses: responseSchema('Sources', 'GET')
     };
+    PUT.apiDoc = {
+        summary: 'Update Sources',
+        operationId: 'updateSources',
+        parameters: [
+        ],
+        responses: responseSchema('Sources', 'PUT')
+    };
+    POST.apiDoc = {
+        summary: 'Update Sources',
+        operationId: 'updateSources',
+        parameters: [
+        ],
+        responses: responseSchema('Sources', 'POST')
+    };
+
 
 
     return operations;

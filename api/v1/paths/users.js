@@ -4,7 +4,7 @@ const profilesJSON = path.resolve('config/users/users.json');
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
 const { rest } = require("lodash");
-const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
+const { readRessource, writeRessource, responseSchema, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
 
 module.exports = function () {
     let operations = {
@@ -57,34 +57,38 @@ module.exports = function () {
 
     // NOTE: We could also use a YAML string here.
     GET.apiDoc = {
-        summary: 'Returns hello world message.',
-        operationId: 'sayHello',
+        summary: 'Returns all users',
+        operationId: 'getAllUsers',
         parameters: [
-            {
-                in: 'query',
-                name: 'name',
-                required: false,
-                type: 'string'
-            }
         ],
-        responses: {
-            200: {
-                description: 'Welcome message',
-                schema: {
-                    type: 'object',
-                    items: {
-                        $ref: '#/definitions/Profile'
-                    }
-                }
-            },
-            default: {
-                description: 'An error occurred',
-                schema: {
-                    additionalProperties: true
-                }
-            }
-        }
+        responses: responseSchema('Users', 'GET')
     };
+    PUT.apiDoc = {
+        summary: 'Update users',
+        operationId: 'updateUsers',
+        parameters: [
+
+        ],
+        responses: responseSchema('Users', 'PUT')
+    };
+    POST.apiDoc = {
+        summary: 'Create a new user',
+        operationId: 'createUser',
+        parameters: [
+            // {
+            //     in: 'body',
+            //     name: "user",
+            //     type: 'object',
+            //     required: true
+            // }
+
+
+        ],
+
+        responses: responseSchema('Users', 'POST')
+    };
+
+
 
 
     return operations;

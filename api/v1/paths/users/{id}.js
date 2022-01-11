@@ -12,27 +12,6 @@ module.exports = function () {
         DELETE
     };
 
-    // function parseProfile(profile) {
-
-    //     const mappedProfile = {
-    //         name: profile.name,
-    //         _type: 'profile',
-    //         id: ulid(),
-    //         allowedSourceSchemas: profile.allowedSourceSchemas,
-    //         allowedSources: profile.allowedSources,
-    //         forbiddenSources: profile.forbiddenSources,
-    //         allowedTools: profile.allowedTools,
-    //         forbiddenTools: profile.forbiddenTools,
-    //         blender: { contextMenuActionStartLevel: profile.blender.contextMenuActionStartLevel }
-    //     }
-    //     if (_.some(mappedProfile, _.isNil)) {
-    //         throw ('There is some null or undefined here. Check your data.')
-    //     }
-
-    //     return mappedProfile
-
-    // }
-
     function GET(req, res, next) {
         fs.readFile(profilesJSON, 'utf8', (err, data) => {
             if (err) {
@@ -80,9 +59,16 @@ module.exports = function () {
 
     }
     GET.apiDoc = {
-        summary: 'This ressource returns profiles list or a profile if an id is provided',
-        operationId: 'getProfiles',
+        summary: 'Returns a specific profile',
+        operationId: 'getOneProfile',
         parameters: [
+            {
+                in: 'path',
+                name: "profile's id"
+                , type: 'string'
+                , required: true
+            }
+
         ],
         responses: {
             200: {

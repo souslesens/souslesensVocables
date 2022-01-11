@@ -55,4 +55,42 @@ function failure(res, code, errMsg) {
     }
 }
 
-module.exports = { writeRessource, failure, ressourceFetched, readRessource, ressourceCreated, ressourceUpdated, ressourceDeleted }
+
+function verbToHuman(verb) {
+    switch (verb) {
+        case 'GET': return "fetched";
+        case 'PUT': return "updated";
+        case 'POST': return "created";
+        case 'DELETE': return "deleted";
+        default: return 'unkown verb'
+    }
+}
+
+function responseSchema(ressourceName, verb) {
+
+    return (
+        {
+            200: {
+                description: `${ressourceName} successfully ${verbToHuman(verb)}`,
+                schema: {
+                    properties: {
+                        message: { type: 'string' },
+                        ressources: {
+                            type: 'object',
+                            $ref: `#/definitions/${ressourceName}`
+                        }
+                    }
+                }
+            },
+
+            default: {
+                description: 'An error occurred',
+                schema: {
+                    additionalProperties: true
+                }
+            }
+        }
+    )
+
+}
+module.exports = { writeRessource, failure, responseSchema, ressourceFetched, readRessource, ressourceCreated, ressourceUpdated, ressourceDeleted }

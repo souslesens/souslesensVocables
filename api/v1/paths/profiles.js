@@ -4,7 +4,7 @@ const profilesJSON = path.resolve('config/profiles.json');
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
 const { rest } = require("lodash");
-const { readRessource, writeRessource, ressourceFetched, ressourceUpdated } = require("./utils");
+const { readRessource, writeRessource, ressourceFetched, ressourceUpdated, responseSchema } = require("./utils");
 
 module.exports = function () {
     let operations = {
@@ -59,53 +59,16 @@ module.exports = function () {
     GET.apiDoc = {
         summary: 'Returns all profiles',
         operationId: 'getProfiles',
-        responses: {
-            200: {
-                description: 'Profiles successfully fetched',
-                schema: {
-
-                    properties: {
-                        message: { type: 'string' },
-                        ressources: {
-                            type: 'array',
-                            items: {
-                                $ref: '#/definitions/Profile'
-                            }
-                        }
-                    }
-                }
-            },
-            default: {
-                description: 'An error occurred',
-                schema: {
-                    type: 'object',
-                    properties: { message: { type: "string" } }
-                }
-            }
-        }
+        responses: responseSchema('Profiles', 'GET')
     };
+
+
     PUT.apiDoc = {
         summary: 'Update profiles one by one',
         operationId: 'updateProfiles',
         parameters: [
         ],
-        responses: {
-            200: {
-                description: 'Profile successfully updated',
-                schema: {
-                    type: 'object',
-                    items: {
-                        $ref: '#/definitions/Profile'
-                    }
-                }
-            },
-            default: {
-                description: 'An error occurred',
-                schema: {
-                    additionalProperties: true
-                }
-            }
-        }
+        responses: responseSchema('Profiles', 'PUT')
     };
 
     POST.apiDoc = {
@@ -113,23 +76,7 @@ module.exports = function () {
         operationId: 'createProfile',
         parameters: [
         ],
-        responses: {
-            200: {
-                description: 'Profile successfully created',
-                schema: {
-                    type: 'object',
-                    items: {
-                        $ref: '#/definitions/Profile'
-                    }
-                }
-            },
-            default: {
-                description: 'An error occurred',
-                schema: {
-                    additionalProperties: true
-                }
-            }
-        }
+        responses: responseSchema('Profiles', 'POST')
     };
 
 

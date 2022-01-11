@@ -57,7 +57,7 @@ module.exports = function () {
 
     // NOTE: We could also use a YAML string here.
     GET.apiDoc = {
-        summary: 'Returns dddprofiles',
+        summary: 'Returns all profiles',
         operationId: 'getProfiles',
         responses: {
             200: {

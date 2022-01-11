@@ -83,7 +83,7 @@ var elasticRestProxy = {
             }
             var json = JSON.parse(response.body);
             if (json.error && json.error.reason) {
-              return callback(json.error.reason, null);
+                return callback(json.error.reason, null);
             }
             var responses = json.responses;
             var totalDocsAnnotated = 0;

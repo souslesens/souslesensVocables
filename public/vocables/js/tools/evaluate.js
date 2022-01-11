@@ -253,16 +253,10 @@ var Evaluate = (function () {
         self.loadCorpusSubjectTree = function (corpusName, callback) {
             if (corpusName == "")
                 return;
-            var payload = {
-                getConceptsSubjectsTree: 1,
-                corpusName: corpusName,
 
-            }
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
+                type: "GET",
+                url: Config.apiUrl + "/annotator/tree/" + corpusName,
                 success: function (data, textStatus, jqXHR) {
                     self.currentCorpusData = data;
 

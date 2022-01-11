@@ -10,16 +10,6 @@ const apiDoc = {
     version: '1.0.0'
   },
   definitions: {
-    Hello: {
-      type: 'object',
-      properties: {
-        name: {
-          description: 'Your name',
-          type: 'string'
-        }
-      },
-      required: []
-    },
     AuthCheck: {
       properties: {
         logged: {

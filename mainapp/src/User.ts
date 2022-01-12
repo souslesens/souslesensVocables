@@ -2,28 +2,55 @@
 import { ulid } from 'ulid';
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { Msg } from './Admin'
+import { Msg_, Type, Mode } from '../src/Component/UsersTable'
+import { ThemeContext } from '@emotion/react';
+const endpoint = "/api/v1/users"
+
 
 
 async function getUsers(url: string): Promise<User[]> {
-
-    const response = await fetch(url);
-    const json = await response.json();
-    const users: [string, UserJSON][] = Object.entries(json);
-    const mapped_users = users.map(([key, val]) => decodeUser(val))
-
-    return mapped_users
+    const response = await fetch(endpoint);
+    const { message, ressources } = await response.json();
+    return mapUsers(ressources)
+}
+function mapUsers(ressources: any) {
+    const users: [string, UserJSON][] = Object.entries(ressources);
+    const mapped_users = users.map(([_, val]) => decodeUser(val));
+    return mapped_users;
 }
 
 async function putUsers(url: string, body: User[]): Promise<User[]> {
 
+
     const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.id]: item }), {});
-    const response = await fetch(url, { method: "put", body: JSON.stringify(usersToObject, null, '\t'), headers: { 'Content-Type': 'application/json' } });
+    const response = await fetch(endpoint, { method: "put", body: JSON.stringify(body, null, '\t'), headers: { 'Content-Type': 'application/json' } });
     const json = await response.json();
     const users: [string, UserJSON][] = Object.entries(json);
     const decoded_users = users.map(([key, val]) => decodeUser(val))
 
     return decoded_users
 }
+
+async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+
+    try {
+        const response = await fetch(endpoint, { method: mode === Mode.Edition ? "put" : "post", body: JSON.stringify({ [body.id]: body }, null, '\t'), headers: { 'Content-Type': 'application/json' } });
+        const { message, ressources } = await response.json()
+
+        console.log("RESPONSE", ressources)
+
+        updateModel({ type: 'ServerRespondedWithUsers', payload: success(mapUsers(ressources)) })
+        updateLocal({ type: Type.UserClickedModal, payload: false })
+        updateLocal({ type: Type.ResetUser, payload: mode })
+    } catch (e) {
+        console.log(e)
+        updateModel({ type: 'ServerRespondedWithUsers', payload: failure(e) })
+    }
+    //.catch((e) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(e.msg) }))
+
+
+}
+
 
 function deleteUser(users: User[], user: User, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>> = () => console.log("modal closed")) {
     const updatedUsers = users.filter(prevUsers => prevUsers.id !== user.id);
@@ -90,6 +117,6 @@ const newUser = (key: string): User => { return ({ id: key, _type: 'user', login
 
 
 
-export { getUsers, newUser, restoreUsers, saveUser, deleteUser, putUsers, User }
+export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, saveUser, deleteUser, putUsers, User }
 
 

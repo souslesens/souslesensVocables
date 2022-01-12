@@ -6,7 +6,7 @@ import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
 import { identity, style } from '../Utils';
-import { newUser, putUsers, User } from '../User';
+import { newUser, putUsers, putUsersBis, User } from '../User';
 import { ulid } from 'ulid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -111,12 +111,12 @@ type UserEditionState = { modal: boolean, userForm: User }
 
 const initSourceEditionState: UserEditionState = { modal: false, userForm: newUser(ulid()) }
 
-enum Type {
+const enum Type {
     UserClickedModal,
     UserUpdatedField,
     ResetUser
 }
-enum Mode { Creation, Edition }
+const enum Mode { Creation, Edition }
 
 type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
@@ -124,7 +124,7 @@ type Msg_ =
     | { type: Type.ResetUser, payload: Mode }
 
 const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionState => {
-    console.log(Type[msg.type], msg.payload)
+    //console.log(Type[msg.type], msg.payload)
     const { model } = useModel()
     const unwrappedUsers = SRD.unwrap([], identity, model.users)
 
@@ -174,14 +174,17 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const saveSources = () => {
 
-        const updateUsers = unwrappedUsers.map(s => s.login === user.login ? userModel.userForm : s)
-        const addUser = [...unwrappedUsers, userModel.userForm]
-        updateModel({ type: 'UserClickedSaveChanges', payload: {} });
-        putUsers("/users", create ? addUser : updateUsers)
-            .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
-            .then(() => update({ type: Type.UserClickedModal, payload: false }))
-            .then(() => update({ type: Type.ResetUser, payload: create ? Mode.Creation : Mode.Edition }))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
+        // const updateUsers = unwrappedUsers.map(s => s.login === user.login ? userModel.userForm : s)
+        // const addUser = [...unwrappedUsers, userModel.userForm]
+        // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
+        // putUsers("/users", create ? addUser : updateUsers)
+        //     .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
+        //     .then(() => update({ type: Type.UserClickedModal, payload: false }))
+        //     .then(() => update({ type: Type.ResetUser, payload: create ? Mode.Creation : Mode.Edition }))
+        //     .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
+
+        if (create) { putUsersBis(userModel.userForm, Mode.Creation, updateModel, update) }
+        else { putUsersBis(userModel.userForm, Mode.Edition, updateModel, update) }
     };
 
     const creationVariant = (edition: any, creation: any) => create ? creation : edition
@@ -240,5 +243,5 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
         </Modal></>)
 };
 
-export default UsersTable
+export { UsersTable, Msg_, Type, Mode }
 

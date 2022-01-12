@@ -8,7 +8,7 @@ import { identity } from './Utils';
 import ProfilesTable from './Component/ProfilesTable';
 import { Profile } from './Profile';
 import SourcesTable from './Component/SourcesTable';
-import UsersTableBis from './Component/UsersTable';
+import { UsersTable } from './Component/UsersTable';
 import { Source, getSources } from "./Source";
 import { Config, getConfig } from "./Config";
 
@@ -167,7 +167,7 @@ const Admin = () => {
 const Dispatcher = (props: { model: Model }) => {
     switch (props.model.currentEditionTab) {
         case 'UsersEdition':
-            return <UsersTableBis />
+            return <UsersTable />
         case 'ProfilesEdition':
             return <ProfilesTable />
         case 'SourcesEdition':

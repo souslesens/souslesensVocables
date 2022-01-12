@@ -41,6 +41,10 @@ const user = {
       }
 
       return result
+    },
+    getProfiles: function(reqUser) {
+      const currentUser = user.getUser(reqUser)
+      return currentUser.user.hasOwnProperty('groups') ? currentUser.user.groups : []
     }
 }
 

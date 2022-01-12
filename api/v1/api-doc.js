@@ -9,6 +9,9 @@ const apiDoc = {
     loginScheme: {
       type: 'basic'
     },
+    restrictAdmin: {
+      type: 'basic'
+    }
   },
   definitions: {
     Hello: {

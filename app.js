@@ -90,6 +90,59 @@ openapi.initialize({
             }
             return Promise.resolve(true);
         },
+        restrictAdmin: function (req, scopes, definition) {
+
+          const logged = req.user ? true : false
+
+          const auth =
+              config.auth == "keycloak"
+                  ? {
+                        realm: config.keycloak.realm,
+                        clientID: config.keycloak.clientID,
+                        authServerURL: config.keycloak.authServerURL,
+                    }
+                  : {};
+
+          const findUser = logged ? Object.keys(users)
+              .map(function (key, index) {
+                  return {
+                      id: users[key].id,
+                      login: users[key].login,
+                      groups: users[key].groups,
+                      source: users[key].source,
+                  };
+              })
+              .find((user) => user.login == req.user.login) : {};
+
+          const result = {
+            logged: config.disableAuth ? true : logged,
+            user: config.disableAuth ? {
+              login: "admin",
+              groups: ["admin"],
+            } : logged ? {
+              login: findUser.login,
+              groups: findUser.groups,
+            } : {},
+            authSource: config.disableAuth ? "json" : config.auth,
+            auth: config.disableAuth ? {} : auth,
+          }
+
+          if (!result.logged) {
+            throw {
+                status: 401,
+                message: "You must authenticate to access this ressource.",
+            };
+          }
+
+          if (!result.user.groups.includes("admin")) {
+            throw {
+                status: 401,
+                message: "You must be admin to access this ressource.",
+            };
+          }
+
+          return Promise.resolve(true);
+        }
     },
 });
 

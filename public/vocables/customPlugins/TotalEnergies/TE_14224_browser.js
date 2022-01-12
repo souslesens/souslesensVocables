@@ -69,7 +69,7 @@ var TE_14224_browser = (function () {
 
             var limit = 100000
 
-            var sqlQuery = " select distinct location1,location2 from " + table;
+            var sqlQuery = " select distinct concat('A_',id) as id,location1,location2 from " + table + " where (location3 is null or location3='') and (location2 is not null and location2 !='')";
 
 
             self.querySQLserver(sqlQuery, function (err, data) {
@@ -87,7 +87,7 @@ var TE_14224_browser = (function () {
                             text: item.location1,
                             parent: "#",
                             data: {
-                                location: item.location1,
+                                FunctionalLocationCode: item.location1,
                                 id: item.location1,
                                 label: item.location1,
                                 type: "location",
@@ -98,13 +98,17 @@ var TE_14224_browser = (function () {
                     }
                     if (!assetTreeDistinctNodes[item.location2]) {
                         assetTreeDistinctNodes[item.location2] = 1
+
+
                         jstreeData.push({
-                            id: item.location1 + "/" + item.location2,
+                            //  id: item.location1 + "/" + item.location2,
+                            id: item.id,
                             text: item.location2,
                             parent: item.location1,
                             data: {
-                                location: item.location1 + "/" + item.location2,
-                                id: item.location1 + "/" + item.location2,
+                                FunctionalLocationCode: item.location1 + "/" + item.location2,
+                                // id: item.location1 + "/" + item.location2,
+                                id: item.id,
                                 label: item.location2,
                                 type: "location",
                             }
@@ -121,6 +125,11 @@ var TE_14224_browser = (function () {
                     selectTreeNodeFn: function (event, obj) {
                         self.currentTreeNode = obj.node
                         var level = self.currentTreeNode.parents.length + 1
+                        self.openAssetTreeNode(self.currentTreeNode, level)
+                    },
+                    selectTreeNodeFnXXX: function (event, obj) {
+                        self.currentTreeNode = obj.node
+                        var level = self.currentTreeNode.parents.length + 1
                         if (level > 4) {
                             if (self.currentTreeNode.data.type == "location")
                                 self.openClassTreeNode(self.currentTreeNode.data.id, level)
@@ -129,7 +138,7 @@ var TE_14224_browser = (function () {
                             else if (self.currentTreeNode.data.type == "tag")
                                 ;//  self.showAssetNodeInfos(self.currentTreeNode)
                         } else {
-                            self.openFunctionalLocationTreeNode(self.currentTreeNode.data.id, level)
+                            self.openFunctionalLocationTreeNode(self.currentTreeNode.data, level)
                         }
 
                     }
@@ -141,206 +150,41 @@ var TE_14224_browser = (function () {
 
         }
 
-        self.openFunctionalLocationTreeNode = function (nodeId, level) {
 
-
+        self.openAssetTreeNode = function (node, level, callback) {
             var limit = 100000
+            var parentData = node.data;
+            var sqlQuery = " select id," +
+                "FunctionalLocationCode,functionalLocationDescription," +
+                self.currentTable_14224Field + " as mapping_14224 " +
+                " from " + self.currenTable + " where  parentFunctionalLocation ='" + parentData.FunctionalLocationCode + "' order by className";
+            //   var sqlQuery = " select distinct tag," + self.currentTable_14224Field + " as mapping_14224 from " + self.currenTable + " where  id='"+node.data.id+"' order by tag";
 
-            var sqlQuery = " select distinct location" + level + " from " + self.currenTable + " where  parentFunctionalLocation='" + nodeId + "'";
 
-
-            self.querySQLserver(sqlQuery, function (err, data) {
+            self.querySQLserver(sqlQuery, function (err, result) {
                 if (err)
                     return MainController.UI.message(err)
+                if (callback)
+                    return callback(null, result)
                 var jstreeData = []
-                data.forEach(function (item) {
-
-                    var childId = item["location" + level]
-                    if (!assetTreeDistinctNodes[childId]) {
-                        assetTreeDistinctNodes[childId] = 1
+                result.forEach(function (item) {
+                    var data = item;
+                    data.level = level;
+                    //  var childId = nodeId + "/" + common.formatUriToJqueryId(item.functionalLocationDescription)
+                    if (!assetTreeDistinctNodes[item.id]) {
+                        assetTreeDistinctNodes[item.id] = 1
                         jstreeData.push({
-                            id: nodeId + "/" + childId,
-                            text: childId,
-                            parent: nodeId,
-                            data: {
-                                type: "location",
-                                id: nodeId + "/" + childId,
-                                location: nodeId + "/" + childId,
-
-                                text: childId,
-
-                            }
-                        })
-                    }
-                })
-                common.jstree.addNodesToJstree("TE_114224_browser_assetPanelTreeDiv", nodeId, jstreeData)
-            })
-        }
-        self.openClassTreeNode = function (nodeId, level) {
-
-
-            var limit = 100000
-
-            var sqlQuery = " select FunctionalLocationCode,functionalLocationDescription from " + self.currenTable + " where  FunctionalLocationCode like'" + nodeId + "%' order by className";
-
-
-            self.querySQLserver(sqlQuery, function (err, data) {
-                if (err)
-                    return MainController.UI.message(err)
-                var jstreeData = []
-                data.forEach(function (item) {
-
-                    var childId = nodeId + "/" + common.formatUriToJqueryId(item.functionalLocationDescription)
-                    if (!assetTreeDistinctNodes[childId]) {
-                        assetTreeDistinctNodes[childId] = 1
-                        jstreeData.push({
-                            id: childId,
+                            id: "A_" + item.id,
                             text: item.functionalLocationDescription,
-                            parent: nodeId,
+                            parent: node.id,
                             type: "owl:Class",
-                            data: {
-                                type: "class",
-                                id: childId,
-                                location: nodeId,
-                                className: item.functionalLocationDescription,
-
-                                label: item.functionalLocationDescription,
-
-                            }
+                            data: data
                         })
                     }
                 })
-                common.jstree.addNodesToJstree("TE_114224_browser_assetPanelTreeDiv", nodeId, jstreeData)
-            })
-        }
-
-        self.openTagTreeNode = function (node) {
-
-            var limit = 100000
-
-            var sqlQuery = " select distinct tag," + self.currentTable_14224Field + " as mapping_14224 from " + self.currenTable + " where  functionalLocationDescription ='" + node.data.className + "' and   FunctionalLocationCode like'" + node.data.location + "%' order by tag";
-
-
-            self.querySQLserver(sqlQuery, function (err, data) {
-                if (err)
-                    return MainController.UI.message(err)
-                var jstreeData = []
-                var nodeId = node.id
-                data.forEach(function (item) {
-
-                    var childId = item.tag
-                    if (!assetTreeDistinctNodes[childId]) {
-                        assetTreeDistinctNodes[childId] = 1
-                        jstreeData.push({
-                            id: nodeId + "/" + childId,
-                            text: childId,
-                            parent: nodeId,
-                            type: "owl:table",
-                            data: {
-                                type: "tag",
-                                id: nodeId + "/" + childId,
-                                className: node.data.className,
-                                location: node.data.location,
-                                tag: childId,
-                                text: childId,
-                                mapping_14224: item["mapping_14224"]
-
-                            }
-                        })
-                    }
-                })
-                common.jstree.addNodesToJstree("TE_114224_browser_assetPanelTreeDiv", nodeId, jstreeData)
+                common.jstree.addNodesToJstree("TE_114224_browser_assetPanelTreeDiv", "A_" + node.id, jstreeData)
             })
 
-
-        }
-
-
-        self.xxx = function () {
-            setTimeout(function () {
-                    var levels = [
-
-                        "Country",
-                        "3-Installation",
-                        "4-Plant/Unit",
-                        "5-System",
-                        "6-Equipment unit/Package",
-                        "7-SubUnit/Class",
-                        "8-Component",
-                        "9-part"
-
-                    ]
-                    //  common.fillSelectOptions("TE_114224_browser_levelsSelect", levels)
-
-
-                    var superClasses = [
-                        {uri: "http://w3id.org/readi/z018-rdl/prod_SYS", label: "SYSTEM"},
-                        {uri: "http://standards.iso.org/iso/15926/part14/FunctionalObject", label: "FUNCTION"},
-                        {uri: "http://w3id.org/readi/rdl/CFIHOS-30000311", label: "ARTEFACT"},
-                        {uri: "http://w3id.org/readi/rdl/CFIHOS-30000311", label: "COMPONENT"},
-                        {uri: "https://w3id.org/requirement-ontology/rdl/REQ_0007", label: "ADVICE"},
-                        {uri: "https://w3id.org/requirement-ontology/rdl/REQ_0010", label: "RECOMMENDATION"},
-                        {uri: "https://w3id.org/requirement-ontology/rdl/REQ_0011", label: "REQUIREMENT"},
-
-
-                    ]
-                    var index = 0
-                    var htmlTotal = ""
-                    var treesData = {}
-                    async.eachSeries(superClasses, function (superClass, callbackEach) {
-
-                        Sparql_OWL.getNodeChildren(self.referenceOntologySource, null, [superClass.uri], 1, null, function (err, result) {
-                            if (err)
-                                return callbackEach()
-
-                            var html = "<div class='TE_114224_browser_leftPanelClassDiv'>"
-                            html += "<div  class='TE_114224_browser_title'>" + superClass.label + "</div>"
-                            html += "<div class='TE_114224_browser_leftPanelTreeContainer'>"
-                            html += "<div id='TE_114224_browser_tree_" + superClass.label + "'>"
-                            html += "</div>"
-                            html += "</div>"
-                            html += "</div>"
-                            htmlTotal += html;
-
-                            result.forEach(function (item) {
-                                jstreeData.push({
-                                    id: item.child1.value,
-                                    text: item.child1Label.value,
-                                    parent: "#",
-                                    data: {
-                                        id: item.child1.value,
-                                        label: item.child1Label.value,
-                                    }
-                                })
-
-                            })
-
-                            treesData["TE_114224_browser_tree_" + superClass.label] = jstreeData
-
-
-                            if (++index > 5)
-                                return callbackEach("stop")
-                            callbackEach()
-                        })
-                    }, function (err) {
-                        if (err)
-                            ;//  return alert(err)
-                        $("#TE_114224_browser_filtersContainerDiv").html(htmlTotal)
-                        setTimeout(function () {
-
-                            var options = {withCheckboxes: 1}
-                            for (var key in treesData) {
-                                common.jstree.loadJsTree(key, treesData[key], options)
-
-                            }
-
-                        }, 200)
-
-                    })
-
-
-                }
-                , 200)
 
         }
 
@@ -386,8 +230,7 @@ var TE_14224_browser = (function () {
                 return;
 
 
-            var sqlQuery = " select distinct * from " + self.currenTable + " where  id="+node.data.id
-
+            var sqlQuery = " select distinct * from " + self.currenTable + " where  id=" + node.data.id
 
 
             self.querySQLserver(sqlQuery, function (err, data) {
@@ -438,15 +281,15 @@ var TE_14224_browser = (function () {
             var nodeData14224;
             var allGraphIds = {}
             var Iso14224AssetMap = {}
-            var iso14224CodeIdMap={}
+            var iso14224CodeIdMap = {}
             async.series([
 
                     function (callbackSeries) {
-                        if (node.data.type != "location") {
-                            return callbackSeries()
-                        }
-                        var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription as className," + self.currentTable_14224Field + " as mapping_14224  from " + self.currenTable + "" +
-                            " where  FunctionalLocationCode like'" + node.data.id + "%' order by className";
+                        MainController.UI.message("looking for " + node.label + " children")
+                        var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription as className," +
+                            "FunctionalLocationCode, parentFunctionalLocation, " +
+                            "" + self.currentTable_14224Field + " as mapping_14224  from " + self.currenTable + "" +
+                            " where  FunctionalLocationCode like'" + node.data.FunctionalLocationCode + "%' order by className";
 
                         self.querySQLserver(sqlQuery, function (err, data) {
                             if (err)
@@ -456,12 +299,6 @@ var TE_14224_browser = (function () {
 
 
                                 var childId = item.id
-
-                                //insert className beetwen location and tag
-                             /*   if (item.className) {
-                                    var p = childId.lastIndexOf("/")
-                                    childId = childId.substring(0, p) + "/" + item.className;//+ childId.substring(p)
-                                }*/
 
                                 if (!Iso14224AssetMap[item.mapping_14224])
                                     Iso14224AssetMap[item.mapping_14224] = []
@@ -479,12 +316,17 @@ var TE_14224_browser = (function () {
                         var words = []
                         for (var key in childrenMap) {
                             var word = childrenMap[key].mapping_14224;
-                            var word2=word.replace(/[0-9]/g,"")
-                            if (word2 && words.indexOf(word2)<0)
+                            var word2 = word// word.replace(/[0-9]/g, "")
+                            if (word2 && words.indexOf(word2) < 0)
                                 words.push(word2)
+                        }
+                        if (words.length == 0) {
+                            MainController.UI.message("No matching ISO_14424 classes", true)
+                            return callbackSeries("No matching ISO_14424 classes")
                         }
 
 
+                        MainController.UI.message("looking for ISO_14424 classes")
                         SearchUtil.getSimilarLabelsInSources(null, self.referenceOntologySource.toLowerCase(), words, null, "exactMatch", {parentlabels: true}, function (err, result) {
 
                             if (err)
@@ -496,27 +338,27 @@ var TE_14224_browser = (function () {
                                     item.matches[source].forEach(function (match) {
                                         ids.push(match.id)
 
-                                        iso14224CodeIdMap[item.id]=match.id
+                                        iso14224CodeIdMap[item.id] = match.id
                                         var assetObjs = Iso14224AssetMap[item.id]
                                         assetObjs.forEach(function (assetObj) {
                                             var edgeId = assetObj.id + "_" + match.id
 
-                                                var edge = {
-                                                    id: edgeId,
-                                                    from: "A_" + assetObj.id,
-                                                    to: match.id
-                                                }
-                                                edge.color="blue"
+                                            var edge = {
+                                                id: edgeId,
+                                                from: "A_" + assetObj.id,
+                                                to: match.id
+                                            }
+                                            edge.color = "blue"
 
 
-                                                visjsData.edges.push(edge);
+                                            visjsData.edges.push(edge);
 
                                         })
                                     })
                                 }
                             })
 
-
+                            MainController.UI.message("drawing ISO_14424 classes")
                             async.eachSeries(ids, function (id, callbackEach) {
                                 if (allGraphIds[id])
                                     return callbackEach();
@@ -551,18 +393,15 @@ var TE_14224_browser = (function () {
                                 if (!allGraphIds[assetObj.id]) {
                                     allGraphIds[assetObj.id] = 1
 
-                                    assetObjs.push( assetObj)
+                                    assetObjs.push(assetObj)
                                 }
                             })
                         }
 
-
-
-
-                        self.graphAssetNodeAndParents(assetObjs, function (err, result) {
+                        MainController.UI.message("drawing asset nodes ")
+                        self.graphAssetNodeAndParents(assetObjs, {withoutParents: true}, function (err, result) {
                             if (err)
                                 return callbackSeries(err)
-
 
 
                             visjsData.nodes = common.concatArraysWithoutDuplicate(visjsData.nodes, result.nodes, "id")
@@ -575,34 +414,33 @@ var TE_14224_browser = (function () {
 
 
                     // make edges with fuzz matches assetNodes and iso14224
-                function(callbackSeries){
+                    function (callbackSeries) {
+                        return callbackSeries()
+                        for (var keyAsset in Iso14224AssetMap) {
+                            for (var keyIso in iso14224CodeIdMap) {
+                                if (keyAsset != keyIso && keyAsset.indexOf(keyIso) == 0) {
+                                    Iso14224AssetMap[keyAsset].forEach(function (itemAsset) {
+                                        var from = "A_" + itemAsset.id;
+                                        var to = iso14224CodeIdMap[keyIso]
+                                        var edgeId = from + "_" + to
+                                        var edge = {
+                                            id: edgeId,
+                                            from: from,
+                                            to: to
+                                        }
+                                        edge.color = "green"
 
-                    for( var keyAsset in Iso14224AssetMap){
-                        for( var keyIso in iso14224CodeIdMap) {
-                            if(keyAsset!=keyIso && keyAsset.indexOf(keyIso)==0){
-                                Iso14224AssetMap[keyAsset].forEach(function(itemAsset){
-                                    var from="A_" +itemAsset.id;
-                                    var to=iso14224CodeIdMap[keyIso]
-                                    var edgeId = from + "_" + to
-                                    var edge = {
-                                        id: edgeId,
-                                        from:from,
-                                        to: to
-                                    }
-                                    edge.color = "grey"
 
-
-                                    visjsData.edges.push(edge);
-                                })
-                            }
+                                        visjsData.edges.push(edge);
+                                    })
+                                }
 
 
                             }
                         }
-                    callbackSeries()
+                        callbackSeries()
 
                     }
-
 
 
                 ]
@@ -627,7 +465,9 @@ var TE_14224_browser = (function () {
         }
 
 
-        self.graphAssetNodeAndParents = function (nodes, callback) {
+        self.graphAssetNodeAndParents = function (nodes, options, callback) {
+            if (!options)
+                options = {}
             var startLevel = 8
 
             if (!Array.isArray(nodes)) {
@@ -637,26 +477,21 @@ var TE_14224_browser = (function () {
             var visjsExistingNodes = visjsGraph.getExistingIdsMap();
 
             nodes.forEach(function (item) {
-
+                var data = item;
+                data.source = "TE_14224_browser";
+                data.level = i;
+                data.type = "assetNode";
                 if (!visjsExistingNodes[item.id]) {
                     visjsExistingNodes[item.id] = 1
                     var node = {
-                        id: "A_"+item.id,
-                        label:item.className,
+                        id: "A_" + item.id,
+                        label: item.className,
 
                         size: Lineage_classes.defaultShapeSize,
                         shape: "square",
                         size: Lineage_classes.defaultShapeSize,
                         color: Lineage_classes.getSourceColor(self.currenTable),
-                        data: {
-                            source: "TE_14224_browser",
-                            level: i,
-                            type: "assetNode",
-                            id: item.id,
-                            label: item.className,
-                            mapping_14224:item.mapping_14224
-
-                        },
+                        data: data,
                         level: startLevel + 5 - i,
 
                     }
@@ -665,59 +500,56 @@ var TE_14224_browser = (function () {
 
                 }
 
-                var previousId = "A_"+item.id
-                for (var i=5; i >0; i--) {
+                if (!options.withoutParents) {
+                    var previousId = "A_" + item.id
+                    for (var i = 5; i > 0; i--) {
 
 
-                   if(item["location"+i]){
-                       var id=item["location"+i]
+                        if (item["location" + i]) {
+                            var id = item["location" + i]
 
 
+                            if (!visjsExistingNodes[id]) {
+                                visjsExistingNodes[id] = 1
+                                var node = {
+                                    id: id,
+                                    label: id,
 
-                       if (!visjsExistingNodes[id]) {
-                           visjsExistingNodes[id] = 1
-                           var node = {
-                               id: id,
-                               label:id,
+                                    size: Lineage_classes.defaultShapeSize,
+                                    shape: "square",
+                                    size: Lineage_classes.defaultShapeSize,
+                                    color: Lineage_classes.getSourceColor(self.currenTable),
+                                    data: {
+                                        source: "TE_14224_browser",
+                                        level: i,
+                                        type: "assetNode",
+                                        id: id,
+                                        label: id,
 
-                               size: Lineage_classes.defaultShapeSize,
-                               shape: "square",
-                               size: Lineage_classes.defaultShapeSize,
-                               color: Lineage_classes.getSourceColor(self.currenTable),
-                               data: {
-                                   source: "TE_14224_browser",
-                                   level: i,
-                                   type: "assetNode",
-                                   id: id,
-                                   label: id,
+                                    },
+                                    level: startLevel + 5 - i,
 
-                               },
-                               level: startLevel +5 - i,
+                                }
+                                visjsData.nodes.push(node)
 
-                           }
-                           visjsData.nodes.push(node)
-
-                       }
-
+                            }
 
 
+                            var edgeId = previousId + "_" + id
+                            if (!visjsExistingNodes[edgeId]) {
+                                visjsExistingNodes[edgeId] = 1
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: previousId,
+                                    to: id
 
-                    if (true) {
+                                })
 
-                        var edgeId = previousId + "_" + id
-                        if (!visjsExistingNodes[edgeId]) {
-                            visjsExistingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: previousId,
-                                to: id
 
-                            })
-
+                            }
+                            previousId = id
 
                         }
-                        previousId =id
-                    }
                     }
                 }
             })
@@ -779,8 +611,8 @@ var TE_14224_browser = (function () {
             items.nodeInfos = {
                 label: "Node Infos",
                 action: function (e) {// pb avec source
-                    if (self.currentTreeNode.data.type == "tag")
-                        self.showAssetNodeInfos(self.currentTreeNode, "tree")
+                    //  if (self.currentTreeNode.data.type == "tag")
+                    self.showAssetNodeInfos(self.currentTreeNode, "tree")
 
 
                 }
@@ -788,7 +620,7 @@ var TE_14224_browser = (function () {
             items.graphAssetNodeAndParents = {
                 label: "Graph Node",
                 action: function (e) {// pb avec source
-                    TE_14224_browser.graphAssetNodeAndParents(self.currentTreeNode)
+                    TE_14224_browser.graphAssetNodeAndParents(self.currentTreeNode.data)
 
                 }
             }
@@ -852,6 +684,7 @@ var TE_14224_browser = (function () {
                         return;
 
                     var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_14224_browser.showAssetNodeInfos(null,'Graph');\"> Node infos</span>"
+                    html += "    <span  class=\"popupMenuItem\"onclick=\"TE_14224_browser.graphActions.showNodeChildren();\"> show tags</span>"
 
                     $("#graphPopupDiv").html(html);
                     self.currentGraphNode = node;
@@ -860,6 +693,127 @@ var TE_14224_browser = (function () {
                 } else {
                     Lineage_classes.graphActions.showGraphPopupMenu(node, point, options)
                 }
+
+
+            }
+
+            , showNodeChildren: function () {
+                var node = self.currentGraphNode;
+
+                self.openAssetTreeNode(self.currentGraphNode, null, function (err, result) {
+                    if (err)
+                        return;
+                    var visjsData = {nodes: [], edges: []}
+                    result.forEach(function (item) {
+                        var data = item;
+                        data.type = "assetNode"
+                        var existingNodes = visjsGraph.getExistingIdsMap()
+                        if (!existingNodes[item.id]) {
+                            existingNodes[item.id] = 1
+                            visjsData.nodes.push({
+
+                                id: "A_" + item.id,
+                                label: item.functionalLocationDescription,
+                                type: "owl:Class",
+                                data: data,
+                                size: Lineage_classes.defaultShapeSize,
+                                shape: "square",
+                                color: Lineage_classes.getSourceColor(self.currenTable),
+                                level: self.currentGraphNode.level + 1
+                            })
+
+                            var edgeId = item.id + "_" + self.currentGraphNode.id
+                            var edge = {
+                                id: edgeId,
+                                from: "A_" + item.id,
+                                to: self.currentGraphNode.id
+                            }
+                            edge.color = "green"
+
+
+                            visjsData.edges.push(edge);
+                        }
+                    })
+                    visjsGraph.data.nodes.update(visjsData.nodes)
+                    visjsGraph.data.edges.update(visjsData.edges)
+                })
+
+            }, drawAssetNodesParents: function () {
+
+                var nodes = visjsGraph.data.nodes.get();
+
+                var assetNodesIds = [];
+
+                var level = 10
+                nodes.forEach(function (node) {
+                    if (node.data.type == "assetNode")
+                        if (assetNodesIds.indexOf(node.data.parentFunctionalLocation) < 0)
+                            assetNodesIds.push(node.data.parentFunctionalLocation)
+
+                })
+
+                var filterStr = JSON.stringify(assetNodesIds).replace(/[\[\]]/g, "").replace(/"/g, "'")
+                /* var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription as className,FunctionalLocationCode," + self.currentTable_14224Field + " as mapping_14224  from " + self.currenTable + "" +
+                     " where  FunctionalLocationCode in (" + filterStr + ") ";*/
+
+                var sqlQuery = " select distinct parentTable.id,parentTable.location1,parentTable.location2,parentTable.location3,parentTable.location4,parentTable.functionalLocationDescription \n" +
+                    " as className,parentTable.FunctionalLocationCode,parentTable.RDLRelation as mapping_14224 ,\n" +
+                    " childTable.id as childId\n" +
+                    " \n" +
+                    " from " + self.currenTable + " as parentTable , " + self.currenTable + " as childTable where  childTable.parentFunctionalLocation in ('ABS/CCR/CRS/CONT/50-MS-001','ABS/CCR/CRS/CONT/50-SC-001') \n" +
+                    "\n" +
+                    " and childTable.parentFunctionalLocation=parentTable.functionalLocationCode"
+
+                var startLevel = 10;
+                self.querySQLserver(sqlQuery, function (err, result) {
+                    if (err)
+                        return callbackSeries(err)
+                    var visjsData = {nodes: [], edges: []}
+                    var visjsExistingNodes = visjsGraph.getExistingIdsMap()
+                    result.forEach(function (item) {
+
+                        var data = item;
+                        data.type = "assetNode"
+                        var id = item.id
+
+                        if (!visjsExistingNodes[id]) {
+                            visjsExistingNodes[id] = 1
+                            var node = {
+                                id: "A_" + id,
+                                label: item.className,
+
+                                size: Lineage_classes.defaultShapeSize,
+                                shape: "square",
+                                size: Lineage_classes.defaultShapeSize,
+                                color: Lineage_classes.getSourceColor(self.currenTable),
+                                data: data,
+                                level: level,
+
+                            }
+                            visjsData.nodes.push(node)
+
+                        }
+
+
+                        var edgeId = "A_" + item.childId + "_" + "A_" + id;
+                        if (!visjsExistingNodes[edgeId]) {
+                            visjsExistingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: "A_" + item.childId,
+                                to: "A_" + id,
+
+                            })
+
+
+                        }
+
+                    })
+
+
+                    visjsGraph.data.nodes.update(visjsData.nodes)
+                    visjsGraph.data.edges.update(visjsData.edges)
+                })
 
 
             }
@@ -959,194 +913,6 @@ var TE_14224_browser = (function () {
         }
 
 
-        self.mapClassesTo14224Old = function (node) {
-            var visjsData = {nodes: [], edges: []}
-            var assetNodeIds = []
-
-            async.series([
-
-                function (callbackSeries) {
-                    var assetClassColumn = ""
-                    var samAs207Column = ""
-                    if (self.currenTable == "girassol") {
-                        samAs207Column = "className"
-                        assetClassColumn = "description"
-                    } else if (self.currenTable == "absheron") {
-                        samAs207Column = "RDLRelation"
-                        assetClassColumn = "functionalLocationDescription"
-                    }
-
-                    var sqlQuery = "select distinct location1,location2,location3,location4," + samAs207Column + "," + assetClassColumn + " from " + self.currenTable;
-                    //  var sqlQuery = " select distinct '" + node.data.id + "' as id ," + samAs207Column + " from " + self.currenTable;
-                    if (node.data.type == "location") {
-                        //    sqlQuery += " where parentFunctionalLocation = '" + node.id + "'"
-                        sqlQuery += " where   FunctionalLocationCode like'" + node.data.location + "%' ";
-
-                    } else if (node.data.type == "class") {
-                        sqlQuery += " where  className ='" + node.data.className + "' and   FunctionalLocationCode like'" + node.data.location + "%' ";
-
-                    } else if (node.data.type == "tag") {
-                        sqlQuery += " where  className ='" + node.data.className + "' " +
-                            "and   FunctionalLocationCode like'" + node.data.location + "%'" +
-                            " and tag='" + node.data.tag + "' ";
-
-
-                    }
-                    self.querySQLserver(sqlQuery, function (err, data) {
-
-
-                        if (err)
-                            return MainController.UI.message(err)
-
-                        var standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
-
-                        var visjsExistingNodes = visjsGraph.getExistingIdsMap();
-
-                        if (data.length > 0) {
-                            data.forEach(function (item) {
-                                if (item[samAs207Column] == '')
-                                    return;
-                                var uri = graphUri + item[samAs207Column].replace(/-/g, "_")
-                                var id = item.location1 + "/" + item.location2 + "/" + item.location3 + "/" + item.location4 + "/" + item[assetClassColumn]
-                                id = id.replace(/\/\//g, "")
-                                assetNodeIds.push({id: id})
-
-                                if (!visjsExistingNodes[uri]) {
-                                    visjsExistingNodes[uri] = 1
-                                    var node = {
-                                        id: uri,
-                                        label: item[assetClassColumn],
-
-                                        size: Lineage_classes.defaultShapeSize,
-                                        //  image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
-                                        //   shape: "circularImage",
-                                        shape: "dot",
-                                        size: 5,
-                                        borderWidth: 4,
-                                        shadow: true,
-                                        color: Lineage_classes.getSourceColor(self.currenTable),
-                                        data: {source: source, id: uri, label: item[assetClassColumn]},
-                                        level: 6,
-
-                                    }
-                                    visjsData.nodes.push(node)
-                                }
-
-                                var edgeId = uri + "_" + id
-                                if (!visjsExistingNodes[edgeId]) {
-                                    visjsExistingNodes[edgeId] = 1
-                                    visjsData.edges.push({
-                                        id: edgeId,
-                                        from: uri,
-                                        to: id,
-                                        //   label: "has14224Class"
-                                        dashes: true,
-                                        color: "red"
-
-
-                                    })
-
-
-                                }
-
-
-                                var array = id.split("/");
-                                //    array.push(item[assetClassColumn])
-
-                                var currentId = ""
-                                for (var i = 0; i < array.length; i++) {
-                                    var item = array[i];
-                                    var parent = null
-
-                                    if (i > 0) {
-                                        parent = currentId
-                                        currentId += "/"
-                                    }
-                                    currentId += item
-                                    var standardType
-                                    if (i < 4)
-                                        standardType = "http://standards.iso.org/iso/15926/part14/Location"
-                                    if (i == 4) {
-                                        standardType = "http://w3id.org/readi/rdl/CFIHOS-30000311"
-                                    }
-                                    if (i == 5) {
-                                        standardType = "http://w3id.org/readi/rdl/D101001495"
-                                    }
-
-
-                                    if (!visjsExistingNodes[currentId]) {
-                                        visjsExistingNodes[currentId] = 1
-                                        var node = {
-                                            id: currentId,
-                                            label: item,
-
-                                            size: Lineage_classes.defaultShapeSize,
-                                            //   image: CustomPluginController.path + CustomPluginController.typeUrisIcons[standardType],
-                                            //   shape: "circularImage",
-                                            shape: "square",
-                                            size: 20,
-                                            borderWidth: 1,
-                                            color: Lineage_classes.getSourceColor(self.currenTable),
-                                            data: {
-                                                source: "TE_14224_browser",
-                                                id: currentId,
-                                                label: item,
-                                                type: "assetNode"
-                                            },
-                                            level: i,
-
-                                        }
-                                        visjsData.nodes.push(node)
-
-                                    }
-                                    if (parent) {
-                                        var edgeId = currentId + "_" + parent
-                                        if (!visjsExistingNodes[edgeId]) {
-                                            visjsExistingNodes[edgeId] = 1
-                                            visjsData.edges.push({
-                                                id: edgeId,
-                                                from: currentId,
-                                                to: parent
-
-                                            })
-
-
-                                        }
-                                    }
-                                }
-
-
-                            })
-
-                            callbackSeries();
-                            //   Lineage_classes.addParentsToGraph(source, ids)
-
-                        }
-
-                    })
-
-                },
-                function (callbackSeries) {
-                    return callbackSeries()
-                    self.graphAssetNodeAndParents(assetNodeIds, function (err, result) {
-                        if (err)
-                            return callbackSeries()
-                        visjsData.nodes = visjsData.nodes.concat(result.nodes)
-                        visjsData.edges = visjsData.edges.concat(result.nodes)
-                        callbackSeries()
-                    })
-
-                },
-            ], function (err) {
-                if (visjsGraph.data && visjsGraph.data.nodes) {
-                    visjsGraph.data.nodes.add(visjsData.nodes)
-                    visjsGraph.data.edges.add(visjsData.edges)
-                } else {
-                    self.drawNewGraph(visjsData)
-                }
-
-            })
-        }
         return self;
 
     }

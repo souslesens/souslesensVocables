@@ -84,11 +84,13 @@ mappingsMap = {
 
         //SubClass	SubClassCode	LEV	SubClassDescription	EquipmentClass
         tripleModels: [
-            {s: "SubClass", p: "rdf:type", o: "owl:Class"},
+         /*   {s: "SubClass", p: "rdf:type", o: "owl:Class"},
             {s: "SubClass", p:  "rdf:type", o: "http://standards.iso.org/iso/15926/part14/FunctionalObject"},
             {s: "SubClass", p:  "rdfs:subClassOf", o: "EquipmentClass"},
             { s: "SubClass", p: "rdfs:label", o: "SubClassDescription" },
-            { s: "SubClass", p: "skos:prefLabel", o: "SubClassCode" },
+            { s: "SubClass", p: "skos:prefLabel", o: "SubClassCode" },*/
+            { s: "SubClass", p: "skos:prefLabel", o: "SubClass" },
+
             //  {s: "id", p:"_restriction" , o: "system",prop:"part14:functionalPartOf"},
         ],
     },
@@ -339,7 +341,7 @@ if( false){
 
 if (true) {
     var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6c"];
-    var mappingNames = ["CLASSES_4"];
+    var mappingNames = ["FUNCTIONALOBJECT"];
 
     var mappings = [];
     mappingNames.forEach(function (mappingName) {

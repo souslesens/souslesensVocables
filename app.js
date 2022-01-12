@@ -14,6 +14,7 @@ const swaggerUi = require("swagger-ui-express");
 var indexRouter = require(path.resolve("routes/index"));
 var httpProxy = require(path.resolve("bin/httpProxy."));
 var configManager = require(path.resolve("bin/configManager."));
+const userManager = require(path.resolve("bin/user."));
 
 const config = require(path.resolve("config/mainConfig.json"));
 
@@ -92,49 +93,16 @@ openapi.initialize({
         },
         restrictAdmin: function (req, scopes, definition) {
 
-          const logged = req.user ? true : false
+          currentUser = userManager.getUser(req.user)
 
-          const auth =
-              config.auth == "keycloak"
-                  ? {
-                        realm: config.keycloak.realm,
-                        clientID: config.keycloak.clientID,
-                        authServerURL: config.keycloak.authServerURL,
-                    }
-                  : {};
-
-          const findUser = logged ? Object.keys(users)
-              .map(function (key, index) {
-                  return {
-                      id: users[key].id,
-                      login: users[key].login,
-                      groups: users[key].groups,
-                      source: users[key].source,
-                  };
-              })
-              .find((user) => user.login == req.user.login) : {};
-
-          const result = {
-            logged: config.disableAuth ? true : logged,
-            user: config.disableAuth ? {
-              login: "admin",
-              groups: ["admin"],
-            } : logged ? {
-              login: findUser.login,
-              groups: findUser.groups,
-            } : {},
-            authSource: config.disableAuth ? "json" : config.auth,
-            auth: config.disableAuth ? {} : auth,
-          }
-
-          if (!result.logged) {
+          if (!currentUser.logged) {
             throw {
                 status: 401,
                 message: "You must authenticate to access this ressource.",
             };
           }
 
-          if (!result.user.groups.includes("admin")) {
+          if (!currentUser.user.groups.includes("admin")) {
             throw {
                 status: 401,
                 message: "You must be admin to access this ressource.",

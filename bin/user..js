@@ -31,7 +31,7 @@ const user = {
         logged: config.disableAuth ? true : logged,
         user: config.disableAuth ? {
           login: "admin",
-          groups: ["toto"],
+          groups: ["admin"],
         } : logged ? {
           login: findUser.login,
           groups: findUser.groups,

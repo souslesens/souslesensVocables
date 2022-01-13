@@ -251,7 +251,7 @@ mappingsMap = {
 
         transform: {
 
-            line: function (value) {
+            propId: function (value) {
                 return "equip-data-" + value;
             },
             "code": function (value) {
@@ -263,21 +263,21 @@ mappingsMap = {
         //line	table	item	code	Name	Description	type	physicalQuantity	ListId	UnitCodeList	Priority
         tripleModels: [
             {
-                s: "code", p: "_restriction", o: "line", prop: function (line, mapping) {
+                s: "code", p: "_restriction", o: "propId", prop: function (line, mapping) {
                     return line.physicalQuantity ? "part14:hasPhysicalQuantity" : "part14:hasQuality"
                 }
             },
 
-            {s: "line", p: "rdf:type", o: "owl:Class"},
-            {s: "line", p: "rdfs:label", o: "Name"},
+       {s: "propId", p: "rdf:type", o: "owl:Class"},
+            {s: "propId", p: "rdfs:label", o: "Name"},
             {
-                s: "line",
+                s: "propId",
                 p: "rdfs:subClassOf",
                 o: "http://data.total.com/resource/tsf/maintenance/romain_14224/b08e3714de"
             },
 
             {
-                s: "line", p: "rdf:type", o: function (line, mapping) {
+                s: "propId", p: "rdf:type", o: function (line, mapping) {
                     if (line.type == "PQ")
                         return "part14:PhysicalQuantity"
                     else if (line.type == "Bool")

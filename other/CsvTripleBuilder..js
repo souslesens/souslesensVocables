@@ -255,6 +255,12 @@ var processor = {
                                                 o: blankNode,
                                             });
                                             objectStr = blankNode;
+
+                                            console.log(JSON.stringify({
+                                                s: subjectStr,
+                                                p: "rdfs:subClassOf",
+                                                o: blankNode,
+                                            }))
                                             return;
                                         }
 

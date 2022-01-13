@@ -617,7 +617,9 @@ var Sparql_OWL = (function () {
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
             if (options.listPropertiesOnly)
-                query += "SELECT distinct ?prop ?propLabel "
+                query += " SELECT distinct ?prop ?propLabel "
+              else  if(options.withoutBlankNodes)
+                    query += " SELECT distinct ?concept  ?prop ?propLabel ?conceptLabel  ?value ?valueLabel "
             else
                 query += "SELECT * "
             query += "" + fromStr + " WHERE {"

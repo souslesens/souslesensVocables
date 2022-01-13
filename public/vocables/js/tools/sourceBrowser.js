@@ -1111,7 +1111,7 @@ var SourceBrowser = (function () {
             // blankNodes.
 
 
-            Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, null, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, {withoutBlankNodes:1}, function (err, result) {
 
                 if (err) {
                     return callback(err)

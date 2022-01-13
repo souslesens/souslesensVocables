@@ -47,11 +47,14 @@ var KGmappingData = (function () {
         self.currentDatabase = dbName
         self.currentKGgraphURI = Config.sources[KGmappings.currentKGsource].graphUri
 
+        const params = new URLSearchParams({
+          name: self.currentKGdataSource.dbName,
+          type: self.currentKGdataSource.type,
+        });
 
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {KGquery: 1, getModel: JSON.stringify(self.currentKGdataSource)},
+            type: "GET",
+            url: Config.apiUrl + "?" + params.toString(),
             dataType: "json",
 
             success: function (tablesData, textStatus, jqXHR) {

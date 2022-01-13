@@ -37,16 +37,17 @@ var SQLquery=(function(){
             return alert ("no source specified")
 
 
-        self.currentKGdataSource=Config.sources[source].dataSource
+        const datasource = Config.sources[source].dataSource;
+
+        const params = new URLSearchParams({
+            dbName: datasource.dbName,
+            type: datasource.type,
+            sqlQuery: query
+        });
+
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {
-                KGquery: 1,
-                getData: 1,
-                dataSource: JSON.stringify(self.currentKGdataSource),
-                sqlQuery: query
-            },
+            type: "GET",
+            url: Config.apiUrl + "?" + params.toString(),
             dataType: "json",
 
             success: function (data, textStatus, jqXHR) {

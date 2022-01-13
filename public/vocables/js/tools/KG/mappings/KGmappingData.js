@@ -385,16 +385,15 @@ var KGmappingData = (function () {
             if (self.currentKGdataSource.type == "sql.sqlserver")
                 sqlQuery = " select top " + SampleSizelimit + " * from " + table;
 
+            const params = new URLSearchParams({
+                dbName: self.currentKGdataSource.dbName,
+                type: self.currentKGdataSource.type,
+                sqlQuery: sqlQuery
+            });
 
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: {
-                    KGquery: 1,
-                    getData: 1,
-                    dataSource: JSON.stringify(self.currentKGdataSource),
-                    sqlQuery: sqlQuery
-                },
+                type: "GET",
+                url: Config.apiUrl + "?" + params.toString(),
                 dataType: "json",
 
                 success: function (data, textStatus, jqXHR) {

@@ -202,11 +202,6 @@ router.post(
             }
         }
 
-        if (req.body.KGquery) {
-            KGcontroller.KGquery(req, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
         if (req.body.buildKG) {
             var mappingFileNames = JSON.parse(req.body.mappingFileNames);
             KGbuilder.buidlKG(

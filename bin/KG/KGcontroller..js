@@ -100,17 +100,6 @@ var KGcontroller = {
             var x = predicatesMap;
         });
     },
-    KGquery: function (req, callback) {
-
-        if (req.body.getData) {
-            req.body.dataSource = JSON.parse(req.body.dataSource);
-            if (req.body.dataSource.type == "sql.sqlserver") {
-                SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, callback);
-            } else {
-                KGSqlConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, callback);
-            }
-        }
-    },
 
     relationalKeysMap: {
         "tblUnitOfMeasure.UnitOfMeasureDimensionID": "tblUnitOfMeasureDimension.ID",

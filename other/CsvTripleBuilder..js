@@ -136,6 +136,8 @@ var processor = {
                                         {
                                             if (item.s_type == "fixed")
                                                 subjectStr = item.s;
+                                            else if (typeof item.s === 'function')
+                                                subjectStr= item.s(line,item)
                                             else if (mapping.transform && mapping.transform[item.s])
                                                 subjectStr = mapping.transform[item.s](line[item.s], "s", item.p);
                                             else if (item.s.match(/.+:.+|http.+/))
@@ -160,6 +162,8 @@ var processor = {
                                                 var x = 3
                                             if (item.o_type == "fixed")
                                                 objectStr = item.o;
+                                            if (typeof item.o === 'function')
+                                                objectStr= item.o(line,item)
                                             else if (mapping.transform && mapping.transform[item.o])
                                                 objectStr = mapping.transform[item.o](line[item.o], "o", item.p);
                                             else if (item.o.match(/.+:.+|http.+/))
@@ -214,8 +218,12 @@ var processor = {
                                             if (!item.prop) {
                                                 return callbackSeries("no prop defined for restriction");
                                             }
+                                            var propStr=item.prop
+                                            if (typeof item.prop === 'function') {
+                                                propStr= item.prop(line,line)
+                                            }
                                             var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                            var prop = item.prop;
+                                            var prop =propStr;
                                             if (prop.indexOf("$") == 0)
                                                 prop = line[prop.substring(1)]
                                             if (prop.indexOf("http") == 0)
@@ -254,16 +262,19 @@ var processor = {
                                         else {
 
                                             // get value for property
+                                            var propertyStr=item.p
                                             if (item.p.indexOf("$") == 0)
-                                                item.p = line[item.p.substring(1)]
-
+                                                propertyStr = line[item.p.substring(1)]
+                                           else if (typeof item.p === 'function') {
+                                                propertyStr= item.p(line,line)
+                                            }
                                             if (subjectStr && objectStr) {
                                                 // return console.log("missing type " + item.p)
                                                 if (!existingNodes[subjectStr + "_" + objectStr]) {
                                                     existingNodes[subjectStr + "_" + objectStr] = 1
                                                     triples.push({
                                                         s: subjectStr,
-                                                        p: item.p,
+                                                        p: propertyStr,
                                                         o: objectStr,
                                                     });
                                                 }

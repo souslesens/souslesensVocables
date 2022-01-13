@@ -883,7 +883,7 @@ var SourceBrowser = (function () {
 
                     },
                     function (callbackSeries) {
-                        if (type != "http://www.w3.org/2002/07/owl#Class") {
+                        if (false && type != "http://www.w3.org/2002/07/owl#Class") {
                             return callbackSeries()
                         }
                         self.showClassRestrictions(sourceLabel, [nodeId], options, function (err, result) {

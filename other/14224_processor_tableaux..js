@@ -10,10 +10,10 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\failureMechanism.txt",
         lookups: [],
         transform: {
-            typeCode: function (value,role) {
+            typeCode: function (value, role) {
                 if (value == "")
                     return "";
-                else{
+                else {
                     if (role == "s")
                         return "failureMechanism_" + value
                     else if (role == "o")
@@ -21,7 +21,7 @@ mappingsMap = {
 
                 }
             },
-            subdivisionCodeNumber: function (value,role) {
+            subdivisionCodeNumber: function (value, role) {
                 if (value == "")
                     return "";
                 else {
@@ -38,19 +38,19 @@ mappingsMap = {
         tripleModels: [
             {s: "typeCode", p: "skos:prefLabel", o: "typeCode"},
             {s: "subTypeCode", p: "skos:prefLabel", o: "subTypeCode"},
-          /*  {s: "typeCode", p: "rdfs:label", o: "type"},
+            /*  {s: "typeCode", p: "rdfs:label", o: "type"},
 
-            {s: "typeCode", p: "rdf:type", o: "owl:Class"},
-            {
-                s: "typeCode",
-                p: "rdfs:subClassOf",
-                o: "http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337"
-            },
-            {s: "subTypeCode", p: "rdfs:label", o: "subType"},
+              {s: "typeCode", p: "rdf:type", o: "owl:Class"},
+              {
+                  s: "typeCode",
+                  p: "rdfs:subClassOf",
+                  o: "http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337"
+              },
+              {s: "subTypeCode", p: "rdfs:label", o: "subType"},
 
-            {s: "subTypeCode", p: "rdf:type", o: "owl:Class"},
-            {s: "subTypeCode", p: "rdfs:subClassOf", o: "typeCode"},
-            {s: "subTypeCode", p: "owl:comment", o: "comment"},*/
+              {s: "subTypeCode", p: "rdf:type", o: "owl:Class"},
+              {s: "subTypeCode", p: "rdfs:subClassOf", o: "typeCode"},
+              {s: "subTypeCode", p: "owl:comment", o: "comment"},*/
         ],
     },
     failureCauses: {
@@ -58,7 +58,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\failureCauses.txt",
         lookups: [],
         transform: {
-            CodeNumber: function (value,role) {
+            CodeNumber: function (value, role) {
                 if (value == "")
                     return "";
                 else {
@@ -83,13 +83,13 @@ mappingsMap = {
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
 
             {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
-          /*  {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
-            {s: "CodeNumber", p: "rdfs:label", o: "Notation"},
-            {
-                s: "CodeNumber",
-                p: "rdfs:subClassOf",
-                o: "http://data.total.com/resource/tsf/maintenance/romain_14224/43b40cf901"
-            },*/
+            /*  {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
+              {s: "CodeNumber", p: "rdfs:label", o: "Notation"},
+              {
+                  s: "CodeNumber",
+                  p: "rdfs:subClassOf",
+                  o: "http://data.total.com/resource/tsf/maintenance/romain_14224/43b40cf901"
+              },*/
 
         ],
     },
@@ -203,14 +203,14 @@ mappingsMap = {
         tripleModels: [
 
 
-         //   {s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code"},
+            //   {s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code"},
             /*   { s: "Failure_mode_code", p: "rdfs:label", o: "Description" },
 
                      { s: "Failure_mode_code", p: "rdf:type", o: "owl:Class" },
                       { s: "Failure_mode_code", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/69a85b5298" },
                       { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true},*/
-                      { s: "Failure_mode_code", p: "_restriction", o: "System", prop: "part14:dispositionOf" },
-                      { s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf" },
+            {s: "Failure_mode_code", p: "_restriction", o: "System", prop: "part14:dispositionOf"},
+            {s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf"},
         ],
     },
 
@@ -244,6 +244,57 @@ mappingsMap = {
     },
 
 
+    QUALITIES: {
+        type: "owl:Class",
+        fileName: "D:\\NLP\\ontologies\\14224\\qualities2.txt",
+        lookups: [],
+
+        transform: {
+
+            line: function (value) {
+                return "equip-data-" + value;
+            },
+            "code": function (value) {
+                return "http://data.total.com/resource/tsf/maintenance/romain_14224/" + value;
+            },
+
+
+        },
+        //line	table	item	code	Name	Description	type	physicalQuantity	ListId	UnitCodeList	Priority
+        tripleModels: [
+            {
+                s: "code", p: "_restriction", o: "line", prop: function (line, mapping) {
+                    return line.physicalQuantity ? "part14:hasPhysicalQuantity" : "part14:hasQuality"
+                }
+            },
+
+            {s: "line", p: "rdf:type", o: "owl:Class"},
+            {s: "line", p: "rdfs:label", o: "Name"},
+            {
+                s: "line",
+                p: "rdfs:subClassOf",
+                o: "http://data.total.com/resource/tsf/maintenance/romain_14224/b08e3714de"
+            },
+
+            {
+                s: "line", p: "rdf:type", o: function (line, mapping) {
+                    if (line.type == "PQ")
+                        return "part14:PhysicalQuantity"
+                    else if (line.type == "Bool")
+                        return "xsd:boolean"
+                    else if (line.type == "Number")
+                        return "xsd:decimal"
+                    else if (line.type == "List")
+                        return "https://www.jip36-cfihos.org/ontology/cfihos_1_5/EAID_B46F0548_B6C4_4f59_9846_3BE8F5F49AA2"
+                    else
+                        return "xsd:string"
+                }
+            },
+
+
+        ],
+    },
+
 };
 
 var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6c"];
@@ -252,7 +303,7 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_3"]
 
 //var mappingNames = ["QUALITIES"]
-var mappingNames = ["failureMode",];
+var mappingNames = ["QUALITIES",];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
@@ -261,57 +312,7 @@ mappingNames.forEach(function (mappingName) {
 var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
 var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
 //processor.getDescription("D:\\NLP\\ontologies\\14224\\RDL_Structure_14224_import.txt");
-if (false) {
-    if (mappings.length == 1) return processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-    var triples = [
-        {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'"},
-        {s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdf:type", o: "owl:Class"},
-        {
-            s: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
-            p: "rdfs:subClassOf",
-            o: "<http://standards.iso.org/iso/15926/part14/System>",
-        },
-        {s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdfs:label", o: "'READI_ARTEFACT'"},
-        {s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdf:type", o: "owl:Class"},
-        {
-            s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
-            p: "rdfs:subClassOf",
-            o: "<http://w3id.org/readi/rdl/D101001053>",
-        },
 
-        {
-            s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
-            p: "rdfs:label",
-            o: "'PART_14_Functional_Object'",
-        },
-        {s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>", p: "rdf:type", o: "owl:Class"},
-        {
-            s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
-            p: "rdfs:subClassOf",
-            o: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
-        },
-
-        {
-            s: "<http://w3id.org/readi/rdl/Z101001232>",
-            p: "rdfs:label",
-            o: "'IEC/ISO 81346 Component'",
-        },
-
-        {s: "<http://w3id.org/readi/rdl/Z101001232>", p: "rdf:type", o: "owl:Class"},
-        {
-            s: "<http://w3id.org/readi/rdl/Z101001232>",
-            p: "rdfs:subClassOf",
-            o: "<http://w3id.org/readi/rdl/Z101001232>",
-        },
-    ];
-    processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
-        if (err) return console.log(err);
-        processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, result) {
-            if (err) return console.log(err);
-            processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-        });
-    });
-}
 
 if (true) {
     //  graphUri="http://data.total.com/resource/tsf/top_ontology/"

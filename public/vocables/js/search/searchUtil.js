@@ -271,7 +271,19 @@ var SearchUtil = (function () {
                         ]
                     }
                 }
-            } else {
+            } else if(word.indexOf("*">-1)) {
+
+                queryObj = {
+                    "wildcard": {
+                        "label": {
+                            "value": word,
+                                "boost": 1.0,
+                                "rewrite": "constant_score"
+                        }
+                    }
+
+                }
+            }else{
                 queryObj = {
 
                     "bool": {

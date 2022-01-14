@@ -5,9 +5,9 @@ import { User as User, getUsers, newUser } from './User'
 import { getProfiles } from './Profile'
 import Box from '@mui/material/Box';
 import { identity } from './Utils';
-import ProfilesTable from './Component/ProfilesTable';
+import { ProfilesTable } from './Component/ProfilesTable';
 import { Profile } from './Profile';
-import SourcesTable from './Component/SourcesTable';
+import { SourcesTable } from './Component/SourcesTable';
 import { UsersTable } from './Component/UsersTable';
 import { Source, getSources } from "./Source";
 import { Config, getConfig } from "./Config";

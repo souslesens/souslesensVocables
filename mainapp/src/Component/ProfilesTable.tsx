@@ -5,7 +5,7 @@ import { useModel } from '../Admin';
 import { User } from '../User';
 import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { defaultProfile, Profile, putProfiles } from '../Profile';
+import { defaultProfile, saveProfile, Profile, deleteProfile, putProfiles } from '../Profile';
 import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField, TextFieldProps } from '@material-ui/core';
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';

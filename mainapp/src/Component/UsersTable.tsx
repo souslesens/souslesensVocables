@@ -6,7 +6,7 @@ import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
 import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from '@material-ui/core';
 import { identity, style } from '../Utils';
-import { newUser, putUsers, putUsersBis, User } from '../User';
+import { newUser, deleteUser, putUsersBis, User } from '../User';
 import { ulid } from 'ulid';
 import { ButtonWithConfirmation } from './ButtonWithConfirmation';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -15,16 +15,7 @@ const UsersTable = () => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], (users => users.sort((x, y) => x.login.localeCompare(y.login))), model.users)
     const [filteringChars, setFilteringChars] = React.useState("")
-    const deleteUser = (user: User) => {
 
-        const updatedUsers = unwrappedSources.filter(prevUser => prevUser.id !== user.id);
-        console.log("deleted")
-
-        putUsers("/users", updatedUsers)
-            .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
-
-    }
 
     const renderUsers =
         SRD.match({
@@ -84,7 +75,7 @@ const UsersTable = () => {
 
                                                         <Box sx={{ display: 'flex' }}>
                                                             <UserForm maybeuser={user} />
-                                                            <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label='Delete' msg={() => deleteUser(user)} />                                                </Box>
+                                                            <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label='Delete' msg={() => deleteUser(user, updateModel)} />                                                </Box>
                                                     </TableCell>
 
                                                 </TableRow>);
@@ -173,16 +164,6 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
 
     const saveSources = () => {
-
-        // const updateUsers = unwrappedUsers.map(s => s.login === user.login ? userModel.userForm : s)
-        // const addUser = [...unwrappedUsers, userModel.userForm]
-        // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
-        // putUsers("/users", create ? addUser : updateUsers)
-        //     .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
-        //     .then(() => update({ type: Type.UserClickedModal, payload: false }))
-        //     .then(() => update({ type: Type.ResetUser, payload: create ? Mode.Creation : Mode.Edition }))
-        //     .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
-
         if (create) { putUsersBis(userModel.userForm, Mode.Creation, updateModel, update) }
         else { putUsersBis(userModel.userForm, Mode.Edition, updateModel, update) }
     };

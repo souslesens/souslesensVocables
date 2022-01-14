@@ -28,7 +28,7 @@ module.exports = function () {
         try {
             const objectToUpdateKey = Object.keys(req.body)[0]
             const oldProfiles = await readRessource(profilesJSON, res)//.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));
-            const updatedProfiles = { ...oldProfiles, [objectToUpdateKey]: updatedProfile }
+            const updatedProfiles = { ...oldProfiles, ...updatedProfile }
             const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res)//.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
             if (oldProfiles.hasOwnProperty(objectToUpdateKey)) {
                 ressourceUpdated(res, savedProfiles)

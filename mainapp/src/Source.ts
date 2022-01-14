@@ -1,15 +1,17 @@
 import { ulid } from 'ulid'
+import { Mode, Type, Msg_ } from "./Component/SourcesTable"
+import { SRD, RD, notAsked, loading, failure, success } from 'srd'
+import { Msg } from './Admin'
+import React from 'react';
 
+const endpoint = "/api/v1/sources"
 
 async function getSources(): Promise<Source[]> {
-
-    const response = await fetch('/sources');
-    const json = await response.json();
-    const entries: [string, SourceJson][] = Object.entries(json)
-    const decodedEntries = entries.map(([name, val]) => decodeSource(name, val))
-
-
-    return decodedEntries
+    try {
+        const response = await fetch(endpoint);
+        const json = await response.json();
+        return mapSources(json.ressources)
+    } catch (e) { throw e }
 }
 
 export async function putSources(body: Source[]): Promise<Source[]> {
@@ -22,12 +24,46 @@ export async function putSources(body: Source[]): Promise<Source[]> {
 
     return decodedEntries
 }
+function mapSources(ressources: any) {
+    const sources: [string, SourceJson][] = Object.entries(ressources);
+    const mapped_users = sources.map(([key, val]) => decodeSource(key, val));
+    return mapped_users;
+}
+
+export async function saveSource(body: Source, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+    try {
+        const response = await fetch(endpoint, { method: mode === Mode.Edition ? "put" : "post", body: JSON.stringify({ [body.id]: body }, null, '\t'), headers: { 'Content-Type': 'application/json' } });
+        const { message, ressources } = await response.json()
+        if (response.status === 200) {
+            updateModel({ type: 'ServerRespondedWithSources', payload: success(mapSources(ressources)) })
+            updateLocal({ type: Type.UserClickedModal, payload: false })
+            updateLocal({ type: Type.ResetSource, payload: mode })
+        } else {
+            updateModel({ type: 'ServerRespondedWithSources', payload: failure(`${response.status}, ${message}`) })
+        }
+    } catch (e) {
+        updateModel({ type: 'ServerRespondedWithSources', payload: failure(`Uncatched : ${e}`) })
+    }
+}
+
+export async function deleteSource(source: Source, updateModel: React.Dispatch<Msg>) {
+    try {
+        const response = await fetch(`${endpoint}/${source.id}`, { method: "delete" })
+        const { message, ressources } = await response.json()
+        if (response.status === 200) {
+            updateModel({ type: 'ServerRespondedWithSources', payload: success(mapSources(ressources)) })
+        } else {
+            updateModel({ type: 'ServerRespondedWithSources', payload: failure(`${response.status}, ${message}`) })
+        }
+    }
+    catch (e) { (updateModel({ type: 'ServerRespondedWithUsers', payload: failure(`Unhandled Error : ${e}`) })) };
+}
 
 
-const decodeSource = (name: string, source: SourceJson): Source => {
+const decodeSource = (key: string, source: SourceJson): Source => {
 
     const decodedSource = {
-        name: name,
+        name: source.name ? source.name : key,
         _type: 'source',
         id: source.id ? source.id : ulid(),
         type: source.type ? source.type : "missing type",
@@ -104,6 +140,7 @@ export const defaultSource = (id: string): Source => {
 
 interface SourceJson {
     id?: string;
+    name?: string;
     type?: string;
     graphUri?: string;
     sparql_server?: SparqlServer;

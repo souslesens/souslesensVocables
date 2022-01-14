@@ -4,7 +4,7 @@ import {
 import { useModel } from '../Admin';
 import * as React from "react";
 import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { Source, putSources, defaultSource, DataSource } from '../Source';
+import { Source, saveSource, putSources, defaultSource, DataSource, deleteSource } from '../Source';
 import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel, MenuItem, Modal, Radio, Select, TextField } from '@material-ui/core';
 import { identity, style } from '../Utils';
 import { ulid } from 'ulid';
@@ -16,16 +16,16 @@ const SourcesTable = () => {
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
 
     const [filteringChars, setFilteringChars] = React.useState("")
-    const deleteSource = (source: Source) => {
+    // const deleteSource = (source: Source) => {
 
-        const updatedSources = unwrappedSources.filter(prevSources => prevSources.id !== source.id);
-        console.log("deleted")
+    //     const updatedSources = unwrappedSources.filter(prevSources => prevSources.id !== source.id);
+    //     console.log("deleted")
 
-        putSources(updatedSources)
-            .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
+    //     putSources(updatedSources)
+    //         .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
+    //         .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
 
-    }
+    // }
 
     const renderSources =
         SRD.match({
@@ -79,7 +79,7 @@ const SourcesTable = () => {
                                                     <TableCell>
 
                                                         <Box sx={{ display: 'flex' }}><SourceForm source={source} />
-                                                            <ButtonWithConfirmation label='Delete' msg={() => deleteSource(source)} />
+                                                            <ButtonWithConfirmation label='Delete' msg={() => deleteSource(source, updateModel)} />
                                                         </Box>
                                                     </TableCell>
 
@@ -106,7 +106,7 @@ type SourceEditionState = { modal: boolean, sourceForm: Source }
 
 const initSourceEditionState: SourceEditionState = { modal: false, sourceForm: defaultSource(ulid()) }
 
-enum Type {
+const enum Type {
     UserClickedModal,
     UserUpdatedField,
     ResetSource,
@@ -118,7 +118,7 @@ enum Type {
     UserUpdatedsparql_server
 }
 
-enum Mode { Creation, Edition }
+const enum Mode { Creation, Edition }
 
 type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
@@ -133,7 +133,6 @@ type Msg_ =
 
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
-    console.log(Type[msg.type], msg.payload)
     const { model } = useModel()
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
 
@@ -204,17 +203,17 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             type: Type.UserUpdatedsparql_server,
             payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, '').split(',') : event.target.value }
         })
-    const saveSources = () => {
+    // const saveSources = () => {
 
-        const updateSources = unwrappedSources.map(s => s.name === source.name ? sourceModel.sourceForm : s)
-        const addSources = [...unwrappedSources, sourceModel.sourceForm]
+    //     const updateSources = unwrappedSources.map(s => s.name === source.name ? sourceModel.sourceForm : s)
+    //     const addSources = [...unwrappedSources, sourceModel.sourceForm]
 
-        putSources(create ? addSources : updateSources)
-            .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
-            .then(() => update({ type: Type.UserClickedModal, payload: false }))
-            .then(() => update({ type: Type.ResetSource, payload: create ? Mode.Creation : Mode.Edition }))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
-    };
+    //     putSources(create ? addSources : updateSources)
+    //         .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
+    //         .then(() => update({ type: Type.UserClickedModal, payload: false }))
+    //         .then(() => update({ type: Type.ResetSource, payload: create ? Mode.Creation : Mode.Edition }))
+    //         .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
+    // };
 
     const creationVariant = (edition: any, creation: any) => create ? creation : edition
 
@@ -348,7 +347,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
 
 
-                    <Grid item xs={12} style={{ textAlign: 'center' }}><Button color="primary" variant="contained" onClick={saveSources}>Save Source</Button></Grid>
+                    <Grid item xs={12} style={{ textAlign: 'center' }}><Button color="primary" variant="contained" onClick={(() => saveSource(sourceModel.sourceForm, create ? Mode.Creation : Mode.Edition, updateModel, update))}>Save Source</Button></Grid>
                 </Grid>
 
 
@@ -433,4 +432,4 @@ const FormGivenSchemaType = (props: { model: SourceEditionState, update: React.D
             return <div></div>
     }
 }
-export default SourcesTable
+export { SourcesTable, Msg_, Type, Mode }

@@ -8,6 +8,9 @@ var TE_14224_browser = (function () {
 
         self.currentTable_14224Field;
 
+        self.asset_iso14224MapMap = {}
+        self.iso_14224MapMap = {}
+
         //self.graphUri = Config.sources[self.referenceOntologySource]
         self.onSourceSelect = function () {
 
@@ -19,7 +22,7 @@ var TE_14224_browser = (function () {
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
             $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html", function () {
-                self.ontology.loadOntologytree()
+
             })
 
 
@@ -55,7 +58,40 @@ var TE_14224_browser = (function () {
 
             visjsGraph.clearGraph()
             $("#graphDiv").html("")
+            self.loadAssetIso14224Maps(asset)
             self.getFunctionalLocations(asset)
+        }
+
+        self.loadAssetIso14224Maps = function (asset) {
+
+            self.asset_iso14224MapMap = {}
+            self.iso_14224MapMap = {}
+            Sparql_OWL.getItems("TSF_ASSET_14224_MAPPINGS", null, function (err, result) {
+                if (err)
+                    return alert(err)
+                var pIso, pAsset
+                result.forEach(function (item, index) {
+                    if (index == 0)
+                        pIso = item.concept.value.lastIndexOf("/") + 1
+                    pAsset = item.o.value.lastIndexOf("#") + 1
+                    if (item.o.value.indexOf(asset) > -1) {
+                        var assetId = item.o.value.substring(pAsset)
+                        var iso14224Code = item.concept.value//;.substring(pIso)
+                        if (!self.asset_iso14224MapMap[assetId])
+                            self.asset_iso14224MapMap[assetId] = []
+                        self.asset_iso14224MapMap[assetId].push(iso14224Code)
+
+                        if (!self.iso_14224MapMap[iso14224Code])
+                            self.iso_14224MapMap[iso14224Code] = []
+                        self.iso_14224MapMap[iso14224Code].push(assetId)
+
+                    }
+                })
+
+                self.ontology.loadOntologytree()
+
+            })
+
         }
 
 
@@ -157,7 +193,7 @@ var TE_14224_browser = (function () {
             var sqlQuery = " select id," +
                 "FunctionalLocationCode,functionalLocationDescription," +
                 self.currentTable_14224Field + " as mapping_14224 " +
-                " from " +TE_14224_browser.currenTable + " where  parentFunctionalLocation ='" + parentData.FunctionalLocationCode + "' order by className";
+                " from " + TE_14224_browser.currenTable + " where  parentFunctionalLocation ='" + parentData.FunctionalLocationCode + "' order by className";
             //   var sqlQuery = " select distinct tag," + self.currentTable_14224Field + " as mapping_14224 from " + self.currenTable + " where  id='"+node.data.id+"' order by tag";
 
 
@@ -653,6 +689,101 @@ var TE_14224_browser = (function () {
         }
 
 
+        self.drawAssetNodesParents = function (assetNodesIds) {
+
+
+            if (!assetNodesIds) {
+                var nodes = visjsGraph.data.nodes.get();
+
+                var assetNodesIds = [];
+
+                var level = 10
+                nodes.forEach(function (node) {
+                    if (node.data.type == "assetNode")
+                        if (assetNodesIds.indexOf(node.data.parentFunctionalLocation) < 0)
+                            assetNodesIds.push(node.data.parentFunctionalLocation)
+
+                })
+            }
+
+            var filterStr = JSON.stringify(assetNodesIds).replace(/[\[\]]/g, "").replace(/"/g, "'")
+            /* var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription as className,FunctionalLocationCode," + self.currentTable_14224Field + " as mapping_14224  from " + self.currenTable + "" +
+                 " where  FunctionalLocationCode in (" + filterStr + ") ";*/
+
+            var sqlQuery = " select distinct parentTable.id,parentTable.location1,parentTable.location2,parentTable.location3,parentTable.location4,parentTable.functionalLocationDescription \n" +
+                " as className,parentTable.FunctionalLocationCode,parentTable.RDLRelation as mapping_14224 ,\n" +
+                " childTable.id as childId\n" +
+                " \n" +
+                " from " + self.currenTable + " as parentTable , " + self.currenTable + " as childTable where   parentTable.FunctionalLocationCode in (" + filterStr + ") \n" +
+                "\n" +
+                " and childTable.parentFunctionalLocation=parentTable.functionalLocationCode"
+
+            var startLevel = 5;
+            self.querySQLserver(sqlQuery, function (err, result) {
+                if (err)
+                    return callbackSeries(err)
+                var visjsData = {nodes: [], edges: []}
+                var visjsExistingNodes = visjsGraph.getExistingIdsMap()
+                result.forEach(function (item) {
+
+                    var data = item;
+                    data.type = "assetNode"
+                    var id = "A_" + item.id
+                    var level = startLevel + item.FunctionalLocationCode.split("/").length
+                    if (!visjsExistingNodes[id]) {
+                        visjsExistingNodes[id] = 1
+                        var node = {
+                            id: id,
+                            label: item.className,
+
+                            size: 10,
+                            shape: "diamond",
+                            size: Lineage_classes.defaultShapeSize,
+                            color: Lineage_classes.getSourceColor(self.currenTable),
+                            data: data,
+                            level: level,
+
+                        }
+                        visjsData.nodes.push(node)
+
+                    }
+
+
+                    var edgeId = "A_" + item.childId + "_" + id;
+                    if (!visjsExistingNodes[edgeId]) {
+                        visjsExistingNodes[edgeId] = 1
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: "A_" + item.childId,
+                            to: id,
+                            color: "grey",
+                            // physics:false
+                            // length: 500
+
+                        })
+
+
+                    }
+
+                })
+
+
+                if (visjsGraph.data && visjsGraph.data.nodes) {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                } else {
+                    self.drawNewGraph(visjsData,)
+                }
+
+
+                MainController.UI.message("Done")
+
+            })
+
+
+        }
+
+
         self.graphActions = {
             onNodeClick: function (node, point, options) {
 
@@ -730,104 +861,39 @@ var TE_14224_browser = (function () {
                     visjsGraph.data.edges.update(visjsData.edges)
                 })
 
-            }, drawAssetNodesParents: function () {
-
-                var nodes = visjsGraph.data.nodes.get();
-
-                var assetNodesIds = [];
-
-                var level = 10
-                nodes.forEach(function (node) {
-                    if (node.data.type == "assetNode")
-                        if (assetNodesIds.indexOf(node.data.parentFunctionalLocation) < 0)
-                            assetNodesIds.push(node.data.parentFunctionalLocation)
-
-                })
-
-                var filterStr = JSON.stringify(assetNodesIds).replace(/[\[\]]/g, "").replace(/"/g, "'")
-                /* var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription as className,FunctionalLocationCode," + self.currentTable_14224Field + " as mapping_14224  from " + self.currenTable + "" +
-                     " where  FunctionalLocationCode in (" + filterStr + ") ";*/
-
-                var sqlQuery = " select distinct parentTable.id,parentTable.location1,parentTable.location2,parentTable.location3,parentTable.location4,parentTable.functionalLocationDescription \n" +
-                    " as className,parentTable.FunctionalLocationCode,parentTable.RDLRelation as mapping_14224 ,\n" +
-                    " childTable.id as childId\n" +
-                    " \n" +
-                    " from " + self.currenTable + " as parentTable , " + self.currenTable + " as childTable where   parentTable.FunctionalLocationCode in (" + filterStr + ") \n" +
-                    "\n" +
-                    " and childTable.parentFunctionalLocation=parentTable.functionalLocationCode"
-
-                var startLevel = 10;
-                self.querySQLserver(sqlQuery, function (err, result) {
-                    if (err)
-                        return callbackSeries(err)
-                    var visjsData = {nodes: [], edges: []}
-                    var visjsExistingNodes = visjsGraph.getExistingIdsMap()
-                    result.forEach(function (item) {
-
-                        var data = item;
-                        data.type = "assetNode"
-                        var id = item.id
-
-                        if (!visjsExistingNodes[id]) {
-                            visjsExistingNodes[id] = 1
-                            var node = {
-                                id: "A_" + id,
-                                label: item.className,
-
-                                size: 10,
-                                shape: "diamond",
-                                size: Lineage_classes.defaultShapeSize,
-                                color: Lineage_classes.getSourceColor(self.currenTable),
-                                data: data,
-                                level: level,
-
-                            }
-                            visjsData.nodes.push(node)
-
-                        }
-
-
-                        var edgeId = "A_" + item.childId + "_" + "A_" + id;
-                        if (!visjsExistingNodes[edgeId]) {
-                            visjsExistingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: "A_" + item.childId,
-                                to: "A_" + id,
-                                color: "grey",
-                                // physics:false
-                                length: 500
-
-                            })
-
-
-                        }
-
-                    })
-
-
-                    visjsGraph.data.nodes.update(visjsData.nodes)
-                    visjsGraph.data.edges.update(visjsData.edges)
-                })
-
-
-            }
+            },
         }
 
 
+        self.ontology = {
 
+            countIso14224_to_AssetNodes:function(id){
+                var count=0;
+                if(!id)
+                   return 0;
+                for(var key in self.iso_14224MapMap){
+                    if(   key.indexOf( id )>-1)
+                        count+=self.iso_14224MapMap[key].length
+                }
+                return count;
+            },
 
+            loadOntologytree: function () {
 
-        self.ontology={
-            loadOntologytree : function () {
 
                 //   var source = "TSF_GS_EP-EXP_207_11"
                 var topClasses = [{
                     id: "http://data.total.com/resource/tsf/maintenance/romain_14224/bad731c1e7",
                     label: "Failure"
                 },
-                    {id: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fcb03c2dd", label: "maintenance"},
-                    {id: "http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3", label: "O&G systems"}]
+                    {
+                        id: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fcb03c2dd",
+                        label: "maintenance"
+                    },
+                    {
+                        id: "http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3",
+                        label: "O&G systems"
+                    }]
 
                 var jstreeData = []
                 var existingNodes = {}
@@ -844,6 +910,8 @@ var TE_14224_browser = (function () {
                         Sparql_OWL.getNodeChildren(source, null, topClass.id, 2, null, function (err, result) {
                             if (err)
                                 return callbackEach(err)
+
+
                             result.forEach(function (item) {
                                 if (!existingNodes[item.concept.value]) {
                                     existingNodes[item.concept.value] = 1
@@ -859,22 +927,30 @@ var TE_14224_browser = (function () {
 
                                     })
                                 }
+
+
                                 if (!existingNodes[item.child1.value]) {
                                     existingNodes[item.child1.value] = 1
                                     jstreeData.push({
                                         id: item.child1.value,
-                                        text: item.child1Label.value,
+                                        text: item.child1Label.value ,
                                         parent: item.concept.value,
                                         data: {
                                             id: item.child1.value,
                                             label: item.child1Label.value,
                                             path: item.child1.value + "/",
-                                            source:source,
+                                            source: source,
                                             type: "ontologyNode"
                                         }
 
                                     })
                                 }
+
+                              /*  var count=0
+                                if( item.child2 )
+                                    count=self.ontology.countIso14224_to_AssetNodes( item.child2.value)*/
+
+
                                 if (item.child2 && !existingNodes[item.child2.value]) {
                                     existingNodes[item.child2.value] = 1
                                     jstreeData.push({
@@ -884,80 +960,121 @@ var TE_14224_browser = (function () {
                                         data: {
                                             id: item.child2.value,
                                             label: item.child2Label.value,
-                                            source:source,
-                                            path: item.child2.value + "/" + item.child2.value+"/",
+                                            source: source,
+                                            path: item.child2.value + "/" + item.child2.value + "/",
                                             type: "ontologyNode"
                                         }
-
                                     })
                                 }
-
-
                             })
                             callbackEach()
                         })
-
-
                     }
+
+
                     , function (err) {
                         if (err)
                             return MainController.UI.message(err)
                         var options = {
                             selectTreeNodeFn: function (event, obj) {
                                 self.currentOntologyTreeNode = obj.node
-                                SourceBrowser.openTreeNode("TE_14224_browser_ontologyPanelDiv", obj.node.data.source, obj.node, {ctrlKey: obj.event.ctrlKey})
+
+                                SourceBrowser.openTreeNode("TE_14224_browser_ontologyPanelDiv", obj.node.data.source, obj.node,
+                                    {
+                                        ctrlKey: obj.event.ctrlKey,
+                                        beforeDrawingFn: function (sparqlResult) {
+                                            sparqlResult.forEach(function(item){
+                                                if(item.child1  ) {
+                                                  var  count = self.ontology.countIso14224_to_AssetNodes(item.child1)
+                                                    item.child1Label.value+= ' (' + count + ")"
+
+                                                }
+
+                                            })
+
+                                        }
+                                    }
+
+
+                                    )
                             }
                             ,
                             contextMenu: TE_14224_browser.getOntologyJstreeContextMenu()
                         }
+
+                        jstreeData.forEach(function(node){
+                            var count=0
+                            if(node.data && node.data.id ) {
+                                count = self.ontology.countIso14224_to_AssetNodes(node.data.id)
+                                node.text += ' (' + count + ")"
+                                node.data.countAssetNodes = count
+                            }
+                        })
                         common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options)
 
                     })
             },
 
-            showAssetData :function (node) {
+
+            showAssetData: function (node) {
+                if (!self.currenTable)
+                    return alert("select an asset ")
                 var mapping_14224
                 async.series([
-                    function(callbackSeries) {
-                        var options = {
-                            filter: "filter (?concept =<" + node.data.id + "> && ?p=<http://www.w3.org/2004/02/skos/core#prefLabel>) "
-                        }
-                        Sparql_generic.getItems(source, options, function (err, result) {
+                        function (callbackSeries) {
+                            var options = {
+                                filter: "filter (?concept =<" + node.data.id + "> && ?p=<http://www.w3.org/2004/02/skos/core#prefLabel>) "
+                            }
+                            Sparql_generic.getItems(source, options, function (err, result) {
 
-                            if (err)
-                                return callbackSeries(err)
-                            mapping_14224= result[result.length-1].o.value;// pb with code
-                            callbackSeries()
-                        })
-
-
-                    },
-                    function(callbackSeries) {
-                        var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription \n" +
-                            " as className,FunctionalLocationCode,RDLRelation as mapping_14224 \n"
-                        +" from " + self.currenTable + " " +
-                        " where   RDLRelation='" + mapping_14224 + "' \n"
-
-
-                        var startLevel = 10;
-                        self.querySQLserver(sqlQuery, function (err, result) {
-                            if (err)
-                                return callbackSeries(err)
-                            var visjsData = {nodes: [], edges: []}
-                            var visjsExistingNodes = visjsGraph.getExistingIdsMap()
-                            result.forEach(function (item) {
-
+                                if (err)
+                                    return callbackSeries(err)
+                                mapping_14224 = result[result.length - 1].o.value;// pb with code
+                                callbackSeries()
                             })
 
-                        })
-                    }
+
+                        },
+                        function (callbackSeries) {
+                            var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription\n" +
+                                " as className,FunctionalLocationCode,RDLRelation as mapping_14224,parentFunctionalLocation  \n"
+                                + " from " + self.currenTable + " " +
+                                " where   RDLRelation like ('" + mapping_14224 + "%')  and len(RDLRelation)<11 \n"
+
+
+                            var startLevel = 10;
+                            self.querySQLserver(sqlQuery, function (err, result) {
+                                if (err)
+                                    return callbackSeries(err)
+                                if (result.length == 0) {
+                                    return callbackSeries(" no result ")
+                                }
+                                if (result.length > 500) {
+                                    return callbackSeries(" too many result : " + result.length + " select a more precise item")
+                                }
+
+                                var visjsData = {nodes: [], edges: []}
+                                var visjsExistingNodes = visjsGraph.getExistingIdsMap()
+
+
+                                var functionalLocations = []
+                                result.forEach(function (item) {
+                                    if (functionalLocations.indexOf(item.FunctionalLocationCode) < 0)
+                                        functionalLocations.push(item.FunctionalLocationCode);
+                                })
+
+
+                                self.drawAssetNodesParents(functionalLocations)
+
+                            })
+                        }
                     ]
 
 
-                , function (err) {
-                    if (err)
-                        return MainController.UI.message(err)
-                })
+                    , function (err) {
+                        if (err)
+                            return MainController.UI.message(err)
+                    })
 
 
             }

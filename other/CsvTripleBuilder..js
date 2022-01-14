@@ -5,6 +5,7 @@ var async = require("async");
 var util = require("../bin/util.");
 var httpProxy = require("../bin/httpProxy.");
 var UML2OWLparser = require("./UML2OWLparser");
+var sqlServerProxy = require("../bin/KG/SQLserverConnector.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
@@ -63,7 +64,10 @@ var processor = {
                 var filePath = fileName;
                 var lookUpMap = {};
                 var triples = [];
-
+                var lines = [];
+                var dataSource = mapping.dataSource;
+                if(mapping.graphUri)
+                    graphUri= mapping.graphUri
                 async.series(
                     [
                         // load Lookups
@@ -94,23 +98,14 @@ var processor = {
                             );
                         },
 
-                        //build triples
-                        function (callbackSeries) {
-                            function getLookupValue(lookupSequence, value) {
-                                var lookupItem = lookupSequence.split("|");
-                                var target = value;
-                                lookupItem.forEach(function (lookupItem) {
-                                    if (lookUpMap[lookupItem]) {
-                                        target = lookUpMap[lookupItem][target];
-                                        if (!target) {
-                                            console.log("lookup value not found " + value + ": ");
-                                            return "";
-                                        }
-                                    } else return target;
-                                });
 
-                                return target;
-                            }
+
+
+                        //load csv
+                        function (callbackSeries) {
+
+                            if (!filePath)
+                                return callbackSeries()
 
                             processor.readCsv(filePath, function (err, result) {
                                 if (err) {
@@ -119,184 +114,225 @@ var processor = {
 
                                 }
 
-                                var lines = result.data[0];
-                                var emptyMappings = 0;
-                                lines.forEach(function (line, indexLine) {
-                                    if (false && indexLine > 2) return;
-                                    var hasDirectSuperClass = false;
-                                    var subjectStr = null;
-                                    var objectStr = null;
+                                lines = result.data[0];
+                                callbackSeries();
+                            })
 
-                                    mapping.tripleModels.forEach(function (item) {
-                                        subjectStr = null;
-                                        objectStr = null;
+                        },
 
+                        //load SQL dataSource
+                        function (callbackSeries) {
+                            if (!dataSource)
+                                return callbackSeries()
+                            sqlServerProxy.getData(dataSource.dbName,dataSource.sql,function (err,result){
 
-                                        //get value for Subject
-                                        {
-                                            if (item.s_type == "fixed")
-                                                subjectStr = item.s;
-                                            else if (typeof item.s === 'function')
-                                                subjectStr= item.s(line,item)
-                                            else if (mapping.transform && mapping.transform[item.s])
-                                                subjectStr = mapping.transform[item.s](line[item.s], "s", item.p);
-                                            else if (item.s.match(/.+:.+|http.+/))
-                                                subjectStr = item.s;
-                                            else if (item.lookup_S) {
-                                                subjectStr = getLookupValue(item.lookup_S, line[item.s]);
-                                                if (!subjectStr) {
-                                                    console.log(line[item.s])
-                                                    return;
-                                                }
-                                            } else subjectStr = line[item.s];
+                                if(err)
+                                    return callbackSeries(err);
+                                lines=result;
+                                callbackSeries()
 
-                                            if (!subjectStr) {
-                                                console.log(line[item.s])
-                                                return;
-                                            }
-                                        }
-
-                                        //get value for Object
-                                        {
-                                            if (item.p == "rdf:type")
-                                                var x = 3
-                                            if (item.o_type == "fixed")
-                                                objectStr = item.o;
-                                            if (typeof item.o === 'function')
-                                                objectStr= item.o(line,item)
-                                            else if (mapping.transform && mapping.transform[item.o])
-                                                objectStr = mapping.transform[item.o](line[item.o], "o", item.p);
-                                            else if (item.o.match(/.+:.+|http.+/))
-                                                objectStr = item.o;
-                                            else if (item.lookup_O) {
-                                                objectStr = getLookupValue(item.lookup_O, objectStr);
-                                                if (!objectStr) {
-                                                    console.log(line[item.o])
-                                                    return;
-                                                }
-                                            } else objectStr = line[item.o];
-
-                                            if (!objectStr) {
-                                                console.log(line[item.o])
-                                                return;
-                                            }
-
-                                        }
-
-                                        //format subject
-                                        {
-                                            if (subjectStr.indexOf("http") == 0)
-                                                subjectStr = "<" + subjectStr + ">";
-                                            else if (subjectStr.indexOf(":") > -1)
-                                                subjectStr = subjectStr;
-                                            else
-                                                subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
-                                        }
+                            })
 
 
-                                        //format object
-                                        {
-                                            if (!objectStr || !objectStr.indexOf) {
-                                                var x = line
-                                                var y = item
+                        }
 
-                                            }
+                        , function (callbackSeries) {
 
-                                            if (objectStr.indexOf("http") == 0)
-                                                objectStr = "<" + objectStr + ">";
-                                            else if (objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
-                                                objectStr = objectStr;
+                        function getLookupValue(lookupSequence, value) {
+                            var lookupItem = lookupSequence.split("|");
+                            var target = value;
+                            lookupItem.forEach(function (lookupItem) {
+                                if (lookUpMap[lookupItem]) {
+                                    target = lookUpMap[lookupItem][target];
+                                    if (!target) {
+                                        console.log("lookup value not found " + value + ": ");
+                                        return "";
+                                    }
+                                } else return target;
+                            });
 
-                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString)
-                                                objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                            else
-                                                objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
-                                        }
-
-
-                                        if (item.p == "_restriction") {
-                                            if (!item.prop) {
-                                                return callbackSeries("no prop defined for restriction");
-                                            }
-                                            var propStr=item.prop
-                                            if (typeof item.prop === 'function') {
-                                                propStr= item.prop(line,line)
-                                            }
-                                            var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                            var prop =propStr;
-                                            if (prop.indexOf("$") == 0)
-                                                prop = line[prop.substring(1)]
-                                            if (prop.indexOf("http") == 0)
-                                                prop = "<" + prop + ">";
+                            return target;
+                        }
 
 
-                                            triples.push({
-                                                s: blankNode,
-                                                p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                                o: "<http://www.w3.org/2002/07/owl#Restriction>",
-                                            });
-                                            triples.push({
-                                                s: blankNode,
-                                                p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                                o: prop,
-                                            });
-                                            if (objectStr) {
-                                                triples.push({
-                                                    s: blankNode,
-                                                    p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                                    o: objectStr,
-                                                });
-                                            } else {
-                                                var x = 5
-                                            }
-                                            triples.push({
-                                                s: subjectStr,
-                                                p: "rdfs:subClassOf",
-                                                o: blankNode,
-                                            });
-                                            objectStr = blankNode;
 
-                                            console.log(JSON.stringify({
-                                                s: subjectStr,
-                                                p: "rdfs:subClassOf",
-                                                o: blankNode,
-                                            }))
+                        var emptyMappings = 0;
+                        lines.forEach(function (line, indexLine) {
+                            if (false && indexLine > 2) return;
+                            var hasDirectSuperClass = false;
+                            var subjectStr = null;
+                            var objectStr = null;
+
+                            mapping.tripleModels.forEach(function (item) {
+                                subjectStr = null;
+                                objectStr = null;
+
+
+                                //get value for Subject
+                                {
+                                    if (item.s_type == "fixed")
+                                        subjectStr = item.s;
+                                    else if (typeof item.s === 'function')
+                                        subjectStr = item.s(line, item)
+                                    else if (mapping.transform && mapping.transform[item.s])
+                                        subjectStr = mapping.transform[item.s](line[item.s], "s", item.p);
+                                    else if (item.s.match(/.+:.+|http.+/))
+                                        subjectStr = item.s;
+                                    else if (item.lookup_S) {
+                                        subjectStr = getLookupValue(item.lookup_S, line[item.s]);
+                                        if (!subjectStr) {
+                                            console.log(line[item.s])
                                             return;
                                         }
+                                    } else subjectStr = line[item.s];
 
-                                        //not restriction
-                                        else {
+                                    if (!subjectStr) {
+                                        console.log(line[item.s])
+                                        return;
+                                    }
+                                }
 
-                                            // get value for property
-                                            var propertyStr=item.p
-                                            if (item.p.indexOf("$") == 0)
-                                                propertyStr = line[item.p.substring(1)]
-                                           else if (typeof item.p === 'function') {
-                                                propertyStr= item.p(line,line)
-                                            }
-                                            if (subjectStr && objectStr) {
-                                                // return console.log("missing type " + item.p)
-                                                if (!existingNodes[subjectStr + "_" + objectStr]) {
-                                                    existingNodes[subjectStr + "_" + objectStr] = 1
-                                                    triples.push({
-                                                        s: subjectStr,
-                                                        p: propertyStr,
-                                                        o: objectStr,
-                                                    });
-                                                }
-                                            }
+                                //get value for Object
+                                {
+                                    if (item.p == "rdf:type")
+                                        var x = 3
+                                    if (item.o_type == "fixed")
+                                        objectStr = item.o;
+                                    if (typeof item.o === 'function')
+                                        objectStr = item.o(line, item)
+                                    else if (mapping.transform && mapping.transform[item.o])
+                                        objectStr = mapping.transform[item.o](line[item.o], "o", item.p);
+                                    else if (item.o.match(/.+:.+|http.+/))
+                                        objectStr = item.o;
+                                    else if (item.lookup_O) {
+                                        objectStr = getLookupValue(item.lookup_O, objectStr);
+                                        if (!objectStr) {
+                                            console.log(line[item.o])
+                                            return;
                                         }
+                                    } else objectStr = line[item.o];
 
+                                    if (!objectStr) {
+                                        console.log(line[item.o])
+                                        return;
+                                    }
+
+                                }
+
+                                //format subject
+                                {
+                                    if (subjectStr.indexOf && subjectStr.indexOf("http") == 0)
+                                        subjectStr = "<" + subjectStr + ">";
+                                    else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1)
+                                        subjectStr = subjectStr;
+                                    else
+                                        subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                }
+
+
+                                //format object
+                                {
+                                    if (!objectStr || !objectStr.indexOf) {
+                                        var x = line
+                                        var y = item
+
+                                    }
+
+                                    if (objectStr.indexOf && objectStr.indexOf("http") == 0)
+                                        objectStr = "<" + objectStr + ">";
+                                    else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+                                        objectStr = objectStr;
+
+                                    } else if (propertiesTypeMap[item.p] == "string" || item.isString)
+                                        objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                    else
+                                        objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                }
+
+
+                                if (item.p == "_restriction") {
+                                    if (!item.prop) {
+                                        return callbackSeries("no prop defined for restriction");
+                                    }
+                                    var propStr = item.prop
+                                    if (typeof item.prop === 'function') {
+                                        propStr = item.prop(line, line)
+                                    }
+                                    var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                    var prop = propStr;
+                                    if (prop.indexOf("$") == 0)
+                                        prop = line[prop.substring(1)]
+                                    if (prop.indexOf("http") == 0)
+                                        prop = "<" + prop + ">";
+
+
+                                    triples.push({
+                                        s: blankNode,
+                                        p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+                                        o: "<http://www.w3.org/2002/07/owl#Restriction>",
                                     });
+                                    triples.push({
+                                        s: blankNode,
+                                        p: "<http://www.w3.org/2002/07/owl#onProperty>",
+                                        o: prop,
+                                    });
+                                    if (objectStr) {
+                                        triples.push({
+                                            s: blankNode,
+                                            p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
+                                            o: objectStr,
+                                        });
+                                    } else {
+                                        var x = 5
+                                    }
+                                    triples.push({
+                                        s: subjectStr,
+                                        p: "rdfs:subClassOf",
+                                        o: blankNode,
+                                    });
+                                    objectStr = blankNode;
 
+                                    console.log(JSON.stringify({
+                                        s: subjectStr,
+                                        p: "rdfs:subClassOf",
+                                        o: blankNode,
+                                    }))
+                                    return;
+                                }
 
-                                    var x = triples;
-                                });
+                                //not restriction
+                                else {
 
-                                var x = triples;
-                                callbackSeries();
+                                    // get value for property
+                                    var propertyStr = item.p
+                                    if (item.p.indexOf("$") == 0)
+                                        propertyStr = line[item.p.substring(1)]
+                                    else if (typeof item.p === 'function') {
+                                        propertyStr = item.p(line, line)
+                                    }
+                                    if (subjectStr && objectStr) {
+                                        // return console.log("missing type " + item.p)
+                                        if (!existingNodes[subjectStr + "_" + objectStr]) {
+                                            existingNodes[subjectStr + "_" + objectStr] = 1
+                                            triples.push({
+                                                s: subjectStr,
+                                                p: propertyStr,
+                                                o: objectStr,
+                                            });
+                                        }
+                                    }
+                                }
+
                             });
-                        },
+
+
+                            var x = triples;
+                        });
+
+                        var x = triples;
+                        callbackSeries();
+                    }
+                        ,
 
                         //write triples
                         function (callbackSeries) {

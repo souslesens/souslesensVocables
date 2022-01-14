@@ -294,6 +294,8 @@ var SourceBrowser = (function () {
                 if (err) {
                     return MainController.UI.message(err);
                 }
+                if (options.beforeDrawingFn)
+                    options.beforeDrawingFn(result)
                 TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {
                     source: sourceLabel,
                     type: node.data.type
@@ -439,9 +441,9 @@ var SourceBrowser = (function () {
 
 
                         items.sort(function (a, b) {
-                          if(a.label>b.label)
-                              return 1
-                            if(b.label>a.label)
+                            if (a.label > b.label)
+                                return 1
+                            if (b.label > a.label)
                                 return -1
                             return 0;
                         })
@@ -1111,7 +1113,7 @@ var SourceBrowser = (function () {
             // blankNodes.
 
 
-            Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, {withoutBlankNodes:1}, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, {withoutBlankNodes: 1}, function (err, result) {
 
                 if (err) {
                     return callback(err)

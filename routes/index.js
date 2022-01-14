@@ -108,7 +108,7 @@ router.get("/profiles", ensureLoggedIn(), function (req, res, next) {
 
 router.put("/profiles", ensureLoggedIn(), async function (req, res, next) {
     try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/profiles.json"), JSON.stringify(req.body, null, 2));
+        await promiseFs.writeFile(path.join(__dirname, "/../config/profiles.json"), req.body);
         res.sendFile(path.join(__dirname, "/../config/profiles.json"));
     } catch (err) {
         res.sendStatus(500);

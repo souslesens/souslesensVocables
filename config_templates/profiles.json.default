@@ -1,10 +1,19 @@
 {
-  "admin": {
-    "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUALS"],
+  "01FSCJ5H4W8TCVGFJDX1AGZ512": {
+    "allowedSourceSchemas": [
+      "SKOS",
+      "OWL",
+      "INDIVIDUALS"
+    ],
+    "id": "01FSCJ5H4W8TCVGFJDX1AGZ512",
     "allowedSources": "ALL",
-    "forbiddenSources": ["Dbpedia"],
+    "forbiddenSources": [
+      "Dbpedia"
+    ],
     "allowedTools": "ALL",
     "forbiddenTools": [],
-    "blender": {"contextMenuActionStartLevel": 0}
+    "blender": {
+      "contextMenuActionStartLevel": 0
+    }
   }
-  }
+}

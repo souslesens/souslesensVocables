@@ -1,30 +1,24 @@
 //const bcrypt = require('bcrypt');
 const fs = require('fs');
-
-
+const ulid = require('ulid')
 // Create configs dir if not exists
-fs.mkdirSync('config/users', options={"recursive": true})
+fs.mkdirSync('config/users', options = { "recursive": true })
 
 
 // config/users/users.json
 const usersPath = "config/users/users.json"
+const usersTemplatePath = "config_templates/users/users.json.default"
 if (!fs.existsSync(usersPath)) {
-  const USERNAME = process.env.USER_USERNAME;
-  const PASSWORD = process.env.USER_PASSWORD;
-
+  const USERNAME = 'defaultUserName';
+  const PASSWORD = 'defaultPassword';
+  const id = ulid;
   // const HASH_PASSWORD = bcrypt.hashSync(PASSWORD, 10);
 
-  const user_json = {
-    USERNAME: {
-      "login": USERNAME,
-      "password": PASSWORD,
-      "groups": [
-        "admin"
-      ]
-    }
-  }
+  fs.readFile(usersTemplatePath, (err, data) => {
+    fs.writeFileSync(usersPath, data)
+  })
 
-  fs.writeFileSync('config/users/users.json', JSON.stringify(user_json, null, 2));
+  //  fs.writeFileSync('config/users/users.json', JSON.stringify(user_json, null, 2));
 }
 
 
@@ -103,5 +97,5 @@ const sourcesTemplatePath = "config_templates/sources.json.default"
 if (!fs.existsSync(sourcesPath)) {
   fs.readFile(sourcesTemplatePath, (err, data) => {
     fs.writeFileSync(sourcesPath, JSON.stringify(JSON.parse(data), null, 2));
-  });  
+  });
 }

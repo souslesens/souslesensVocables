@@ -19,16 +19,6 @@ const ProfilesTable = () => {
 
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
 
-    const deleteProfile = (profile: Profile) => {
-
-        const updatedProfiles = unwrappedProfiles.filter(prevProfiles => prevProfiles.name !== profile.name);
-        console.log("deleted")
-
-        putProfiles(updatedProfiles)
-            .then((profiles) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(profiles) }))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
-
-    }
 
     const renderProfiles =
         SRD.match({
@@ -72,7 +62,7 @@ const ProfilesTable = () => {
                                         gotProfiles
                                             .filter((profile) => profile.name.includes(filteringChars))
                                             .map(profile => {
-                                                return (<TableRow key={profile.name}>
+                                                return (<TableRow key={profile.id}>
                                                     <TableCell>
                                                         {profile.name}
                                                     </TableCell>
@@ -83,7 +73,7 @@ const ProfilesTable = () => {
                                                     <TableCell>
 
                                                         <ProfileForm profile={profile} />
-                                                        <ButtonWithConfirmation label='Delete' msg={() => deleteProfile(profile)} />
+                                                        <ButtonWithConfirmation label='Delete' msg={() => deleteProfile(profile, updateModel)} />
 
                                                     </TableCell>
 
@@ -110,7 +100,7 @@ type ProfileEditionState = { modal: boolean, profileForm: Profile }
 
 const initProfileEditionState: ProfileEditionState = { modal: false, profileForm: defaultProfile(ulid()), }
 
-enum Type {
+const enum Type {
     UserClickedModal,
     UserUpdatedField,
     ResetProfile,
@@ -118,7 +108,7 @@ enum Type {
     UserUpdatedBlenderLevel
 }
 
-enum Mode { Creation, Edition }
+const enum Mode { Creation, Edition }
 
 type Msg_ =
     { type: Type.UserClickedModal, payload: boolean }
@@ -128,7 +118,6 @@ type Msg_ =
     | { type: Type.UserUpdatedBlenderLevel, payload: number }
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
-    console.log(Type[msg.type], msg.payload)
     const { model } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles)
     switch (msg.type) {
@@ -187,14 +176,16 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const shouldDisplayMultiselect = () => Array.isArray(profileModel.profileForm.allowedTools)
     const saveProfiles = () => {
 
-        const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
-        const addProfile = [...unwrappedProfiles, profileModel.profileForm]
-        updateModel({ type: 'UserClickedSaveChanges', payload: {} });
-        putProfiles(create ? addProfile : updateProfiles)
-            .then((person) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(person) }))
-            .then(() => update({ type: Type.UserClickedModal, payload: false }))
-            .then(() => update({ type: Type.ResetProfile, payload: create ? Mode.Creation : Mode.Edition }))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
+
+        // const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
+        // const addProfile = [...unwrappedProfiles, profileModel.profileForm]
+        // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
+        // putProfiles(create ? addProfile : updateProfiles)
+        //     .then((person) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(person) }))
+        //     .then(() => update({ type: Type.UserClickedModal, payload: false }))
+        //     .then(() => update({ type: Type.ResetProfile, payload: create ? Mode.Creation : Mode.Edition }))
+        //     .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
+        saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update)
     };
 
 
@@ -338,4 +329,5 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         </Modal></>)
 }
 
-export default ProfilesTable
+export { ProfilesTable, Mode, Msg_, Type }
+

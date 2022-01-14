@@ -44,8 +44,8 @@ module.exports = function () {
             const oldProfiles = await readRessource(profilesJSON, res)
             const profileDoesntExist = !oldProfiles.hasOwnProperty(Object.keys(profileToAdd)[0])
             const newProfiles = { ...oldProfiles, ...profileToAdd }
-            const saved = await writeRessource(profilesJSON, newProfiles, res)
             if (profileDoesntExist) {
+                const saved = await writeRessource(profilesJSON, newProfiles, res)
                 ressourceCreated(res, saved)
             } else { res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." }) }
         } catch (e) { res.status(500) }

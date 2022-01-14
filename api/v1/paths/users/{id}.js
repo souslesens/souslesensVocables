@@ -40,21 +40,21 @@ module.exports = function () {
 
             await writeFile(profilesJSON, JSON.stringify(remainingProfiles))
                 .catch(err => res.status(500).json({
-                    message: "I couldn't write profiles.json",
+                    message: "I couldn't write users.json",
                     error: err
                 }))
 
-            const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read profiles json" }))
+            const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read users json" }))
             res.status(200).json({
                 message: `${req.params.id} successfully deleted`,
-                profiles: JSON.parse(updatedProfiles)
+                ressources: JSON.parse(updatedProfiles)
             })
 
         } else if (!req.params.id) {
             res.status(500).json({ message: "I need a ressource ID to perform this request" })
 
         } else {
-            res.status(500).json({ message: `I couldn't delete ressource ${req.params.id}. Maybe it has been deleted already?` })
+            res.status(500).json({ message: `I couldn't delete ressource ${req.params.id}. Maybe it has been deleted already? Does the id field matches the object property name ?` })
         }
 
     }

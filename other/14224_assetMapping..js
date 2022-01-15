@@ -35,13 +35,44 @@ mappingsMap = {
 
         ],
     },
+    GIRASSOL: {
+        graphUri : "http://data.total.com/resource/tsf/maintenance/romain_14224/asset-mappings/",
+        fileName: null,
+        dataSource: {
+            "type": "sql.sqlserver",
+            "connection": "_default",
+            "dbName": "data14224",
+            "table_schema": "dbo",
+            "sql":" select distinct id,RDLRelation from girassol  where RDLRelation is not null and len(RDLRelation)<11   "
+        },
+        lookups: [],
+        transform: {
+
+            id: function (value,role,prop) {
+                return "girassol#" + value;
+            },
+
+
+
+            RDLRelation: function (value,role,prop) {
+                if(value=="")
+                    return ""
+                return "http://data.total.com/resource/tsf/maintenance/romain_14224/" + value;
+            },
+
+        },
+        tripleModels: [
+            {s: "RDLRelation", p: "<http://rds.posccaesar.org/ontology/lis14/rdl/represents>", o: "id"},
+
+        ],
+    },
 
 
 
 };
 
 
-var mappingNames = ["ABSHERON",];
+var mappingNames = ["GIRASSOL",];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

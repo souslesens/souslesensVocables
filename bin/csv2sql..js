@@ -109,7 +109,7 @@ Csv2Sql = {
                     sql.getData("data14224", insertStr, function (err, result) {
                         if (err) return callbackEach(err);
 
-                        totalRecords += sliceIndex * sliceSize;
+                        totalRecords = sliceIndex * sliceSize;
                         console.log("records inserted :" + totalRecords);
                         callbackEach();
                     });
@@ -132,6 +132,15 @@ var tableName = "girassol";
 
 var input = "D:\\NLP\\ontologies\\14224\\data\\absheron.txt";
 var tableName = "absheron";
+
+
+var input = "D:\\NLP\\ontologies\\14224\\mappingISO14224-207.txt";
+var tableName = "mappingISO14224_207";
+
+var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
+var tableName = "Wordorder_girassol";
+
+
 
 Csv2Sql.getColumns(input, tableName, function (err, result) {
     var createSql = result.createSql;

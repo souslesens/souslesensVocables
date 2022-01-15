@@ -1235,7 +1235,7 @@ var SourceBrowser = (function () {
         }
 
 
-        self.addProperty = function () {
+        self.addProperty = function (property,value) {
 
             var property = $("#sourceBrowser_addPropertyName").val()
             var value = $("#sourceBrowser_addPropertyValue").val().trim()

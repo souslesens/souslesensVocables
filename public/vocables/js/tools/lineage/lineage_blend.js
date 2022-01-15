@@ -9,6 +9,7 @@ var Lineage_blend = (function () {
             self.currentAssociation = [node.data, ""]
             $("#lineage_sourceNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
             $("#lineage_targetNodeDiv").html("")
+            $("#lineage_blendCreateSubClassButton").css("display","block")
         } else if (role == "target") {
             if (!self.currentAssociation)
                 return
@@ -21,6 +22,7 @@ var Lineage_blend = (function () {
                 self.initAllowedPropertiesForRelation()
             } else {
                 $("#lineage_createRelationButtonsDiv").css('display', 'none')
+                $("#lineage_blendCreateSubClassButton").css("display","none")
             }
         }
 
@@ -59,6 +61,18 @@ var Lineage_blend = (function () {
             Lineage_classes.registerSource(source);
             callback()
         })
+
+    }
+
+    self.createSubClass=function(){
+        var sourceNode = self.currentAssociation[0];
+        if( confirm("create node as subClassOf "+self.sourceNode.label )){
+
+            SourceBrowser.addProperty()
+
+
+
+        }
 
     }
 

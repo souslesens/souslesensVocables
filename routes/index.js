@@ -179,17 +179,17 @@ router.post(
             });
         }
 
-        if (req.body.getProfiles) {
-            configManager.getProfiles({}, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
+        // if (req.body.getProfiles) {
+        //     configManager.getProfiles({}, function (err, result) {
+        //         processResponse(response, err, result);
+        //     });
+        // }
 
-        if (req.body.getSources) {
-            configManager.getSources({}, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
+        // if (req.body.getSources) {
+        //     configManager.getSources({}, function (err, result) {
+        //         processResponse(response, err, result);
+        //     });
+        // }
         if (req.body.getBlenderSources) {
             configManager.getBlenderSources({}, function (err, result) {
                 processResponse(response, err, result);

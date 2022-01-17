@@ -99,3 +99,4 @@ if (!fs.existsSync(sourcesPath)) {
     fs.writeFileSync(sourcesPath, JSON.stringify(JSON.parse(data), null, 2));
   });
 }
+

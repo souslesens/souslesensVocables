@@ -16,7 +16,8 @@ async function getProfiles(url: string): Promise<Profile[]> {
 
 function mapProfiles(ressources: any) {
     const profiles: [string, ProfileJson][] = Object.entries(ressources);
-    const mapped_users = profiles.map(([key, val]) => decodeProfile(key, val));
+    const mapped_users = profiles.map(([key, val]) => { return (decodeProfile(key, val)) });
+
     return mapped_users;
 }
 
@@ -45,7 +46,9 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
             updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(`${response.status}, ${message}`) })
         }
     }
-    catch (e) { (updateModel({ type: 'ServerRespondedWithUsers', payload: failure(`Uncatched Error : ${e}`) })) };
+    catch (e) {
+        updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(`Uncatched Error : ${e}`) })
+    };
 }
 
 
@@ -77,11 +80,10 @@ type Blender = {
 
 
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
-    const id = ulid()
     return {
         name: profile.name ? profile.name : key,
         _type: 'profile',
-        id: profile.id ? profile.id : id,
+        id: profile.id ? profile.id : ulid(),
         allowedSourceSchemas: profile.allowedSourceSchemas,
         allowedSources: profile.allowedSources,
         forbiddenSources: profile.forbiddenSources,

@@ -56,7 +56,7 @@ export async function deleteSource(source: Source, updateModel: React.Dispatch<M
             updateModel({ type: 'ServerRespondedWithSources', payload: failure(`${response.status}, ${message}`) })
         }
     }
-    catch (e) { (updateModel({ type: 'ServerRespondedWithUsers', payload: failure(`Unhandled Error : ${e}`) })) };
+    catch (e) { (updateModel({ type: 'ServerRespondedWithSources', payload: failure(`Unhandled Error : ${e}`) })) };
 }
 
 

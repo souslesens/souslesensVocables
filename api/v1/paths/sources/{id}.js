@@ -51,7 +51,7 @@ module.exports = function () {
             }
         });
     }
-        async function DELETE(req, res, next) {
+    async function DELETE(req, res, next) {
         const profiles = await readFile(profilesJSON).catch(err => res.status(500).json(e))
         const oldProfiles = JSON.parse(profiles)
         const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles
@@ -68,7 +68,7 @@ module.exports = function () {
             const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read profiles json" }))
             res.status(200).json({
                 message: `${req.params.id} successfully deleted`,
-                profiles: JSON.parse(updatedProfiles)
+                ressources: JSON.parse(updatedProfiles)
             })
 
         } else if (!req.params.id) {

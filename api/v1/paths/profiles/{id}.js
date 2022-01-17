@@ -47,7 +47,7 @@ module.exports = function () {
             const updatedProfiles = await readFile(profilesJSON).catch(err => res.status(500).json({ message: "Couldn't read profiles json" }))
             res.status(200).json({
                 message: `${req.params.id} successfully deleted`,
-                profiles: JSON.parse(updatedProfiles)
+                ressources: JSON.parse(updatedProfiles)
             })
 
         } else if (!req.params.id) {

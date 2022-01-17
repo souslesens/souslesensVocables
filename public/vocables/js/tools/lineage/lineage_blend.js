@@ -9,7 +9,7 @@ var Lineage_blend = (function () {
             self.currentAssociation = [node.data, ""]
             $("#lineage_sourceNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
             $("#lineage_targetNodeDiv").html("")
-            $("#lineage_blendCreateSubClassButton").css("display","block")
+
         } else if (role == "target") {
             if (!self.currentAssociation)
                 return
@@ -20,7 +20,9 @@ var Lineage_blend = (function () {
             if (self.currentAssociation && self.currentAssociation.length == 2 && self.currentAssociation[1]!=="") {
                 $("#lineage_createRelationButtonsDiv").css('display', 'block')
                 self.initAllowedPropertiesForRelation()
-            } else {
+            } else if(self.currentAssociation &&   self.currentAssociation[0]!==""){
+                $("#lineage_blendCreateSubClassButton").css("display","block")
+            }else {
                 $("#lineage_createRelationButtonsDiv").css('display', 'none')
                 $("#lineage_blendCreateSubClassButton").css("display","none")
             }
@@ -66,9 +68,10 @@ var Lineage_blend = (function () {
 
     self.createSubClass=function(){
         var sourceNode = self.currentAssociation[0];
-        if( confirm("create node as subClassOf "+self.sourceNode.label )){
 
-            SourceBrowser.addProperty()
+        if(confirm("Create  for subclass of "+sourceNode.label )){
+
+            SourceBrowser.addProperty("http://www.w3.org/2000/01/rdf-schema#subClassOf",sourceNode.id,sourceNode.source,true)
 
 
 

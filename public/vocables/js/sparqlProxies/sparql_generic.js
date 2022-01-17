@@ -959,6 +959,7 @@ WHERE {
             }
 
             var allClassesMap = {}
+            var allLabels={}
             var allData = []
 
 
@@ -1028,6 +1029,11 @@ WHERE {
                 function (callbackSeries) {
                     var skosLabelsMap = {}
                     allData.forEach(function (item) {
+
+                        if(!allLabels[item.concept.value]){
+                            allLabels[item.concept.value]= item.conceptLabel ? item.conceptLabel.value : null
+                        }
+
                         if (!skosLabelsMap[item.concept.value])
                             skosLabelsMap[item.concept.value] =[]
                         if (item.skosLabel)
@@ -1094,7 +1100,7 @@ WHERE {
                     callbackSeries()
                 }
             ], function (err) {
-                return callback(err, {classesMap: allClassesMap})
+                return callback(err, {classesMap: allClassesMap,labels:allLabels})
             })
 
 

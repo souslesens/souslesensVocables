@@ -64,6 +64,7 @@
         padding: 2px;
         font-style: italic;
     }
+
     .Lineage_objectDivContainer {
         display: flex;
         flex-wrap: wrap;
@@ -71,8 +72,6 @@
         overflow: auto;
         margin-left: 10px;
     }
-
-
 
 
 </style>
@@ -131,7 +130,6 @@
             </button>
 
 
-
         </div>
 
     </div>
@@ -147,12 +145,15 @@
                  style="background-color: #8792a2;font-weight: bold;text-align: center;"></div>
         </div>
         <div id="lineage_blendButtonsDiv" style="margin: 5px; display: none">
-            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
-                    onclick="Lineage_blend.createNode()">Create Node
-            </button>
-            <button id="lineage_blendCreateSubClassButton" class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
-                    onclick="Lineage_blend.createSubClass()">Create subClass
-            </button>
+            <div style="    display: flex; flex-direction: row;">
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                        onclick="Lineage_blend.createNode()">Create Node
+                </button>&nbsp;
+                <button id="lineage_blendCreateSubClassButton" class='btn btn-sm my-1 py-0 btn-outline-primary'
+                        style=" display: none" class='lineage_button'
+                        onclick="Lineage_blend.createSubClass()">Create subClass
+                </button>
+            </div>
             <div id="lineage_createRelationButtonsDiv" style="margin: 5px; display: none">
                 <div style="border:solid 1px brown;padding:2px;margin:2px">
                     Property
@@ -183,7 +184,7 @@
 
         <div id="lineage_actionDiv_Keyslegend" style="display: none">
 
-            <table  class="lineage_actionDiv_legend">
+            <table class="lineage_actionDiv_legend">
                 <tr>
                     <td>object</td>
                     <td>ctrl</td>
@@ -239,14 +240,15 @@
     </div>
 
     <div class="lineage_actionDiv" style="margin: 5px; display: block">
-Graph decoration  <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect" onchange="Lineage_classes.graphDecoration.run($(this).val())">
+        Graph decoration <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect"
+                                 onchange="Lineage_classes.graphDecoration.run($(this).val())">
 
     </select>
         <!--    <button class='btn btn-sm my-1 py-0 btn-outline-primary'
                     onclick="Lineage_classes.graphDecoration.showGraphDecorationDialog()">+
             </button>-->
 
-        <div id="Lineage_classes_graphDecoration_legendDiv"class="Lineage_objectDivContainer">  </div>
+        <div id="Lineage_classes_graphDecoration_legendDiv" class="Lineage_objectDivContainer"></div>
     </div>
     <!--   <div>
 

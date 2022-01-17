@@ -71,18 +71,22 @@ mappingsMap = {
 
 
             },
-            SubdivisionCodeNumber: function (value) {
+            SubdivisionCodeNumber: function (value,role) {
                 if (value == "")
                     return "";
-                else
-                    return "failureCause_" + value
+                else {
+                    if (role == "s")
+                        return "failureCause_" + value
+                    else if (role == "o")
+                        return value
 
+                }
             },
         },
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-
-            {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
+            {s: "SubdivisionCodeNumber", p: "skos:prefLabel", o: "SubdivisionCodeNumber"},
+          //  {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
             /*  {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
               {s: "CodeNumber", p: "rdfs:label", o: "Notation"},
               {
@@ -98,24 +102,42 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\detectionMethods.txt",
         lookups: [],
         transform: {
-            Activity: function (value) {
+            Activity: function (value,role) {
                 if (value == "")
                     return "";
-                else
-                    return "detectionMethod_" + value
 
+            else {
+                    if (role == "s")
+                        return "detectionMethod_" + value
+                    else if (role == "o")
+                        return value
+
+                }
             },
-            Number: function (value) {
+            Number: function (value,role) {
                 if (value == "")
                     return "";
-                else
-                    return "detectionMethod_" + value
+                else {
+                    if (role == "s")
+                        return "detectionMethod_" + value
+                    else if (role == "o")
+                        return value
+
+                }
 
             },
         },
+
+        //Number	Notation	Description	Activity
         tripleModels: [
-            // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            // { s: "Number", p: "rdf:type", o: "owl:Class" },
+
+            { s: "Number", p: "rdf:type", o: "owl:Class" },
+
+            { s: "Number", p: "skos:prefLabel", o: "Number" },
+            { s: "Number", p: "rdfs:label", o: "Notation" },
+            { s: "Number", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fd899794a" },
+            { s: "Number", p: "owl:comment", o: "Description" },
+            { s: "Number", p: "owl:comment", o: "Activity" },
 
             /* { s: "Activity", p: "rdfs:label", o: "Activity" },
              { s: "Activity", p: "rdf:type", o: "owl:Class" },
@@ -303,7 +325,7 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_3"]
 
 //var mappingNames = ["QUALITIES"]
-var mappingNames = ["QUALITIES",];
+var mappingNames = ["detectionMethods",];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

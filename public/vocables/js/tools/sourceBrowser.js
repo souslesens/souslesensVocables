@@ -401,8 +401,8 @@ var SourceBrowser = (function () {
                             if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
                                 if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1)
                                     searchedSources.push(sourceLabel)
-                                else
-                                    searchedSources.push(sourceLabel)
+                           /*     else
+                                    searchedSources.push(sourceLabel)*/
 
                         }
                     }
@@ -483,7 +483,7 @@ var SourceBrowser = (function () {
                                             parent: parentId,
                                             data: {
                                                 id: aClass,
-                                                text: label,
+                                                label: label,
                                                 source: source
                                             }
                                         })
@@ -502,7 +502,7 @@ var SourceBrowser = (function () {
                                     parent: nodeId,
                                     data: {
                                         id: match.id,
-                                        text: match.label,
+                                        label: match.label,
                                         source: source
                                     }
                                 })
@@ -1235,16 +1235,20 @@ var SourceBrowser = (function () {
         }
 
 
-        self.addProperty = function (property,value) {
-
-            var property = $("#sourceBrowser_addPropertyName").val()
-            var value = $("#sourceBrowser_addPropertyValue").val().trim()
+        self.addProperty = function (property, value, source,createNewNode) {
+            if (!property)
+                property = $("#sourceBrowser_addPropertyName").val()
+            if (!value)
+                value = $("#sourceBrowser_addPropertyValue").val().trim()
 
             if (!property || !value)
                 return;
-            if (confirm("add property")) {
+
+            if (source)
+                self.currentSource = source
+            if (createNewNode || confirm("add property")) {
                 var triples = []
-                if (!self.currentNodeId) {
+                if (createNewNode) {
                     self.currentNodeId = Config.sources[self.currentSource].graphUri + common.getRandomHexaId(10)
 
                     triples.push({
@@ -1272,7 +1276,7 @@ var SourceBrowser = (function () {
                         self.newProperties = {};
                     self.newProperties[property] = value
                     self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
-                    if (property == "http://www.w3.org/2000/01/rdf-schema#") {
+                    if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         visjsGraph.data.nodes.push({
                             id: self.currentNodeId,
                             label: value,

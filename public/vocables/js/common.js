@@ -242,13 +242,16 @@ var common = (function () {
                 jstreeData.forEach(function (node) {
                     var parentNode = parentNodeId;
 
-                    if (node.parent)
-                        parentNode = node.parent;
+                    if (!parentNodeId)
+                        parentNodeId = node.parent;
+
                     if (!parentNode)
                         return;
 
-                    $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
-                        $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
+                    if(parentNodeId==node.id)
+                        return console.log("  Error jstree parent == childNode : " + parentNodeId)
+                    $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, position, function () {
+
 
                     })
 
@@ -256,7 +259,7 @@ var common = (function () {
                 setTimeout(function () {
                     self.jstree.setTreeAppearance()
                     //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-
+                    $("#" + jstreeDiv).jstree(true).open_node(parentNodeId, null, 500);
                     var offset = $(document.getElementById(parentNodeId)).offset();
                 }, 500)
             },

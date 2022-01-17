@@ -424,7 +424,7 @@ var DirContentAnnotator = {
         return callback(null, files);
     },
 
-    parseDocumentsDir: function (rooDirPath, name, options, callback) {
+    parseDocumentsDir: function (rooDirPath, name, callback) {
         var files = {};
         async.series(
             [
@@ -616,7 +616,7 @@ var DirContentAnnotator = {
 
                 function (callbackSeries) {
                     DirContentAnnotator.socket.message("parsing files in directory " + corpusDirPath);
-                    DirContentAnnotator.parseDocumentsDir(corpusDirPath, corpusName, options, function (err, result) {
+                    DirContentAnnotator.parseDocumentsDir(corpusDirPath, corpusName, function (err, result) {
                         if (err) return callbackSeries(err);
                         files = result;
                         callbackSeries();

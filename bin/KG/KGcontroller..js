@@ -100,30 +100,6 @@ var KGcontroller = {
             var x = predicatesMap;
         });
     },
-    KGquery: function (req, callback) {
-        // obsolete
-        if (req.body.getFromSparql) {
-            KGSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), callback);
-        }
-
-        if (req.body.getModel) {
-            req.body.getModel = JSON.parse(req.body.getModel);
-            if (req.body.getModel.type == "sql.sqlserver") {
-                SQLserverConnector.getKGmodel(req.body.getModel.dbName, callback);
-            } else {
-                KGSqlConnector.getKGmodel(req.body.getModel.dbName, callback);
-            }
-        }
-
-        if (req.body.getData) {
-            req.body.dataSource = JSON.parse(req.body.dataSource);
-            if (req.body.dataSource.type == "sql.sqlserver") {
-                SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, callback);
-            } else {
-                KGSqlConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, callback);
-            }
-        }
-    },
 
     relationalKeysMap: {
         "tblUnitOfMeasure.UnitOfMeasureDimensionID": "tblUnitOfMeasureDimension.ID",

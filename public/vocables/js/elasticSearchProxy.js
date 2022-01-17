@@ -45,13 +45,12 @@ var ElasticSearchProxy = (function () {
 
         self.executeMsearch = function (ndjson, callback) {
             var payload = {
-                executeMsearch: 1,
                 ndjson: ndjson
-
             }
+
             $.ajax({
                 type: "POST",
-                 url:Config.serverUrl,
+                 url:Config.apiUrl + "/msearch",
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {
@@ -79,7 +78,7 @@ var ElasticSearchProxy = (function () {
         }
             $.ajax({
                 type: "POST",
-                url:Config.serverUrl,
+                url:Config.apiUrl + "/analyzesentence",
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {

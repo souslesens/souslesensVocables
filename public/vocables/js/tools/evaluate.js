@@ -99,17 +99,16 @@ var Evaluate = (function () {
                 return alert("enter corpus name)")
 
             var payload = {
-                annotateAndStoreCorpus: true,
                 corpusPath: corpusPath,
-                sources: JSON.stringify(sources),
+                sources: sources,
                 corpusName: corpusName,
-                options: JSON.stringify({})
+                options: {}
 
             }
             $("#annotate_waitImg").css("display", "block");
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: Config.apiUrl + "/annotator/corpus",
                 data: payload,
                 dataType: "json",
 
@@ -192,17 +191,16 @@ var Evaluate = (function () {
 
         /*
                     var payload = {
-                        annotateAndStoreCorpus: true,
                         corpusPath: corpusPath,
-                        sources: JSON.stringify(sources),
+                        sources: sources,
                         corpusName: corpusName,
-                        options: JSON.stringify({})
+                        options: {}
 
                     }
                     $("#annotate_waitImg").css("display", "block");
                     $.ajax({
                         type: "POST",
-                        url: Config.serverUrl,
+                        url: Config.apiUrl + "annotator/corpus",
                         data: payload,
                         dataType: "json",
 
@@ -229,15 +227,9 @@ var Evaluate = (function () {
 
         self.initCorpusList = function () {
 
-
-            var payload = {
-                getAnnotatedCorpusList: 1,
-                group: "all",
-
-            }
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
+                type: "GET",
+                url: Config.apiUrl + "/annotator/corpus",
                 data: payload,
                 dataType: "json",
                 success: function (result, textStatus, jqXHR) {
@@ -253,16 +245,10 @@ var Evaluate = (function () {
         self.loadCorpusSubjectTree = function (corpusName, callback) {
             if (corpusName == "")
                 return;
-            var payload = {
-                getConceptsSubjectsTree: 1,
-                corpusName: corpusName,
 
-            }
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
+                type: "GET",
+                url: Config.apiUrl + "/annotator/tree/" + corpusName,
                 success: function (data, textStatus, jqXHR) {
                     self.currentCorpusData = data;
 

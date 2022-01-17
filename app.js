@@ -7,18 +7,16 @@ var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var bodyParser = require("body-parser");
-var indexRouter = require("./routes/index");
-var httpProxy = require("./bin/httpProxy.");
-var configManager = require("./bin/configManager.");
-
 const fileUpload = require("express-fileupload");
+const openapi = require("express-openapi");
+const swaggerUi = require("swagger-ui-express");
 
-const openapi = require('express-openapi');
-const swaggerUi = require('swagger-ui-express');
+var indexRouter = require(path.resolve("routes/index"));
+var httpProxy = require(path.resolve("bin/httpProxy."));
+var configManager = require(path.resolve("bin/configManager."));
+const userManager = require(path.resolve("bin/user."));
 
-var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
+const config = require(path.resolve("config/mainConfig.json"));
 
 var app = express();
 
@@ -77,25 +75,58 @@ app.use(cookieParser());
 
 // API
 openapi.initialize({
-  apiDoc: require('./api/v1/api-doc.js'),
-  app: app,
-  paths: './api/v1/paths'
+    apiDoc: require("./api/v1/api-doc.js"),
+    app: app,
+    paths: "./api/v1/paths",
+    securityHandlers: {
+        loginScheme: function (req, scopes, definition) {
+            if (!config.disableAuth) {
+                config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
+                if (!req.isAuthenticated || !req.isAuthenticated()) {
+                    throw {
+                        status: 401,
+                        message: "You must authenticate to access this ressource.",
+                    };
+                }
+            }
+            return Promise.resolve(true);
+        },
+        restrictAdmin: function (req, scopes, definition) {
+
+          currentUser = userManager.getUser(req.user)
+
+          if (!currentUser.logged) {
+            throw {
+                status: 401,
+                message: "You must authenticate to access this ressource.",
+            };
+          }
+
+          if (!currentUser.user.groups.includes("admin")) {
+            throw {
+                status: 401,
+                message: "You must be admin to access this ressource.",
+            };
+          }
+
+          return Promise.resolve(true);
+        }
+    },
 });
 
 // OpenAPI UI
 app.use(
-  "/api-documentation",
-  swaggerUi.serve,
-  swaggerUi.setup(null, {
-    swaggerOptions: {
-      url: "http://localhost:3010/api/v1/api-docs",
-    },
-  })
+    "/api-documentation",
+    swaggerUi.serve,
+    swaggerUi.setup(null, {
+        swaggerOptions: {
+            url: "http://localhost:3010/api/v1/api-docs",
+        },
+    })
 );
 
 // main router
 app.use("/", indexRouter);
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

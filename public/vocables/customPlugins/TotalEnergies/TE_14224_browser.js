@@ -340,15 +340,15 @@ var TE_14224_browser = (function () {
             }
 
 
+            const params = new URLSearchParams({
+                dbName: dataSource.dbName,
+                type: dataSource.type,
+                sqlQuery: sqlQuery
+            });
+
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: {
-                    KGquery: 1,
-                    getData: 1,
-                    dataSource: JSON.stringify(dataSource),
-                    sqlQuery: sqlQuery
-                },
+                type: "GET",
+                url: Config.apiUrl + "?" + params.toString(),
                 dataType: "json",
 
                 success: function (data, textStatus, jqXHR) {

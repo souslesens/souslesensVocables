@@ -36,7 +36,7 @@ var KGSqlConnector = {
     ],
 
     getFromSparql: function (objectName, quantumArray, callback) {
-        var KGqueryMap = {};
+        var KGqueryMap = {}; // key: quantumType, value: Array[quantumTotalId]
         var QuantumTypesMap = {
             F: "FunctionalClassID",
             A: "AttributeID",

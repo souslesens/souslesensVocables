@@ -1949,7 +1949,7 @@ var Standardizer = (function () {
         if (!text || text == "")
             return alert("enter a text")
 
-        var options = {"composedWords_2": 0}
+        var options = {"composedWords_2": false}
         var chunks = [];
         var chunkSize = 5000
         var currentChunk = ""
@@ -1969,14 +1969,13 @@ var Standardizer = (function () {
 
 
                 var payload = {
-                    SpacyExtract: 1,
                     text: chunk,
-                    options: JSON.stringify(options),
-                    types: JSON.stringify(["NN"])
+                    options: options,
+                    types: ["NN"]
                 }
                 $.ajax({
                     type: "POST",
-                    url: Config.serverUrl,
+                    url: Config.apiUrl + "/annotator/spacyextract",
                     data: payload,
                     dataType: "json",
                     success: function (tokens, textStatus, jqXHR) {

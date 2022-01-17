@@ -12,6 +12,7 @@
 var Config = (function () {
     var self = {};
     self.serverUrl = "/slsv";
+    self.apiUrl = '/api/v1';
     if (window.location.href.indexOf("localhost") < 0)
       self.serverUrl = "../slsv";
  //   self.default_sparql_url = "http://51.178.139.80:8890/sparql"

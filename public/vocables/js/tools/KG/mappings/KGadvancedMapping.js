@@ -655,15 +655,15 @@ var KGadvancedMapping = (function () {
     }
 
     self.executeSqlserverQuery = function (sql, datasource, callback) {
+        const params = new URLSearchParams({
+            dbName: datasource.dbName,
+            type: datasource.type,
+            sqlQuery: sql
+        });
+
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {
-                KGquery: 1,
-                getData: 1,
-                dataSource: JSON.stringify(datasource),
-                sqlQuery: sql
-            },
+            type: "GET",
+            url: Config.apiUrl + "?" + params.toString(),
             dataType: "json",
 
             success: function (data, textStatus, jqXHR) {

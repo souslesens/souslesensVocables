@@ -18,20 +18,15 @@ var MainController = (function () {
 
     self.initConfig = function (callback) {
 
-        var payload = {
-            getGeneralConfig: 1,
-        }
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            type: "GET",
+            url: Config.apiUrl + "/config",
             dataType: "json",
             success: function (serverConfig, textStatus, jqXHR) {
                 //  Config.serverUrl = serverConfig.serverUrl
                 Config.default_lang = serverConfig.default_lang
                 Config.default_sparql_url = serverConfig.default_sparql_url
                 Config.wiki = serverConfig.wiki
-                Config.sousLeSensVocablesGraphUri = serverConfig.sousLeSensVocablesGraphUri
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);
@@ -107,12 +102,11 @@ var MainController = (function () {
 
     self.writeUserLog = function (user, tool, source) {
         var payload = {
-            writeUserLog: 1,
             infos: user.identifiant + "," + tool + "," + source
         }
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: Config.apiUrl + "/log",
             data: payload,
             dataType: "json",
 

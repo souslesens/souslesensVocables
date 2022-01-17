@@ -40,13 +40,6 @@ var ConfigManager = {
             if (callback) return callback(err, config);
         }
     },
-
-    getDictionary: function (dictionary, callback) {
-        var dictionaryPath = path.join(__dirname, "../data/dictionaries/" + dictionary);
-        jsonFileStorage.retrieve(path.resolve(dictionaryPath), function (err, profiles) {
-            callback(err, profiles);
-        });
-    },
     getProfiles: function (options, callback) {
         var profilesPath = path.join(__dirname, "../config/profiles.json");
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {

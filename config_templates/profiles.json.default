@@ -14,6 +14,7 @@
     "forbiddenTools": [],
     "blender": {
       "contextMenuActionStartLevel": 0
-    }
+    },
+    "name": "admin"
   }
 }

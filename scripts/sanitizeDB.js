@@ -11,9 +11,9 @@ async function sanitize(ressource) {
             const parsedData = JSON.parse(data)
             const sanitizedData =
                 Object.entries(parsedData)
-                    .map(([key, val]) => addFields(val))
+                    .map(([key, val]) => addFields(key, val))
                     .reduce((obj, item) => ({ ...obj, [item.id]: item }), {})
-            fs.writeFile(ressource, JSON.stringify(sanitizedData), (err) => {
+            fs.writeFile(ressource, JSON.stringify(sanitizedData, null, 2), (err) => {
                 if (err) { console.log(err) }
                 console.log('OK:', sanitizedData)
             })
@@ -24,11 +24,13 @@ async function sanitize(ressource) {
     }
 }
 
-function addFields(val) {
+function addFields(key, val) {
     const id = ulid.ulid();
 
-    return ((val.hasOwnProperty(id) ? val : { ...val, id: id }))
-
+    return (
+        (val.hasOwnProperty("id") ? val : { ...val, id: id })
+            .hasOwnProperty("name") ? val : { ...val, name: key }
+    )
 }
 
 sanitize(sources);

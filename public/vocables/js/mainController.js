@@ -51,11 +51,11 @@ var MainController = (function () {
             getSources: 1,
         }
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            type: "GET",
+            url: "/api/v1/sources",
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data_, textStatus, jqXHR) {
+                const data = data_.ressources;
                 for (var source in data) {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
                         data[source].sparql_server.url = Config.default_sparql_url
@@ -66,7 +66,7 @@ var MainController = (function () {
                     return callback()
             },
             error: function (err) {
-                alert("cannot load profiles")
+                alert("cannot load sources")
                 console.log(err);
                 if (callback)
                     return callback()
@@ -85,16 +85,12 @@ var MainController = (function () {
     }
     self.loadProfiles = function (callback) {
 
-        var payload = {
-            getProfiles: 1,
-        }
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            type: "GET",
+            url: "/api/v1/profiles",
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
-                Config.profiles = data;
+                Config.profiles = data.ressources;
                 if (callback)
                     return callback()
             },
@@ -129,6 +125,12 @@ var MainController = (function () {
         })
     }
 
+    function groupWithinCurrentProfile(valueCheckedAgainst) {
+        return (Object.entries(Config.profiles)
+            .filter(([key, val]) => val.name === valueCheckedAgainst))
+
+    }
+
 
     self.onAfterLogin = function () {
 
@@ -139,8 +141,9 @@ var MainController = (function () {
             MainController.loadProfiles(function (err, result) {
                 //  Config.currentProfile=Config.profiles["reader_all"]
                 groups.forEach(function (group) {
-                    if (Config.profiles[group])
-                        return Config.currentProfile = Config.profiles[group]
+                    if (groupWithinCurrentProfile(group).length)
+                        return Config.currentProfile = groupWithinCurrentProfile(group)[0][1]
+
                 })
 
 

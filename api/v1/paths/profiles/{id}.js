@@ -60,6 +60,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: 'Get a specific profile',
+        security: [{ loginScheme: [] }],
         operationId: 'getOneProfile',
         parameters: [
         ],
@@ -74,6 +75,7 @@ module.exports = function () {
     };
     DELETE.apiDoc = {
         summary: 'Delete a specific profile',
+        security: [{ loginScheme: [] }],
         operationId: 'DeleteOneProfile',
         parameters: [
         ],

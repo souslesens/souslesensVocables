@@ -58,6 +58,7 @@ module.exports = function () {
     // NOTE: We could also use a YAML string here.
     GET.apiDoc = {
         summary: 'Returns all users',
+        security: [{ loginScheme: [] }],
         operationId: 'getAllUsers',
         parameters: [
         ],
@@ -65,6 +66,7 @@ module.exports = function () {
     };
     PUT.apiDoc = {
         summary: 'Update users',
+        security: [{ loginScheme: [] }],
         operationId: 'updateUsers',
         parameters: [
 
@@ -73,6 +75,7 @@ module.exports = function () {
     };
     POST.apiDoc = {
         summary: 'Create a new user',
+        security: [{ loginScheme: [] }],
         operationId: 'createUser',
         parameters: [
             // {

@@ -60,6 +60,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: 'Returns a specific profile',
+        security: [{ loginScheme: [] }],
         operationId: 'getOneProfile',
         parameters: [
             {

@@ -56,11 +56,13 @@ module.exports = function () {
 
     GET.apiDoc = {
         summary: 'Returns all sources',
+        security: [{ loginScheme: [] }],
         operationId: 'getSources',
         responses: responseSchema('Sources', 'GET')
     };
     PUT.apiDoc = {
         summary: 'Update Sources',
+        security: [{ loginScheme: [] }],
         operationId: 'updateSources',
         parameters: [
         ],
@@ -68,6 +70,7 @@ module.exports = function () {
     };
     POST.apiDoc = {
         summary: 'Update Sources',
+        security: [{ loginScheme: [] }],
         operationId: 'updateSources',
         parameters: [
         ],

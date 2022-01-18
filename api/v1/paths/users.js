@@ -5,7 +5,7 @@ exports.profilesJSON = profilesJSON;
 const _ = require("lodash")
 const { rest } = require("lodash");
 const { readRessource, writeRessource, responseSchema, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
-
+const bcrypt = require("bcrypt");
 module.exports = function () {
     let operations = {
         GET,
@@ -24,7 +24,7 @@ module.exports = function () {
     }
 
     async function PUT(req, res, next) {
-        const updatedProfile = req.body
+        const updatedProfile = ressourceWithHashedPassword(req)
         try {
             const objectToUpdateKey = Object.keys(req.body)[0]
             const oldProfiles = await readRessource(profilesJSON, res)//.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));
@@ -38,14 +38,15 @@ module.exports = function () {
     }
 
     async function POST(req, res, next) {
-        const profileToAdd = req.body
         //        const successfullyCreated = newProfiles[req.params.id]
+        const userToAdd = ressourceWithHashedPassword(req)
         try {
-            const oldProfiles = await readRessource(profilesJSON, res)
-            const profileDoesntExist = !oldProfiles.hasOwnProperty(Object.keys(profileToAdd)[0])
-            const newProfiles = { ...oldProfiles, ...profileToAdd }
-            if (profileDoesntExist) {
-                const saved = await writeRessource(profilesJSON, newProfiles, res)
+            const oldUsers = await readRessource(profilesJSON, res)
+            //const hash = await bcrypt.hash(req.body.password, 10)
+            const userDoesntExist = !oldUsers.hasOwnProperty(Object.keys(userToAdd)[0])
+            const newUsers = { ...oldUsers, ...userToAdd }
+            if (userDoesntExist) {
+                const saved = await writeRessource(profilesJSON, newUsers, res)
                 ressourceCreated(res, saved)
             } else { res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." }) }
         } catch (e) { res.status(500) }
@@ -55,7 +56,6 @@ module.exports = function () {
 
 
 
-    // NOTE: We could also use a YAML string here.
     GET.apiDoc = {
         summary: 'Returns all users',
         security: [{ loginScheme: [] }],
@@ -98,4 +98,9 @@ module.exports = function () {
 }
 
 
+
+function ressourceWithHashedPassword(req) {
+    return Object.fromEntries(Object.entries(req.body)
+        .map(([key, val]) => [key, { ...val, password: val.password.startsWith("$2b$") ? val.password : bcrypt.hashSync(val.password, 10) }]));
+}
 

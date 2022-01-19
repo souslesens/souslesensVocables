@@ -143,11 +143,13 @@ var tableName = "absheron";
 var input = "D:\\NLP\\ontologies\\14224\\mappingISO14224-207.txt";
 var tableName = "mappingISO14224_207";
 
-var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
-var tableName = "Wordorder_girassol";
+
 
 var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Notifications failure analysis.txt";
 var tableName = "Maintenance_girassol";
+
+var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
+var tableName = "Wordorder_girassol";
 
 
 

@@ -270,8 +270,14 @@ var visjsGraph = (function () {
 
                 html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
+                html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>"
+                html+="<div id='visjsConfigureDiv' style='overflow: auto'></div>"
 
-                if (true)
+
+
+
+
+                if (false)
                     html += " &nbsp;&nbsp;" + htmlPlus
 
                 var parent = $("#" + divId).parent()
@@ -928,8 +934,42 @@ var visjsGraph = (function () {
                 return alert(err)
             }
         })
-
     }
+
+
+    self.showGraphConfig=function() {
+
+        $("#visjsConfigureDiv").dialog({
+         //   autoOpen: false,
+         height: 700,
+            width: 550,
+            modal: false,
+            title: "Graph parameters",
+            position: { my: "left top", at: "right top", }
+        })
+
+
+
+    //    $('#graphConfigDiv').dialog("open")
+
+
+
+        setTimeout(function(){
+            // these are all options in full.
+            var options = {
+                configure: {
+                    enabled: true,
+                    filter: "physics,layout,manipulation,renderer",
+
+                    container: document.getElementById("visjsConfigureDiv"),
+                    showButton: true
+                }
+            }
+
+            visjsGraph.network.setOptions(options);
+        },500)
+    }
+
 
     return self;
 

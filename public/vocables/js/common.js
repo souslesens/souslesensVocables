@@ -134,15 +134,15 @@ var common = (function () {
 
 
                 }).on('loaded.jstree', function () {
-                  //  setTimeout(function () {
-                        if (options.openAll)
-                            $('#' + jstreeDiv).jstree(true).open_all();
-                        self.jstree.setTreeAppearance()
-                        if (!options.doNotAdjustDimensions)
-                            common.jstree.setTreeParentDivDimensions(jstreeDiv)
-                        if (callback)
-                            callback();
-                 //   }, 500)
+                    //  setTimeout(function () {
+                    if (options.openAll)
+                        $('#' + jstreeDiv).jstree(true).open_all();
+                    self.jstree.setTreeAppearance()
+                    if (!options.doNotAdjustDimensions)
+                        common.jstree.setTreeParentDivDimensions(jstreeDiv)
+                    if (callback)
+                        callback();
+                    //   }, 500)
 
 
                 }).on("select_node.jstree",
@@ -248,7 +248,7 @@ var common = (function () {
                     if (!parentNode)
                         return;
 
-                    if(parentNodeId==node.id)
+                    if (parentNodeId == node.id)
                         return console.log("  Error jstree parent == childNode : " + parentNodeId)
                     $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, position, function () {
 
@@ -528,61 +528,56 @@ var common = (function () {
                 var element = arr[fromIndex];
                 arr.splice(fromIndex, 1);
                 arr.splice(toIndex, 0, element);
+            },
+            sortObjectArray: function (array, field, options) {
+                array.sort(function (a, b) {
+                    var aValue = (a[field] ? a[field] : "")
+                    var bValue = (b[field] ? b[field] : "")
+                    if (aValue > bValue)
+                        return 1
+                    if (aValue < bValue)
+                        return -1
+                    return 0;
+                })
+                return array
+            }
+
+
+            ,
+            unduplicateArray: function (array, key) {
+
+                var uniqueItems = []
+                var uniqueIds = {}
+                array.forEach(function (item) {
+                    if (!uniqueIds[item[key]]) {
+                        uniqueIds[item[key]] = 1
+                        uniqueItems.push(item)
+                    }
+                })
+                return uniqueItems;
+
+
             }
         }
 
-        self.sortObjectArray = function (array, field, options) {
-            array.sort(function (a, b) {
-                var aValue = (a[field] ? a[field] : "")
-                var bValue = (b[field] ? b[field] : "")
-                if (aValue > bValue)
-                    return 1
-                if (aValue < bValue)
-                    return -1
-                return 0;
+
+        self.concatArraysWithoutDuplicateXX = function (array, addedArray, key) {
+            var filteredArray = []
+            result.nodes.forEach(function (item) {
+                var unique = true;
+                visjsData.nodes.forEach(function (item2) {
+                    if (item2.id == item.id)
+                        unique = false
+
+                })
+                filteredNodes.push(item)
             })
-            return array
         }
-
-
-
-
-        self.unduplicateArray=function(array,key){
-
-            var uniqueItems=[]
-            var uniqueIds={}
-            array.forEach(function(item){
-                if(!uniqueIds[item[key]]) {
-                    uniqueIds[item[key]] = 1
-                    uniqueItems.push(item)
-                }
-            })
-            return uniqueItems;
-
-
-
-        }
-
-
-
-
-    self.concatArraysWithoutDuplicateXX = function (array, addedArray, key) {
-        var filteredArray = []
-        result.nodes.forEach(function (item) {
-            var unique = true;
-            visjsData.nodes.forEach(function (item2) {
-                if (item2.id == item.id)
-                    unique = false
-
-            })
-            filteredNodes.push(item)
-        })
-    }
 
 
         self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
             var filteredArray = JSON.parse(JSON.stringify(array))
-            var keyValues={}
+            var keyValues = {}
             addedArray.forEach(function (addedItem) {
                 var refuse = false
                 array.forEach(function (item) {

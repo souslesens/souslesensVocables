@@ -36,21 +36,24 @@ mappingsMap = {
             },
         },
         tripleModels: [
-            {s: "typeCode", p: "skos:prefLabel", o: "typeCode"},
-            {s: "subTypeCode", p: "skos:prefLabel", o: "subTypeCode"},
-            /*  {s: "typeCode", p: "rdfs:label", o: "type"},
+            {s: "typeCode", p: "iso14224:hasCode", o: "typeCode",isString:true},
+            {s: "subTypeCode", p: "iso14224:hasCode", o: "subTypeCode",isString:true},
 
-              {s: "typeCode", p: "rdf:type", o: "owl:Class"},
-              {
-                  s: "typeCode",
-                  p: "rdfs:subClassOf",
-                  o: "http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337"
-              },
-              {s: "subTypeCode", p: "rdfs:label", o: "subType"},
+            /*  {s: "typeCode", p: "skos:prefLabel", o: "typeCode"},
+             {s: "subTypeCode", p: "skos:prefLabel", o: "subTypeCode"},
+             /*  {s: "typeCode", p: "rdfs:label", o: "type"},
 
-              {s: "subTypeCode", p: "rdf:type", o: "owl:Class"},
-              {s: "subTypeCode", p: "rdfs:subClassOf", o: "typeCode"},
-              {s: "subTypeCode", p: "owl:comment", o: "comment"},*/
+               {s: "typeCode", p: "rdf:type", o: "owl:Class"},
+               {
+                   s: "typeCode",
+                   p: "rdfs:subClassOf",
+                   o: "http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337"
+               },
+               {s: "subTypeCode", p: "rdfs:label", o: "subType"},
+
+               {s: "subTypeCode", p: "rdf:type", o: "owl:Class"},
+               {s: "subTypeCode", p: "rdfs:subClassOf", o: "typeCode"},
+               {s: "subTypeCode", p: "owl:comment", o: "comment"},*/
         ],
     },
     failureCauses: {
@@ -84,8 +87,11 @@ mappingsMap = {
             },
         },
         tripleModels: [
+            {s: "SubdivisionCodeNumber", p:"iso14224:hasCode", o: "SubdivisionCodeNumber",isString:true},
+            {s: "CodeNumber", p: "iso14224:hasCode", o: "CodeNumber",isString:true},
+
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            {s: "SubdivisionCodeNumber", p: "skos:prefLabel", o: "SubdivisionCodeNumber"},
+          //  {s: "SubdivisionCodeNumber", p: "skos:prefLabel", o: "SubdivisionCodeNumber"},
           //  {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
             /*  {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
               {s: "CodeNumber", p: "rdfs:label", o: "Notation"},
@@ -131,13 +137,15 @@ mappingsMap = {
         //Number	Notation	Description	Activity
         tripleModels: [
 
-            { s: "Number", p: "rdf:type", o: "owl:Class" },
+            { s: "Number", p:"iso14224:hasCode", o: "Number",isString:true },
+
+         /*   { s: "Number", p: "rdf:type", o: "owl:Class" },
 
             { s: "Number", p: "skos:prefLabel", o: "Number" },
             { s: "Number", p: "rdfs:label", o: "Notation" },
             { s: "Number", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fd899794a" },
             { s: "Number", p: "owl:comment", o: "Description" },
-            { s: "Number", p: "owl:comment", o: "Activity" },
+            { s: "Number", p: "owl:comment", o: "Activity" },*/
 
             /* { s: "Activity", p: "rdfs:label", o: "Activity" },
              { s: "Activity", p: "rdf:type", o: "owl:Class" },
@@ -154,11 +162,17 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\maintenanceActivity.txt",
         lookups: [],
         transform: {
-            CodeNumber: function (value) {
+            CodeNumber: function (value,role) {
                 if (value == "")
                     return "";
-                else
-                    return "maintenanceActivity_" + value
+                else {
+                    if (role == "s")
+                        return "maintenanceActivity_" + value
+                    else if (role == "o")
+                        return value
+
+                }
+
 
             },
             Number: function (value) {
@@ -170,8 +184,12 @@ mappingsMap = {
             },
         },
         tripleModels: [
+
+            { s: "CodeNumber", p:"iso14224:hasCode", o: "CodeNumber",isString:true },
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            {s: "CodeNumber", p: "rdfs:label", o: "Activity"},
+      /*      {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
+
+          {s: "CodeNumber", p: "rdfs:label", o: "Activity"},
             {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
 
             {
@@ -181,7 +199,7 @@ mappingsMap = {
             },
             {s: "CodeNumber", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples", isString: true},
             {s: "CodeNumber", p: "<http://www.lexinfo.net/ontology/2.0/lexinfo#explanation>", o: "Use", isString: true},
-            {s: "CodeNumber", p: "owl:comment", o: "Description"},
+            {s: "CodeNumber", p: "owl:comment", o: "Description"},*/
         ],
     },
 
@@ -224,15 +242,15 @@ mappingsMap = {
 
         tripleModels: [
 
-
+            { s: "Failure_mode_code", p:"iso14224:hasCode", o: "Failure_mode_code",isString:true },
             //   {s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code"},
             /*   { s: "Failure_mode_code", p: "rdfs:label", o: "Description" },
 
                      { s: "Failure_mode_code", p: "rdf:type", o: "owl:Class" },
                       { s: "Failure_mode_code", p: "rdfs:subClassOf", o: "http://data.total.com/resource/tsf/maintenance/romain_14224/69a85b5298" },
-                      { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true},*/
+                      { s: "Failure_mode_code", p: "<http://www.w3.org/2004/02/skos/core#example>", o: "Examples" ,isString:true}
             {s: "Failure_mode_code", p: "_restriction", o: "System", prop: "part14:dispositionOf"},
-            {s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf"},
+            {s: "Failure_mode_code", p: "_restriction", o: "equipment", prop: "part14:dispositionOf"},*/
         ],
     },
 
@@ -325,7 +343,7 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_3"]
 
 //var mappingNames = ["QUALITIES"]
-var mappingNames = ["detectionMethods",];
+var mappingNames = ["failureMechanism","failureCauses","detectionMethods","maintenanceActivity","failureMode"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

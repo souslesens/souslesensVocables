@@ -187,6 +187,7 @@ var Config = (function () {
     self.tools["TE_14224_browser"] = {
         label: "TE_14224_browser",
         multiSources: 0,
+        noSource:true,
         controller: TE_14224_browser,
         toolDescriptionImg: null
     }

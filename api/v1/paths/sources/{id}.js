@@ -94,6 +94,20 @@ module.exports = function () {
             },
         }
     };
-
+    DELETE.apiDoc = {
+        summary: 'Delete a specific source',
+        security: [{ restrictAdmin: [] }],
+        operationId: 'DeleteOneSource',
+        parameters: [
+        ],
+        responses: {
+            200: {
+                description: 'Sources',
+                schema: {
+                    $ref: '#/definitions/Source'
+                }
+            },
+        }
+    }
     return operations;
 }

@@ -100,7 +100,7 @@ module.exports = function () {
     };
     PUT.apiDoc = {
         summary: 'Update Sources',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'updateSources',
         parameters: [
         ],
@@ -108,7 +108,7 @@ module.exports = function () {
     };
     POST.apiDoc = {
         summary: 'Update Sources',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'updateSources',
         parameters: [
         ],

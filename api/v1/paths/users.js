@@ -58,7 +58,7 @@ module.exports = function () {
 
     GET.apiDoc = {
         summary: 'Returns all users',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'getAllUsers',
         parameters: [
         ],
@@ -66,7 +66,7 @@ module.exports = function () {
     };
     PUT.apiDoc = {
         summary: 'Update users',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'updateUsers',
         parameters: [
 
@@ -75,7 +75,7 @@ module.exports = function () {
     };
     POST.apiDoc = {
         summary: 'Create a new user',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'createUser',
         parameters: [
             // {

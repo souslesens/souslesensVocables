@@ -60,7 +60,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: 'Returns a specific profile',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'getOneProfile',
         parameters: [
             {
@@ -76,6 +76,21 @@ module.exports = function () {
                 description: 'Profiles',
                 schema: {
                     $ref: '#/definitions/Profile'
+                }
+            },
+        }
+    };
+    DELETE.apiDoc = {
+        summary: 'Delete a specific user',
+        security: [{ restrictAdmin: [] }],
+        operationId: 'DeleteOneUser',
+        parameters: [
+        ],
+        responses: {
+            200: {
+                description: 'Users',
+                schema: {
+                    $ref: '#/definitions/User'
                 }
             },
         }

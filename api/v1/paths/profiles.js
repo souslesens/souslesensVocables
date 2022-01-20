@@ -65,7 +65,7 @@ module.exports = function () {
 
     PUT.apiDoc = {
         summary: 'Update profiles one by one',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'updateProfiles',
         parameters: [
         ],
@@ -74,7 +74,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: 'Create a new profile',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'createProfile',
         parameters: [
         ],

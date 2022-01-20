@@ -75,7 +75,7 @@ module.exports = function () {
     };
     DELETE.apiDoc = {
         summary: 'Delete a specific profile',
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: 'DeleteOneProfile',
         parameters: [
         ],

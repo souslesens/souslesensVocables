@@ -267,7 +267,8 @@ const apiDoc = {
           properties: {
             url: {
               type: 'string'
-            }          }
+            }
+          }
         },
         version: {
           type: 'string'
@@ -300,7 +301,8 @@ const apiDoc = {
           properties: {
             url: {
               type: 'string'
-            }          }
+            }
+          }
         },
         controller: {
           type: 'string',

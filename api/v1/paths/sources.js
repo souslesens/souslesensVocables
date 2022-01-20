@@ -44,7 +44,8 @@ module.exports = function () {
     async function GET(req, res, next) {
         const profiles = await read(profilesJSON);
         const parsedProfiles = await JSON.parse(profiles)
-        const allowedSources = getAllowedSources(req.user, parsedProfiles);
+        const userInfo = userManager.getUser()
+        const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
 
         fs.readFile(sourcesJSON, 'utf8', (err, data) => {
             if (err) {
@@ -60,7 +61,8 @@ module.exports = function () {
     async function PUT(req, res, next) {
         const updatedSource = req.body
         const profiles = await read(profilesJSON).then(p => JSON.parse(p));
-        const allowedSources = getAllowedSources(req.user, profiles);
+        const userInfo = userManager.getUser()
+        const allowedSources = getAllowedSources(userInfo.user, profiles);
         try {
             const objectToUpdateKey = Object.keys(req.body)[0]
             const oldSources = await readRessource(sourcesJSON, res)//.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));

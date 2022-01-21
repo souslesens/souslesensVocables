@@ -69,18 +69,17 @@ var KGbuild = (function () {
         }
         self.serverMessageCount = 0;
         var payload = {
-            buildKG: true,
-            mappingFileNames: JSON.stringify(mappingFileNames),
+            mappingFileNames: mappingFileNames,
             sparqlServerUrl: sparqlServerUrl,
             adlGraphUri: adlGraphUri,
             replaceGraph: replaceGraph,
-            options: JSON.stringify(options),
-            dataSource: JSON.stringify(Config.sources[KGmappingData.currentSource].dataSource)
+            options: options,
+            dataSource: Config.sources[KGmappingData.currentSource].dataSource
         }
 
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: Config.apiUrl + "/kg/mappings",
             data: payload,
             dataType: "json",
 

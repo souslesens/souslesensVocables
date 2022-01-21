@@ -141,21 +141,6 @@ router.post(
             }
         }
 
-        if (req.body.buildKG) {
-            var mappingFileNames = JSON.parse(req.body.mappingFileNames);
-            KGbuilder.buidlKG(
-                mappingFileNames,
-                req.body.sparqlServerUrl,
-                req.body.adlGraphUri,
-                JSON.parse(req.body.replaceGraph),
-                JSON.parse(req.body.dataSource),
-                JSON.parse(req.body.options),
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
-        }
-
         if (req.body.dictionaries_listIndexes) {
             DictionariesManager.listIndexes(function (err, result) {
                 processResponse(response, err, result);

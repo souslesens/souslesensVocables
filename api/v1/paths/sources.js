@@ -44,7 +44,7 @@ module.exports = function () {
     async function GET(req, res, next) {
         const profiles = await read(profilesJSON);
         const parsedProfiles = await JSON.parse(profiles)
-        const userInfo = userManager.getUser()
+        const userInfo = userManager.getUser(req.user);
         const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
 
         fs.readFile(sourcesJSON, 'utf8', (err, data) => {
@@ -61,7 +61,7 @@ module.exports = function () {
     async function PUT(req, res, next) {
         const updatedSource = req.body
         const profiles = await read(profilesJSON).then(p => JSON.parse(p));
-        const userInfo = userManager.getUser()
+        const userInfo = userManager.getUser(req.user);
         const allowedSources = getAllowedSources(userInfo.user, profiles);
         try {
             const objectToUpdateKey = Object.keys(req.body)[0]

@@ -472,12 +472,9 @@ var KGmappings = (function () {
                 name = self.currentKGsource+"_"+KGmappingData.currentDatabase + "_" + KGmappingData.currentKGtable.data.adlView || KGmappingData.currentKGtable.data.adlTable
             //    name = KGmappingData.currentKGdataSource.dbName + "_" + KGmappingData.currentKGtable.data.adlView || KGmappingData.currentKGtable.data.adlTable
 
-            var payload = {KG_GetMappings: name}
-
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
+                type: "GET",
+                url: Config.apiUrl + "/kg/mappings/" + name,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {
                     if (!data.mappings)

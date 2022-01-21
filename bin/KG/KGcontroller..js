@@ -20,14 +20,16 @@ var KGcontroller = {
     },
     getMappings: function (source, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";
-        if (!fs.existsSync(filePath)) return callback(null, null);
+        console.log("filePath", filePath);
+        if (!fs.existsSync(filePath)) return callback("file " + source + ".json not found", null);
         fs.readFile(filePath, function (err, result) {
             try {
                 var json = JSON.parse(result);
                 //  json.data.fileName=filePath
                 callback(err, json);
             } catch (e) {
-                callback(e);
+                console.error(e);
+                return callback("file " + source + ".json not valid", null);
             }
         });
     },

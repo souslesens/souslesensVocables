@@ -155,11 +155,6 @@ router.post(
                 }
             );
         }
-        if (req.body.KG_GetMappings) {
-            KGcontroller.getMappings(req.body.KG_GetMappings, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
 
         if (req.body.dictionaries_listIndexes) {
             DictionariesManager.listIndexes(function (err, result) {

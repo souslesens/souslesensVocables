@@ -342,8 +342,8 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_4"];
 //var mappingNames = ["CLASSES_3"]
 
-//var mappingNames = ["QUALITIES"]
-var mappingNames = ["failureMechanism","failureCauses","detectionMethods","maintenanceActivity","failureMode"];
+var mappingNames = ["QUALITIES"]
+//var mappingNames = ["failureMechanism","failureCauses","detectionMethods","maintenanceActivity","failureMode"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

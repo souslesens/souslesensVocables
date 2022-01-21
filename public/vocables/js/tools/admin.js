@@ -203,7 +203,7 @@ var Admin = (function () {
                         var obj = result.classesMap[key]
                         if (!obj.parents)
                             return;
-                        var parents = obj.parents.split("|")
+                        var parents = obj.parents//;.split("|")
                         maxLevels = Math.max(maxLevels, parents.length)
                         parents.forEach(function (parent, index) {
                             if (index == 0)

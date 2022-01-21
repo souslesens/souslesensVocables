@@ -241,7 +241,8 @@ var Lineage_classes = (function () {
             SourceBrowser.currentTreeNode = propertiesMap.node;
             self.currentTreeNode = propertiesMap.node;
             var data = propertiesMap.node.data;
-
+            if(event.which==3)
+                return;
             if (self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event, {callee: "Tree"}) != null) {
                 if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
                     return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node)

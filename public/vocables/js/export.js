@@ -218,6 +218,70 @@ var Export = (function () {
 
     }
 
+
+
+    self.exportAllDescendants = function (parentId,indexes) {
+MainController.UI.message("exporting node descendants...")
+        $("#waitImg").css("display","block")
+        SearchUtil.getParentAllDescendants(parentId, indexes, null, function (err, result) {
+            if (err)
+                MainController.UI.message(err, true)
+            var matrixLabels = []
+            var matrixIds = []
+            var maxParentsLength = 0
+            result.data.forEach(function (hit, index) {
+
+                var parentIdsArray = []
+                var parentLabelsArray = []
+                hit.parents.forEach(function (parent, indexParent) {
+                    if (indexParent > 0) {
+                        parentLabelsArray.push(result.labelsMap[parent] || Sparql_common.getLabelFromURI(parent))
+                        parentIdsArray.push(parent)
+
+                    }
+
+                })
+                maxParentsLength = Math.max(maxParentsLength, parentIdsArray.length)
+                var lineIds = []
+                lineIds.push(hit.id)
+                lineIds = lineIds.concat(parentIdsArray.reverse())
+                matrixIds.push(lineIds)
+
+                var lineLabels = []
+                lineLabels.push(hit.label)
+                lineLabels = lineLabels.concat(parentLabelsArray.reverse())
+                matrixLabels.push(lineLabels)
+
+
+            })
+            var cols = []
+            for (var i = 0; i < maxParentsLength; i++) {
+                if (i == 0)
+                    cols.push({title: "Class", defaultContent: ""})
+                else
+                    cols.push({title: "Parent_" + i, defaultContent: ""})
+            }
+
+            matrixLabels.forEach(function(line, lineIndex){
+                line.push("");
+                matrixLabels[lineIndex]= matrixLabels[lineIndex].concat(matrixIds[lineIndex])
+            })
+            cols.push({title: "-----", defaultContent: ""})
+            cols=cols.concat(cols)
+
+
+
+            MainController.UI.message("",true)
+            Export.showDataTable(null,cols,matrixLabels)
+
+
+        })
+    }
+
+
+
+
+
     self.prepareDataSet = function (flatNodesArray, nodesMap) {
 
 

@@ -132,8 +132,8 @@ var SearchUtil = (function () {
                                                 label: toHit._source.label,
                                                 parents: toHit._source.parents
                                             })
-                                            if (toHit._source.parents && toHit._source.parents.split) {
-                                                var parentsArray = toHit._source.parents.split("|")
+                                            if (toHit._source.parents) {//} && toHit._source.parents.split) {
+                                                var parentsArray = toHit._source.parents;//.split("|")
                                                 parentsArray.forEach(function (parent, indexParent) {
                                                     if (indexParent > 0 && !parentsMap[parent])
                                                         parentsMap[parent] = {}
@@ -420,7 +420,7 @@ var SearchUtil = (function () {
                     var index = 0
                     var classesArray = [];
                     for (var key in result.classesMap) {
-
+                        result.classesMap[key].parents = result.classesMap[key].parents;//.split("|")
                         classesArray.push(result.classesMap[key])
                     }
                     var slices = common.array.slice(classesArray, 100)
@@ -479,6 +479,95 @@ var SearchUtil = (function () {
                     return callback(err, "DONE")
                 })
             })
+        }
+
+
+        self.getParentAllDescendants = function (parentId, indexes, options, callback) {
+            var allData = []
+            var allLabelsMap = {}
+
+            async.series([
+                function (callbackSeries) {
+                    var queryObj = {
+                        "term": {
+                            "parents.keyword": parentId
+                        }
+                    };
+
+                    var size = 200;
+                    var from = 0
+                    var resultSize = 1;
+
+                    async.whilst(function (test) {
+                            return resultSize > 0
+                        },
+
+                        function (callbackWhilst) {
+                            var query = {
+                                "query": queryObj,
+                                "from": from,
+                                "size": size,
+                                "_source": {
+                                    "excludes": [
+                                        "attachment.content"
+                                    ]
+                                    ,
+
+                                }
+                            }
+                            ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
+                                if (err)
+                                    return callback(err);
+                                var hits = result.hits.hits;
+                                resultSize = hits.length
+                                from += size
+                                hits.forEach(function (hit) {
+                                    var data = hit._source;
+                                    data.index = hit._index;
+                                    allData.push(data)
+                                })
+                                callbackWhilst()
+
+                            })
+                        }, function (err) {
+                            return callbackSeries(err);
+                        })
+                }, function (callbackSeries) {
+                    var resultSize = 1;
+                    var allData = [];
+                    var offset = 0;
+                    var size = 500;
+                    async.whilst(
+                        function (test) {
+                            return resultSize > 0
+                        },
+
+                        function (callbackWhilst) {
+
+                            self.listSourcesAllLabels(indexes[0], offset, size, function (err, hits) {
+                                if (err)
+                                    return callbackWhilst(err);
+                             //
+                                resultSize = hits.length
+                                offset += size
+                                hits.forEach(function (hit) {
+                                    allLabelsMap[hit._source.id] = hit._source.label
+
+                                })
+                                callbackWhilst()
+
+
+                            })
+
+                        }, function (err) {
+                                return callbackSeries(err)
+
+                        })
+                }
+            ], function (err) {
+                return callback(err, {data: allData, labelsMap: allLabelsMap});
+            })
+
         }
 
 

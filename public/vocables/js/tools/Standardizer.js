@@ -1046,13 +1046,13 @@ var Standardizer = (function () {
 
                             if (indexes.indexOf(hit._index) < 0)
                                 indexes.push(hit._index)
-                            var parentsStr = hit._source.parents
-
+                         //   var parentsStr = hit._source.parents
+var parents=hit._source.parents
                             classUris.push(hit._source.id)
-                            if (parentsStr) {
+                            if (parents) {
 
                                 var lastParent
-                                var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+                             //   var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
                                 if (!distinctParentsMap[parentsStr])
                                     distinctParentsMap[parentsStr] = []
@@ -1267,7 +1267,8 @@ var Standardizer = (function () {
                                 return;
                             var commonNodes = []
                             hits.forEach(function (hit) {
-                                var ancestors = hit._source.parents.split("|").reverse()
+                               // var ancestors = hit._source.parents.split("|").reverse()
+                                var ancestors = hit._source.parents.reverse()
                                 var done = false
                                 ancestors.forEach(function (ancestor) {
                                     if (!done) {
@@ -1451,7 +1452,7 @@ var Standardizer = (function () {
         var nodes = {}
         var orphans = []
         var treemapData = {}
-        var distinctParentsMap = {}
+
         var hierarchy = {}
 
         async.series([
@@ -1505,16 +1506,14 @@ var Standardizer = (function () {
 
                         if (indexes.indexOf(hit._index) < 0)
                             indexes.push(hit._index)
-                        var parentsStr = hit._source.parents
-
+                    //    var parentsStr = hit._source.parents
+                        var parents = hit._source.parents
                         classUris.push(hit._source.id)
-                        if (parentsStr) {
+                        if (parents) {
 
                             var lastParent
-                            var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+                          //  var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
-                            if (!distinctParentsMap[parentsStr])
-                                distinctParentsMap[parentsStr] = []
 
                             var ancestors = [];
                             var path = "";

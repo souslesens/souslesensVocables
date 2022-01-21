@@ -876,6 +876,7 @@ var TE_14224_browser = (function () {
                     self.showAssetNodeInfos(self.currentGraphNode)
                 } else {
                     Lineage_classes.currentGraphNode = node
+
                     Lineage_classes.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
                 }
 
@@ -1114,11 +1115,11 @@ var TE_14224_browser = (function () {
                                 node.data.countAssetNodes = count
                             }
                         })
-                        /*     common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options, function(){
-                                 $("#TE_14224_browser_ontologyPanelDiv").jstree().get
+                         common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options, function(){
+                             /*        $("#TE_14224_browser_ontologyPanelDiv").jstree().get
 
-                                 set_type (obj, type)
-                             })*/
+                                 set_type (obj, type)*/
+                             })
 
                     })
             },

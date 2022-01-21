@@ -31,7 +31,8 @@ var SourceBrowser = (function () {
             $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
                 "<input type='checkbox' checked='checked' id= 'GenericTools_exactMatchSearchCBX'>Exact Match" +
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.searchTerm()'>Search</button>" +
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showThesaurusTopConcepts(MainController.currentSource)'>reset</button>" +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showThesaurusTopConcepts(MainController.currentSource);" +
+                "$(\"#GenericTools_searchTermInput\").val(\"\");'>reset</button>" +
                 "<div id='SourceBrowser_collectionDiv'>" +
                 "Collection<select id='SourceBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
                 "</div>")
@@ -132,7 +133,7 @@ var SourceBrowser = (function () {
 
                 TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions)
 
-
+                $('#GenericTools_searchAllSourcesTermInput').val('')
                 /* Collection.Sparql.getCollections(sourceLabel, options, function (err, result) {
 
                    })*/
@@ -263,16 +264,31 @@ var SourceBrowser = (function () {
                 }
 
             }
-            items.toDataTable = {
+        /*    items.toDataTable = {
                 label: "export to Table",
                 action: function (e) {// pb avec source
                     Export.exportTeeToDataTable()
 
                 }
 
+            }*/
+
+            items.exportAllDescendants = {
+                label: "Export all descendants",
+                action: function (e) {// pb avec source
+                    SourceBrowser.exportAllDescendants()
+
+                }
+
             }
 
             return items;
+        }
+
+        self.exportAllDescendants = function () {
+            var parentId = self.currentTreeNode.data.id
+            var indexes = [self.currentTreeNode.data.source.toLowerCase()]
+            Export.exportAllDescendants(parentId,indexes)
         }
 
 
@@ -401,8 +417,8 @@ var SourceBrowser = (function () {
                             if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
                                 if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1)
                                     searchedSources.push(sourceLabel)
-                           /*     else
-                                    searchedSources.push(sourceLabel)*/
+                            /*     else
+                                     searchedSources.push(sourceLabel)*/
 
                         }
                     }
@@ -453,10 +469,10 @@ var SourceBrowser = (function () {
                             /*   if(match.label.toLowerCase().indexOf(term)<0 )
                                    return*/
 
-                            if (match.parents && match.parents.split) {
+                            if (match.parents) {//} && match.parents.split) {
 
                                 var parentId = ""
-                                var parents = match.parents.split("|")
+                                var parents = match.parents;//.split("|")
                                 var nodeId = ""
                                 parents.forEach(function (aClass, indexParent) {
                                     if (aClass == "")
@@ -1235,7 +1251,7 @@ var SourceBrowser = (function () {
         }
 
 
-        self.addProperty = function (property, value, source,createNewNode) {
+        self.addProperty = function (property, value, source, createNewNode) {
             if (!property)
                 property = $("#sourceBrowser_addPropertyName").val()
             if (!value)

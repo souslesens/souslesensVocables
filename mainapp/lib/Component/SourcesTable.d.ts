@@ -1,3 +1,4 @@
+/// <reference types="react" />
 declare const SourcesTable: () => JSX.Element;
 declare const enum Type {
     UserClickedModal = 0,

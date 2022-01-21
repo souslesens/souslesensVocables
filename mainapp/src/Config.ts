@@ -1,6 +1,6 @@
 async function getConfig(): Promise<Config> {
 
-    const response = await fetch('/config');
+    const response = await fetch('/api/v1/config');
     const json = await response.json();
     return json
 

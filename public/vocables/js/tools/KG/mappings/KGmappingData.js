@@ -54,7 +54,7 @@ var KGmappingData = (function () {
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "?" + params.toString(),
+            url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
             success: function (tablesData, textStatus, jqXHR) {

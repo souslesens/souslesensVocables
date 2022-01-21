@@ -153,12 +153,6 @@ router.post(
             });
         }
 
-        if (req.body.getAssetGlobalMappings) {
-            KGcontroller.getAssetGlobalMappings(req.body.getAssetGlobalMappings, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.query.SPARQLquery) {
             var query = req.body.query;
             if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");

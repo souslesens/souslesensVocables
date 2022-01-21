@@ -31,9 +31,8 @@ var KGassetGraph = (function () {
             function (callbackSeries) {
 
                 $.ajax({
-                    type: "POST",
-                    url: Config.serverUrl,
-                    data: {getAssetGlobalMappings: assetLabel},
+                    type: "GET",
+                    url: Config.apiUrl + "/kg/assets/" + assetLabel,
                     dataType: "json",
 
                     success: function (data, textStatus, jqXHR) {

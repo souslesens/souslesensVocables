@@ -170,9 +170,8 @@ var KGmappingData = (function () {
             if (err)
                 return alert(err);
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: {getAssetGlobalMappings: assetLabel},
+                type: "GET",
+                url: Config.apiUrl + "/kg/assets/" + assetLabel,
                 dataType: "json",
 
                 success: function (result, textStatus, jqXHR) {

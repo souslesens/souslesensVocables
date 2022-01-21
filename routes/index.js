@@ -74,56 +74,6 @@ if (!config.disableAuth) {
     });
 }
 
-// Users/profile/sources routes
-// TODO: move this routes to OpenApi
-router.get("/users", ensureLoggedIn(), function (req, res, next) {
-    res.sendFile(path.join(__dirname, "/../config/users/users.json"));
-});
-router.put("/users", ensureLoggedIn(), async function (req, res, next) {
-    // Hash password that are not hashed yet
-    Object.keys(req.body).forEach(function (key, index) {
-        if (req.body[key].password && !req.body[key].password.startsWith("$2b$")) {
-            req.body[key].password = bcrypt.hashSync(req.body[key].password, 10);
-        }
-    });
-    // Write the file
-    try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/users/users.json"), JSON.stringify(req.body, null, 2));
-        res.sendFile(path.join(__dirname, "/../config/users/users.json"));
-    } catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
-});
-
-router.get("/profiles", ensureLoggedIn(), function (req, res, next) {
-    res.sendFile(path.join(__dirname, "/../config/profiles.json"));
-});
-
-router.put("/profiles", ensureLoggedIn(), async function (req, res, next) {
-    try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/profiles.json"), req.body);
-        res.sendFile(path.join(__dirname, "/../config/profiles.json"));
-    } catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
-});
-
-router.get("/sources", ensureLoggedIn(), function (req, res, next) {
-    res.sendFile(path.join(__dirname, "/../config/sources.json"));
-});
-
-router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
-    try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/sources.json"), JSON.stringify(req.body, null, 2));
-        res.sendFile(path.join(__dirname, "/../config/sources.json"));
-    } catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
-});
-
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     let sampleFile;
     let uploadPath;

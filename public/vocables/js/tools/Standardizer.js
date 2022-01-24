@@ -69,13 +69,10 @@ var Standardizer = (function () {
     self.initSourcesIndexesList = function (options, callback) {
         if (!options)
             options = {}
-        var payload = {
-            dictionaries_listIndexes: 1,
 
-        }
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "get",
+            url: Config.apiUrl + "/elasticsearch/indices",
             data: payload,
             dataType: "json",
             success: function (indexes, textStatus, jqXHR) {

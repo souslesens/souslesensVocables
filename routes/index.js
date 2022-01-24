@@ -141,12 +141,6 @@ router.post(
             }
         }
 
-        if (req.body.dictionaries_listIndexes) {
-            DictionariesManager.listIndexes(function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.dictionaries_indexSource) {
             DictionariesManager.indexSource(req.body.indexName, JSON.parse(req.body.data), JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result);

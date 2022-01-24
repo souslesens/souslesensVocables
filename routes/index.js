@@ -93,11 +93,6 @@ router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
     function (req, response) {
-        if (req.body.elasticSearch) {
-            elasticRestProxy.executePostQuery(req.body.url, JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
 
         if (req.body.getBlenderSources) {
             configManager.getBlenderSources({}, function (err, result) {

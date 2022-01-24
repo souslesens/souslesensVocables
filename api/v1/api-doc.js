@@ -81,6 +81,57 @@ const apiDoc = {
       "title": "User Model"
 
     },
+    "BlenderSources": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/BlenderSource" },
+      "title": "BlenderSources"
+    },
+    "BlenderSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "editable": {
+          "type": "boolean"
+        },
+        "controller": {
+          "type": "string"
+        },
+        "sparql_server": {
+          "$ref": "#/definitions/SparqlServer"
+        },
+        "graphUri": {
+          "type": "string",
+          "format": "uri",
+        },
+        "schemaType": {
+          "type": "string"
+        },
+        "predicates": {
+          "$ref": "#/definitions/Predicates"
+        },
+        "protected": {
+          "type": "boolean"
+        },
+        "color": {
+          "type": "string"
+        },
+        "isBlenderTemplate": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "color",
+        "controller",
+        "editable",
+        "graphUri",
+        "isBlenderTemplate",
+        "predicates",
+        "protected",
+        "schemaType",
+        "sparql_server"
+      ],
+      "title": "TopTaxonomy"
+    },
     "Source": {
       "type": "object",
       "additionalProperties": false,

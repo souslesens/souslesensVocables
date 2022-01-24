@@ -47,12 +47,9 @@ var OwlEditor = (function () {
 
 
     self.loadSources = function () {
-        var payload = {
-            getBlenderSources: 1,
-        }
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "GET",
+            url: Config.apiUrl + "/blenderSources",
             data: payload,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {

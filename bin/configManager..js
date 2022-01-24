@@ -59,10 +59,19 @@ var ConfigManager = {
         });
     },
     getBlenderSources: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
-        jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
-            callback(err, sources);
-        });
+        const options_ = {
+            path: '/api/v1/blenderSources',
+            method: 'GET'
+        }
+        const req = https.request(options_, res => {
+            res.on('data', d => { callback(null, res) });
+            res.on('error', error => { callback(error, null) })
+        })
+        // var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+        // jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+        //     callback(err, sources);
+        // });
+
     },
     createNewResource: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         async.series(

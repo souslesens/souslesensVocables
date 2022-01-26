@@ -133,7 +133,7 @@ var MainController = (function () {
         }
         $.ajax({
             type: "POST",
-            url: Config.apiUrl + "/log",
+            url: Config.apiUrl + "/logs",
             data: payload,
             dataType: "json",
 

@@ -4,15 +4,17 @@ import { User as User } from './User';
 import { Profile } from './Profile';
 import { Source } from "./Source";
 import { Config } from "./Config";
+import { Log } from './Log';
 declare type Model = {
     users: RD<string, User[]>;
     profiles: RD<string, Profile[]>;
     sources: RD<string, Source[]>;
+    logs: RD<string, Log[]>;
     config: RD<string, Config>;
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
 };
-declare type EditionTab = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition';
+declare type EditionTab = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition' | 'Logs';
 declare type UpadtedFieldPayload = {
     id: string;
     fieldName: string;
@@ -34,6 +36,9 @@ declare type Msg = {
 } | {
     type: 'ServerRespondedWithConfig';
     payload: RD<string, Config>;
+} | {
+    type: 'ServerRespondedWithLogs';
+    payload: RD<string, Log[]>;
 } | {
     type: 'UserUpdatedField';
     payload: UpadtedFieldPayload;

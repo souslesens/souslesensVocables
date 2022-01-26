@@ -1,4 +1,3 @@
-/// <reference types="react" />
 declare const UsersTable: () => JSX.Element;
 declare const enum Type {
     UserClickedModal = 0,

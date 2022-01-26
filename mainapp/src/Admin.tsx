@@ -9,28 +9,31 @@ import { ProfilesTable } from './Component/ProfilesTable';
 import { Profile } from './Profile';
 import { SourcesTable } from './Component/SourcesTable';
 import { UsersTable } from './Component/UsersTable';
+import { LogsTable } from './Component/LogsTable';
 import { Source, getSources } from "./Source";
 import { Config, getConfig } from "./Config";
-
+import { Log, sample, getLogs } from './Log';
 
 
 type Model = {
     users: RD<string, User[]>,
     profiles: RD<string, Profile[]>,
     sources: RD<string, Source[]>,
+    logs: RD<string, Log[]>
     config: RD<string, Config>,
     isModalOpen: boolean,
     currentEditionTab: EditionTab
 }
 
 type EditionTab
-    = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition'
+    = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition' | 'Logs'
 
 const editionTabToNumber = (editionTab: EditionTab) => {
     switch (editionTab) {
         case 'UsersEdition': return 0
         case 'ProfilesEdition': return 1
         case 'SourcesEdition': return 2
+        case 'Logs': return 3
         default: 0
     }
 }
@@ -40,6 +43,7 @@ const editionTabToString = (editionTab: number): EditionTab => {
         case 0: return 'UsersEdition'
         case 1: return 'ProfilesEdition'
         case 2: return 'SourcesEdition'
+        case 3: return 'Logs'
         default: return 'UsersEdition'
     }
 }
@@ -53,6 +57,7 @@ const initialModel: Model =
     users: loading(),
     profiles: loading(),
     sources: loading(),
+    logs: loading(),
     config: loading(),
     isModalOpen: false,
     currentEditionTab: 'ProfilesEdition'
@@ -73,6 +78,7 @@ type Msg =
     | { type: 'ServerRespondedWithProfiles', payload: RD<string, Profile[]> }
     | { type: 'ServerRespondedWithSources', payload: RD<string, Source[]> }
     | { type: 'ServerRespondedWithConfig', payload: RD<string, Config> }
+    | { type: 'ServerRespondedWithLogs', payload: RD<string, Log[]> }
     | { type: 'UserUpdatedField', payload: UpadtedFieldPayload }
     | { type: 'UserClickedSaveChanges', payload: {} }
     | { type: 'UserChangedModalState', payload: boolean }
@@ -97,6 +103,8 @@ function update(model: Model, msg: Msg): Model {
 
         case 'ServerRespondedWithConfig':
             return { ...model, config: msg.payload }
+        case 'ServerRespondedWithLogs':
+            return { ...model, logs: msg.payload }
 
         case 'UserClickedSaveChanges':
             return { ...model, isModalOpen: false }
@@ -151,12 +159,17 @@ const Admin = () => {
             .catch((err) => updateModel({ type: 'ServerRespondedWithConfig', payload: failure(err.msg) }))
     }, [])
 
+    React.useEffect(() => {
+        getLogs().then((logs) => updateModel({ type: 'ServerRespondedWithLogs', payload: success(logs) }))
+    }, []);
+
     return <ModelContext.Provider value={{ model, updateModel }}>
         <Box sx={{ width: '100%', bgcolor: 'Background.paper' }}>
             <Tabs onChange={(event: React.SyntheticEvent, newValue: number) => updateModel({ type: 'UserClickedNewTab', payload: newValue })} value={editionTabToNumber(model.currentEditionTab)} centered>
                 <Tab label="Users" />
                 <Tab label="Profiles" />
                 <Tab label="Sources" />
+                <Tab label='Logs' />
             </Tabs>
         </Box>
         <Dispatcher model={model} />
@@ -172,6 +185,8 @@ const Dispatcher = (props: { model: Model }) => {
             return <ProfilesTable />
         case 'SourcesEdition':
             return <SourcesTable />
+        case 'Logs':
+            return <LogsTable />
         default:
             return <div>Problem</div>
     }

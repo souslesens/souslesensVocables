@@ -16,17 +16,7 @@ const SourcesTable = () => {
     const unwrappedSources = SRD.unwrap([], identity, model.sources)
 
     const [filteringChars, setFilteringChars] = React.useState("")
-    // const deleteSource = (source: Source) => {
-
-    //     const updatedSources = unwrappedSources.filter(prevSources => prevSources.id !== source.id);
-    //     console.log("deleted")
-
-    //     putSources(updatedSources)
-    //         .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
-    //         .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
-
-    // }
-
+    
     const renderSources =
         SRD.match({
             notAsked: () => <p>Let's fetch some data!</p>,

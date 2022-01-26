@@ -766,7 +766,16 @@ var KGadvancedMapping = (function () {
 
     }
 
-    self.lookForBestMatches = function (callback) {
+    self.standardizeValues = function (callback) {
+
+     window.open(window.location.href+"?x=3","SLSV_standardizer")
+       setTimeout(function(){
+            KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
+                broadcastChannel.postMessage({initStandardizerWords: result})
+            })
+    },500)
+
+        return
         if (!KGmappingData.currentColumn)
             return alert("no column selected")
         KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {

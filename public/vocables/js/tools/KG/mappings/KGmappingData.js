@@ -341,7 +341,7 @@ var KGmappingData = (function () {
 
                     var html = "    <span class=\"popupMenuItem\" onclick=\"KGmappingData.menuActions.removeMapping();\"> remove Mapping</span>" +
                         "<span class=\"popupMenuItem\" onclick=\"KGmappingData.menuActions.showAdvancedMappingDialog();\"> advanced Mapping</span>"+
-                    "<span class=\"popupMenuItem\" onclick=\"KGadvancedMapping.lookForBestMatches();\"> find best matches</span>"
+                    "<span class=\"popupMenuItem\" onclick=\"KGadvancedMapping.standardizeValues();\"> Standardize values</span>"
                     //   "<span class=\"popupMenuItem\" onclick=\"KGadvancedMapping.executeBulkMappingSequence();\">executeBulkMappingSequence</span>"
 
 

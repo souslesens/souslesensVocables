@@ -323,7 +323,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: item.domain,
                                 label: item.domainLabel,
-                                shape: shape,
+                               shadow:Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(domainSource),
@@ -359,7 +359,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: item.range,
                                 label: item.rangeLabel,
-                                shape: shape,
+                               shadow:Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(rangeSource),
@@ -470,7 +470,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: parentId,
                                 label: parentId,
-                                shape: "box",
+                               shadow:Lineage_classes.nodeShadow, shape: "box",
                                 level: index,
 
                                 color: Lineage_classes.getSourceColor(ancestorsSource),
@@ -486,7 +486,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: parentId,
                                 label: labelsMap[parentId],
-                                shape: shape,
+                               shadow:Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: index,
                                 color: Lineage_classes.getSourceColor(restriction.rangeSourceLabel),

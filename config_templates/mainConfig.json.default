@@ -5,6 +5,7 @@
   "disableAuth": false,
   "auth": "json",
   "defaultGroups": [],
+  "logDir": "logs",
   "keycloak": {
     "realm": "master",
     "publicClient": false,

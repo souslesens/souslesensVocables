@@ -38,7 +38,7 @@ var KGmappings = (function () {
         }
 
 
-        self.onLoaded = function () {
+        self.onLoaded = function (callback) {
             self.init()
             var KGsources = []
             for (var source in Config.sources) {
@@ -113,6 +113,8 @@ var KGmappings = (function () {
                     }
 
                 })
+                if(callback)
+                    callback()
 
             }, 500)
 

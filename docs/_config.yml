@@ -4,3 +4,5 @@ plugins:
 title: SouslesensVocables Documentation
 description: Technical documentation of souslesensVocables
 show_downloads: false
+
+theme: jekyll-theme-slate

@@ -1,9 +1,3 @@
-const sample = [{
-    "user": "xgarnier",
-    "tool": "Lineage",
-    "timestamp": "2021-11-29 12:20:21"
-
-}]
 
 type Log = { user: string, tool: string, timestamp: string }
 
@@ -17,4 +11,4 @@ async function getLogs(): Promise<Log[]> {
 
 
 
-export { sample, Log, getLogs }
+export { Log, getLogs }

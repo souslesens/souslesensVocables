@@ -12,7 +12,7 @@ import { UsersTable } from './Component/UsersTable';
 import { LogsTable } from './Component/LogsTable';
 import { Source, getSources } from "./Source";
 import { Config, getConfig } from "./Config";
-import { Log, sample, getLogs } from './Log';
+import { Log, getLogs } from './Log';
 
 
 type Model = {

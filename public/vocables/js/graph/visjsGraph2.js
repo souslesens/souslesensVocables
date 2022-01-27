@@ -808,7 +808,6 @@ var allNodes={}
             return;
         fileName = fileName + ".json"
         var payload = {
-            dir: "graphs",
             fileName: fileName,
             data: data
         }

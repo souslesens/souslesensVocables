@@ -12,8 +12,8 @@ var DataController = {
         });
     },
 
-    saveDataToFile: function (dir, fileName, data, callback) {
-        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+    saveDataToFile: function (fileName, data, callback) {
+        var filePath = path.join(__dirname, "../data/graphs/" + fileName);
         fs.writeFile(filePath, JSON.stringify(data, null, 2), {}, function (err, result) {
             return callback(err, "file saved");
         });

@@ -8,7 +8,7 @@ module.exports = function() {
 
   function POST(req, res, next) {
 
-    dataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
+    dataController.saveDataToFile(req.body.fileName, req.body.data, function (err, result) {
       if (err) {
         return res.status(400).json({error: err})
       }
@@ -30,9 +30,6 @@ module.exports = function() {
         schema: {
           type: 'object',
           properties: {
-            dir: {
-              type: "string",
-            },
             fileName: {
               type: "string",
             },

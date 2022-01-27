@@ -13,15 +13,14 @@ var ElasticSearchProxy = (function () {
 
             var strQuery = JSON.stringify(query);
             var payload = {
-                elasticSearch:1,
-                executeQuery: strQuery,
+                query: query,
                 url:"_search",
-                indexes: JSON.stringify(indexes)
-
+                indexes: indexes
             }
+
             $.ajax({
                 type: "POST",
-                url:Config.serverUrl,
+                url:Config.apiUrl + "/elasticsearch/query",
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {

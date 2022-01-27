@@ -50,7 +50,7 @@ var ElasticSearchProxy = (function () {
 
             $.ajax({
                 type: "POST",
-                 url:Config.apiUrl + "/msearch",
+                 url:Config.apiUrl + "/elasticsearch/msearch",
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {

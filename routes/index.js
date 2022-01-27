@@ -169,12 +169,6 @@ router.post(
             });
         }
 
-        if (req.body.saveData) {
-            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.listDirFiles) {
             DataController.getFilesList(req.body.dir, function (err, result) {
                 processResponse(response, err, result);

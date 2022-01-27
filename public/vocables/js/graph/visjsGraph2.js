@@ -808,14 +808,13 @@ var allNodes={}
             return;
         fileName = fileName + ".json"
         var payload = {
-            saveData: 1,
             dir: "graphs",
             fileName: fileName,
-            data: JSON.stringify(data)
+            data: data
         }
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: Config.apiUrl + "/data",
             data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {

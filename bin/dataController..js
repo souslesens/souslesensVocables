@@ -14,7 +14,7 @@ var DataController = {
 
     saveDataToFile: function (dir, fileName, data, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        fs.writeFile(filePath, data, {}, function (err, result) {
+        fs.writeFile(filePath, JSON.stringify(data, null, 2), {}, function (err, result) {
             return callback(err, "file saved");
         });
     },

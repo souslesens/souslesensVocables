@@ -169,12 +169,6 @@ router.post(
             });
         }
 
-        if (req.body.KG_SaveMappings) {
-            KGcontroller.saveMappings(req.body.KGsource, req.body.mappings, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.saveData) {
             DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
                 processResponse(response, err, result);

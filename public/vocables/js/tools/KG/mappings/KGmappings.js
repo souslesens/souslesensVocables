@@ -697,14 +697,13 @@ var KGmappings = (function () {
             self.isModifyingMapping = false;
 
             var payload = {
-                KG_SaveMappings: true,
-                mappings: JSON.stringify(mappings, null, 2),
-                KGsource: mappingName
+                mappings: mappings,
+                source: mappingName
             }
 
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: Config.apiUrl + "/kg/mappings",
                 data: payload,
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {

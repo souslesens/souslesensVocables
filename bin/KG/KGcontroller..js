@@ -12,9 +12,9 @@ var KGcontroller = {
         return path.resolve(filePath) + path.sep;
     },
 
-    saveMappings: function (source, jsonStr, callback) {
+    saveMappings: function (source, mappings, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";
-        fs.writeFile(filePath, jsonStr, null, function (err, result) {
+        fs.writeFile(filePath, JSON.stringify(mappings, null, 2), null, function (err, result) {
             callback(err);
         });
     },

@@ -136,12 +136,6 @@ router.post(
             }
         }
 
-        if (req.body.dictionaries_indexSource) {
-            DictionariesManager.indexSource(req.body.indexName, JSON.parse(req.body.data), JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.query.SPARQLquery) {
             var query = req.body.query;
             if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");

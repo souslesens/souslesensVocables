@@ -1086,15 +1086,14 @@ var Standardizer = (function () {
             //  MainController.UI.message("indexing " + data.length)
             var options = {replaceIndex: replaceIndex, owlType: "Class"}
             var payload = {
-                dictionaries_indexSource: 1,
-                indexName: sourceLabel.toLowerCase(),
-                data: JSON.stringify(data),
-                options: JSON.stringify(options)
+                name: sourceLabel.toLowerCase(),
+                data: data,
+                options: options
             }
 
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: Config.apiUrl + "/elasticsearch/indexsource",
                 data: payload,
                 dataType: "json",
                 success: function (data2, textStatus, jqXHR) {

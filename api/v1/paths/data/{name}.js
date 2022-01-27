@@ -1,5 +1,5 @@
 const path = require("path");
-const kGcontroller = require(path.resolve("bin/KG/KGcontroller."));
+const dataController = require(path.resolve("bin/dataController."));
 
 module.exports = function() {
   let operations = {
@@ -20,9 +20,9 @@ module.exports = function() {
   GET.apiDoc = {
 
     security: [{loginScheme: []}],
-    summary: 'Retrieve a KG mapping',
-    description: "Retrieve a KG mapping",
-    operationId: 'Retrieve a KG mapping',
+    summary: 'Read content of a file',
+    description: "Read content of a file",
+    operationId: 'Read content of a file',
     parameters: [
       {
         name: 'name',

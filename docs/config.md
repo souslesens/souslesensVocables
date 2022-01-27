@@ -41,11 +41,11 @@ Finally, it is possible to **create new sources** or **delete** existing ones.
 
 ### User credentials' modification
 
-![User modification](img/user-modification.png)
+![User modification](img/user-modification1.png)
 
-![User modification](img/user-modification.png)
+![User modification](img/user-modification2.png)
 
-![User modification](img/user-modification.png)
+![User modification](img/user-modification3.png)
 
 ### User removal
 

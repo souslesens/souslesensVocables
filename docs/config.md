@@ -49,7 +49,7 @@ Finally, it is possible to **create new sources** or **delete** existing ones.
 
 ### User removal
 
-![User remove](img/user-remove.png)
+![User remove](img/user-remove1.png)
 
 ### Sources' repository management
 

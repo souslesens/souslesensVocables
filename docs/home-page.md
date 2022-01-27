@@ -1,4 +1,4 @@
-# Introduction
+# Home page
 
 ![Home page: right panel](img/home1.png)
 

@@ -18,8 +18,8 @@ var DataController = {
             return callback(err, "file saved");
         });
     },
-    readfile: function (dir, fileName, callback) {
-        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+    readfile: function (fileName, callback) {
+        var filePath = path.join(__dirname, "../data/graphs/" + fileName);
         if (!fs.existsSync(filePath)) return callback("file does not exist", null);
         fs.readFile(filePath, function (err, result) {
             var data = "" + result;

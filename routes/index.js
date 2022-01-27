@@ -174,11 +174,6 @@ router.post(
                 processResponse(response, err, result);
             });
         }
-        if (req.body.readDataFile) {
-            DataController.readfile(req.body.dir, req.body.fileName, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
     },
     router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);

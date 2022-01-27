@@ -838,16 +838,11 @@ var allNodes={}
         var addToCurrentGraph = $("#visjsGraph_addToCurrentGraphCBX").prop("checked")
         if (!fileName || fileName == "")
             return;
-        var payload = {
-            readDataFile: 1,
-            dir: "graphs",
-            fileName: fileName
-        }
 
         self.message("Loading Graph...")
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "GET",
+            url: Config.apiUrl + "/data/" + fileName,
             data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {

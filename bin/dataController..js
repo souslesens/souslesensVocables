@@ -3,8 +3,8 @@ var path = require("path");
 var async = require("async");
 
 var DataController = {
-    getFilesList: function (dir, callback) {
-        var dirPath = path.join(__dirname, "../data/" + dir);
+    getFilesList: function (callback) {
+        var dirPath = path.join(__dirname, "../data/graphs");
         if (!fs.existsSync(dirPath)) return callback(null, null);
 
         fs.readdir(dirPath, function (err, result) {

@@ -168,12 +168,6 @@ router.post(
                 processResponse(response, err, result);
             });
         }
-
-        if (req.body.listDirFiles) {
-            DataController.getFilesList(req.body.dir, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
     },
     router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
         var elasticQuery = JSON.parse(req.query.query);

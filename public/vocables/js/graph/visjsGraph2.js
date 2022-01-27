@@ -901,13 +901,10 @@ var allNodes={}
     self.listSavedGraphs = function () {
         if (!Config || !Config.serverUrl)
             return
-        var payload = {
-            listDirFiles: 1,
-            dir: "graphs"
-        }
+
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "GET",
+            url: Config.apiUrl + "/data/files",
             data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {

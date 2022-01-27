@@ -116,7 +116,7 @@ openapi.initialize({
 
 // OpenAPI UI
 app.use(
-    "/api-documentation",
+    "/api/v1",
     swaggerUi.serve,
     swaggerUi.setup(null, {
         swaggerOptions: {

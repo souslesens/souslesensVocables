@@ -79,7 +79,7 @@ var KGbuild = (function () {
 
         $.ajax({
             type: "POST",
-            url: Config.apiUrl + "/kg/mappings",
+            url: Config.apiUrl + "/kg",
             data: payload,
             dataType: "json",
 

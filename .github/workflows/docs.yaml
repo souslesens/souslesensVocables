@@ -7,10 +7,15 @@ on:
 
 jobs:
   build:
-    name: Push Sphinx Pages
+    name: Build sphinx pages
     runs-on: ubuntu-latest
     steps:
-    - uses: seanzhengw/sphinx-pages@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        create_readme: true
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install
+        working-directory: ./docs
+        run : python3 -e requirements.txt
+      - name: Build
+        working-directory: ./docs
+        run: make html
+

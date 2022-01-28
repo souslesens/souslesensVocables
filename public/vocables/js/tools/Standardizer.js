@@ -717,7 +717,8 @@ var Standardizer = (function () {
 
     self.showFuzzyMatchSearch = function (word) {
         var html = 'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
-            'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">'
+            'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">'+
+        "<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" </div>'
         $("#Standardizer_matrixCellDataDiv").html(html);
         setTimeout(function () {
@@ -1021,7 +1022,6 @@ var Standardizer = (function () {
         var nodes = {}
         var orphans = []
         var treemapData = {}
-        var distinctParentsMap = {}
         var hierarchy = {}
 
         async.series([
@@ -1054,11 +1054,12 @@ var parents=hit._source.parents
                                 var lastParent
                              //   var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
-                                if (!distinctParentsMap[parentsStr])
-                                    distinctParentsMap[parentsStr] = []
+
 
                                 var ancestors = [];
                                 var path = "";
+                                if(! parents.forEach)
+                                    return;
                                 parents.forEach(function (itemParent, index) {
                                     var parentPath = path
                                     path += itemParent + "|"
@@ -1262,6 +1263,8 @@ var parents=hit._source.parents
 
                         var pairs = {}
                         self.searchResultArray.forEach(function (item, itemIndex) {
+                            if(! item.hits)
+                                return;
                             var hits = item.hits.hits;
                             if (hits.length == 0)
                                 return;
@@ -1517,6 +1520,8 @@ var parents=hit._source.parents
 
                             var ancestors = [];
                             var path = "";
+                            if(! parents.forEach)
+                                return;
                             parents.forEach(function (itemParent, index) {
                                 var parentPath = path
                                 path += itemParent + "|"

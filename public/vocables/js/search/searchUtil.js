@@ -132,12 +132,15 @@ var SearchUtil = (function () {
                                                 label: toHit._source.label,
                                                 parents: toHit._source.parents
                                             })
-                                            if (toHit._source.parents) {//} && toHit._source.parents.split) {
-                                                var parentsArray = toHit._source.parents;//.split("|")
+                                            var parentsArray = toHit._source.parents;
+                                            if (Array.isArray(parentsArray) ) {//} && toHit._source.parents.split) {
+                                              //.split("|")
                                                 parentsArray.forEach(function (parent, indexParent) {
                                                     if (indexParent > 0 && !parentsMap[parent])
                                                         parentsMap[parent] = {}
                                                 })
+                                            }else{
+                                                var x=3
                                             }
 
                                         })
@@ -303,7 +306,7 @@ var SearchUtil = (function () {
                                     "query_string": {
                                         "query": word,
                                         "fields": ["label", "skoslabels"],
-                                        "default_operator": "OR"
+                                        "default_operator": "AND"
                                     }
                                 }
                             ]

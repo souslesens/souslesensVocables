@@ -950,8 +950,8 @@ WHERE {
             var parentType = "rdfs:subClassOf"
             var conceptType = "owl:Class"
             if (Config.sources[sourceLabel].schemaType == "SKOS") {
-                parentType == "skos:broader"
-                conceptType:"skos:Concept"
+                parentType = "skos:broader"
+                conceptType="skos:Concept"
             } else if (options.parentType) {
                 parentType = options.parentType
                 if (parentType == "rdfs:subPropertyOf")
@@ -990,7 +990,7 @@ WHERE {
 
                         "?concept rdf:type " + conceptType + ". "
                  //   query += "  FILTER (!isBlank(?parent)) "
-                    query += "?firstParent rdf:type owl:Class."
+                    query += "?firstParent rdf:type " + conceptType + ". "
                        // "?concept rdfs:subClassOf ?firstParent.?firstParent rdf:type owl:Class."
                     if (options.filter)
                         query += " " + options.filter + " "
@@ -1077,8 +1077,7 @@ WHERE {
 
                     // chain parents
                     for (var key in allClassesMap) {
-                        if(key=="http://data.total.com/resource/tsf/maintenance/romain_14224/Well_Completion")
-                            var x=3
+
                         recurse(key, allClassesMap[key].parents)
                     }
                     var x = allClassesMap
@@ -1088,14 +1087,14 @@ WHERE {
                         var parentArray = obj.parents;
                         parentArray.push(sourceLabel)
                         parentArray = parentArray.reverse()
-                        var str = ""
+                     /*   var str = ""
                         parentArray.forEach(function (parent, index) {
                             if (index > 0)
                                 str += "|"
                             str += parent;
-                        })
+                        })*/
                         delete allClassesMap[key].parent
-                        allClassesMap[key].parents = str;
+                        allClassesMap[key].parents = parentArray;
                     }
                     callbackSeries()
                 }

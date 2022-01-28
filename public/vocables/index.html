@@ -206,6 +206,8 @@
                 $("#graphDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
+
+               // $(".max-height").height(h - 300)
               //  $(".ui-accordion-content-active").height(h-100)
               //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
 
@@ -213,7 +215,9 @@
                 //  $('.jstree-default').css("max-height",h-200)
                // $(".jstree").height(w - 100);
 
-                $("#accordion").accordion()
+                $("#accordion").accordion({
+                    heightStyle: "fill"
+                })
                 $("#accordion").accordion("option", {active: 0});
                 $("#accordion").on("accordionbeforeactivate", function (event, ui) {
                     if (!KGmappings.checkMappingEditionSave())
@@ -282,7 +286,7 @@
 
         .ui-accordion .ui-accordion-content{
             overflow: hidden !important;
-           height:600px !important;
+          min-height:600px !important;
 
         }
 
@@ -414,6 +418,9 @@
             padding:5px !important;
         }
 
+        .max-height{
+            height: 700px !important;
+        }
 
 
     </style>
@@ -462,7 +469,7 @@
 
 <div style="display: flex;flex-direction: row;justify-content:left">
 
-    <div id="leftPanelDiv" style='max-width: 400px;'>
+    <div id="leftPanelDiv" style='max-width: 400px;height: 90vh'>
 
 
         <div id="accordion">

@@ -205,6 +205,8 @@ var Admin = (function () {
                             return;
                         var parents = obj.parents//;.split("|")
                         maxLevels = Math.max(maxLevels, parents.length)
+                        if(! parents.forEach)
+                            return;
                         parents.forEach(function (parent, index) {
                             if (index == 0)
                                 return

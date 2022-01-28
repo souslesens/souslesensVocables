@@ -91,18 +91,18 @@ var Export = (function () {
                 leafLabel = leafNode.label || leafNode.id
             lineLabels.push(leafLabel)
             lineIds.push(leafNode.id)
-            var previousAncestorLevel=null
+            var previousAncestorLevel = null
             for (var ancestorLevel in leafNode.ancestors) {
                 var labels = ""
                 var ids = ""
-                var propLabel=""
-               if(previousAncestorLevel){// search edge label
-                   edges.forEach(function(edge){
-                       if(edge.from==leafNode.ancestors[previousAncestorLevel] && edge.to==leafNode.ancestors[ancestorLevel])
-                       propLabel= "-["+edge.label+"]-"
-                   })
-               }
-                previousAncestorLevel=ancestorLevel
+                var propLabel = ""
+                if (previousAncestorLevel) {// search edge label
+                    edges.forEach(function (edge) {
+                        if (edge.from == leafNode.ancestors[previousAncestorLevel] && edge.to == leafNode.ancestors[ancestorLevel])
+                            propLabel = "-[" + edge.label + "]-"
+                    })
+                }
+                previousAncestorLevel = ancestorLevel
 
                 leafNode.ancestors[ancestorLevel].forEach(function (item, index) {
 
@@ -113,7 +113,7 @@ var Export = (function () {
                     }
                     var label = item;
                     if (nodesMap[item].data) {
-                        label =propLabel+ nodesMap[item].data.label || item
+                        label = propLabel + nodesMap[item].data.label || item
 
                     }
 
@@ -146,8 +146,6 @@ var Export = (function () {
 
 
     }
-
-
 
 
     self.exportTeeToDataTable = function (jstreeDiv, nodeId) {
@@ -219,10 +217,12 @@ var Export = (function () {
     }
 
 
+    self.exportAllDescendants = function (parentId, options, indexes) {
+        if (!options)
+            options = {}
 
-    self.exportAllDescendants = function (parentId,indexes) {
-MainController.UI.message("exporting node descendants...")
-        $("#waitImg").css("display","block")
+        MainController.UI.message("exporting node descendants...")
+        $("#waitImg").css("display", "block")
         SearchUtil.getParentAllDescendants(parentId, indexes, null, function (err, result) {
             if (err)
                 MainController.UI.message(err, true)
@@ -233,6 +233,8 @@ MainController.UI.message("exporting node descendants...")
 
                 var parentIdsArray = []
                 var parentLabelsArray = []
+               if(hit.parents ||  hit.parents.forEach)
+                   return
                 hit.parents.forEach(function (parent, indexParent) {
                     if (indexParent > 0) {
                         parentLabelsArray.push(result.labelsMap[parent] || Sparql_common.getLabelFromURI(parent))
@@ -242,44 +244,57 @@ MainController.UI.message("exporting node descendants...")
 
                 })
                 maxParentsLength = Math.max(maxParentsLength, parentIdsArray.length)
-                var lineIds = []
-                lineIds.push(hit.id)
-                lineIds = lineIds.concat(parentIdsArray.reverse())
-                matrixIds.push(lineIds)
 
-                var lineLabels = []
-                lineLabels.push(hit.label)
-                lineLabels = lineLabels.concat(parentLabelsArray.reverse())
-                matrixLabels.push(lineLabels)
+
+                if (options.fromBottomToTop) {
+                    parentIdsArray.push(hit.id)
+                    parentIdsArray = parentIdsArray.reverse()
+
+                } else {
+                    parentIdsArray = parentIdsArray
+                    parentIdsArray.push(hit.id)
+                }
+
+
+                matrixIds.push(parentIdsArray)
+
+
+
+                if (options.fromBottomToTop) {
+                    parentLabelsArray.push(hit.label)
+                    parentLabelsArray = parentLabelsArray.reverse()
+
+                } else {
+                    parentLabelsArray = parentLabelsArray
+                    parentLabelsArray.push(hit.label)
+                }
+
+
+                matrixLabels.push(parentLabelsArray)
 
 
             })
             var cols = []
-            for (var i = 0; i < maxParentsLength; i++) {
-                if (i == 0)
-                    cols.push({title: "Class", defaultContent: ""})
-                else
-                    cols.push({title: "Parent_" + i, defaultContent: ""})
+            for (var i = 0; i <= maxParentsLength; i++) {
+                cols.push({title: "Level" + i, defaultContent: ""})
             }
 
-            matrixLabels.forEach(function(line, lineIndex){
-                line.push("");
-                matrixLabels[lineIndex]= matrixLabels[lineIndex].concat(matrixIds[lineIndex])
+            matrixLabels.forEach(function (line, lineIndex) {
+                for (var i = line.length; i <= maxParentsLength + 1; i++) {
+                    matrixLabels[lineIndex].push("");
+                }
+                matrixLabels[lineIndex] = matrixLabels[lineIndex].concat(matrixIds[lineIndex])
             })
             cols.push({title: "-----", defaultContent: ""})
-            cols=cols.concat(cols)
+            cols = cols.concat(cols)
 
 
-
-            MainController.UI.message("",true)
-            Export.showDataTable(null,cols,matrixLabels)
+            MainController.UI.message("", true)
+            Export.showDataTable(null, cols, matrixLabels)
 
 
         })
     }
-
-
-
 
 
     self.prepareDataSet = function (flatNodesArray, nodesMap) {
@@ -310,7 +325,7 @@ MainController.UI.message("exporting node descendants...")
         })
 
         for (var i = 1; i <= colsMax; i++) {
-            cols.push({title: "Label_" + i, defaultContent: "", "width": "20%" })
+            cols.push({title: "Label_" + i, defaultContent: "", "width": "20%"})
         }
         for (var i = 1; i <= colsMax; i++) {
             cols.push({title: "Uri_" + i, defaultContent: ""})
@@ -319,8 +334,8 @@ MainController.UI.message("exporting node descendants...")
     }
 
 
-    self.showDataTable = function (div, cols, dataSet,buttons) {
-        if ( self.dataTable){
+    self.showDataTable = function (div, cols, dataSet, buttons) {
+        if (self.dataTable) {
             self.dataTable.destroy();
             $('#dataTableDiv').html("");
         }
@@ -329,14 +344,14 @@ MainController.UI.message("exporting node descendants...")
             $('#mainDialogDiv').dialog("open")
             $('#mainDialogDiv').html("<table id='dataTableDivExport'></table>");
             div = 'dataTableDiv'
-        }else{
-            $('#'+div).html("<table id='dataTableDivExport'></table>");
+        } else {
+            $('#' + div).html("<table id='dataTableDivExport'></table>");
         }
         setTimeout(function () {
 
-            if(!buttons)
-                buttons='Bfrtip'
-            self.dataTable= $('#dataTableDivExport' ).DataTable({
+            if (!buttons)
+                buttons = 'Bfrtip'
+            self.dataTable = $('#dataTableDivExport').DataTable({
                 data: dataSet,
                 columns: cols,
 
@@ -355,9 +370,9 @@ MainController.UI.message("exporting node descendants...")
                     },
                     'copy'
                 ],
-               /* 'columnDefs': [
-                    {'max-width': '20%', 'targets': 0}
-                ],*/
+                /* 'columnDefs': [
+                     {'max-width': '20%', 'targets': 0}
+                 ],*/
                 order: []
 
 

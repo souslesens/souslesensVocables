@@ -1858,7 +1858,8 @@ var Lineage_classes = (function () {
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showObjectProperties();\">ObjectProperties</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showRestrictions();\">Restrictions</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showIndividuals();\">Individuals</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">Neighborhood</span>"
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">Neighborhood</span>"+
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.removeFromGraph();\">Remove from graph</span>"
 
 
             if (node.id && node.id.indexOf("_cluster") > 0) {
@@ -2171,6 +2172,9 @@ var Lineage_classes = (function () {
                     $("#graphPopupDiv").css("display", "flex")
                 }, 100)
 
+            },
+            removeFromGraph:function(){
+                visjsGraph.removeNodes("id",Lineage_classes.currentGraphNode.id,true)
             },
             showObjectProperties: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey

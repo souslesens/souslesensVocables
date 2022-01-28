@@ -230,4 +230,28 @@ var treeDirPath = "D:\\ATD_Baillet\\Search2021\\treeDirs.json";
 var openXmlFilePath = "D:\\NLP\\ontologies\\14224\\ISO14224_Datacollection-oilandgas\\word\\document.xml";
 //var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
 
-docxArraysExtractor.buildParts(treeDirPath, openXmlFilePath, function (err, result) {});
+var openXmlFilePath ="D:\\NLP\\ontologies\\ISO 81346\\part10.xml"
+
+
+docxArraysExtractor.parseXml(openXmlFilePath, function (err, result) {
+  var str="";
+    result.forEach(function (array, arrayIndex) {
+        str += "\n";
+        str += "-------- " + array.title + "-----------\n";
+        array.forEach(function (line, lineIndex) {
+            str += arrayIndex + "\t";
+            if (!Array.isArray(line)) return;
+            line.forEach(function (cell, cellIndex) {
+                if (lineIndex > 2) {
+                    if (cell == "") cell = array[lineIndex - 1][cellIndex];
+                }
+                str += cell + "\t";
+            });
+            str += "\n";
+        });
+    });
+
+    var str2 = str; // Buffer.from(str, 'Windows-1252')
+    fs.writeFileSync(openXmlFilePath + ".csv", str);
+
+});

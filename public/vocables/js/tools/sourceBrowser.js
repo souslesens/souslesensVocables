@@ -288,7 +288,7 @@ var SourceBrowser = (function () {
         self.exportAllDescendants = function () {
             var parentId = self.currentTreeNode.data.id
             var indexes = [self.currentTreeNode.data.source.toLowerCase()]
-            Export.exportAllDescendants(parentId,indexes)
+            Export.exportAllDescendants(parentId,{},indexes)
         }
 
 
@@ -474,6 +474,8 @@ var SourceBrowser = (function () {
                                 var parentId = ""
                                 var parents = match.parents;//.split("|")
                                 var nodeId = ""
+                                if(! parents.forEach)
+                                    return;
                                 parents.forEach(function (aClass, indexParent) {
                                     if (aClass == "")
                                         return

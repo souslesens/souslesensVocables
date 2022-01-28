@@ -607,6 +607,11 @@ var Sparql_OWL = (function () {
             if (sourceLabel) {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+
+
+                options.selectGraph=false //!!!!!!!!!!!!!!PB cannot have graph when concept ands value are not in the same graph
+
+             //   fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
                 fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
             } else {
                 fromStr = ""

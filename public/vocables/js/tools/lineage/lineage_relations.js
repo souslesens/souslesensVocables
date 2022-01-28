@@ -32,6 +32,13 @@ Lineage_relations = (function () {
             result.forEach(function (item) {
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
+            props.sort(function(a,b){
+                if(a.label>b.label)
+                    return 1;
+                if(a.label<b.label)
+                    return -1;
+                return 0
+            })
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
             // self.initProjectedGraphs()
         })
@@ -144,6 +151,10 @@ Lineage_relations = (function () {
                     rangeSourceLabel: rangeSourceLabel,
                     domainSourceLabel: domainSourceLabel
 
+                })
+
+                restrictions.sort(function(a,b){
+                  return (a.propLabel>b.prop)
                 })
 
 

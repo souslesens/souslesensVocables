@@ -66,8 +66,8 @@ var processor = {
                 var triples = [];
                 var lines = [];
                 var dataSource = mapping.dataSource;
-                if(mapping.graphUri)
-                    graphUri= mapping.graphUri
+                if (mapping.graphUri)
+                    graphUri = mapping.graphUri
                 async.series(
                     [
                         // load Lookups
@@ -99,8 +99,6 @@ var processor = {
                         },
 
 
-
-
                         //load csv
                         function (callbackSeries) {
 
@@ -124,11 +122,11 @@ var processor = {
                         function (callbackSeries) {
                             if (!dataSource)
                                 return callbackSeries()
-                            sqlServerProxy.getData(dataSource.dbName,dataSource.sql,function (err,result){
+                            sqlServerProxy.getData(dataSource.dbName, dataSource.sql, function (err, result) {
 
-                                if(err)
+                                if (err)
                                     return callbackSeries(err);
-                                lines=result;
+                                lines = result;
                                 callbackSeries()
 
                             })
@@ -153,7 +151,6 @@ var processor = {
 
                             return target;
                         }
-
 
 
                         var emptyMappings = 0;
@@ -221,6 +218,8 @@ var processor = {
 
                                 //format subject
                                 {
+                                    if (typeof item.s === "function")
+                                        subjectStr=subjectStr
                                     if (subjectStr.indexOf && subjectStr.indexOf("http") == 0)
                                         subjectStr = "<" + subjectStr + ">";
                                     else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1)
@@ -237,8 +236,9 @@ var processor = {
                                         var y = item
 
                                     }
-
-                                    if (objectStr.indexOf && objectStr.indexOf("http") == 0)
+                                    if (typeof item.o === "function")
+                                        objectStr=objectStr
+                                    else if (objectStr.indexOf && objectStr.indexOf("http") == 0)
                                         objectStr = "<" + objectStr + ">";
                                     else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                         objectStr = objectStr;
@@ -383,6 +383,9 @@ var processor = {
             "PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>" +
             "PREFIX req: <https://w3id.org/requirement-ontology/rdl/>" +
             "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>" +
+            "PREFIX iso81346: <http://data.total.com/resource/tsf/IEC_ISO_81346/>" +
+
+
             "";
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";

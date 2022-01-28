@@ -19,12 +19,9 @@ jobs:
         working-directory: ./docs
         run: make html
       - name: Publish
-        working-directory: ./docs
         uses: ad-m/github-push-action@v0.5.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           force: true
           directory: ./docs/_build/html
-
-

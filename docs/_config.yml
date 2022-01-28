@@ -1,8 +1,0 @@
-remote_theme: pages-themes/slate@v0.2.0
-plugins:
-  - jekyll-remote-theme
-title: SouslesensVocables Documentation
-description: Technical documentation of souslesensVocables
-show_downloads: false
-
-theme: jekyll-theme-slate

@@ -86,7 +86,7 @@ type UserJSON = { id?: string, login: string, password: string, groups: string[]
 
 type User = { id: string, _type: string, login: string, password: string, groups: string[], source: string }
 
-const newUser = (key: string): User => { return ({ id: key, _type: 'user', login: '', password: '', groups: [], source: 'local' }) }
+const newUser = (key: string): User => { return ({ id: key, _type: 'user', login: '', password: '', groups: [], source: 'json' }) }
 
 
 

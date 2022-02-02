@@ -22,8 +22,7 @@ var SourceMatcher = (function () {
             SourceBrowser.showThesaurusTopConcepts(sourceLabel)
 
 
-            $("#actionDivContolPanelDiv").load("snippets/sourceMatcher.html")
-            setTimeout(function () {
+            $("#actionDivContolPanelDiv").load("snippets/sourceMatcher.html",function () {
                 var sourceLabels = Object.keys(Config.sources).sort();
                 common.fillSelectOptions("SourceMatcher_targetGraphUriSelect", sourceLabels, true)
                 $("#accordion").accordion("option", {active: 2});

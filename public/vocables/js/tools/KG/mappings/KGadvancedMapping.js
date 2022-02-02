@@ -185,14 +185,17 @@ var KGadvancedMapping = (function () {
 
                     if (err)
                         return alert(err)
-                    $("#KGmappings_AdvancedMappingDialogDiv").load("snippets/KG/KGmappingAdvancedMappingDialog.html");
-                    $("#KGmappings_AdvancedMappingDialogDiv").dialog("open")
+                    $("#KGmappings_AdvancedMappingDialogDiv").load("snippets/KG/KGmappingAdvancedMappingDialog.html",function(){
+                        $("#KGmappings_AdvancedMappingDialogDiv").dialog("open")
 
-                    setTimeout(function () {
-                        MainController.UI.message("", true)
-                        $("#KGmappingData_column").html(KGmappingData.currentColumn)
-                        self.setDictionaryMappings(dictionary, columnClassId, KGmappingData.currentColumnDistinctValues)
-                    }, 200)
+                        setTimeout(function () {
+                            MainController.UI.message("", true)
+                            $("#KGmappingData_column").html(KGmappingData.currentColumn)
+                            self.setDictionaryMappings(dictionary, columnClassId, KGmappingData.currentColumnDistinctValues)
+
+                    });
+
+                    })
 
 
                 })

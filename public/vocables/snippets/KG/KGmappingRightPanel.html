@@ -56,14 +56,13 @@
 
 
     $("#KGmappings_Tabs").tabs()
-    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
-    setTimeout(function () {
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html",function () {
         $("#GenericTools_searchInAllSources").prop("checked", true)
         MainController.currentSource = Config.KG.mappingAlternativeSource
         SourceBrowser.currentTargetDiv = "KGmappingsjsOtherOntologiesTreeDiv"
         $("#GenericTools_searchSchemaType").val("OWL")
 
-    }, 300)
+    }, )
 
     var to = false;
     $('#KGmappings_OneModelSearchTree').keyup(function () {

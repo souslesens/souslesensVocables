@@ -163,8 +163,8 @@ var KGmappingGraph = (function () {
                   "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
   $("#KGmappings_Tabs").tabs("option", "active", 3);
               $("#mainDialogDiv").html(html);*/
-            $("#mainDialogDiv").load("snippets/KG/KGPropertyassocationDialog.html");
-            setTimeout(function () {
+            $("#mainDialogDiv").load("snippets/KG/KGPropertyassocationDialog.html",function(){;
+                $("#mainDialogDiv").dialog("open")
                 $("#KGMapping_graphAssociationSubjectSpan").html(self.currentAssociation.subject.data.columnId + "->" + subjectLabel)
                 $("#KGMapping_graphAssociationObjectSpan").html(self.currentAssociation.object.data.columnId + "->" + objectLabel)
                 KGmappings.displayPropertiesTree("KGmappingPropertiesTree")
@@ -183,7 +183,7 @@ var KGmappingGraph = (function () {
                 });
 
             })
-            $("#mainDialogDiv").dialog("open")
+
             KGmappingGraph.isAssigningProperty = true
             setTimeout(function () {
 

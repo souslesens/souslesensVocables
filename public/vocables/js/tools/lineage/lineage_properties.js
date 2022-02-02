@@ -62,7 +62,7 @@ Lineage_properties = (function () {
                     label: "graph Node",
                     action: function (e) {// pb avec source
                         self.drawProperty(self.currentTreeNode.data)
-                        //   Lineage_classes.addArbitraryNodeToGraph(self.currentTreeNode.data)
+                        //   Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
 
                     }
 
@@ -125,12 +125,17 @@ Lineage_properties = (function () {
 
         }
         self.onTreeNodeClick = function (event, obj) {
+            if(!obj  || !obj.node)
+                return;
             self.currentTreeNode = obj.node
+            if(node.children  && node.children.length>0)
+                return;
             self.openNode(obj.node);
 
         }
 
         self.openNode = function (node) {
+
             var options = {subPropIds: node.id}
             MainController.UI.message("searching in " + Lineage_common.currentSource)
             Sparql_OWL.getObjectProperties(Lineage_common.currentSource, null, options, function (err, result) {
@@ -721,6 +726,8 @@ Lineage_properties = (function () {
             }
 
         }
+
+
         self.searchAllSourcesTerm = function () {
 
             var term = $("#LineageProperties_searchAllSourcesTermInput").val()
@@ -736,22 +743,23 @@ Lineage_properties = (function () {
                         searchedSources.push(sourceLabel)
                 }
             } else {
-                if (!MainController.currentSource)
+                if (!Lineage_common.currentSource)
                     return alert("select a source or search in all source")
-                searchedSources.push(MainController.currentSource)
+                searchedSources.push(Lineage_common.currentSource)
             }
             var jstreeData = []
             var uniqueIds = {}
 
             async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
                 //  setTimeout(function () {
+
                 MainController.UI.message("searching in " + sourceLabel)
                 //  }, 100)
 
 
                 self.getPropertiesjsTreeData(sourceLabel, null, term, {exactMatch: exactMatch}, function (err, result) {
                     if (err)
-                        callbackEach(err);
+                      return  callbackEach(err);
 
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {

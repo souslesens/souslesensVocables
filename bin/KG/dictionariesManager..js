@@ -115,6 +115,16 @@ var DictionariesManager = {
                                             },
                                         },
                                     },
+                                    skoslabels: {
+                                        type: "text",
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword",
+                                                ignore_above: 256,
+                                            },
+                                        },
+                                    },
+
                                     id: {
                                         type: "text",
                                         fielddata: true,
@@ -127,6 +137,12 @@ var DictionariesManager = {
                                     },
                                     parents: {
                                         type: "text",
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword",
+                                                ignore_above: 256,
+                                            },
+                                        },
                                     },
                                     owlType: {
                                         type: "keyword",

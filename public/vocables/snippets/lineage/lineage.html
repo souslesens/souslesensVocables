@@ -6,14 +6,15 @@
     }
 
     .Lineage_sourceLabelDiv {
-        margin: 5px;
-        padding: 5px;
+
+        margin: 3px;
+        padding: 3px;
         font-size: 14px;
         border: solid 1px black;
         border-radius: 5px;
         font-weight: bold;
         background: #eee;
-      //  width:150px;
+    / / width: 150 px;
     }
 
     .Lineage_selectedSourceDiv {
@@ -24,6 +25,7 @@
         margin: 3px;
         padding: 2px;
     }
+
     .jstree-defaultXX {
         min-height: 150px !important;
     }
@@ -35,17 +37,41 @@
         border: solid 1px blue;
         border-radius: 3px;
     }
+
     .lineage_actionDiv_title {
-      font-weight: bold;
+        font-weight: bold;
         font-size: larger;
     }
 
-    .lineage_hiddenSource{
+    .lineage_hiddenSource {
         border-style: dashed;
-       opacity: 0.2;
+        opacity: 0.2;
 
     }
 
+
+    .lineage_actionDiv_legend {
+
+
+    }
+
+    .lineage_actionDiv_legend td {
+
+        border: 1px solid #aaa;
+        font-size: 12px;
+        margin: 2px;
+        text-align: center;
+        padding: 2px;
+        font-style: italic;
+    }
+
+    .Lineage_objectDivContainer {
+        display: flex;
+        flex-wrap: wrap;
+        max-height: 200px;
+        overflow: auto;
+        margin-left: 10px;
+    }
 
 
 </style>
@@ -61,40 +87,148 @@
     </div>
 </div>-->
 <div>
-    <div id="lineage_drawnSources" style="display: flex;flex-wrap: wrap">
+    <div id="lineage_drawnSources" class="Lineage_objectDivContainer">
     </div>
 </div>
 <div class="Lineage_paramsDiv" style="display: flex;flex-direction: column">
 
-  <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
+    <div class="lineage_actionDiv" style="display: none" id="lineage_controlPanel0Div">
 
-      <div class="lineage_actionDiv">
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.drawTopConcepts()">topClasses</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">expand</button>
-      <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.collapseNode()">collapse</button>-->
-
-
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.addParentsToGraph()">parents</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
-      <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.drawRestrictions()">Restrictions</button>
-    <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
-      </div>
-      <div class="lineage_actionDiv">
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.initUI()">Clear all</button>
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.clearLastAddedNodes()">Clear last</button>
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
+        <div class="lineage_actionDiv">
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.drawTopConcepts()">
+                topClasses
+            </button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button"
+                    onclick="Lineage_classes.addChildrenToGraph()">expand
+            </button>
+            <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.collapseNode()">collapse</button>-->
 
 
-      </div>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button"
+                    onclick="Lineage_classes.addParentsToGraph()">parents
+            </button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button"
+                    onclick="Lineage_classes.drawObjectProperties()">Properties
+            </button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button"
+                    onclick="Lineage_classes.drawRestrictions()">Restrictions
+            </button>
+            <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
+        </div>
+        <div class="lineage_actionDiv">
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.initUI()">Clear all
+            </button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.clearLastAddedNodes()">
+                Clear last
+            </button>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary'
+                    onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide
+            </button>
+
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary'
+                    onclick="Lineage_classes.showHideHelp()">help
+            </button>
+
+
+        </div>
 
     </div>
     <div class="lineage_actionDiv" style="display: flex;flex-direction: column;margin: 5px" id="lineage_blendDiv">
 
 
-        <div> source node <div id="lineage_sourceNodeDiv" style="background-color: #8792a2;font-weight: bold;text-align: center;"></div></div>
-        <div> target node<div id="lineage_targetNodeDiv" style="background-color: #8792a2;font-weight: bold;text-align: center;"></div></div>
-        <div id="lineage_blendButtonsDiv"  style="margin: 5px; display: none">
-            <button class='btn btn-sm my-1 py-0 btn-outline-primary'  class='lineage_button' onclick="Lineage_blend.createRelation('sameAs',true)">Create relation SameAs</button>
+        <div> source node
+            <div id="lineage_sourceNodeDiv"
+                 style="background-color: #8792a2;font-weight: bold;text-align: center;"></div>
+        </div>
+        <div> target node
+            <div id="lineage_targetNodeDiv"
+                 style="background-color: #8792a2;font-weight: bold;text-align: center;"></div>
+        </div>
+        <div id="lineage_blendButtonsDiv" style="margin: 5px; display: none">
+            <div style="    display: flex; flex-direction: row;">
+                <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                        onclick="Lineage_blend.createNode()">Create Node
+                </button>&nbsp;
+                <button id="lineage_blendCreateSubClassButton" class='btn btn-sm my-1 py-0 btn-outline-primary'
+                        style=" display: none" class='lineage_button'
+                        onclick="Lineage_blend.createSubClass()">Create subClass
+                </button>
+            </div>
+            <div id="lineage_createRelationButtonsDiv" style="margin: 5px; display: none">
+                <div style="border:solid 1px brown;padding:2px;margin:2px">
+                    Property
+                    <select id="lineage_createRelationPropertySelect" style="width:200px"></select><br>
+                    <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked"> +Inverse
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                            onclick="Lineage_blend.createRelation()">Create Relation
+                    </button>
+                </div>
+
+            </div>
+            <br>
+            <button id='lineage_blendToGraphButton' class='btn btn-sm my-1 py-0 btn-outline-primary'
+                    class='lineage_button'
+                    style="display:none" onclick="Lineage_blend.importNodeInCurrentMainSource()">Import Node in main
+                source
+            </button>
+
+            <br>
+            <button class='btn btn-sm my-1 py-0 btn-outline-primary' class='lineage_button'
+                    id="transformSameLabelsEdgesIntoSameAsRelationsButton"
+                    style="display: none" onclick="Lineage_blend.transformSameLabelsEdgesIntoSameAsRelations()">
+                transform SameLabelsEdges Into SameAsRelations
+            </button>
+
+
+        </div>
+
+        <div id="lineage_actionDiv_Keyslegend" style="display: none">
+
+            <table class="lineage_actionDiv_legend">
+                <tr>
+                    <td>object</td>
+                    <td>ctrl</td>
+                    <td>shift</td>
+                    <td>alt</td>
+                    <td>action</td>
+                </tr>
+                <tr>
+                    <td>node/edge</td>
+                    <td>X</td>
+                    <td></td>
+                    <td></td>
+                    <td>show infos</td>
+                </tr>
+                <tr>
+                    <td>node</td>
+                    <td>X</td>
+                    <td>X</td>
+                    <td></td>
+                    <td>burst</td>
+                </tr>
+                <tr>
+                    <td>node</td>
+                    <td>X</td>
+                    <td></td>
+                    <td>X</td>
+                    <td>select as source</td>
+                </tr>
+                <tr>
+                    <td>node</td>
+                    <td></td>
+                    <td>X</td>
+                    <td>X</td>
+                    <td>select as target</td>
+                </tr>
+                <tr>
+                    <td>edge</td>
+
+                    <td>X</td>
+                    <td></td>
+                    <td>X</td>
+                    <td>delete relation</td>
+                </tr>
+            </table>
 
         </div>
 
@@ -102,20 +236,27 @@
     </div>
 
     <div class="lineage_actionDiv" style="margin: 5px; display: block">
-        <b>Description</b>
-        <div  id="lineage_sourceDescriptionDiv"></div>
+        <span id="lineage_sourceDescriptionDiv"></span>
     </div>
 
+    <div class="lineage_actionDiv" style="margin: 5px; display: block">
+        Graph decoration <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect"
+                                 onchange="Lineage_classes.graphDecoration.run($(this).val())">
 
+    </select>
+        <!--    <button class='btn btn-sm my-1 py-0 btn-outline-primary'
+                    onclick="Lineage_classes.graphDecoration.showGraphDecorationDialog()">+
+            </button>-->
 
+        <div id="Lineage_classes_graphDecoration_legendDiv" class="Lineage_objectDivContainer"></div>
+    </div>
+    <!--   <div>
 
- <!--   <div>
-
-        <input type='radio' id='Lineage_topClassesRadio' name='Lineage_similarTypeRadio' checked="checked"/> topClasses
-        <input type='radio' id='Lineage_similarTypeRadio_Labels' name='Lineage_similarTypeRadio' /> Labels
-        <input type='radio' id='Lineage_similarTypeRadio_SameAs' name='Lineage_similarTypeRadio'/> SameAs
-    </div>-->
-  <!--  <select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>-->
+           <input type='radio' id='Lineage_topClassesRadio' name='Lineage_similarTypeRadio' checked="checked"/> topClasses
+           <input type='radio' id='Lineage_similarTypeRadio_Labels' name='Lineage_similarTypeRadio' /> Labels
+           <input type='radio' id='Lineage_similarTypeRadio_SameAs' name='Lineage_similarTypeRadio'/> SameAs
+       </div>-->
+    <!--  <select id="Lineage_toSource" onchange="Lineage_classes.drawSimilarsNodes(null,[$(this).val()])"></select>-->
     <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_classes.onPlusButton()">+</button>-->
 </div>
 

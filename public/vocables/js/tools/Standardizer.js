@@ -13,15 +13,26 @@ var Standardizer = (function () {
 
     }
     self.onLoaded = function (callback) {
+
         $("#actionDiv").html("")
-        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html")
+        $("#graphDiv").html("")
+        $("#graphDiv").load("snippets/standardizer/standardizer_central.html",function(){
+            $("#standardizerCentral_tabs").tabs({});;
+        })
+
+        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html",function(){
+            $("#Standardizer_leftTab").tabs({});
+        })
         MainController.UI.toogleRightPanel(true)
         $("#rightPanelDiv").html("")
-        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html")
+        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html",function() {
+
+        });
+
 
 
         $("#graphDiv").html("")
-        $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+
         $("#accordion").accordion("option", {active: 2});
 
         self.initSourcesIndexesList(null, function (err, sources) {
@@ -55,13 +66,16 @@ var Standardizer = (function () {
 
         })
         setTimeout(function () {
-            $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
+          /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
             $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
             setTimeout(function () {
                 $("#standardizerCentral_tabs").tabs({});
                 if(callback)
                     callback()
-            }, 500)
+            }, 500)*/
+
+            if(callback)
+                callback()
         }, 500)
 
 
@@ -120,97 +134,7 @@ var Standardizer = (function () {
     }
 
 
-    self.getElasticSearchMatches = function (words, indexes, mode, from, size, callback) {
 
-
-        $("#waitImg").css("display", "block")
-        //   MainController.UI.message("Searching exact matches ")
-        KGadvancedMapping.currentColumnValueDivIds = {}
-
-
-        var entitiesMap = {};
-        var count = 0
-
-        self.getWordBulkQuery = function (word, mode, indexes) {
-
-            var queryObj;
-            if (!mode || mode == "exactMatch") {
-                queryObj = {
-                    "bool": {
-                        "must": [
-                            {
-                                "term": {
-                                    "label.keyword": word.toLowerCase(),
-
-                                }
-                            }
-                        ]
-                    }
-                }
-            } else {
-                queryObj = {
-
-                    "bool": {
-                        "must": [
-                            {
-                                "query_string": {
-                                    "query": word,
-                                    "default_field": "label",
-                                    "default_operator": "OR"
-                                }
-                            }
-                        ]
-
-                    }
-
-                }
-            }
-            var header = {}
-            if (indexes)
-                header = {"index": indexes}
-
-
-            var query = {
-                "query": queryObj,
-                "from": from,
-                "size": size,
-                "_source": {
-                    "excludes": [
-                        "attachment.content"
-                    ]
-                },
-            }
-            var str = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-            return str;
-
-        }
-
-
-        self.entitiesMap = {}
-        var bulQueryStr = ""
-        var slices = common.array.slice(words, 100)
-        var allResults = []
-        var totalProcessed = 0
-        async.eachSeries(slices, function (wordSlice, callbackEach) {
-            bulQueryStr = "";
-            wordSlice.forEach(function (word) {
-                var wordQuery = self.getWordBulkQuery(word, mode, indexes)
-                bulQueryStr += wordQuery;
-            })
-            ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
-                if (err)
-                    return callbackEach(err)
-
-                allResults = allResults.concat(result)
-                callbackEach();
-            })
-
-
-        }, function (err) {
-            callback(err, allResults);
-
-        })
-    }
     self.getClassesLabels = function (classUris, indexes, callback) {
 
         var bulQueryStr = ""
@@ -631,7 +555,7 @@ var Standardizer = (function () {
             var indexes = self.getSelectedIndexes()
 
             self.currentWordsCount += words.length
-            self.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
+            SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
                 var html = self.processMatrixResult(words, result, indexes)
                 MainController.UI.message(" processed items: " + (totalProcessed))
                 $("#KGmapping_matrixContainer").append(html)
@@ -713,7 +637,7 @@ var Standardizer = (function () {
                     //   self.currentWords.push(hit._source.label)
                 })
                 var indexes = self.getSelectedIndexes(true)
-                self.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                     if (err)
                         return alert(err)
                     //  self.getMatchesClassesByIndex(result)
@@ -751,6 +675,8 @@ var Standardizer = (function () {
             }, 500)
         })
     }
+
+
 
 
     self.onMatrixCellClick = function (event) {
@@ -791,7 +717,8 @@ var Standardizer = (function () {
 
     self.showFuzzyMatchSearch = function (word) {
         var html = 'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
-            'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">'
+            'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">'+
+        "<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" </div>'
         $("#Standardizer_matrixCellDataDiv").html(html);
         setTimeout(function () {
@@ -1077,92 +1004,7 @@ var Standardizer = (function () {
         }
     }
 
-    self.generateElasticIndex = function (sourceLabel, callback) {
-        var totalLines = 0
 
-
-        var processor = function (data, replaceIndex, callback) {
-
-
-            if (data.length == 0)
-                return callback();
-            //  MainController.UI.message("indexing " + data.length)
-            var options = {replaceIndex: replaceIndex, owlType: "Class"}
-            var payload = {
-                dictionaries_indexSource: 1,
-                indexName: sourceLabel.toLowerCase(),
-                data: JSON.stringify(data),
-                options: JSON.stringify(options)
-            }
-
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
-                success: function (data2, textStatus, jqXHR) {
-                    totalLines += data.length
-                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase())
-                    callback(null, data)
-                }
-                , error: function (err) {
-                    callback(err);
-
-                }
-
-
-            })
-
-        }
-
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_OWL.getSourceTaxonomyAnClasses(sourceLabel, null, function (err, result) {
-
-                if (err) {
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message(err, true)
-                }
-                var index = 0
-                var classesArray = [];
-                for (var key in result.classesMap) {
-                    classesArray.push(result.classesMap[key])
-                }
-                var slices = common.array.slice(classesArray, 200)
-                async.eachSeries(slices, function (data, callbackEach) {
-                    var replaceIndex = false
-                    if ((index++) == 0)
-                        replaceIndex = true;
-                    processor(data, replaceIndex, function (err, result) {
-                        if (err)
-                            return callbackEach(err)
-                        //   MainController.UI.message("indexed "+data.length+" lines in "+sourceLabel)
-                        callbackEach();
-                    })
-                }, function (err) {
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message("DONE " + sourceLabel, true)
-                })
-
-            })
-
-            return;
-            Sparql_OWL.getDictionary(sourceLabel, {}, processor, function (err, result) {
-                if (err) {
-
-                    if (callback)
-                        return callback(err);
-                    MainController.UI.message(err, true)
-                }
-
-
-                if (callback)
-                    return callback();
-                MainController.UI.message("DONE " + sourceLabel, true)
-            })
-        }
-    }
 
 
     self.drawSunBurst = function (searchResultArray, words, options, callback) {
@@ -1180,7 +1022,6 @@ var Standardizer = (function () {
         var nodes = {}
         var orphans = []
         var treemapData = {}
-        var distinctParentsMap = {}
         var hierarchy = {}
 
         async.series([
@@ -1205,19 +1046,20 @@ var Standardizer = (function () {
 
                             if (indexes.indexOf(hit._index) < 0)
                                 indexes.push(hit._index)
-                            var parentsStr = hit._source.parents
-
+                         //   var parentsStr = hit._source.parents
+var parents=hit._source.parents
                             classUris.push(hit._source.id)
-                            if (parentsStr) {
+                            if (parents) {
 
                                 var lastParent
-                                var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+                             //   var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
-                                if (!distinctParentsMap[parentsStr])
-                                    distinctParentsMap[parentsStr] = []
+
 
                                 var ancestors = [];
                                 var path = "";
+                                if(! parents.forEach)
+                                    return;
                                 parents.forEach(function (itemParent, index) {
                                     var parentPath = path
                                     path += itemParent + "|"
@@ -1421,12 +1263,17 @@ var Standardizer = (function () {
 
                         var pairs = {}
                         self.searchResultArray.forEach(function (item, itemIndex) {
+                            if(! item.hits)
+                                return;
                             var hits = item.hits.hits;
                             if (hits.length == 0)
                                 return;
                             var commonNodes = []
                             hits.forEach(function (hit) {
-                                var ancestors = hit._source.parents.split("|").reverse()
+                                if(! hit._source.parents)
+                                    return;
+                               // var ancestors = hit._source.parents.split("|").reverse()
+                                var ancestors = hit._source.parents.reverse()
                                 var done = false
                                 ancestors.forEach(function (ancestor) {
                                     if (!done) {
@@ -1610,7 +1457,7 @@ var Standardizer = (function () {
         var nodes = {}
         var orphans = []
         var treemapData = {}
-        var distinctParentsMap = {}
+
         var hierarchy = {}
 
         async.series([
@@ -1637,7 +1484,7 @@ var Standardizer = (function () {
                 var totalProcessed = 0
 
 
-                Standardizer.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                     if (err)
                         return callbackSeries(err)
                     resultSize = result.length;
@@ -1664,19 +1511,19 @@ var Standardizer = (function () {
 
                         if (indexes.indexOf(hit._index) < 0)
                             indexes.push(hit._index)
-                        var parentsStr = hit._source.parents
-
+                    //    var parentsStr = hit._source.parents
+                        var parents = hit._source.parents
                         classUris.push(hit._source.id)
-                        if (parentsStr) {
+                        if (parents) {
 
                             var lastParent
-                            var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+                          //  var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
-                            if (!distinctParentsMap[parentsStr])
-                                distinctParentsMap[parentsStr] = []
 
                             var ancestors = [];
                             var path = "";
+                            if(! parents.forEach)
+                                return;
                             parents.forEach(function (itemParent, index) {
                                 var parentPath = path
                                 path += itemParent + "|"
@@ -2099,7 +1946,7 @@ var Standardizer = (function () {
         var cols = [];
         async.eachSeries(slices, function (words, callbackEach) {
 
-            self.getElasticSearchMatches(words, indexes, searchType, 0, 10000, function (err, result) {
+            SearchUtil.getElasticSearchMatches(words, indexes, searchType, 0, 10000, function (err, result) {
                 if (err)
                     return alert(err)
                 var entities = []

@@ -2,7 +2,7 @@
     <div>
         <input id='GenericTools_searchAllSourcesTermInput' style="width: 150px" value="">
         <button class='btn btn-sm my-1 py-0 btn-outline-primary' id="GenericTools_onSearchAllInput" onclick='SourceBrowser.searchAllSourcesTerm()'>Search</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.showThesaurusTopConcepts(MainController.currentSource)">reset</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.showThesaurusTopConcepts(MainController.currentSource);">reset</button>
         <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Export.exportTeeToDataTable(null,'#')">toTable</button>
      <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.exportSearchResult()">CSV</button>-->
     </div>
@@ -16,10 +16,17 @@
             <option>SKOS</option>
             <option>INDIVIDUAL</option>
         </select>
-
+<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.showSearchableSourcesTreeDialog()">+</button>
     </div>
 
 
+</div>
+<div id="searchAllDialogDiv"    style="margin-bottom: 10px;">
+    <div class="jstreeContainer" >
+        <div id="searchAll_sourcesTree"></div>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#searchAllDialogDiv').dialog('close')">Cancel</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.searchAllSourcesTerm()">Search</button>
+    </div>
 </div>
 
 <script>
@@ -30,5 +37,11 @@
         }
 
     })
+    $("#searchAllDialogDiv").dialog({
+        autoOpen: false,
+        height: 600,
+        width: 300,
+        modal: true,
+    });
 
 </script>

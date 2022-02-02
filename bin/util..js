@@ -254,7 +254,7 @@ var util = {
         r = r.replace(new RegExp("[ùúûü]", "g"), "u");
         r = r.replace(new RegExp("[ýÿ]", "g"), "y");
         r = r.replace(new RegExp("\\W", "g"), "");
-      //  r = "" + r.charAt(0).toLowerCase() + r.substring(1);
+        //  r = "" + r.charAt(0).toLowerCase() + r.substring(1);
         headerArray.push(r);
         return r;
     },

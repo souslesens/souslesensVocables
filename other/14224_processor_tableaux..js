@@ -1,7 +1,6 @@
 var processor = require("./CsvTripleBuilder.");
-var util = require("../bin/util.")
+var util = require("../bin/util.");
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-
 
 mappingsMap = {
     failureMechanism: {
@@ -11,33 +10,23 @@ mappingsMap = {
         lookups: [],
         transform: {
             typeCode: function (value, role) {
-                if (value == "")
-                    return "";
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "failureMechanism_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "failureMechanism_" + value;
+                    else if (role == "o") return value;
                 }
             },
             subdivisionCodeNumber: function (value, role) {
-                if (value == "")
-                    return "";
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "failureMechanism_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "failureMechanism_" + value;
+                    else if (role == "o") return value;
                 }
-
-
             },
         },
         tripleModels: [
-            {s: "typeCode", p: "iso14224:hasCode", o: "typeCode",isString:true},
-            {s: "subTypeCode", p: "iso14224:hasCode", o: "subTypeCode",isString:true},
+            { s: "typeCode", p: "iso14224:hasCode", o: "typeCode", isString: true },
+            { s: "subTypeCode", p: "iso14224:hasCode", o: "subTypeCode", isString: true },
 
             /*  {s: "typeCode", p: "skos:prefLabel", o: "typeCode"},
              {s: "subTypeCode", p: "skos:prefLabel", o: "subTypeCode"},
@@ -62,37 +51,27 @@ mappingsMap = {
         lookups: [],
         transform: {
             CodeNumber: function (value, role) {
-                if (value == "")
-                    return "";
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "failureCause_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "failureCause_" + value;
+                    else if (role == "o") return value;
                 }
-
-
             },
-            SubdivisionCodeNumber: function (value,role) {
-                if (value == "")
-                    return "";
+            SubdivisionCodeNumber: function (value, role) {
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "failureCause_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "failureCause_" + value;
+                    else if (role == "o") return value;
                 }
             },
         },
         tripleModels: [
-            {s: "SubdivisionCodeNumber", p:"iso14224:hasCode", o: "SubdivisionCodeNumber",isString:true},
-            {s: "CodeNumber", p: "iso14224:hasCode", o: "CodeNumber",isString:true},
+            { s: "SubdivisionCodeNumber", p: "iso14224:hasCode", o: "SubdivisionCodeNumber", isString: true },
+            { s: "CodeNumber", p: "iso14224:hasCode", o: "CodeNumber", isString: true },
 
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-          //  {s: "SubdivisionCodeNumber", p: "skos:prefLabel", o: "SubdivisionCodeNumber"},
-          //  {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
+            //  {s: "SubdivisionCodeNumber", p: "skos:prefLabel", o: "SubdivisionCodeNumber"},
+            //  {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
             /*  {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
               {s: "CodeNumber", p: "rdfs:label", o: "Notation"},
               {
@@ -100,7 +79,6 @@ mappingsMap = {
                   p: "rdfs:subClassOf",
                   o: "http://data.total.com/resource/tsf/maintenance/romain_14224/43b40cf901"
               },*/
-
         ],
     },
     detectionMethods: {
@@ -108,38 +86,27 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\detectionMethods.txt",
         lookups: [],
         transform: {
-            Activity: function (value,role) {
-                if (value == "")
-                    return "";
-
-            else {
-                    if (role == "s")
-                        return "detectionMethod_" + value
-                    else if (role == "o")
-                        return value
-
+            Activity: function (value, role) {
+                if (value == "") return "";
+                else {
+                    if (role == "s") return "detectionMethod_" + value;
+                    else if (role == "o") return value;
                 }
             },
-            Number: function (value,role) {
-                if (value == "")
-                    return "";
+            Number: function (value, role) {
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "detectionMethod_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "detectionMethod_" + value;
+                    else if (role == "o") return value;
                 }
-
             },
         },
 
         //Number	Notation	Description	Activity
         tripleModels: [
+            { s: "Number", p: "iso14224:hasCode", o: "Number", isString: true },
 
-            { s: "Number", p:"iso14224:hasCode", o: "Number",isString:true },
-
-         /*   { s: "Number", p: "rdf:type", o: "owl:Class" },
+            /*   { s: "Number", p: "rdf:type", o: "owl:Class" },
 
             { s: "Number", p: "skos:prefLabel", o: "Number" },
             { s: "Number", p: "rdfs:label", o: "Notation" },
@@ -162,32 +129,22 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\maintenanceActivity.txt",
         lookups: [],
         transform: {
-            CodeNumber: function (value,role) {
-                if (value == "")
-                    return "";
+            CodeNumber: function (value, role) {
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "maintenanceActivity_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "maintenanceActivity_" + value;
+                    else if (role == "o") return value;
                 }
-
-
             },
             Number: function (value) {
-                if (value == "")
-                    return "";
-                else
-                    return "detectionMethod_" + value
-
+                if (value == "") return "";
+                else return "detectionMethod_" + value;
             },
         },
         tripleModels: [
-
-            { s: "CodeNumber", p:"iso14224:hasCode", o: "CodeNumber",isString:true },
+            { s: "CodeNumber", p: "iso14224:hasCode", o: "CodeNumber", isString: true },
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-      /*      {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
+            /*      {s: "CodeNumber", p: "skos:prefLabel", o: "CodeNumber"},
 
           {s: "CodeNumber", p: "rdfs:label", o: "Activity"},
             {s: "CodeNumber", p: "rdf:type", o: "owl:Class"},
@@ -203,46 +160,31 @@ mappingsMap = {
         ],
     },
 
-
     failureMode: {
         type: "owl:Class",
         fileName: "D:\\NLP\\ontologies\\14224\\failureModes2.txt",
         lookups: [],
         transform: {
             Failure_mode_code: function (value, role) {
-
-                if (value == "")
-                    return "";
+                if (value == "") return "";
                 else {
-                    if (role == "s")
-                        return "failureMode_" + value
-                    else if (role == "o")
-                        return value
-
+                    if (role == "s") return "failureMode_" + value;
+                    else if (role == "o") return value;
                 }
-
             },
             SystemXX: function (value) {
-                if (value == "")
-                    return "";
-                else
-                    var x = "http://data.total.com/resource/tsf/iso_14224/" + util.formatStringForTriple(value, true)
+                if (value == "") return "";
+                else var x = "http://data.total.com/resource/tsf/iso_14224/" + util.formatStringForTriple(value, true);
                 return x;
-
             },
             equipmentXX: function (value) {
-                if (value == "")
-                    return "";
-                else
-                    return "http://data.total.com/resource/tsf/iso_14224/" + util.formatStringForTriple(value, true)
-
+                if (value == "") return "";
+                else return "http://data.total.com/resource/tsf/iso_14224/" + util.formatStringForTriple(value, true);
             },
-
         },
 
         tripleModels: [
-
-            { s: "Failure_mode_code", p:"iso14224:hasCode", o: "Failure_mode_code",isString:true },
+            { s: "Failure_mode_code", p: "iso14224:hasCode", o: "Failure_mode_code", isString: true },
             //   {s: "Failure_mode_code", p: "skos:prefLabel", o: "Failure_mode_code"},
             /*   { s: "Failure_mode_code", p: "rdfs:label", o: "Description" },
 
@@ -254,7 +196,6 @@ mappingsMap = {
         ],
     },
 
-
     tsf_top_ontology: {
         type: "owl:Class",
         topClass: "<http://data.total.com/resource/tsf/maintenance/romain_14224/5bc30a1337>",
@@ -262,27 +203,19 @@ mappingsMap = {
         lookups: [],
         transform: {
             from: function (value) {
-                if (value == "")
-                    return "owl:Thing";
-                else
-                    return value
-
+                if (value == "") return "owl:Thing";
+                else return value;
             },
             to: function (value) {
-                if (value == "")
-                    return "owl:Thing";
-                else
-                    return value
-
+                if (value == "") return "owl:Thing";
+                else return value;
             },
         },
         tripleModels: [
             // {s: "id", p: "rdfs:subClassOf", o: "superClass"},
-            {s: "from", p: "_restriction", o: "to", prop: "$property"},
-
+            { s: "from", p: "_restriction", o: "to", prop: "$property" },
         ],
     },
-
 
     QUALITIES: {
         type: "owl:Class",
@@ -290,51 +223,45 @@ mappingsMap = {
         lookups: [],
 
         transform: {
-
             propId: function (value) {
                 return "equip-data-" + value;
             },
-            "code": function (value) {
+            code: function (value) {
                 return "http://data.total.com/resource/tsf/maintenance/romain_14224/" + value;
             },
-
-
         },
         //line	table	item	code	Name	Description	type	physicalQuantity	ListId	UnitCodeList	Priority
         tripleModels: [
             {
-                s: "code", p: "_restriction", o: "propId", prop: function (line, mapping) {
-                    return line.physicalQuantity ? "part14:hasPhysicalQuantity" : "part14:hasQuality"
-                }
+                s: "code",
+                p: "_restriction",
+                o: "propId",
+                prop: function (line, mapping) {
+                    return line.physicalQuantity ? "part14:hasPhysicalQuantity" : "part14:hasQuality";
+                },
             },
 
-       {s: "propId", p: "rdf:type", o: "owl:Class"},
-            {s: "propId", p: "rdfs:label", o: "Name"},
+            { s: "propId", p: "rdf:type", o: "owl:Class" },
+            { s: "propId", p: "rdfs:label", o: "Name" },
             {
                 s: "propId",
                 p: "rdfs:subClassOf",
-                o: "http://data.total.com/resource/tsf/maintenance/romain_14224/b08e3714de"
+                o: "http://data.total.com/resource/tsf/maintenance/romain_14224/b08e3714de",
             },
 
             {
-                s: "propId", p: "rdf:type", o: function (line, mapping) {
-                    if (line.type == "PQ")
-                        return "part14:PhysicalQuantity"
-                    else if (line.type == "Bool")
-                        return "xsd:boolean"
-                    else if (line.type == "Number")
-                        return "xsd:decimal"
-                    else if (line.type == "List")
-                        return "https://www.jip36-cfihos.org/ontology/cfihos_1_5/EAID_B46F0548_B6C4_4f59_9846_3BE8F5F49AA2"
-                    else
-                        return "xsd:string"
-                }
+                s: "propId",
+                p: "rdf:type",
+                o: function (line, mapping) {
+                    if (line.type == "PQ") return "part14:PhysicalQuantity";
+                    else if (line.type == "Bool") return "xsd:boolean";
+                    else if (line.type == "Number") return "xsd:decimal";
+                    else if (line.type == "List") return "https://www.jip36-cfihos.org/ontology/cfihos_1_5/EAID_B46F0548_B6C4_4f59_9846_3BE8F5F49AA2";
+                    else return "xsd:string";
+                },
             },
-
-
         ],
     },
-
 };
 
 var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6c"];
@@ -342,7 +269,7 @@ var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "CLASSES_5", "CLASSES_6
 //var mappingNames = ["CLASSES_4"];
 //var mappingNames = ["CLASSES_3"]
 
-var mappingNames = ["QUALITIES"]
+var mappingNames = ["QUALITIES"];
 //var mappingNames = ["failureMechanism","failureCauses","detectionMethods","maintenanceActivity","failureMode"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
@@ -352,7 +279,6 @@ mappingNames.forEach(function (mappingName) {
 var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
 var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
 //processor.getDescription("D:\\NLP\\ontologies\\14224\\RDL_Structure_14224_import.txt");
-
 
 if (true) {
     //  graphUri="http://data.total.com/resource/tsf/top_ontology/"

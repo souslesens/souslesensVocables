@@ -17,7 +17,7 @@ var docxArraysExtractor = {
                 if (headers.indexOf(key) < 0) headers.push(key);
             });
         });
-        return callback(null, {headers: headers, data: dataArray});
+        return callback(null, { headers: headers, data: dataArray });
     },
 
     testJson: function (filePath, callback) {
@@ -43,7 +43,7 @@ var docxArraysExtractor = {
             this._parser.resume();
         });
 
-        var json = {classes: [], generalizations: [], collaborations: [], associations: []};
+        var json = { classes: [], generalizations: [], collaborations: [], associations: [] };
         saxStream.on("opentag", function (node) {
             line++;
             if (line % 10000 == 0) console.log(line);
@@ -72,8 +72,7 @@ var docxArraysExtractor = {
             var x = 3;
 
             if (currentCell !== null) {
-                if (text && text != "\n" && currentCell.indexOf(text) < 0)
-                    currentCell += text;
+                if (text && text != "\n" && currentCell.indexOf(text) < 0) currentCell += text;
             }
         });
 
@@ -90,12 +89,10 @@ var docxArraysExtractor = {
             }
             if (node == "W:TC") {
                 var str = currentCell.replace(/[\n\t\r]/g, "");
-                if (!currentRow || !currentRow.push)
-                    var x = 3;
-
+                if (!currentRow || !currentRow.push) var x = 3;
                 else {
-                    str = str.trim()
-                    str = str.replace(/  /g, "")
+                    str = str.trim();
+                    str = str.replace(/  /g, "");
                     currentRow.push(str);
                 }
             }
@@ -237,60 +234,41 @@ var treeDirPath = "D:\\ATD_Baillet\\Search2021\\treeDirs.json";
 var openXmlFilePath = "D:\\NLP\\ontologies\\14224\\ISO14224_Datacollection-oilandgas\\word\\document.xml";
 //var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
 
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\part10.xml"
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\81346-2-2022.xml"
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-2_2019.xml"
-var openXmlFilePath ="D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-12_2018.xml"
+var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\part10.xml";
+var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\81346-2-2022.xml";
+var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-2_2019.xml";
+var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-12_2018.xml";
 
+options = {
+    rotate: false,
+};
 
-options={
-    rotate:false
-}
-
-
-
-docxArraysExtractor.parseXml(openXmlFilePath, options,function (err, result) {
-
-
+docxArraysExtractor.parseXml(openXmlFilePath, options, function (err, result) {
     var str = "";
     if (options.rotate) {
-
         result.forEach(function (array, arrayIndex) {
-
-            var cols = []
+            var cols = [];
             var totalCols = 0;
-            var totalLines = 0
-            var colsMap = {}
+            var totalLines = 0;
+            var colsMap = {};
             array.forEach(function (line, lineIndex) {
                 if (line) {
                     line.forEach(function (cell, cellIndex) {
-                        var X = "K" + cellIndex
-                        if (!colsMap[X])
-                            colsMap[X] = ""
-                        else
-                            var x = 3
-                        colsMap[X] = (cell ? cell.trim() : "") + "\t" + colsMap[X]
-
-                    })
-
+                        var X = "K" + cellIndex;
+                        if (!colsMap[X]) colsMap[X] = "";
+                        else var x = 3;
+                        colsMap[X] = (cell ? cell.trim() : "") + "\t" + colsMap[X];
+                    });
                 }
             });
 
-
-            var x = colsMap
+            var x = colsMap;
 
             for (var key in colsMap) {
-                str += colsMap[key] + "\n"
-
-
+                str += colsMap[key] + "\n";
             }
-
-
         });
-
     } else {
-
-
         result.forEach(function (array, arrayIndex) {
             str += "\n";
             str += "-------- " + array.title + "-----------\n";
@@ -305,13 +283,9 @@ docxArraysExtractor.parseXml(openXmlFilePath, options,function (err, result) {
                 });
                 str += "\n";
             });
-
-
         });
     }
 
     var str2 = str; // Buffer.from(str, 'Windows-1252')
     fs.writeFileSync(openXmlFilePath + "R.csv", str);
-
-})
-;
+});

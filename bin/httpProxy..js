@@ -114,8 +114,7 @@ var httpProxy = {
 
             if (typeof body === "string") {
                 body = body.trim();
-                if ((body.indexOf("error")>-1 && body.indexOf("error")<30)|| body.indexOf("{") < 0)
-                    return callback(body); //error
+                if ((body.indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
 
                 var err = null;
                 try {

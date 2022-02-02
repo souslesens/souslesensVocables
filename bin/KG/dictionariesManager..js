@@ -121,7 +121,6 @@ var DictionariesManager = {
                                             keyword: {
                                                 type: "keyword",
                                                 ignore_above: 256,
-
                                             },
                                         },
                                     },

@@ -8,20 +8,17 @@ mappingsMap = {
         lookups: [],
         transform: {
             label2: function (value, role, prop) {
-                if (prop == "skos:prefLabel")
-                    return value;
-                else
-                    return "Syst-" + value
+                if (prop == "skos:prefLabel") return value;
+                else return "Syst-" + value;
             },
         },
         tripleModels: [
-
-            {s: "id", p: "iso14224:hasCode", o: "id", isString: true},
-            {s: "id", p: "rdfs:subClassOf", o: "http://standards.iso.org/iso/15926/part14/System"},
-            {s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS"},
-            {s: "id", p: "rdf:type", o: "owl:Class"},
-            {s: "id", p: "skos:prefLabel", o: "label2"},
-            {s: "id", p: "rdfs:label", o: "label2"},
+            { s: "id", p: "iso14224:hasCode", o: "id", isString: true },
+            { s: "id", p: "rdfs:subClassOf", o: "http://standards.iso.org/iso/15926/part14/System" },
+            { s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_SYS" },
+            { s: "id", p: "rdf:type", o: "owl:Class" },
+            { s: "id", p: "skos:prefLabel", o: "label2" },
+            { s: "id", p: "rdfs:label", o: "label2" },
         ],
     },
     // package
@@ -35,16 +32,14 @@ mappingsMap = {
         },
         lookups: [],
         tripleModels: [
-
-            {s: "id", p: "part14:partOf", o: "system"},
-            {s: "id", p: "iso14224:hasCode", o: "label1", isString: true},
-            {s: "id", p: "skos:prefLabel", o: "label1"},
-            {s: "id", p: "rdf:type", o: "owl:Class"},
-            {s: "id", p: "rdf:type", o: "http://w3id.org/readi/rdl/CFIHOS-30000311"},
-            {s: "id", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/PhysicalObject"},
-            {s: "id", p: "rdfs:subClassOf", o: "system"},
-            {s: "id", p: "rdfs:label", o: "label2"},
-
+            { s: "id", p: "part14:partOf", o: "system" },
+            { s: "id", p: "iso14224:hasCode", o: "label1", isString: true },
+            { s: "id", p: "skos:prefLabel", o: "label1" },
+            { s: "id", p: "rdf:type", o: "owl:Class" },
+            { s: "id", p: "rdf:type", o: "http://w3id.org/readi/rdl/CFIHOS-30000311" },
+            { s: "id", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/PhysicalObject" },
+            { s: "id", p: "rdfs:subClassOf", o: "system" },
+            { s: "id", p: "rdfs:label", o: "label2" },
         ],
     },
     //equipment
@@ -59,20 +54,17 @@ mappingsMap = {
             },
         },
         tripleModels: [
-
-            {s: "id", p: "part14:partOf", o: "superClass"},
-            {s: "id", p: "iso14224:hasCode", o: "label1", isString: true},
-            {s: "id", p: "rdf:type", o: "owl:Class"},
-            {s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_EQUI"},
-            {s: "id", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/PhysicalObject"},
-            {s: "id", p: "skos:prefLabel", o: "label1"},
-            {s: "id", p: "rdfs:label", o: "label2"},
-
+            { s: "id", p: "part14:partOf", o: "superClass" },
+            { s: "id", p: "iso14224:hasCode", o: "label1", isString: true },
+            { s: "id", p: "rdf:type", o: "owl:Class" },
+            { s: "id", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_EQUI" },
+            { s: "id", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/PhysicalObject" },
+            { s: "id", p: "skos:prefLabel", o: "label1" },
+            { s: "id", p: "rdfs:label", o: "label2" },
         ],
     },
 
-
-//boundary
+    //boundary
     FUNCTIONALOBJECT: {
         type: "owl:Class",
         fileName: "D:\\NLP\\ontologies\\14224\\functionalObjects.txt",
@@ -85,13 +77,12 @@ mappingsMap = {
 
         //SubClass	SubClassCode	LEV	SubClassDescription	EquipmentClass
         tripleModels: [
-            {s: "SubClass", p: "part14:partOf", o: "EquipmentClass"},
-            {s: "SubClass", p: "iso14224:hasCode", o: "SubClass", isString: true},
-            {s: "SubClass", p: "rdf:type", o: "owl:Class"},
-            {s: "SubClass", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/FunctionalObject"},
-            {s: "SubClass", p: "rdfs:label", o: "SubClassDescription"},
-            {s: "SubClass", p: "skos:prefLabel", o: "SubClassCode"},
-
+            { s: "SubClass", p: "part14:partOf", o: "EquipmentClass" },
+            { s: "SubClass", p: "iso14224:hasCode", o: "SubClass", isString: true },
+            { s: "SubClass", p: "rdf:type", o: "owl:Class" },
+            { s: "SubClass", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/FunctionalObject" },
+            { s: "SubClass", p: "rdfs:label", o: "SubClassDescription" },
+            { s: "SubClass", p: "skos:prefLabel", o: "SubClassCode" },
         ],
     },
 
@@ -104,29 +95,21 @@ mappingsMap = {
                 return "Class-" + value;
             },
         },
-//Component	ComponentCode	LEV	ComponentDescription	SubClass
+        //Component	ComponentCode	LEV	ComponentDescription	SubClass
 
         tripleModels: [
-            {s: "ComponentCode", p: "part14:partOf", o: "SubClass"},
-            {s: "ComponentCode", p: "iso14224:hasCode", o: "ComponentCode", isString: true},
-            {s: "ComponentCode", p: "rdf:type", o: "owl:Class"},
-            {s: "ComponentCode", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_COMP"},
-            {s: "ComponentCode", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/PhysicalObject"},
-            {s: "ComponentCode", p: "rdfs:label", o: "ComponentDescription"},
-            {s: "ComponentCode", p: "skos:prefLabel", o: "ComponentCode"}
-
-
+            { s: "ComponentCode", p: "part14:partOf", o: "SubClass" },
+            { s: "ComponentCode", p: "iso14224:hasCode", o: "ComponentCode", isString: true },
+            { s: "ComponentCode", p: "rdf:type", o: "owl:Class" },
+            { s: "ComponentCode", p: "rdf:type", o: "http://w3id.org/readi/z018-rdl/prod_COMP" },
+            { s: "ComponentCode", p: "rdf:type", o: "http://standards.iso.org/iso/15926/part14/PhysicalObject" },
+            { s: "ComponentCode", p: "rdfs:label", o: "ComponentDescription" },
+            { s: "ComponentCode", p: "skos:prefLabel", o: "ComponentCode" },
         ],
     },
-
-
 };
 
-
 var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
-
-
-
 
 if (true) {
     var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "COMPONENTS", "FUNCTIONALOBJECT"];

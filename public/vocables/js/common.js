@@ -558,6 +558,36 @@ var common = (function () {
 
 
             }
+            ,
+            //to be finished ???
+            pivotTable: function(array) {
+            var matrix = []
+            var countCols = 0
+            var countLines = array.length
+            array.forEach(function (line, lineIndex) {
+                var mLine = []
+                countCols = Math.max(countCols, line.length)
+                line.forEach(function (cell, lineIndex) {
+                    mLine.push(cell)
+
+                })
+                matrix.push(mLine)
+
+            })
+
+            var x = matrix
+            var matrix2 = []
+            for (var i = 0; i < countCols; i++) {
+                var col = []
+                for (var j = 0; j < countLines; j++) {
+                    col.push(matrix[j][i])
+                }
+                matrix2.push(col)
+            }
+
+            var x = matrix2
+            return matrix2
+        }
         }
 
 

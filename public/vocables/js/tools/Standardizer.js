@@ -1270,6 +1270,8 @@ var parents=hit._source.parents
                                 return;
                             var commonNodes = []
                             hits.forEach(function (hit) {
+                                if(! hit._source.parents)
+                                    return;
                                // var ancestors = hit._source.parents.split("|").reverse()
                                 var ancestors = hit._source.parents.reverse()
                                 var done = false

@@ -249,7 +249,7 @@ var SearchUtil = (function () {
 
             self.getWordBulkQuery = function (word, mode, indexes) {
                 var field = "label.keyword"
-                if (word.indexOf("http://") == 0)
+                if (word.indexOf && word.indexOf("http://") == 0)
                     var field = "id.keyword"
                 var queryObj;
                 if (!mode || mode == "exactMatch") {
@@ -346,6 +346,8 @@ var SearchUtil = (function () {
             async.eachSeries(slices, function (wordSlice, callbackEach) {
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
+                    if(!word)
+                        return;
                     var wordQuery = self.getWordBulkQuery(word, mode, indexes)
                     bulQueryStr += wordQuery;
                 })

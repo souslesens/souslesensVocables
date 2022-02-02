@@ -947,15 +947,21 @@ WHERE {
         self.getSourceTaxonomy = function (sourceLabel, options, callback) {
             if (!options)
                 options = {}
-            var parentType = "rdfs:subClassOf"
-            var conceptType = "owl:Class"
-            if (Config.sources[sourceLabel].schemaType == "SKOS") {
+            var parentType;
+            var conceptType;
+            if (Config.sources[sourceLabel].schemaType == "OWL") {
+                 parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
+                 conceptType = "owl:Class"
+
+            }else if (Config.sources[sourceLabel].schemaType == "SKOS") {
                 parentType = "skos:broader"
                 conceptType="skos:Concept"
             } else if (options.parentType) {
                 parentType = options.parentType
                 if (parentType == "rdfs:subPropertyOf")
                     conceptType:"owl:ObjectProperty"
+            }else{
+                return alert("no schema type")
             }
 
             var allClassesMap = {}
@@ -974,7 +980,7 @@ WHERE {
                     var limitSize = 500
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel,false,false)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel,false, options.withoutImports)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +

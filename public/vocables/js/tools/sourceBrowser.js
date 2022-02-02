@@ -1214,11 +1214,11 @@ var SourceBrowser = (function () {
                 result.forEach(function (item) {
                     str += "<tr class='infos_table'>"
 
-                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel.value + "</td>"
+                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel?item.sourceClassLabel.value:Sparql_common.getLabelFromURI(item.sourceClass.value) + "</td>"
 
                     str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</td>"
 
-                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" + item.targetClassLabel.value + "</td>"
+                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" +  item.targetClassLabel?item.targetClassLabel.value:Sparql_common.getLabelFromURI(item.targetClass.value)  + "</td>"
 
 
                     str += "</tr>"

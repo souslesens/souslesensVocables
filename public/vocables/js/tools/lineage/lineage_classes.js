@@ -943,7 +943,7 @@ var Lineage_classes = (function () {
                     if (true) {
                         if (!distinctProps[item.prop.value])
                             distinctProps[item.prop.value] = 1
-                        if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1) {
+                        if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 ||  item.prop.value.indexOf("partOf") > -1) {
                             // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
                             //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
                             if (!existingIds[item.value.value]) {
@@ -1205,7 +1205,7 @@ var Lineage_classes = (function () {
                 for (var key in map) {
 
 
-                    if (map[key].length > Lineage_classes.maxChildrenDrawn) {
+                    if (map[key].length > Lineage_classes.maxChildrenDrawn && !options.dontClusterNodes) {
                         //on enleve les cluster du dernier bootomIds dsiono on cree des orphelins au niveau suivant
 
 
@@ -2121,13 +2121,15 @@ var Lineage_classes = (function () {
             },
 
             expand: function () {
+                var dontClusterNodes=false
                 var depth = 1;
-                if (graphContext.clickOptions.ctrlKey)
+                if (graphContext.clickOptions.ctrlKey) {
                     depth = 2
-                if (graphContext.clickOptions.ctrlKey && graphContext.clickOptions.altKey)
+                    dontClusterNodes=true
+                } if (graphContext.clickOptions.ctrlKey && graphContext.clickOptions.altKey)
                     depth = 3
 
-                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], {depth: depth})
+                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], {depth: depth,dontClusterNodes:dontClusterNodes})
             },
             drawParents: function () {
                 Lineage_classes.addParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id])

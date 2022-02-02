@@ -125,6 +125,8 @@ Lineage_properties = (function () {
 
         }
         self.onTreeNodeClick = function (event, obj) {
+            if(!obj  || !obj.node)
+                return;
             self.currentTreeNode = obj.node
             if(node.children  && node.children.length>0)
                 return;

@@ -10,12 +10,37 @@
 
 var Sparql_OWL = (function () {
 
+
         var self = {};
+
 
         var filterCollectionsGenealogyDepth = 4
         self.ancestorsDepth = 6
 
         var elasticUrl = Config.serverUrl;
+
+        self.getSourceTaxonomyPredicates = function (source) {
+
+            var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> "
+            if (!source)
+                return defaultTaxonomyPredicates;
+            var sourceConfig = Config.sources[source];
+            if (!sourceConfig || !sourceConfig.taxonomyPredicates)
+                return defaultTaxonomyPredicates
+
+            var str=""
+            sourceConfig.taxonomyPredicates.forEach(function(item,index){
+                if(index>0)
+                    str+="|"
+                if (item.indexOf("http://") == 0)
+                    str+=" <"+item+"> "
+                else
+                    str+=" "+item+" "
+            })
+            return str;
+
+        }
+
 
         self.getTopConcepts = function (sourceLabel, options, callback) {
             if (!options)
@@ -28,7 +53,7 @@ var Sparql_OWL = (function () {
             if (topClassFilter && topClassFilter != "" && topClassFilter != "_default")
                 strFilterTopConcept = topClassFilter;
             else
-                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept rdfs:subClassOf ?z}) "
+                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?z}) "
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -46,7 +71,7 @@ var Sparql_OWL = (function () {
                 strFilterTopConcept +
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
-                query += "?collection skos:member ?aConcept. ?aConcept rdfs:subClassOf+ ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
+                query += "?collection skos:member ?aConcept. ?aConcept "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
             query += "}order by ?topConceptLabel "
             " }"
             var limit = options.limit || Config.queryLimit;
@@ -84,21 +109,19 @@ var Sparql_OWL = (function () {
             }
 
             fromStr = Sparql_common.getFromStr(sourceLabel)
-            var owlPredicate = "subClassOf";
-            if (options.owlType)
-                owlPredicate = options.owlType
+
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * " + fromStr + " where {" +
-                "?child1   rdfs:" + owlPredicate + " ?concept.  FILTER (!isBlank(?concept)) " + strFilter +
+                "?child1 " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?concept.  FILTER (!isBlank(?concept)) " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
             if (false && options.skipRestrictions) {
-                query += " filter ( NOT EXISTS {?child1 rdfs:subClassOf ?superClass.?superClass rdf:type owl:Restriction}) "
+                query += " filter ( NOT EXISTS {?child1 "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?superClass.?superClass rdf:type owl:Restriction}) "
             }
 
             for (var i = 1; i < descendantsDepth; i++) {
 
-                query += "OPTIONAL { ?child" + (i + 1) + " rdfs:" + owlPredicate + " ?child" + i + "." +
+                query += "OPTIONAL { ?child" + (i + 1)  + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?child" + i + "." +
                     "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
 
@@ -118,10 +141,9 @@ var Sparql_OWL = (function () {
                     "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                     "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
                     " select  distinct * " + fromStr + "   WHERE { " +
-                    "  ?child1 rdfs:" + owlPredicate + " ?concept.   " + strFilter +
+                    "  ?child1 " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?concept.   " + strFilter +
                     "   ?collection skos:member* ?acollection. " + Sparql_generic.Sparql_common.getUriFilter("collection", options.filterCollections) +
-                    //"?acollection rdf:type skos:Collection.    ?acollection skos:member/(^rdfs:subClassOf+|rdfs:subClassOf*) ?child1.  " +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(rdfs:" + owlPredicate + "*) ?child1.  " +
+                    "?acollection rdf:type skos:Collection.    ?acollection skos:member/(" + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "*) ?child1.  " +
                     "  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
                     "   ?acollection skos:prefLabel ?acollectionLabel." +
@@ -172,7 +194,7 @@ var Sparql_OWL = (function () {
             query += "{<" + conceptId + "> ?prop ?value.  ";
             if (options.getValuesLabels)
                 query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} "
-            if(true){
+            if (true) {
                 query += "    filter( !isBlank(?value))"
             }
             query += "}"
@@ -206,6 +228,7 @@ var Sparql_OWL = (function () {
          * limit at 4 ancestorsDepth when imports
          *
          * */
+
         self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
 
             if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) { //limit at 4 ancestorsDepth when imports
@@ -226,9 +249,7 @@ var Sparql_OWL = (function () {
 
             var fromStr = Sparql_common.getFromStr(sourceLabel)
 
-            var owlPredicate = "subClassOf";
-            if (options.owlType)
-                owlPredicate = options.owlType
+
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -250,7 +271,7 @@ var Sparql_OWL = (function () {
             for (var i = 1; i <= ancestorsDepth; i++) {
                 if (i == 1) {
 
-                    query += "  OPTIONAL{?concept rdfs:" + owlPredicate + "  ?broader" + i + "."
+                    query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + "."
 
                     if (true || options.skipRestrictions) {
                         //  query += " OPTIONAL {?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} "
@@ -262,7 +283,7 @@ var Sparql_OWL = (function () {
 
                 } else {
 
-                    query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:" + owlPredicate + " ?broader" + i + "."
+                    query += "OPTIONAL { ?broader" + (i - 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?broader" + i + "."
                     //   "?broader" + i + " rdf:type owl:Class."
                     if (true || options.skipRestrictions) {
                         query += " ?broader" + (i) + " rdf:type ?broaderType" + (i) + ". filter(?broaderType" + (i) + " !=owl:Restriction) "
@@ -482,7 +503,7 @@ var Sparql_OWL = (function () {
                 query += "FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
-            query += "OPTIONAL {?concept rdfs:subClassOf ?superClass. }";
+            query += "OPTIONAL {?concept "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?superClass. }";
 
             if (options.filter)
                 query += options.filter;
@@ -609,9 +630,9 @@ var Sparql_OWL = (function () {
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
 
-                options.selectGraph=false //!!!!!!!!!!!!!!PB cannot have graph when concept ands value are not in the same graph
+                options.selectGraph = false //!!!!!!!!!!!!!!PB cannot have graph when concept ands value are not in the same graph
 
-             //   fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
+                //   fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
                 fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
             } else {
                 fromStr = ""
@@ -623,8 +644,8 @@ var Sparql_OWL = (function () {
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
             if (options.listPropertiesOnly)
                 query += " SELECT distinct ?prop ?propLabel "
-              else  if(options.withoutBlankNodes)
-                    query += " SELECT distinct ?concept  ?prop ?propLabel ?conceptLabel  ?value ?valueLabel "
+            else if (options.withoutBlankNodes)
+                query += " SELECT distinct ?concept  ?prop ?propLabel ?conceptLabel  ?value ?valueLabel "
             else
                 query += "SELECT * "
             query += "" + fromStr + " WHERE {"
@@ -842,7 +863,7 @@ var Sparql_OWL = (function () {
 
             query += " ?restriction <http://www.w3.org/2002/07/owl#onProperty> ?prop."
                 + filterStr +
-                "  ?sourceClass rdfs:subClassOf ?restriction." +
+                "  ?sourceClass "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?restriction." +
                 "   OPTIONAL {?restriction  owl:someValuesFrom ?targetClass.   OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" +
                 "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}"
             var limit = options.limit || Config.queryLimit;
@@ -865,7 +886,6 @@ var Sparql_OWL = (function () {
 
             })
         }
-
 
 
         self.getDictionary = function (sourceLabel, options, processor, callback) {
@@ -1023,7 +1043,7 @@ var Sparql_OWL = (function () {
                     Sparql_generic.insertTriples(source, slice, null, function (err, result) {
                         if (err)
                             return callbackEach(err);
-                        MainController.UI.message((totalItems+=slice.length) + " done ")
+                        MainController.UI.message((totalItems += slice.length) + " done ")
                         callbackEach()
                     })
 
@@ -1038,7 +1058,6 @@ var Sparql_OWL = (function () {
 
 
         }
-
 
 
         /* self.getLabels = function (sourceLabel,ids, callback) {

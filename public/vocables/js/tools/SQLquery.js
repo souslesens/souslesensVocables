@@ -4,12 +4,10 @@ var SQLquery=(function(){
     var self={}
 
     self.onLoaded = function () {
-        $("#graphDiv").load("./snippets/SQLquery.html");
-
-        setTimeout(function () {
-
+        $("#graphDiv").load("./snippets/SQLquery.html",function(){
             self.initSources();
-        }, 500)
+        })
+
     }
 
 

@@ -1407,9 +1407,7 @@ click(aaa)
     self.draw2=function(data){
 
 
-        $("#graphDiv").load("snippets/treemap3.html")
-
-        setTimeout(function(){
+        $("#graphDiv").load("snippets/treemap3.html",function(){
 
 
 
@@ -1580,9 +1578,7 @@ click(aaa)
 
         $("#mainDialogDiv").dialog("open");
 
-        $("#mainDialogDiv").load("snippets/treemap.html")
-
-        setTimeout(function(){
+        $("#mainDialogDiv").load("snippets/treemap.html",function(){
    var divId = d3.selectAll("#treeMapDiv")[0];
             divId = d3.selectAll("#treeMapDiv")[0];
             divId ="treeMapDiv"

@@ -67,56 +67,55 @@ var KGmappings = (function () {
             visjsGraph.clearGraph()
 
 
-            $("#graphDiv").load("./snippets/KG/KGmappings.html");
-            $("#rightPanelDiv").load("snippets/KG/KGmappingRightPanel.html");
+            $("#graphDiv").load("./snippets/KG/KGmappings.html",function() {
+                $("#rightPanelDiv").load("snippets/KG/KGmappingRightPanel.html", function () {
 
 
-            setTimeout(function () {
+                    //  $("#KGmappings_OneModelTab").html("")
 
-                //  $("#KGmappings_OneModelTab").html("")
+                    KGadvancedMapping.loadSuperClasses()
+                    self.currentModelSource = Config.KG.OneModelSource;
+                    KGmappingData.initAdlsList()
+                    if (authentication.currentUser.groupes.indexOf("reader") > -1) {
+                        $("#KGmappings_saveMappingsButton").prop("disabled", true)
+                        $("#KGmappings_buildTriplesButton").prop("disabled", true)
 
-                KGadvancedMapping.loadSuperClasses()
-                self.currentModelSource = Config.KG.OneModelSource;
-                KGmappingData.initAdlsList()
-                if (authentication.currentUser.groupes.indexOf("reader") > -1) {
-                    $("#KGmappings_saveMappingsButton").prop("disabled", true)
-                    $("#KGmappings_buildTriplesButton").prop("disabled", true)
-
-                }
-
-
-                KGmappings.displayOneModelTree()
-
-                self.displayLiteralsTree()
-                //   self.displayPropertiesTree("KGmappingPropertiesTree")
-
-                $("#KGmappings_AdvancedMappingDialogDiv").dialog({
-                    autoOpen: false,
-                    height: 800,
-                    width: 1000,
-                    modal: false,
-                    beforeClose: function (ui, event) {
-                        return KGadvancedMapping.beforeCloseDialog()
                     }
-                });
 
-                $("#KGassetGraphDiv").dialog({
-                    autoOpen: false,
-                    height: 900,
-                    width: 1100,
-                    modal: false,
-                    close: function (event, ui) {
-                        KGmappings.isShowingAssetGraph = false
-                    },
-                    open: function (event, ui) {
-                        KGmappings.isShowingAssetGraph = true
-                    }
+
+                    KGmappings.displayOneModelTree()
+
+                    self.displayLiteralsTree()
+                    //   self.displayPropertiesTree("KGmappingPropertiesTree")
+
+                    $("#KGmappings_AdvancedMappingDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 800,
+                        width: 1000,
+                        modal: false,
+                        beforeClose: function (ui, event) {
+                            return KGadvancedMapping.beforeCloseDialog()
+                        }
+                    });
+
+                    $("#KGassetGraphDiv").dialog({
+                        autoOpen: false,
+                        height: 900,
+                        width: 1100,
+                        modal: false,
+                        close: function (event, ui) {
+                            KGmappings.isShowingAssetGraph = false
+                        },
+                        open: function (event, ui) {
+                            KGmappings.isShowingAssetGraph = true
+                        }
+
+                    })
+                    if (callback)
+                        callback()
 
                 })
-                if(callback)
-                    callback()
-
-            }, 500)
+            })
 
 
         }
@@ -137,9 +136,9 @@ var KGmappings = (function () {
             KGmappingData.loadKG_SQLModel(dataSource.dbName)
 
             $("#accordion").accordion("option", {active: 2});
-          //  $("#graphDiv").html("")
+
             visjsGraph.clearGraph()
-         //   $("#graphDiv").load("./snippets/KG/KGmappings.html");
+
 
 
 
@@ -789,7 +788,6 @@ var KGmappings = (function () {
             KGmappingGraph.initMappedProperties()
             $(".dataSample_type").html("");
             visjsGraph.clearGraph()
-            //  $("#graphDiv").load("./snippets/KG/KGmappings.html");
             KGadvancedMapping.assignConditionalTypeOn
             TextAnnotator.isAnnotatingText = false;
         }

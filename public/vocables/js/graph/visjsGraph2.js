@@ -52,19 +52,24 @@ var visjsGraph = (function () {
         var nodesDataSet = new vis.DataSet(visjsData.nodes)
         var edgesDataSet = new vis.DataSet(visjsData.edges)
         nodesDataSet.on('*', function (event, properties, senderId) {
-            if(event=="add")
-                self.lastAddedNodes=properties.items
-           // console.log('add:', event, 'properties:', properties, 'senderId:', senderId);
+            if (event == "add")
+                self.lastAddedNodes = properties.items
+            // console.log('add:', event, 'properties:', properties, 'senderId:', senderId);
         });
 
         self.data = {
             nodes: nodesDataSet,
             edges: edgesDataSet
         };
+        self.canvasDimension={
+           w:$("#" + divId).width(),
+            h:($("#" + divId).height() - 50)
+        }
         var options = {
+
             interaction: {hover: true},
-            width: "" + $("#" + divId).width() + "px",
-            height: "" + ($("#" + divId).height() - 50) + "px",
+            width: "" + self.canvasDimension.w + "px",
+            height: "" + self.canvasDimension.h + "px",
             nodes: {
                 shape: 'dot',
                 size: 12,
@@ -229,7 +234,6 @@ var visjsGraph = (function () {
                     visjsGraph.data.nodes.update(newNodes)
 
 
-
                 }
             });
 
@@ -266,8 +270,14 @@ var visjsGraph = (function () {
 
                 html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
+                html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>"
+                html+="<div id='visjsConfigureDiv' style='overflow: auto'></div>"
 
-                if (true)
+
+
+
+
+                if (false)
                     html += " &nbsp;&nbsp;" + htmlPlus
 
                 var parent = $("#" + divId).parent()
@@ -280,7 +290,7 @@ var visjsGraph = (function () {
         }
         setTimeout(function () {
             self.listSavedGraphs()
-     // CustomPluginController.setGraphNodesIcons()
+            // CustomPluginController.setGraphNodesIcons()
         }, 500)
 
         if (callback) {
@@ -477,12 +487,13 @@ var visjsGraph = (function () {
         self.currentScale = scale;
     }
 
-    self.getExistingIdsMap = function () {
+    self.getExistingIdsMap = function (nodesOnly) {
         var existingVisjsIds = {}
         if (!visjsGraph.data || !visjsGraph.data.nodes)
             return {}
         var oldIds = visjsGraph.data.nodes.getIds()
-        oldIds = oldIds.concat(visjsGraph.data.edges.getIds())
+        if (!nodesOnly)
+            oldIds = oldIds.concat(visjsGraph.data.edges.getIds())
         oldIds.forEach(function (id) {
             existingVisjsIds[id] = 1;
         })
@@ -553,13 +564,14 @@ var visjsGraph = (function () {
         if (includeParents)
             nodes = nodeIds
         var allEdges = self.data.edges.get();
-var allNodes={}
+        var allNodes = {}
+
         function recurse(nodeId) {
             allEdges.forEach(function (edge) {
                 if (edge.from == nodeId) {
 
-                    if(!allNodes[edge.to]) {
-                        allNodes[edge.to]=1
+                    if (!allNodes[edge.to]) {
+                        allNodes[edge.to] = 1
                         nodes.push(edge.to)
                         recurse(edge.to)
                     }
@@ -747,7 +759,6 @@ var allNodes={}
     }
 
 
-
     self.searchNode = function () {
         var word = $("#visjsGraph_searchInput").val()
         if (word == "")
@@ -913,8 +924,42 @@ var allNodes={}
                 return alert(err)
             }
         })
-
     }
+
+
+    self.showGraphConfig=function() {
+
+        $("#visjsConfigureDiv").dialog({
+         //   autoOpen: false,
+         height: 700,
+            width: 550,
+            modal: false,
+            title: "Graph parameters",
+            position: { my: "left top", at: "right top", }
+        })
+
+
+
+    //    $('#graphConfigDiv').dialog("open")
+
+
+
+        setTimeout(function(){
+            // these are all options in full.
+            var options = {
+                configure: {
+                    enabled: true,
+                    filter: "physics,layout,manipulation,renderer",
+
+                    container: document.getElementById("visjsConfigureDiv"),
+                    showButton: true
+                }
+            }
+
+            visjsGraph.network.setOptions(options);
+        },500)
+    }
+
 
     return self;
 

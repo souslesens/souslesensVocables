@@ -29,7 +29,7 @@
 
         <div class="" id="Lineage_ClassesTab">
 
-            <div id="GenericTools_searchAllDiv" style="height: 50px"></div>
+            <div id="GenericTools_searchAllDiv" style="height: 50px;margin-bottom: 10px"></div>
             <div id="Lineage_sourceLabelDiv"
                  style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
             <div class="jstreeContainer" style="width:90%">
@@ -135,14 +135,14 @@
 
 </div>
 
+
 <script>
     SourceBrowser.targetDiv = "LineagejsTreeDiv"
-    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
-    setTimeout(function () {
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html",function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
-        // $("#Lineage_RighPanelTabs").tabs()
-    }, 300)
-    //   $("#KGqueryTab").load("./snippets/lineage/KGquery.html");
+
+    })
+
 
 
 </script>

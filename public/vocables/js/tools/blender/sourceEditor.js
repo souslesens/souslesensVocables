@@ -76,8 +76,7 @@ var SourceEditor = (function () {
 
         self.onAddNewObject = function (divId, parentObj) {
 
-            $("#" + divId).load("snippets/sourceEditor.html")
-            setTimeout(function () {
+            $("#" + divId).load("snippets/sourceEditor.html",function () {
 
                 //  $("#SourceEditor_mainDiv").css("display", "block")
                 $("#SourceEditor_NewObjectDiv").css("display", "block")
@@ -103,7 +102,7 @@ var SourceEditor = (function () {
                 }
 
 
-            }, 200)
+            })
 
 
         },
@@ -228,9 +227,7 @@ var SourceEditor = (function () {
                     function (callbackSeries) {
 
                         $("#" + divId).html("")
-                        $("#" + divId).load("snippets/sourceEditor.html");
-
-                        setTimeout(function () {
+                        $("#" + divId).load("snippets/sourceEditor.html",function () {
                             $("#SourceEditor_mainDiv").css("display", "block")
                             $("#SourceEditor_ObjectUri").val(editingObject.about);
                             $("#SourceEditor_ObjectType").html(OwlSchema.currentSourceSchema.classes[editingObject.type].label);
@@ -252,7 +249,7 @@ var SourceEditor = (function () {
                                 if (editingObject.annotations[key].value)
                                     self.drawObjectValue("annotations", key, editingObject, "SourceEditor_ObjectAnnotationsTableDiv")
                             }
-                        }, 200)
+                        })
 
                     }
 

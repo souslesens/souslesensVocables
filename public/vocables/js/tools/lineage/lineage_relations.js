@@ -32,6 +32,13 @@ Lineage_relations = (function () {
             result.forEach(function (item) {
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
+            props.sort(function(a,b){
+                if(a.label>b.label)
+                    return 1;
+                if(a.label<b.label)
+                    return -1;
+                return 0
+            })
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
             // self.initProjectedGraphs()
         })
@@ -60,7 +67,7 @@ Lineage_relations = (function () {
 
     }
     self.getUriSource = function (uri) {
-        var source = Lineage_classes.mainSource
+        var source = Lineage_common.currentSource
         Object.keys(self.graphUriSourceMap).forEach(function (graphUri) {
 
             if (uri.indexOf(graphUri) == 0) {
@@ -122,7 +129,9 @@ Lineage_relations = (function () {
                     propLabel = item.propLabel.value
                 if (item.node)
                     node = item.node.value
-
+               /* if (item.g) {
+                    domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
+                }*/
                 if (item.domainSourceLabel) {
                     domainSourceLabel = item.domainSourceLabel.value
                 }
@@ -143,6 +152,15 @@ Lineage_relations = (function () {
                     domainSourceLabel: domainSourceLabel
 
                 })
+
+                restrictions.sort(function(a,b){
+                  return (a.propLabel>b.prop)
+                })
+
+
+
+
+
             })
             return restrictions
         }
@@ -153,6 +171,7 @@ Lineage_relations = (function () {
         var restrictions = []
         var filter = ""
         var propertyFilter = $("#LineageRelations_propertiesSelect").val()
+        $("#LineageRelations_propertiesSelect").val("")
         if (propertyFilter && propertyFilter != "")
             filter += " filter (?prop=<" + propertyFilter + ">)"
         self.getFromSourceSelection(function (err, selectedNodes) {
@@ -163,7 +182,8 @@ Lineage_relations = (function () {
                 Sparql_OWL.getObjectRestrictions(currentSource, null, {
                     withoutImports: 0,
                     someValuesFrom: 1,
-                    filter: filter
+                    filter: filter,
+                    selectGraph:true
 
                 }, function (err, result) {
                     if (err)
@@ -182,7 +202,8 @@ Lineage_relations = (function () {
                     Sparql_OWL.getObjectRestrictions(currentSource, slice, {
                         withoutImports: 0,
                         someValuesFrom: 1,
-                        filter: filter
+                        filter: filter,
+                        selectGraph:true
 
                     }, function (err, result) {
                         if (err)
@@ -388,12 +409,16 @@ Lineage_relations = (function () {
                                         type: "bar",
                                         scaleFactor: 0.5
                                     },
+                                    length: 30,
                                 },
+
+                                width:3,
+
                                 label: "<i>" + prop + "</i>",
                                 font: {multi: true, size: 10},
 
                                 dashes: true,
-                                color: Lineage_classes.objectPropertyColor
+                                color: Lineage_classes.restrictionColor
                             })
 
 
@@ -598,7 +623,7 @@ Lineage_relations = (function () {
                         })
 
 
-                        Standardizer.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
+                        SearchUtil.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
                             if (err)
                                 return alert(err)
                             var entities = []

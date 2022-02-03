@@ -103,7 +103,32 @@ var Config = (function () {
 
         }
 
+    self.Lineage = {
+        showSourceNodesInGraph:false,
+        basicObjectProperties : [
+            {id: "http://www.w3.org/2002/07/owl#sameAs", label: "owl:sameAs",type:"ObjectProperty"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#label", label: "rdfs:label",type:"dataTypeProperty"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment",type:"dataTypeProperty"},
+            {id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf",type:"ObjectProperty"},
+            {id: "http://standards.iso.org/iso/15926/part14/partOf", label: "part14:partOf",type:"ObjectProperty"},
+            {id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type",type:"ObjectProperty"},
+            {id: "http://standards.iso.org/iso/15926/part14/representedBy", label: "part14:representedBy",type:"dataTypeProperty"},
+            {id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel",type:"dataTypeProperty"},
 
+        ]
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /*****************************************************************************/
     self.sources = {}
     self.tools = {};
 
@@ -158,6 +183,15 @@ var Config = (function () {
         label: "Config",
         noSource: 1,
         controller: Config,
+        toolDescriptionImg: null
+    }
+
+
+    self.tools["TE_14224_browser"] = {
+        label: "TE_14224_browser",
+        multiSources: 0,
+        noSource:true,
+        controller: TE_14224_browser,
         toolDescriptionImg: null
     }
 

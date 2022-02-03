@@ -19,27 +19,28 @@
 
 
     <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"/>
+    <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css"/>
 
 
-    <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
-    <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css"/>
-    <script src="./js/graph/visjsGraph2.js"></script>
-    <script src="./js/graph/canvas2svg.js"></script>
-    <script src="./js/graph/SVGexport.js"></script>
-    <script src="./js/graph/graphMLexport.js"></script>
+      <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
+      <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css"/>
+      <script src="./js/graph/visjsGraph2.js"></script>
+      <script src="./js/graph/canvas2svg.js"></script>
+      <script src="./js/graph/SVGexport.js"></script>
+      <script src="./js/graph/graphMLexport.js"></script>
 
 
-    <script src="js/mainController.js"></script>
-    <script src="js/graphController.js"></script>
-    <script src="js/treeController.js"></script>
-    <script src="js/clipboard.js"></script>
+      <script src="js/mainController.js"></script>
+      <script src="js/graphController.js"></script>
+      <script src="js/treeController.js"></script>
+      <script src="js/clipboard.js"></script>
 
 
-    <script src="js/tools/sourceBrowser.js"></script>
+      <script src="js/tools/sourceBrowser.js"></script>
 
-    <script src="js/tools/sourceMatcher.js"></script>
-    <!--script src="js/tools/evaluate.js"></script-->
+      <script src="js/tools/sourceMatcher.js"></script>
+      <!--script src="js/tools/evaluate.js"></script-->
     <script src="js/tools/evaluate.js"></script>
     <script src="js/tools/genealogy.js"></script>
     <script src="js/tools/owlSchema.js"></script>
@@ -60,7 +61,7 @@
     <script src="js/tools/lineage/lineage_blend.js"></script>
     <script src="js/tools/lineage/lineage_relations.js"></script>
 
-    <script src="js/tools/blender/owlEditor.js"></script>
+    <script src="js/tools/owlEditor.js"></script>
 
 
    <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
@@ -102,7 +103,7 @@
 <!-----------private tools--------------->
     <script src="js/customPluginController.js"></script>
 
-  <!--  <script src="customPlugins/TotalEnergies/TE_14224_browser.js"></script>-->
+  <script src="customPlugins/TotalEnergies/TE_14224_browser.js"></script>
 
 
 
@@ -135,6 +136,7 @@
     <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
     <script src="js/sparqlProxies/sparql_NPD.js"></script>
     <script src="js/tools/orchestrator.js"></script>
+    <script src="js/search/searchUtil.js"></script>
 
     <script src="js/external/socket.io.js"></script>
 
@@ -150,7 +152,7 @@
     <script src="js/external/graph.js"></script>
     <script src="js/external/download.js"></script>
 
-    <script src="js/elasticSearchProxy.js"></script>
+    <script src="js/search/elasticSearchProxy.js"></script>
 
     <script src="js/external/d3/d3.v3.min.js"></script>
     <script src="js/sunburst.js"></script>
@@ -204,6 +206,8 @@
                 $("#graphDiv").height(h - 70)
                 $("#leftPanelDiv").height(h - 50)
                 $("#rightPanelDiv").height(h - 50)
+
+               // $(".max-height").height(h - 300)
               //  $(".ui-accordion-content-active").height(h-100)
               //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
 
@@ -211,7 +215,9 @@
                 //  $('.jstree-default').css("max-height",h-200)
                // $(".jstree").height(w - 100);
 
-                $("#accordion").accordion()
+                $("#accordion").accordion({
+                    heightStyle: "fill"
+                })
                 $("#accordion").accordion("option", {active: 0});
                 $("#accordion").on("accordionbeforeactivate", function (event, ui) {
                     if (!KGmappings.checkMappingEditionSave())
@@ -280,7 +286,7 @@
 
         .ui-accordion .ui-accordion-content{
             overflow: hidden !important;
-           height:600px !important;
+          min-height:600px !important;
 
         }
 
@@ -412,6 +418,9 @@
             padding:5px !important;
         }
 
+        .max-height{
+            height: 700px !important;
+        }
 
 
     </style>
@@ -438,8 +447,8 @@
     <div class="col text-end">
       <button onclick="Blender.onLoaded()" type="button" class="btn btn-sm py-0 btn-outline-primary">Blender</button>
       <!--
-      <button onclick="MainController.UI.toogleRightPanel()" type="button" class="btn btn-sm py-0 btn-outline-primary">R</button>
-      <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>  -->
+      <button onclick="MainController.UI.toogleRightPanel()" type="button" class="btn btn-sm py-0 btn-outline-primary">R</button> -->
+      <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>
       <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>
 
       <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">cpQy</button>
@@ -460,7 +469,7 @@
 
 <div style="display: flex;flex-direction: row;justify-content:left">
 
-    <div id="leftPanelDiv" style='max-width: 400px;'>
+    <div id="leftPanelDiv" style='max-width: 400px;height: 90vh'>
 
 
         <div id="accordion">
@@ -473,7 +482,7 @@
 
             <h3><span class="title">Sources </span></h3>
             <div id="sourcesPanel" style="margin:5px" class='max-height'>
-                <div id="sourceDivControlPanelDiv" style="min-height: 50px"></div>
+                <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px" ></div>
                 <div id="sourcesTreeDivContainer"  style="overflow: auto;" class='jstreeContainer XXXmax-height'>
                     <div id="sourcesTreeDiv"> </div>
                 </div>
@@ -482,7 +491,8 @@
 
 
             <h3><span class="title" id="toolPanelLabel"> </span></h3>
-            <div id="toolPanelDiv" style="margin:5px" class='max-height'>
+            <div id="toolPanelDiv" style="margin:5px ; height: 800px !important; overflow: auto" class='max-height'    >
+
                 <div id="actionDivContolPanelDiv"></div>
                 <div id="actionDiv" class="jstree"></div>
 

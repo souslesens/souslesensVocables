@@ -89,7 +89,7 @@ Csv2Sql = {
                     insertStr += " VALUES  ";
 
                     slice.forEach(function (line, lineIndex) {
-                        if (sliceIndex++ == 0 && lineIndex == 0) return;
+                        if (sliceIndex == 0 && lineIndex == 0) return;
 
                         insertStr += "(";
                         result.headers.forEach(function (header, headerIndex) {
@@ -107,10 +107,15 @@ Csv2Sql = {
                     insertStr = insertStr.substring(0, insertStr.length - 1);
 
                     sql.getData("data14224", insertStr, function (err, result) {
-                        if (err) return callbackEach(err);
+                        if (err) {
+                            console.log("error slice " + sliceIndex + "  " + err);
+                            return callbackEach();
+                        }
 
-                        totalRecords += sliceIndex * sliceSize;
+                        totalRecords = sliceIndex * sliceSize;
                         console.log("records inserted :" + totalRecords);
+
+                        sliceIndex += 1;
                         callbackEach();
                     });
                     //   fs.writeFileSync(input.replace(".csv","_"+sliceIndex+"_insert.sql"),insertStr)
@@ -132,6 +137,15 @@ var tableName = "girassol";
 
 var input = "D:\\NLP\\ontologies\\14224\\data\\absheron.txt";
 var tableName = "absheron";
+
+var input = "D:\\NLP\\ontologies\\14224\\mappingISO14224-207.txt";
+var tableName = "mappingISO14224_207";
+
+var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Notifications failure analysis.txt";
+var tableName = "Maintenance_girassol";
+
+var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
+var tableName = "Wordorder_girassol";
 
 Csv2Sql.getColumns(input, tableName, function (err, result) {
     var createSql = result.createSql;

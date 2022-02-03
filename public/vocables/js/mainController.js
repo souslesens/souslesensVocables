@@ -438,7 +438,7 @@ var MainController = (function () {
                 }
             }
 
-            //   $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html");
+
 
 
             if (controller.onLoaded)
@@ -571,10 +571,10 @@ var MainController = (function () {
             $("#graphDiv").width(w - rightPanelWidth)
             $("#rightPanelToogleButton").css("display", "block")
             $("#rightPanelDiv").width(rightPanelWidth)
-            setTimeout(function () {
+         //   setTimeout(function () {
                     $("#graphDiv").hide().fadeIn('fast');
-                }
-                , 500)
+              /*  }
+                , 500)*/
         },
         showCurrentQuery: function () {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>")

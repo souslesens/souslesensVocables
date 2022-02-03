@@ -22,10 +22,9 @@ var SPARQL_endpoint = (function () {
      //   var html = "<iframe id='sparql_iframe' style='width:100%;height:100%' src='snippets/SPARQLendpoint.html?"+new Date()/1+"'></iframe>"
       //  $("#graphDiv").html(html);
         $("#graphDiv").html("")
-        $("#graphDiv").load('snippets/SPARQLendpoint.html')
-        setTimeout(function(){
+        $("#graphDiv").load('snippets/SPARQLendpoint.html',function(){
             self.initYasGuy();
-        },1000)
+        })
 
 
     }

@@ -134,7 +134,7 @@ var common = (function () {
 
 
                 }).on('loaded.jstree', function () {
-
+                    //  setTimeout(function () {
                     if (options.openAll)
                         $('#' + jstreeDiv).jstree(true).open_all();
                     self.jstree.setTreeAppearance()
@@ -142,6 +142,7 @@ var common = (function () {
                         common.jstree.setTreeParentDivDimensions(jstreeDiv)
                     if (callback)
                         callback();
+                    //   }, 500)
 
 
                 }).on("select_node.jstree",
@@ -149,9 +150,7 @@ var common = (function () {
 
                         if (options.selectTreeNodeFn)
                             options.selectTreeNodeFn(evt, obj);
-                    }).
-
-                on('open_node.jstree', function (evt, obj) {
+                    }).on('open_node.jstree', function (evt, obj) {
                     self.jstree.setTreeAppearance()
                     if (options.onOpenNodeFn) {
                         options.onOpenNodeFn(evt, obj);
@@ -243,13 +242,16 @@ var common = (function () {
                 jstreeData.forEach(function (node) {
                     var parentNode = parentNodeId;
 
-                    if (node.parent)
-                        parentNode = node.parent;
+                    if (!parentNodeId)
+                        parentNodeId = node.parent;
+
                     if (!parentNode)
                         return;
 
-                    $("#" + jstreeDiv).jstree(true).create_node(parentNode, node, position, function () {
-                        $("#" + jstreeDiv).jstree(true).open_node(parentNode, null, 500);
+                    if (parentNodeId == node.id)
+                        return console.log("  Error jstree parent == childNode : " + parentNodeId)
+                    $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, position, function () {
+
 
                     })
 
@@ -257,7 +259,7 @@ var common = (function () {
                 setTimeout(function () {
                     self.jstree.setTreeAppearance()
                     //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-
+                    $("#" + jstreeDiv).jstree(true).open_node(parentNodeId, null, 500);
                     var offset = $(document.getElementById(parentNodeId)).offset();
                 }, 500)
             },
@@ -340,7 +342,6 @@ var common = (function () {
                 if (!parentDiv)// || parentDiv.width)
                     return
 
-//$("#"+jstreeDiv).addClass("jstreeParent")
                 var p = $("#" + jstreeDiv).offset();
                 var p2 = $("#" + jstreeDiv).position();
                 if (p.top > 200)//in case jstreeDiv in inactive tab
@@ -352,17 +353,18 @@ var common = (function () {
                 else
                     w = 340
                 parentDiv.width(w)
-                parentDiv.height(h)
+
+                if (jstreeDiv == "LineagejsTreeDiv") // cannot do it generic !!!!!
+                    parentDiv.height(h)
+                if (jstreeDiv == "Lineage_propertiesTree")
+                    parentDiv.height(h)
+                if (jstreeDiv == "Blender_conceptTreeDiv")
+                    parentDiv.height(h)
+
                 parentDiv.css('overflow', 'auto')
                 parentDiv.css('margin-top', '5px')
                 if (false && p.left < 600)
                     parentDiv.css('margin-left', '-25px')
-                /*    $("#" + jstreeDiv).width(w)
-                    $("#" + jstreeDiv).height(h)
-                    $("#" + jstreeDiv).css('overflow', 'auto')
-                    $("#" + jstreeDiv).css('margin-top', '5px')
-                    if (false && p.left < 600)
-                        $("#" + jstreeDiv).css('margin-left', '-25px')*/
 
 
             },
@@ -391,8 +393,6 @@ var common = (function () {
             openNode: function (jstreeDiv, nodeId) {
                 $("#" + jstreeDiv).jstree().open_node(nodeId)
             }
-
-
 
 
         }
@@ -528,23 +528,86 @@ var common = (function () {
                 var element = arr[fromIndex];
                 arr.splice(fromIndex, 1);
                 arr.splice(toIndex, 0, element);
+            },
+            sortObjectArray: function (array, field, options) {
+                array.sort(function (a, b) {
+                    var aValue = (a[field] ? a[field] : "")
+                    var bValue = (b[field] ? b[field] : "")
+                    if (aValue > bValue)
+                        return 1
+                    if (aValue < bValue)
+                        return -1
+                    return 0;
+                })
+                return array
             }
+
+
+            ,
+            unduplicateArray: function (array, key) {
+
+                var uniqueItems = []
+                var uniqueIds = {}
+                array.forEach(function (item) {
+                    if (!uniqueIds[item[key]]) {
+                        uniqueIds[item[key]] = 1
+                        uniqueItems.push(item)
+                    }
+                })
+                return uniqueItems;
+
+
+            }
+            ,
+            //to be finished ???
+            pivotTable: function(array) {
+            var matrix = []
+            var countCols = 0
+            var countLines = array.length
+            array.forEach(function (line, lineIndex) {
+                var mLine = []
+                countCols = Math.max(countCols, line.length)
+                line.forEach(function (cell, lineIndex) {
+                    mLine.push(cell)
+
+                })
+                matrix.push(mLine)
+
+            })
+
+            var x = matrix
+            var matrix2 = []
+            for (var i = 0; i < countCols; i++) {
+                var col = []
+                for (var j = 0; j < countLines; j++) {
+                    col.push(matrix[j][i])
+                }
+                matrix2.push(col)
+            }
+
+            var x = matrix2
+            return matrix2
+        }
         }
 
-        self.sortObjectArray = function (array, field, options) {
-            array.sort(function (a, b) {
-                var aValue = (a[field] ? a[field] : "")
-                var bValue = (b[field] ? b[field] : "")
-                if (aValue > bValue)
-                    return 1
-                if (aValue < bValue)
-                    return -1
-                return 0;
+
+        self.concatArraysWithoutDuplicateXX = function (array, addedArray, key) {
+            var filteredArray = []
+            result.nodes.forEach(function (item) {
+                var unique = true;
+                visjsData.nodes.forEach(function (item2) {
+                    if (item2.id == item.id)
+                        unique = false
+
+                })
+                filteredNodes.push(item)
             })
-            return array
         }
+
 
         self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
+            var filteredArray = JSON.parse(JSON.stringify(array))
+            var keyValues = {}
             addedArray.forEach(function (addedItem) {
                 var refuse = false
                 array.forEach(function (item) {
@@ -556,9 +619,9 @@ var common = (function () {
 
                 })
                 if (!refuse)
-                    array.push(addedItem)
+                    filteredArray.push(addedItem)
             })
-            return array;
+            return filteredArray;
         }
 
 
@@ -790,7 +853,7 @@ var common = (function () {
                 return str
             }
 
-       // var dateTime='2000-01-15T00:00:00'
+        // var dateTime='2000-01-15T00:00:00'
 
         self.dateToRDFString = function (date) {
             var str = ""

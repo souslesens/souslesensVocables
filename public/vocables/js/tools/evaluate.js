@@ -24,11 +24,11 @@ var Evaluate = (function () {
         self.onLoaded = function (callback) {
             //    self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
             $("#actionDiv").html("")
-            $("#actionDivContolPanelDiv").load("snippets/evaluate/evaluate_left.html")
-            $("#graphDiv").load("snippets/evaluate/evaluate_central.html")
-            $("#rightPanelDiv").load("snippets/evaluate/evaluate_right.html")
+            $("#actionDivContolPanelDiv").load("snippets/evaluate/evaluate_left.html",function () {
+            $("#graphDiv").load("snippets/evaluate/evaluate_central.html",function () {
+            $("#rightPanelDiv").load("snippets/evaluate/evaluate_right.html",function () {
             $("#accordion").accordion("option", {active: 2});
-            setTimeout(function () {
+
                 var w = $(document).width() - leftPanelWidth - 30;
                 var h = $(document).height() - 20;
                 $("#Evaluate_graphDiv").height(h - 200)
@@ -45,7 +45,9 @@ var Evaluate = (function () {
                 if(callback)
                     callback()
 
-            }, 200)
+            })
+            })
+            })
         }
 
 

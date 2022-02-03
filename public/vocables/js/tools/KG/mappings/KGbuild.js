@@ -10,16 +10,16 @@ var KGbuild = (function () {
             return
 
 
-        $("#mainDialogDiv").load("snippets/KG/KGbuildDialog.html");
-        $("#mainDialogDiv").dialog("open");
-        setTimeout(function () {
-
+        $("#mainDialogDiv").load("snippets/KG/KGbuildDialog.html",function(){
+            $("#mainDialogDiv").dialog("open");
             var graphUri = KGmappingData.currentKGgraphURI
             $("#KGbuild_sparqlServerUrl").val(Config.default_sparql_url)
             $("#KGbuild_adlGraphUri").val(graphUri)
             $("#KGbuild_rdlGraphUri").val("http://data.total.com/resource/one-model/quantum-rdl/")
             $("#KGbuild_oneModelGraphUri").val(Config.sources["ONE-MODEL"].graphUri[0])
-        }, 200)
+        });
+
+
 
 
     }

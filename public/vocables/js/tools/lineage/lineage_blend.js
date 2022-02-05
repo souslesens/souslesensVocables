@@ -17,14 +17,14 @@ var Lineage_blend = (function () {
             $("#lineage_targetNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>")
         }
         if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource].editable > -1) {
-            if (self.currentAssociation && self.currentAssociation.length == 2 && self.currentAssociation[1]!=="") {
+            if (self.currentAssociation && self.currentAssociation.length == 2 && self.currentAssociation[1] !== "") {
                 $("#lineage_createRelationButtonsDiv").css('display', 'block')
                 self.initAllowedPropertiesForRelation()
-            } else if(self.currentAssociation &&   self.currentAssociation[0]!==""){
-                $("#lineage_blendCreateSubClassButton").css("display","block")
-            }else {
+            } else if (self.currentAssociation && self.currentAssociation[0] !== "") {
+                $("#lineage_blendCreateSubClassButton").css("display", "block")
+            } else {
                 $("#lineage_createRelationButtonsDiv").css('display', 'none')
-                $("#lineage_blendCreateSubClassButton").css("display","none")
+                $("#lineage_blendCreateSubClassButton").css("display", "none")
             }
         }
 
@@ -66,24 +66,23 @@ var Lineage_blend = (function () {
 
     }
 
-    self.createSubClass=function(){
+    self.createSubClass = function () {
         var sourceNode = self.currentAssociation[0];
 
-        if(confirm("Create  for subclass of "+sourceNode.label )){
+        if (confirm("Create  for subclass of " + sourceNode.label)) {
 
-            SourceBrowser.addProperty("http://www.w3.org/2000/01/rdf-schema#subClassOf",sourceNode.id,sourceNode.source,true)
-
+            SourceBrowser.addProperty("http://www.w3.org/2000/01/rdf-schema#subClassOf", sourceNode.id, sourceNode.source, true)
 
 
         }
 
     }
 
-    self.createRelation = function (type, addImportToCurrentSource) {
+    self.createRelationUI = function (type, addImportToCurrentSource, createInverseRelation) {
         var sourceNode = self.currentAssociation[0]
         var targetNode = self.currentAssociation[1]
-        if(!type)
-            type=$("#lineage_createRelationPropertySelect").val()
+        if (!type)
+            type = $("#lineage_createRelationPropertySelect").val()
 
         if (!sourceNode || !targetNode)
             return alert("select a source node and a target node ")
@@ -91,25 +90,27 @@ var Lineage_blend = (function () {
         if (sourceNode == targetNode)
             return "source node and target node must be distinct "
 
-        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?"))
-            return;
-
-
         var createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked")
 
+        if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?"))
+            return;
+        self.createRelation(type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, function (err, result) {
+            if (err)
+                return alert(err)
+            self.addRelationToGraph(propId)
+            MainController.UI.message("relation added", true)
+        })
+    }
 
-        if( type!="http://www.w3.org/2002/07/owl#sameAs")
-            createInverseRelation=false;
+    self.createRelation = function (type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, callback) {
+
+
+        if (type != "http://www.w3.org/2002/07/owl#sameAs")
+            createInverseRelation = false;
         var propId = type;
 
         async.series([
-            function (callbackSeries) {
-                if (!addImportToCurrentSource)
-                    return callbackSeries()
-                self.manageImports(sourceNode.source, function (err, result) {
-                    callbackSeries(err)
-                })
-            },
+
             function (callbackSeries) {
                 if (!addImportToCurrentSource)
                     return callbackSeries()
@@ -121,7 +122,7 @@ var Lineage_blend = (function () {
             , function (callbackSeries) {
 
                 var relations = {type: type, sourceNode: sourceNode, targetNode: targetNode}
-                self.createRelationTriples(relations, createInverseRelation, function (err, result) {
+                self.createRelationTriples(relations, createInverseRelation, Lineage_classes.mainSource,function (err, result) {
                     callbackSeries(err)
                 })
 
@@ -130,10 +131,14 @@ var Lineage_blend = (function () {
 
 
         ], function (err) {
-            if (err)
+            if (err) {
+                if (callback)
+                    return callback(err);
                 return alert(err);
-            self.addRelationToGraph(propId)
-            MainController.UI.message("relation added", true)
+            }
+            if (callback)
+                return callback()
+
         })
 
 
@@ -147,49 +152,49 @@ var Lineage_blend = (function () {
         relations.forEach(function (relation) {
 
 
-               var  propId=relation.type
+            var propId = relation.type
 
-                var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId)
-                var normalBlankNode = restrictionTriples.blankNode
-                var metadataOptions = {
-                    domainSourceLabel: relation.sourceNode.source,
-                    rangeSourceLabel: relation.targetNode.source,
+            var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId)
+            var normalBlankNode = restrictionTriples.blankNode
+            var metadataOptions = {
+                domainSourceLabel: relation.sourceNode.source,
+                rangeSourceLabel: relation.targetNode.source,
+            }
+            var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, "manual", "candidate", metadataOptions)
+            restrictionTriples = restrictionTriples.concat(metaDataTriples)
+
+
+            if (createInverseRelation) {
+                var restrictionTriplesInverse = self.getRestrictionTriples(relation.targetNode.id, relation.sourceNode.id, propId)
+                var inverseBlankNode = restrictionTriplesInverse.blankNode
+                restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse)
+                var inverseMetadataOptions = {
+                    domainSourceLabel: relation.targetNode.source,
+                    rangeSourceLabel: relation.sourceNode.source,
                 }
-                var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, "manual", "candidate", metadataOptions)
-                restrictionTriples = restrictionTriples.concat(metaDataTriples)
+                var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, "manual", "candidate", inverseMetadataOptions)
+                restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples)
+
+                restrictionTriples.push({
+                    subject: normalBlankNode,
+                    predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                    object: inverseBlankNode
+                })
+                restrictionTriples.push({
+                    subject: inverseBlankNode,
+                    predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                    object: normalBlankNode
+                })
 
 
-                if (createInverseRelation) {
-                    var restrictionTriplesInverse = self.getRestrictionTriples(relation.targetNode.id, relation.sourceNode.id, propId)
-                    var inverseBlankNode = restrictionTriplesInverse.blankNode
-                    restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse)
-                    var inverseMetadataOptions = {
-                        domainSourceLabel: relation.targetNode.source,
-                        rangeSourceLabel: relation.sourceNode.source,
-                    }
-                    var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, "manual", "candidate", inverseMetadataOptions)
-                    restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples)
+            }
 
-                    restrictionTriples.push({
-                        subject: normalBlankNode,
-                        predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                        object: inverseBlankNode
-                    })
-                    restrictionTriples.push({
-                        subject: inverseBlankNode,
-                        predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                        object: normalBlankNode
-                    })
-
-
-                }
-
-                allTriples = allTriples.concat(restrictionTriples)
+            allTriples = allTriples.concat(restrictionTriples)
 
         })
 
 
-        Sparql_generic.insertTriples(Lineage_classes.mainSource, allTriples, null, function (err, result) {
+        Sparql_generic.insertTriples(source, allTriples, null, function (err, result) {
             callback(err)
 
         })
@@ -578,16 +583,16 @@ var Lineage_blend = (function () {
     self.initAllowedPropertiesForRelation = function () {
         var fromNode = self.currentAssociation[0]
         var toNode = self.currentAssociation[1]
-        var distinctProperties={}
-        var properties =[];
-        Config.Lineage.basicObjectProperties.forEach(function(item){
-            if(item.type=="ObjectProperty") {
+        var distinctProperties = {}
+        var properties = [];
+        Config.Lineage.basicObjectProperties.forEach(function (item) {
+            if (item.type == "ObjectProperty") {
                 properties.push(item)
-                distinctProperties[item.id]=1
+                distinctProperties[item.id] = 1
             }
         })
 
-     //   properties.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
+        //   properties.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
 
 
         self.getAssociationAllowedProperties(fromNode, toNode, function (err, result) {
@@ -597,13 +602,13 @@ var Lineage_blend = (function () {
 
 
             result.forEach(function (item) {
-               if(!distinctProperties[item.id]){
-                   var prefix=''
-                   if(item.p.value.indexOf("part14")>-1)
-                       prefix="part14:"
+                if (!distinctProperties[item.id]) {
+                    var prefix = ''
+                    if (item.p.value.indexOf("part14") > -1)
+                        prefix = "part14:"
                     properties.push({
                         id: item.p.value,
-                        label: prefix+(item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value))
+                        label: prefix + (item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value))
 
                     })
                 }
@@ -625,7 +630,7 @@ var Lineage_blend = (function () {
     }
 
 
-    self.getAssociationAllowedProperties = function (fromNode, toNode,callback) {
+    self.getAssociationAllowedProperties = function (fromNode, toNode, callback) {
 
         var topOntology = "TSF_TOP_ONTOLOGY"
 
@@ -638,33 +643,26 @@ var Lineage_blend = (function () {
             " " +
             Sparql_common.getFromStr(topOntology, null, false) +
             " " +
-         /*   "WHERE {" +
-            "?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
-            " optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
-            "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
-            " filter (?from=<"+fromNode.id+"\> )     }"+*/
+            /*   "WHERE {" +
+               "?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
+               " optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
+               "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
+               " filter (?from=<"+fromNode.id+"\> )     }"+*/
 
             " WHERE {{?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} \n" +
-            "   optional{ ?b owl:someValuesFrom ?toAncestor.  ?to rdfs:subClassOf+ ?toAncestor   filter( ?toAncestor!=owl:Thing  && ?to=<"+toNode.id+">)}\n" +
+            "   optional{ ?b owl:someValuesFrom ?toAncestor.  ?to rdfs:subClassOf+ ?toAncestor   filter( ?toAncestor!=owl:Thing  && ?to=<" + toNode.id + ">)}\n" +
             "     optional{ ?b owl:someValuesFrom ?toAncestor.  filter( ?toAncestor=owl:Thing)}\n" +
             " filter(BOUND(?toAncestor))\n" +
             "   \n" +
-            "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (?from=<"+fromNode.id+"> )     }}}\n" +
+            "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (?from=<" + fromNode.id + "> )     }}}\n" +
             "  \n" +
 
 
-
-
-
-
-
-
-
-        /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://standards.iso.org/iso/15926/part14/\",\"i\"))" +
-            " {SELECT ?fromAncestor ?toAncestor ?from ?to" +
-            "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
-            "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
-            "  }" +*/
+            /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://standards.iso.org/iso/15926/part14/\",\"i\"))" +
+                " {SELECT ?fromAncestor ?toAncestor ?from ?to" +
+                "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
+                "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
+                "  }" +*/
             "} limit 1000"
 
         var sparql_url = Config.sources[topOntology].sparql_server.url;
@@ -674,7 +672,6 @@ var Lineage_blend = (function () {
                 return callback(err)
             }
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["node", "concept"])
-
 
 
             return callback(null, result.results.bindings)

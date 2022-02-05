@@ -216,10 +216,16 @@ var Standardizer = (function () {
         return html;
     }
 
-    self.processMatrixResult = function (words, data, indexes) {
+    self.processMatrixResult = function (sourceObjects, data, indexes) {
 
         var entitiesMap = []
-        words.forEach(function (word, index) {
+        sourceObjects.forEach(function (obj, index) {
+            var word
+            if(typeof obj==="string")//compare words
+                word=obj;
+            else//compare sources
+                word=obj.parentLabel+" : "+obj.label
+
             if (!entitiesMap[word]) {
                 entitiesMap[word] = []
             }
@@ -235,15 +241,17 @@ var Standardizer = (function () {
                     id: hit._source.id,
                     score: hit._score,
                     label: hit._source.label,
-                    status: "exactMatch"
-                }
+                    status: "exactMatch",
 
+                }
+                if(typeof obj==="object")
+                    entity.sourceHit=obj;
                 entitiesMap[word][entity.index] = entity
             })
         })
 
 
-        if (self.mode == "normal") {
+      /*  if (self.mode == "normal") {
 
             KGadvancedMapping.currentColumnValueDivIds = {}
             var distinctSources = []
@@ -283,7 +291,9 @@ var Standardizer = (function () {
 
 
             })
-        } else if (self.mode == "matrix") {
+        }
+        else */
+        if (self.mode == "matrix") {
             var html = ""
 
             for (var word in entitiesMap) {
@@ -347,7 +357,7 @@ var Standardizer = (function () {
 
 
     }
-    self.exportExactMatchMatrix = function () {
+    self.exportExactMatchMatrix = function (callback) {
         var cols = []
 
         cols.push({title: "word", defaultContent: ""})
@@ -376,6 +386,8 @@ var Standardizer = (function () {
             dataSet.push(line)
 
         }
+        if(callback)
+            return callback(null,{cols:cols, data:dataSet})
         Export.showDataTable(null, cols, dataSet)
 
     }
@@ -404,28 +416,45 @@ var Standardizer = (function () {
     }
 
     self.createSameAsRelations = function () {
-        var relations = []
-        self.fuzzyMatches.forEach(function (item) {
-            var from = self.currentWordsMap[item.word]
+var relations=[]
+       for(var key in self.matrixWordsMap.entities) {
+           self.matrixWordsMap.entities[key].forEach(function (obj) {
+               if (obj) {
 
-            if (from) {
-                relations.push({
-                    to: {
+                   relations.push({
+                       sourceNode: {
+                           source: self.currentSource,
+                           label: obj.sourceHit.label,
+                           id: obj.sourceHit.id,
+                       }, targetNode: {
 
-                        source: item.source,
-                        label: item.item.label,
-                        id: item.item.id,
-                    }, from: {
-                        source: from.source,
-                        label: from.item.label,
-                        id: from.item.id,
-                    }
-                })
-            }
+                           source: self.indexSourcesMap[obj.index],
+                           label: obj.label,
+                           id: obj.id,
+                       }
+                       ,
+                       type: "http://www.w3.org/2002/07/owl#sameAs"
+                   })
 
-        })
 
-        return alert(" coming soon");
+               }
+           })
+       }
+
+
+       if(!confirm ( "create "+relations.length+" relations sameAs in TSF-DICTIONARY" ))
+           return;
+
+    Lineage_blend.createRelationTriples(relations,true,function(err,result){
+        if(err)
+            alert(err)
+        MainController.UI.message()
+    })
+
+
+
+          //  return alert(" coming soon");
+
     }
 
 
@@ -526,7 +555,6 @@ var Standardizer = (function () {
         var words1 = text.split("\n")
         var words = []
         self.matrixIndexRankingsMap = {}
-        self.currentWordsMap = {}
         words1.forEach(function (word) {
             word = word.trim()
             if (words.indexOf(word) < 0)
@@ -614,7 +642,7 @@ var Standardizer = (function () {
         self.currentWordsCount = 0
         var searchResultArray = []
         var allWords = []
-        self.currentWordsMap = {}
+        var objects=[]
         async.whilst(function (test) {
             return resultSize > 0
 
@@ -626,23 +654,31 @@ var Standardizer = (function () {
                 resultSize = hits.length
                 self.currentWordsCount += hits.length
                 var words = []
-                offset += size
+                offset += size;
+                var sourceClassUri=[]
                 hits.forEach(function (hit) {
                     words.push(hit._source.label);
+                    hit._source.parent=hit._source.parents[hit._source.parents.length-1]
+                    sourceClassUri.push( hit._source.parent);
                     allWords = allWords.concat(words)
-                    self.currentWordsMap[hit._source.label] = {
-                        source: self.currentSource,
-                        id: hit._source.id,
-                        label: hit._source.label
-                    }
-                    //   self.currentWords.push(hit._source.label)
+                    objects.push(hit._source)
                 })
+                Standardizer.getClassesLabels(sourceClassUri, self.currentSource.toLowerCase(), function (err, result) {
+                    if (err)
+                        return callbackWhilst(err)
+                    objects.forEach(function(item){
+                        item.parentLabel=result[item.parent] || Sparql_common.getLabelFromURI(item.id)
+                    })
+
+
+
+
                 var indexes = self.getSelectedIndexes(true)
                 SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                     if (err)
-                        return alert(err)
+                        return callbackWhilst(err)
                     //  self.getMatchesClassesByIndex(result)
-                    var html = self.processMatrixResult(words, result, indexes)
+                    var html = self.processMatrixResult(objects, result, indexes)
                     searchResultArray = searchResultArray.concat(result)
                     totalProcessed += result.length;
                     MainController.UI.message(" processed items: " + (totalProcessed))
@@ -650,7 +686,7 @@ var Standardizer = (function () {
 
                     callbackWhilst()
                 })
-
+                })
 
             })
         }, function (err) {

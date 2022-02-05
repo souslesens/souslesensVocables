@@ -121,6 +121,19 @@ var processor = {
                                 callbackSeries();
                             });
                         },
+                        //fileProcessing
+                        function (callbackSeries) {
+                            if (!mapping.dataProcessing)
+                                return callbackSeries();
+                            mapping.dataProcessing(lines, function(err, result){
+                                if (err)
+                                    return callbackSeries(err);
+                                lines = result;
+                                callbackSeries();
+                            });
+                        },
+
+
 
                         function (callbackSeries) {
                             function getLookupValue(lookupSequence, value) {
@@ -154,7 +167,7 @@ var processor = {
                                     {
                                         if (item.s_type == "fixed") subjectStr = item.s;
                                         else if (typeof item.s === "function") subjectStr = item.s(line, item);
-                                        else if (mapping.transform && mapping.transform[item.s]) subjectStr = mapping.transform[item.s](line[item.s], "s", item.p);
+                                        else if (mapping.transform && mapping.transform[item.s]) subjectStr = mapping.transform[item.s](line[item.s], "s", item.p,line);
                                         else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
                                         else if (item.lookup_S) {
                                             subjectStr = getLookupValue(item.lookup_S, line[item.s]);
@@ -175,7 +188,7 @@ var processor = {
                                         if (item.p == "rdf:type") var x = 3;
                                         if (item.o_type == "fixed") objectStr = item.o;
                                         if (typeof item.o === "function") objectStr = item.o(line, item);
-                                        else if (mapping.transform && mapping.transform[item.o]) objectStr = mapping.transform[item.o](line[item.o], "o", item.p);
+                                        else if (mapping.transform && mapping.transform[item.o]) objectStr = mapping.transform[item.o](line[item.o], "o", item.p,line);
                                         else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
                                         else if (item.lookup_O) {
                                             objectStr = getLookupValue(item.lookup_O, objectStr);
@@ -193,7 +206,9 @@ var processor = {
 
                                     //format subject
                                     {
+                                        subjectStr=subjectStr.trim()
                                         if (typeof item.s === "function") subjectStr = subjectStr;
+
                                         if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
                                         else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) subjectStr = subjectStr;
                                         else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
@@ -201,12 +216,15 @@ var processor = {
 
                                     //format object
                                     {
+                                        objectStr=objectStr.trim()
                                         if (!objectStr || !objectStr.indexOf) {
                                             var x = line;
                                             var y = item;
                                         }
-                                        if (typeof item.o === "function") objectStr = objectStr;
-                                        else if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
+                                        if (typeof item.o === "function")
+                                            objectStr = objectStr;
+
+                                        if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
                                         else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                             objectStr = objectStr;
                                         } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
@@ -299,7 +317,12 @@ var processor = {
                                 slices,
                                 function (slice, callbackEach) {
                                     processor.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-                                        if (err) return callbackEach(err);
+                                        if (err){
+
+
+                                            var x=sparqlServerUrl
+                                            return callbackEach(err);
+                                        }
                                         totalTriples += result;
 
                                         callbackEach();

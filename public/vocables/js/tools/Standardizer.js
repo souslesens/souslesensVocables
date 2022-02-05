@@ -525,6 +525,7 @@ var Standardizer = (function () {
             return alert("Enter text to standardize")
         var words1 = text.split("\n")
         var words = []
+        self.matrixIndexRankingsMap = {}
         self.currentWordsMap = {}
         words1.forEach(function (word) {
             word = word.trim()
@@ -589,7 +590,7 @@ var Standardizer = (function () {
         if (self.isWorking)
             return alert(" busy !")
         self.matrixDivsMap = {}
-
+        self.matrixIndexRankingsMap = {}
         //   var source = $("#Standardizer_sourcesSelect").val();
         if (!source || source == "")
             return alert("select a source");
@@ -1270,7 +1271,7 @@ var parents=hit._source.parents
                                 return;
                             var commonNodes = []
                             hits.forEach(function (hit) {
-                                if(! hit._source.parents)
+                                if(! hit._source.parents ||  !hit._source.parents.reverse)
                                     return;
                                // var ancestors = hit._source.parents.split("|").reverse()
                                 var ancestors = hit._source.parents.reverse()

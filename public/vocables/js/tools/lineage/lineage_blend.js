@@ -50,17 +50,19 @@ var Lineage_blend = (function () {
         $("#lineage_createRelationButtonsDiv").css('display', 'none')
     }
 
-    self.manageImports = function (source, callback) {
-
-        var imports = Config.sources[Lineage_classes.mainSource].imports.concat(Lineage_classes.mainSource);
-        if (imports && imports.indexOf(source) > -1) {
+    self.setNewImport = function (mainSourceLabel,importedSourceLabel, callback) {
+       var mainSource= Config.sources[mainSourceLabel]
+        if(!mainSource)
+            return alert ("nos source with label "+mainSourceLabel)
+        var imports = mainSource.imports.concat(mainSource);
+        if (imports && imports.indexOf(importedSourceLabel) > -1) {
             return callback()
         }
-        if (!confirm("add  source " + source + " to imports of source " + Lineage_common.currentSource))
+        if (!confirm("add  source " + importedSourceLabel + " to imports of source " + mainSourceLabel))
             return callback("stop");
 
-        self.addImportToCurrentSource(Lineage_classes.mainSource, source, function (err, result) {
-            Lineage_classes.registerSource(source);
+        self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (err, result) {
+            Lineage_classes.registerSource(importedSourceLabel);
             callback()
         })
 
@@ -114,7 +116,7 @@ var Lineage_blend = (function () {
             function (callbackSeries) {
                 if (!addImportToCurrentSource)
                     return callbackSeries()
-                self.manageImports(targetNode.source, function (err, result) {
+                self.setNewImport(Lineage_classes.mainSource,targetNode.source, function (err, result) {
                     callbackSeries(err)
                 })
             }
@@ -145,7 +147,7 @@ var Lineage_blend = (function () {
     }
 
 
-    self.createRelationTriples = function (relations, createInverseRelation, callback) {
+    self.createRelationTriples = function (relations, createInverseRelation,source, callback) {
         var allTriples = []
         if (!Array.isArray(relations))
             relations = [relations]
@@ -327,11 +329,11 @@ var Lineage_blend = (function () {
     }
 
 
-    self.addImportToCurrentSource = function (parentSource, importedSource, callback) {
+    self.addImportToCurrentSource = function (parentSourceLabel, importedSourceLabel, callback) {
         var payload = {
             addImportToSource: 1,
-            parentSource: parentSource,
-            importedSource: importedSource
+            parentSource: parentSourceLabel,
+            importedSource: importedSourceLabel
         }
         $.ajax({
             type: "POST",
@@ -339,9 +341,9 @@ var Lineage_blend = (function () {
             data: payload,
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
-                if (!Config.sources[parentSource].imports)//synchro on client
-                    Config.sources[parentSource].imports = []
-                Config.sources[parentSource].imports.push(importedSource)
+                if (!Config.sources[parentSourceLabel].imports)//synchro on client
+                    Config.sources[parentSourceLabel].imports = []
+                Config.sources[parentSourceLabel].imports.push(importedSourceLabel)
                 return callback()
             },
             error: function (err) {
@@ -439,7 +441,7 @@ var Lineage_blend = (function () {
             return alert("node " + node.label + " already exists in graph ")
         /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
              return;*/
-        self.manageImports(node.source, function (err, result) {
+        self.setNewImport(Lineage_classes.mainSource,node.source, function (err, result) {
             if (err)
                 return ""
             var toGraphUri = Config.sources[Lineage_classes.mainSource].graphUri
@@ -461,7 +463,7 @@ var Lineage_blend = (function () {
         })
     }
 
-    self.getCommonMetaDataTriples = function (subjectUri, provenance, status, options) {
+    self.getCommonMetaDataTriples = function (subjectUri, source, status, options) {
         var metaDataTriples = []
         if (!options)
             options = {}
@@ -489,8 +491,8 @@ var Lineage_blend = (function () {
         })
         metaDataTriples.push({
             subject: subjectUri,
-            predicate: "http://purl.org/dc/terms/provenance",
-            object: Config.sousLeSensVocablesGraphUri + "provenance/" + provenance
+            predicate: "http://purl.org/dc/terms/source",
+            object:   source
         })
         if (options) {
             for (var key in options) {
@@ -558,7 +560,7 @@ var Lineage_blend = (function () {
             }
         })
         if (relations.length > 0) {
-            self.createRelationTriples(relations, true, function (err, result) {
+            self.createRelationTriples(relations, true, Lineage_classes.mainSource,function (err, result) {
                 if (err)
                     return alert(err)
                 visjsGraph.data.edges.remove(sameLabelEdgeIds);

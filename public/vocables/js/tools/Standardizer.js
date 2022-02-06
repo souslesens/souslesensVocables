@@ -16,19 +16,19 @@ var Standardizer = (function () {
 
         $("#actionDiv").html("")
         $("#graphDiv").html("")
-        $("#graphDiv").load("snippets/standardizer/standardizer_central.html",function(){
-            $("#standardizerCentral_tabs").tabs({});;
+        $("#graphDiv").load("snippets/standardizer/standardizer_central.html", function () {
+            $("#standardizerCentral_tabs").tabs({});
+            ;
         })
 
-        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html",function(){
+        $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html", function () {
             $("#Standardizer_leftTab").tabs({});
         })
         MainController.UI.toogleRightPanel(true)
         $("#rightPanelDiv").html("")
-        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html",function() {
+        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html", function () {
 
         });
-
 
 
         $("#graphDiv").html("")
@@ -66,15 +66,15 @@ var Standardizer = (function () {
 
         })
         setTimeout(function () {
-          /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
-            $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
-            setTimeout(function () {
-                $("#standardizerCentral_tabs").tabs({});
-                if(callback)
-                    callback()
-            }, 500)*/
+            /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
+              $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+              setTimeout(function () {
+                  $("#standardizerCentral_tabs").tabs({});
+                  if(callback)
+                      callback()
+              }, 500)*/
 
-            if(callback)
+            if (callback)
                 callback()
         }, 500)
 
@@ -132,7 +132,6 @@ var Standardizer = (function () {
 
 
     }
-
 
 
     self.getClassesLabels = function (classUris, indexes, callback) {
@@ -221,10 +220,15 @@ var Standardizer = (function () {
         var entitiesMap = []
         sourceObjects.forEach(function (obj, index) {
             var word
-            if(typeof obj==="string")//compare words
-                word=obj;
-            else//compare sources
-                word=obj.parentLabel+" : "+obj.label
+            if (typeof obj === "string")//compare words
+                word = obj;
+            else {//compare sources
+                word = obj.label
+                //  word=obj.parentLabel+" : "+obj.label
+            }
+
+            if (word && word.toLowerCase() == "elevator")
+                var x = 3
 
             if (!entitiesMap[word]) {
                 entitiesMap[word] = []
@@ -244,55 +248,55 @@ var Standardizer = (function () {
                     status: "exactMatch",
 
                 }
-                if(typeof obj==="object")
-                    entity.sourceHit=obj;
+                if (typeof obj === "object")
+                    entity.sourceHit = obj;
                 entitiesMap[word][entity.index] = entity
             })
         })
 
 
-      /*  if (self.mode == "normal") {
+        /*  if (self.mode == "normal") {
 
-            KGadvancedMapping.currentColumnValueDivIds = {}
-            var distinctSources = []
-            words.forEach(function (word) {
-                word = word.toLowerCase().trim()
-                var sourcesHtml = ""
-                var id = "columnValue" + common.getRandomHexaId(5)
-                KGadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
-                var cssClass;
-
-
-                if (entitiesMap[word]) {//exact match
+              KGadvancedMapping.currentColumnValueDivIds = {}
+              var distinctSources = []
+              words.forEach(function (word) {
+                  word = word.toLowerCase().trim()
+                  var sourcesHtml = ""
+                  var id = "columnValue" + common.getRandomHexaId(5)
+                  KGadvancedMapping.currentColumnValueDivIds[id] = {value: word, sources: [], indexData: []}
+                  var cssClass;
 
 
-                    cssClass = "KGmapping_columnValues_referenceValue"
-                    for (var index in entitiesMap[word]) {
-                        KGadvancedMapping.currentColumnValueDivIds[id].indexData.push(entitiesMap[word])
-                        KGadvancedMapping.currentColumnValueDivIds[id].sources.push(index)
-
-                        if (index && distinctSources.indexOf(index) < 0)
-                            distinctSources.push(index)
-                        sourcesHtml += "&nbsp;<span class='KGmapping_distinctColumnValueSource' style='background-color:" + KGadvancedMapping.getSourceColor(index) + "'>" + index + "</span>";
-
-                    }
-                } else {
-                    cssClass = "KGmapping_columnValues_hasCandidateValues"
-                }
+                  if (entitiesMap[word]) {//exact match
 
 
-                if (cssClass && cssClass != "") {
-                    $("#KGmapping_columnValues option[value='" + word + "']").addClass(cssClass);
+                      cssClass = "KGmapping_columnValues_referenceValue"
+                      for (var index in entitiesMap[word]) {
+                          KGadvancedMapping.currentColumnValueDivIds[id].indexData.push(entitiesMap[word])
+                          KGadvancedMapping.currentColumnValueDivIds[id].sources.push(index)
 
-                }
+                          if (index && distinctSources.indexOf(index) < 0)
+                              distinctSources.push(index)
+                          sourcesHtml += "&nbsp;<span class='KGmapping_distinctColumnValueSource' style='background-color:" + KGadvancedMapping.getSourceColor(index) + "'>" + index + "</span>";
 
-                var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
-                $("#KGmapping_matrixContainer").append(html)
+                      }
+                  } else {
+                      cssClass = "KGmapping_columnValues_hasCandidateValues"
+                  }
 
 
-            })
-        }
-        else */
+                  if (cssClass && cssClass != "") {
+                      $("#KGmapping_columnValues option[value='" + word + "']").addClass(cssClass);
+
+                  }
+
+                  var html = "<div onclick='Standardizer.editCandidateValues(\"" + id + "\")' id='" + id + "' class='KGmapping_columnValue " + cssClass + "'>" + word + sourcesHtml + "</div>";
+                  $("#KGmapping_matrixContainer").append(html)
+
+
+              })
+          }
+          else */
         if (self.mode == "matrix") {
             var html = ""
 
@@ -386,8 +390,8 @@ var Standardizer = (function () {
             dataSet.push(line)
 
         }
-        if(callback)
-            return callback(null,{cols:cols, data:dataSet})
+        if (callback)
+            return callback(null, {cols: cols, data: dataSet})
         Export.showDataTable(null, cols, dataSet)
 
     }
@@ -416,45 +420,84 @@ var Standardizer = (function () {
     }
 
     self.createSameAsRelations = function () {
-var relations=[]
-       for(var key in self.matrixWordsMap.entities) {
-           self.matrixWordsMap.entities[key].forEach(function (obj) {
-               if (obj) {
+        var relations = [];
+        var targetSources = []
+        for (var key in self.matrixWordsMap.entities) {
+            self.matrixWordsMap.entities[key].forEach(function (obj) {
 
-                   relations.push({
-                       sourceNode: {
-                           source: self.currentSource,
-                           label: obj.sourceHit.label,
-                           id: obj.sourceHit.id,
-                       }, targetNode: {
+                if (obj) {
+                    var targetSource = self.indexSourcesMap[obj.index]
+                    if (targetSources.indexOf(targetSource) < 0)
+                        targetSources.push(targetSource)
+                    relations.push({
+                        sourceNode: {
+                            source: self.currentSource,
+                            label: obj.sourceHit.label,
+                            id: obj.sourceHit.id,
+                        }, targetNode: {
 
-                           source: self.indexSourcesMap[obj.index],
-                           label: obj.label,
-                           id: obj.id,
-                       }
-                       ,
-                       type: "http://www.w3.org/2002/07/owl#sameAs"
-                   })
-
-
-               }
-           })
-       }
-
-
-       if(!confirm ( "create "+relations.length+" relations sameAs in TSF-DICTIONARY" ))
-           return;
-
-    Lineage_blend.createRelationTriples(relations,true,function(err,result){
-        if(err)
-            alert(err)
-        MainController.UI.message()
-    })
+                            source: targetSource,
+                            label: obj.label,
+                            id: obj.id,
+                        }
+                        ,
+                        type: "http://www.w3.org/2002/07/owl#sameAs"
+                    })
 
 
+                }
+            })
+        }
 
-          //  return alert(" coming soon");
 
+        if (!confirm("create " + relations.length + " relations sameAs in TSF-DICTIONARY"))
+            return;
+
+        var sliceLength = 10
+        var totalCreated = 0
+        async.series([
+            function (callbackSeries) {
+                async.eachSeries(targetSources, function (targetSource, callbackEach) {
+                    MainController.UI.message(" adding " + targetSource + " in   TSF-DICTIONARY imports");
+                    Lineage_blend.addImportToCurrentSource("TSF-DICTIONARY", targetSource, function (err, result) {
+                        return callbackEach(err)
+
+                        //  return alert(" coming soon");
+                    })
+                })
+            },
+            function (callbackSeries) {
+
+
+                var slices = common.array.slice(relations, sliceLength)
+                MainController.UI.message(" Creating relations  in TSF-DICTIONARY...");
+                async.eachSeries(slices, function (slice, callbackEach) {
+                    Lineage_blend.createRelationTriples(slice, true, "TSF-DICTIONARY", function (err, result) {
+                        if (err)
+                            return callbackEach(err)
+                        /*   slice.forEach(function(relation){
+                           var labelTriples=[
+                               { subject: relation.sourceNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.sourceNode.label},
+                               { subject: relation.targetNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.targetNode.label},
+                               })*/
+
+                        totalCreated += sliceLength
+                        MainController.UI.message(totalCreated + " relations created in TSF-DICTIONARY");
+
+                        return callbackEach()
+                    })
+                }, function (err) {
+                    callbackSeries()
+                })
+            }
+
+
+        ], function (err) {
+            if (err)
+                return alert(err)
+
+            MainController.UI.message(totalCreated + " relations created in TSF-DICTIONARY", true)
+        })
     }
 
 
@@ -642,7 +685,7 @@ var relations=[]
         self.currentWordsCount = 0
         var searchResultArray = []
         var allWords = []
-        var objects=[]
+
         async.whilst(function (test) {
             return resultSize > 0
 
@@ -655,37 +698,36 @@ var relations=[]
                 self.currentWordsCount += hits.length
                 var words = []
                 offset += size;
-                var sourceClassUri=[]
+                var sourceClassUri = []
+                var objects = []
                 hits.forEach(function (hit) {
                     words.push(hit._source.label);
-                    hit._source.parent=hit._source.parents[hit._source.parents.length-1]
-                    sourceClassUri.push( hit._source.parent);
+                    hit._source.parent = hit._source.parents[hit._source.parents.length - 1]
+                    sourceClassUri.push(hit._source.parent);
                     allWords = allWords.concat(words)
                     objects.push(hit._source)
                 })
                 Standardizer.getClassesLabels(sourceClassUri, self.currentSource.toLowerCase(), function (err, result) {
                     if (err)
                         return callbackWhilst(err)
-                    objects.forEach(function(item){
-                        item.parentLabel=result[item.parent] || Sparql_common.getLabelFromURI(item.id)
+                    objects.forEach(function (item) {
+                        item.parentLabel = result[item.parent] || Sparql_common.getLabelFromURI(item.id)
                     })
 
 
+                    var indexes = self.getSelectedIndexes(true)
+                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                        if (err)
+                            return callbackWhilst(err)
+                        //  self.getMatchesClassesByIndex(result)
+                        var html = self.processMatrixResult(objects, result, indexes)
+                        searchResultArray = searchResultArray.concat(result)
+                        totalProcessed += result.length;
+                        MainController.UI.message(" processed items: " + (totalProcessed))
+                        $("#KGmapping_matrixContainer").append(html)
 
-
-                var indexes = self.getSelectedIndexes(true)
-                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
-                    if (err)
-                        return callbackWhilst(err)
-                    //  self.getMatchesClassesByIndex(result)
-                    var html = self.processMatrixResult(objects, result, indexes)
-                    searchResultArray = searchResultArray.concat(result)
-                    totalProcessed += result.length;
-                    MainController.UI.message(" processed items: " + (totalProcessed))
-                    $("#KGmapping_matrixContainer").append(html)
-
-                    callbackWhilst()
-                })
+                        callbackWhilst()
+                    })
                 })
 
             })
@@ -712,8 +754,6 @@ var relations=[]
             }, 500)
         })
     }
-
-
 
 
     self.onMatrixCellClick = function (event) {
@@ -754,8 +794,8 @@ var relations=[]
 
     self.showFuzzyMatchSearch = function (word) {
         var html = 'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
-            'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">'+
-        "<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
+            'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">' +
+            "<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" </div>'
         $("#Standardizer_matrixCellDataDiv").html(html);
         setTimeout(function () {
@@ -1042,9 +1082,8 @@ var relations=[]
     }
 
 
-
-
     self.drawSunBurst = function (searchResultArray, words, options, callback) {
+        return;
         if ({options})
             options = {}
 
@@ -1083,19 +1122,18 @@ var relations=[]
 
                             if (indexes.indexOf(hit._index) < 0)
                                 indexes.push(hit._index)
-                         //   var parentsStr = hit._source.parents
-var parents=hit._source.parents
+                            //   var parentsStr = hit._source.parents
+                            var parents = hit._source.parents
                             classUris.push(hit._source.id)
                             if (parents) {
 
                                 var lastParent
-                             //   var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
-
+                                //   var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
 
                                 var ancestors = [];
                                 var path = "";
-                                if(! parents.forEach)
+                                if (!parents.forEach)
                                     return;
                                 parents.forEach(function (itemParent, index) {
                                     var parentPath = path
@@ -1224,15 +1262,15 @@ var parents=hit._source.parents
                     var maxlevels = 2;
                     maxlevels = parseInt($("#Standardizer_ancestorsMaxLevels").val())
                     var existingNodes = {}
-                    var y0=-200
-                    var yOffset=50;
+                    var y0 = -200
+                    var yOffset = 50;
 
                     var recurse = function (parent, level) {
                         if (level > maxlevels)
                             return;
                         if (!parent.children)
                             return;
-                        var y=  y0+(yOffset*level)
+                        var y = y0 + (yOffset * level)
                         parent.children.forEach(function (item) {
 
                             if (!existingNodes[item.id]) {
@@ -1258,9 +1296,9 @@ var parents=hit._source.parents
                                     level: level,
                                     color: Lineage_classes.getSourceColor(item.index),
                                     shape: "box",
-                                  //  fixed:{x:false, y:true},
+                                    //  fixed:{x:false, y:true},
 
-                                   // y:  y,
+                                    // y:  y,
                                     data: {
                                         id: item.id,
                                         text: item.name,
@@ -1300,16 +1338,16 @@ var parents=hit._source.parents
 
                         var pairs = {}
                         self.searchResultArray.forEach(function (item, itemIndex) {
-                            if(! item.hits)
+                            if (!item.hits)
                                 return;
                             var hits = item.hits.hits;
                             if (hits.length == 0)
                                 return;
                             var commonNodes = []
                             hits.forEach(function (hit) {
-                                if(! hit._source.parents ||  !hit._source.parents.reverse)
+                                if (!hit._source.parents || !hit._source.parents.reverse)
                                     return;
-                               // var ancestors = hit._source.parents.split("|").reverse()
+                                // var ancestors = hit._source.parents.split("|").reverse()
                                 var ancestors = hit._source.parents.reverse()
                                 var done = false
                                 ancestors.forEach(function (ancestor) {
@@ -1336,8 +1374,8 @@ var parents=hit._source.parents
                             }
 
                         })
-                        var x=-100
-                        var xoffset=100
+                        var x = -100
+                        var xoffset = 100
                         for (var key in pairs) {
 
                             if (true) {
@@ -1350,9 +1388,9 @@ var parents=hit._source.parents
                                         shape: "circle",
                                         value: pairs[key],
                                         level: maxlevels + 2,
-                                        fixed:{x:true, y:true},
-                                     //   y:0,
-                                     //   x:  (x+=xoffset)
+                                        fixed: {x: true, y: true},
+                                        //   y:0,
+                                        //   x:  (x+=xoffset)
 
                                     })
                                 }
@@ -1403,41 +1441,40 @@ var parents=hit._source.parents
                     }
                     if (false) {
 
-                    var html = ""
-                    var row0 = "<td>&nbsp;</td>"
-                    var nodesMap = {}
-                    visjsData.nodes.forEach(function (node) {
-                        nodesMap[node.id] = node
-                    })
+                        var html = ""
+                        var row0 = "<td>&nbsp;</td>"
+                        var nodesMap = {}
+                        visjsData.nodes.forEach(function (node) {
+                            nodesMap[node.id] = node
+                        })
 
-                    visjsData.edges.forEach(function (edgeH) {
-                        if (edgeH.value) {
-                            var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
-                            row0 += "<td class='Standardizer_ancestorsCooccurenceColHeader'>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
-                            visjsData.edges.forEach(function (edgeV) {
-                                if (edgeV.value) {
-                                    var value = ""
-                                    if (edgeV.from != edgeH.from && edgeV.to != edgeH.to) {
-                                        if (edgeV.from == edgeH.to || edgeV.to == edgeH.from)
-                                            value = edgeV.value
+                        visjsData.edges.forEach(function (edgeH) {
+                            if (edgeH.value) {
+                                var row = "<tr><td>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
+                                row0 += "<td class='Standardizer_ancestorsCooccurenceColHeader'>" + nodesMap[edgeH.from].data.ancestorsLabel + "</td>"
+                                visjsData.edges.forEach(function (edgeV) {
+                                    if (edgeV.value) {
+                                        var value = ""
+                                        if (edgeV.from != edgeH.from && edgeV.to != edgeH.to) {
+                                            if (edgeV.from == edgeH.to || edgeV.to == edgeH.from)
+                                                value = edgeV.value
+                                        }
+
+                                        row += "<td class='Standardizer_ancestorsCooccurenceCell'>" + value + "</td>"
                                     }
 
-                                    row += "<td class='Standardizer_ancestorsCooccurenceCell'>" + value + "</td>"
-                                }
+                                })
+                                row += "</tr>"
+                                html += row
 
-                            })
-                            row += "</tr>"
-                            html += row
-
-                        }
-                    })
-                    html = "<table>" + "<tr>" + row0 + "</tr>" + html
-                    html += "</table>"
+                            }
+                        })
+                        html = "<table>" + "<tr>" + row0 + "</tr>" + html
+                        html += "</table>"
 
 
-                    $("#Standardizer_ancestorsDiv").html(html)
-                }
-                   else {
+                        $("#Standardizer_ancestorsDiv").html(html)
+                    } else {
 
                         var options = {
                             edges: {
@@ -1448,7 +1485,7 @@ var parents=hit._source.parents
                                     roundness: 0.4,
                                 }
                             },
-                          layoutHierarchical: {
+                            layoutHierarchical: {
                                 direction: "LR",
                                 sortMethod: "hubsize",
 
@@ -1548,18 +1585,18 @@ var parents=hit._source.parents
 
                         if (indexes.indexOf(hit._index) < 0)
                             indexes.push(hit._index)
-                    //    var parentsStr = hit._source.parents
+                        //    var parentsStr = hit._source.parents
                         var parents = hit._source.parents
                         classUris.push(hit._source.id)
                         if (parents) {
 
                             var lastParent
-                          //  var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
+                            //  var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
 
                             var ancestors = [];
                             var path = "";
-                            if(! parents.forEach)
+                            if (!parents.forEach)
                                 return;
                             parents.forEach(function (itemParent, index) {
                                 var parentPath = path

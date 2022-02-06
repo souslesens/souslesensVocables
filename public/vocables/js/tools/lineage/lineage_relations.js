@@ -3,7 +3,7 @@ Lineage_relations = (function () {
     var self = {}
     self.graphUriSourceMap = {}
     self.projectedGraphsMap = {}
-    self.maxRelationToDraw=1000
+    self.maxRelationToDraw = 5000
 
     self.init = function () {
         var sources = []
@@ -32,10 +32,10 @@ Lineage_relations = (function () {
             result.forEach(function (item) {
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
-            props.sort(function(a,b){
-                if(a.label>b.label)
+            props.sort(function (a, b) {
+                if (a.label > b.label)
                     return 1;
-                if(a.label<b.label)
+                if (a.label < b.label)
                     return -1;
                 return 0
             })
@@ -74,7 +74,7 @@ Lineage_relations = (function () {
                 source = self.graphUriSourceMap[graphUri]
             }
         })
-       // console.log(uri + "_" + source)
+        // console.log(uri + "_" + source)
         return source
     }
 
@@ -88,22 +88,25 @@ Lineage_relations = (function () {
             if (Config.sources[selectedNode.id]) {// selection of source in graph
                 Lineage_classes.setCurrentSource(selectedNode.id)
                 selectedNodes = null
-                return callback(null,selectedNodes)
+                return callback(null, selectedNodes)
 
             }
-           selectedNodes = [selectedNode.id]
+            selectedNodes = [selectedNode.id]
             Sparql_generic.getNodeChildren(Lineage_common.currentSource, null, selectedNode.id, 3, null, function (err, result) {
                 if (err)
                     callback(err)
                 result.forEach(function (item) {
                     selectedNodes.push(item.child1.value)
                 })
-                return callback(null,selectedNodes)
+                return callback(null, selectedNodes)
             })
 
+        } else if (selectionMode == "currentGraphNodes") {
+            var selectedNodes = visjsGraph.data.nodes.getIds()
+            return callback(null, selectedNodes)
         } else {
             selectedNodes = null
-            return callback(null,selectedNodes)
+            return callback(null, selectedNodes)
         }
 
 
@@ -111,7 +114,7 @@ Lineage_relations = (function () {
     self.getExistingRestrictions = function (currentSource, callback) {
 
         function formatResult(result) {
-            restrictions=[]
+            restrictions = []
             result.forEach(function (item) {
                 var domain, range, domainLabel, rangeLabel, prop, propLabel, node, domainSourceLabel,
                     rangeSourceLabel
@@ -129,9 +132,9 @@ Lineage_relations = (function () {
                     propLabel = item.propLabel.value
                 if (item.node)
                     node = item.node.value
-               /* if (item.g) {
-                    domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
-                }*/
+                /* if (item.g) {
+                     domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
+                 }*/
                 if (item.domainSourceLabel) {
                     domainSourceLabel = item.domainSourceLabel.value
                 }
@@ -153,19 +156,14 @@ Lineage_relations = (function () {
 
                 })
 
-                restrictions.sort(function(a,b){
-                  return (a.propLabel>b.prop)
+                restrictions.sort(function (a, b) {
+                    return (a.propLabel > b.prop)
                 })
-
-
-
 
 
             })
             return restrictions
         }
-
-
 
 
         var restrictions = []
@@ -178,23 +176,23 @@ Lineage_relations = (function () {
             if (err)
                 return callback(err)
 
-            if(selectedNodes==null){
+            if (selectedNodes == null) {
                 Sparql_OWL.getObjectRestrictions(currentSource, null, {
                     withoutImports: 0,
                     someValuesFrom: 1,
                     filter: filter,
-                    selectGraph:true
+                    selectGraph: true
 
                 }, function (err, result) {
                     if (err)
                         return callback(err)
 
-                    restrictions=formatResult(result)
-                    callback(null,restrictions)
+                    restrictions = formatResult(result)
+                    callback(null, restrictions)
 
                 })
 
-            }else {
+            } else {
 
 
                 var slices = common.array.slice(selectedNodes, 200)
@@ -203,7 +201,7 @@ Lineage_relations = (function () {
                         withoutImports: 0,
                         someValuesFrom: 1,
                         filter: filter,
-                        selectGraph:true
+                        selectGraph: true
 
                     }, function (err, result) {
                         if (err)
@@ -222,7 +220,6 @@ Lineage_relations = (function () {
     }
 
 
-
     self.showRestrictions = function (output, relations, toLabelsMap) {
         var currentSource = Lineage_common.currentSource
         var selectedNodes = null
@@ -235,21 +232,21 @@ Lineage_relations = (function () {
                 if (relations)
                     return callbackSeries()
                 self.getExistingRestrictions(currentSource, function (err, restrictions) {
-                    if(err)
+                    if (err)
                         return callbackSeries(err)
-                    relations=restrictions
+                    relations = restrictions
                     return callbackSeries()
                 })
             },
-             function (callbackSeries) {
-            if(!relations || relations.length==0)
-                return callbackSeries("no relations found")
-            if(relations.length>self.maxRelationToDraw)
-                return callbackSeries("Cannot draw : too many relations "+relations.length +" max "+self.maxRelationToDraw)
-                    else
-                return callbackSeries()
-             }
-,
+            function (callbackSeries) {
+                if (!relations || relations.length == 0)
+                    return callbackSeries("no relations found")
+                if (relations.length > self.maxRelationToDraw)
+                    return callbackSeries("Cannot draw : too many relations " + relations.length + " max " + self.maxRelationToDraw)
+                else
+                    return callbackSeries()
+            }
+            ,
             function (callbackSeries) {
                 var sources
                 sources = Config.sources[currentSource].imports
@@ -344,7 +341,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: item.domain,
                                 label: item.domainLabel,
-                               shadow:Lineage_classes.nodeShadow, shape: shape,
+                                shadow: Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(domainSource),
@@ -380,7 +377,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: item.range,
                                 label: item.rangeLabel,
-                               shadow:Lineage_classes.nodeShadow, shape: shape,
+                                shadow: Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(rangeSource),
@@ -394,15 +391,17 @@ Lineage_relations = (function () {
                         }
                         var propSource = Lineage_classes.mainSource
                         var edgeId = item.node
-                        var edgeId = item.domain+"_"+item.prop+"_"+item.range
+                        var edgeId = item.domain + "_" + item.prop + "_" + item.range
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
-                                id:edgeId,
+                                id: edgeId,
                                 from: item.range,
                                 to: item.domain,
-                                data: {id: item.node,propertyId: item.prop, source: propSource,  id:edgeId,
-                                    from: item.range},
+                                data: {
+                                    id: item.node, propertyId: item.prop, source: propSource, id: edgeId,
+                                    from: item.range
+                                },
                                 arrows: {
                                     from: {
                                         enabled: true,
@@ -412,7 +411,7 @@ Lineage_relations = (function () {
                                     length: 30,
                                 },
 
-                                width:3,
+                                width: 3,
 
                                 label: "<i>" + prop + "</i>",
                                 font: {multi: true, size: 10},
@@ -446,7 +445,7 @@ Lineage_relations = (function () {
                 callbackSeries()
             }
         ], function (err) {
-            if(err)
+            if (err)
                 return alert(err)
             MainController.UI.message("DONE", true)
         })
@@ -495,7 +494,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: parentId,
                                 label: parentId,
-                               shadow:Lineage_classes.nodeShadow, shape: "box",
+                                shadow: Lineage_classes.nodeShadow, shape: "box",
                                 level: index,
 
                                 color: Lineage_classes.getSourceColor(ancestorsSource),
@@ -511,7 +510,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: parentId,
                                 label: labelsMap[parentId],
-                               shadow:Lineage_classes.nodeShadow, shape: shape,
+                                shadow: Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: index,
                                 color: Lineage_classes.getSourceColor(restriction.rangeSourceLabel),
@@ -560,7 +559,7 @@ Lineage_relations = (function () {
 
 
     self.projectSameAsRestrictionsOnSource = function (orphans) {
-        if(orphans)
+        if (orphans)
             return alert("Coming soon...")
         if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked"))
             Lineage_classes.initUI()

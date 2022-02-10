@@ -120,7 +120,7 @@ app.use(
     swaggerUi.serve,
     swaggerUi.setup(null, {
         swaggerOptions: {
-            url: "http://localhost:3010/api/v1/api-docs",
+            url: "/api/v1/api-docs",
         },
     })
 );

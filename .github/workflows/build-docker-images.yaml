@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'openapi'
     tags:
       - '*.*.*'
   pull_request:

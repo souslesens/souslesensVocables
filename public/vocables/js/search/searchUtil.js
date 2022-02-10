@@ -338,6 +338,34 @@ var SearchUtil = (function () {
             }
 
 
+
+
+           var  x= {
+               "query": {
+                   "bool": {
+                       "must": [
+                           {
+                               "term": {
+                                   "id": "/var/montageJungle/Photo/FONDS/0003_val_d'oise_70-81/002/002/",
+
+                               }
+                           },
+                           {
+                               "term": {
+                                   "id": "0003-002-002_001.jpg",
+
+                               }
+                           },
+
+                       ]
+                   }
+               }
+           }
+
+
+
+
+
             self.entitiesMap = {}
             var bulQueryStr = ""
             var slices = common.array.slice(words, 100)

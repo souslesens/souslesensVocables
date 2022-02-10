@@ -281,8 +281,6 @@ var MainController = (function () {
 
 
                 var group = Config.sources[sourceLabel].group
-                if (sourceLabel.indexOf("CFIHOS_READI-REMOTE") > -1)
-                    var x = 3
                 if (group) {
                     var subGroups = group.split("/")
                     subGroups.forEach(function (subGroup, index) {

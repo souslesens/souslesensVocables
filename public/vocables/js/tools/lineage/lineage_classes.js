@@ -241,7 +241,7 @@ var Lineage_classes = (function () {
             SourceBrowser.currentTreeNode = propertiesMap.node;
             self.currentTreeNode = propertiesMap.node;
             var data = propertiesMap.node.data;
-            if(event.which==3)
+            if (event.which == 3)
                 return;
             if (self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event, {callee: "Tree"}) != null) {
                 if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
@@ -943,7 +943,7 @@ var Lineage_classes = (function () {
                     if (true) {
                         if (!distinctProps[item.prop.value])
                             distinctProps[item.prop.value] = 1
-                        if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 ||  item.prop.value.indexOf("partOf") > -1) {
+                        if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 || item.prop.value.indexOf("partOf") > -1) {
                             // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
                             //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
                             if (!existingIds[item.value.value]) {
@@ -1582,7 +1582,8 @@ var Lineage_classes = (function () {
 
         }
 
-        self.drawRestrictions = function (source, classIds, descendants, withoutImports) {
+
+        self.drawRestrictions = function (source, classIds, descendants, withoutImports, options) {
 
             if (!classIds) {
                 if (!source)
@@ -1725,10 +1726,39 @@ var Lineage_classes = (function () {
                 CustomPluginController.setGraphNodesIcons()
                 $("#waitImg").css("display", "none");
 
+
+                if(options.processorFn){
+                    options.processorFn(result)
+                }
             })
 
 
+
         }
+
+        self.drawDictionarySameAs = function () {
+
+            function processMetadata(restrictionNodes){
+                var restrictionIds=[];
+                restrictionNodes.forEach(function(bNode){
+                    restrictionIds.push(bNode.node.id)
+                })
+                var options={
+                    includeBlankNodes:1,
+                    filter:""
+                }
+              //  Sparql_OWL.getItems("TSF-DICTIONARY",)
+
+            }
+
+
+            var existingNodes = visjsGraph.data.nodes.getIds();
+            var options = {processorFn:processMetadata,filter: " FILTER (?prop in <http://www.w3.org/2002/07/owl#sameAs>) "};
+            self.drawRestrictions("TSF-DICTIONARY", existingNodes, false, false, options)
+
+
+        }
+
 
         self.drawNamedIndividuals = function (classIds) {
             var source = Lineage_common.currentSource
@@ -1858,7 +1888,7 @@ var Lineage_classes = (function () {
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showObjectProperties();\">ObjectProperties</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showRestrictions();\">Restrictions</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showIndividuals();\">Individuals</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">Neighborhood</span>"+
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">Neighborhood</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.removeFromGraph();\">Remove from graph</span>"
 
 
@@ -1935,7 +1965,7 @@ var Lineage_classes = (function () {
                 var ids = [];
 
                 if (result.length == 0) {
-                    if(callback)
+                    if (callback)
                         return callback("No data found")
                     $("#waitImg").css("display", "none");
                     return MainController.UI.message("No data found")
@@ -2056,7 +2086,7 @@ var Lineage_classes = (function () {
 
                 }
                 if (callback)
-                   return callback(null,visjsData)
+                    return callback(null, visjsData)
 
                 self.registerSource(nodeData.source)
                 /*  expandedLevels[nodeData.source][expandedLevels[nodeData.source].length ].push(newNodeIds);*/
@@ -2121,15 +2151,19 @@ var Lineage_classes = (function () {
             },
 
             expand: function () {
-                var dontClusterNodes=false
+                var dontClusterNodes = false
                 var depth = 1;
                 if (graphContext.clickOptions.ctrlKey) {
                     depth = 2
-                    dontClusterNodes=true
-                } if (graphContext.clickOptions.ctrlKey && graphContext.clickOptions.altKey)
+                    dontClusterNodes = true
+                }
+                if (graphContext.clickOptions.ctrlKey && graphContext.clickOptions.altKey)
                     depth = 3
 
-                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], {depth: depth,dontClusterNodes:dontClusterNodes})
+                Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], {
+                    depth: depth,
+                    dontClusterNodes: dontClusterNodes
+                })
             },
             drawParents: function () {
                 Lineage_classes.addParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id])
@@ -2175,8 +2209,8 @@ var Lineage_classes = (function () {
                 }, 100)
 
             },
-            removeFromGraph:function(){
-                visjsGraph.removeNodes("id",Lineage_classes.currentGraphNode.id,true)
+            removeFromGraph: function () {
+                visjsGraph.removeNodes("id", Lineage_classes.currentGraphNode.id, true)
             },
             showObjectProperties: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey

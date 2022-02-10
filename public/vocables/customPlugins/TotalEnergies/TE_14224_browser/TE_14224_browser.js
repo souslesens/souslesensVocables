@@ -22,10 +22,10 @@ var TE_14224_browser = (function () {
         self.onLoaded = function () {
 
             $("#actionDiv").html("")
-            $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/snippets/leftPanel.html")
+            $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/TE_14224_browser/snippets/leftPanel.html")
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
-            $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html", function () {
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_14224_browser/snippets/rightPanel.html", function () {
 
             })
 

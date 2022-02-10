@@ -194,6 +194,14 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
+    self.tools["TE_TagGenerator"] = {
+        label: "TE_TagGenerator",
+        multiSources: 0,
+        noSource:true,
+        controller: TE_TagGenerator,
+        toolDescriptionImg: null
+    }
+
 
 
 

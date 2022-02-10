@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .TE_TagGenerator_itemSelect {
+            width: 200px;
+        }
+
+        .TE_TagGenerator_Location {
+            padding:3px;
+            border:solid 1px black;
+            background-color: #ebcff5;
+        }
+
+        .TE_TagGenerator_Function {
+            padding:3px;
+            border:solid 1px black;
+            background-color: #f5dfb3;
+        }
+
+    </style>
+</head>
+<body>
+
+<div  style="margin-bottom: 10px;margin-left: 30px">
+    <table>
+        <tr class="TE_TagGenerator_Location">
+            <td>Construction Complex</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L1_SELECT"></select></td>
+            <td>
+                <button onclick="TE_TagGenerator.create('L_1')">New</button>
+            </td>
+        </tr>
+        <tr class="TE_TagGenerator_Location">
+            <td>Construction Entity</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L2_SELECT"></select></td>
+            <td>
+                <button onclick="TE_TagGenerator.create('L_2')">New</button>
+            </td>
+        </tr>
+        <tr class="TE_TagGenerator_Location">
+            <td>Space</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L3_SELECT"></select></td>
+            <td>
+                <button onclick="TE_TagGenerator.create('L_3')">New</button>
+            </td>
+        </tr>
+        <tr class="TE_TagGenerator_Function">
+            <td>Functional System</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_F1_SELECT"></select></td>
+            <td>
+                <button onclick="TE_TagGenerator.create('F_1')">New</button>
+            </td>
+        </tr>
+        <tr class="TE_TagGenerator_Function">
+            <td>Technical System</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_F2_SELECT"></select></td>
+            <td>
+                <button onclick="TE_TagGenerator.create('F_2')">New</button>
+            </td>
+        </tr>
+        <tr class="TE_TagGenerator_Function">
+            <td>Functional Object</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_F3_SELECT"></select></td>
+            <td>
+                <button onclick="TE_TagGenerator.create('F_3')">New</button>
+            </td>
+        </tr>
+
+    </table>
+
+
+
+</div>
+
+<div id="TE_TagGenerator_81346TreePanel" style="margin-bottom: 10px;margin-left: 15px">
+    <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#Standardizer_filterClassesDialogDiv').dialog('close')">Cancel</button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.compareSource(null,true)">Compare</button>-->
+    <div id="TE_TagGenerator_searchAllDiv" style="height: 50px;margin-bottom: 10px"></div>
+
+    <div class="jstreeContainer" style="height:400px">
+        <div id="TE_TagGenerator_81346TreeDiv"></div>
+    </div>
+
+
+</div>
+
+</body>
+</html>

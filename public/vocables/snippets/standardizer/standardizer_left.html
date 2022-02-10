@@ -51,10 +51,24 @@
         </div>
     </div>
 
+</div>
+<div id="Standardizer_filterClassesDialogDiv"    style="margin-bottom: 10px;">
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#Standardizer_filterClassesDialogDiv').dialog('close')">Cancel</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.compareSource(null,true)">Compare</button>
+    <div class="jstreeContainer" >
+        <div id="Standardizer_filterClassesTree"></div>
+    </div>
+
 
 </div>
 
 <script>
+    $("#Standardizer_filterClassesDialogDiv").dialog({
+        autoOpen: false,
+        height: 650,
+        width: 300,
+        modal: false,
+    });
 
 
 </script>

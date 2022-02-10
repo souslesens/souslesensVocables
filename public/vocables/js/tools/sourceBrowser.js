@@ -127,8 +127,11 @@ var SourceBrowser = (function () {
 
 
                 var jsTreeOptions = options;
+                if(! options.contextMenu)
                 jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu()
-                jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
+                if (!options.selectTreeNodeFn)
+                    jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
+
                 jsTreeOptions.source = sourceLabel;
 
                 TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions)
@@ -264,14 +267,14 @@ var SourceBrowser = (function () {
                 }
 
             }
-        /*    items.toDataTable = {
-                label: "export to Table",
-                action: function (e) {// pb avec source
-                    Export.exportTeeToDataTable()
+            /*    items.toDataTable = {
+                    label: "export to Table",
+                    action: function (e) {// pb avec source
+                        Export.exportTeeToDataTable()
 
-                }
+                    }
 
-            }*/
+                }*/
 
             items.exportAllDescendants = {
                 label: "Export all descendants",
@@ -288,7 +291,7 @@ var SourceBrowser = (function () {
         self.exportAllDescendants = function () {
             var parentId = self.currentTreeNode.data.id
             var indexes = [self.currentTreeNode.data.source.toLowerCase()]
-            Export.exportAllDescendants(parentId,{},indexes)
+            Export.exportAllDescendants(parentId, {}, indexes)
         }
 
 
@@ -474,7 +477,7 @@ var SourceBrowser = (function () {
                                 var parentId = ""
                                 var parents = match.parents;//.split("|")
                                 var nodeId = ""
-                                if(! parents.forEach)
+                                if (!parents.forEach)
                                     return;
                                 parents.forEach(function (aClass, indexParent) {
                                     if (aClass == "")
@@ -1214,11 +1217,11 @@ var SourceBrowser = (function () {
                 result.forEach(function (item) {
                     str += "<tr class='infos_table'>"
 
-                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel?item.sourceClassLabel.value:Sparql_common.getLabelFromURI(item.sourceClass.value) + "</td>"
+                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value) + "</td>"
 
                     str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</td>"
 
-                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" +  item.targetClassLabel?item.targetClassLabel.value:Sparql_common.getLabelFromURI(item.targetClass.value)  + "</td>"
+                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" + item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value) + "</td>"
 
 
                     str += "</tr>"

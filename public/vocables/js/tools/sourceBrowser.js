@@ -315,10 +315,17 @@ var SourceBrowser = (function () {
                 }
                 if (options.beforeDrawingFn)
                     options.beforeDrawingFn(result)
-                TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {
+                var jsTreeOptions={
                     source: sourceLabel,
                     type: node.data.type
-                })
+                }
+                if(options.optionalData){
+
+                        jsTreeOptions.optionalData=options.optionalData
+
+                }
+                TreeController.drawOrUpdateTree(divId, result, node.id, "child1", jsTreeOptions)
+
                 $("#waitImg").css("display", "none");
 
             })

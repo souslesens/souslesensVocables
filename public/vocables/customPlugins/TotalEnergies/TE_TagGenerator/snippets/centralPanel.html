@@ -1,10 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<style>
+    .TagGenerator_displayDiv{
+        display:flex;
+       // flex-direction: row;
+        flex-wrap:wrap;
+        border: solid 1px #6e2500;
+        margin: 3px;
+        padding: 3px;
+        min-height: 50px;
+    }
+    .TagGenerator_selectedDisplayDiv{
+        border-width: 3px;
+    }
 
-</body>
-</html>
+    .TagGenerator_displayDivTitle {
+        margin-bottom: -15px;
+        background-color: #f2f4f8;
+        text-align: center;
+        max-width: 200px;
+        margin-top: 15px;
+        margin-left: 10px;
+        margin-right: 10px;
+        position: relative;
+        z-index: 10;
+    }
+
+
+</style>
+
+<div id="TagGenerator_infosDiv" style="width:100%; height:30px"></div>
+<div id="TagGenerator_displayDiv" style="width:100%; height:100vh"></div>

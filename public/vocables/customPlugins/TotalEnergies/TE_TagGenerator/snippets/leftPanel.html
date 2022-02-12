@@ -10,13 +10,17 @@
         }
 
         .TE_TagGenerator_Location {
-            padding:3px;
+
+            padding:5px;
+            margin: 5px;
             border:solid 1px black;
             background-color: #ebcff5;
         }
 
         .TE_TagGenerator_Function {
-            padding:3px;
+
+            padding:5px;
+            margin: 5px;
             border:solid 1px black;
             background-color: #f5dfb3;
         }
@@ -27,47 +31,36 @@
 
 <div  style="margin-bottom: 10px;margin-left: 30px">
     <table>
-        <tr class="TE_TagGenerator_Location">
-            <td>Construction Complex</td>
-            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L1_SELECT"></select></td>
-            <td>
-                <button onclick="TE_TagGenerator.create('L_1')">New</button>
-            </td>
-        </tr>
+
         <tr class="TE_TagGenerator_Location">
             <td>Construction Entity</td>
             <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L2_SELECT"></select></td>
-            <td>
-                <button onclick="TE_TagGenerator.create('L_2')">New</button>
-            </td>
+
+        </tr>
+        <tr class="TE_TagGenerator_Location">
+            <td>Construction Complex</td>
+            <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L1_SELECT"></select></td>
+
         </tr>
         <tr class="TE_TagGenerator_Location">
             <td>Space</td>
             <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_L3_SELECT"></select></td>
-            <td>
-                <button onclick="TE_TagGenerator.create('L_3')">New</button>
-            </td>
+
         </tr>
         <tr class="TE_TagGenerator_Function">
             <td>Functional System</td>
             <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_F1_SELECT"></select></td>
-            <td>
-                <button onclick="TE_TagGenerator.create('F_1')">New</button>
-            </td>
+
         </tr>
         <tr class="TE_TagGenerator_Function">
             <td>Technical System</td>
             <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_F2_SELECT"></select></td>
-            <td>
-                <button onclick="TE_TagGenerator.create('F_2')">New</button>
-            </td>
+
         </tr>
         <tr class="TE_TagGenerator_Function">
             <td>Functional Object</td>
             <td><select class="TE_TagGenerator_itemSelect" id="TE_TagGenerator_F3_SELECT"></select></td>
-            <td>
-                <button onclick="TE_TagGenerator.create('F_3')">New</button>
-            </td>
+
         </tr>
 
     </table>

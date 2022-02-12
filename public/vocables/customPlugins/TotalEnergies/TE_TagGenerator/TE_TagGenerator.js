@@ -1,6 +1,45 @@
 var TE_TagGenerator = (function () {
         var self = {}
         self.currentSource = "TSF-ISO-IEC-81346"
+        self.displayedDivsMap = {}
+        self.systemsMap = {
+
+
+            "TE_TagGenerator_L1_SELECT": {
+                uri: "http://data.total.com/resource/tsf/IEC_ISO_81346/construction_complexes",
+                color: "#d54df3",
+                level: 1
+            },
+            "TE_TagGenerator_L2_SELECT": {
+                uri: "http://data.total.com/resource/tsf/IEC_ISO_81346/space",
+                color: "#d54df3",
+                level: 2
+            },
+            "TE_TagGenerator_L3_SELECT": {
+                uri: "http://data.total.com/resource/tsf/IEC_ISO_81346/space",
+                color: "#d54df3",
+                level: 3
+            },
+            "TE_TagGenerator_F1_SELECT": {
+                uri: "http://data.total.com/resource/tsf/IEC_ISO_81346/functional_systems",
+                color: "#fab70e",
+                level: 4
+            },
+            "TE_TagGenerator_F2_SELECT": {
+                uri: "http://data.total.com/resource/tsf/IEC_ISO_81346/technical_systems",
+                color: "#fab70e",
+                level: 5
+            },
+            "TE_TagGenerator_F3_SELECT": {
+                uri: "http://data.total.com/resource/tsf/IEC_ISO_81346/object_functions",
+                color: "#fab70e",
+                level: 6
+            },
+
+
+        }
+
+        self.currentSystemType=-1
 
         self.onLoaded = function () {
 
@@ -13,14 +52,17 @@ var TE_TagGenerator = (function () {
 
                     MainController.currentSource = "TSF-ISO-IEC-81346"
                     $(".TE_TagGenerator_itemSelect").bind("change", function () {
-                        TE_TagGenerator.on81346TypeSelect($(this).val())
+                        TE_TagGenerator.on81346TypeSelect($(this).val(), $(this).attr("id"));
+                        $(this).val("")
                     })
-                    self.init81346Tree();
+                    //    self.init81346Tree();
                     self.init81346Types()
-                    Config.sources[self.currentSource].controller=Sparql_OWL
+                    Config.sources[self.currentSource].controller = Sparql_OWL
                 })
             })
-            //   $("#graphDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/centralPanel.html")
+        //    $("#graphDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/centralPanel.html")
+
+
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
             $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/rightPanel.html")
@@ -34,17 +76,17 @@ var TE_TagGenerator = (function () {
                 Sparql_generic.getNodeChildren(self.currentSource, null, parentClassId, 1, null, function (err, result) {
                     if (err)
                         return MainController.UI.message(err);
-                    var objs=[]
-                    result.forEach(function(item){
+                    var objs = []
+                    result.forEach(function (item) {
                         objs.push({
-                            id:item.child1.value,
-                            label:item.child1Label.value,
+                            id: item.child1.value,
+                            label: item.child1Label.value,
                         })
                     })
-                    objs.sort(function(a,b){
-                        return a.label-b.label;
+                    objs.sort(function (a, b) {
+                        return a.label - b.label;
                     })
-                    common.fillSelectOptions(selectId,objs,true,"label","id")
+                    common.fillSelectOptions(selectId, objs, true, "label", "id")
 
                 })
             }
@@ -55,7 +97,6 @@ var TE_TagGenerator = (function () {
             setTypeSelectOptions("TE_TagGenerator_F1_SELECT", "http://data.total.com/resource/tsf/IEC_ISO_81346/functional_systems")
             setTypeSelectOptions("TE_TagGenerator_F2_SELECT", "http://data.total.com/resource/tsf/IEC_ISO_81346/technical_systems")
             setTypeSelectOptions("TE_TagGenerator_F3_SELECT", "http://data.total.com/resource/tsf/IEC_ISO_81346/object_functions")
-
 
 
         }
@@ -98,20 +139,24 @@ var TE_TagGenerator = (function () {
 
         }
 
-        self.on81346TypeSelect = function (typeId) {
+        self.on81346TypeSelect = function (typeId, systemType) {
+            self.currentSystemType=self.systemsMap[systemType]
 
-            Sparql_OWL.getNodeChildren(self.currentSource,null,typeId,3,{},function(err, result){
-                if(err)
+            Sparql_OWL.getNodeChildren(self.currentSource, null, typeId, 3, {}, function (err, result) {
+                if (err)
                     return MainController.UI.message(err);
                 var options = {
                     selectTreeNodeFn: function (evt, obj) {
                         var node = obj.node
                         self.currentTreeNode = node
-                        SourceBrowser.openTreeNode("TE_TagGenerator_81346TreeDiv", self.currentSource, node)
+                        var options = {optionalData: {systemType: node.data.systemType}}
+                        SourceBrowser.openTreeNode("TE_TagGenerator_81346TreeDiv", self.currentSource, node, options)
                     },
-                    contextMenu: TE_TagGenerator.get81346ContextMenu()
+                    contextMenu: TE_TagGenerator.get81346ContextMenu(),
+                    optionalData: {systemType: systemType},
 
                 }
+
                 TreeController.drawOrUpdateTree("TE_TagGenerator_81346TreeDiv", result, "#", "child1", options)
             })
 
@@ -119,21 +164,162 @@ var TE_TagGenerator = (function () {
 
         self.addNode = function (node) {
 
-            var existingNodes = visjsGraph.getExistingIdsMap()
-            var visjsData = {nodes: [], edges: []}
-            visjsData.nodes.push({
-                id: node.data.id + "_" + common.getRandomHexaId(5),
-                label: node.data.label,
-                data: node.data,
-                shape: "box",
-                //  color:"ced"
-            })
-            if (visjsGraph.data && visjsGraph.data.nodes) {
-                visjsGraph.data.nodes.add(visjsData.nodes)
-                visjsGraph.data.edges.add(visjsData.edges)
-            } else {
-                Lineage_classes.drawNewGraph(visjsData)
+            if (true) {
+                node.data.level= self.currentSystemType.level
+
+                var existingNodes = visjsGraph.getExistingIdsMap()
+                var visjsData = {nodes: [], edges: []}
+                var visjsId= common.getRandomHexaId(10);
+                var node={
+                    id: visjsId,
+                    label: node.data.label,
+                    data: node.data,
+                    level:self.currentSystemType.level,
+                    shape: "square",
+                    size:10,
+                    color:self.currentSystemType.color
+                }
+                visjsData.nodes.push(node)
+
+               if (self.currentGraphNode){
+                   var deltaLevel=Math.abs(self.currentGraphNode.level-self.currentSystemType.level)
+                   if(deltaLevel==1 || deltaLevel==1) {
+                       visjsData.edges.push({
+                           id: common.getRandomHexaId(10),
+                           from: visjsId,
+                           to: self.currentGraphNode.id
+                       })
+                   }
+
+               }
+                self.currentGraphNode=node
+
+
+                if (visjsGraph.data && visjsGraph.data.nodes) {
+                    visjsGraph.data.nodes.add(visjsData.nodes)
+                    visjsGraph.data.edges.add(visjsData.edges)
+                } else {
+                   var options= {
+                       layoutHierarchical: {
+                           direction: "TD",
+                           sortMethod: "directed",
+                           levelSeparation: 50,
+                           nodeSpacing: 20,
+                           parentCentralization: true,
+                           edgeMinimization: true
+                       }
+                   }
+                   options.onclickFn=function(node){
+                       self.currentGraphNode=node
+                   }
+                   visjsGraph.draw("graphDiv",visjsData,options)
+                }
+                self.setSystemTypesSelectVisibility(self.currentSystemType.level) ;
             }
+
+            if (false) {
+                var id = node.data.id;
+                var label = node.data.label;
+                var divId = common.getRandomHexaId(10);
+                self.displayedDivsMap[divId] = node.data
+
+                var color = self.systemsMap[node.data.systemType].color
+
+                var html = "<div id='" + divId + "' >" +
+                    "<div class='TagGenerator_displayDivTitle' style='color:" + color + "'>" + node.data.label + "</div>" +
+                    "<div id='" + divId + "_rect'  class='TagGenerator_displayDiv' style='border-color:" + color + "' ></div>" +
+                    "</div>"
+
+                var containerDivId
+                if (!self.currentDisplayDivId)
+                    containerDivId = "TagGenerator_displayDiv"
+                else
+                    containerDivId = self.currentDisplayDivId
+
+                $("#"+containerDivId).append(html)
+
+
+                if (self.currentDisplayDivId) {
+                    var curentDivObj = self.displayedDivsMap[self.currentDisplayDivId]
+                    var currentDivIdLevel = self.systemsMap[curentDivObj.systemType].level
+                    if (currentDivIdLevel > self.systemsMap[node.data.systemType].level) {// include outside
+
+
+                        $("#" + self.currentDisplayDivId).wrapAll($("#" + divId + "_rect"));
+
+
+                    }
+                }
+
+                //   $("#" + containerDivId).append(html)
+
+                $("#" + divId + "_rect").bind("click", function () {
+                    var divId = $(this).attr("id")
+                    var divId2 = divId.replace("_rect", "")
+                    $("#TagGenerator_infosDiv").html(self.displayedDivsMap[divId2].label);
+                    $(".TagGenerator_displayDiv").removeClass("TagGenerator_selectedDisplayDiv")
+                    $(this).addClass("TagGenerator_selectedDisplayDiv")
+                    self.currentDisplayDivId = divId2;
+
+                    event.stopPropagation();
+                })
+
+                document.getElementById(divId + "_rect").click();
+                self.setSystemTypesSelectVisibility()
+
+
+                ;
+
+
+            }
+
+        }
+
+        self.setSystemTypesSelectVisibility = function (level) {
+
+            var levels=[level-1,level,level+1]
+            for (var key in self.systemsMap) {
+                if (levels.indexOf(self.systemsMap[key].level)<0)
+                    $("#" + key).css("display", "none")
+                else
+                    $("#" + key).css("display", "block")
+            }
+        }
+
+
+
+        self.setSystemTypesSelectVisibilityOld = function () {
+            var currentSystemType = 10
+            var currentSystemType = null;
+            if (self.currentDisplayDivId)
+                currentSystemType = self.displayedDivsMap[self.currentDisplayDivId].systemType
+            if (currentSystemType) {
+                currentSystemType = self.systemsMap[currentSystemType].level
+            }
+            for (var key in self.systemsMap) {
+                if (self.systemsMap[key].level > currentSystemType + 1)
+                    $("#" + key).css("display", "none")
+                else
+                    $("#" + key).css("display", "block")
+            }
+        }
+
+
+        self.deleteSelectedObject = function () {
+            if (self.currentDisplayDivId){
+                delete  self.displayedDivsMap[self.currentDisplayDivId]
+                $("#"+self.currentDisplayDivId).remove();
+                self.currentDisplayDivId=null
+            }
+
+        }
+        self.clearAll = function () {
+            visjsGraph.clearGraph()
+            self.displayedDivsMap={}
+            $("#TagGenerator_displayDiv").html("");
+            self.currentDisplayDivId=null;
+        }
+        self.generateTag = function () {
 
         }
 

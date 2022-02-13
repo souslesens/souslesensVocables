@@ -44,8 +44,7 @@ var visjsGraph = (function () {
         self.currentContext = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
-        if (_options.simulationTimeOut)
-            self.simulationTimeOut = _options.simulationTimeOut
+
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
 
@@ -81,6 +80,13 @@ var visjsGraph = (function () {
             layout: {improvedLayout: false}
 
         };
+
+        for(var key in _options){
+            options[key]=_options[key]
+        }
+
+      /*  if (_options.simulationTimeOut)
+            self.simulationTimeOut = _options.simulationTimeOut
         if (_options.nodes) {
             options.nodes = _options.nodes
         }
@@ -88,15 +94,7 @@ var visjsGraph = (function () {
             options.edges = _options.edges
         }
 
-        if (_options.layoutHierarchical) {
 
-            options.layout = {
-                hierarchical: _options.layoutHierarchical
-            }
-
-        } else {
-            $("#visjsGraph_layoutSelect").val("")
-        }
         if (_options.groups) {
             options.groups = _options.groups
         }
@@ -110,6 +108,15 @@ var visjsGraph = (function () {
         }
         if (_options.physics) {
             options.physics = _options.physics
+        }*/
+        if (_options.layoutHierarchical) {
+
+            options.layout = {
+                hierarchical: _options.layoutHierarchical
+            }
+
+        } else {
+            $("#visjsGraph_layoutSelect").val("")
         }
 
         self.globalOptions = options

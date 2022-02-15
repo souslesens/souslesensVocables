@@ -196,6 +196,8 @@ var util = {
             str = str.replace(/ /gm, "_");
             str = str.replace(/\-/gm, "_");
             str = str.replace(/:/gm, "_");
+
+            str=encodeURIComponent(str)
         }
 
         return str;

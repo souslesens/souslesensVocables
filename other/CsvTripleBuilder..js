@@ -166,8 +166,11 @@ var processor = {
                                     //get value for Subject
                                     {
                                         if (item.s_type == "fixed") subjectStr = item.s;
+
                                         else if (typeof item.s === "function") subjectStr = item.s(line, item);
-                                        else if (mapping.transform && mapping.transform[item.s]) subjectStr = mapping.transform[item.s](line[item.s], "s", item.p,line);
+                                        else if (mapping.transform && line[item.s] && mapping.transform[item.s]){
+                                            subjectStr = mapping.transform[item.s](line[item.s], "s", item.p,line);
+                                        }
                                         else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
                                         else if (item.lookup_S) {
                                             subjectStr = getLookupValue(item.lookup_S, line[item.s]);
@@ -175,7 +178,8 @@ var processor = {
                                                 console.log(line[item.s]);
                                                 return;
                                             }
-                                        } else subjectStr = line[item.s];
+                                        } else
+                                            subjectStr = line[item.s];
 
                                         if (!subjectStr) {
                                             console.log(line[item.s]);
@@ -185,10 +189,19 @@ var processor = {
 
                                     //get value for Object
                                     {
-                                        if (item.p == "rdf:type") var x = 3;
+                                     /*   if(line.system!="Component system 3")
+                                          return ;// console.log(line.code1+" "+line.code2+"  "+ line.code3)
+                                        if(line.system=="Component system 3" && line.code2)
+                                            var x=3
+                                        if(line.system=="Component system 3" && line.code3)
+                                            var x=3*/
+
+
                                         if (item.o_type == "fixed") objectStr = item.o;
                                         if (typeof item.o === "function") objectStr = item.o(line, item);
-                                        else if (mapping.transform && mapping.transform[item.o]) objectStr = mapping.transform[item.o](line[item.o], "o", item.p,line);
+                                        else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
+                                            objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line);
+                                        }
                                         else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
                                         else if (item.lookup_O) {
                                             objectStr = getLookupValue(item.lookup_O, objectStr);
@@ -288,6 +301,7 @@ var processor = {
                                         else if (typeof item.p === "function") {
                                             propertyStr = item.p(line, line);
                                         }
+
                                         if (subjectStr && objectStr) {
                                             // return console.log("missing type " + item.p)
                                             if (!existingNodes[subjectStr + "_" + objectStr]) {

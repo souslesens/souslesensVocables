@@ -54,11 +54,11 @@ var SourceBrowser = (function () {
             else
                 source = MainController.currentSource// coming from  specific tool current surce
             self.currentTreeNode = obj.node;
-            if (self.propertiesMap.event.ctrlKey)
-                self.copyNode(self.propertiesMap.event);
+            if (obj.event.ctrlKey)
+                self.copyNode(self.currentTreeNode);
 
 
-            if (true || self.propertiesMap.event.ctrlKey) {
+            if (true || obj.event.ctrlKey) {
                 self.editThesaurusConceptInfos(source, obj.node)
             }
             {

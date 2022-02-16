@@ -133,14 +133,14 @@ var SearchUtil = (function () {
                                                 parents: toHit._source.parents
                                             })
                                             var parentsArray = toHit._source.parents;
-                                            if (Array.isArray(parentsArray) ) {//} && toHit._source.parents.split) {
-                                              //.split("|")
+                                            if (Array.isArray(parentsArray)) {//} && toHit._source.parents.split) {
+                                                //.split("|")
                                                 parentsArray.forEach(function (parent, indexParent) {
                                                     if (indexParent > 0 && !parentsMap[parent])
                                                         parentsMap[parent] = {}
                                                 })
-                                            }else{
-                                                var x=3
+                                            } else {
+                                                var x = 3
                                             }
 
                                         })
@@ -340,32 +340,6 @@ var SearchUtil = (function () {
 
 
 
-           var  x= {
-               "query": {
-                   "bool": {
-                       "must": [
-                           {
-                               "term": {
-                                   "id": "/var/montageJungle/Photo/FONDS/0003_val_d'oise_70-81/002/002/",
-
-                               }
-                           },
-                           {
-                               "term": {
-                                   "id": "0003-002-002_001.jpg",
-
-                               }
-                           },
-
-                       ]
-                   }
-               }
-           }
-
-
-
-
-
             self.entitiesMap = {}
             var bulQueryStr = ""
             var slices = common.array.slice(words, 100)
@@ -374,7 +348,7 @@ var SearchUtil = (function () {
             async.eachSeries(slices, function (wordSlice, callbackEach) {
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
-                    if(!word)
+                    if (!word)
                         return;
                     var wordQuery = self.getWordBulkQuery(word, mode, indexes)
                     bulQueryStr += wordQuery;
@@ -580,7 +554,7 @@ var SearchUtil = (function () {
                             self.listSourcesAllLabels(indexes[0], offset, size, function (err, hits) {
                                 if (err)
                                     return callbackWhilst(err);
-                             //
+                                //
                                 resultSize = hits.length
                                 offset += size
                                 hits.forEach(function (hit) {
@@ -593,7 +567,7 @@ var SearchUtil = (function () {
                             })
 
                         }, function (err) {
-                                return callbackSeries(err)
+                            return callbackSeries(err)
 
                         })
                 }

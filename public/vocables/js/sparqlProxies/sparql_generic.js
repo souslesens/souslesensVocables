@@ -993,6 +993,7 @@ WHERE {
                      //   "  ?concept " + parentType + "+ ?anyParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
                         "  ?concept " + parentType + " ?firstParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
                         "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
+                        "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. " +
 
                         "?concept rdf:type " + conceptType + ". "
                  //   query += "  FILTER (!isBlank(?parent)) "
@@ -1045,6 +1046,9 @@ WHERE {
                         if (item.skosLabel)
                             if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0)
                                 skosLabelsMap[item.concept.value].push(item.skosLabel.value)
+                        if (item.code)
+                            if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0)
+                                skosLabelsMap[item.concept.value].push(item.code.value)
 
                     })
 

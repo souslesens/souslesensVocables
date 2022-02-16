@@ -1057,7 +1057,7 @@ var SourceBrowser = (function () {
                         var valuesStr = ""
                         values.forEach(function (value, index) {
                             var optionalStr = ""
-                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.currentSource].editable > -1) {
+                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1) {
                                 var propUri = self.propertiesMap.properties[key].propUri
                                 optionalStr = "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
                                     " onclick=\"SourceBrowser.deletePropertyValue('" + propUri + "','" + value + "')\">X</button>"

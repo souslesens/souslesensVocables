@@ -17,17 +17,17 @@ mappingsMap = {
                 if (role == "s" && (line.code2 || line.code3))
                     return ""
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code1
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" +util.formatStringForTriple(line.aspect, true) + util.formatStringForTriple(line.system, true) + "/" + line.code1
             }
             , code2: function (value, role, prop, line) {
 
-                if (prop == "<http://souslesens.org/resource/vocabulary/hasCode> " && role == "o")
+                if (prop == "<http://souslesens.org/resource/vocabulary/hasCode>" && role == "o")
                     return value;
 
                 if (role == "s" && line.code3)
                     return ""
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code2
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) +util.formatStringForTriple(line.system, true) + "/" + line.code2
             }
             ,
             code3: function (value, role, prop, line) {
@@ -35,7 +35,12 @@ mappingsMap = {
                 if (prop == "<http://souslesens.org/resource/vocabulary/hasCode>" && role == "o")
                     return value;
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code3
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) +util.formatStringForTriple(line.system, true) + "/" + line.code3
+            },
+
+            system: function (value, role, prop, line) {
+
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) + "/" + util.formatStringForTriple(line.system, true)
             }
 
         },
@@ -108,7 +113,7 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code1",
-                isString: true
+
             },
 
 
@@ -148,7 +153,7 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code2",
-                isString: true
+
             },
 
 
@@ -305,7 +310,7 @@ mappingsMap = {
 
 
 var mappingNames = ["systems", "examples"];
-var mappingNames = ["examples"];
+var mappingNames = ["systems"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

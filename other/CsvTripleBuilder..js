@@ -154,7 +154,7 @@ var processor = {
 
                             var emptyMappings = 0;
                             lines.forEach(function (line, indexLine) {
-                                if (false && indexLine > 2) return;
+
                                 var hasDirectSuperClass = false;
                                 var subjectStr = null;
                                 var objectStr = null;
@@ -182,7 +182,7 @@ var processor = {
                                             subjectStr = line[item.s];
 
                                         if (!subjectStr) {
-                                            console.log(line[item.s]);
+                                           ;// console.log(line[item.s]);
                                             return;
                                         }
                                     }
@@ -212,7 +212,7 @@ var processor = {
                                         } else objectStr = line[item.o];
 
                                         if (!objectStr) {
-                                            console.log(line[item.o]);
+                                          ; // console.log(line[item.o]);
                                             return;
                                         }
                                     }
@@ -283,13 +283,13 @@ var processor = {
                                         });
                                         objectStr = blankNode;
 
-                                        console.log(
+                                      /*  console.log(
                                             JSON.stringify({
                                                 s: subjectStr,
                                                 p: "rdfs:subClassOf",
                                                 o: blankNode,
                                             })
-                                        );
+                                        );*/
                                         return;
                                     }
 

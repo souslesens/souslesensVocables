@@ -1,27 +1,56 @@
+<style>
+
+    #TagGenerator_graphHOverDiv {
+        background-color:#a0caef;
+        border:solid 1px black;
+        width:250px;
+       /// font-weight: bold;
+    }
+
+
+</style>
+
+
+
+
+
 
 <table>
+
+    <tr>
+
+        <td>
+            Graphs
+        </td>
+    <tr>
+</tr>
+
+        <td>
+         <select id="TE_TagGenerator_savedGraphsSelect" onchange="TE_TagGenerator.loadGraph($(this).val())"></select>
+            <!--&nbsp;<button onclick="TE_TagGenerator.loadGraph()">Load</button>-->
+        </td>
+
+        <td>
+            <button onclick="TE_TagGenerator.saveGraph()">Save</button>
+        </td>
+    </tr>
+
+
     <tr>
 
         <td>
             <button onclick="TE_TagGenerator.deleteSelectedObject()">Delete Selected</button>
         </td>
-    </tr>
-    <tr >
 
         <td>
             <button onclick="TE_TagGenerator.clearAll()">Clear All</button>
         </td>
     </tr>
 
-    <tr >
 
-        <td>
-            <button onclick="TE_TagGenerator.generateTag()">Generate Tag</button>
-        </td>
-    </tr>
 
 </table>
 <br>
-<div id="TagGenerator_graphHOverDiv"></div>
-
+<div id="TagGenerator_graphHOverDiv" style=""></div>
+<br>
 <div id="TagGenerator_NodeInfosDiv"></div>

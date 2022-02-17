@@ -515,7 +515,7 @@ var TE_14224_browser = (function () {
                     visjsData.edges = common.array.unduplicateArray(visjsData.edges, "id")
 
 
-                    if (visjsGraph.data && visjsGraph.data.nodes) {
+                    if(visjsGraph.isGraphNotEmpty()){
                         visjsGraph.data.nodes.add(visjsData.nodes)
                         visjsGraph.data.edges.add(visjsData.edges)
                     } else {
@@ -620,7 +620,7 @@ var TE_14224_browser = (function () {
             if (callback)
                 return callback(null, visjsData)
 
-            if (visjsGraph.data && visjsGraph.data.nodes) {
+            if(visjsGraph.isGraphNotEmpty()){
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
             } else {
@@ -848,7 +848,7 @@ var TE_14224_browser = (function () {
                 }
 
 
-                if (visjsGraph.data && visjsGraph.data.nodes) {
+                if(visjsGraph.isGraphNotEmpty()){
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
                 } else {
@@ -1325,7 +1325,7 @@ var TE_14224_browser = (function () {
                             visjsData.nodes = common.array.unduplicateArray(visjsData.nodes, "id")
                             visjsData.edges = common.array.unduplicateArray(visjsData.edges, "id")
 
-                            if (visjsGraph.data && visjsGraph.data.nodes) {
+                            if(visjsGraph.isGraphNotEmpty()){
                                 visjsGraph.data.nodes.add(visjsData.nodes)
                                 visjsGraph.data.edges.add(visjsData.edges)
                             } else {
@@ -1495,7 +1495,7 @@ var TE_14224_browser = (function () {
                         if (callback)
                             return callback(null, visjsData);
                         else {
-                            if (visjsGraph.data && visjsGraph.data.nodes) {
+                            if(visjsGraph.isGraphNotEmpty()){
                                 visjsGraph.data.nodes.add(visjsData.nodes)
                                 visjsGraph.data.edges.add(visjsData.edges)
                             } else {

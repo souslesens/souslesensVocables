@@ -209,7 +209,7 @@ var TE_TagGenerator = (function () {
                 self.currentGraphNode = node
 
 
-                if (visjsGraph.data && visjsGraph.data.nodes) {
+                if(visjsGraph.isGraphNotEmpty()){
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
                     $("#graphDiv").focus()

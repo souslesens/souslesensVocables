@@ -1009,7 +1009,7 @@ var Lineage_classes = (function () {
                 })
                 //console.log(JSON.stringify(distinctProps, null, 2))
 
-                if (visjsGraph.data && visjsGraph.data.nodes) {
+                if(visjsGraph.isGraphNotEmpty()){
                     visjsGraph.data.nodes.update(visjsData.nodes)
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {
@@ -1098,7 +1098,7 @@ var Lineage_classes = (function () {
 
                         })
 
-                        if (visjsGraph.data && visjsGraph.data.nodes) {
+                        if(visjsGraph.isGraphNotEmpty()){
                             visjsGraph.data.nodes.add(visjsData.nodes)
                             visjsGraph.data.edges.add(visjsData.edges)
                         } else {

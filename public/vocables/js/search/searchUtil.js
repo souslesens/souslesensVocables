@@ -62,7 +62,7 @@ var SearchUtil = (function () {
                                     return callbackSeries()
                                 }
 
-                                self.listSourcesAllLabels(fromSource.toLowerCase(), offset, size, function (err, hits) {
+                                self.getSourceLabels(fromSource.toLowerCase(), null, offset, size, function (err, hits) {
                                     if (err)
                                         return callbackWhilst(err)
                                     resultSize = hits.length
@@ -209,13 +209,23 @@ var SearchUtil = (function () {
         }
 
 
-        self.listSourcesAllLabels = function (index, offset, size, callback) {
+        self.getSourceLabels = function (index, ids, offset, size, callback) {
             if (!offset)
                 offset = 0
             if (!size)
                 size = 1000
+            var queryObj
+            if (ids) {
+                size = ids.length + 10
+                queryObj = {
+                    "terms": {
+                        "id.keyword": ids,
 
-            var queryObj = {"match_all": {}}
+                    }
+                }
+            } else {
+                queryObj = {"match_all": {}}
+            }
             var query = {
                 "query": queryObj,
                 "from": offset,
@@ -285,15 +295,7 @@ var SearchUtil = (function () {
                                         }
                                     }
                                 },
-                                {
-                                    "wildcard": {
-                                        "label": {
-                                            "value": word,
-                                            "boost": 1.0,
-                                            "rewrite": "constant_score"
-                                        }
-                                    }
-                                }
+
                             ]
                         }
                     }
@@ -336,8 +338,6 @@ var SearchUtil = (function () {
                 return str;
 
             }
-
-
 
 
             self.entitiesMap = {}
@@ -551,7 +551,7 @@ var SearchUtil = (function () {
 
                         function (callbackWhilst) {
 
-                            self.listSourcesAllLabels(indexes[0], offset, size, function (err, hits) {
+                            self.getSourceLabels(indexes[0], null, offset, size, function (err, hits) {
                                 if (err)
                                     return callbackWhilst(err);
                                 //

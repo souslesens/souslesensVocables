@@ -37,6 +37,12 @@
 
 
     <tr>
+        <td>
+            show <select onchange="TE_TagGenerator.switchLabelsAndCodesInGraph($(this).val())">
+            <option>codes</option>
+            <option>labels</option>
+        </select>
+        </td>
 
         <td>
             <button onclick="TE_TagGenerator.deleteSelectedObject()">Delete Selected</button>

@@ -79,22 +79,23 @@ var TE_TagGenerator = (function () {
 
 
             $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/leftPanel.html", function () {
-                $("#TE_TagGenerator_searchAllDiv").load("snippets/searchAll.html", function () {
-                    $("#GenericTools_searchInAllSources").prop("checked", false)
-                    $("#GenericTools_searchInAllSources").prop("checked", false)
-                    $(".GenericTools_searchAllOptional").css("display", "none")
+                //  $("#TE_TagGenerator_searchAllDiv").load("snippets/searchAll.html", function () {
+                $("#GenericTools_searchInAllSources").prop("checked", false)
+                $("#GenericTools_searchInAllSources").prop("checked", false)
+                $(".GenericTools_searchAllOptional").css("display", "none")
 
-                    MainController.currentSource = self.currentSource
-                    $(".TE_TagGenerator_itemSelect").bind("change", function () {
-                        TE_TagGenerator.on81346TypeSelect($(this).val(), $(this).attr("id"));
-                        $(this).val("")
-                    })
-                    //  self.initSytemsTree();
-                    self.initSytemsSelect()
-                    Config.sources[self.currentSource].controller = Sparql_OWL
-                    visjsGraph.clearGraph()
-                    self.listSavedGraphs()
+                MainController.currentSource = self.currentSource
+                $(".TE_TagGenerator_itemSelect").bind("change", function () {
+                    TE_TagGenerator.on81346TypeSelect($(this).val(), $(this).attr("id"));
+                    $(this).val("")
                 })
+                //  self.initSytemsTree();
+                self.initSytemsSelect()
+                Config.sources[self.currentSource].controller = Sparql_OWL
+                visjsGraph.clearGraph()
+                $("#graphDiv").css("width", "800px")
+                self.listSavedGraphs()
+                // })
             })
             //    $("#graphDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/centralPanel.html")
 
@@ -187,28 +188,32 @@ var TE_TagGenerator = (function () {
                     return MainController.UI.message(err);
 
 
-                var options = {
-                    selectTreeNodeFn: function (evt, obj) {
-                        if (obj.event.ctrlKey) {
-                            return self.addNode(obj.node)
-                        }
-                        var node = obj.node
-                        self.currentTreeNode = node
-                        var options = {optionalData: {systemType: node.data.systemType}}
-                        SourceBrowser.openTreeNode("TE_TagGenerator_81346TreeDiv", self.currentSource, node, options)
-                        self.setTreeSystemNodesInfos(obj.node.id)
-
-                    },
-                    contextMenu: TE_TagGenerator.getSystemsTreeContextMenu(),
-                    optionalData: {system: "concept"},
-
-                }
+                var options = self.getJstreeOptions()
                 TreeController.drawOrUpdateTree("TE_TagGenerator_81346TreeDiv", result, "#", "child1", options)
 
 
                 self.setTreeSystemNodesInfos()
             })
 
+        }
+        self.getJstreeOptions = function () {
+            var options = {
+                selectTreeNodeFn: function (evt, obj) {
+                    if (obj.event.ctrlKey) {
+                        return self.addNode(obj.node)
+                    }
+                    var node = obj.node
+                    self.currentTreeNode = node
+                    var options = {optionalData: {systemType: node.data.systemType}}
+                    SourceBrowser.openTreeNode("TE_TagGenerator_81346TreeDiv", self.currentSource, node, options)
+                    self.setTreeSystemNodesInfos(obj.node.id)
+
+                },
+                contextMenu: TE_TagGenerator.getSystemsTreeContextMenu(),
+                optionalData: {system: "concept"},
+
+            }
+            return options
         }
 
         self.addNode = function (node) {
@@ -226,10 +231,11 @@ var TE_TagGenerator = (function () {
 
                 if (!self.objectsMap[node.data.id]) {
                     self.objectsMap[node.data.id] = {counter: 0, items: []}
-                    var counter = self.objectsMap[node.data.id].counter + 1
-                    self.objectsMap[node.data.id].counter = counter;
-
                 }
+                var counter = self.objectsMap[node.data.id].counter + 1
+                self.objectsMap[node.data.id].counter = counter;
+
+
                 node.data.number = counter
 
                 var existingNodes = visjsGraph.getExistingIdsMap()
@@ -239,9 +245,10 @@ var TE_TagGenerator = (function () {
                 node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
                 node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example
                 node.data.code = code
+                node.data.number = counter
                 var node = {
                     id: visjsId,
-                    label: code,
+                    label: code + counter,
                     data: node.data,
                     level: level,
                     shape: "square",
@@ -291,6 +298,14 @@ var TE_TagGenerator = (function () {
                         },
                         "minVelocity": 0.75,
                         "solver": "hierarchicalRepulsion"
+                    },
+                    edges: {
+                        smooth: {
+                            type: "cubicBezier",
+                            forceDirection: "verical",
+
+                            roundness: 0.4,
+                        }
                     }
                 }
                 options.onclickFn = function (node, point, options) {
@@ -400,13 +415,14 @@ var TE_TagGenerator = (function () {
             var nodeIds = []
             if (edges.length < 1)
                 return {
-                    locationTag: "+" + targetNode.data.code,
-                    functionTag: "=" + targetNode.data.code
+                    locationTag: "-" + targetNode.data.code + targetNode.data.number,
+                    functionTag: "-" + targetNode.data.code + targetNode.data.number
                 }
 
 
             edges.forEach(function (edge) {
                 if (edge.from == targetNode.id || edge.to == targetNode.id)
+
                     if (nodeIds.indexOf(edge.from) < 0)
                         nodeIds.push(edge.from)
                 if (nodeIds.indexOf(edge.to) < 0)
@@ -428,45 +444,34 @@ var TE_TagGenerator = (function () {
 
             var bulQueryStr = ""
             var header = {}
-            /*   nodes.forEach(function (node) {
-                   var query = {
-                       "query": {
-                           "term": {
-                               "id.keyword": node.data.id,
-                           }
-                       }
-                   }
-                   bulQueryStr += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-               })
-
-               ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
-                   if (err)
-                       return MainController.UI.message(err)
-
-                   result.forEach(function (item) {
-
-                   })
-               })*/
 
 
-            var locationTag = "+"
-            var functionTag = "="
+            var locationTag = ""
+            var functionTag = ""
             nodes.forEach(function (node) {
+                if (node.data.number != targetNode.data.number)
+                    return;
 
                 if (node.data.level > targetNode.data.level)
                     return;
                 if (node.data.aspect == "Component") {
-                    locationTag += node.data.code + "."
-                    functionTag += node.data.code + "."
+                    locationTag += "-" + node.data.code + node.data.number
+                    functionTag += "-" + node.data.code + node.data.number
                 } else {
 
-                    if (node.data.aspect != targetNode.data.aspect && targetNode.data.aspect!="Component")
+                    if (node.data.aspect != targetNode.data.aspect && targetNode.data.aspect != "Component")
                         return;
 
-                    if (node.data.aspect == "Location" || node.data.aspect == "Construction work")
-                        locationTag += node.data.code + "."
-                    if (node.data.aspect == "Function")
-                        functionTag += node.data.code + "."
+                    if (node.data.aspect == "Location" || node.data.aspect == "Construction work") {
+                        // if(locationTag!="")
+                        locationTag += "+"
+                        locationTag += node.data.code + node.data.number
+                    }
+                    if (node.data.aspect == "Function") {
+                        // if(functionTag!="")
+                        functionTag += "="
+                        functionTag += node.data.code + node.data.number
+                    }
                 }
             })
 
@@ -506,12 +511,12 @@ var TE_TagGenerator = (function () {
                         }
                     }
                 }
-                edge.arrows = {
-                    to: {
-                        enabled: true,
-                        type: Lineage_classes.defaultEdgeArrowType,
-                        scaleFactor: 0.5
-                    },
+
+                edge.smooth = {
+                    type: "cubicBezier",
+                    forceDirection: "verical",
+
+                    roundness: 0.4,
                 }
 
                 if (relationType) {
@@ -605,7 +610,7 @@ var TE_TagGenerator = (function () {
         }
         self.loadGraph = function (graphName) {
             visjsGraph.clearGraph()
-            self.addToGraph({nodes: [{id: "graphName", "label": graphName, level: 0,shape:"box"}], edges: []})
+            self.addToGraph({nodes: [{id: "graphName", "label": graphName, level: 0, shape: "box"}], edges: []})
             visjsGraph.loadGraph(graphName, true)
         }
 
@@ -623,6 +628,129 @@ var TE_TagGenerator = (function () {
         }
 
 
+        self.searchInCurrentSystem = function (word) {
+            var matchingHits
+            var parentIdsMap = {}
+            async.series([
+                    function (callbackSeries) {
+                        var queryObj = {
+                            query: {
+                                "bool": {
+                                    "must": [
+                                        {
+                                            "term": {
+                                                "parents.keyword": self.currentSystem,
+
+                                            }
+                                        },
+                                        {
+                                            "wildcard": {
+                                                "label": {
+                                                    "value": word,
+                                                    "boost": 1.0,
+                                                    "rewrite": "constant_score"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                        ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
+                            if (err)
+                                MainController.UI.message(err)
+                            matchingHits = result.hits.hits
+                            if (matchingHits.length == 0)
+                                return callbackSeries("no result")
+                            return callbackSeries();
+
+                        })
+                    },
+                    //get parents
+                    function (callbackSeries) {
+                        var parentIds = []
+                        matchingHits.forEach(function (hit) {
+                            hit._source.parents.forEach(function (item, indexParent) {
+
+
+                                if (parentIds.indexOf(item) < 0)
+                                    parentIds.push(item)
+                            })
+                        })
+                        SearchUtil.getSourceLabels(self.currentSource.toLowerCase(), parentIds, null, null, function (err, hits) {
+                            if (err)
+                                return callbackSeries(err)
+                            hits.forEach(function (hit) {
+                                parentIdsMap[hit._source.id] = hit._source.label
+                            })
+                            callbackSeries()
+                        })
+                    },
+                    //set tree
+                    function (callbackSeries) {
+
+                        var jstreeData = []
+                        var existingNodes = {}
+
+                        matchingHits.forEach(function (hit) {
+                            var parent
+                            hit._source.parents.forEach(function (item, indexParent) {
+                                if (indexParent == 0) {
+                                    return;
+                                }
+
+                                if (indexParent == 1)
+                                    parent = "#"
+                                else
+                                    parent = hit._source.parents[indexParent - 1]
+
+                                if (!existingNodes[item]) {
+                                    existingNodes[item] = 1
+                                    var label = parentIdsMap[item]
+                                    jstreeData.push({
+                                        id: item,
+                                        text: label,
+                                        parent: parent,
+                                        data: {
+                                            id: item,
+                                            label: label,
+                                            source:self.currentSource
+                                        }
+                                    })
+                                }
+                            })
+                            jstreeData.push({
+                                id: hit._source.id,
+                                text: hit._source.label,
+                                parent: parent,
+                                data: {
+                                    id: hit._source.id,
+                                    label: hit._source.label,
+                                    source:self.currentSource
+                                }
+                            })
+
+                        })
+                        var options = self.getJstreeOptions()
+                        options.openAll = true;
+                        common.jstree.loadJsTree("TE_TagGenerator_81346TreeDiv", jstreeData, options)
+
+                    }
+                ],
+
+                function (err) {
+                    if (err)
+                        return MainController.UI.message(err)
+
+                })
+        }
+
+        self.switchLabelsAndCodesInGraph=function(value){
+
+        }
+
+
         return self;
     }
-)()
+)
+()

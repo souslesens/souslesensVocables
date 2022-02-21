@@ -501,8 +501,14 @@ var MainController = (function () {
 
             } else {//close->open (if not allready opened)
                 if (currentCentralPanelWidth != self.UI.initialGraphDivWitdh) {
+                   /* $("#leftPanelDiv").css("width", "20VW")
+                    $("#rightPanelDiv").css("width", "20VW")
+                    $("#centralPanelDiv").css("width", "60VW")
+                    $("#graphDiv").css("width", "60VW")
+ return*/
 
                     $("#rightPanelDiv").css("display", "flex")
+
                     $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
                     $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
                     setTimeout(function () {

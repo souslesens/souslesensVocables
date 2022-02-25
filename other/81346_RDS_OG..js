@@ -17,7 +17,7 @@ mappingsMap = {
                 if (role == "s" && (line.code2 || line.code3))
                     return ""
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" +util.formatStringForTriple(line.aspect, true) + util.formatStringForTriple(line.system, true) + "/" + line.code1
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" +util.formatStringForTriple(line.aspect, true) +"/"+ util.formatStringForTriple(line.system, true) + "/" + line.code1
             }
             , code2: function (value, role, prop, line) {
 
@@ -27,7 +27,7 @@ mappingsMap = {
                 if (role == "s" && line.code3)
                     return ""
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) +util.formatStringForTriple(line.system, true) + "/" + line.code2
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true)  +"/"+util.formatStringForTriple(line.system, true) + "/" + line.code2
             }
             ,
             code3: function (value, role, prop, line) {
@@ -35,12 +35,12 @@ mappingsMap = {
                 if (prop == "<http://souslesens.org/resource/vocabulary/hasCode>" && role == "o")
                     return value;
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) +util.formatStringForTriple(line.system, true) + "/" + line.code3
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true)  +"/"+util.formatStringForTriple(line.system, true) + "/" + line.code3
             },
 
             system: function (value, role, prop, line) {
 
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) + "/" + util.formatStringForTriple(line.system, true)
+                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true)  + "/" + util.formatStringForTriple(line.system, true)
             }
 
         },
@@ -216,6 +216,7 @@ mappingsMap = {
                                 code1: line.code1,
                                 code2: line.code2,
                                 code3: line.code3,
+                                aspect: line.aspect,
                                 system: line.system,
                                 example: example
                             })
@@ -233,43 +234,6 @@ mappingsMap = {
 
         ,
         transform: {
-            code1: function (value, role, prop, line) {
-                if (prop == "<http://souslesens.org/resource/vocabulary/hasCode>" && role == "o")
-                    return value;
-
-                if (role == "s" && (line.code2 || line.code3))
-                    return ""
-
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code1
-            }
-            , code2: function (value, role, prop, line) {
-
-                if (prop == "<http://souslesens.org/resource/vocabulary/hasCode> " && role == "o")
-                    return value;
-
-                if (role == "s" && line.code3)
-                    return ""
-
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code2
-            }
-            ,
-            code3: function (value, role, prop, line) {
-
-                if (prop == "<http://souslesens.org/resource/vocabulary/hasCode>" && role == "o")
-                    return value;
-
-                return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code3
-            }
-
-            ,
-            example: function (value, role, prop, line) {
-                if (role == "s") {
-                    return "http://data.total.com/resource/tsf/RDS_OG_81346/exampleTerm/" + util.formatStringForTriple(value, true)
-                } else {
-                    return value;
-                }
-
-            }
 
         }
         ,
@@ -279,11 +243,14 @@ mappingsMap = {
             {
                 s: "example", p: "<http://www.w3.org/2004/02/skos/core#member>", o: function (line, mapping) {
                     if (line.code3)
-                        return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code3;
+                        return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true)  +"/"+util.formatStringForTriple(line.system, true) + "/" + line.code3
+
                     else if (line.code2)
-                        return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code2;
+                        return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true)  +"/"+util.formatStringForTriple(line.system, true) + "/" + line.code2
+
                     else if (line.code1)
-                        return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code1;
+                        return "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true)  +"/"+util.formatStringForTriple(line.system, true) + "/" + line.code1
+
                     return null;
 
                 }
@@ -310,7 +277,7 @@ mappingsMap = {
 
 
 var mappingNames = ["systems", "examples"];
-var mappingNames = ["systems"];
+//var mappingNames = ["examples"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);

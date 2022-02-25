@@ -65,9 +65,9 @@ var TE_TagGenerator = (function () {
                 label: "Component",
 
                 color: "#c7f8ea",
-                level: 3,
+                level: 4,
                 aspect: "Component",
-                leafLevel: 3
+                leafLevel: 4
             },
 
 
@@ -91,6 +91,7 @@ var TE_TagGenerator = (function () {
                 })
                 //  self.initSytemsTree();
                 self.initSytemsSelect()
+
                 Config.sources[self.currentSource].controller = Sparql_OWL
                 visjsGraph.clearGraph()
                 $("#graphDiv").css("width", "800px")
@@ -181,6 +182,9 @@ var TE_TagGenerator = (function () {
         self.filterSytemTree = function (systemUri, sytemDivId) {
             $(".TagGenerator_SystemDiv").removeClass("TagGenerator_SystemDiv_selected")
             $("#" + sytemDivId).addClass("TagGenerator_SystemDiv_selected")
+            $("#TE_TagGenerator_searchInSystemInput").focus()
+
+
             self.currentSystem = systemUri
 
             Sparql_OWL.getNodeChildren(self.currentSource, null, systemUri, 3, {}, function (err, result) {
@@ -223,6 +227,8 @@ var TE_TagGenerator = (function () {
             $("#TagGenerator_treeInfosDiv").html("adding " + node.data.label);
             if (true) {
                 var level = self.systemsMap[self.currentSystem].level
+                if (self.currentGraphNode && self.currentGraphNode.data.aspect == "Component")
+                    level = self.currentGraphNode.data.level + 1
 
                 node.data.level = level
                 node.data.system = self.currentSystem
@@ -329,20 +335,10 @@ var TE_TagGenerator = (function () {
                     }
                 }
                 options.onHoverNodeFn = function (node, point, options) {
-                    var html = "<table>"
 
-                    html += "<tr><td>Aspect: </td><td>" + self.systemsMap[node.data.system].aspect + "</td></tr>"
-                    html += "<tr><td>System: </td><td>" + self.systemsMap[node.data.system].label + "</td></tr>"
-                    html += "<tr><td>Label: </td><td>" + node.data.label + "</td></tr>"
-                    html += "<tr><td>Location TAG: </td><td><B>" + self.getNodeTag(node).locationTag + "</B></td></tr>"
-                    html += "<tr><td>Function TAG: </td><td><B>" + self.getNodeTag(node).functionTag + "</B></td></tr>"
-                    html += "</table>"
-
-                    $("#TagGenerator_graphHOverDiv").html(html)
-                    //  $("TagGenerator_graphHOverDiv").css("background-color",self.systemsMap[node.data.system].color)
-
-                    // SourceBrowser.drawCommonInfos(self.currentSource, node.data.id, "TagGenerator_NodeInfosDiv")
+                    self.showGraphNodeInfos(node)
                 }
+                options.onRightClickFn= TE_TagGenerator.showGraphPopupMenus
 
                 visjsGraph.draw("graphDiv", visjsData, options)
             }
@@ -355,6 +351,50 @@ var TE_TagGenerator = (function () {
         }
 
 
+        self.showGraphNodeInfos=function(node){
+            self.getNodeClassificationTree(node.data.id,function(err,parentsMap) {
+                if(err)
+                    return MainController.UI.message(err)
+                var parentsStr="<ol>"
+                var i=0
+                for(var key in parentsMap){
+                    parentsStr+="<li>"+parentsMap[key]+"</li>"
+
+                }
+                parentsStr+="</ol>"
+
+                var html = "<table>"
+                html += "<tr><td>Aspect: <b>" + self.systemsMap[node.data.system].aspect + "</td></tr>"
+                html += "<tr><td>System:  <b>" + self.systemsMap[node.data.system].label + "</td></tr>"
+                html += "<tr><td>Classification:  <b>" + parentsStr + "</td></tr>"
+                html += "<tr><td>Label:  <b>" + node.data.label + "</td></tr>"
+                html += "<tr><td>Location TAG  <b>:" + self.getNodeTag(node).locationTag + "</B></td></tr>"
+                html += "<tr><td>Function TAG  <b>:" + self.getNodeTag(node).functionTag + "</B></td></tr>"
+                html += "</table>"
+
+                $("#TagGenerator_graphHOverDiv").html(html)
+            })
+        }
+
+
+    self.showGraphPopupMenus = function (node,point, event) {
+        if (!node)
+            return  MainController.UI.hidePopup("graphPopupDiv");
+        if( node.from){//edge
+            var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_TagGenerator.deleteSelectedEdge()();\"> Delete</span>"
+
+        }
+        else {
+
+            var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_TagGenerator.deleteSelectedObject()();\"> Delete</span>" +
+                "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_TagGenerator.rename();\"> Rename</span>"
+        }
+            $("#graphPopupDiv").html(html);
+            self.currentGraphNode = node;
+            MainController.UI.showPopup(point, "graphPopupDiv")
+
+
+    }
         self.setSystemTypesSelectVisibility = function (level) {
 
             return;
@@ -398,6 +438,17 @@ var TE_TagGenerator = (function () {
               }*/
 
         }
+        self.deleteSelectedEdge= function () {
+            visjsGraph.data.edge.remove(self.currentGraphNode.id)
+            /*  if (self.currentDisplayDivId) {
+                  delete self.displayedDivsMap[self.currentDisplayDivId]
+                  $("#" + self.currentDisplayDivId).remove();
+                  self.currentDisplayDivId = null
+              }*/
+
+        }
+
+
         self.clearAll = function () {
             visjsGraph.clearGraph()
             self.displayedDivsMap = {}
@@ -483,7 +534,7 @@ var TE_TagGenerator = (function () {
 
         self.createRelation = function (startNode, endNode, callback) {
 
-            var getEdge = function (relationType) {
+            var getEdge = function (relationType, drawLabel) {
                 var edgeId = common.getRandomHexaId(10);
                 var edge
                 if (startNode.data.level < endNode.data.level) {
@@ -494,6 +545,7 @@ var TE_TagGenerator = (function () {
                         data: {
                             from: endNode.id,
                             to: startNode.id,
+                            property: relationType
 
 
                         }
@@ -506,6 +558,7 @@ var TE_TagGenerator = (function () {
                         data: {
                             from: startNode,
                             to: endNode.id,
+                            property: relationType
 
 
                         }
@@ -532,10 +585,26 @@ var TE_TagGenerator = (function () {
             var globalOK = false
             if (startNode.data.aspect == endNode.data.aspect) {
 
-                var deltaLevel = Math.abs(startNode.data.level - endNode.data.level)
-                if (deltaLevel == 1 || deltaLevel == 1) {
-                    visjsData.edges.push(getEdge())
+                if (startNode.data.aspect == "Component") {
+
+                    visjsData.edges.push(getEdge("part14:partOf"))
                     globalOK = true
+
+                } else {
+
+
+                    var deltaLevel = Math.abs(startNode.data.level - endNode.data.level)
+                    if (deltaLevel == 1) {
+                        var propName
+                        if (startNode.data.aspect == "Location") {
+                            visjsData.edges.push(getEdge("part14:hasLocation"))
+                        }
+                        if (startNode.data.aspect == "Function") {
+                            visjsData.edges.push(getEdge("part14:hasFunction"))
+                        }
+
+                        globalOK = true
+                    }
                 }
 
             } else {
@@ -544,7 +613,7 @@ var TE_TagGenerator = (function () {
                 var ok3 = startNode.data.level == endNode.data.level
                 if ((ok1 || ok2)) {
 
-                    visjsData.edges.push(getEdge("part14:hasLocation"))
+                    visjsData.edges.push(getEdge("part14:hasLocation", true))
                     globalOK = true
                 } else {
                     var ok1 = startNode.data.aspect == "Function" && endNode.data.aspect == "Component"
@@ -553,7 +622,7 @@ var TE_TagGenerator = (function () {
 
                     if ((ok1 || ok2)) {
 
-                        visjsData.edges.push(getEdge("part14:implements"))
+                        visjsData.edges.push(getEdge("part14:implements", true))
                         globalOK = true
                     }
                 }
@@ -603,16 +672,55 @@ var TE_TagGenerator = (function () {
         }
 
 
-        self.saveGraph = function () {
-            var graphName = prompt("graph name")
-            if (graphName)
-                visjsGraph.saveGraph("RDS_" + graphName, true)
+        self.saveGraph = function (isNewGraph) {
+            if (isNewGraph) {
+                var graphName = prompt("graph name")
+                if (graphName) {
+                    visjsGraph.saveGraph("RDS_" + graphName, true)
+                    self.listSavedGraphs();
+                }
+            } else {
+                visjsGraph.saveGraph(graphName, true)
+                self.listSavedGraphs();
+
+            }
         }
         self.loadGraph = function (graphName) {
             visjsGraph.clearGraph()
-            self.addToGraph({nodes: [{id: "graphName", "label": graphName, level: 0, shape: "box"}], edges: []})
-            visjsGraph.loadGraph(graphName, true)
+
+
+            visjsGraph.loadGraph(graphName, false, function (err, visjsData) {
+                visjsData.nodes.forEach(function (node) {
+                    if (!self.objectsMap[node.data.id])
+                        self.objectsMap[node.data.id] = {items: [], counter: 0}
+                    self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
+                    self.objectsMap[node.data.id].items.push(node)
+                })
+                self.addToGraph(visjsData)
+            })
         }
+
+
+        /*
+
+                        var id=common.getRandomHexaId(10)
+                    self.addToGraph({nodes: [{id: id, "label": graphName, level: 0, shape: "box"}], edges: []})
+
+                     visjsGraph.loadGraph(graphName, true, function (err, result) {
+                        var nodes = visjsGraph.data.nodes.get()
+                         visjsGraph.data.nodes.remove(id)
+                        self.objectsMap = {}
+                        nodes.forEach(function (node) {
+                            if (!self.objectsMap[node.data.id])
+                                self.objectsMap[node.data.id] = {items: [], counter: 0}
+                            self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
+                            self.objectsMap[node.data.id].items.push(node)
+                            //if(item.data.level==1)
+
+                        })
+
+                     })*/
+
 
         self.listSavedGraphs = function () {
             visjsGraph.listSavedGraphs(function (err, result) {
@@ -624,6 +732,54 @@ var TE_TagGenerator = (function () {
                         graphs.push(item)
                 })
                 common.fillSelectOptions("TE_TagGenerator_savedGraphsSelect", graphs, true)
+            })
+        }
+
+
+        self.getNodeClassificationTree = function (nodeId, callback) {
+            var matchingHits;
+            var parentIdsMap = {};
+            async.series([
+                function (callbackSeries) {
+                    var queryObj = {
+                        query: {
+                            "term": {
+                                "id.keyword": nodeId,
+
+                            }
+                        }
+                    }
+                    ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
+                        if (err)
+                            MainController.UI.message(err)
+                        matchingHits = result.hits.hits
+                        if (matchingHits.length == 0)
+                            return callbackSeries("no result")
+                        return callbackSeries();
+
+                    })
+                },
+                //get parents
+                function (callbackSeries) {
+                    var parentIds = []
+                    matchingHits.forEach(function (hit) {
+                        hit._source.parents.forEach(function (item, indexParent) {
+                            if (parentIds.indexOf(item) < 0)
+                                parentIds.push(item)
+                        })
+                    })
+                    SearchUtil.getSourceLabels(self.currentSource.toLowerCase(), parentIds, null, null, function (err, hits) {
+                        if (err)
+                            return callbackSeries(err)
+                        hits.forEach(function (hit) {
+                            parentIdsMap[hit._source.id] = hit._source.label
+                        })
+                        callbackSeries()
+                    })
+                }
+            ], function (err) {
+                return callback(err, parentIdsMap)
+
             })
         }
 
@@ -706,7 +862,7 @@ var TE_TagGenerator = (function () {
 
                                 if (!existingNodes[item]) {
                                     existingNodes[item] = 1
-                                    var label = parentIdsMap[item]
+                                    var label = Sparql_common.getLabelFromURI(item) + " " + parentIdsMap[item]
                                     jstreeData.push({
                                         id: item,
                                         text: label,
@@ -714,19 +870,21 @@ var TE_TagGenerator = (function () {
                                         data: {
                                             id: item,
                                             label: label,
-                                            source:self.currentSource
+                                            source: self.currentSource,
+                                            code: Sparql_common.getLabelFromURI(item)
                                         }
                                     })
                                 }
                             })
                             jstreeData.push({
                                 id: hit._source.id,
-                                text: hit._source.label,
+                                text: Sparql_common.getLabelFromURI(hit._source.id) + " " + hit._source.label,
                                 parent: parent,
                                 data: {
                                     id: hit._source.id,
                                     label: hit._source.label,
-                                    source:self.currentSource
+                                    source: self.currentSource,
+                                    code: Sparql_common.getLabelFromURI(hit._source.id),
                                 }
                             })
 
@@ -745,7 +903,22 @@ var TE_TagGenerator = (function () {
                 })
         }
 
-        self.switchLabelsAndCodesInGraph=function(value){
+        self.switchLabelsAndCodesInGraph = function (value) {
+            var nodes = visjsGraph.data.nodes.get();
+            var newNodes = []
+            nodes.forEach(function (node) {
+                if (!node.data)
+                    return;
+                var label
+                if (value == "codes")
+                    label = node.data.code;
+                else
+                    label = node.data.label;
+
+                newNodes.push({id: node.id, label: label})
+
+            })
+            visjsGraph.data.nodes.update(newNodes)
 
         }
 

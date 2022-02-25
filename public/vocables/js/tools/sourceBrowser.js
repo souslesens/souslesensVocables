@@ -792,7 +792,7 @@ var SourceBrowser = (function () {
 
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions)
             setTimeout(function () {
-                MainController.UI.updateActionDivLabel("Multi source search :" + term)
+              //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
                 MainController.UI.message("");
                 $("#waitImg").css("display", "none");
                 $('#' + targetDiv).jstree(true).open_all();

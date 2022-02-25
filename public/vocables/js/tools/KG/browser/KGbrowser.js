@@ -41,10 +41,10 @@ KGbrowserCustom.initsuperClassesPalette()
         MainController.UI.openRightPanel()
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html",function(){
             self.jstree.load.loadAdlsList();
-            self.jstree.load.loadOneModel();
+           // self.jstree.load.loadOneModel();
             //  self.loadAdlJstree()
-            self.jstree.load.loadRdl();
-            self.initOneModelDictionary()
+          //  self.jstree.load.loadRdl();
+           // self.initOneModelDictionary()
 
             SourceBrowser.currentTargetDiv = "KGbrowserItemsjsTreeDiv"
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL")

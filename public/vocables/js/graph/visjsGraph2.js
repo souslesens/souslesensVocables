@@ -828,7 +828,8 @@ var visjsGraph = (function () {
             fileName = prompt("graph name")
         if (!fileName || fileName == "")
             return;
-        fileName = fileName + ".json"
+        if (fileName.indexOf(".json") < 0)
+            fileName = fileName + ".json"
         var payload = {
             saveData: 1,
             dir: "graphs",
@@ -854,7 +855,7 @@ var visjsGraph = (function () {
         $("#VisJsGraph_message").html(message)
     }
 
-    self.loadGraph = function (fileName,add) {
+    self.loadGraph = function (fileName, add, callback) {
         if (false && !self.currentContext)
             return;
         if (!fileName)
@@ -899,6 +900,9 @@ var visjsGraph = (function () {
                     }
                 })
 
+                if (callback)
+                    return callback(null, visjsData)
+
 
                 if (add || (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0)) {
                     self.data.nodes.add(visjsData.nodes)
@@ -915,11 +919,14 @@ var visjsGraph = (function () {
                             context.options[key] = eval(key + "=" + context.options[key]);
                         }
                     }
+                    if (context.callback)
+                        callback = context.callback
                     if (self.isGraphNotEmpty()) {
                         self.data.edges.add(visjsData.edges)
                         self.data.nodes.add(visjsData.nodes)
+
                     } else {
-                        self.draw(context.divId, visjsData, context.options, context.callback)
+                        self.draw(context.divId, visjsData, context.options, callback)
                     }
                     self.message("")
                 }

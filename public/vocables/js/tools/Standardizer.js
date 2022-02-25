@@ -939,7 +939,7 @@ var Standardizer = (function () {
 
 
         self.drawSunBurst = function (searchResultArray, words, options, callback) {
-            return;
+        //    return;
             if ({options})
                 options = {}
 

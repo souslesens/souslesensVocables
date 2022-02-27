@@ -1,0 +1,6 @@
+"handover event name","handover event description","handover event reporting sequence number","CFIHOS unique id","status","change request number","created date","modified date","terminated date"
+"handover for detailed engineering","Project milestone of information handover for the start of detailed engineering activity","1","CFIHOS-68000500","STANDARD","FR27","2021-10-05T05:59:46.170Z","2021-10-05T05:59:46.170Z",
+"handover for construction","Project milestone of information handover for the start of construction activity","2","CFIHOS-68000501","STANDARD","FR27","2021-10-05T05:59:46.170Z","2021-10-05T05:59:46.170Z",
+"handover for commissioning","Project milestone of information handover for the start of commissioning activity","3","CFIHOS-68000502","STANDARD","FR27","2021-10-05T05:59:46.170Z","2021-10-05T05:59:46.170Z",
+"handover for start-up","Project milestone of information handover for the safe start-up activity","4","CFIHOS-68000503","STANDARD","FR27","2021-10-05T05:59:46.170Z","2021-10-05T05:59:46.170Z",
+"handover for operations","Project milestone of information handover for the start of operations activity","5","CFIHOS-68000504","STANDARD","FR27","2021-10-05T05:59:46.170Z","2021-10-05T05:59:46.170Z",

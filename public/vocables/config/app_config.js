@@ -185,6 +185,13 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
+    self.tools["KGcreator"] = {
+        label: "KGcreator",
+        noSource: 1,
+        controller: KGcreator,
+        toolDescriptionImg: null
+    }
+
 
     self.tools["TE_14224_browser"] = {
         label: "TE_14224_browser",

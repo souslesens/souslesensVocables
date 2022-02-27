@@ -448,8 +448,20 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+        if (req.body.readCsv) {
+            DataController.readCsv(req.body.dir,req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
         if (req.body.readDataFile) {
             DataController.readfile(req.body.dir, req.body.fileName, function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+        if( req.body.createTriplesFromCsv){
+            var CsvTripleBuilder=require("../bin/KG/CsvTripleBuilder.")
+            CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, function (err, result) {
                 processResponse(response, err, result);
             });
         }

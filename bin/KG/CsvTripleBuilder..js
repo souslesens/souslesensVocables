@@ -1,11 +1,11 @@
 var fs = require("fs");
 var path = require("path");
-var csvCrawler = require("../bin/_csvCrawler.");
+var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
-var util = require("../bin/util.");
-var httpProxy = require("../bin/httpProxy.");
-var UML2OWLparser = require("./UML2OWLparser");
-var sqlServerProxy = require("../bin/KG/SQLserverConnector.");
+var util = require("../util.");
+var httpProxy = require("../httpProxy.");
+var UML2OWLparser = require("../../other/UML2OWLparser");
+var sqlServerProxy = require("./SQLserverConnector.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
@@ -408,6 +408,14 @@ var processor = {
             return callback(null);
         });
     },
+
+
+    createTriplesFromCsv:function(dirName,mappingFileName,callback){
+
+
+
+
+    }
 };
 
 module.exports = processor;

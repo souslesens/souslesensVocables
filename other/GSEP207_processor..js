@@ -1,4 +1,4 @@
-var processor = require("./CsvTripleBuilder.");
+var processor = require("../bin/KG/CsvTripleBuilder.");
 
 var x = [
     "classFamily",

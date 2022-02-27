@@ -24,7 +24,6 @@ Csv2Sql = {
             result.headers.forEach(function (header) {
                 if (header != "")
                     if (!fields[header]) {
-                        if (header == "catalogProfile") var x = 3;
                         result.data.forEach(function (slice) {
                             slice.forEach(function (line) {
                                 if (fields[header]) return;

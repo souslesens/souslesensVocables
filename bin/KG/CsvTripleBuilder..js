@@ -7,31 +7,33 @@ var httpProxy = require("../httpProxy.");
 var UML2OWLparser = require("../../other/UML2OWLparser");
 var sqlServerProxy = require("./SQLserverConnector.");
 
+var ConfigManager = require('../configManager.')
+
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
-var processor = {
+var CsvTripleBuilder = {
     readCsv: function (filePath, callback) {
-        csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
+        csvCrawler.readCsv({filePath: filePath}, 500000, function (err, result) {
             if (err) return callback(err);
             var data = result.data;
             var headers = result.headers;
             console.log(filePath);
-            return callback(null, { headers: headers, data: data });
+            return callback(null, {headers: headers, data: data});
         });
     },
 
     getDescription: function (filePath) {
         var descriptionMap = {};
 
-        processor.readCsv(filePath, function (err, result) {
-            descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
+        CsvTripleBuilder.readCsv(filePath, function (err, result) {
+            descriptionMap = {filePath: filePath, headers: result.headers, length: result.data[0].length};
 
             fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
             //  console.log(JSON.stringify(descriptionMap,null,2))
         });
     },
 
-    processSubClasses: function (mappings, graphUri, sparqlServerUrl) {
+    createTriples: function (mappings, graphUri, sparqlServerUrl, options, callback) {
         //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
 
         var existingNodes = {};
@@ -56,7 +58,7 @@ var processor = {
             "rdfs:subClassOf": "uri",
             _restriction: "uri",
         };
-
+        var totalTriplesCount = 0
         async.eachSeries(
             mappings,
             function (mapping, callbackEachMapping) {
@@ -64,6 +66,7 @@ var processor = {
                 var filePath = fileName;
                 var lookUpMap = {};
                 var triples = [];
+
                 var lines = [];
                 var dataSource = mapping.dataSource;
                 if (mapping.graphUri) graphUri = mapping.graphUri;
@@ -76,10 +79,9 @@ var processor = {
                             async.eachSeries(
                                 mapping.lookups,
                                 function (lookup, callbackEachLookup) {
-                                    var lookupFileName = lookup.fileName;
-                                    var lookupFilePath = rootDir + path.sep + lookupFileName;
+                                    var lookupFilePath =  lookup.filePath;
 
-                                    processor.readCsv(lookupFilePath, function (err, result) {
+                                    CsvTripleBuilder.readCsv(lookupFilePath, function (err, result) {
                                         if (err) return callbackEachLookup(err);
                                         var lookupLines = result.data[0];
                                         lookUpMap[lookup.name] = {};
@@ -101,7 +103,7 @@ var processor = {
                         function (callbackSeries) {
                             if (!filePath) return callbackSeries();
 
-                            processor.readCsv(filePath, function (err, result) {
+                            CsvTripleBuilder.readCsv(filePath, function (err, result) {
                                 if (err) {
                                     console.log(err);
                                     return callbackSeries(err);
@@ -125,14 +127,13 @@ var processor = {
                         function (callbackSeries) {
                             if (!mapping.dataProcessing)
                                 return callbackSeries();
-                            mapping.dataProcessing(lines, function(err, result){
+                            mapping.dataProcessing(lines, function (err, result) {
                                 if (err)
                                     return callbackSeries(err);
                                 lines = result;
                                 callbackSeries();
                             });
                         },
-
 
 
                         function (callbackSeries) {
@@ -168,10 +169,9 @@ var processor = {
                                         if (item.s_type == "fixed") subjectStr = item.s;
 
                                         else if (typeof item.s === "function") subjectStr = item.s(line, item);
-                                        else if (mapping.transform && line[item.s] && mapping.transform[item.s]){
-                                            subjectStr = mapping.transform[item.s](line[item.s], "s", item.p,line);
-                                        }
-                                        else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
+                                        else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
+                                            subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line);
+                                        } else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
                                         else if (item.lookup_S) {
                                             subjectStr = getLookupValue(item.lookup_S, line[item.s]);
                                             if (!subjectStr) {
@@ -182,27 +182,26 @@ var processor = {
                                             subjectStr = line[item.s];
 
                                         if (!subjectStr) {
-                                           ;// console.log(line[item.s]);
+                                            ;// console.log(line[item.s]);
                                             return;
                                         }
                                     }
 
                                     //get value for Object
                                     {
-                                     /*   if(line.system!="Component system 3")
-                                          return ;// console.log(line.code1+" "+line.code2+"  "+ line.code3)
-                                        if(line.system=="Component system 3" && line.code2)
-                                            var x=3
-                                        if(line.system=="Component system 3" && line.code3)
-                                            var x=3*/
+                                        /*   if(line.system!="Component system 3")
+                                             return ;// console.log(line.code1+" "+line.code2+"  "+ line.code3)
+                                           if(line.system=="Component system 3" && line.code2)
+                                               var x=3
+                                           if(line.system=="Component system 3" && line.code3)
+                                               var x=3*/
 
 
                                         if (item.o_type == "fixed") objectStr = item.o;
                                         if (typeof item.o === "function") objectStr = item.o(line, item);
                                         else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
                                             objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line);
-                                        }
-                                        else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
+                                        } else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
                                         else if (item.lookup_O) {
                                             objectStr = getLookupValue(item.lookup_O, objectStr);
                                             if (!objectStr) {
@@ -212,14 +211,14 @@ var processor = {
                                         } else objectStr = line[item.o];
 
                                         if (!objectStr) {
-                                          ; // console.log(line[item.o]);
+                                            ; // console.log(line[item.o]);
                                             return;
                                         }
                                     }
 
                                     //format subject
                                     {
-                                        subjectStr=subjectStr.trim()
+                                        subjectStr = subjectStr.trim()
                                         if (typeof item.s === "function") subjectStr = subjectStr;
 
                                         if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
@@ -229,7 +228,7 @@ var processor = {
 
                                     //format object
                                     {
-                                        objectStr=objectStr.trim()
+                                        objectStr = objectStr.trim()
                                         if (!objectStr || !objectStr.indexOf) {
                                             var x = line;
                                             var y = item;
@@ -283,13 +282,13 @@ var processor = {
                                         });
                                         objectStr = blankNode;
 
-                                      /*  console.log(
-                                            JSON.stringify({
-                                                s: subjectStr,
-                                                p: "rdfs:subClassOf",
-                                                o: blankNode,
-                                            })
-                                        );*/
+                                        /*  console.log(
+                                              JSON.stringify({
+                                                  s: subjectStr,
+                                                  p: "rdfs:subClassOf",
+                                                  o: blankNode,
+                                              })
+                                          );*/
                                         return;
                                     }
 
@@ -325,16 +324,23 @@ var processor = {
                         //write triples
                         function (callbackSeries) {
                             var totalTriples = 0;
+                            if (options.sampleSize) {
+                                var sampleTriples = triples.slice(0, options.sampleSize)
+                                return callback(null, sampleTriples)
+                            }
+
+
+                            totalTriplesCount += triples.length;
 
                             var slices = util.sliceArray(triples, 200);
                             async.eachSeries(
                                 slices,
                                 function (slice, callbackEach) {
-                                    processor.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-                                        if (err){
+                                    CsvTripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                        if (err) {
 
 
-                                            var x=sparqlServerUrl
+                                            var x = sparqlServerUrl
                                             return callbackEach(err);
                                         }
                                         totalTriples += result;
@@ -355,7 +361,8 @@ var processor = {
                 );
             },
             function (err) {
-                console.log(err);
+                if (callback)
+                    return callback(null, totalTriplesCount)
             }
         );
     },
@@ -383,7 +390,7 @@ var processor = {
         // console.log(query)
 
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
-        var params = { query: queryGraph };
+        var params = {query: queryGraph};
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
             if (err) {
@@ -397,25 +404,133 @@ var processor = {
     },
 
     clearGraph: function (graphUri, sparqlServerUrl, callback) {
-        var query = "clear graph   <" + graphUri + ">";
-        var params = { query: query };
-
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-
-            return callback(null);
-        });
-    },
 
 
-    createTriplesFromCsv:function(dirName,mappingFileName,callback){
+        async.series([
+
+            function (callbackSeries) {
+                if (sparqlServerUrl) {
+                    sparqlServerUrl = options.sparqlServerUrl
+                    return callbackSeries()
+                }
+                ConfigManager.getGeneralConfig(function (err, result) {
+                    if (err)
+                        return callbackSeries(err);
+                    sparqlServerUrl = result.default_sparql_url
+                    callbackSeries()
+                })
+            },
+            function (callbackSeries) {
+                var query = "clear graph   <" + graphUri + ">";
+                var params = {query: query};
+
+                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+
+                    return callback(null);
+                });
+            }], function (err) {
+            return callback(err, "graph cleared")
+        })
+    }
+    ,
+
+    createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
 
 
+        var sparqlServerUrl;
+        var output = ""
+        async.series([
+
+            function (callbackSeries) {
+                if (options.sparqlServerUrl) {
+                    sparqlServerUrl = options.sparqlServerUrl
+                    return callbackSeries()
+                }
+                ConfigManager.getGeneralConfig(function (err, result) {
+                    if (err)
+                        return callbackSeries(err);
+                    sparqlServerUrl = result.default_sparql_url
+                    callbackSeries()
+                })
+            },
+
+
+            function (callbackSeries) {
+                if (!options.deleteOldGraph) {
+                    return callbackSeries()
+                }
+                CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, result) {
+                    if (err)
+                        return callbackSeries(err);
+                    console.log("graph deleted")
+                    callbackSeries()
+                })
+
+            },
+
+            function (callbackSeries) {
+                var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
+                var mappings = "" + fs.readFileSync(mappingsFilePath)
+                mappings = JSON.parse(mappings)
+                mappings.fileName = mappingsFilePath.replace(".json", "")
+
+
+                mappings.tripleModels.forEach(function(item){
+                    if(item.o["_function(line, mapping)_"]) {
+                        var expression=item.o["_function(line, mapping)_"]
+                        try {
+                            var fn = new Function("line", "mapping", expression )
+                        }
+                        catch(err){
+                            return callbackSeries(err)
+                        }
+                        item.o=fn
+                    }
+
+
+
+                })
+
+                var mappingsMap = {[mappings.fileName]: mappings}
+
+                CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
+                    if (err)
+                        return callbackSeries(err);
+                    if (options.sampleSize)
+                        output = result
+                    else
+                        output = {countCreatedTriples: result}
+                    callbackSeries()
+
+
+                })
+            },
+
+
+            function (callbackSeries) {
+                callbackSeries()
+            },
+
+
+        ], function (err) {
+            return callback(err, output)
+        })
 
 
     }
 };
 
-module.exports = processor;
+module.exports = CsvTripleBuilder;
+
+if (false) {
+    var options = {
+        deleteOldGraph: true,
+        sampleSize: 500
+    }
+    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (err, result) {
+
+    })
+}

@@ -5,12 +5,14 @@ var KGcreator = (function () {
         "rdf:type",
         "rdfs:subClassOf",
         "rdfs:label",
-        "_function",
-        "_lookup",
         "slsv:hasCode",
         "skos:definition",
         "skos:altLabel",
         "skos:prefLabel",
+        "",
+        "_function",
+        "_restriction",
+        ""
 
 
     ]
@@ -19,14 +21,15 @@ var KGcreator = (function () {
         "owl:Class",
         "rdfs:subClassOf",
         "rdfs:label",
+        "",
         "_function",
-        "_lookup",
-        "_restriction",
+        "",
+
 
     ]
     self.usualSubjectTypes = [
         "_function",
-        "_lookup",
+        "",
 
     ]
 
@@ -50,10 +53,10 @@ var KGcreator = (function () {
 
     self.listFiles = function () {
 
-self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
+        self.currentCsvDir = $("#KGcreator_csvDirsSelect").val()
         var payload = {
             listDirFiles: 1,
-            dir: "CSV/"+self.currentCsvDir
+            dir: "CSV/" + self.currentCsvDir
         }
         $.ajax({
             type: "POST",
@@ -64,9 +67,14 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
                 var jstreeData = []
 
                 result.forEach(function (file) {
+                    if (file.indexOf(".json") > 0)
+                        return;
+                    var label = file
+                    if (result.indexOf(file + ".json") > -1)
+                        label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>"
                     jstreeData.push({
                         id: file,
-                        text: file,
+                        text: label,
                         parent: "#"
 
                     })
@@ -75,27 +83,38 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
                 var options = {
                     openAll: true,
                     selectTreeNodeFn: function (event, obj) {
+                        $("#KGcreator_dataSampleDiv").val("")
                         self.currentTreeNode = obj.node
                         if (obj.node.parents.length == 0)
                             return;
                         if (obj.node.parents.length == 2) {
-                            var html="<ul>"
-                            obj.node.data.sample.forEach(function(item){
-                                html+="<li>"+item[obj.node.id]+"</li>"
+                            $("#KGcreator_dataSampleDiv").val("")
+                            var str = "Sample data for column " + obj.node.id + "\n"
+                            str += ""
+                            obj.node.data.sample.forEach(function (item) {
+                                str += item[obj.node.id] + "\n"
                             })
-                             html+="</ul>"
-                            $("#KGcreator_dataSampleDiv").html(html)
+
+                            $("#KGcreator_dataSampleDiv").val(str)
                             return
                         }
-                        if (obj.node.children.length> 0)
-                            return;
-                        self.currentJsonObject= {fileName:obj.node.id,tripleModels:[],transform:{}, lookups: [],graphUri:""}
+
+
+                        self.currentJsonObject = {
+                            fileName: obj.node.id,
+                            tripleModels: [],
+                            transform: {},
+                            lookups: [],
+                            graphUri: ""
+                        }
                         self.loadMappings()
+                        if (obj.node.children.length > 0)
+                        return;
                         var payload = {
                             readCsv: 1,
                             dir: "CSV/CFIHOS_V1.5_RDL",
                             fileName: obj.node.id,
-                            options: JSON.stringify({lines: 10})
+                            options: JSON.stringify({lines: 100})
                         }
                         $.ajax({
                             type: "POST",
@@ -110,13 +129,13 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
                                         id: col,
                                         text: col,
                                         parent: obj.node.id,
-                                        data:{sample:result.data[0]}
+                                        data: {sample: result.data[0]}
 
                                     })
                                 })
                                 common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData)
                             }, error: function (err) {
-                                alert(err)
+                                alert(err.responseText)
                             }
                         })
                     },
@@ -128,7 +147,7 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
 
 
             }, error: function (err) {
-                alert(err)
+                alert(err.responseText)
             }
         })
 
@@ -155,36 +174,44 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
                 $("#KGcreator_objectInput").val(self.currentTreeNode.id)
             }
         }
+
+        items.copy = {
+            label: "Copy",
+            action: function (e) {// pb avec source
+                navigator.clipboard.writeText(self.currentTreeNode.id);
+            }
+        }
+
         items.setLookup = {
-            label: "lookup",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length < 2)
-                    return;
+              label: "Add lookup",
+              action: function (e) {// pb avec source
+                  if (self.currentTreeNode.parents.length < 1)
+                      return;
+                  $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html")
+                  $("#KGcreator_dialogDiv").dialog("open")
 
-                $("#KGcreator_dialogDiv").dialog("open")
-                $("#KGcreator_dialogDiv").html(html)
-            }
-        }
-        items.setTransform = {
-            label: "transform",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length < 2)
-                    return;
+              }
+          }
+      /*    items.setTransform = {
+              label: "transform",
+              action: function (e) {// pb avec source
+                  if (self.currentTreeNode.parents.length < 2)
+                      return;
 
-                var html= " <button onclick='KGcreator.validateDialog()'>" +
-                    "</button> <pre id=\"KGcreator_dialogJsonDisplay\" style=\"width: 100%;height:500px;\"></pre>"
-                $("#KGcreator_dialogDiv").dialog("open")
-                $("#KGcreator_dialogDiv").html(html)
-                self.dialogJsonEditor = new JsonEditor('#KGcreator_dialogJsonDisplay', {});
-            }
-        }
+                  var html = " <button onclick='KGcreator.validateDialog()'>" +
+                      "</button> <pre id=\"KGcreator_dialogJsonDisplay\" style=\"width: 100%;height:500px;\"></pre>"
+                  $("#KGcreator_dialogDiv").dialog("open")
+                  $("#KGcreator_dialogDiv").html(html)
+                  self.dialogJsonEditor = new JsonEditor('#KGcreator_dialogJsonDisplay', {});
+              }
+          }*/
 
         items.loadMappings = {
             label: "load",
             action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length !=1)
+                if (self.currentTreeNode.parents.length != 1)
                     return;
-              KGcreator.loadMappings()
+                KGcreator.loadMappings()
             }
         }
 
@@ -240,23 +267,37 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
                 common.fillSelectOptions("KGcreator_subjectSelect", self.usualSubjectTypes, true)
                 common.fillSelectOptions("KGcreator_predicateSelect", self.usualProperties, true)
                 common.fillSelectOptions("KGcreator_objectSelect", self.usualObjectClasses, true)
-            self.mainJsonEditor = new JsonEditor('#KGcreator_mainJsonDisplay', {});
-             /*   tinymce.init({
-                    selector: '#KGcreator_tripleTA',
-                    menubar: false,
-                    plugins: [
-                        'advlist autolink lists link image charmap print preview anchor',
-                        'searchreplace visualblocks code fullscreen',
-                        'insertdatetime media table paste code help wordcount'
-                    ],
-                    toolbar: 'undo redo | formatselect | ' +
-                        'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                        'removeformat | help',
-                    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                });
+                var options = {
+                    mode: 'code',
+                    onError: function (err) {
+                        alert(err.toString());
+                    },
+                    onChange: function () {
+                        try {
+                            console.log(JSON.stringify(editor.get()));
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    }
+                }
 
-                tinymce.activeEditor.execCommand('mceCodeEditor');*/
+                self.mainJsonEditor = new JsonEditor('#KGcreator_mainJsonDisplay',{}, options);
+                /*   tinymce.init({
+                       selector: '#KGcreator_tripleTA',
+                       menubar: false,
+                       plugins: [
+                           'advlist autolink lists link image charmap print preview anchor',
+                           'searchreplace visualblocks code fullscreen',
+                           'insertdatetime media table paste code help wordcount'
+                       ],
+                       toolbar: 'undo redo | formatselect | ' +
+                           'bold italic backcolor | alignleft aligncenter ' +
+                           'alignright alignjustify | bullist numlist outdent indent | ' +
+                           'removeformat | help',
+                       content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                   });
+
+                   tinymce.activeEditor.execCommand('mceCodeEditor');*/
 
                 $("#KGcreator_dialogDiv").dialog({
                     autoOpen: false,
@@ -269,7 +310,7 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
 
         ], function (err) {
             if (err)
-                return alert(err)
+                return alert(err.responseText)
         })
 
 
@@ -291,14 +332,12 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
             return $("#KGcreator_tripleMessageDiv").html("missing object")
 
 
-
-
-        if (subject == "_function") {
-            subject = {function:"..."}
+        if (subject.indexOf("_function") == 0) {
+            subject = {[subject]: "..."}
 
         }
-        if (object == "_function") {
-            object =  {function:"..."}
+        if (object.indexOf("_function") == 0) {
+            object = {[object]: "..."}
         }
 
         var tripleObj =
@@ -309,23 +348,51 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
 
         self.currentJsonObject.tripleModels.push(tripleObj)
 
-        self.mainJsonEditor.load( self.currentJsonObject)
+        self.mainJsonEditor.load(self.currentJsonObject)
 
         $("#KGcreator_objectInput").val("")
         $("#KGcreator_objectSelect").val("")
-        $("#KGcreator_propertyInput").val("")
-        $("#KGcreator_propertySelect").val("")
+        $("#KGcreator_predicateInput").val("")
+        $("#KGcreator_predicateSelect").val("")
 
         //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
 
     }
-    self.saveMappings=function(callback) {
-        var data = self.mainJsonEditor.get()
 
+    self.addLookup=function(){
+        var lookup={
+            name:$("#KGCreator_lookupName").val(),
+            fileName:$("#KGCreator_lookupFileName").val(),
+            sourceColumn:$("#KGCreator_lookupSourceColumn").val(),
+            targetColumn:$("#KGCreator_lookuptargetColumn").val(),
+
+        }
+        self.currentJsonObject=self.mainJsonEditor.get()
+
+        self.currentJsonObject.lookups.push(lookup)
+        self.mainJsonEditor.load(self.currentJsonObject)
+
+
+
+
+
+
+
+    }
+    self.saveMappings = function (callback) {
+        try {
+            var data = self.mainJsonEditor.get()
+        } catch (err) {
+            var p = err.message.substring(err.message.indexOf("position") + 9)
+            var x = $("#KGcreator_mainJsonDisplay").val()
+            var y = $("#KGcreator_mainJsonDisplay")
+            alert(err.responseText)
+        }
+        self.currentJsonObject = data;
         var payload = {
             saveData: 1,
-            dir: "CSV/"+self.currentCsvDir,
-            fileName: self.currentJsonObject.fileName+".json",
+            dir: "CSV/" + self.currentCsvDir,
+            fileName: self.currentJsonObject.fileName + ".json",
             data: JSON.stringify(self.currentJsonObject)
         }
         $.ajax({
@@ -334,34 +401,99 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
             data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
-              $("#KGcreator_dialogDiv").html("json saved")
-                if(callback)
+                MainController.UI.message("json saved")
+                if (callback)
                     return callback()
             }, error(err) {
-                if(callback)
+                if (callback)
                     return callback(err)
-                return alert(err)
+                return alert(err.responseText)
             }
         })
 
     }
-    self.copyMappings=function(){
-        var data=self.mainJsonEditor.get()
+    self.copyMappings = function () {
+        try {
+            var data = self.mainJsonEditor.get()
+
+            data.tripleModels.forEach(function (item) {
+                if (item.o["_function(line, mapping)_"]) {
+                    var expression = item.o["_function(line, mapping)_"]
+                    try {
+                        var fn = new Function("line", "mapping", expression)
+                        var x = fn({x: 1})
+                    } catch (err) {
+                        $("#KGcreator_dataSampleDiv").val(err)
+                    }
+                    item.o = fn
+                }
+
+
+            })
+
+        } catch (err) {
+            alert(err.responseText)
+        }
     }
-    self.clearMappings=function(){
-        var data=self.mainJsonEditor.load({})
+    self.clearMappings = function () {
+        var data = self.mainJsonEditor.load({})
     }
-    self.loadMappings=function() {
+    self.loadMappings = function () {
         if (self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
             if (confirm(" save current json before opening new file"))
                 self.saveMappings(function (err, result) {
                 })
 
+        }
+        var payload = {
+            readDataFile: 1,
+            dir: "CSV/" + self.currentCsvDir,
+            fileName: self.currentJsonObject.fileName + ".json",
 
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (result, textStatus, jqXHR) {
+                self.currentJsonObject = JSON.parse(result.result)
+                self.mainJsonEditor.load(self.currentJsonObject)
+
+            }, error(err) {
+                ;// return alert(err.responseText)
+            }
+        })
+
+    }
+    self.createTriples = function (test) {
+        if (!self.currentJsonObject)
+            return;
+        if (!self.currentJsonObject.graphUri) {
+            var graphUri = prompt("enter graphUri")
+            if (!graphUri)
+                return;
+            self.currentJsonObject.graphUri = graphUri
+        }
+        var options = {};
+        if (test) {
+            var options = {
+                deleteOldGraph: false,
+                sampleSize: 500
+            }
+        } else {
+            var options = {
+                deleteOldGraph: false,
+            }
+        }
+
+        self.saveMappings(function (err, result) {
+            $("#KGcreator_dataSampleDiv").val("")
             var payload = {
-                readDataFile: 1,
+                createTriplesFromCsv: 1,
                 dir: "CSV/" + self.currentCsvDir,
                 fileName: self.currentJsonObject.fileName + ".json",
+                options: JSON.stringify(options)
 
             }
             $.ajax({
@@ -370,49 +502,48 @@ self.currentCsvDir=$("#KGcreator_csvDirsSelect").val()
                 data: payload,
                 dataType: "json",
                 success: function (result, textStatus, jqXHR) {
-                    self.currentJsonObject = JSON.parse(result.result)
-                    self.mainJsonEditor.load(self.currentJsonObject)
+
+                    if (test) {
+                        var str = JSON.stringify(result, null, 2)
+
+                        $("#KGcreator_dataSampleDiv").val(str)
+                    } else {
+                        $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri)
+                    }
+
 
                 }, error(err) {
-                    return alert(err)
+                    return alert(err.responseText)
                 }
             })
+        })
 
-        }
-        createTriples = function () {
-            if (!self.currentJsonObject)
-                return;
-            if (!self.currentJsonObject.graphUri) {
-                var graphUri = prompt("enter graphUri")
-                if (!graphUri)
-                    return;
-                self.currentJsonObject.graphUri = graphUri
-            }
-            self.saveMappings(function (err, result) {
-                var payload = {
-                    createTriplesFromCsv: 1,
-                    dir: "CSV/" + self.currentCsvDir,
-                    fileName: self.currentJsonObject.fileName + ".json",
 
-                }
-                $.ajax({
-                    type: "POST",
-                    url: Config.serverUrl,
-                    data: payload,
-                    dataType: "json",
-                    success: function (result, textStatus, jqXHR) {
-                        self.currentJsonObject = JSON.parse(result.result)
-                        self.mainJsonEditor.load(self.currentJsonObject)
-
-                    }, error(err) {
-                        return alert(err)
-                    }
-                })
-            })
-
-        }
     }
 
+    self.clearGraph = function () {
+        if (!self.currentJsonObject)
+            return alert("no file mappings selected");
+        if (!self.currentJsonObject.graphUri)
+            return alert("no graphUri");
+
+        if (!confirm("clear graph " + self.currentJsonObject.graphUri))
+            return;
+        var payload = {
+            clearGraph: self.currentJsonObject.graphUri,
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (result, textStatus, jqXHR) {
+                return MainController.UI.message("graph deleted " + self.currentJsonObject.graphUri)
+            }, error(err) {
+                return MainController.UI.message(err)
+            }
+        })
+    }
 
     return self;
 

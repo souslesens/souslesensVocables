@@ -31,17 +31,17 @@
 
     <div class="KGcreator_tripleDiv">
         Subject <input id="KGcreator_subjectInput" class="KGcreator_tripleInput">
-        <select id="KGcreator_subjectSelect" onclick="$('#KGcreator_subjectInput').val($(this).val())"></select>
-        <!-- is String<input type="checkbox" id="KGcreator_isSubjectStringCBX">-->
+        <select id="KGcreator_subjectSelect" onchange="KGcreator.onTripleModelSelect('s',$(this).val())"></select>
+        lookup name<input  id="KGcreator_subjectLookupName">
     </div>
     <div class="KGcreator_tripleDiv">
         Predicate <input id="KGcreator_predicateInput" class="KGcreator_tripleInput">
-        <select id="KGcreator_predicateSelect" onclick="$('#KGcreator_predicateInput').val($(this).val())"></select>
+        <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
     </div>
     <div class="KGcreator_tripleDiv">
         Object <input id="KGcreator_objectInput" class="KGcreator_tripleInput">
-        <select id="KGcreator_objectSelect" onclick="$('#KGcreator_objectInput').val($(this).val())"></select>
-        is String<input type="checkbox" id="KGcreator_isObjectStringCBX">
+        <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
+        is String<input type="checkbox" id="KGcreator_isObjectStringCBX"> lookup name<input  id="KGcreator_objectLookupName">
 
     </div>
 

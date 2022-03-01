@@ -21,6 +21,7 @@ var KGcreator = (function () {
         "owl:Class",
         "rdfs:subClassOf",
         "rdfs:label",
+        "slsv:TopConcept",
         "",
         "_function",
         "",
@@ -109,7 +110,7 @@ var KGcreator = (function () {
                         }
                         self.loadMappings()
                         if (obj.node.children.length > 0)
-                        return;
+                            return;
                         var payload = {
                             readCsv: 1,
                             dir: "CSV/CFIHOS_V1.5_RDL",
@@ -182,29 +183,26 @@ var KGcreator = (function () {
             }
         }
 
-        items.setLookup = {
-              label: "Add lookup",
-              action: function (e) {// pb avec source
-                  if (self.currentTreeNode.parents.length < 1)
-                      return;
-                  $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html")
-                  $("#KGcreator_dialogDiv").dialog("open")
+        items.showLookupDialog = {
+            label: "Add lookup",
+            action: function (e) {// pb avec source
+                if (self.currentTreeNode.parents.length < 1)
+                    return;
+                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html")
+                $("#KGcreator_dialogDiv").dialog("open")
 
-              }
-          }
-      /*    items.setTransform = {
-              label: "transform",
-              action: function (e) {// pb avec source
-                  if (self.currentTreeNode.parents.length < 2)
-                      return;
+            }
+        }
+        items.showTransformDialog = {
+            label: "Add Transform",
+            action: function (e) {// pb avec source
+                if (self.currentTreeNode.parents.length !=2)
+                    return;
+                $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html",)
+                $("#KGcreator_dialogDiv").dialog("open")
 
-                  var html = " <button onclick='KGcreator.validateDialog()'>" +
-                      "</button> <pre id=\"KGcreator_dialogJsonDisplay\" style=\"width: 100%;height:500px;\"></pre>"
-                  $("#KGcreator_dialogDiv").dialog("open")
-                  $("#KGcreator_dialogDiv").html(html)
-                  self.dialogJsonEditor = new JsonEditor('#KGcreator_dialogJsonDisplay', {});
-              }
-          }*/
+            }
+        }
 
         items.loadMappings = {
             label: "load",
@@ -267,37 +265,10 @@ var KGcreator = (function () {
                 common.fillSelectOptions("KGcreator_subjectSelect", self.usualSubjectTypes, true)
                 common.fillSelectOptions("KGcreator_predicateSelect", self.usualProperties, true)
                 common.fillSelectOptions("KGcreator_objectSelect", self.usualObjectClasses, true)
-                var options = {
-                    mode: 'code',
-                    onError: function (err) {
-                        alert(err.toString());
-                    },
-                    onChange: function () {
-                        try {
-                            console.log(JSON.stringify(editor.get()));
-                        } catch (err) {
-                            console.error(err);
-                        }
-                    }
-                }
 
-                self.mainJsonEditor = new JsonEditor('#KGcreator_mainJsonDisplay',{}, options);
-                /*   tinymce.init({
-                       selector: '#KGcreator_tripleTA',
-                       menubar: false,
-                       plugins: [
-                           'advlist autolink lists link image charmap print preview anchor',
-                           'searchreplace visualblocks code fullscreen',
-                           'insertdatetime media table paste code help wordcount'
-                       ],
-                       toolbar: 'undo redo | formatselect | ' +
-                           'bold italic backcolor | alignleft aligncenter ' +
-                           'alignright alignjustify | bullist numlist outdent indent | ' +
-                           'removeformat | help',
-                       content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-                   });
 
-                   tinymce.activeEditor.execCommand('mceCodeEditor');*/
+                self.mainJsonEditor = new JsonEditor('#KGcreator_mainJsonDisplay', {});
+
 
                 $("#KGcreator_dialogDiv").dialog({
                     autoOpen: false,
@@ -324,6 +295,9 @@ var KGcreator = (function () {
         var isObjectString = $("#KGcreator_isStringCBX").prop("checked")
         var isSubjectString = $("#KGcreator_isStringCBX").prop("checked")
 
+        var subjectLookupName= $("#KGcreator_subjectLookupName").val()
+        var objectLookupName= $("#KGcreator_objectLookupName").val()
+
         if (!subject)
             return $("#KGcreator_tripleMessageDiv").html("missing subject")
         if (!predicate)
@@ -345,6 +319,10 @@ var KGcreator = (function () {
 
         if (isObjectString)
             tripleObj.isString = true
+        if(subjectLookupName)
+            tripleObj.lookup_s = subjectLookupName
+        if(objectLookupName)
+            tripleObj.lookup_o = objectLookupName
 
         self.currentJsonObject.tripleModels.push(tripleObj)
 
@@ -359,26 +337,99 @@ var KGcreator = (function () {
 
     }
 
-    self.addLookup=function(){
-        var lookup={
-            name:$("#KGCreator_lookupName").val(),
-            fileName:$("#KGCreator_lookupFileName").val(),
-            sourceColumn:$("#KGCreator_lookupSourceColumn").val(),
-            targetColumn:$("#KGCreator_lookuptargetColumn").val(),
-
+    self.onTripleModelSelect=function(role,value){
+self.currentTripleModelRole=role
+        if(value=="_function"){
+           return self.showFunctionDialog(role)
         }
-        self.currentJsonObject=self.mainJsonEditor.get()
-
-        self.currentJsonObject.lookups.push(lookup)
-        self.mainJsonEditor.load(self.currentJsonObject)
-
-
-
-
-
-
+        if(role=="s")
+        $('#KGcreator_subjectInput').val(value)
+        else if(role=="p")
+            $('#KGcreator_predicateInput').val(value)
+        else if(role=="o")
+            $('#KGcreator_objectInput').val(value)
 
     }
+
+    self.addLookup = function () {
+        var lookup = {
+            name: $("#KGCreator_lookupName").val(),
+            fileName: $("#KGCreator_lookupFileName").val(),
+            sourceColumn: $("#KGCreator_lookupSourceColumn").val(),
+            targetColumn: $("#KGCreator_lookuptargetColumn").val(),
+        }
+        self.currentJsonObject = self.mainJsonEditor.get()
+        self.currentJsonObject.lookups.push(lookup)
+        self.mainJsonEditor.load(self.currentJsonObject)
+        $("#KGcreator_dialogDiv").dialog("close")
+
+    }
+    self.showFunctionDialog=function(role){
+
+        $("#KGcreator_dialogDiv").load("snippets/KGcreator/functionDialog.html",)
+        $("#KGcreator_dialogDiv").dialog("open")
+
+    }
+    self.testFunction=function(){
+        var fnBody=$("#KGcreator_fnBody").val()
+        try {
+            var fn = new Function("row","mapping",fnBody)
+            $("#KGcreator_testFnResult").html("function OK")
+        }
+        catch(err){
+            $("#KGcreator_testFnResult").html("error in function code "+err.message)
+
+        }
+    }
+    self.addFunction = function () {
+
+        var fnBody=$("#KGcreator_fnBody").val()
+
+        try {
+            var fn = new Function("row","mapping",fnBody)
+
+        }
+        catch(err){
+           return alert("error in function code "+err.message)
+
+        }
+     var fnObject="function{"+fnBody+"}"
+        //  var fnObject=JSON.stringify({"_function":fnBody})
+        var role=self.currentTripleModelRole
+        if(role=="s")
+            $('#KGcreator_subjectInput').val(fnObject)
+        else if(role=="p")
+            $('#KGcreator_predicateInput').val(fnObject)
+        else if(role=="o")
+            $('#KGcreator_objectInput').val(fnObject)
+        $("#KGcreator_dialogDiv").dialog("close")
+
+    }
+
+    self.addTransformFunction = function () {
+        var column=$("#KGcreator_transformColumn").val()
+        var fnBody=$("#KGcreator_fnBody").val()
+
+        try {
+            var fn = new Function("value", "role", "prop", "row",fnBody)
+
+        }
+        catch(err){
+            return alert("error in function code "+err.message)
+
+        }
+        var fnObject="function{"+fnBody+"}"
+        self.currentJsonObject = self.mainJsonEditor.get()
+        self.currentJsonObject.transform[column]=fnObject;
+        self.mainJsonEditor.load( self.currentJsonObject)
+
+        $("#KGcreator_dialogDiv").dialog("close")
+
+    }
+
+
+
+
     self.saveMappings = function (callback) {
         try {
             var data = self.mainJsonEditor.get()

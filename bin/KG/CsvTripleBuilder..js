@@ -79,7 +79,7 @@ var CsvTripleBuilder = {
                             async.eachSeries(
                                 mapping.lookups,
                                 function (lookup, callbackEachLookup) {
-                                    var lookupFilePath =  lookup.filePath;
+                                    var lookupFilePath = lookup.filePath;
 
                                     CsvTripleBuilder.readCsv(lookupFilePath, function (err, result) {
                                         if (err) return callbackEachLookup(err);
@@ -137,228 +137,248 @@ var CsvTripleBuilder = {
 
 
                         function (callbackSeries) {
-                            function getLookupValue(lookupSequence, value) {
-                                var lookupItem = lookupSequence.split("|");
-                                var target = value;
-                                lookupItem.forEach(function (lookupItem) {
-                                    if (lookUpMap[lookupItem]) {
-                                        target = lookUpMap[lookupItem][target];
-                                        if (!target) {
-                                            console.log("lookup value not found " + value + ": ");
-                                            return "";
-                                        }
-                                    } else return target;
-                                });
-
+                            function getLookupValue(lookupName, value) {
+                                if (!lookUpMap[lookupName])
+                                    return "badLookupName"
+                                var target = lookUpMap[lookupName][value]
                                 return target;
+
+                                /*  var lookupItem = lookupSequence.split("|");
+                                  var target = value;
+                                  lookupItem.forEach(function (lookupItem) {
+                                      if (lookUpMap[lookupItem]) {
+                                          target = lookUpMap[lookupItem][target];
+                                          if (!target) {
+                                              console.log("lookup value not found " + value + ": ");
+                                              return "";
+                                          }
+                                      } else return target;
+                                  });
+
+                                  return target;
+                              }*/
                             }
 
-                            var emptyMappings = 0;
-                            lines.forEach(function (line, indexLine) {
+                                var emptyMappings = 0;
+                                lines.forEach(function (line, indexLine) {
 
-                                var hasDirectSuperClass = false;
-                                var subjectStr = null;
-                                var objectStr = null;
+                                    var hasDirectSuperClass = false;
+                                    var subjectStr = null;
+                                    var objectStr = null;
 
-                                mapping.tripleModels.forEach(function (item) {
-                                    subjectStr = null;
-                                    objectStr = null;
+                                    mapping.tripleModels.forEach(function (item) {
+                                        subjectStr = null;
+                                        objectStr = null;
 
-                                    //get value for Subject
-                                    {
-                                        if (item.s_type == "fixed") subjectStr = item.s;
+                                        //get value for Subject
+                                        {
+                                            if (item.s_type == "fixed") subjectStr = item.s;
 
-                                        else if (typeof item.s === "function") subjectStr = item.s(line, item);
-                                        else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
-                                            subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line);
-                                        } else if (item.s.match(/.+:.+|http.+/)) subjectStr = item.s;
-                                        else if (item.lookup_S) {
-                                            subjectStr = getLookupValue(item.lookup_S, line[item.s]);
+                                            else if (typeof item.s === "function") {
+                                                subjectStr = item.s(line, item);
+                                            } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
+                                                subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line);
+                                            } else if (item.s.match(/.+:.+|http.+/)) {
+                                                subjectStr = item.s;
+                                            } else {
+                                                subjectStr = line[item.s];
+                                            }
+
+                                            if (item.lookup_s) {
+                                                var lookupValue = getLookupValue(item.lookup_s, subjectStr);
+                                                if (!lookupValue)
+                                                    console.log("missing lookup_s: " + line[item.s]);
+                                                else if (lookupValue == "badLookupName")
+                                                    return callbackSeries(lookupValue)
+                                                else
+                                                    subjectStr = lookupValue
+
+                                            }
                                             if (!subjectStr) {
-                                                console.log(line[item.s]);
                                                 return;
                                             }
-                                        } else
-                                            subjectStr = line[item.s];
-
-                                        if (!subjectStr) {
-                                            ;// console.log(line[item.s]);
-                                            return;
                                         }
-                                    }
 
-                                    //get value for Object
-                                    {
-                                        /*   if(line.system!="Component system 3")
-                                             return ;// console.log(line.code1+" "+line.code2+"  "+ line.code3)
-                                           if(line.system=="Component system 3" && line.code2)
-                                               var x=3
-                                           if(line.system=="Component system 3" && line.code3)
-                                               var x=3*/
-
-
-                                        if (item.o_type == "fixed") objectStr = item.o;
-                                        if (typeof item.o === "function") objectStr = item.o(line, item);
-                                        else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
-                                            objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line);
-                                        } else if (item.o.match(/.+:.+|http.+/)) objectStr = item.o;
-                                        else if (item.lookup_O) {
-                                            objectStr = getLookupValue(item.lookup_O, objectStr);
-                                            if (!objectStr) {
-                                                console.log(line[item.o]);
-                                                return;
+                                        //get value for Object
+                                        {
+                                            if (item.o_type == "fixed") {
+                                                objectStr = item.o;
                                             }
-                                        } else objectStr = line[item.o];
+                                            if (typeof item.o === "function") {
+                                                objectStr = item.o(line, item);
+                                            } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
+                                                objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line);
+                                            } else if (item.o.match(/.+:.+|http.+/)) {
+                                                objectStr = item.o;
+                                            } else objectStr = line[item.o];
 
+                                            if (item.lookup_o) {
+                                                var lookupValue = getLookupValue(item.lookup_o, objectStr);
+
+                                                if (!lookupValue)
+                                                    console.log("missing lookup_o: " + line[item.o]);
+                                                else if (lookupValue == "badLookupName")
+                                                    return callbackSeries(lookupValue)
+                                                else
+                                                    objectStr = lookupValue
+                                            }
+                                        }
                                         if (!objectStr) {
                                             ; // console.log(line[item.o]);
                                             return;
                                         }
-                                    }
 
-                                    //format subject
-                                    {
-                                        subjectStr = subjectStr.trim()
-                                        if (typeof item.s === "function") subjectStr = subjectStr;
 
-                                        if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
-                                        else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) subjectStr = subjectStr;
-                                        else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
-                                    }
+                                        //format subject
+                                        {
+                                            subjectStr = subjectStr.trim()
+                                            if (typeof item.s === "function") subjectStr = subjectStr;
 
-                                    //format object
-                                    {
-                                        objectStr = objectStr.trim()
-                                        if (!objectStr || !objectStr.indexOf) {
-                                            var x = line;
-                                            var y = item;
+                                            if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
+                                            else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) subjectStr = subjectStr;
+                                            else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
                                         }
-                                        if (typeof item.o === "function")
-                                            objectStr = objectStr;
 
-                                        if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
-                                        else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
-                                            objectStr = objectStr;
-                                        } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                        else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
-                                    }
+                                        //format object
+                                        {
+                                            objectStr = objectStr.trim()
+                                            if (!objectStr || !objectStr.indexOf) {
+                                                var x = line;
+                                                var y = item;
+                                            }
+                                            if (typeof item.o === "function")
+                                                objectStr = objectStr;
 
-                                    if (item.p == "_restriction") {
-                                        if (!item.prop) {
-                                            return callbackSeries("no prop defined for restriction");
+                                            if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
+                                            else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+                                                objectStr = objectStr;
+                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                            else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                         }
-                                        var propStr = item.prop;
-                                        if (typeof item.prop === "function") {
-                                            propStr = item.prop(line, line);
-                                        }
-                                        var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                        var prop = propStr;
-                                        if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
-                                        if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
-                                        triples.push({
-                                            s: blankNode,
-                                            p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                            o: "<http://www.w3.org/2002/07/owl#Restriction>",
-                                        });
-                                        triples.push({
-                                            s: blankNode,
-                                            p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                            o: prop,
-                                        });
-                                        if (objectStr) {
+                                        if (item.p == "_restriction") {
+                                            if (!item.prop) {
+                                                return callbackSeries("no prop defined for restriction");
+                                            }
+                                            var propStr = item.prop;
+                                            if (typeof item.prop === "function") {
+                                                propStr = item.prop(line, item);
+                                            }
+                                            var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                            var prop = propStr;
+                                            if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
+                                            if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
+
                                             triples.push({
                                                 s: blankNode,
-                                                p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                                o: objectStr,
+                                                p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+                                                o: "<http://www.w3.org/2002/07/owl#Restriction>",
                                             });
-                                        } else {
-                                            var x = 5;
-                                        }
-                                        triples.push({
-                                            s: subjectStr,
-                                            p: "rdfs:subClassOf",
-                                            o: blankNode,
-                                        });
-                                        objectStr = blankNode;
-
-                                        /*  console.log(
-                                              JSON.stringify({
-                                                  s: subjectStr,
-                                                  p: "rdfs:subClassOf",
-                                                  o: blankNode,
-                                              })
-                                          );*/
-                                        return;
-                                    }
-
-                                    //not restriction
-                                    else {
-                                        // get value for property
-                                        var propertyStr = item.p;
-                                        if (item.p.indexOf("$") == 0) propertyStr = line[item.p.substring(1)];
-                                        else if (typeof item.p === "function") {
-                                            propertyStr = item.p(line, line);
-                                        }
-
-                                        if (subjectStr && objectStr) {
-                                            // return console.log("missing type " + item.p)
-                                            if (!existingNodes[subjectStr + "_" + objectStr]) {
-                                                existingNodes[subjectStr + "_" + objectStr] = 1;
+                                            triples.push({
+                                                s: blankNode,
+                                                p: "<http://www.w3.org/2002/07/owl#onProperty>",
+                                                o: prop,
+                                            });
+                                            if (objectStr) {
                                                 triples.push({
-                                                    s: subjectStr,
-                                                    p: propertyStr,
+                                                    s: blankNode,
+                                                    p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
                                                     o: objectStr,
                                                 });
+                                            } else {
+                                                var x = 5;
+                                            }
+                                            triples.push({
+                                                s: subjectStr,
+                                                p: "rdfs:subClassOf",
+                                                o: blankNode,
+                                            });
+                                            objectStr = blankNode;
+
+                                            /*  console.log(
+                                                  JSON.stringify({
+                                                      s: subjectStr,
+                                                      p: "rdfs:subClassOf",
+                                                      o: blankNode,
+                                                  })
+                                              );*/
+                                            return;
+                                        }
+
+                                        //not restriction
+                                        else {
+                                            // get value for property
+                                            var propertyStr = item.p;
+                                            if (item.p.indexOf("$") == 0) propertyStr = line[item.p.substring(1)];
+                                            else if (typeof item.p === "function") {
+                                                propertyStr = item.p(line, line);
+                                            }
+
+                                            if (subjectStr && objectStr) {
+                                                // return console.log("missing type " + item.p)
+                                                if (!existingNodes[subjectStr + "_" + objectStr]) {
+                                                    existingNodes[subjectStr + "_" + objectStr] = 1;
+                                                    triples.push({
+                                                        s: subjectStr,
+                                                        p: propertyStr,
+                                                        o: objectStr,
+                                                    });
+                                                }
                                             }
                                         }
-                                    }
+                                    });
+
+                                    var x = triples;
                                 });
 
                                 var x = triples;
-                            });
-
-                            var x = triples;
-                            callbackSeries();
-                        },
-                        //write triples
-                        function (callbackSeries) {
-                            var totalTriples = 0;
-                            if (options.sampleSize) {
-                                var sampleTriples = triples.slice(0, options.sampleSize)
-                                return callback(null, sampleTriples)
+                                callbackSeries();
                             }
 
+                        ,
 
-                            totalTriplesCount += triples.length;
-
-                            var slices = util.sliceArray(triples, 200);
-                            async.eachSeries(
-                                slices,
-                                function (slice, callbackEach) {
-                                    CsvTripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-                                        if (err) {
-
-
-                                            var x = sparqlServerUrl
-                                            return callbackEach(err);
-                                        }
-                                        totalTriples += result;
-
-                                        callbackEach();
-                                    });
-                                },
-                                function (err) {
-                                    console.log("------------" + filePath + " " + totalTriples);
-                                    callbackSeries();
+                            //write triples
+                            function (callbackSeries) {
+                                var totalTriples = 0;
+                                if (options.sampleSize) {
+                                    var sampleTriples = triples.slice(0, options.sampleSize)
+                                    return callback(null, sampleTriples)
                                 }
-                            );
-                        },
-                    ],
-                    function (err) {
-                        callbackEachMapping();
-                    }
-                );
+
+
+                                totalTriplesCount += triples.length;
+
+                                var slices = util.sliceArray(triples, 200);
+                                async.eachSeries(
+                                    slices,
+                                    function (slice, callbackEach) {
+                                        CsvTripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                            if (err) {
+
+
+                                                var x = sparqlServerUrl
+                                                return callbackEach(err);
+                                            }
+                                            totalTriples += result;
+
+                                            callbackEach();
+                                        });
+                                    },
+                                    function (err) {
+                                        console.log("------------" + filePath + " " + totalTriples);
+                                        callbackSeries();
+                                    }
+                                );
+                            }
+
+                        ,
+                        ],
+
+                            function (err) {
+                                callbackEachMapping();
+                            }
+
+                        );
             },
             function (err) {
                 if (callback)
@@ -384,6 +404,8 @@ var CsvTripleBuilder = {
             "PREFIX req: <https://w3id.org/requirement-ontology/rdl/>" +
             "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>" +
             "PREFIX iso81346: <http://data.total.com/resource/tsf/IEC_ISO_81346/>" +
+            "PREFIX slsv: <http://souslesens.org/resource/vocabulary/>" +
+
             "";
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
@@ -478,20 +500,52 @@ var CsvTripleBuilder = {
                 mappings.fileName = mappingsFilePath.replace(".json", "")
 
 
-                mappings.tripleModels.forEach(function(item){
-                    if(item.o["_function(line, mapping)_"]) {
-                        var expression=item.o["_function(line, mapping)_"]
-                        try {
-                            var fn = new Function("line", "mapping", expression )
-                        }
-                        catch(err){
-                            return callbackSeries(err)
-                        }
-                        item.o=fn
+                function getFunction(fnStr) {
+                    try {
+
+                        var array = /\{(?<body>.*)\}/.exec(fnStr)
+                        var fnBody = array.groups["body"]
+                        var fn = new Function("row", "mapping", fnBody)
+                        return fn;
+                    } catch (err) {
+                        return null;
+                    }
+                }
+
+                // format functions
+                mappings.tripleModels.forEach(function (item) {
+                    if (item.s.indexOf("function") > -1) {
+                        var fn = getFunction(item.o)
+                        if (fn)
+                            item.s = fn
+                        else
+                            return callbackSeries("error in subejct function " + JSON.stringify(item))
+                    }
+                    if (item.o.indexOf("function") > -1) {
+                        var fn = getFunction(item.o)
+                        if (fn)
+                            item.o = fn
+                        else
+                            return callbackSeries("error in object function " + JSON.stringify(item))
                     }
 
+                })
+                for (var key in mappings.transform) {
+                    var item = mappings.transform[key]
+                    if (item.s.indexOf("function") > -1) {
+                        var fn = getFunction(item.o)
+                        if (fn)
+                            mappings.transform[key] = fn
+                        else
+                            return callbackSeries("error in transform" + JSON.stringify(mappings.transform))
+                    }
 
+                }
 
+                // format lookups
+                mappings.lookups.forEach(function (item) {
+                    var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
+                    item.filePath = lookupFilePath
                 })
 
                 var mappingsMap = {[mappings.fileName]: mappings}

@@ -1,6 +1,7 @@
 <script src="js/external/jquery/jquery.json-editor.min.js"></script>
+<!--<script src="js/external/jsoneditor.js"></script>>-->
+<!--script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script-->
 
-<!--<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>-->
 
 <style>
     .KGcreator_tripleInput {
@@ -37,6 +38,7 @@
     <div class="KGcreator_tripleDiv">
         Predicate <input id="KGcreator_predicateInput" class="KGcreator_tripleInput">
         <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
+        is Restriction<input type="checkbox" id="KGcreator_isRestrictionCBX">
     </div>
     <div class="KGcreator_tripleDiv">
         Object <input id="KGcreator_objectInput" class="KGcreator_tripleInput">
@@ -58,6 +60,8 @@
         <!--textarea id="KGcreator_tripleTA" style="width: 100%;height:100px;"></textarea>-->
 
         <pre id="KGcreator_mainJsonDisplay" style="width: 100%;height:500px;"></pre>
+
+
 
         <div>
             <button onclick="KGcreator.saveMappings()">Save</button>

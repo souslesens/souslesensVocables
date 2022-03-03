@@ -557,7 +557,7 @@ var Sparql_OWL = (function () {
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel" + fromStr +
+                "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel ?inverseProp ?inversePropLabel" + fromStr +
                 " WHERE {"
             if (options.selectGraph)
                 query += " graph ?g "
@@ -568,8 +568,12 @@ var Sparql_OWL = (function () {
                 query += "   {?prop rdf:type owl:ObjectProperty "
 
             query += "OPTIONAL{?prop rdfs:label ?propLabel.}  " +
-                "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
-                "OPTIONAL { ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " + "OPTIONAL{?domain rdfs:label ?domainLabel.}} " +
+                "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+                "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.}}  " +
+                "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType." +
+                " OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
+                "OPTIONAL { ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " +
+                "OPTIONAL{?domain rdfs:label ?domainLabel.}} " +
                 " OPTIONAL {?prop rdfs:subPropertyOf ?subProp. {?subProp rdfs:label ?subPropLabel.}} " + filterStr
 
                 /* " WHERE { ?domain ?prop ?range ." + filterStr +
@@ -592,7 +596,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "inverseProp","domain", "range"])
                 if (options.addInverseRestrictions) {
                     delete options.addInverseRestrictions
                     options.inverseRestriction = true

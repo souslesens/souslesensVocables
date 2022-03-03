@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@futpib/tika-server-client": "0.0.5",
-    "2d-array-rotation": "^2.1.1",
     "@triply/yasgui": "^4.2.21",
+    "2d-array-rotation": "^2.1.1",
     "async": "^3.2.3",
     "base64-stream": "^1.0.0",
     "bcrypt": "^5.0.1",

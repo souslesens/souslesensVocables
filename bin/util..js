@@ -176,7 +176,7 @@ var util = {
         return string.charAt(0).toUpperCase() + string.slice(1);
     },
 
-    formatStringForTriple: function (str, forUri) {
+    formatStringForTriple: function (str, forUri,) {
         if (!str || !str.replace) return null;
         str = str.trim();
         str = str.replace(/\\/gm, "");
@@ -194,10 +194,11 @@ var util = {
 
         if (forUri) {
             str = str.replace(/ /gm, "_");
-            str = str.replace(/\-/gm, "_");
+          //  str = str.replace(/\-/gm, "_");
             str = str.replace(/:/gm, "_");
 
             str=encodeURIComponent(str)
+            str=str.replace(/%2F/gm,"/")
         }
 
         return str;

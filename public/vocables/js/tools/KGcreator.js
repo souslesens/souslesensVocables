@@ -1,14 +1,20 @@
+//https://openbase.com/js/@json-editor/json-editor/documentation
+
 var KGcreator = (function () {
 
     var self = {}
     self.usualProperties = [
         "rdf:type",
         "rdfs:subClassOf",
+        "rdfs:isDefinedBy",
         "rdfs:label",
+        "",
         "slsv:hasCode",
+        "",
         "skos:definition",
         "skos:altLabel",
         "skos:prefLabel",
+        "skos:member",
         "",
         "_function",
         "_restriction",
@@ -19,10 +25,12 @@ var KGcreator = (function () {
 
     self.usualObjectClasses = [
         "owl:Class",
-        "rdfs:subClassOf",
-        "rdfs:label",
+        "owl:Property",
+        "owl:NamedIndividual",
+        "skos:Concept",
+        "skos:Collection",
+
         "slsv:TopConcept",
-        "",
         "_function",
         "",
 
@@ -83,63 +91,7 @@ var KGcreator = (function () {
 
                 var options = {
                     openAll: true,
-                    selectTreeNodeFn: function (event, obj) {
-                        $("#KGcreator_dataSampleDiv").val("")
-                        self.currentTreeNode = obj.node
-                        if (obj.node.parents.length == 0)
-                            return;
-                        if (obj.node.parents.length == 2) {
-                            $("#KGcreator_dataSampleDiv").val("")
-                            var str = "Sample data for column " + obj.node.id + "\n"
-                            str += ""
-                            obj.node.data.sample.forEach(function (item) {
-                                str += item[obj.node.id] + "\n"
-                            })
-
-                            $("#KGcreator_dataSampleDiv").val(str)
-                            return
-                        }
-
-
-                        self.currentJsonObject = {
-                            fileName: obj.node.id,
-                            tripleModels: [],
-                            transform: {},
-                            lookups: [],
-                            graphUri: ""
-                        }
-                        self.loadMappings()
-                        if (obj.node.children.length > 0)
-                            return;
-                        var payload = {
-                            readCsv: 1,
-                            dir: "CSV/CFIHOS_V1.5_RDL",
-                            fileName: obj.node.id,
-                            options: JSON.stringify({lines: 100})
-                        }
-                        $.ajax({
-                            type: "POST",
-                            url: Config.serverUrl,
-                            data: payload,
-                            dataType: "json",
-                            success: function (result, textStatus, jqXHR) {
-                                var jstreeData = []
-
-                                result.headers.forEach(function (col) {
-                                    jstreeData.push({
-                                        id: col,
-                                        text: col,
-                                        parent: obj.node.id,
-                                        data: {sample: result.data[0]}
-
-                                    })
-                                })
-                                common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData)
-                            }, error: function (err) {
-                                alert(err.responseText)
-                            }
-                        })
-                    },
+                    selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
                     contextMenu: KGcreator.getSystemsTreeContextMenu(),
 
                 }
@@ -153,70 +105,128 @@ var KGcreator = (function () {
         })
 
     }
+    self.onCsvtreeNodeClicked = function (event, obj) {
 
-    self.getSystemsTreeContextMenu = function () {
-        var items = {}
+        $("#KGcreator_dataSampleDiv").val("")
+        self.currentTreeNode = obj.node
+        if (obj.node.parents.length == 0)
+            return;
+        if (obj.node.parents.length == 2) {
+            $("#KGcreator_dataSampleDiv").val("")
+            var str = "Sample data for column " + obj.node.id + "\n"
+            str += ""
+            obj.node.data.sample.forEach(function (item) {
+                str += item[obj.node.id] + "\n"
+            })
 
-
-        items.setAsSubject = {
-            label: "Subject",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length < 2)
-                    return;
-                $("#KGcreator_subjectInput").val(self.currentTreeNode.id)
-            }
+            $("#KGcreator_dataSampleDiv").val(str)
+            return
         }
+        if (obj.event.button != 2)//if popup menu dont load
+            self.loadMappings(obj.node.id)
 
-        items.setAsObject = {
-            label: "Object",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length < 2)
-                    return;
-                $("#KGcreator_objectInput").val(self.currentTreeNode.id)
-            }
+
+        if (obj.node.children.length > 0)
+            return;
+
+        // load csv columns
+        var payload = {
+            readCsv: 1,
+            dir: "CSV/CFIHOS_V1.5_RDL",
+            fileName: obj.node.id,
+            options: JSON.stringify({lines: 100})
         }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (result, textStatus, jqXHR) {
+                var jstreeData = []
 
-        items.copy = {
-            label: "Copy",
-            action: function (e) {// pb avec source
-                navigator.clipboard.writeText(self.currentTreeNode.id);
+                result.headers.forEach(function (col) {
+                    jstreeData.push({
+                        id: col,
+                        text: col,
+                        parent: obj.node.id,
+                        data: {sample: result.data[0]}
+
+                    })
+                })
+                common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData)
+            }, error: function (err) {
+                alert(err.responseText)
             }
-        }
+        })
+    },
 
-        items.showLookupDialog = {
-            label: "Add lookup",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length < 1)
-                    return;
-                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html")
-                $("#KGcreator_dialogDiv").dialog("open")
+        self.getSystemsTreeContextMenu = function () {
+            var items = {}
 
+
+            items.setAsSubject = {
+                label: "Subject",
+                action: function (e) {// pb avec source
+                    if (self.currentTreeNode.parents.length < 2)
+                        return;
+                    $("#KGcreator_subjectInput").val(self.currentTreeNode.id)
+                }
             }
-        }
-        items.showTransformDialog = {
-            label: "Add Transform",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length !=2)
-                    return;
-                $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html",)
-                $("#KGcreator_dialogDiv").dialog("open")
 
+            items.setAsObject = {
+                label: "Object",
+                action: function (e) {// pb avec source
+                    if (self.currentTreeNode.parents.length < 2)
+                        return;
+                    $("#KGcreator_objectInput").val(self.currentTreeNode.id)
+                }
             }
-        }
 
-        items.loadMappings = {
-            label: "load",
-            action: function (e) {// pb avec source
-                if (self.currentTreeNode.parents.length != 1)
-                    return;
-                KGcreator.loadMappings()
+            items.copy = {
+                label: "Copy",
+                action: function (e) {// pb avec source
+                    navigator.clipboard.writeText(self.currentTreeNode.id);
+                }
             }
+
+            items.showLookupDialog = {
+                label: "Add lookup",
+                action: function (e) {// pb avec source
+                    if (self.currentTreeNode.parents.length < 1)
+                        return;
+                    $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function () {
+                        $("#KGCreator_lookupName").val(self.currentTreeNode.id)
+                    })
+                    $("#KGcreator_dialogDiv").dialog("open")
+
+                }
+            }
+            items.showTransformDialog = {
+                label: "Add Transform",
+                action: function (e) {// pb avec source
+                    if (self.currentTreeNode.parents.length != 2)
+                        return;
+                    $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function () {
+                        $("#KGcreator_transformColumn").val(self.currentTreeNode.id)
+                    })
+                    $("#KGcreator_dialogDiv").dialog("open")
+
+                }
+            }
+
+            items.loadMappings = {
+                label: "load",
+                action: function (e) {// pb avec source
+                    if (self.currentTreeNode.parents.length != 1)
+                        return;
+                    KGcreator.loadMappings()
+                }
+            }
+
+
+            return items
+
         }
-
-
-        return items
-
-    }
 
     self.initCentralPanel = function () {
         async.series([
@@ -254,10 +264,29 @@ var KGcreator = (function () {
                             return -1;
                         return 0;
                     })
+                    self.propertiesMap = {}
                     result.forEach(function (item) {
+                        self.propertiesMap["part14:" + item.propLabel.value] = {
+                            id: item.prop.value,
+                            label: item.propLabel.value,
+                            inverseProp: item.inverseProp ? item.inverseProp.value : null,
+                            inversePropLabel: item.inversePropLabel ? ("part14:" + item.inversePropLabel.value) : null,
+
+                        }
+
 
                         self.usualProperties.push("part14:" + item.propLabel.value)
                     })
+// set missing inverse props
+                    for (var key in self.propertiesMap) {
+
+                        if (self.propertiesMap[key].inversePropLabel) {
+                            if (!self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel)
+                                self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel = key
+                            self.propertiesMap[self.propertiesMap[key].inversePropLabel].inverseProp = self.propertiesMap[key]
+                        }
+                    }
+
                     callbackSeries()
                 })
             },
@@ -268,11 +297,16 @@ var KGcreator = (function () {
 
 
                 self.mainJsonEditor = new JsonEditor('#KGcreator_mainJsonDisplay', {});
+                /*  const element = document.getElementById('KGcreator_mainJsonDisplay',{});
+                  self.mainJsonEditor = new JSONEditor(element, {});*/
+                $("#KGcreator_mainJsonDisplay").on('click', () => {
+                    self.mainJsonEditorModified = true
+                });
 
 
                 $("#KGcreator_dialogDiv").dialog({
                     autoOpen: false,
-                    height: 400,
+                    height: 600,
                     width: 600,
                     modal: false
                 })
@@ -295,38 +329,39 @@ var KGcreator = (function () {
         var isObjectString = $("#KGcreator_isStringCBX").prop("checked")
         var isSubjectString = $("#KGcreator_isStringCBX").prop("checked")
 
-        var subjectLookupName= $("#KGcreator_subjectLookupName").val()
-        var objectLookupName= $("#KGcreator_objectLookupName").val()
+        var subjectLookupName = $("#KGcreator_subjectLookupName").val()
+        var objectLookupName = $("#KGcreator_objectLookupName").val()
+        var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked")
 
         if (!subject)
-            return $("#KGcreator_tripleMessageDiv").html("missing subject")
+            return alert("missing subject")
         if (!predicate)
-            return $("#KGcreator_tripleMessageDiv").html("missing predicate")
+            return alert("missing predicate")
         if (!object)
-            return $("#KGcreator_tripleMessageDiv").html("missing object")
+            return alert("missing object")
 
-
-        if (subject.indexOf("_function") == 0) {
-            subject = {[subject]: "..."}
-
-        }
-        if (object.indexOf("_function") == 0) {
-            object = {[object]: "..."}
-        }
 
         var tripleObj =
             {s: subject, p: predicate, o: object}
 
         if (isObjectString)
             tripleObj.isString = true
-        if(subjectLookupName)
+        if (subjectLookupName)
             tripleObj.lookup_s = subjectLookupName
-        if(objectLookupName)
+        if (objectLookupName)
             tripleObj.lookup_o = objectLookupName
+
+        if (isRestrictionCBX) {
+            tripleObj.isRestriction = true;
+            if (self.propertiesMap[predicate] && self.propertiesMap[predicate].inversePropLabel) {
+                tripleObj.inverseRestrictionProperty = self.propertiesMap[predicate].inversePropLabel;
+            }
+        }
 
         self.currentJsonObject.tripleModels.push(tripleObj)
 
         self.mainJsonEditor.load(self.currentJsonObject)
+        self.mainJsonEditorModified = true
 
         $("#KGcreator_objectInput").val("")
         $("#KGcreator_objectSelect").val("")
@@ -337,16 +372,16 @@ var KGcreator = (function () {
 
     }
 
-    self.onTripleModelSelect=function(role,value){
-self.currentTripleModelRole=role
-        if(value=="_function"){
-           return self.showFunctionDialog(role)
+    self.onTripleModelSelect = function (role, value) {
+        self.currentTripleModelRole = role
+        if (value == "_function") {
+            return self.showFunctionDialog(role)
         }
-        if(role=="s")
-        $('#KGcreator_subjectInput').val(value)
-        else if(role=="p")
+        if (role == "s")
+            $('#KGcreator_subjectInput').val(value)
+        else if (role == "p")
             $('#KGcreator_predicateInput').val(value)
-        else if(role=="o")
+        else if (role == "o")
             $('#KGcreator_objectInput').val(value)
 
     }
@@ -356,78 +391,79 @@ self.currentTripleModelRole=role
             name: $("#KGCreator_lookupName").val(),
             fileName: $("#KGCreator_lookupFileName").val(),
             sourceColumn: $("#KGCreator_lookupSourceColumn").val(),
-            targetColumn: $("#KGCreator_lookuptargetColumn").val(),
+            targetColumn: $("#KGCreator_lookupTargetColumn").val(),
+            transformFn: $("#KGCreator_lookupTransformFn").val(),
+
         }
         self.currentJsonObject = self.mainJsonEditor.get()
         self.currentJsonObject.lookups.push(lookup)
         self.mainJsonEditor.load(self.currentJsonObject)
+        self.mainJsonEditorModified = true
         $("#KGcreator_dialogDiv").dialog("close")
 
     }
-    self.showFunctionDialog=function(role){
+    self.showFunctionDialog = function (role) {
 
         $("#KGcreator_dialogDiv").load("snippets/KGcreator/functionDialog.html",)
         $("#KGcreator_dialogDiv").dialog("open")
 
     }
-    self.testFunction=function(){
-        var fnBody=$("#KGcreator_fnBody").val()
+    self.testFunction = function () {
+        var fnBody = $("#KGcreator_fnBody").val()
         try {
-            var fn = new Function("row","mapping",fnBody)
+            var fn = new Function("row", "mapping", fnBody)
             $("#KGcreator_testFnResult").html("function OK")
-        }
-        catch(err){
-            $("#KGcreator_testFnResult").html("error in function code "+err.message)
+        } catch (err) {
+            $("#KGcreator_testFnResult").html("error in function code " + err.message)
 
         }
     }
     self.addFunction = function () {
 
-        var fnBody=$("#KGcreator_fnBody").val()
+        var fnBody = $("#KGcreator_fnBody").val()
 
         try {
-            var fn = new Function("row","mapping",fnBody)
+            var fn = new Function("row", "mapping", fnBody)
+
+        } catch (err) {
+            return alert("error in function code " + err.message)
 
         }
-        catch(err){
-           return alert("error in function code "+err.message)
-
-        }
-     var fnObject="function{"+fnBody+"}"
+        var fnObject = "function{" + fnBody + "}"
         //  var fnObject=JSON.stringify({"_function":fnBody})
-        var role=self.currentTripleModelRole
-        if(role=="s")
+        var role = self.currentTripleModelRole
+        if (role == "s")
             $('#KGcreator_subjectInput').val(fnObject)
-        else if(role=="p")
+        else if (role == "p")
             $('#KGcreator_predicateInput').val(fnObject)
-        else if(role=="o")
+        else if (role == "o")
             $('#KGcreator_objectInput').val(fnObject)
         $("#KGcreator_dialogDiv").dialog("close")
 
     }
 
     self.addTransformFunction = function () {
-        var column=$("#KGcreator_transformColumn").val()
-        var fnBody=$("#KGcreator_fnBody").val()
+        var column = $("#KGcreator_transformColumn").val()
+        var fnBody = $("#KGcreator_fnBody").val()
 
         try {
-            var fn = new Function("value", "role", "prop", "row",fnBody)
+            var fn = new Function("value", "role", "prop", "row", fnBody)
+
+        } catch (err) {
+            return alert("error in function code " + err.message)
 
         }
-        catch(err){
-            return alert("error in function code "+err.message)
-
-        }
-        var fnObject="function{"+fnBody+"}"
+        var fnObject = "function{" + fnBody + "}"
         self.currentJsonObject = self.mainJsonEditor.get()
-        self.currentJsonObject.transform[column]=fnObject;
-        self.mainJsonEditor.load( self.currentJsonObject)
+        if (!self.currentJsonObject.transform)
+            self.currentJsonObject.transform = {}
+        self.currentJsonObject.transform[column] = fnBody;
+        self.mainJsonEditor.load(self.currentJsonObject)
+        self.mainJsonEditorModified = true
 
         $("#KGcreator_dialogDiv").dialog("close")
 
     }
-
-
 
 
     self.saveMappings = function (callback) {
@@ -488,43 +524,79 @@ self.currentTripleModelRole=role
     }
     self.clearMappings = function () {
         var data = self.mainJsonEditor.load({})
+        self.mainJsonEditorModified = false
     }
-    self.loadMappings = function () {
-        if (self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
-            if (confirm(" save current json before opening new file"))
-                self.saveMappings(function (err, result) {
-                })
+    self.loadMappings = function (csvFileName) {
 
-        }
-        var payload = {
-            readDataFile: 1,
-            dir: "CSV/" + self.currentCsvDir,
-            fileName: self.currentJsonObject.fileName + ".json",
 
-        }
-        $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
-            dataType: "json",
-            success: function (result, textStatus, jqXHR) {
-                self.currentJsonObject = JSON.parse(result.result)
-                self.mainJsonEditor.load(self.currentJsonObject)
+        function execLoadMappings() {
+            self.currentJsonObject = {}
+            self.mainJsonEditor.load(self.currentJsonObject)
 
-            }, error(err) {
-                ;// return alert(err.responseText)
+            var payload = {
+                readDataFile: 1,
+                dir: "CSV/" + self.currentCsvDir,
+                fileName: csvFileName + ".json",
+
             }
-        })
+            $.ajax({
+                type: "POST",
+                url: Config.serverUrl,
+                data: payload,
+                dataType: "json",
+                success: function (result, textStatus, jqXHR) {
+                    self.currentJsonObject = JSON.parse(result.result)
+                    self.mainJsonEditor.load(self.currentJsonObject)
+                    self.mainJsonEditorModified = false
+                    self.currentGraphUri = self.currentJsonObject.graphUri
+
+                }, error(err) {
+                    self.currentJsonObject = {
+                        fileName: csvFileName,
+                        tripleModels: [],
+                        transform: {},
+                        lookups: [],
+                        graphUri: ""
+                    }
+                    ;// return alert(err.responseText)
+                }
+            })
+        }
+
+        if (self.mainJsonEditorModified) {//self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
+            if (!self.currentJsonObject.fileName)
+                return execLoadMappings()
+
+            if (confirm(" save current json before opening new file")) {
+                self.saveMappings(function (err, result) {
+                    execLoadMappings()
+                })
+            } else {
+                execLoadMappings()
+            }
+
+        } else {
+            execLoadMappings()
+        }
+
 
     }
     self.createTriples = function (test) {
+        $("#KGcreator_dataSampleDiv").val("creating triples...")
         if (!self.currentJsonObject)
             return;
         if (!self.currentJsonObject.graphUri) {
-            var graphUri = prompt("enter graphUri")
+            var graphUri = ""
+            if (self.currentGraphUri)
+                graphUri = self.currentGraphUri;
+            graphUri = prompt("enter graphUri", graphUri)
             if (!graphUri)
                 return;
+            self.currentGraphUri = graphUri
+            self.currentJsonObject = self.mainJsonEditor.get()
             self.currentJsonObject.graphUri = graphUri
+            self.mainJsonEditor.load(self.currentJsonObject)
+
         }
         var options = {};
         if (test) {
@@ -574,7 +646,7 @@ self.currentTripleModelRole=role
 
     self.clearGraph = function () {
         if (!self.currentJsonObject)
-            return alert("no file mappings selected");
+            return; //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri)
             return alert("no graphUri");
 

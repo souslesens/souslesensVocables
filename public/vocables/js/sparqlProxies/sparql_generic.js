@@ -149,6 +149,7 @@ var Sparql_generic = (function () {
          */
 
 
+
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
             $("#waitImg").css("display", "block");
             if (!options) {

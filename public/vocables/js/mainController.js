@@ -349,7 +349,7 @@ var MainController = (function () {
                         }
                     } else {
                         self.currentSource = obj.node.id;
-                        MainController.UI.onSourceSelect()
+                        MainController.UI.onSourceSelect(obj.event)
                     }
 
                 }
@@ -460,7 +460,7 @@ var MainController = (function () {
 
         },
 
-        onSourceSelect: function () {
+        onSourceSelect: function (event) {
 
             if (Config.tools[self.currentTool].multiSources) {
 
@@ -472,7 +472,7 @@ var MainController = (function () {
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource)
             var controller = Config.tools[self.currentTool].controller
             if (controller.onSourceSelect)
-                controller.onSourceSelect(self.currentSource)
+                controller.onSourceSelect(self.currentSource,event)
 
 
         },

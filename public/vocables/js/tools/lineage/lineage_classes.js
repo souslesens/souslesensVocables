@@ -107,9 +107,12 @@ var Lineage_classes = (function () {
         }
 
 
-        self.onSourceSelect = function (sourceLabel) {
+        self.onSourceSelect = function (sourceLabel,event) {
             if (!sourceLabel)
                 return
+
+            if(event.button==0)// except context menu
+                visjsGraph.clearGraph()
 
             self.mainSource = sourceLabel
             if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.mainSource].editable > -1) {
@@ -1889,7 +1892,8 @@ var Lineage_classes = (function () {
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showRestrictions();\">Restrictions</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.showIndividuals();\">Individuals</span>" +
                 "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.graphNodeNeighborhoodUI();\">Neighborhood</span>" +
-                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.removeFromGraph();\">Remove from graph</span>"
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.removeFromGraph();\">Remove from graph</span>"+
+                "    <span  class=\"popupMenuItem\"onclick=\"Lineage_classes.graphActions.removeOthersFromGraph();\">Remove others</span>"
 
 
             if (node.id && node.id.indexOf("_cluster") > 0) {
@@ -2212,6 +2216,22 @@ var Lineage_classes = (function () {
             removeFromGraph: function () {
                 visjsGraph.removeNodes("id", Lineage_classes.currentGraphNode.id, true)
             },
+
+            removeOthersFromGraph:function(){
+                if(! Lineage_classes.currentGraphNode.id)
+                    return;
+                var nodes = visjsGraph.data.nodes.get();
+                var nodeIds=[]
+                nodes.forEach(function (node) {
+                   if(node.id!= Lineage_classes.currentGraphNode.id)
+                        nodeIds.push(node.id)
+                })
+                visjsGraph.data.nodes.remove(nodeIds);
+
+            },
+
+
+
             showObjectProperties: function () {
                 var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey
                 Lineage_classes.drawObjectProperties(self.currentGraphNode.data.source, [self.currentGraphNode.id], descendantsAlso)

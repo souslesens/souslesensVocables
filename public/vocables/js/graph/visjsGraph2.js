@@ -229,14 +229,17 @@ var visjsGraph = (function () {
                          return;*/
 
                     var nodeId = params.nodes[0]
+                    var nodeObj = self.data.nodes.get(nodeId)
+
                     self.lastMovedNode = nodeId
                     //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
                     var fixed = true;
                     if (params.event.srcEvent.altKey)
                         fixed = false;
+                    var newNode = {id: nodeId, fixed: fixed}
+                    newNodes.push(newNode)
 
-                    newNodes.push({id: nodeId, fixed: fixed})
 
                     visjsGraph.data.nodes.update(newNodes)
 

@@ -201,11 +201,11 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
-    self.tools["TE_TagGenerator"] = {
-        label: "TE_TagGenerator",
+    self.tools["TE_AssetConfigurator"] = {
+        label: "TE_AssetConfigurator",
         multiSources: 0,
         noSource:true,
-        controller: TE_TagGenerator,
+        controller: TE_AssetConfigurator,
         toolDescriptionImg: null
     }
 

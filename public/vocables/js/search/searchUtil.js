@@ -213,39 +213,61 @@ var SearchUtil = (function () {
             if (!offset)
                 offset = 0
             if (!size)
-                size = 1000
-            var queryObj
-            if (ids) {
-                size = ids.length + 10
-                queryObj = {
-                    "terms": {
-                        "id.keyword": ids,
+                size = 10000
 
+            if (ids) {
+
+                size = ids.length + 10
+                var str = ""
+                var header = {"index": index}
+                ids.forEach(function (id) {
+                    var query = {
+                        query: {
+                            "term": {
+                                "id.keyword": id,
+                            }
+                        }
+                    }
+                    str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
+                })
+
+                ElasticSearchProxy.executeMsearch(str, function (err, result) {
+                    if (err) {
+                        return callback(err)
+                    }
+                    var hits = []
+                    result.forEach(function (item) {
+                        if (item.hits.hits.length > 0)
+                            hits.push(item.hits.hits[0])
+                    })
+                    return callback(null, hits)
+                })
+
+
+            } else {
+                var queryObj = {"match_all": {}}
+
+                var query = {
+                    "query": queryObj,
+                    "from": offset,
+                    "size": size,
+                    "_source": {
+                        "excludes": [
+                            "attachment.content"
+                        ]
+                    }
+                    , "sort": {
+                        "label.keyword": {"order": "asc"}
                     }
                 }
-            } else {
-                queryObj = {"match_all": {}}
-            }
-            var query = {
-                "query": queryObj,
-                "from": offset,
-                "size": size,
-                "_source": {
-                    "excludes": [
-                        "attachment.content"
-                    ]
-                }
-                , "sort": {
-                    "label.keyword": {"order": "asc"}
-                }
-            }
 
-            ElasticSearchProxy.queryElastic(query, index, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, result.hits ? result.hits.hits : [])
-            })
+                ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+                    if (err) {
+                        return callback(err)
+                    }
+                    return callback(null, result.hits ? result.hits.hits : [])
+                })
+            }
         }
 
 
@@ -576,6 +598,9 @@ var SearchUtil = (function () {
             })
 
         }
+
+
+
 
 
         return self;

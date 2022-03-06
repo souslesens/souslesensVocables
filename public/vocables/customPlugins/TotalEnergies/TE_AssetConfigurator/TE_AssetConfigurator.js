@@ -1,4 +1,4 @@
-var TE_TagGenerator = (function () {
+var TE_AssetConfigurator = (function () {
         var self = {}
         self.currentSource = "TSF-RDS-OG-81346"
         self.displayedDivsMap = {}
@@ -78,15 +78,15 @@ var TE_TagGenerator = (function () {
         self.onLoaded = function () {
 
 
-            $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/leftPanel.html", function () {
-                //  $("#TE_TagGenerator_searchAllDiv").load("snippets/searchAll.html", function () {
+            $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/leftPanel.html", function () {
+                //  $("#TE_AssetConfigurator_searchAllDiv").load("snippets/searchAll.html", function () {
                 $("#GenericTools_searchInAllSources").prop("checked", false)
                 $("#GenericTools_searchInAllSources").prop("checked", false)
                 $(".GenericTools_searchAllOptional").css("display", "none")
 
                 MainController.currentSource = self.currentSource
-                $(".TE_TagGenerator_itemSelect").bind("change", function () {
-                    TE_TagGenerator.on81346TypeSelect($(this).val(), $(this).attr("id"));
+                $(".TE_AssetConfigurator_itemSelect").bind("change", function () {
+                    TE_AssetConfigurator.on81346TypeSelect($(this).val(), $(this).attr("id"));
                     $(this).val("")
                 })
                 //  self.initSytemsTree();
@@ -98,12 +98,12 @@ var TE_TagGenerator = (function () {
                 self.listSavedGraphs()
                 // })
             })
-            //    $("#graphDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/centralPanel.html")
+            //    $("#graphDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/centralPanel.html")
 
 
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
-            $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_TagGenerator/snippets/rightPanel.html")
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/rightPanel.html")
 
             $("#accordion").accordion("option", {active: 2});
 
@@ -115,8 +115,8 @@ var TE_TagGenerator = (function () {
             for (var key in self.systemsMap) {
                 var obj = self.systemsMap[key]
                 var divId = common.getRandomHexaId(10)
-                var str = "<div class='TagGenerator_SystemDiv' id='" + divId + "'" +
-                    " onclick='TE_TagGenerator.filterSytemTree(\"" + key + "\",\"" + divId + "\")'> " + obj.label + "</div>"
+                var str = "<div class='AssetConfigurator_SystemDiv' id='" + divId + "'" +
+                    " onclick='TE_AssetConfigurator.filterSytemTree(\"" + key + "\",\"" + divId + "\")'> " + obj.label + "</div>"
 
                 if (!htmlAspects[obj.aspect])
                     htmlAspects[obj.aspect] = {html: "", color: obj.color};
@@ -127,13 +127,13 @@ var TE_TagGenerator = (function () {
             var html = ""
             for (var key in htmlAspects) {
                 html += "<b>" + key + "</b>"
-                html += "<div id='" + key + "'  class='TagGenerator_AspectDiv'' style='background-color: " + htmlAspects[key].color + " '>" +
+                html += "<div id='" + key + "'  class='AssetConfigurator_AspectDiv'' style='background-color: " + htmlAspects[key].color + " '>" +
 
                     htmlAspects[key].html +
                     "</div>"
 
             }
-            $("#TE_TagGenerator_allSystemsDiv").append(html)
+            $("#TE_AssetConfigurator_allSystemsDiv").append(html)
 
             return
 
@@ -142,14 +142,14 @@ var TE_TagGenerator = (function () {
         self.initSytemsTree = function () {
 
             var options = {
-                targetDiv: "TE_TagGenerator_81346TreeDiv",
+                targetDiv: "TE_AssetConfigurator_81346TreeDiv",
                 selectTreeNodeFn: function (evt, obj) {
                     var node = obj.node
                     self.currentTreeNode = node
-                    SourceBrowser.openTreeNode("TE_TagGenerator_81346TreeDiv", self.currentSource, node)
+                    SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node)
                 },
 
-                contextMenu: TE_TagGenerator.getSystemsTreeContextMenu()
+                contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu()
 
             }
             SourceBrowser.showThesaurusTopConcepts(self.currentSource, options)
@@ -164,7 +164,7 @@ var TE_TagGenerator = (function () {
             items.addNode = {
                 label: "add Node",
                 action: function (e) {// pb avec source
-                    TE_TagGenerator.addNode(self.currentTreeNode)
+                    TE_AssetConfigurator.addNode(self.currentTreeNode)
                 }
             }
 
@@ -180,9 +180,15 @@ var TE_TagGenerator = (function () {
 
 
         self.filterSytemTree = function (systemUri, sytemDivId) {
-            $(".TagGenerator_SystemDiv").removeClass("TagGenerator_SystemDiv_selected")
-            $("#" + sytemDivId).addClass("TagGenerator_SystemDiv_selected")
-            $("#TE_TagGenerator_searchInSystemInput").focus()
+            if (!systemUri) {
+                self.currentSystem = null;
+                $(".AssetConfigurator_SystemDiv").removeClass("AssetConfigurator_SystemDiv_selected")
+                return;
+            }
+
+            $(".AssetConfigurator_SystemDiv").removeClass("AssetConfigurator_SystemDiv_selected")
+            $("#" + sytemDivId).addClass("AssetConfigurator_SystemDiv_selected")
+            $("#TE_AssetConfigurator_searchInSystemInput").focus()
 
 
             self.currentSystem = systemUri
@@ -193,7 +199,7 @@ var TE_TagGenerator = (function () {
 
 
                 var options = self.getJstreeOptions()
-                TreeController.drawOrUpdateTree("TE_TagGenerator_81346TreeDiv", result, "#", "child1", options)
+                TreeController.drawOrUpdateTree("TE_AssetConfigurator_81346TreeDiv", result, "#", "child1", options)
 
 
                 self.setTreeSystemNodesInfos()
@@ -209,11 +215,11 @@ var TE_TagGenerator = (function () {
                     var node = obj.node
                     self.currentTreeNode = node
                     var options = {optionalData: {systemType: node.data.systemType}}
-                    SourceBrowser.openTreeNode("TE_TagGenerator_81346TreeDiv", self.currentSource, node, options)
+                    SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options)
                     self.setTreeSystemNodesInfos(obj.node.id)
 
                 },
-                contextMenu: TE_TagGenerator.getSystemsTreeContextMenu(),
+                contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu(),
                 optionalData: {system: "concept"},
 
             }
@@ -221,61 +227,59 @@ var TE_TagGenerator = (function () {
         }
 
         self.addNode = function (node) {
-            $("#TagGenerator_treeInfosDiv").html("");
+            $("#AssetConfigurator_treeInfosDiv").html("");
             /*  if (node.parents.length + 1 < self.currentSystem.leafLevel)
-                        return $("#TagGenerator_treeInfosDiv").html("not allowed , select a descendant")*/
-            $("#TagGenerator_treeInfosDiv").html("adding " + node.data.label);
-            if (true) {
-                var level = self.systemsMap[self.currentSystem].level
-                if (self.currentGraphNode && self.currentGraphNode.data.aspect == "Component")
-                    level = self.currentGraphNode.data.level + 1
+                        return $("#AssetConfigurator_treeInfosDiv").html("not allowed , select a descendant")*/
+            $("#AssetConfigurator_treeInfosDiv").html("adding " + node.data.label);
 
-                node.data.level = level
-                node.data.system = self.currentSystem
-                node.data.aspect = self.systemsMap[self.currentSystem].aspect
+            var level = self.systemsMap[self.currentSystem].level
+            if (self.currentGraphNode && self.currentGraphNode.data.aspect == "Component")
+                level = self.currentGraphNode.data.level + 1
 
-
-                if (!self.objectsMap[node.data.id]) {
-                    self.objectsMap[node.data.id] = {counter: 0, items: []}
-                }
-                var counter = self.objectsMap[node.data.id].counter + 1
-                self.objectsMap[node.data.id].counter = counter;
+            node.data.level = level
+            node.data.system = self.currentSystem
+            node.data.aspect = self.systemsMap[self.currentSystem].aspect
 
 
-                node.data.number = counter
-
-                var existingNodes = visjsGraph.getExistingIdsMap()
-                var visjsData = {nodes: [], edges: []}
-                var visjsId = common.getRandomHexaId(10);
-                var code = self.systemsMap[self.currentSystem].items[node.data.id].code
-                node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
-                node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example
-                node.data.code = code
-                node.data.number = counter
-                var node = {
-                    id: visjsId,
-                    label: code + counter,
-                    data: node.data,
-                    level: level,
-                    shape: "square",
-                    size: 10,
-                    color: self.systemsMap[self.currentSystem].color
-                }
-                visjsData.nodes.push(node)
-
-                if (self.currentGraphNode)
-                    self.createRelation(node, self.currentGraphNode, function (err, result) {
-                        if (err)
-                            MainController.UI.message(err)
-                        else
-                            visjsData.edges = visjsData.edges.concat(result.edges)
-                    })
-                self.currentGraphNode = node
-
-                self.addToGraph(visjsData)
-
-
+            if (!self.objectsMap[node.data.id]) {
+                self.objectsMap[node.data.id] = {counter: 0, items: []}
             }
+            var counter = self.objectsMap[node.data.id].counter + 1
+            self.objectsMap[node.data.id].counter = counter;
+
+
+            node.data.number = counter
+
+            var existingNodes = visjsGraph.getExistingIdsMap()
+            var visjsData = {nodes: [], edges: []}
+            var visjsId = common.getRandomHexaId(10);
+            var code = self.systemsMap[self.currentSystem].items[node.data.id].code
+            node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
+            node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example
+            node.data.code = code
+            node.data.number = counter
+            var node = {
+                id: visjsId,
+                label: code + counter,
+                data: node.data,
+                level: level,
+                shape: "square",
+                size: 10,
+                color: self.systemsMap[self.currentSystem].color
+            }
+            visjsData.nodes.push(node)
+
+            if (self.currentGraphNode)
+                self.createRelation(node, self.currentGraphNode, function (err, result) {
+                    if (err)
+                        MainController.UI.message(err)
+                    else
+                        visjsData.edges = visjsData.edges.concat(result.edges)
+                })
+            //  self.currentGraphNode = node
+
+            self.addToGraph(visjsData)
+
 
         }
         self.addToGraph = function (visjsData) {
@@ -287,6 +291,7 @@ var TE_TagGenerator = (function () {
                 $("#graphDiv").focus()
             } else {
                 var options = {
+
                     "layout": {
                         "hierarchical": {
                             "enabled": true,
@@ -315,6 +320,7 @@ var TE_TagGenerator = (function () {
                     }
                 }
                 options.onclickFn = function (node, point, options) {
+                    MainController.UI.hidePopup("graphPopupDiv")
                     self.currentGraphNode = node
                     if (options.ctrlKey) {
                         if (!self.relationObj)
@@ -328,6 +334,7 @@ var TE_TagGenerator = (function () {
                                     var existingNodes = visjsGraph.getExistingIdsMap()
                                     visjsGraph.data.edges.add(visjsData.edges)
                                     self.relationObj = null;
+
                                 }
 
                             })
@@ -338,9 +345,13 @@ var TE_TagGenerator = (function () {
 
                     self.showGraphNodeInfos(node)
                 }
-                options.onRightClickFn= TE_TagGenerator.showGraphPopupMenus
+                options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus
 
-                visjsGraph.draw("graphDiv", visjsData, options)
+                visjsGraph.draw("graphDiv", visjsData, options, function () {
+
+                })
+
+
             }
             self.setSystemTypesSelectVisibility(self.currentSystem.level);
 
@@ -351,17 +362,17 @@ var TE_TagGenerator = (function () {
         }
 
 
-        self.showGraphNodeInfos=function(node){
-            self.getNodeClassificationTree(node.data.id,function(err,parentsMap) {
-                if(err)
+        self.showGraphNodeInfos = function (node) {
+            self.getNodeClassificationTree(node.data.id, function (err, parentsMap) {
+                if (err)
                     return MainController.UI.message(err)
-                var parentsStr="<ol>"
-                var i=0
-                for(var key in parentsMap){
-                    parentsStr+="<li>"+parentsMap[key]+"</li>"
+                var parentsStr = "<ol>"
+                var i = 0
+                for (var key in parentsMap) {
+                    parentsStr += "<li>" + parentsMap[key] + "</li>"
 
                 }
-                parentsStr+="</ol>"
+                parentsStr += "</ol>"
 
                 var html = "<table>"
                 html += "<tr><td>Aspect: <b>" + self.systemsMap[node.data.system].aspect + "</td></tr>"
@@ -372,29 +383,28 @@ var TE_TagGenerator = (function () {
                 html += "<tr><td>Function TAG  <b>:" + self.getNodeTag(node).functionTag + "</B></td></tr>"
                 html += "</table>"
 
-                $("#TagGenerator_graphHOverDiv").html(html)
+                $("#AssetConfigurator_graphHOverDiv").html(html)
             })
         }
 
 
-    self.showGraphPopupMenus = function (node,point, event) {
-        if (!node)
-            return  MainController.UI.hidePopup("graphPopupDiv");
-        if( node.from){//edge
-            var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_TagGenerator.deleteSelectedEdge()();\"> Delete</span>"
+        self.showGraphPopupMenus = function (node, point, event) {
+            if (!node)
+                return MainController.UI.hidePopup("graphPopupDiv");
+            if (node.from) {//edge
+                var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_AssetConfigurator.deleteSelectedEdge()();\"> Delete</span>"
 
-        }
-        else {
+            } else {
 
-            var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_TagGenerator.deleteSelectedObject()();\"> Delete</span>" +
-                "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_TagGenerator.rename();\"> Rename</span>"
-        }
+                var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_AssetConfigurator.deleteSelectedObject()();\"> Delete</span>" +
+                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.rename();\"> Rename</span>"
+            }
             $("#graphPopupDiv").html(html);
             self.currentGraphNode = node;
             MainController.UI.showPopup(point, "graphPopupDiv")
 
 
-    }
+        }
         self.setSystemTypesSelectVisibility = function (level) {
 
             return;
@@ -438,7 +448,7 @@ var TE_TagGenerator = (function () {
               }*/
 
         }
-        self.deleteSelectedEdge= function () {
+        self.deleteSelectedEdge = function () {
             visjsGraph.data.edge.remove(self.currentGraphNode.id)
             /*  if (self.currentDisplayDivId) {
                   delete self.displayedDivsMap[self.currentDisplayDivId]
@@ -452,7 +462,7 @@ var TE_TagGenerator = (function () {
         self.clearAll = function () {
             visjsGraph.clearGraph()
             self.displayedDivsMap = {}
-            $("#TagGenerator_displayDiv").html("");
+            $("#AssetConfigurator_displayDiv").html("");
             self.currentDisplayDivId = null;
             self.setSystemTypesSelectVisibility(-1)
             self.currentGraphNode = null;
@@ -640,7 +650,7 @@ var TE_TagGenerator = (function () {
             setTimeout(function () {
                 if (!topNode)
                     topNode = "#"
-                var treeNodes = common.jstree.getjsTreeNodes("TE_TagGenerator_81346TreeDiv", false, "#")
+                var treeNodes = common.jstree.getjsTreeNodes("TE_AssetConfigurator_81346TreeDiv", false, "#")
                 var ids = []
                 treeNodes.forEach(function (item) {
                     ids.push(item.data.id)
@@ -680,14 +690,15 @@ var TE_TagGenerator = (function () {
                     self.listSavedGraphs();
                 }
             } else {
-                visjsGraph.saveGraph(graphName, true)
+                visjsGraph.saveGraph(self.currentGraphName, true)
                 self.listSavedGraphs();
 
             }
         }
         self.loadGraph = function (graphName) {
             visjsGraph.clearGraph()
-
+            self.objectsMap = {}
+            self.currentGraphName = graphName
 
             visjsGraph.loadGraph(graphName, false, function (err, visjsData) {
                 visjsData.nodes.forEach(function (node) {
@@ -731,7 +742,7 @@ var TE_TagGenerator = (function () {
                     if (item.indexOf("RDS_") == 0)
                         graphs.push(item)
                 })
-                common.fillSelectOptions("TE_TagGenerator_savedGraphsSelect", graphs, true)
+                common.fillSelectOptions("TE_AssetConfigurator_savedGraphsSelect", graphs, true)
             })
         }
 
@@ -793,12 +804,7 @@ var TE_TagGenerator = (function () {
                             query: {
                                 "bool": {
                                     "must": [
-                                        {
-                                            "term": {
-                                                "parents.keyword": self.currentSystem,
 
-                                            }
-                                        },
                                         {
                                             "wildcard": {
                                                 "label": {
@@ -812,6 +818,17 @@ var TE_TagGenerator = (function () {
                                 }
                             }
                         }
+                        if (self.currentSystem) {
+                            queryObj.query.bool.must.push(
+                                {
+                                    "term": {
+                                        "parents.keyword": self.currentSystem,
+
+                                    }
+                                })
+
+
+                        }
                         ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
                             if (err)
                                 MainController.UI.message(err)
@@ -822,6 +839,7 @@ var TE_TagGenerator = (function () {
 
                         })
                     },
+
                     //get parents
                     function (callbackSeries) {
                         var parentIds = []
@@ -832,16 +850,30 @@ var TE_TagGenerator = (function () {
                                 if (parentIds.indexOf(item) < 0)
                                     parentIds.push(item)
                             })
+                            if (parentIds.indexOf(hit._source.id) < 0)
+                                parentIds.push(hit._source.id)
                         })
+
                         SearchUtil.getSourceLabels(self.currentSource.toLowerCase(), parentIds, null, null, function (err, hits) {
                             if (err)
                                 return callbackSeries(err)
                             hits.forEach(function (hit) {
-                                parentIdsMap[hit._source.id] = hit._source.label
+                                parentIdsMap[hit._source.id] = {
+                                    label: hit._source.label,
+                                    code: hit._source.skoslabels[0] || "ex"
+                                }
                             })
                             callbackSeries()
                         })
                     },
+
+                    function (callbackSeries) {
+                        var ids = Object.keys(parentIdsMap)
+                        self.setTreeItemSameAs(ids, function (err, result) {
+
+                        })
+                    },
+
                     //set tree
                     function (callbackSeries) {
 
@@ -862,36 +894,45 @@ var TE_TagGenerator = (function () {
 
                                 if (!existingNodes[item]) {
                                     existingNodes[item] = 1
-                                    var label = Sparql_common.getLabelFromURI(item) + " " + parentIdsMap[item]
+                                    var label
+                                    if (parentIdsMap[item])
+                                        label = parentIdsMap[item].code + " " + parentIdsMap[item].label
+                                    else
+                                        label = Sparql_common.getLabelFromURI(item)
                                     jstreeData.push({
                                         id: item,
                                         text: label,
                                         parent: parent,
                                         data: {
                                             id: item,
-                                            label: label,
+                                            label: parentIdsMap[item] ? parentIdsMap[item].label : Sparql_common.getLabelFromURI(item),
+
                                             source: self.currentSource,
-                                            code: Sparql_common.getLabelFromURI(item)
+                                            code: parentIdsMap[item] ? parentIdsMap[item].code : Sparql_common.getLabelFromURI(item)
                                         }
                                     })
                                 }
                             })
+
+
+                            var label2 = parentIdsMap[hit._source.id].code + " " + parentIdsMap[hit._source.id].label
+
                             jstreeData.push({
                                 id: hit._source.id,
-                                text: Sparql_common.getLabelFromURI(hit._source.id) + " " + hit._source.label,
+                                text: label2, // Sparql_common.getLabelFromURI(hit._source.id) + " " + hit._source.label,
                                 parent: parent,
                                 data: {
                                     id: hit._source.id,
-                                    label: hit._source.label,
+                                    label: label2,
                                     source: self.currentSource,
-                                    code: Sparql_common.getLabelFromURI(hit._source.id),
+                                    code: parentIdsMap[hit._source.id].code,
                                 }
                             })
 
                         })
                         var options = self.getJstreeOptions()
                         options.openAll = true;
-                        common.jstree.loadJsTree("TE_TagGenerator_81346TreeDiv", jstreeData, options)
+                        common.jstree.loadJsTree("TE_AssetConfigurator_81346TreeDiv", jstreeData, options)
 
                     }
                 ],
@@ -919,6 +960,16 @@ var TE_TagGenerator = (function () {
 
             })
             visjsGraph.data.nodes.update(newNodes)
+
+        }
+
+        self.setTreeItemSameAs = function (ids) {
+
+            Sparql_OWL.getObjectRestrictions("TSF-DICTIONARY", ids, {filter: "FILTER (?prop=owl:sameAs) "}, function (err, result) {
+                if (err)
+                    return alert(err.responseText)
+            })
+
 
         }
 

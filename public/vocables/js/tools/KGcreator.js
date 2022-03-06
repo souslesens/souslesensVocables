@@ -7,14 +7,18 @@ var KGcreator = (function () {
         "rdf:type",
         "rdfs:subClassOf",
         "rdfs:isDefinedBy",
+        "rdfs:comment",
         "rdfs:label",
         "",
         "slsv:hasCode",
         "",
-        "skos:definition",
+
         "skos:altLabel",
         "skos:prefLabel",
+        "skos:definition",
+        "skos:example",
         "skos:member",
+        "dcterms:format",
         "",
         "_function",
         "_restriction",
@@ -546,9 +550,15 @@ var KGcreator = (function () {
                 dataType: "json",
                 success: function (result, textStatus, jqXHR) {
                     self.currentJsonObject = JSON.parse(result.result)
+
+                    if(! self.currentJsonObject.graphUri )
+                        self.currentJsonObject.graphUri=self.currentGraphUri|| ""
+                    else
+                    self.currentGraphUri = self.currentJsonObject.graphUri
+
+
                     self.mainJsonEditor.load(self.currentJsonObject)
                     self.mainJsonEditorModified = false
-                    self.currentGraphUri = self.currentJsonObject.graphUri
 
                 }, error(err) {
                     self.currentJsonObject = {

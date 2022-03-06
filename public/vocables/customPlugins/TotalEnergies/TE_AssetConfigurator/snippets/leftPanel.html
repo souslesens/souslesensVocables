@@ -5,13 +5,13 @@
     <title>Title</title>
 
     <style>
-        .TagGenerator_AspectDiv{
+        .AssetConfigurator_AspectDiv{
             display: flex;
             flex-direction: row;
             margin: 2px;
             padding: 2px;
         }
-       .TagGenerator_SystemDiv{
+       .AssetConfigurator_SystemDiv{
            align-content: center;
            margin: 2px;
            padding: 4px;
@@ -20,11 +20,11 @@
            background: white;
            border: solid 1px black;
        }
-        .TagGenerator_SystemDiv_selected {
+        .AssetConfigurator_SystemDiv_selected {
             opacity: 1;
             border: solid 3px black;
         }
-        .TE_TagGenerator_Location {
+        .TE_AssetConfigurator_Location {
 
             padding:5px;
             margin: 5px;
@@ -32,7 +32,7 @@
             background-color: #ebcff5;
         }
 
-        .TE_TagGenerator_Function {
+        .TE_AssetConfigurator_Function {
 
             padding:5px;
             margin: 5px;
@@ -47,7 +47,7 @@
 <div  style="margin-bottom: 10px;margin-left: 30px">
 
     Systems<br>
-    <div id="TE_TagGenerator_allSystemsDiv"></div>
+    <div id="TE_AssetConfigurator_allSystemsDiv"></div>
 
 
 
@@ -57,15 +57,16 @@
 
 </div>
 
-<div id="TE_TagGenerator_81346TreePanel" style="margin-bottom: 10px;margin-left: 15px">
+<div id="TE_AssetConfigurator_81346TreePanel" style="margin-bottom: 10px;margin-left: 15px">
     <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#Standardizer_filterClassesDialogDiv').dialog('close')">Cancel</button>
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.compareSource(null,true)">Compare</button>-->
- <!--  <div id="TE_TagGenerator_searchAllDiv" style="height: 50px;margin-bottom: 10px ;display:block"></div>-->
-    <input  id="TE_TagGenerator_searchInSystemInput"   onkeyup="if (event.keyCode == 13 || event.keyCode == 9)TE_TagGenerator.searchInCurrentSystem($(this).val(),null)">
+ <!--  <div id="TE_AssetConfigurator_searchAllDiv" style="height: 50px;margin-bottom: 10px ;display:block"></div>-->
+    <input  id="TE_AssetConfigurator_searchInSystemInput"   onkeyup="if (event.keyCode == 13 || event.keyCode == 9)TE_AssetConfigurator.searchInCurrentSystem($(this).val(),null)">
+    <button onclick="TE_AssetConfigurator.filterSytemTree(null)">clear system</button>
 
-    <div id="TagGenerator_treeInfosDiv"></div>
+    <div id="AssetConfigurator_treeInfosDiv"></div>
     <div class="jstreeContainer" style="height:400px">
-        <div id="TE_TagGenerator_81346TreeDiv"></div>
+        <div id="TE_AssetConfigurator_81346TreeDiv"></div>
     </div>
 
 

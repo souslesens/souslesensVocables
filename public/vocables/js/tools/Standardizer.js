@@ -2245,6 +2245,8 @@ var Standardizer = (function () {
         self.createSameAsRelations = function (type) {
             var relations = [];
             var targetSources = []
+            var dictionarySourceLabel="TSF-DICTIONARY"
+
             if (type == "exactMatch") {
 
                 for (var key in self.matrixWordsMap.entities) {
@@ -2301,29 +2303,34 @@ var Standardizer = (function () {
             }
 
 
-            if (!confirm("create " + relations.length + " relations sameAs in TSF-DICTIONARY"))
+            if (!confirm("create " + relations.length + " relations sameAs in "+dictionarySourceLabel))
                 return;
 
             var sliceLength = 10
             var totalCreated = 0
+
             async.series([
                 function (callbackSeries) {
                     async.eachSeries(targetSources, function (targetSource, callbackEach) {
-                        MainController.UI.message(" adding " + targetSource + " in   TSF-DICTIONARY imports");
-                        Lineage_blend.addImportToCurrentSource("TSF-DICTIONARY", targetSource, function (err, result) {
+                        if(Config.sources[dictionarySourceLabel].imports.indexOf(targetSource))
+                            return callbackEach()
+                        MainController.UI.message(" adding " + targetSource + " in   dictionarySourceLabel imports");
+                        Lineage_blend.addImportToCurrentSource("dictionarySourceLabel", targetSource, function (err, result) {
                             return callbackEach(err)
 
                             //  return alert(" coming soon");
                         })
+                    },function(err){
+                        callbackSeries(err);
                     })
                 },
                 function (callbackSeries) {
 
 
                     var slices = common.array.slice(relations, sliceLength)
-                    MainController.UI.message(" Creating relations  in TSF-DICTIONARY...");
+                    MainController.UI.message(" Creating relations  in +"+dictionarySourceLabel+"...");
                     async.eachSeries(slices, function (slice, callbackEach) {
-                        Lineage_blend.createRelationTriples(slice, true, "TSF-DICTIONARY", function (err, result) {
+                        Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, result) {
                             if (err)
                                 return callbackEach(err)
                             /*   slice.forEach(function(relation){
@@ -2333,7 +2340,7 @@ var Standardizer = (function () {
                                    })*/
 
                             totalCreated += sliceLength
-                            MainController.UI.message(totalCreated + " relations created in TSF-DICTIONARY");
+                            MainController.UI.message(totalCreated + " relations created in "+dictionarySourceLabel);
 
                             return callbackEach()
                         })
@@ -2347,7 +2354,7 @@ var Standardizer = (function () {
                 if (err)
                     return alert(err)
 
-                MainController.UI.message(totalCreated + " relations created in TSF-DICTIONARY", true)
+                MainController.UI.message(totalCreated + " relations created in "+dictionarySourceLabel, true)
             })
         }
 

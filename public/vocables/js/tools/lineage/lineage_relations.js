@@ -29,7 +29,10 @@ Lineage_relations = (function () {
                 return alert(err)
             var x = result
             var props = [];
+            var asSamAsProp=false
             result.forEach(function (item) {
+                if(item.prop.value.indexOf("sameAs")>-1)
+                    asSamAsProp=true;
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
             props.sort(function (a, b) {
@@ -39,6 +42,9 @@ Lineage_relations = (function () {
                     return -1;
                 return 0
             })
+            if(!asSamAsProp)
+                props.splice(0,0,{id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
+
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
             // self.initProjectedGraphs()
         })
@@ -263,11 +269,12 @@ Lineage_relations = (function () {
 
             function (callbackSeries) {
 
-                var existingNodes = visjsGraph.getExistingIdsMap()
+                var existingNodes
                 var jstreeData = [];
                 var visjsData = {nodes: [], edges: []}
                 var sameAsLevel = 1;
                 if (relations && toLabelsMap && output == "visjs") {// get ancestors first if called by projectCurrrentSourceOnSource
+                    existingNodes= visjsGraph.getExistingIdsMap()
                     visjsData = self.getRestrictionAncestorsVisjsData(relations, toLabelsMap, output)
                     visjsData.nodes.forEach(function (node) {
                         existingNodes[node.id] = 1
@@ -278,6 +285,8 @@ Lineage_relations = (function () {
                     sameAsLevel = visjsData.maxLevel + 1;
 
                 }
+                else
+                    existingNodes= {}
 
 
                 var color;
@@ -429,13 +438,29 @@ Lineage_relations = (function () {
 
 
                 })
-                if(visjsGraph.isGraphNotEmpty()){
-                    visjsGraph.data.nodes.update(visjsData.nodes)
-                    visjsGraph.data.edges.update(visjsData.edges)
-                } else {
+                if(output == "jstree") {
 
-                    var options = {layoutHierarchical: 1}
-                    Lineage_classes.drawNewGraph(visjsData, options)
+                    $("#mainDialogDiv").dialog("open")
+                    $("#mainDialogDiv").load("snippets/lineage/listRelationsDialog.html",function(){
+
+                        var options = {
+                            openAll:true,
+                            selectTreeNodeFn: function () {
+                            }
+                        }
+                        common.jstree.loadJsTree("LineageRelation_listRelationDiv",jstreeData,options)
+                    })
+
+
+                } else if (output == "visjs") {
+                    if (visjsGraph.isGraphNotEmpty()) {
+                        visjsGraph.data.nodes.update(visjsData.nodes)
+                        visjsGraph.data.edges.update(visjsData.edges)
+                    } else {
+
+                        var options = {layoutHierarchical: 1}
+                        Lineage_classes.drawNewGraph(visjsData, options)
+                    }
                 }
 
                 callbackSeries()

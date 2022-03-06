@@ -39,10 +39,14 @@ var CsvTripleBuilder = {
         var existingNodes = {};
         var propertiesTypeMap = {
             "rdfs:label": "string",
-            "skos:definition": "string",
-            "skos:notation": "string",
+            "rdfs:comment": "string",
+
+            "dcterms:format":"string",
             "owl:comment": "string",
             "skos:prefLabel": "string",
+            "skos:definition": "string",
+            "skos:notation": "string",
+            "skos:example": "string",
             //   "cfihos:status": "string",
             "iso14224:priority": "string",
 
@@ -84,7 +88,7 @@ var CsvTripleBuilder = {
                                     CsvTripleBuilder.readCsv(lookupFilePath, function (err, result) {
                                         if (err) return callbackEachLookup(err);
                                         var lookupLines = result.data[0];
-                                        lookUpMap[lookup.name] = {dictionary:{},transformFn:lookup.transformFn};
+                                        lookUpMap[lookup.name] = {dictionary: {}, transformFn: lookup.transformFn};
                                         lookupLines.forEach(function (line, index) {
                                             if (![line[lookup.sourceColumn]] && line[lookup.targetColumn])
                                                 return console.log("missing lookup line" + index + " " + lookupFilePath);
@@ -142,8 +146,8 @@ var CsvTripleBuilder = {
                                 if (!lookUpMap[lookupName])
                                     return "badLookupName"
                                 var target = lookUpMap[lookupName].dictionary[value]
-                                if(target && lookUpMap[lookupName].transformFn)
-                                    target=lookUpMap[lookupName].transformFn(target)
+                                if (target && lookUpMap[lookupName].transformFn)
+                                    target = lookUpMap[lookupName].transformFn(target)
                                 return target;
 
 
@@ -161,8 +165,8 @@ var CsvTripleBuilder = {
                                     objectStr = null;
 
 
-                                    if(line[item.s]=="CFIHOS-30000310")
-                                        var x=3
+                                    if (line[item.s] == "CFIHOS-30000310")
+                                        var x = 3
                                     //get value for Subject
                                     {
                                         if (item.s_type == "fixed") subjectStr = item.s;
@@ -178,13 +182,13 @@ var CsvTripleBuilder = {
                                         }
 
                                         if (item.lookup_s) {
-                                            if(subjectStr=="IT and telecom equipment")
-                                                var x=3
+                                            if (subjectStr == "IT and telecom equipment")
+                                                var x = 3
                                             var lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                             if (!lookupValue) {
                                                 console.log("missing lookup_s: " + line[item.s]);
-                                            }else if (lookupValue == "badLookupName")
-                                               ;
+                                            } else if (lookupValue == "badLookupName")
+                                                ;
                                             else
                                                 subjectStr = lookupValue
 
@@ -215,7 +219,7 @@ var CsvTripleBuilder = {
                                             if (!lookupValue)
                                                 console.log("missing lookup_o: " + line[item.o]);
                                             else if (lookupValue == "badLookupName")
-                                               ;
+                                                ;
                                             else
                                                 objectStr = lookupValue
                                         }
@@ -253,6 +257,9 @@ var CsvTripleBuilder = {
                                         else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                     }
 
+                                    if (!item.p.match(/.+:.+|http.+/)) {
+                                        item.p = "<" + graphUri + util.formatStringForTriple(item.p, true) + ">";
+                                    }
                                     if (item.isRestriction) {
 
                                         var propStr = item.p;
@@ -290,8 +297,7 @@ var CsvTripleBuilder = {
                                         });
 
 
-
-                                        if(item.inverseRestrictionProperty){
+                                        if (item.inverseRestrictionProperty) {
                                             var propStr = item.inverseRestrictionProperty;
 
                                             var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
@@ -323,7 +329,6 @@ var CsvTripleBuilder = {
                                                 p: "rdfs:subClassOf",
                                                 o: blankNode,
                                             });
-
 
 
                                         }
@@ -431,6 +436,8 @@ var CsvTripleBuilder = {
             "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>" +
             "PREFIX iso81346: <http://data.total.com/resource/tsf/IEC_ISO_81346/>" +
             "PREFIX slsv: <http://souslesens.org/resource/vocabulary/>" +
+            "PREFIX dcterms: <http://purl.org/dc/terms/>" +
+
 
 
             "";
@@ -527,30 +534,30 @@ var CsvTripleBuilder = {
                 mappings.fileName = mappingsFilePath.replace(".json", "")
 
 
-                function getFunction(argsArray,fnStr) {
+                function getFunction(argsArray, fnStr) {
                     try {
-                        fnStr=fnStr.replace(/[\/r\/n\/t]gm/,"")
+                        fnStr = fnStr.replace(/[\/r\/n\/t]gm/, "")
                         var array = /\{(?<body>.*)\}/.exec(fnStr)
-                        if(!array){
+                        if (!array) {
                             return callbackSeries("cannot parse object function " + JSON.stringify(item))
                         }
                         var fnBody = array.groups["body"]
                         var fn = new Function(argsArray, fnBody)
                         return fn;
                     } catch (err) {
-                        return callbackSeries("error in object function " +fnStr)
+                        return callbackSeries("error in object function " + fnStr)
                     }
                 }
 
                 // format functions
                 mappings.tripleModels.forEach(function (item) {
                     if (item.s.indexOf("function") > -1) {
-                        var fn = getFunction(["row", "mapping"],item.s)
-                            item.s = fn
+                        var fn = getFunction(["row", "mapping"], item.s)
+                        item.s = fn
                     }
                     if (item.o.indexOf("function") > -1) {
-                        var fn = getFunction(["row", "mapping"],item.o)
-                            item.o = fn
+                        var fn = getFunction(["row", "mapping"], item.o)
+                        item.o = fn
 
                     }
 
@@ -558,8 +565,8 @@ var CsvTripleBuilder = {
                 for (var key in mappings.transform) {
                     var fnStr = mappings.transform[key]
                     if (fnStr.indexOf("function") > -1) {
-                            var fn = getFunction(["value", "role", "prop", "row"],fnStr)
-                            mappings.transform[key] = fn
+                        var fn = getFunction(["value", "role", "prop", "row"], fnStr)
+                        mappings.transform[key] = fn
 
                     }
                 }
@@ -568,10 +575,10 @@ var CsvTripleBuilder = {
                 mappings.lookups.forEach(function (item) {
                     var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
                     item.filePath = lookupFilePath
-                    if(item.transformFn) {
+                    if (item.transformFn) {
 
-                            var fn = getFunction(["value", "role", "prop", "row"],item.transformFn)
-                            item.transformFn= fn
+                        var fn = getFunction(["value", "role", "prop", "row"], item.transformFn)
+                        item.transformFn = fn
 
                     }
                 })

@@ -199,7 +199,7 @@ var KGcreator = (function () {
                     if (self.currentTreeNode.parents.length < 1)
                         return;
                     $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function () {
-                        $("#KGCreator_lookupName").val(self.currentTreeNode.id)
+                        $("#KGCreator_lookupFileName").val(self.currentTreeNode.id)
                     })
                     $("#KGcreator_dialogDiv").dialog("open")
 
@@ -396,7 +396,7 @@ var KGcreator = (function () {
             fileName: $("#KGCreator_lookupFileName").val(),
             sourceColumn: $("#KGCreator_lookupSourceColumn").val(),
             targetColumn: $("#KGCreator_lookupTargetColumn").val(),
-            transformFn: $("#KGCreator_lookupTransformFn").val(),
+            transformFn: $("#KGCreator_lookupTransformFn").val().replace(/"/g,"'"),
 
         }
         self.currentJsonObject = self.mainJsonEditor.get()
@@ -414,6 +414,7 @@ var KGcreator = (function () {
     }
     self.testFunction = function () {
         var fnBody = $("#KGcreator_fnBody").val()
+        fnBody=fnBody.replace(/"/g,"'")
         try {
             var fn = new Function("row", "mapping", fnBody)
             $("#KGcreator_testFnResult").html("function OK")
@@ -425,6 +426,7 @@ var KGcreator = (function () {
     self.addFunction = function () {
 
         var fnBody = $("#KGcreator_fnBody").val()
+        fnBody=fnBody.replace(/"/g,"'")
 
         try {
             var fn = new Function("row", "mapping", fnBody)
@@ -449,6 +451,7 @@ var KGcreator = (function () {
     self.addTransformFunction = function () {
         var column = $("#KGcreator_transformColumn").val()
         var fnBody = $("#KGcreator_fnBody").val()
+        fnBody=fnBody.replace(/"/g,"'")
 
         try {
             var fn = new Function("value", "role", "prop", "row", fnBody)

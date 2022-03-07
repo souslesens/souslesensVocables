@@ -33,6 +33,7 @@ var Config = (function () {
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 6
+   self.dictionarySource="TSF-DICTIONARY"
     self.Blender = {
         openTaxonomyTreeOnLoad: 3,
         pasteDescendantsMaxDepth: 6,

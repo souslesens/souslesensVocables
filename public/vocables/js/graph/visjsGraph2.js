@@ -442,6 +442,25 @@ var visjsGraph = (function () {
         }
     }
 
+    self.removeOtherNodesFromGraph=function(nodeId){
+
+        var nodes = visjsGraph.data.nodes.get();
+        var nodeIds=[]
+        nodes.forEach(function (node) {
+            if(node.id!= nodeId)
+                nodeIds.push(node.id)
+        })
+        visjsGraph.data.nodes.remove(nodeIds);
+        var edges = visjsGraph.data.edges.get();
+        var edgesIds=[]
+        edges.forEach(function (edge) {
+            if(nodeIds.indexOf(edge.from)>-1 || nodeIds.indexOf(edge.to)>-1)
+                edgesIds.push(edge.id)
+        })
+        visjsGraph.data.edges.remove(edgesIds);
+
+    },
+
 
     self.onScaleChange = function () {
         // return;

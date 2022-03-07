@@ -73,7 +73,7 @@ var TE_AssetConfigurator = (function () {
 
         }
 
-        self.currentSystem = -1
+        self.currentSystem = null
 
         self.onLoaded = function () {
 
@@ -673,7 +673,6 @@ var TE_AssetConfigurator = (function () {
 
                         if (item.p.value == "http://www.w3.org/2004/02/skos/core#example")
                             obj.example = item.o.value
-
                         self.systemsMap[self.currentSystem].items[obj.id] = obj
                     })
 
@@ -870,6 +869,16 @@ var TE_AssetConfigurator = (function () {
                     function (callbackSeries) {
                         var ids = Object.keys(parentIdsMap)
                         self.setTreeItemSameAs(ids, function (err, result) {
+                                if (err)
+                                    return callbackSeries(err)
+                            self.currentSameAsIds={}
+                                result.forEach(function (item) {
+                                    if(! self.currentSameAsIds[item.concept.value])
+                                    self.currentSameAsIds[item.concept.value]=[]
+                                    self.currentSameAsIds[item.concept.value].push( self.currentSameAsIds[item.value.value])
+
+                                }  )
+                            callbackSeries()
 
                         })
                     },
@@ -899,6 +908,9 @@ var TE_AssetConfigurator = (function () {
                                         label = parentIdsMap[item].code + " " + parentIdsMap[item].label
                                     else
                                         label = Sparql_common.getLabelFromURI(item)
+
+                                    if( self.currentSameAsIds[item])
+                                        label="* "+label
                                     jstreeData.push({
                                         id: item,
                                         text: label,
@@ -906,7 +918,7 @@ var TE_AssetConfigurator = (function () {
                                         data: {
                                             id: item,
                                             label: parentIdsMap[item] ? parentIdsMap[item].label : Sparql_common.getLabelFromURI(item),
-
+                                            sameAsIds:self.currentSameAsIds[item],
                                             source: self.currentSource,
                                             code: parentIdsMap[item] ? parentIdsMap[item].code : Sparql_common.getLabelFromURI(item)
                                         }
@@ -916,7 +928,8 @@ var TE_AssetConfigurator = (function () {
 
 
                             var label2 = parentIdsMap[hit._source.id].code + " " + parentIdsMap[hit._source.id].label
-
+                            if( self.currentSameAsIds[hit._source.id])
+                                label2="* "+label2
                             jstreeData.push({
                                 id: hit._source.id,
                                 text: label2, // Sparql_common.getLabelFromURI(hit._source.id) + " " + hit._source.label,
@@ -924,6 +937,7 @@ var TE_AssetConfigurator = (function () {
                                 data: {
                                     id: hit._source.id,
                                     label: label2,
+                                    sameAsIds:self.currentSameAsIds[hit._source.id],
                                     source: self.currentSource,
                                     code: parentIdsMap[hit._source.id].code,
                                 }
@@ -963,11 +977,12 @@ var TE_AssetConfigurator = (function () {
 
         }
 
-        self.setTreeItemSameAs = function (ids) {
+        self.setTreeItemSameAs = function (ids,callback) {
 
-            Sparql_OWL.getObjectRestrictions("TSF-DICTIONARY", ids, {filter: "FILTER (?prop=owl:sameAs) "}, function (err, result) {
+            Sparql_OWL.getObjectRestrictions(Config.dictionarySource, ids, {filter: "FILTER (?prop=owl:sameAs) "}, function (err, result) {
                 if (err)
-                    return alert(err.responseText)
+                    return callback(err.responseText)
+                return callback(null,result)
             })
 
 

@@ -1201,14 +1201,21 @@ var Lineage_classes = (function () {
                 })
 
 
-                var existingNodes = visjsGraph.getExistingIdsMap();
+                var existingNodes = visjsGraph.getExistingIdsMap(true);
                 var visjsData = {nodes: [], edges: []}
                 self.currentExpandLevel += 1
                 var expandedLevel = []
                 for (var key in map) {
 
+                    //check if cluster is already open
+                    var cancelCluster=true
+                    map[key].forEach(function(item){
+                        if(existingNodes[item.child1])
+                            cancelCluster=true
+                    })
 
-                    if (map[key].length > Lineage_classes.maxChildrenDrawn && !options.dontClusterNodes) {
+
+                    if (!cancelCluster && map[key].length > Lineage_classes.maxChildrenDrawn && !options.dontClusterNodes) {
                         //on enleve les cluster du dernier bootomIds dsiono on cree des orphelins au niveau suivant
 
 
@@ -1750,14 +1757,14 @@ var Lineage_classes = (function () {
                     includeBlankNodes:1,
                     filter:""
                 }
-              //  Sparql_OWL.getItems("TSF-DICTIONARY",)
+
 
             }
 
 
             var existingNodes = visjsGraph.data.nodes.getIds();
             var options = {processorFn:processMetadata,filter: " FILTER (?prop in <http://www.w3.org/2002/07/owl#sameAs>) "};
-            self.drawRestrictions("TSF-DICTIONARY", existingNodes, false, false, options)
+            self.drawRestrictions(Config.dictionarySource, existingNodes, false, false, options)
 
 
         }
@@ -2220,13 +2227,7 @@ var Lineage_classes = (function () {
             removeOthersFromGraph:function(){
                 if(! Lineage_classes.currentGraphNode.id)
                     return;
-                var nodes = visjsGraph.data.nodes.get();
-                var nodeIds=[]
-                nodes.forEach(function (node) {
-                   if(node.id!= Lineage_classes.currentGraphNode.id)
-                        nodeIds.push(node.id)
-                })
-                visjsGraph.data.nodes.remove(nodeIds);
+             visjsGraph.removeOtherNodesFromGraph(Lineage_classes.currentGraphNode.id)
 
             },
 

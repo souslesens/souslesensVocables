@@ -2245,7 +2245,7 @@ var Standardizer = (function () {
         self.createSameAsRelations = function (type) {
             var relations = [];
             var targetSources = []
-            var dictionarySourceLabel="TSF-DICTIONARY"
+            var dictionarySourceLabel=Config.dictionarySource
 
             if (type == "exactMatch") {
 
@@ -2311,6 +2311,9 @@ var Standardizer = (function () {
 
             async.series([
                 function (callbackSeries) {
+
+                    return callbackSeries();
+
                     async.eachSeries(targetSources, function (targetSource, callbackEach) {
                         if(Config.sources[dictionarySourceLabel].imports.indexOf(targetSource))
                             return callbackEach()

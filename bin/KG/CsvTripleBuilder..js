@@ -41,7 +41,7 @@ var CsvTripleBuilder = {
             "rdfs:label": "string",
             "rdfs:comment": "string",
 
-            "dcterms:format":"string",
+            "dcterms:format": "string",
             "owl:comment": "string",
             "skos:prefLabel": "string",
             "skos:definition": "string",
@@ -439,7 +439,6 @@ var CsvTripleBuilder = {
             "PREFIX dcterms: <http://purl.org/dc/terms/>" +
 
 
-
             "";
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
@@ -534,30 +533,39 @@ var CsvTripleBuilder = {
                 mappings.fileName = mappingsFilePath.replace(".json", "")
 
 
-                function getFunction(argsArray, fnStr) {
+                function getFunction(argsArray, fnStr, callback) {
                     try {
+
                         fnStr = fnStr.replace(/[\/r\/n\/t]gm/, "")
                         var array = /\{(?<body>.*)\}/.exec(fnStr)
                         if (!array) {
-                            return callbackSeries("cannot parse object function " + JSON.stringify(item))
+                            return callbackSeries("cannot parse object function " + JSON.stringify(item)+" missing enclosing body into 'function{..}'")
                         }
                         var fnBody = array.groups["body"]
                         var fn = new Function(argsArray, fnBody)
-                        return fn;
+                        return callback(null, fn);
                     } catch (err) {
-                        return callbackSeries("error in object function " + fnStr)
+                        return callback("error in object function " + fnStr)
                     }
                 }
 
                 // format functions
                 mappings.tripleModels.forEach(function (item) {
                     if (item.s.indexOf("function") > -1) {
-                        var fn = getFunction(["row", "mapping"], item.s)
-                        item.s = fn
+                        getFunction(["row", "mapping"], item.s, function (err, fn) {
+                            if (err)
+                                return callbackSeries(err+" in mapping"+ JSON.stringify(item))
+                            item.s = fn
+                        })
+
                     }
                     if (item.o.indexOf("function") > -1) {
-                        var fn = getFunction(["row", "mapping"], item.o)
-                        item.o = fn
+                        getFunction(["row", "mapping"], item.o, function (err, fn) {
+                            if (err)
+                                return callbackSeries(err + " in mapping" + JSON.stringify(item))
+
+                            item.o = fn
+                        })
 
                     }
 
@@ -565,8 +573,11 @@ var CsvTripleBuilder = {
                 for (var key in mappings.transform) {
                     var fnStr = mappings.transform[key]
                     if (fnStr.indexOf("function") > -1) {
-                        var fn = getFunction(["value", "role", "prop", "row"], fnStr)
-                        mappings.transform[key] = fn
+                    getFunction(["value", "role", "prop", "row",],fnStr,function (err, fn) {
+                            if (err)
+                                return callbackSeries(err + " in mapping" + JSON.stringify(item))
+                            mappings.transform[key] = fn
+                        })
 
                     }
                 }
@@ -577,8 +588,11 @@ var CsvTripleBuilder = {
                     item.filePath = lookupFilePath
                     if (item.transformFn) {
 
-                        var fn = getFunction(["value", "role", "prop", "row"], item.transformFn)
-                        item.transformFn = fn
+                       getFunction(["value", "role", "prop", "row"], item.transformFn,function (err, fn) {
+                           if (err)
+                               return callbackSeries(err + " in mapping" + JSON.stringify(item))
+                           item.transformFn = fn
+                       })
 
                     }
                 })

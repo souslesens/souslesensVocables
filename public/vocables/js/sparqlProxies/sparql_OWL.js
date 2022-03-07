@@ -28,14 +28,14 @@ var Sparql_OWL = (function () {
             if (!sourceConfig || !sourceConfig.taxonomyPredicates)
                 return defaultTaxonomyPredicates
 
-            var str=""
-            sourceConfig.taxonomyPredicates.forEach(function(item,index){
-                if(index>0)
-                    str+="|"
+            var str = ""
+            sourceConfig.taxonomyPredicates.forEach(function (item, index) {
+                if (index > 0)
+                    str += "|"
                 if (item.indexOf("http://") == 0)
-                    str+=" <"+item+"> "
+                    str += " <" + item + "> "
                 else
-                    str+=" "+item+" "
+                    str += " " + item + " "
             })
             return str;
 
@@ -53,7 +53,7 @@ var Sparql_OWL = (function () {
             if (topClassFilter && topClassFilter != "" && topClassFilter != "_default")
                 strFilterTopConcept = topClassFilter;
             else
-                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?z}) "
+                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?z}) "
 
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -71,7 +71,7 @@ var Sparql_OWL = (function () {
                 strFilterTopConcept +
                 " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
-                query += "?collection skos:member ?aConcept. ?aConcept "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
+                query += "?collection skos:member ?aConcept. ?aConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
             query += "}order by ?topConceptLabel "
             " }"
             var limit = options.limit || Config.queryLimit;
@@ -116,12 +116,12 @@ var Sparql_OWL = (function () {
                 "?child1 " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?concept.  FILTER (!isBlank(?concept)) " + strFilter +
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
             if (false && options.skipRestrictions) {
-                query += " filter ( NOT EXISTS {?child1 "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?superClass.?superClass rdf:type owl:Restriction}) "
+                query += " filter ( NOT EXISTS {?child1 " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?superClass.?superClass rdf:type owl:Restriction}) "
             }
 
             for (var i = 1; i < descendantsDepth; i++) {
 
-                query += "OPTIONAL { ?child" + (i + 1)  + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?child" + i + "." +
+                query += "OPTIONAL { ?child" + (i + 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?child" + i + "." +
                     "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}"
 
 
@@ -248,7 +248,6 @@ var Sparql_OWL = (function () {
             }
 
             var fromStr = Sparql_common.getFromStr(sourceLabel)
-
 
 
             var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -503,7 +502,7 @@ var Sparql_OWL = (function () {
                 query += "FILTER (!isBlank(?concept))"
             query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
             query += "OPTIONAL {?concept rdf:type ?conceptType.}";
-            query += "OPTIONAL {?concept "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?superClass. }";
+            query += "OPTIONAL {?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?superClass. }";
 
             if (options.filter)
                 query += options.filter;
@@ -596,7 +595,7 @@ var Sparql_OWL = (function () {
                 if (err) {
                     return callback(err)
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "inverseProp","domain", "range"])
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "inverseProp", "domain", "range"])
                 if (options.addInverseRestrictions) {
                     delete options.addInverseRestrictions
                     options.inverseRestriction = true
@@ -671,6 +670,14 @@ var Sparql_OWL = (function () {
                     "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                     "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}"
             }
+
+            if (options.getMetadata)
+                query += " ?node  <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status>" +
+                    " ?status.?node <purl.org/dc/terms/created> ?creationDate. " +
+                    "?node  <http://purl.org/dc/terms/creator> ?creator." +
+                    "?node  <http://purl.org/dc/terms/source> ?provenance." +
+                    "?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel." +
+                    "?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel."
 
 
             if (options.filter) {
@@ -867,7 +874,7 @@ var Sparql_OWL = (function () {
 
             query += " ?restriction <http://www.w3.org/2002/07/owl#onProperty> ?prop."
                 + filterStr +
-                "  ?sourceClass "+Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)+" ?restriction." +
+                "  ?sourceClass " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?restriction." +
                 "   OPTIONAL {?restriction  owl:someValuesFrom ?targetClass.   OPTIONAL {?targetClass rdfs:label ?targetClassLabel}}" +
                 "  OPTIONAL {?sourceClass rdfs:label ?sourceClassLabel}"
             var limit = options.limit || Config.queryLimit;

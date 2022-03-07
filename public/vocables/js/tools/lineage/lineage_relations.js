@@ -14,12 +14,19 @@ Lineage_relations = (function () {
         sources.sort()
         if (!sources || sources.length == 0)
             return;
+        if(Object.keys(visjsGraph.getExistingIdsMap().length==0))
+            $("#LineageRelations_nodesSelectionSelect").val("All Nodes")
+
+
         common.fillSelectOptions("LineageRelations_setExactMatchSameAsSourceSelect", sources, true)
         common.fillSelectOptions("LineageRelations_propertiesSelect", [], true)
-        var statusList = ["candidate", " reference"]
-        common.fillSelectOptions("LineageRelations_statusSelect", statusList, true)
+        var statusList = [{id:"http://data.souslesens.org/status/candidate",label:"candidate"}, {id:"http://data.souslesens.org/status/reference",label:"reference"}]
+        common.fillSelectOptions("LineageRelations_statusSelect", statusList, true,"label","id")
         var provenances = ["manual", " auto_exactMatch"]
         common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true)
+        var withoutImports = 0
+        if (Config.sources[source].isDictionary)
+            withoutImports = 1
         Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {
             withoutImports: 0,
             someValuesFrom: 1,
@@ -29,10 +36,10 @@ Lineage_relations = (function () {
                 return alert(err)
             var x = result
             var props = [];
-            var asSamAsProp=false
+            var asSamAsProp = false
             result.forEach(function (item) {
-                if(item.prop.value.indexOf("sameAs")>-1)
-                    asSamAsProp=true;
+                if (item.prop.value.indexOf("sameAs") > -1)
+                    asSamAsProp = true;
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
             props.sort(function (a, b) {
@@ -42,8 +49,8 @@ Lineage_relations = (function () {
                     return -1;
                 return 0
             })
-            if(!asSamAsProp)
-                props.splice(0,0,{id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
+            if (!asSamAsProp)
+                props.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
 
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
             // self.initProjectedGraphs()
@@ -118,7 +125,6 @@ Lineage_relations = (function () {
 
     }
     self.getExistingRestrictions = function (currentSource, callback) {
-
         function formatResult(result) {
             restrictions = []
             result.forEach(function (item) {
@@ -148,7 +154,7 @@ Lineage_relations = (function () {
                     rangeSourceLabel = item.rangeSourceLabel.value
                 }
 
-                restrictions.push({
+                var obj = {
 
                     domain: domain,
                     domainLabel: domainLabel,
@@ -160,24 +166,42 @@ Lineage_relations = (function () {
                     rangeSourceLabel: rangeSourceLabel,
                     domainSourceLabel: domainSourceLabel
 
-                })
-
-                restrictions.sort(function (a, b) {
-                    return (a.propLabel > b.prop)
-                })
-
-
+                }
+                if (currentSource == Config.dictionarySource) {
+                    obj.creator = item.creator ? item.creator.value : null;
+                    obj.status = item.status ? item.status.value : null;
+                    obj.provenance = item.provenance ? item.provenance.value : null;
+                    obj.creationDate = item.creationDate ? item.creationDate.value : nul;
+                }
+                restrictions.push(obj);
             })
+
+
+            restrictions.sort(function (a, b) {
+                return (a.propLabel > b.prop)
+            })
+
             return restrictions
         }
-
 
         var restrictions = []
         var filter = ""
         var propertyFilter = $("#LineageRelations_propertiesSelect").val()
-        $("#LineageRelations_propertiesSelect").val("")
+        var creatorFilter = $("#LineageRelations_creatorSelect").val()
+        var statusFilter = $("#LineageRelations_statusSelect").val()
+        var provenanceFilter = $("#LineageRelations_provenanceSelect").val()
+
+        // $("#LineageRelations_propertiesSelect").val("")
         if (propertyFilter && propertyFilter != "")
             filter += " filter (?prop=<" + propertyFilter + ">)"
+        if (creatorFilter && creatorFilter != "")
+            filter += " filter (?creator='" + creatorFilter + "')"
+        if (statusFilter && statusFilter != "")
+            filter += " filter (?status=<" + statusFilter + ">)"
+        if (provenanceFilter && provenanceFilter != "")
+            filter += " filter (?provenance='" + provenanceFilter + "')"
+
+
         self.getFromSourceSelection(function (err, selectedNodes) {
             if (err)
                 return callback(err)
@@ -187,7 +211,8 @@ Lineage_relations = (function () {
                     withoutImports: 0,
                     someValuesFrom: 1,
                     filter: filter,
-                    selectGraph: true
+                    selectGraph: true,
+                    getMetadata: currentSource == Config.dictionarySource
 
                 }, function (err, result) {
                     if (err)
@@ -207,7 +232,8 @@ Lineage_relations = (function () {
                         withoutImports: 0,
                         someValuesFrom: 1,
                         filter: filter,
-                        selectGraph: true
+                        selectGraph: true,
+                        getMetadata: currentSource == Config.dictionarySource
 
                     }, function (err, result) {
                         if (err)
@@ -222,6 +248,7 @@ Lineage_relations = (function () {
                     callback(null, restrictions)
                 })
             }
+
         })
     }
 
@@ -272,9 +299,10 @@ Lineage_relations = (function () {
                 var existingNodes
                 var jstreeData = [];
                 var visjsData = {nodes: [], edges: []}
+                var tableData = {columns: [], data: []}
                 var sameAsLevel = 1;
                 if (relations && toLabelsMap && output == "visjs") {// get ancestors first if called by projectCurrrentSourceOnSource
-                    existingNodes= visjsGraph.getExistingIdsMap()
+                    existingNodes = visjsGraph.getExistingIdsMap()
                     visjsData = self.getRestrictionAncestorsVisjsData(relations, toLabelsMap, output)
                     visjsData.nodes.forEach(function (node) {
                         existingNodes[node.id] = 1
@@ -284,9 +312,8 @@ Lineage_relations = (function () {
                     })
                     sameAsLevel = visjsData.maxLevel + 1;
 
-                }
-                else
-                    existingNodes= {}
+                } else
+                    existingNodes = {}
 
 
                 var color;
@@ -294,7 +321,7 @@ Lineage_relations = (function () {
                 var size = Lineage_classes.defaultShapeSize
 
 
-                relations.forEach(function (item) {
+                relations.forEach(function (item, index) {
 
                     var prop;
                     if (item.propLabel)
@@ -364,8 +391,58 @@ Lineage_relations = (function () {
                         }
                     }
 
+                    if (output == "table") {
+                        if (index == 0) {
+                            tableData.columns = [
+                                {
+                                    title: "action", render: function (datum, type, row) {
 
-                    if (output == "jstree") {
+                                        return "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  Lineage_relations.dictionaryValidation.validateSameAsCandidate (\"" + row[0] + "\")'>V</button>" +
+                                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='   Lineage_relations.dictionaryValidation.rejectSameAsCandidate (\"" + row[0] + "\")'>R</button>"
+                                        //  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='   Lineage_relations.dictionaryValidation.SameAsCandidateInfos (\"" + row[0] + "\")'>R</button>"
+                                    },
+                                    width: '75px'
+                                },
+
+                                {title: "domainSource", defaultContent: ""},
+                                {title: "domainLabel", defaultContent: ""},
+                                {title: "propLabel", defaultContent: ""},
+                                {title: "rangeSource", defaultContent: ""},
+                                {title: "rangeLabel", defaultContent: ""}
+                            ]
+                            if (currentSource == Config.dictionarySource) {
+                                tableData.columns.push({title: "status", defaultContent: ""})
+                                tableData.columns.push({title: "provenance", defaultContent: ""})
+                                tableData.columns.push({title: "creator", defaultContent: ""})
+                                tableData.columns.push({title: "creationDate", defaultContent: ""})
+
+
+                            }
+                        }
+
+
+                        var line = [
+                            item.node,
+                            item.domainSourceLabel,
+                            item.domainLabel,
+                            item.propLabel,
+                            item.rangeSourceLabel,
+                            item.rangeLabel
+                        ]
+                        if (currentSource == Config.dictionarySource) {
+                            line = line.concat([
+                                item.status,
+                                item.provenance,
+                                item.creator,
+                                item.creationDate
+
+                            ])
+                        }
+
+                        tableData.data.push(line);
+
+
+                    } else if (output == "jstree") {
                         var nodeId = item.domain + "_" + prop + "_" + item.range
                         if (!existingNodes[nodeId]) {
                             existingNodes[nodeId] = 1
@@ -374,6 +451,7 @@ Lineage_relations = (function () {
                                 text: prop + "_" + rangeSource + "." + item.rangeLabel,
                                 parent: item.domain,
                                 data: {
+
                                     id: nodeId,
                                     label: prop + "_" + rangeSource + "." + item.rangeLabel,
                                     source: rangeSource,
@@ -438,18 +516,23 @@ Lineage_relations = (function () {
 
 
                 })
-                if(output == "jstree") {
+                if (output == "jstree") {
+
 
                     $("#mainDialogDiv").dialog("open")
-                    $("#mainDialogDiv").load("snippets/lineage/listRelationsDialog.html",function(){
+                    $("#mainDialogDiv").load("snippets/lineage/listRelationsDialog.html", function () {
 
                         var options = {
-                            openAll:true,
+                            openAll: true,
                             selectTreeNodeFn: function () {
                             }
                         }
-                        common.jstree.loadJsTree("LineageRelation_listRelationDiv",jstreeData,options)
+                        common.jstree.loadJsTree("LineageRelation_listRelationDiv", jstreeData, options)
                     })
+
+                } else if (output == "table") {
+
+                    Export.showDataTable(null, tableData.columns, tableData.data)
 
 
                 } else if (output == "visjs") {
@@ -826,7 +909,22 @@ Lineage_relations = (function () {
 
     }
 
+    self.dictionaryValidation = {
+        validateSameAsCandidate: function (nodeId) {
+
+        },
+        rejectSameAsCandidate: function (nodeId) {
+
+        },
+        sameAsCandidateInfos: function (nodeId) {
+
+        }
+
+
+    }
+
 
     return self;
 
-})()
+})
+()

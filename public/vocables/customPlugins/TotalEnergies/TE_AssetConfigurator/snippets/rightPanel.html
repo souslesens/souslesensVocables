@@ -8,46 +8,78 @@
     / / / font-weight: bold;
     }
 
+    .TE_AssetConfigurator_assetPanelTreeContainer{
+        width: 350px; height: 600px;overflow: auto;
+    }
+
 
 </style>
 
+<div id="TE_AssetConfigurator_Tabs" style="width:360px;">
+
+    <ul>
+        <li><a href="#TE_AssetConfigurator_graphTab">Graph</a></li>
+
+        <li><a href="#TE_AssetConfigurator_AssetsTab">Assets</a></li>
 
 
-
-Graphs <select id="TE_AssetConfigurator_savedGraphsSelect" onchange="TE_AssetConfigurator.loadGraph($(this).val())"></select>
-<table>
+    </ul>
 
 
-    <tr>
-        <td>
-            <button onclick="TE_AssetConfigurator.saveGraph()">Save</button>
-        </td>
-        <td>
-            <button onclick="TE_AssetConfigurator.saveGraph(true)">Save new</button>
-        </td>
-    </tr>
+    <div class="" id="TE_AssetConfigurator_graphTab">
 
 
-    <tr>
-        <td>
-            show <select onchange="TE_AssetConfigurator.switchLabelsAndCodesInGraph($(this).val())">
-            <option>codes</option>
-            <option>labels</option>
+        Graphs <select id="TE_AssetConfigurator_savedGraphsSelect"
+                       onchange="TE_AssetConfigurator.loadGraph($(this).val())"></select>
+        <table>
+
+
+            <tr>
+                <td>
+                    <button onclick="TE_AssetConfigurator.saveGraph()">Save</button>
+                </td>
+                <td>
+                    <button onclick="TE_AssetConfigurator.saveGraph(true)">Save new</button>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    show <select id="TE_AssetConfigurator_displayLabelsMode"
+                                 onchange="TE_AssetConfigurator.switchLabelsAndCodesInGraph($(this).val())">
+                    <option>codes</option>
+                    <option>labels</option>
+                </select>
+                </td>
+
+                <td>
+                    <button onclick="TE_AssetConfigurator.deleteSelectedObject()">Delete Selected</button>
+                </td>
+
+                <td>
+                    <button onclick="TE_AssetConfigurator.clearAll()">Clear All</button>
+                </td>
+            </tr>
+
+
+        </table>
+        <br>
+        <div id="AssetConfigurator_graphHOverDiv" style="width:100%"></div>
+        <br>
+        <div id="AssetConfigurator_NodeInfosDiv"></div>
+    </div>
+    <div id="TE_AssetConfigurator_AssetsTab">
+        <div>
+            Asset <select onchange="TE_AssetDataManager.loadAsset($(this).val())">
+            <option></option>
+            <option>girassol</option>
+            <option>absheron</option>
+            <option>Moho North</option>
         </select>
-        </td>
+        <div class="TE_AssetConfigurator_assetPanelTreeContainer" >
+            <div id="TE_AssetConfigurator_assetPanelTreeDiv"></div>
+        </div>
 
-        <td>
-            <button onclick="TE_AssetConfigurator.deleteSelectedObject()">Delete Selected</button>
-        </td>
-
-        <td>
-            <button onclick="TE_AssetConfigurator.clearAll()">Clear All</button>
-        </td>
-    </tr>
-
-
-</table>
-<br>
-<div id="AssetConfigurator_graphHOverDiv" style="width:100%"></div>
-<br>
-<div id="AssetConfigurator_NodeInfosDiv"></div>
+    </div>
+</div>

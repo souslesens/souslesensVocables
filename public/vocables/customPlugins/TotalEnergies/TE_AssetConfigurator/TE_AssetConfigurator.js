@@ -103,7 +103,15 @@ var TE_AssetConfigurator = (function () {
 
             MainController.UI.toogleRightPanel(true)
             $("#rightPanelDiv").html("")
-            $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/rightPanel.html")
+            $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/rightPanel.html", function () {
+                $("#TE_AssetConfigurator_Tabs").tabs({
+                    activate: function (e, ui) {
+
+
+                    }
+
+                });
+            })
 
             $("#accordion").accordion("option", {active: 2});
 
@@ -192,18 +200,19 @@ var TE_AssetConfigurator = (function () {
 
 
             self.currentSystem = systemUri
+            self.searchInCurrentSystem(null)
 
-            Sparql_OWL.getNodeChildren(self.currentSource, null, systemUri, 3, {}, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err);
-
-
-                var options = self.getJstreeOptions()
-                TreeController.drawOrUpdateTree("TE_AssetConfigurator_81346TreeDiv", result, "#", "child1", options)
+            /*   Sparql_OWL.getNodeChildren(self.currentSource, null, systemUri, 3, {}, function (err, result) {
+                   if (err)
+                       return MainController.UI.message(err);
 
 
-                self.setTreeSystemNodesInfos()
-            })
+                   var options = self.getJstreeOptions()
+                   TreeController.drawOrUpdateTree("TE_AssetConfigurator_81346TreeDiv", result, "#", "child1", options)
+
+
+                   self.setTreeSystemNodesInfos()
+               })*/
 
         }
         self.getJstreeOptions = function () {
@@ -214,7 +223,10 @@ var TE_AssetConfigurator = (function () {
                     }
                     var node = obj.node
                     self.currentTreeNode = node
-                    var options = {optionalData: {systemType: node.data.systemType}}
+                    var options = {
+                        optionalData: {systemType: node.data.systemType},
+                        reopen:true
+                    }
                     SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options)
                     self.setTreeSystemNodesInfos(obj.node.id)
 
@@ -253,7 +265,12 @@ var TE_AssetConfigurator = (function () {
             var existingNodes = visjsGraph.getExistingIdsMap()
             var visjsData = {nodes: [], edges: []}
             var visjsId = common.getRandomHexaId(10);
-            var code = self.systemsMap[self.currentSystem].items[node.data.id].code
+            var code = node.data.code;
+            if(!code || code=="ex")// example
+                var parent=common.jstree.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv",node.parent)
+                code=parent.data.code
+
+            // self.systemsMap[self.currentSystem].items[node.data.id].code
             node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
             node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example
             node.data.code = code
@@ -353,7 +370,8 @@ var TE_AssetConfigurator = (function () {
 
 
             }
-            self.setSystemTypesSelectVisibility(self.currentSystem.level);
+            if (self.currentSystem)
+                self.setSystemTypesSelectVisibility(self.currentSystem.level);
 
             setTimeout(function () {
                 visjsGraph.network.redraw()
@@ -593,51 +611,36 @@ var TE_AssetConfigurator = (function () {
 
             var visjsData = {edges: []}
             var globalOK = false
-            if (startNode.data.aspect == endNode.data.aspect) {
 
-                if (startNode.data.aspect == "Component") {
-
-                    visjsData.edges.push(getEdge("part14:partOf"))
-                    globalOK = true
-
-                } else {
-
-
-                    var deltaLevel = Math.abs(startNode.data.level - endNode.data.level)
-                    if (deltaLevel == 1) {
-                        var propName
-                        if (startNode.data.aspect == "Location") {
-                            visjsData.edges.push(getEdge("part14:hasLocation"))
-                        }
-                        if (startNode.data.aspect == "Function") {
-                            visjsData.edges.push(getEdge("part14:hasFunction"))
-                        }
-
-                        globalOK = true
-                    }
-                }
-
-            } else {
-                var ok1 = startNode.data.aspect == "Location" && endNode.data.aspect == "Component"
-                var ok2 = startNode.data.aspect == "Component" && endNode.data.aspect == "Location"
-                var ok3 = startNode.data.level == endNode.data.level
-                if ((ok1 || ok2)) {
-
-                    visjsData.edges.push(getEdge("part14:hasLocation", true))
-                    globalOK = true
-                } else {
-                    var ok1 = startNode.data.aspect == "Function" && endNode.data.aspect == "Component"
-                    var ok2 = startNode.data.aspect == "Component" && endNode.data.aspect == "Function"
-                    var ok3 = startNode.data.level == endNode.data.level
-
-                    if ((ok1 || ok2)) {
-
-                        visjsData.edges.push(getEdge("part14:implements", true))
-                        globalOK = true
-                    }
-                }
-
+            var codesMap = {
+                Component: "C",
+                Function: "F",
+                "Construction work": "W",
+                Location: "L",
             }
+
+            var key = codesMap[startNode.data.aspect] + codesMap[endNode.data.aspect]
+
+
+            var allowedRelationsMap = {
+                CC: "part14:partOf",
+                LL: "part14:hasLocation",
+                FF: "part14:Function",
+                LC: "part14:hasLocation",
+                CL: "part14:hasLocation",
+                CF: "part14:implements",
+                FC: "part14:implements",
+                CW: "part14:hasLocation",
+                WC: "part14:hasLocation"
+            }
+
+
+            if (allowedRelationsMap[key]) {
+                visjsData.edges.push(getEdge(allowedRelationsMap[key], true))
+                globalOK = true
+            }
+
+
             var err = null
             if (!globalOK)
                 err = "relation not allowed "
@@ -666,8 +669,8 @@ var TE_AssetConfigurator = (function () {
                     result2.forEach(function (item) {
                         var obj = {id: item.concept.value}
                         obj.code = item.concept.value.substring(item.concept.value.lastIndexOf("/") + 1)
-                        /*if (item.p.value == "http://souslesens.org/resource/vocabulary/hasCode")
-                            obj.code = item.o.value*/
+                        if (item.p.value == "http://souslesens.org/resource/vocabulary/hasCode")
+                            obj.code = item.o.value
                         if (item.p.value == "http://www.w3.org/2004/02/skos/core#definition")
                             obj.definition = item.o.value
 
@@ -698,9 +701,14 @@ var TE_AssetConfigurator = (function () {
             visjsGraph.clearGraph()
             self.objectsMap = {}
             self.currentGraphName = graphName
-
+            var displayMode = $("#TE_AssetConfigurator_displayLabelsMode").val()
             visjsGraph.loadGraph(graphName, false, function (err, visjsData) {
                 visjsData.nodes.forEach(function (node) {
+                    if (displayMode == "codes") {
+                        node.label = node.data.code || node.data.label
+                    } else if (displayMode == "labels") {
+                        node.label = node.data.label
+                    }
                     if (!self.objectsMap[node.data.id])
                         self.objectsMap[node.data.id] = {items: [], counter: 0}
                     self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
@@ -709,27 +717,6 @@ var TE_AssetConfigurator = (function () {
                 self.addToGraph(visjsData)
             })
         }
-
-
-        /*
-
-                        var id=common.getRandomHexaId(10)
-                    self.addToGraph({nodes: [{id: id, "label": graphName, level: 0, shape: "box"}], edges: []})
-
-                     visjsGraph.loadGraph(graphName, true, function (err, result) {
-                        var nodes = visjsGraph.data.nodes.get()
-                         visjsGraph.data.nodes.remove(id)
-                        self.objectsMap = {}
-                        nodes.forEach(function (node) {
-                            if (!self.objectsMap[node.data.id])
-                                self.objectsMap[node.data.id] = {items: [], counter: 0}
-                            self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
-                            self.objectsMap[node.data.id].items.push(node)
-                            //if(item.data.level==1)
-
-                        })
-
-                     })*/
 
 
         self.listSavedGraphs = function () {
@@ -802,20 +789,20 @@ var TE_AssetConfigurator = (function () {
                         var queryObj = {
                             query: {
                                 "bool": {
-                                    "must": [
-
-                                        {
-                                            "wildcard": {
-                                                "label": {
-                                                    "value": word,
-                                                    "boost": 1.0,
-                                                    "rewrite": "constant_score"
-                                                }
-                                            }
-                                        }
-                                    ]
+                                    "must": []
                                 }
                             }
+                        }
+                        if (word) {
+                            queryObj.query.bool.must.push({
+                                "wildcard": {
+                                    "label": {
+                                        "value": word,
+                                        "boost": 1.0,
+                                        "rewrite": "constant_score"
+                                    }
+                                }
+                            })
                         }
                         if (self.currentSystem) {
                             queryObj.query.bool.must.push(
@@ -857,9 +844,23 @@ var TE_AssetConfigurator = (function () {
                             if (err)
                                 return callbackSeries(err)
                             hits.forEach(function (hit) {
+
+
+                                if (hit._source.label == "Centrifugal pump")
+                                    var x = 3
+
+
+                                var parents = hit._source.parents
+                                var code = hit._source.skoslabels[0];
+                              /*  if (!code) {  // pour les exemples ils ont le code de laur parent
+                                    var parentObj = parentIdsMap[parents[parents.length - 1]]
+                                    if (parentObj)
+                                        code = parentObj.code
+                                }*/
                                 parentIdsMap[hit._source.id] = {
                                     label: hit._source.label,
-                                    code: hit._source.skoslabels[0] || "ex"
+                                    code: code,
+                                    parent: parents[parents.length - 1]
                                 }
                             })
                             callbackSeries()
@@ -869,15 +870,15 @@ var TE_AssetConfigurator = (function () {
                     function (callbackSeries) {
                         var ids = Object.keys(parentIdsMap)
                         self.setTreeItemSameAs(ids, function (err, result) {
-                                if (err)
-                                    return callbackSeries(err)
-                            self.currentSameAsIds={}
-                                result.forEach(function (item) {
-                                    if(! self.currentSameAsIds[item.concept.value])
-                                    self.currentSameAsIds[item.concept.value]=[]
-                                    self.currentSameAsIds[item.concept.value].push( self.currentSameAsIds[item.value.value])
+                            if (err)
+                                return callbackSeries(err)
+                            self.currentSameAsIds = {}
+                            result.forEach(function (item) {
+                                if (!self.currentSameAsIds[item.concept.value])
+                                    self.currentSameAsIds[item.concept.value] = []
+                                self.currentSameAsIds[item.concept.value].push(self.currentSameAsIds[item.value.value])
 
-                                }  )
+                            })
                             callbackSeries()
 
                         })
@@ -889,6 +890,38 @@ var TE_AssetConfigurator = (function () {
                         var jstreeData = []
                         var existingNodes = {}
 
+
+                        var getNodeLabel = function (item) {
+                            var label
+                            var prefix = ""
+                            if (parentIdsMap[item]) {
+                                if (self.currentSameAsIds[item]) {
+                                    prefix += "*"
+                                }
+                                if (parentIdsMap[item].code)
+                                    prefix += parentIdsMap[item].code
+                                label = prefix + " " + parentIdsMap[item].label
+                            } else
+                                label = Sparql_common.getLabelFromURI(item)
+                            return label;
+
+                        }
+                        var getCode = function (item) {
+                            if (!parentIdsMap[item])
+                                return null
+                            if (parentIdsMap[item].code)
+                                return parentIdsMap[item].code
+                            return "ex"
+
+                        }
+                        var getParent = function (item) {
+                            if (!parentIdsMap[item])
+                                return "#"
+                            if (parentIdsMap[item].parent)
+                                return parentIdsMap[item].parent
+                            return "#"
+                        }
+
                         matchingHits.forEach(function (hit) {
                             var parent
                             hit._source.parents.forEach(function (item, indexParent) {
@@ -898,19 +931,17 @@ var TE_AssetConfigurator = (function () {
 
                                 if (indexParent == 1)
                                     parent = "#"
-                                else
-                                    parent = hit._source.parents[indexParent - 1]
+                                else {
+                                    parent = getParent(item)
+
+                                }
 
                                 if (!existingNodes[item]) {
                                     existingNodes[item] = 1
-                                    var label
-                                    if (parentIdsMap[item])
-                                        label = parentIdsMap[item].code + " " + parentIdsMap[item].label
-                                    else
-                                        label = Sparql_common.getLabelFromURI(item)
+                                    var code = getCode(item)
+                                    var label = getNodeLabel(item)
 
-                                    if( self.currentSameAsIds[item])
-                                        label="* "+label
+
                                     jstreeData.push({
                                         id: item,
                                         text: label,
@@ -918,28 +949,31 @@ var TE_AssetConfigurator = (function () {
                                         data: {
                                             id: item,
                                             label: parentIdsMap[item] ? parentIdsMap[item].label : Sparql_common.getLabelFromURI(item),
-                                            sameAsIds:self.currentSameAsIds[item],
+                                            sameAsIds: self.currentSameAsIds[item],
                                             source: self.currentSource,
-                                            code: parentIdsMap[item] ? parentIdsMap[item].code : Sparql_common.getLabelFromURI(item)
+                                            code: code
                                         }
                                     })
                                 }
                             })
 
 
-                            var label2 = parentIdsMap[hit._source.id].code + " " + parentIdsMap[hit._source.id].label
-                            if( self.currentSameAsIds[hit._source.id])
-                                label2="* "+label2
+                            if (hit._source.id.indexOf("Centri") > -1)
+                                var x = 3
+                            var parent2 = getParent(hit._source.id)
+                            var code2 = getCode(hit._source.id)
+                            var label2 = getNodeLabel(hit._source.id)
+
                             jstreeData.push({
                                 id: hit._source.id,
                                 text: label2, // Sparql_common.getLabelFromURI(hit._source.id) + " " + hit._source.label,
-                                parent: parent,
+                                parent: parent2,
                                 data: {
                                     id: hit._source.id,
                                     label: label2,
-                                    sameAsIds:self.currentSameAsIds[hit._source.id],
+                                    sameAsIds: self.currentSameAsIds[hit._source.id],
                                     source: self.currentSource,
-                                    code: parentIdsMap[hit._source.id].code,
+                                    code: code2
                                 }
                             })
 
@@ -955,7 +989,8 @@ var TE_AssetConfigurator = (function () {
                     if (err)
                         return MainController.UI.message(err)
 
-                })
+                }
+            )
         }
 
         self.switchLabelsAndCodesInGraph = function (value) {
@@ -977,12 +1012,12 @@ var TE_AssetConfigurator = (function () {
 
         }
 
-        self.setTreeItemSameAs = function (ids,callback) {
+        self.setTreeItemSameAs = function (ids, callback) {
 
             Sparql_OWL.getObjectRestrictions(Config.dictionarySource, ids, {filter: "FILTER (?prop=owl:sameAs) "}, function (err, result) {
                 if (err)
                     return callback(err.responseText)
-                return callback(null,result)
+                return callback(null, result)
             })
 
 

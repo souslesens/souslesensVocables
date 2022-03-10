@@ -243,6 +243,7 @@ var common = (function () {
 
                     if (parentNodeId == node.id)
                         return console.log("  Error jstree parent == childNode : " + parentNodeId)
+
                     $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, position, function () {
 
 
@@ -272,7 +273,15 @@ var common = (function () {
                         descendants.splice(index, 1);
                     }
                 }
-                $("#" + jstreeDiv).jstree(true).delete_node(descendants)
+               /* descendants.forEach(function(item){
+                    $("#" + jstreeDiv).jstree(true).delete_node(item)
+                })*/
+                try {
+                    $("#" + jstreeDiv).jstree(true).delete_node(descendants)
+                }
+                catch(e){
+                    console.log(e)
+                }
 
             },
             getjsTreeNodes: function (jstreeDiv, IdsOnly, parentNodeId) {

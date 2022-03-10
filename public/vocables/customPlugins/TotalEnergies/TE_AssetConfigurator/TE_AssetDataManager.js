@@ -1,6 +1,6 @@
-var TE_AssetDataManager=(function(){
+var TE_AssetDataManager = (function () {
 
-    var self={}
+    var self = {}
 
     self.loadAsset = function (asset) {
         if (asset == "")
@@ -11,9 +11,18 @@ var TE_AssetDataManager=(function(){
             self.currentTable_14224Field = "RDLRelation";
             self.workOrdersTable = "Wordorder_girassol"
             self.failuresTable = ""
+            self.currentDbName = 'data14224'
+            self.currentFLcolumn = 'functionalLocationDescription'
 
         } else if (self.currenTable == "absheron") {
             self.currentTable_14224Field = "RDLRelation"
+            self.currentDbName = 'data14224'
+
+        } else if (self.currenTable == "Moho_N") {
+            self.currentTable_14224Field = "RDScode"
+            self.currentDbName = 'evolen'
+            self.currentOpenNodeQuery = ' select *  from Moho_N where  location2 ='
+            self.currentFLcolumn = 'location3'
         } else {
             self.currentTable_14224Field = null
         }
@@ -37,7 +46,8 @@ var TE_AssetDataManager=(function(){
             assetTreeDistinctNodes = {}
             data.forEach(function (item) {
 
-
+                if (!item.location1)
+                    return
                 if (!assetTreeDistinctNodes[item.location1]) {
                     assetTreeDistinctNodes[item.location1] = 1
                     jstreeData.push({
@@ -91,19 +101,42 @@ var TE_AssetDataManager=(function(){
         })
 
     }
-    self.getAssetJstreeContextMenu=function(){
+    self.getAssetJstreeContextMenu = function () {
 
+        var items = {}
+
+        items.nodeInfos = {
+            label: "Node infos",
+            action: function (e) {// pb avec source
+                TE_AssetDataManager.self.showAssetNodeInfos(self.currentTreeNode)
+            }
+        }
+
+        items.associateToRDSnode = {
+            label: "Associate to RDS node",
+            action: function (e) {// pb avec source
+                TE_AssetConfigurator.asset.associateAssetNode(self.currentTreeNode.data,)
+            }
+        }
+        return items
 
     }
+
+
     self.openAssetTreeNode = function (node, level, callback) {
         var limit = 100000
         var parentData = node.data;
-        var sqlQuery = " select id," +
-            "FunctionalLocationCode,functionalLocationDescription," +
-            self.currentTable_14224Field + " as mapping_14224 " +
-            " from " + TE_AssetDataManager.currenTable + " where  parentFunctionalLocation ='" + parentData.FunctionalLocationCode + "' order by className";
-        //   var sqlQuery = " select distinct tag," + self.currentTable_14224Field + " as mapping_14224 from " + self.currenTable + " where  id='"+node.data.id+"' order by tag";
+        var sqlQuery
+        if (self.currentOpenNodeQuery) {
+            sqlQuery = self.currentOpenNodeQuery + "'" + node.data.label + "'"
+        } else {
 
+            sqlQuery = " select id," +
+                "FunctionalLocationCode,functionalLocationDescription," +
+                self.currentTable_14224Field + " as mapping_14224 " +
+                " from " + TE_AssetDataManager.currenTable + " where  parentFunctionalLocation ='" + parentData.FunctionalLocationCode + "' order by className";
+            //   var sqlQuery = " select distinct tag," + self.currentTable_14224Field + " as mapping_14224 from " + self.currenTable + " where  id='"+node.data.id+"' order by tag";
+        }
 
         self.querySQLserver(sqlQuery, function (err, result) {
             if (err)
@@ -122,7 +155,7 @@ var TE_AssetDataManager=(function(){
                     assetTreeDistinctNodes[item.id] = 1
                     jstreeData.push({
                         id: "A_" + item.id,
-                        text: item.functionalLocationDescription,
+                        text: item[self.currentFLcolumn],
                         parent: node.id,
                         type: "owl:Class",
                         data: data
@@ -139,7 +172,7 @@ var TE_AssetDataManager=(function(){
         var dataSource = {
             "type": "sql.sqlserver",
             "connection": "_default",
-            "dbName": "data14224",
+            "dbName": self.currentDbName,
             "table_schema": "dbo"
         }
 
@@ -219,9 +252,7 @@ var TE_AssetDataManager=(function(){
     }
 
 
-
     return self;
-
 
 
 })()

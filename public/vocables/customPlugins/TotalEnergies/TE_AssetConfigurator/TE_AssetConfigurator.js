@@ -225,7 +225,7 @@ var TE_AssetConfigurator = (function () {
                     self.currentTreeNode = node
                     var options = {
                         optionalData: {systemType: node.data.systemType},
-                        reopen:true
+                        reopen: true
                     }
                     SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options)
                     self.setTreeSystemNodesInfos(obj.node.id)
@@ -266,9 +266,9 @@ var TE_AssetConfigurator = (function () {
             var visjsData = {nodes: [], edges: []}
             var visjsId = common.getRandomHexaId(10);
             var code = node.data.code;
-            if(!code || code=="ex")// example
-                var parent=common.jstree.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv",node.parent)
-                code=parent.data.code
+            if (!code || code == "ex")// example
+                var parent = common.jstree.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv", node.parent)
+            code = parent.data.code
 
             // self.systemsMap[self.currentSystem].items[node.data.id].code
             node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
@@ -334,6 +334,14 @@ var TE_AssetConfigurator = (function () {
 
                             roundness: 0.4,
                         }
+                    },
+                    nodes: {
+                        chosen:{
+                            node: function (values, id, selected, hovering) {
+                                if(selected)
+                                values.color = "red";
+                            }
+                        }
                     }
                 }
                 options.onclickFn = function (node, point, options) {
@@ -390,6 +398,7 @@ var TE_AssetConfigurator = (function () {
                     parentsStr += "<li>" + parentsMap[key] + "</li>"
 
                 }
+                parentsStr += "<li>" + node.data.label + "</li>"
                 parentsStr += "</ol>"
 
                 var html = "<table>"
@@ -399,6 +408,11 @@ var TE_AssetConfigurator = (function () {
                 html += "<tr><td>Label:  <b>" + node.data.label + "</td></tr>"
                 html += "<tr><td>Location TAG  <b>:" + self.getNodeTag(node).locationTag + "</B></td></tr>"
                 html += "<tr><td>Function TAG  <b>:" + self.getNodeTag(node).functionTag + "</B></td></tr>"
+                var assetNode=node.data["assetNode"]
+                if(assetNode){
+                    var assetNode = assetNode.location1+"/"+ assetNode.location2+"/"+assetNode.location3
+                    html += "<tr><td>Current Asset node  <b>:" + assetNode + "</B></td></tr>"
+                }
                 html += "</table>"
 
                 $("#AssetConfigurator_graphHOverDiv").html(html)
@@ -415,7 +429,8 @@ var TE_AssetConfigurator = (function () {
             } else {
 
                 var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_AssetConfigurator.deleteSelectedObject()();\"> Delete</span>" +
-                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.rename();\"> Rename</span>"
+                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.showInfos();\">Node infos</span>" +
+                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.rename();\">Rename</span>"
             }
             $("#graphPopupDiv").html(html);
             self.currentGraphNode = node;
@@ -708,7 +723,14 @@ var TE_AssetConfigurator = (function () {
                         node.label = node.data.code || node.data.label
                     } else if (displayMode == "labels") {
                         node.label = node.data.label
-                    }
+
+                } else if (displayMode == "individuals") {
+                        var assetNode=node.data["assetNode"]
+                        if(assetNode){
+                            node.label = assetNode.location1+"/"+ assetNode.location2+"/"+assetNode.location3
+                        }
+
+                }
                     if (!self.objectsMap[node.data.id])
                         self.objectsMap[node.data.id] = {items: [], counter: 0}
                     self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
@@ -852,11 +874,7 @@ var TE_AssetConfigurator = (function () {
 
                                 var parents = hit._source.parents
                                 var code = hit._source.skoslabels[0];
-                              /*  if (!code) {  // pour les exemples ils ont le code de laur parent
-                                    var parentObj = parentIdsMap[parents[parents.length - 1]]
-                                    if (parentObj)
-                                        code = parentObj.code
-                                }*/
+
                                 parentIdsMap[hit._source.id] = {
                                     label: hit._source.label,
                                     code: code,
@@ -876,7 +894,7 @@ var TE_AssetConfigurator = (function () {
                             result.forEach(function (item) {
                                 if (!self.currentSameAsIds[item.concept.value])
                                     self.currentSameAsIds[item.concept.value] = []
-                                self.currentSameAsIds[item.concept.value].push(self.currentSameAsIds[item.value.value])
+                                self.currentSameAsIds[item.concept.value].push(item.value.value)
 
                             })
                             callbackSeries()
@@ -892,18 +910,26 @@ var TE_AssetConfigurator = (function () {
 
 
                         var getNodeLabel = function (item) {
+                            if (item == "http://data.total.com/resource/tsf/RDS_OG_81346/Location_aspect/Construction_complexe_1")
+                                var x = 3
                             var label
                             var prefix = ""
-                            if (parentIdsMap[item]) {
+                            if (self.systemsMap[item])
+                                label = "System " + self.systemsMap[item].label
+                            else if (parentIdsMap[item]) {
                                 if (self.currentSameAsIds[item]) {
                                     prefix += "*"
                                 }
-                                if (parentIdsMap[item].code)
+                                if (parentIdsMap[item].code) {
                                     prefix += parentIdsMap[item].code
+                                }
                                 label = prefix + " " + parentIdsMap[item].label
-                            } else
+                            } else {
+
                                 label = Sparql_common.getLabelFromURI(item)
+                            }
                             return label;
+
 
                         }
                         var getCode = function (item) {
@@ -1002,8 +1028,14 @@ var TE_AssetConfigurator = (function () {
                 var label
                 if (value == "codes")
                     label = node.data.code;
+
                 else
                     label = node.data.label;
+
+                if (value == "individuals" && node.data.assetNode) {
+                    var assetNode = node.data.assetNode
+                    label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
+                }
 
                 newNodes.push({id: node.id, label: label})
 
@@ -1021,6 +1053,92 @@ var TE_AssetConfigurator = (function () {
             })
 
 
+        }
+
+
+        self.graphActions = {
+            rename: function () {
+                if (!self.currentGraphNode)
+                    return alert("select a node in the graph")
+
+
+            },
+            showInfos: function () {
+                if (!self.currentGraphNode)
+                    return alert("select a node in the graph")
+                var rdsNodeData = self.currentGraphNode.data
+                // JSON.stringify(rdsNodeData, null,2).replace("\\n","<br>")
+
+                var headers = Object.keys(self.currentGraphNode.data)
+
+                var nodeId = self.currentGraphNode.data.label
+                var str = "<div style=overflow: auto'>" +
+
+                    "RDS Infos <table class='infosTable'>"
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>"
+                str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>"
+
+
+                headers.forEach(function (key) {
+                    if (key == "assetNode")
+                        return;
+
+                    str += "<tr class='infos_table'>"
+
+                    str += "<td class='detailsCellName'>" + key + "</td>"
+
+                    str += "<td class='detailsCellValue'>" + self.currentGraphNode.data[key] + "</td>"
+                    str += "</tr>"
+                })
+                str += "</table>"
+                str += "<br>"
+                str += "Asset Infos <table class='infosTable'>"
+
+                if (self.currentGraphNode.data["assetNode"]) {
+
+                    var headers = Object.keys(self.currentGraphNode.data["assetNode"])
+
+                    headers.forEach(function (key) {
+
+
+                        str += "<tr class='infos_table'>"
+
+                        str += "<td class='detailsCellName'>" + key + "</td>"
+
+                        str += "<td class='detailsCellValue'>" + self.currentGraphNode.data["assetNode"][key] + "</td>"
+                        str += "</tr>"
+                    })
+                }
+                str += "</table>"
+
+
+                $("#mainDialogDiv").html(str);
+                $("#mainDialogDiv").dialog("open")
+
+
+            }
+
+
+        }
+
+
+        self.asset = {
+
+            associateAssetNode: function (assetNodeData) {
+
+                if (!self.currentGraphNode)
+                    return alert("select a node in the graph")
+                var rdsNodeData = self.currentGraphNode.data
+                if (!confirm("Associate asset node" + assetNodeData.Description + " to RDS node " + rdsNodeData.code + " " + rdsNodeData.label))
+                    return;
+
+                rdsNodeData.assetNode = assetNodeData
+                visjsGraph.data.nodes.update({
+                    id: self.currentGraphNode.id,
+                    data: rdsNodeData
+                })
+
+            }
         }
 
 

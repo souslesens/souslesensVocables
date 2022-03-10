@@ -72,6 +72,7 @@ var visjsGraph = (function () {
             nodes: {
                 shape: 'dot',
                 size: 12,
+                chosen:{node:true}
                 // scaling:{min:6,max:20}
             },
             edges: {

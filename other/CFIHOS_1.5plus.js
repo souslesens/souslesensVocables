@@ -112,9 +112,7 @@ mappingsMap = {
 var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
 
 if (true) {
-
-
-    var files=[
+    var files = [
         "CFIHOS application condition group member v1.5.csv",
         "CFIHOS application condition group v1.5.csv",
         "CFIHOS application condition v1.5.csv",
@@ -142,11 +140,8 @@ if (true) {
         "CFIHOS tag equipment class relationship v1.5.csv",
         "CFIHOS tag or equipment class source standard v1.5.csv",
         "CFIHOS unit of measure dimension v1.5.csv",
-        "CFIHOS unit of measure v1.5.csv"
-    ]
-
-
-
+        "CFIHOS unit of measure v1.5.csv",
+    ];
 
     var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "COMPONENTS", "FUNCTIONALOBJECT"];
     //var mappingNames = ["FUNCTIONALOBJECT"];

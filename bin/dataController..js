@@ -28,9 +28,8 @@ var DataController = {
         });
     },
 
-    readCsv: function (dir, fileName,options, callback) {
-        if(!options)
-            options={}
+    readCsv: function (dir, fileName, options, callback) {
+        if (!options) options = {};
 
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
         if (!fs.existsSync(filePath)) return callback("file does not exist", null);

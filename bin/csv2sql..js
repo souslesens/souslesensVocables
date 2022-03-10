@@ -66,7 +66,7 @@ Csv2Sql = {
         });
     },
 
-    getInsert: function (filePath,dbName, tableName, fields, callback) {
+    getInsert: function (filePath, dbName, tableName, fields, callback) {
         Csv2Sql.readCsv(filePath, 1000, function (err, result) {
             if (err) return callback(err);
             var sliceIndex = 0;
@@ -146,16 +146,15 @@ var tableName = "Maintenance_girassol";
 var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
 var tableName = "Wordorder_girassol";
 
-
 var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N.csv";
 var tableName = "moho_north_fl";
 
 var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\systems.txt";
 var tableName = "systems";
 
-var dbName="evolen"
+var dbName = "evolen";
 
 Csv2Sql.getColumns(input, tableName, function (err, result) {
     var createSql = result.createSql;
-    Csv2Sql.getInsert(input, dbName,tableName, result.fieldsDecription, function (err, result) {});
+    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (err, result) {});
 });

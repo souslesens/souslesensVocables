@@ -1,4 +1,4 @@
-var processor = require("./CsvTripleBuilder.");
+var processor = require("../bin/KG/CsvTripleBuilder.");
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
 mappingsMap = {

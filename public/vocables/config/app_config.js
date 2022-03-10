@@ -33,6 +33,7 @@ var Config = (function () {
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 6
+   self.dictionarySource="TSF-DICTIONARY"
     self.Blender = {
         openTaxonomyTreeOnLoad: 3,
         pasteDescendantsMaxDepth: 6,
@@ -185,12 +186,27 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
+    self.tools["KGcreator"] = {
+        label: "KGcreator",
+        noSource: 1,
+        controller: KGcreator,
+        toolDescriptionImg: null
+    }
+
 
     self.tools["TE_14224_browser"] = {
         label: "TE_14224_browser",
         multiSources: 0,
         noSource:true,
         controller: TE_14224_browser,
+        toolDescriptionImg: null
+    }
+
+    self.tools["TE_AssetConfigurator"] = {
+        label: "TE_AssetConfigurator",
+        multiSources: 0,
+        noSource:true,
+        controller: TE_AssetConfigurator,
         toolDescriptionImg: null
     }
 

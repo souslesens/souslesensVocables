@@ -1,0 +1,86 @@
+<style>
+
+    #AssetConfigurator_graphHOverDiv {
+        background-color: #f0f5fa;
+        border: solid 1px black;
+        border-radius: 5px;
+        width: 250px;
+    / / / font-weight: bold;
+    }
+
+    .TE_AssetConfigurator_assetPanelTreeContainer{
+        width: 350px; height: 600px;overflow: auto;
+    }
+
+
+</style>
+
+<div id="TE_AssetConfigurator_Tabs" style="width:360px;">
+
+    <ul>
+        <li><a href="#TE_AssetConfigurator_graphTab">Graph</a></li>
+
+        <li><a href="#TE_AssetConfigurator_AssetsTab">Assets</a></li>
+
+
+    </ul>
+
+
+    <div class="" id="TE_AssetConfigurator_graphTab">
+
+
+        Graphs <select id="TE_AssetConfigurator_savedGraphsSelect"
+                       onchange="TE_AssetConfigurator.loadGraph($(this).val())"></select>
+        <table>
+
+
+            <tr>
+                <td>
+                    <button onclick="TE_AssetConfigurator.saveGraph()">Save</button>
+                </td>
+                <td>
+                    <button onclick="TE_AssetConfigurator.saveGraph(true)">Save new</button>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    show <select id="TE_AssetConfigurator_displayLabelsMode"
+                                 onchange="TE_AssetConfigurator.switchLabelsAndCodesInGraph($(this).val())">
+                    <option>codes</option>
+                    <option>labels</option>
+                    <option>individuals</option>
+                </select>
+                </td>
+
+                <td>
+                    <button onclick="TE_AssetConfigurator.deleteSelectedObject()">Delete Selected</button>
+                </td>
+
+                <td>
+                    <button onclick="TE_AssetConfigurator.clearAll()">Clear All</button>
+                </td>
+            </tr>
+
+
+        </table>
+        <br>
+        <div id="AssetConfigurator_graphHOverDiv" style="width:100%"></div>
+        <br>
+        <div id="AssetConfigurator_NodeInfosDiv"></div>
+    </div>
+    <div id="TE_AssetConfigurator_AssetsTab">
+        <div>
+            Asset <select onchange="TE_AssetDataManager.loadAsset($(this).val())">
+            <option></option>
+            <option>girassol</option>
+            <option>absheron</option>
+            <option>Moho_N</option>
+        </select>
+        <div class="TE_AssetConfigurator_assetPanelTreeContainer" >
+            <div id="TE_AssetConfigurator_assetPanelTreeDiv"></div>
+        </div>
+
+    </div>
+</div>

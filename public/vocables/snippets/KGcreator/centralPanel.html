@@ -1,0 +1,83 @@
+<script src="js/external/jquery/jquery.json-editor.min.js"></script>
+<!--<script src="js/external/jsoneditor.js"></script>>-->
+<!--script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script-->
+
+
+<style>
+    .KGcreator_tripleInput {
+        width: 200px;
+        margin: 3px;
+        padding: 3px;
+        border: #6e2500 solid 1px;
+        border-radius: 3px;
+    }
+
+    .KGcreator_tripleDiv {
+        width: 250px;
+        margin: 3px;
+        padding: 3px;
+        border: #6e2500 solid 1px;
+        border-radius: 3px;
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    .KGcreator_fileWithMappings {
+        color: #0000ff;
+    }
+
+</style>
+<div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+
+    <div class="KGcreator_tripleDiv">
+        Subject <input id="KGcreator_subjectInput" class="KGcreator_tripleInput">
+        <select id="KGcreator_subjectSelect" onchange="KGcreator.onTripleModelSelect('s',$(this).val())"></select>
+        lookup name<input  id="KGcreator_subjectLookupName">
+    </div>
+    <div class="KGcreator_tripleDiv">
+        Predicate <input id="KGcreator_predicateInput" class="KGcreator_tripleInput">
+        <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
+        is Restriction<input type="checkbox" id="KGcreator_isRestrictionCBX">
+    </div>
+    <div class="KGcreator_tripleDiv">
+        Object <input id="KGcreator_objectInput" class="KGcreator_tripleInput">
+        <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
+        is String<input type="checkbox" id="KGcreator_isObjectStringCBX"> lookup name<input  id="KGcreator_objectLookupName">
+
+    </div>
+
+    <div>
+        <button onclick="KGcreator.addTripleToTA()">Add</button>
+    </div>
+
+
+</div>
+
+<div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+
+    <div style="width:50%;display: flex;flex-direction: column; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+        <!--textarea id="KGcreator_tripleTA" style="width: 100%;height:100px;"></textarea>-->
+
+        <pre id="KGcreator_mainJsonDisplay" style="width: 100%;height:500px;"></pre>
+
+
+
+        <div>
+            <button onclick="KGcreator.saveMappings()">Save</button>
+            <button onclick="KGcreator.copyMappings()">Copy</button>
+            <button onclick="KGcreator.clearMappings()">Clear</button>
+            <button onclick="KGcreator.createTriples(true)">View Sample triples</button>
+            <button onclick="KGcreator.createTriples()">Create triples</button>
+            <button onclick="KGcreator.clearGraph()">Clear graph</button>
+
+        </div>
+    </div>
+    <textarea style="width:50%;height: 600px;overflow: auto" id="KGcreator_dataSampleDiv"></textarea>
+</div>
+
+
+<div id="KGcreator_dialogDiv">
+
+
+</div>

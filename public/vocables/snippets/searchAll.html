@@ -2,21 +2,21 @@
     <div>
         <input id='GenericTools_searchAllSourcesTermInput' style="width: 150px" value="">
         <button class='btn btn-sm my-1 py-0 btn-outline-primary' id="GenericTools_onSearchAllInput" onclick='SourceBrowser.searchAllSourcesTerm()'>Search</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.showThesaurusTopConcepts(MainController.currentSource);">reset</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Export.exportTeeToDataTable(null,'#')">toTable</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.showThesaurusTopConcepts(Lineage_common.currentSource);">reset</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional' onclick="Export.exportTeeToDataTable(null,'#')">toTable</button>
      <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.exportSearchResult()">CSV</button>-->
     </div>
     <div>
-        <input type='checkbox' checked='checked' id='GenericTools_allExactMatchSearchCBX'>Exact Match
+        <input type='checkbox'  checked='checked' id='GenericTools_allExactMatchSearchCBX'>Exact Match
 
-        <input type='checkbox'  id='GenericTools_searchInAllSources'>All sources
-        <select id="GenericTools_searchSchemaType">
+        <input type='checkbox' class='GenericTools_searchAllOptional' id='GenericTools_searchInAllSources'>All sources
+        <select id="GenericTools_searchSchemaType" class='GenericTools_searchAllOptional'>
             <option></option>
             <option>OWL</option>
             <option>SKOS</option>
             <option>INDIVIDUAL</option>
         </select>
-<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.showSearchableSourcesTreeDialog()">+</button>
+<button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceBrowser.showSearchableSourcesTreeDialog()">+</button>
     </div>
 
 

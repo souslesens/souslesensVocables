@@ -5,7 +5,6 @@ var TE_14224_browser = (function () {
         var graphUri
         var assetTreeDistinctNodes = {}
 
-        var sqlQuerySize = 500
 
         self.currentTable_14224Field;
 
@@ -49,13 +48,10 @@ var TE_14224_browser = (function () {
         self.loadAsset = function (asset) {
             if (asset == "")
                 return;
-            self.currenTable = asset;
-
+            self.currenTable = asset
 
             if (self.currenTable == "girassol") {
-                self.currentTable_14224Field = "RDLRelation";
-                self.workOrdersTable = "Wordorder_girassol"
-                self.failuresTable = ""
+                self.currentTable_14224Field = "RDLRelation"
 
             } else if (self.currenTable == "absheron") {
                 self.currentTable_14224Field = "RDLRelation"
@@ -97,35 +93,7 @@ var TE_14224_browser = (function () {
 
                 self.ontology.loadOntologytree()
                 self.ontology.loadIso14224CodesMap();
-                self.loadMaintenanceAssetCodesMap()
-                self.loadFailureCodesMap()
 
-            })
-
-        }
-
-        self.loadMaintenanceAssetCodesMap = function () {
-            var sqlQuery = "SELECT ActivityCode, count(*) as count from " + self.workOrdersTable +
-                " group by [ActivityCode]"
-            self.querySQLserver(sqlQuery, function (err, data) {
-                if (err)
-                    return MainController.UI.message(err)
-                data.forEach(function (item) {
-                    self.iso_14224AssetMap[item.ActivityCode] = item.count
-                })
-            })
-
-        }
-        self.loadFailureCodesMap = function () {
-            return;
-            var query = "SELECT ActivityCode, count(*) as count from " + self.workOrdersTable +
-                " group by [ActivityCode]"
-            self.querySQLserver(sqlQuery, function (err, data) {
-                if (err)
-                    return MainController.UI.message(err)
-                data.forEach(function (item) {
-                    self.iso_14224AssetMap[item.ActivityCode] = item.count
-                })
             })
 
         }
@@ -259,7 +227,6 @@ var TE_14224_browser = (function () {
                 "table_schema": "dbo"
             }
 
-            console.log(sqlQuery)
 
             $.ajax({
                 type: "POST",
@@ -515,7 +482,7 @@ var TE_14224_browser = (function () {
                     visjsData.edges = common.array.unduplicateArray(visjsData.edges, "id")
 
 
-                    if (visjsGraph.data && visjsGraph.data.nodes) {
+                    if(visjsGraph.isGraphNotEmpty()){
                         visjsGraph.data.nodes.add(visjsData.nodes)
                         visjsGraph.data.edges.add(visjsData.edges)
                     } else {
@@ -620,7 +587,7 @@ var TE_14224_browser = (function () {
             if (callback)
                 return callback(null, visjsData)
 
-            if (visjsGraph.data && visjsGraph.data.nodes) {
+            if(visjsGraph.isGraphNotEmpty()){
                 visjsGraph.data.nodes.add(visjsData.nodes)
                 visjsGraph.data.edges.add(visjsData.edges)
             } else {
@@ -649,24 +616,24 @@ var TE_14224_browser = (function () {
                         roundness: 0.4,
                     }
                 },
-                /*  configure:{
-                      enabled	:true,
-                      filter	:	true,
-                //  container	:'visjsConfigure',
-                  showButton:true
-                  }*/
+              /*  configure:{
+                    enabled	:true,
+                    filter	:	true,
+              //  container	:'visjsConfigure',
+                showButton:true
+                }*/
 
 
             }
-            if (layout == "hierarchical") {
+            if ( layout == "hierarchical") {
                 // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
                 options.layoutHierarchical = {
                     direction: "LR",
                     sortMethod: "directed",
                     levelSeparation: 200,
                     nodeSpacing: 20,
-                    parentCentralization: true,
-                    edgeMinimization: true
+                    parentCentralization:true,
+                    edgeMinimization:true
                 }
 
             } else {
@@ -744,9 +711,10 @@ var TE_14224_browser = (function () {
         }
 
 
-        self.drawAssetNodesParents = function (assetNodesIds, startLevel, callback) {
+        self.drawAssetNodesParents = function (assetNodesIds, startLevel) {
 
-
+            if (!startLevel)
+                startLevel = 0
             if (!assetNodesIds) {
                 var nodes = visjsGraph.data.nodes.get();
                 self.currentAssetLevel += 1
@@ -787,15 +755,12 @@ var TE_14224_browser = (function () {
 
 
             self.querySQLserver(sqlQuery, function (err, result) {
-                if (err) {
-                    if (callback)
-                        return callback(err)
-                    return alert(err)
-                }
+                if (err)
+                    return callbackSeries(err)
                 var visjsData = {nodes: [], edges: []}
                 var visjsExistingNodes = visjsGraph.getExistingIdsMap()
                 result.forEach(function (item) {
-                    var level = startLevel || self.currentAssetLevel// item.childFun
+                    var level = self.currentAssetLevel// item.childFun
                     var data = item;
                     data.type = "assetNode"
                     data.level = level
@@ -823,32 +788,28 @@ var TE_14224_browser = (function () {
                     }
 
 
-                    var edgeId = "A_" + item.childId + "_" + id;
-                    if (!visjsExistingNodes[edgeId]) {
-                        visjsExistingNodes[edgeId] = 1
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: "A_" + item.childId,
-                            to: id,
-                            color: "grey",
-                            // physics:false
-                            // length: 500
+                    if (visjsExistingNodes["A_" + item.childId]) {
+                        var edgeId = "A_" + item.childId + "_" + id;
+                        if (!visjsExistingNodes[edgeId]) {
+                            visjsExistingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: "A_" + item.childId,
+                                to: id,
+                                color: "grey",
+                                // physics:false
+                                // length: 500
 
-                        })
+                            })
 
 
+                        }
                     }
-
 
                 })
 
-                if (callback) {
 
-                    return callback(null, visjsData)
-                }
-
-
-                if (visjsGraph.data && visjsGraph.data.nodes) {
+                if(visjsGraph.isGraphNotEmpty()){
                     visjsGraph.data.nodes.add(visjsData.nodes)
                     visjsGraph.data.edges.add(visjsData.edges)
                 } else {
@@ -876,7 +837,6 @@ var TE_14224_browser = (function () {
                     self.showAssetNodeInfos(self.currentGraphNode)
                 } else {
                     Lineage_classes.currentGraphNode = node
-
                     Lineage_classes.onGraphOrTreeNodeClick(node, options, {callee: "Graph"})
                 }
 
@@ -956,12 +916,8 @@ var TE_14224_browser = (function () {
                 if (!id)
                     return 0;
                 for (var key in self.iso_14224AssetMap) {
-                    if (key.indexOf(id) > -1) {
-                        if (Array.isArray(self.iso_14224AssetMap[key]))
-                            count += self.iso_14224AssetMap[key].length
-                        else
-                            count += self.iso_14224AssetMap[key]
-                    }
+                    if (key.indexOf(id) > -1)
+                        count += self.iso_14224AssetMap[key].length
                 }
                 return count;
             },
@@ -988,10 +944,7 @@ var TE_14224_browser = (function () {
 
                 var jstreeData = []
                 var existingNodes = {}
-                common.jstree.types["isoAssetTreeNode"] = {
-                    "li_attr": {style: "color:#daf"},
-                    "icon": "../icons/externalObject.png"
-                }
+
 
                 async.eachSeries(topClasses, function (topClass, callbackEach) {
                         jstreeData.push({
@@ -1085,11 +1038,7 @@ var TE_14224_browser = (function () {
                                             sparqlResult.forEach(function (item) {
                                                 if (item.child1) {
                                                     var count = self.ontology.countIso14224_to_AssetNodes(item.child1)
-                                                    var label = item.child1Label.value
-                                                    if (count > 0)
-                                                        label = "<span class='isoAssetTreeNode'>" + label + ' (' + count + ")"
-                                                    item.child1Label.value = label
-
+                                                    item.child1Label.value += ' (' + count + ")"
 
                                                 }
 
@@ -1100,26 +1049,18 @@ var TE_14224_browser = (function () {
                                 )
                             }
                             ,
-                            contextMenu: TE_14224_browser.getOntologyJstreeContextMenu(),
-                            types: true
+                            contextMenu: TE_14224_browser.getOntologyJstreeContextMenu()
                         }
 
                         jstreeData.forEach(function (node) {
                             var count = 0
                             if (node.data && node.data.id) {
                                 count = self.ontology.countIso14224_to_AssetNodes(node.data.id)
-                                var label = node.text
-                                if (count > 0)
-                                    label = "<span class='isoAssetTreeNode'>" + label + ' (' + count + ")"
-                                node.text = label
+                                node.text += ' (' + count + ")"
                                 node.data.countAssetNodes = count
                             }
                         })
-                         common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options, function(){
-                             /*        $("#TE_14224_browser_ontologyPanelDiv").jstree().get
-
-                                 set_type (obj, type)*/
-                             })
+                        common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options)
 
                     })
             },
@@ -1159,59 +1100,7 @@ var TE_14224_browser = (function () {
 
 
             },
-            showAssetData: function () {
 
-
-                if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3") > -1) {
-                    TE_14224_browser.ontology.showAssetSystemData(self.currentOntologyTreeNode)
-                    $("#ontologyInfosDiv").html(self.currentOntologyTreeNode.text)
-
-                } else {
-
-                    var params;
-                    var iso14224Code = null;
-                    if (self.iso_14224CodesMap[self.currentOntologyTreeNode.data.id])
-                        iso14224Code = self.iso_14224CodesMap[self.currentOntologyTreeNode.data.id].code
-
-                    if (self.currentOntologyTreeNode.id = ("http://data.total.com/resource/tsf/maintenance/romain_14224/b34865b133") || self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/b34865b133") > -1) {
-
-                        params = {
-                            type: "MaintenanceCode",
-                            iso14224CodeFilterStr: iso14224Code ? " and  [MaintenanceCode] ='" + iso14224Code + "'" : "",
-                            sql: "SELECT TOP (" + sqlQuerySize + ")maintenance.*, system.id as assetId ,maintenance.id as maintenanceId" +
-                                " FROM [data14224].[dbo].[Wordorder_girassol] as maintenance, [data14224].[dbo].[girassol] as system where " +
-                                " system.functionalLocationCode=maintenance.PosteTechnique ",
-                            labelColumn: "Designation",
-                            idColumn: "maintenanceId",
-                        }
-
-                    } else if (self.currentOntologyTreeNode.id = ("http://data.total.com/resource/tsf/maintenance/romain_14224/1970fa62bc") || self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/1970fa62bc") > -1) {
-
-                        params = {
-                            type: "MaintenanceActivity",
-                            iso14224CodeFilterStr: iso14224Code ? " and  ActivityCode ='" + iso14224Code + "'" : "",
-                            sql: "SELECT TOP (" + sqlQuerySize + ")maintenance.*, system.id as assetId ,maintenance.id as maintenanceId" +
-                                " FROM [data14224].[dbo].[Wordorder_girassol] as maintenance, [data14224].[dbo].[girassol] as system where " +
-                                " system.functionalLocationCode=maintenance.PosteTechnique ",
-                            labelColumn: "Designation",
-                            idColumn: "maintenanceId",
-                        }
-
-
-                    }
-
-                    if (params) {
-                        if (visjsGraph.data && visjsGraph.data.nodes)
-                            $("#ontologyInfosDiv").append("   " + self.currentOntologyTreeNode.text)
-                        else
-                            $("#ontologyInfosDiv").html(self.currentOntologyTreeNode.text)
-
-                        TE_14224_browser.ontology.showAssetAspects(params)
-                    }
-                }
-
-
-            },
 
             showAssetAspects: function (params) {
                 var assetIdsFilterStr = ""
@@ -1230,6 +1119,17 @@ var TE_14224_browser = (function () {
                     assetIdsFilterStr = "  and system.id  in (" + assetIdsFilterStr + ") "
 
 
+           /*     var maintenanceCode = self.iso_14224CodesMap[maintenanceNode.data.id].code;
+                if (params.codeFilter)
+                    return MainController.UI.message("no maintenance code")
+                var iso14224CodesStr = " and  ActivityCode ='" + params.codeFilter + "'"
+
+
+                var workOrdersTable = "Wordorder_girassol"*/
+                /*  var sqlQuery = "SELECT TOP (1000)maintenance.*, system.id as assetId ,maintenance.id as maintenanceId" +
+                      " FROM [data14224].[dbo].[Wordorder_girassol] as maintenance, [data14224].[dbo].[girassol] as system where " +
+                      " system.functionalLocationCode=maintenance.PosteTechnique " + assetIdsFilterStr + iso14224CodesStr*/
+
                 var sqlQuery = params.sql + " " + params.iso14224CodeFilterStr + assetIdsFilterStr
 
                 self.querySQLserver(sqlQuery, function (err, result) {
@@ -1237,13 +1137,8 @@ var TE_14224_browser = (function () {
                         return callbackSeries(err)
                     var visjsData = {nodes: [], edges: []}
                     var visjsExistingNodes = visjsGraph.getExistingIdsMap()
-                    if (result.length == 0) {
-                        return MainController.UI.message("no result", true)
 
-                    }
 
-                    if (result.length > sqlQuerySize)
-                        MainController.UI.message("Truncated results , only " + sqlQuerySize + "first liens showed")
                     async.series([
                         // draw assetNodesIds
                         function (callbackSeries) {
@@ -1260,24 +1155,11 @@ var TE_14224_browser = (function () {
                             })
 
                         },
-
                         function (callbackSeries) {
 
 
                             var level = -1
-                            var assetNodesMap = {}
-                            visjsData.nodes.forEach(function (item) {
-                                assetNodesMap[item.id] = item
-                            })
-                            MainController.UI.message("found " + result.length + " items", true)
                             result.forEach(function (item) {
-
-                                if (assetNodesMap["A_" + item.assetId]) {
-                                    assetNodesMap["A_" + item.assetId].color = "red"
-                                    // assetNodesMap["A_" + item.assetId].size = "20"
-                                    assetNodesMap["A_" + item.assetId].shape = "star"
-                                }
-                                return;
 
 
                                 var label = item[params.labelColumn] //item.Designation ;// self.iso_14224InverseCodesMap[item.ActivityCode].label
@@ -1322,15 +1204,13 @@ var TE_14224_browser = (function () {
 
                             })
 
-                            visjsData.nodes = common.array.unduplicateArray(visjsData.nodes, "id")
-                            visjsData.edges = common.array.unduplicateArray(visjsData.edges, "id")
 
-                            if (visjsGraph.data && visjsGraph.data.nodes) {
+                            if(visjsGraph.isGraphNotEmpty()){
                                 visjsGraph.data.nodes.add(visjsData.nodes)
                                 visjsGraph.data.edges.add(visjsData.edges)
                             } else {
-                                self.drawNewGraph(visjsData,)
-                                //   self.drawNewGraph(visjsData, "hierarchical")
+                                // self.drawNewGraph(visjsData, )
+                                self.drawNewGraph(visjsData, "hierarchical")
                             }
                         }
 
@@ -1344,6 +1224,61 @@ var TE_14224_browser = (function () {
 
 
                 })
+
+
+            }, showAssetData: function () {
+
+                /*          id: "http://data.total.com/resource/tsf/maintenance/romain_14224/bad731c1e7",
+                              label: "Failure",
+                              type: "http://standards.iso.org/iso/15926/part14/Event"
+                      },
+              {
+                  id: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fcb03c2dd",
+                      label: "maintenance",
+                  type: "http://standards.iso.org/iso/15926/part14/Activity"
+              },
+              {
+                  id: "http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3",
+                      label: "O&G systems",
+                  type: "http://standards.iso.org/iso/15926/part14/PhysicalObject"
+              }]*/
+                if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3") > -1) {
+                    TE_14224_browser.ontology.showAssetSystemData(self.currentOntologyTreeNode)
+
+                } else {
+
+                    var params;
+                    var iso14224Code= self.iso_14224CodesMap[self.currentOntologyTreeNode.data.id].code
+                    if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/b34865b133") > -1) {
+
+                        params = {
+                            type: "MaintenanceCode",
+                            iso14224CodeFilterStr:iso14224Code?" and  [MaintenanceCode] ='" +iso14224Code + "'":"" ,
+                            sql: "SELECT TOP (1000)maintenance.*, system.id as assetId ,maintenance.id as maintenanceId" +
+                                " FROM [data14224].[dbo].[Wordorder_girassol] as maintenance, [data14224].[dbo].[girassol] as system where " +
+                                " system.functionalLocationCode=maintenance.PosteTechnique ",
+                            labelColumn: "Designation",
+                            idColumn: "maintenanceId",
+                        }
+
+                    } else if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/1970fa62bc") > -1) {
+
+                        params = {
+                            type: "MaintenanceActivity",
+                            iso14224CodeFilterStr:iso14224Code?" and  ActivityCode ='" +iso14224Code + "'":"" ,
+                            sql: "SELECT TOP (1000)maintenance.*, system.id as assetId ,maintenance.id as maintenanceId" +
+                                " FROM [data14224].[dbo].[Wordorder_girassol] as maintenance, [data14224].[dbo].[girassol] as system where " +
+                                " system.functionalLocationCode=maintenance.PosteTechnique ",
+                            labelColumn: "Designation",
+                            idColumn: "maintenanceId",
+                        }
+
+
+                    }
+
+                    if (params)
+                        TE_14224_browser.ontology.showAssetAspects(params)
+                }
 
 
             },
@@ -1381,15 +1316,15 @@ var TE_14224_browser = (function () {
 
                             }
 
+                            if (!mappings_14224FilterStr)
+                                return callbackSeries()
 
-                            return callbackSeries()
+                            return callbackSeries("no data")
 
 
                         },
                         function (callbackSeries) {
 
-                            if (!mappings_14224FilterStr)
-                                return callbackSeries()
 
                             var sqlQuery = " select distinct id,location1,location2,location3,location4,functionalLocationDescription\n" +
                                 " as className,FunctionalLocationCode,RDLRelation as mapping_14224,parentFunctionalLocation  \n"
@@ -1436,48 +1371,19 @@ var TE_14224_browser = (function () {
 
                                     }
                                 })
-
+                                if (!callback) {
+                                    if(visjsGraph.isGraphNotEmpty()){
+                                        visjsGraph.data.nodes.add(visjsData.nodes)
+                                        visjsGraph.data.edges.add(visjsData.edges)
+                                    } else {
+                                        self.currentAssetLevel += 1
+                                        self.drawNewGraph(visjsData, "hierarchical")
+                                    }
+                                }
                                 return callbackSeries()
 
                             })
-                        },
-
-                        //draw asset ancestors
-                        function (callbackSeries) {
-                            var assetIds = []
-                            visjsData.nodes.forEach(function (item) {
-                                assetIds.push(item.data.id)
-                            })
-                            var resultSize = 1
-                            var level = 0;
-                            async.whilst(
-                                function test(cbTest) {
-                                    if (cbTest)
-                                        return cbTest(null, resultSize > 0 || level <= 6);
-                                    return assetIds.length > 0 && level <= 6;
-                                },
-                                function iter(callbackWhilst) {
-                                    level += 1
-                                    self.drawAssetNodesParents(assetIds, level, function (err, result) {
-                                        if (err)
-                                            return callbackSeries();
-
-                                        assetIds = []
-                                        result.nodes.forEach(function (item) {
-                                            assetIds.push(item.data.id)
-                                        })
-
-                                        visjsData.nodes = visjsData.nodes.concat(result.nodes)
-                                        visjsData.edges = visjsData.edges.concat(result.edges)
-
-                                        return callbackWhilst();
-
-                                    })
-                                }, function (err) {
-                                    callbackSeries(err);
-                                })
-
-                        },
+                        }
                     ]
 
 
@@ -1488,22 +1394,8 @@ var TE_14224_browser = (function () {
                             }
                             return MainController.UI.message(err)
                         }
-
-                        visjsData.nodes = common.array.unduplicateArray(visjsData.nodes, "id")
-                        visjsData.edges = common.array.unduplicateArray(visjsData.edges, "id")
-
                         if (callback)
                             return callback(null, visjsData);
-                        else {
-                            if (visjsGraph.data && visjsGraph.data.nodes) {
-                                visjsGraph.data.nodes.add(visjsData.nodes)
-                                visjsGraph.data.edges.add(visjsData.edges)
-                            } else {
-                                self.currentAssetLevel += 1
-                                self.drawNewGraph(visjsData, "hierarchical")
-                            }
-                        }
-
                     })
 
 

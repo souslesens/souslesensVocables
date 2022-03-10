@@ -20,6 +20,7 @@ var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
 var DictionariesManager = require("../bin/KG/dictionariesManager.");
+var CsvTripleBuilder = require("../bin/KG/CsvTripleBuilder.");
 const promiseFs = require("fs").promises;
 
 var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
@@ -448,8 +449,24 @@ router.post(
                 processResponse(response, err, result);
             });
         }
+        if (req.body.readCsv) {
+            DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+
         if (req.body.readDataFile) {
             DataController.readfile(req.body.dir, req.body.fileName, function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+        if (req.body.createTriplesFromCsv) {
+            CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+        if (req.body.clearGraph) {
+            CsvTripleBuilder.clearGraph(req.body.clearGraph, req.body.sparqlServerUrl || null, function (err, result) {
                 processResponse(response, err, result);
             });
         }

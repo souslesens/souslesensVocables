@@ -7,7 +7,7 @@ var httpProxy = require("../bin/httpProxy.");
 var UML2OWLparser = require("./UML2OWLparser");
 
 var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
-var CFIHOS_processor = {
+var CFIHOS_processor_V0Obsolete = {
     readCsv: function (filePath, callback) {
         csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
             if (err) return callback(err);
@@ -28,7 +28,7 @@ var CFIHOS_processor = {
                 var array = /CFIHOS (.*) v1.5.csv/.exec(file);
                 if (!array) return callbackSeries(filePath);
                 var fileName = array[1];
-                CFIHOS_processor.readCsv(filePath, function (err, result) {
+                CFIHOS_processor_V0Obsolete.readCsv(filePath, function (err, result) {
                     descriptionMap[fileName] = { filePath: filePath, headers: result.headers, length: result.data[0].length };
                     callbackSeries();
                 });
@@ -73,7 +73,7 @@ var CFIHOS_processor = {
                                     var lookupFileName = lookup.fileName;
                                     var lookupFilePath = rootDir + path.sep + lookupFileName;
 
-                                    CFIHOS_processor.readCsv(lookupFilePath, function (err, result) {
+                                    CFIHOS_processor_V0Obsolete.readCsv(lookupFilePath, function (err, result) {
                                         if (err) return callbackEachLookup(err);
                                         var lookupLines = result.data[0];
                                         lookUpMap[lookup.name] = {};
@@ -108,7 +108,7 @@ var CFIHOS_processor = {
 
                                 return target;
                             }
-                            CFIHOS_processor.readCsv(filePath, function (err, result) {
+                            CFIHOS_processor_V0Obsolete.readCsv(filePath, function (err, result) {
                                 if (err) return callbackSeries(err);
 
                                 var lines = result.data[0];
@@ -255,7 +255,7 @@ var CFIHOS_processor = {
         );
     },
 };
-CFIHOS_processor.getDescription();
+CFIHOS_processor_V0Obsolete.getDescription();
 
 mappingsMap = {
     TAG_CLASS: {
@@ -348,7 +348,7 @@ mappingNames.forEach(function (mappingName) {
 var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/";
 
 if (false) {
-    CFIHOS_processor.processSubClasses(mappings, graphUri);
+    CFIHOS_processor_V0Obsolete.processSubClasses(mappings, graphUri);
 }
 
 if (true) {
@@ -359,7 +359,7 @@ if (true) {
     UML2OWLparser.parseXMI(sourcePath, jsonPath, function () {
         UML2OWLparser.buildOwl(jsonPath, graphUri, function (err, result) {
             if (err) return console.lg(err);
-            CFIHOS_processor.processSubClasses(mappings, graphUri);
+            CFIHOS_processor_V0Obsolete.processSubClasses(mappings, graphUri);
         });
     });
 }

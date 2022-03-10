@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .AssetConfigurator_AspectDiv{
+            display: flex;
+            flex-direction: row;
+            margin: 2px;
+            padding: 2px;
+        }
+       .AssetConfigurator_SystemDiv{
+           align-content: center;
+           margin: 2px;
+           padding: 4px;
+           opacity: 0.7;
+           border-radius: 5px;
+           background: white;
+           border: solid 1px black;
+       }
+        .AssetConfigurator_SystemDiv_selected {
+            opacity: 1;
+            border: solid 3px black;
+        }
+        .TE_AssetConfigurator_Location {
+
+            padding:5px;
+            margin: 5px;
+            border:solid 1px black;
+            background-color: #ebcff5;
+        }
+
+        .TE_AssetConfigurator_Function {
+
+            padding:5px;
+            margin: 5px;
+            border:solid 1px black;
+            background-color: #f5dfb3;
+        }
+
+    </style>
+</head>
+<body>
+
+<div  style="margin-bottom: 10px;margin-left: 30px">
+
+    Systems<br>
+    <div id="TE_AssetConfigurator_allSystemsDiv"></div>
+
+
+
+
+
+
+
+</div>
+
+<div id="TE_AssetConfigurator_81346TreePanel" style="margin-bottom: 10px;margin-left: 15px">
+    <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#Standardizer_filterClassesDialogDiv').dialog('close')">Cancel</button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.compareSource(null,true)">Compare</button>-->
+ <!--  <div id="TE_AssetConfigurator_searchAllDiv" style="height: 50px;margin-bottom: 10px ;display:block"></div>-->
+    <input  id="TE_AssetConfigurator_searchInSystemInput"   onkeyup="if (event.keyCode == 13 || event.keyCode == 9)TE_AssetConfigurator.searchInCurrentSystem($(this).val(),null)">
+
+    <button onclick="TE_AssetConfigurator.filterSytemTree(null)">clear system</button>
+
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <div id="AssetConfigurator_treeInfosDiv"></div>
+    <div class="jstreeContainer" style="height:400px">
+        <div id="TE_AssetConfigurator_81346TreeDiv"></div>
+    </div>
+
+
+</div>
+
+</body>
+</html>

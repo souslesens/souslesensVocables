@@ -81,7 +81,7 @@ var CustomPluginController = (function () {
                     var newNode = {id: item.concept.value}
                     if (Lineage_classes.sourcesGraphUriMap[item.g.value]) {
                         var source = Lineage_classes.sourcesGraphUriMap[item.g.value].name
-                        if (Config.sources[Lineage_classes.mainSource].imports.indexOf(source) > -1)// only those in the imports of mainSource
+                        if (Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].imports && Config.sources[Lineage_classes.mainSource].imports.indexOf(source) > -1)// only those in the imports of mainSource
                             var node = visjsGraph.data.nodes.get(item.concept.value)
                         if (node)
                             node.data.source = source

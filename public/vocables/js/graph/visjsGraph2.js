@@ -44,8 +44,7 @@ var visjsGraph = (function () {
         self.currentContext = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
-        if (_options.simulationTimeOut)
-            self.simulationTimeOut = _options.simulationTimeOut
+
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
 
@@ -61,9 +60,9 @@ var visjsGraph = (function () {
             nodes: nodesDataSet,
             edges: edgesDataSet
         };
-        self.canvasDimension={
-           w:$("#" + divId).width(),
-            h:($("#" + divId).height() - 50)
+        self.canvasDimension = {
+            w: $("#" + divId).width(),
+            h: ($("#" + divId).height() - 50)
         }
         var options = {
 
@@ -73,6 +72,7 @@ var visjsGraph = (function () {
             nodes: {
                 shape: 'dot',
                 size: 12,
+                chosen:{node:true}
                 // scaling:{min:6,max:20}
             },
             edges: {
@@ -81,13 +81,35 @@ var visjsGraph = (function () {
             layout: {improvedLayout: false}
 
         };
-        if (_options.nodes) {
-            options.nodes = _options.nodes
-        }
-        if (_options.edges) {
-            options.edges = _options.edges
+
+        for (var key in _options) {
+            options[key] = _options[key]
         }
 
+        /*  if (_options.simulationTimeOut)
+              self.simulationTimeOut = _options.simulationTimeOut
+          if (_options.nodes) {
+              options.nodes = _options.nodes
+          }
+          if (_options.edges) {
+              options.edges = _options.edges
+          }
+
+
+          if (_options.groups) {
+              options.groups = _options.groups
+          }
+
+          if (_options.nodes) {
+              options.nodes = _options.nodes
+          }
+
+          if (_options.edges) {
+              options.edges = _options.edges
+          }
+          if (_options.physics) {
+              options.physics = _options.physics
+          }*/
         if (_options.layoutHierarchical) {
 
             options.layout = {
@@ -96,20 +118,6 @@ var visjsGraph = (function () {
 
         } else {
             $("#visjsGraph_layoutSelect").val("")
-        }
-        if (_options.groups) {
-            options.groups = _options.groups
-        }
-
-        if (_options.nodes) {
-            options.nodes = _options.nodes
-        }
-
-        if (_options.edges) {
-            options.edges = _options.edges
-        }
-        if (_options.physics) {
-            options.physics = _options.physics
         }
 
         self.globalOptions = options
@@ -222,14 +230,17 @@ var visjsGraph = (function () {
                          return;*/
 
                     var nodeId = params.nodes[0]
+                    var nodeObj = self.data.nodes.get(nodeId)
+
                     self.lastMovedNode = nodeId
                     //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
                     var fixed = true;
                     if (params.event.srcEvent.altKey)
                         fixed = false;
+                    var newNode = {id: nodeId, fixed: fixed}
+                    newNodes.push(newNode)
 
-                    newNodes.push({id: nodeId, fixed: fixed})
 
                     visjsGraph.data.nodes.update(newNodes)
 
@@ -271,10 +282,7 @@ var visjsGraph = (function () {
                 html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
                 html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>"
-                html+="<div id='visjsConfigureDiv' style='overflow: auto'></div>"
-
-
-
+                html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>"
 
 
                 if (false)
@@ -435,6 +443,25 @@ var visjsGraph = (function () {
         }
     }
 
+    self.removeOtherNodesFromGraph=function(nodeId){
+
+        var nodes = visjsGraph.data.nodes.get();
+        var nodeIds=[]
+        nodes.forEach(function (node) {
+            if(node.id!= nodeId)
+                nodeIds.push(node.id)
+        })
+        visjsGraph.data.nodes.remove(nodeIds);
+        var edges = visjsGraph.data.edges.get();
+        var edgesIds=[]
+        edges.forEach(function (edge) {
+            if(nodeIds.indexOf(edge.from)>-1 || nodeIds.indexOf(edge.to)>-1)
+                edgesIds.push(edge.id)
+        })
+        visjsGraph.data.edges.remove(edgesIds);
+
+    },
+
 
     self.onScaleChange = function () {
         // return;
@@ -498,6 +525,11 @@ var visjsGraph = (function () {
             existingVisjsIds[id] = 1;
         })
         return existingVisjsIds;
+    }
+
+    self.isGraphNotEmpty = function () {
+        // if(visjsGraph.isGraphNotEmpty()){
+        return Object.keys(visjsGraph.getExistingIdsMap()).length > 0
     }
 
 
@@ -795,17 +827,19 @@ var visjsGraph = (function () {
     }
 
 
-    self.saveGraph = function () {
+    self.saveGraph = function (fileName, raw) {
         if (!self.currentContext)
             return;
         var nodes = visjsGraph.data.nodes.get()
         var positions = self.network.getPositions()
 
-        for (var key in self.currentContext.options) {
-            if (key.indexOf("Fn") > 0) {
-                self.currentContext.options[key] = self.currentContext.options[key].toString();
-            }
+        if (!raw) {
+            for (var key in self.currentContext.options) {
+                if (key.indexOf("Fn") > 0) {
+                    self.currentContext.options[key] = self.currentContext.options[key].toString();
+                }
 
+            }
         }
         var data = {
             nodes: visjsGraph.data.nodes.get(),
@@ -813,11 +847,12 @@ var visjsGraph = (function () {
             context: self.currentContext,
             positions: positions
         }
-
-        var fileName = prompt("graph name")
+        if (!fileName)
+            fileName = prompt("graph name")
         if (!fileName || fileName == "")
             return;
-        fileName = fileName + ".json"
+        if (fileName.indexOf(".json") < 0)
+            fileName = fileName + ".json"
         var payload = {
             saveData: 1,
             dir: "graphs",
@@ -843,8 +878,8 @@ var visjsGraph = (function () {
         $("#VisJsGraph_message").html(message)
     }
 
-    self.loadGraph = function (fileName) {
-        if (!self.currentContext)
+    self.loadGraph = function (fileName, add, callback) {
+        if (false && !self.currentContext)
             return;
         if (!fileName)
             fileName = $("#visjsGraph_savedGraphsSelect").val()
@@ -888,8 +923,11 @@ var visjsGraph = (function () {
                     }
                 })
 
+                if (callback)
+                    return callback(null, visjsData)
 
-                if (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0) {
+
+                if (add || (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0)) {
                     self.data.nodes.add(visjsData.nodes)
                     self.data.edges.add(visjsData.edges)
                     self.message("")
@@ -904,7 +942,15 @@ var visjsGraph = (function () {
                             context.options[key] = eval(key + "=" + context.options[key]);
                         }
                     }
-                    self.draw(context.divId, visjsData, context.options, context.callback)
+                    if (context.callback)
+                        callback = context.callback
+                    if (self.isGraphNotEmpty()) {
+                        self.data.edges.add(visjsData.edges)
+                        self.data.nodes.add(visjsData.nodes)
+
+                    } else {
+                        self.draw(context.divId, visjsData, context.options, callback)
+                    }
                     self.message("")
                 }
 
@@ -916,7 +962,7 @@ var visjsGraph = (function () {
 
 
     }
-    self.listSavedGraphs = function () {
+    self.listSavedGraphs = function (callback) {
         if (!Config || !Config.serverUrl)
             return
         var payload = {
@@ -929,32 +975,34 @@ var visjsGraph = (function () {
             data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
+                if (callback)
+                    return callback(null, result)
                 common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true)
             }, error(err) {
+                if (callback)
+                    return callback(err)
                 return alert(err)
             }
         })
     }
 
 
-    self.showGraphConfig=function() {
+    self.showGraphConfig = function () {
 
         $("#visjsConfigureDiv").dialog({
-         //   autoOpen: false,
-         height: 700,
+            //   autoOpen: false,
+            height: 700,
             width: 550,
             modal: false,
             title: "Graph parameters",
-            position: { my: "left top", at: "right top", }
+            position: {my: "left top", at: "right top",}
         })
 
 
-
-    //    $('#graphConfigDiv').dialog("open")
-
+        //    $('#graphConfigDiv').dialog("open")
 
 
-        setTimeout(function(){
+        setTimeout(function () {
             // these are all options in full.
             var options = {
                 configure: {
@@ -967,7 +1015,7 @@ var visjsGraph = (function () {
             }
 
             visjsGraph.network.setOptions(options);
-        },500)
+        }, 500)
     }
 
 

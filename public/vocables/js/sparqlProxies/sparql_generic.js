@@ -149,6 +149,7 @@ var Sparql_generic = (function () {
          */
 
 
+
         self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
             $("#waitImg").css("display", "block");
             if (!options) {
@@ -989,15 +990,16 @@ WHERE {
                         "SELECT distinct * " +
                         fromStr +
                         " WHERE {" +
-                     //   "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel.?parent rdf:type " + conceptType + ". } " +
-                     //   "  ?concept " + parentType + "+ ?anyParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
+
                         "  ?concept " + parentType + " ?firstParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
                         "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
+                        "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. " +
+
 
                         "?concept rdf:type " + conceptType + ". "
-                 //   query += "  FILTER (!isBlank(?parent)) "
+
                     query += "?firstParent rdf:type " + conceptType + ". "
-                       // "?concept rdfs:subClassOf ?firstParent.?firstParent rdf:type owl:Class."
+
                     if (options.filter)
                         query += " " + options.filter + " "
 
@@ -1011,7 +1013,7 @@ WHERE {
                         query2 += " limit " + (limitSize+1) + " offset " + offset
 
                         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                        var url = self.sparql_url + "?format=json&timeout=20000&debug=onquery=";
+                        var url = self.sparql_url //+ "?format=json&timeout=20000&debug=onquery=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
                             if (err)
                                 return callbackWhilst(err);
@@ -1045,6 +1047,9 @@ WHERE {
                         if (item.skosLabel)
                             if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0)
                                 skosLabelsMap[item.concept.value].push(item.skosLabel.value)
+                        if (item.code)
+                            if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0)
+                                skosLabelsMap[item.concept.value].push(item.code.value)
 
                     })
 
@@ -1110,6 +1115,8 @@ WHERE {
 
 
         }
+
+
 
         return self;
     }

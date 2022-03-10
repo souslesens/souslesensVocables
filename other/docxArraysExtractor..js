@@ -26,7 +26,7 @@ var docxArraysExtractor = {
         });
     },
 
-    parseXml: function (filePath, callback) {
+    parseXml: function (filePath, options, callback) {
         var saxStream = sax.createStream(false);
 
         var tables = [];
@@ -238,6 +238,7 @@ var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\part10.xml";
 var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\81346-2-2022.xml";
 var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-2_2019.xml";
 var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-12_2018.xml";
+var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\RDS-OG Library.xml";
 
 options = {
     rotate: false,

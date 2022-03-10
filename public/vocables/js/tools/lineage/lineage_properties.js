@@ -451,7 +451,7 @@ Lineage_properties = (function () {
                 })
 
 
-                if (visjsGraph.data && visjsGraph.data.nodes) {
+                if(visjsGraph.isGraphNotEmpty()){
                     visjsGraph.data.nodes.update(visjsData.nodes)
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {

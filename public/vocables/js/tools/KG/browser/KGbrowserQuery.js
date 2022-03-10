@@ -680,7 +680,7 @@ var KGbrowserQuery = (function () {
                         self.graphActions.removeFilter(filterData.id)
 
                     }
-                    if (visjsGraph.data && visjsGraph.data.nodes) {
+                    if(visjsGraph.isGraphNotEmpty()){
                         visjsGraph.data.nodes.remove(KGbrowserGraph.zeroCountIds)
                     }
                     KGbrowserGraph.zeroCountIds = []

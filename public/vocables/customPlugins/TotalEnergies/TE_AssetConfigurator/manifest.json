@@ -1,0 +1,13 @@
+{
+  "tools": [
+
+     {
+      "label": "TE_AssetConfigurator",
+      "noSource": 1,
+      "controller": "TE_AssetConfigurator",
+      "toolDescriptionImg": null
+    }
+
+
+  ]
+}

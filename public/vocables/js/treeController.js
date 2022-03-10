@@ -51,6 +51,11 @@ var TreeController = (function () {
                         data: {type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId,}
 
                     }
+                if(jsTreeOptions.optionalData){
+                    for(var key in jsTreeOptions.optionalData){
+                        child.data[key]=jsTreeOptions.optionalData[key]
+                    }
+                }
                     jstreeData.push(child);
 
 

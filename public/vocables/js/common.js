@@ -137,6 +137,7 @@ var common = (function () {
                     //  setTimeout(function () {
                     if (options.openAll)
                         $('#' + jstreeDiv).jstree(true).open_all();
+
                     self.jstree.setTreeAppearance()
                     if (!options.doNotAdjustDimensions)
                         common.jstree.setTreeParentDivDimensions(jstreeDiv)
@@ -156,7 +157,7 @@ var common = (function () {
                         options.onOpenNodeFn(evt, obj);
                     }
 
-                }).on("check_node.jstree", function (evt, obj) {
+                }) .on("check_node.jstree", function (evt, obj) {
 
                     if (options.onCheckNodeFn) {
                         options.onCheckNodeFn(evt, obj);
@@ -212,15 +213,7 @@ var common = (function () {
                         });
                     }
                 }
-                if (options.ondblclickFn) {
-                    $('#' + jstreeDiv + ' a').on('dblclick', function (e) {
-                        var node = $(e.target).closest("li");
-                        var type = node.attr('rel');
-                        var item = node[0].id;
-                        options.ondblclickFn(item)
-                        // do stuff...
-                    });
-                }
+
                 if (options.onHoverNode) {
                     $('#' + jstreeDiv).on("hover_node.jstree", function (node) {
                         options.onHoverNode(node)
@@ -250,6 +243,7 @@ var common = (function () {
 
                     if (parentNodeId == node.id)
                         return console.log("  Error jstree parent == childNode : " + parentNodeId)
+
                     $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, position, function () {
 
 
@@ -279,7 +273,15 @@ var common = (function () {
                         descendants.splice(index, 1);
                     }
                 }
-                $("#" + jstreeDiv).jstree(true).delete_node(descendants)
+               /* descendants.forEach(function(item){
+                    $("#" + jstreeDiv).jstree(true).delete_node(item)
+                })*/
+                try {
+                    $("#" + jstreeDiv).jstree(true).delete_node(descendants)
+                }
+                catch(e){
+                    console.log(e)
+                }
 
             },
             getjsTreeNodes: function (jstreeDiv, IdsOnly, parentNodeId) {

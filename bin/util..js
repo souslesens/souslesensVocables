@@ -194,8 +194,11 @@ var util = {
 
         if (forUri) {
             str = str.replace(/ /gm, "_");
-            str = str.replace(/\-/gm, "_");
+            //  str = str.replace(/\-/gm, "_");
             str = str.replace(/:/gm, "_");
+
+            str = encodeURIComponent(str);
+            str = str.replace(/%2F/gm, "/");
         }
 
         return str;

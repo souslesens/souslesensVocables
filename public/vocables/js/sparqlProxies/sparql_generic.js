@@ -408,26 +408,7 @@ var Sparql_generic = (function () {
                 return subjectStr + ' <' + item.predicate + '> ' + objectStr + '. ';
 
 
-            /*   if (typeof item === "string")
-                   return item
 
-
-               var valueStr = ""
-               if (item.valueType == "uri")
-                   valueStr = "<" + item.object + ">"
-               else {
-                   var langStr = "";
-                   if (item.lang)
-                       langStr = "@" + item.lang
-                   valueStr = "'" + item.object + "'" + langStr
-               }
-
-               var p = item.predicate.indexOf("^")
-               if (p == 0) {
-                   var predicate = item.predicate.substring(1)
-                   return valueStr + ' <' + predicate + '> <' + item.subject + '>. ';
-               } else
-                   return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';*/
         }
 
         self.insertTriples = function (sourceLabel, triples,options, callback) {
@@ -481,7 +462,7 @@ WHERE {
              */
 
 
-         return
+            return
 
 
 
@@ -951,8 +932,8 @@ WHERE {
             var parentType;
             var conceptType;
             if (Config.sources[sourceLabel].schemaType == "OWL") {
-                 parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
-                 conceptType = "owl:Class"
+                parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
+                conceptType = "owl:Class"
 
             }else if (Config.sources[sourceLabel].schemaType == "SKOS") {
                 parentType = "skos:broader"
@@ -1098,12 +1079,12 @@ WHERE {
                         var parentArray = obj.parents;
                         parentArray.push(sourceLabel)
                         parentArray = parentArray.reverse()
-                     /*   var str = ""
-                        parentArray.forEach(function (parent, index) {
-                            if (index > 0)
-                                str += "|"
-                            str += parent;
-                        })*/
+                        /*   var str = ""
+                           parentArray.forEach(function (parent, index) {
+                               if (index > 0)
+                                   str += "|"
+                               str += parent;
+                           })*/
                         delete allClassesMap[key].parent
                         allClassesMap[key].parents = parentArray;
                     }
@@ -1115,6 +1096,55 @@ WHERE {
 
 
         }
+
+        self.createDecapitalizedLabelTriples=function(source, callback) {
+            Sparql_generic.getItems(source, {}, function (err, result) {
+                if (err)
+                    return callback(err);
+                var total=0
+                var slices = common.array.slice(result, 100)
+                async.eachSeries(slices, function (slice, callbackEach) {
+
+                    var triples=[]
+
+                    slice.forEach(function(item) {
+
+                        if (item.conceptLabel) {
+                            var altLabel = item.conceptLabel.value.replace(/[A-Z]/g, function (maj) {
+                                return " " + maj
+                            })
+                            altLabel = altLabel.trim();
+
+                            triples.push({
+                                subject: item.concept.value,
+                                predicate: "http://www.w3.org/2004/02/skos/core#altLabel",
+                                object: altLabel
+                            })
+                        }
+                    })
+
+                    if(triples.length==0)
+                        return callbackEach
+                    self.insertTriples(source,triples,null, function(err, result){
+                        total+=result
+                        console.log(total +" inserted")
+
+                        callbackEach(err)
+                    })
+
+
+
+                },function(err){
+                    if(err)
+                        return callback(err)
+                    return callback(err,total)
+                })
+
+            })
+
+        }
+
+
 
 
 

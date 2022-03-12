@@ -244,6 +244,10 @@ var TE_AssetConfigurator = (function () {
                         return $("#AssetConfigurator_treeInfosDiv").html("not allowed , select a descendant")*/
             $("#AssetConfigurator_treeInfosDiv").html("adding " + node.data.label);
 
+            if (!self.currentSystem) {
+                return alert("select a system")
+                // self.currentSystem=node.parents[1]
+            }
             var level = self.systemsMap[self.currentSystem].level
             if (self.currentGraphNode && self.currentGraphNode.data.aspect == "Component")
                 level = self.currentGraphNode.data.level + 1
@@ -266,9 +270,10 @@ var TE_AssetConfigurator = (function () {
             var visjsData = {nodes: [], edges: []}
             var visjsId = common.getRandomHexaId(10);
             var code = node.data.code;
-            if (!code || code == "ex")// example
+            if (!code || code == "ex") {// example
                 var parent = common.jstree.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv", node.parent)
-            code = parent.data.code
+                code = parent.data.code
+            }
 
             // self.systemsMap[self.currentSystem].items[node.data.id].code
             node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
@@ -285,7 +290,7 @@ var TE_AssetConfigurator = (function () {
                 color: self.systemsMap[self.currentSystem].color
             }
             visjsData.nodes.push(node)
-
+            self.addToGraph(visjsData)
             if (self.currentGraphNode)
                 self.createRelation(node, self.currentGraphNode, function (err, result) {
                     if (err)
@@ -295,7 +300,7 @@ var TE_AssetConfigurator = (function () {
                 })
             //  self.currentGraphNode = node
 
-            self.addToGraph(visjsData)
+
 
 
         }
@@ -336,35 +341,40 @@ var TE_AssetConfigurator = (function () {
                         }
                     },
                     nodes: {
-                        chosen:{
+                        chosen: {
                             node: function (values, id, selected, hovering) {
-                                if(selected)
-                                values.color = "red";
+                                if (selected)
+                                    values.color = "red";
                             }
                         }
-                    }
+                    },
+                    /*  manipulation: {
+                          enabled:false,
+                          addEdge: function(edgeData,callback) {
+                              if (edgeData.from === edgeData.to) {
+                                  var r = confirm("Do you want to connect the node to itself?");
+                                  if (r === true) {
+                                      callback(edgeData);
+                                  }
+                              }
+                              else {
+                                  callback(edgeData);
+                              }
+                          }
+                      }*/
+                }
+
+                options.dndCtrlFn = function (startNode, endNode, point) {
+                    if(confirm ("Create relation between "+startNode.data.label+" and "+endNode.data.label ))
+                        self.createRelation(startNode, endNode, function (err, visjsData) {
+                        })
+
                 }
                 options.onclickFn = function (node, point, options) {
                     MainController.UI.hidePopup("graphPopupDiv")
                     self.currentGraphNode = node
-                    if (options.ctrlKey) {
-                        if (!self.relationObj)
-                            self.relationObj = {start: node}
-                        else {
-                            self.relationObj.end = node
-                            self.createRelation(self.relationObj.start, self.relationObj.end, function (err, visjsData) {
-                                if (err)
-                                    MainController.UI.message(err)
-                                else {
-                                    var existingNodes = visjsGraph.getExistingIdsMap()
-                                    visjsGraph.data.edges.add(visjsData.edges)
-                                    self.relationObj = null;
 
-                                }
 
-                            })
-                        }
-                    }
                 }
                 options.onHoverNodeFn = function (node, point, options) {
 
@@ -401,17 +411,19 @@ var TE_AssetConfigurator = (function () {
                 parentsStr += "<li>" + node.data.label + "</li>"
                 parentsStr += "</ol>"
 
+                var nodeTags = self.getNodeTag(node)
                 var html = "<table>"
                 html += "<tr><td>Aspect: <b>" + self.systemsMap[node.data.system].aspect + "</td></tr>"
                 html += "<tr><td>System:  <b>" + self.systemsMap[node.data.system].label + "</td></tr>"
                 html += "<tr><td>Classification:  <b>" + parentsStr + "</td></tr>"
                 html += "<tr><td>Label:  <b>" + node.data.label + "</td></tr>"
-                html += "<tr><td>Location TAG  <b>:" + self.getNodeTag(node).locationTag + "</B></td></tr>"
-                html += "<tr><td>Function TAG  <b>:" + self.getNodeTag(node).functionTag + "</B></td></tr>"
-                var assetNode=node.data["assetNode"]
-                if(assetNode){
-                    var assetNode = assetNode.location1+"/"+ assetNode.location2+"/"+assetNode.location3
-                    html += "<tr><td>Current Asset node  <b>:" + assetNode + "</B></td></tr>"
+                html += "<tr><td>Location TAG  <b>:" + nodeTags.locationTag + "</B></td></tr>"
+                html += "<tr><td>Function TAG  <b>:" + nodeTags.functionTag + "</B></td></tr>"
+                html += "<tr><td>Constr. Work TAG  <b>:" + nodeTags.CWtag + "</B></td></tr>"
+                var assetNode = node.data["assetNode"]
+                if (assetNode) {
+                    var assetNodeLabel = TE_AssetDataManager.getAssetNodeLabel(assetNode);
+                    html += "<tr><td>Current Asset node  <b>:" + assetNodeLabel + "</B></td></tr>"
                 }
                 html += "</table>"
 
@@ -513,28 +525,21 @@ var TE_AssetConfigurator = (function () {
                     functionTag: "-" + targetNode.data.code + targetNode.data.number
                 }
 
-
-            edges.forEach(function (edge) {
-                if (edge.from == targetNode.id || edge.to == targetNode.id)
-
-                    if (nodeIds.indexOf(edge.from) < 0)
-                        nodeIds.push(edge.from)
-                if (nodeIds.indexOf(edge.to) < 0)
-                    nodeIds.push(edge.to)
-            })
-            if (nodeIds.length == 0)
-                return ""
-            var nodes = visjsGraph.data.nodes.get(nodeIds)
+            nodeAncestors = [targetNode.id]
+            var recursePaths = function (nodeId) {
+                edges.forEach(function (edge) {
+                    if (edge.from == nodeId) {
+                        nodeAncestors.push(edge.to)
+                        recursePaths(edge.to)
+                    }
+                })
 
 
-            nodes.sort(function (a, b) {
-                if (a.data.level > b.data.level)
-                    return 1
-                if (a.data.level < b.data.level)
-                    return -1
-                return 0
-            })
+            }
 
+            recursePaths(targetNode.id)
+
+            nodeAncestors.reverse()
 
             var bulQueryStr = ""
             var header = {}
@@ -542,8 +547,10 @@ var TE_AssetConfigurator = (function () {
 
             var locationTag = ""
             var functionTag = ""
-            nodes.forEach(function (node) {
-                if (node.data.number != targetNode.data.number)
+            var CWtag = ""
+            nodeAncestors.forEach(function (nodeId) {
+                var node = visjsGraph.data.nodes.get(nodeId)
+                if (!node || !node.data)
                     return;
 
                 if (node.data.level > targetNode.data.level)
@@ -556,10 +563,15 @@ var TE_AssetConfigurator = (function () {
                     if (node.data.aspect != targetNode.data.aspect && targetNode.data.aspect != "Component")
                         return;
 
-                    if (node.data.aspect == "Location" || node.data.aspect == "Construction work") {
+                    if (node.data.aspect == "Location") {
                         // if(locationTag!="")
                         locationTag += "+"
                         locationTag += node.data.code + node.data.number
+                    }
+                    if (node.data.aspect == "Construction work") {
+                        // if(locationTag!="")
+                        CWtag += "++"
+                        CWtag += node.data.code + node.data.number
                     }
                     if (node.data.aspect == "Function") {
                         // if(functionTag!="")
@@ -570,43 +582,42 @@ var TE_AssetConfigurator = (function () {
             })
 
 
-            return {functionTag: functionTag, locationTag: locationTag}
+            return {functionTag: functionTag, locationTag: locationTag, CWtag}
 
         }
 
 
         self.createRelation = function (startNode, endNode, callback) {
-
+            if (startNode.id == endNode.id)
+                return;
             var getEdge = function (relationType, drawLabel) {
                 var edgeId = common.getRandomHexaId(10);
                 var edge
-                if (startNode.data.level < endNode.data.level) {
-                    edge = {
-                        id: edgeId,
-                        from: endNode.id,
-                        to: startNode.id,
-                        data: {
-                            from: endNode.id,
-                            to: startNode.id,
-                            property: relationType
 
-
-                        }
+                var existingEdges = visjsGraph.data.edges.get()
+                var from, to
+                existingEdges.forEach(function (edge) {
+                    if (edge.from == startNode.id) {
+                        to = startNode.id
+                        from = endNode.id
+                    } else if (edge.from == endNode.id) {
+                        to = endNode.id
+                        from = startNode.id
                     }
-                } else {
-                    edge = {
-                        id: edgeId,
-                        from: startNode.id,
-                        to: endNode.id,
-                        data: {
-                            from: startNode,
-                            to: endNode.id,
-                            property: relationType
+                })
+                edge = {
+                    id: edgeId,
+                    from: from,
+                    to: to,
+                    data: {
+                        from: from,
+                        to: to,
+                        property: relationType
 
 
-                        }
                     }
                 }
+
 
                 edge.smooth = {
                     type: "cubicBezier",
@@ -658,8 +669,28 @@ var TE_AssetConfigurator = (function () {
 
             var err = null
             if (!globalOK)
-                err = "relation not allowed "
+                return MainController.UI.message("relation not allowed ", true)
 
+            else {
+                visjsGraph.data.edges.add(visjsData.edges)
+                self.relationObj = null;
+                var edge = visjsData.edges[0]
+                var fromNode = visjsGraph.data.nodes.get(edge.from)
+                var toNode = visjsGraph.data.nodes.get(edge.to)
+                if (fromNode.data.aspect == "Component" && toNode.data.aspect == "Component") {
+                    var fromNodeData=fromNode.data
+                    fromNodeData.level=toNode.level + 1
+                    var newNodes = [
+                        {
+                            id: fromNode.id,
+                            level: toNode.level + 1,
+                            data:fromNodeData
+
+                        }
+                    ]
+                    visjsGraph.data.nodes.update(newNodes)
+                }
+            }
             return callback(err, visjsData)
         }
 
@@ -724,13 +755,13 @@ var TE_AssetConfigurator = (function () {
                     } else if (displayMode == "labels") {
                         node.label = node.data.label
 
-                } else if (displayMode == "individuals") {
-                        var assetNode=node.data["assetNode"]
-                        if(assetNode){
-                            node.label = assetNode.location1+"/"+ assetNode.location2+"/"+assetNode.location3
+                    } else if (displayMode == "individuals") {
+                        var assetNode = node.data["assetNode"]
+                        if (assetNode) {
+                            node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
                         }
 
-                }
+                    }
                     if (!self.objectsMap[node.data.id])
                         self.objectsMap[node.data.id] = {items: [], counter: 0}
                     self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
@@ -1022,25 +1053,82 @@ var TE_AssetConfigurator = (function () {
         self.switchLabelsAndCodesInGraph = function (value) {
             var nodes = visjsGraph.data.nodes.get();
             var newNodes = []
+            var visjsData = {nodes: [], edges: []}
+            var existingNodes = visjsGraph.getExistingIdsMap()
             nodes.forEach(function (node) {
                 if (!node.data)
                     return;
                 var label
                 if (value == "codes")
-                    label = node.data.code;
+                    label = node.data.code + node.data.number;
 
                 else
                     label = node.data.label;
 
                 if (value == "individuals" && node.data.assetNode) {
                     var assetNode = node.data.assetNode
-                    label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
+                    label = TE_AssetDataManager.getAssetNodeLabel(assetNode)
+                    // label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
+
+
+                    var assetNodeId = "I_" + assetNode.id
+                    if (!existingNodes[assetNodeId]) {
+                        existingNodes[assetNodeId] = 1
+                        visjsData.nodes.push({
+                            id: assetNodeId,
+                            label: label,
+                            level: node.level + 0.5,
+                            shape: "dot",
+                            color: "blue",
+                            size: 10,
+                            data: node.data
+                        })
+                        var edgeId = node.id + "_" + assetNodeId;
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: node.id,
+                                to: assetNodeId,
+                                length: 50
+                            })
+                        }
+
+                    }
+
+                    newNodes.push({id: node.id, label: label})
+
                 }
-
-                newNodes.push({id: node.id, label: label})
-
             })
-            visjsGraph.data.nodes.update(newNodes)
+            visjsGraph.data.nodes.update(visjsData.nodes)
+            visjsGraph.data.edges.update(visjsData.edges)
+            // visjsGraph.data.nodes.update(newNodes)
+
+        }
+
+
+        self.showNodeQualities = function (node) {
+            if (!node)
+                node = self.currentGraphNode
+            if (node.data.sameAdIds) {
+                Sparql_OWL.getObjectRestrictions("CFIHOS_1_5_PLUS", node.data.sameAdIds, {filter: "Filter (?prop=<http://www.w3.org/2002/07/owl#sameAs"}, function (err, result) {
+                    if (err)
+                        return MainController.UI.message(err.responseText)
+
+                    var html = "Properties CFIHOS <br><table" >
+
+
+                        result.forEach(function (item) {
+                            html += "<tr><td>item.value.value</td><td></td></tr>"
+                        })
+
+
+                    $("#TE_AssetConfigurator_ProprertiesDiv").html(html)
+
+                })
+
+            }
+
 
         }
 

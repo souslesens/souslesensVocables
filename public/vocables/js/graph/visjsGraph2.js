@@ -170,6 +170,7 @@ var visjsGraph = (function () {
         });
 
         self.network.on("click", function (params) {
+            console.log( self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y))
             self.processClicks(params, _options)
 
         }).on("hoverNode", function (params) {
@@ -224,7 +225,22 @@ var visjsGraph = (function () {
                 visjsGraph.data.nodes.update(newNodes)
 
             })
+
+            .on("controlNodeDragging",function(params){
+
+            })
             .on("dragEnd", function (params) {
+                if(params.event.srcEvent.ctrlKey && options.dndCtrlFn ){
+                    var dropCtrlNodeId= self.network.getNodeAt(params.pointer.DOM)
+                    if(!dropCtrlNodeId)
+                        return ;
+                    var startNode= self.data.nodes.get(params.nodes[0])
+                    var endNode= self.data.nodes.get(dropCtrlNodeId)
+
+                    options.dndCtrlFn(startNode,endNode, params.pointer.DOM)
+
+                }
+
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
                          return;*/
@@ -463,56 +479,56 @@ var visjsGraph = (function () {
     },
 
 
-    self.onScaleChange = function () {
-        // return;
-        var scale = self.network.getScale();
-        if (!self.currentScale || Math.abs(scale - self.currentScale) > .01) {
+        self.onScaleChange = function () {
+            // return;
+            var scale = self.network.getScale();
+            if (!self.currentScale || Math.abs(scale - self.currentScale) > .01) {
 
-            var scaleCoef = scale >= 1 ? (scale * .9) : (scale * 2)
+                var scaleCoef = scale >= 1 ? (scale * .9) : (scale * 2)
 
-            var size = self.defaultNodeSize / scaleCoef;
-            var fontSize = (self.defaultTextSize / (scaleCoef));
-            if (scale < 1)
-                fontSize = (self.defaultTextSize / 1); //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
-            else
-                fontSize = (self.defaultTextSize / (scaleCoef * 1.3));
+                var size = self.defaultNodeSize / scaleCoef;
+                var fontSize = (self.defaultTextSize / (scaleCoef));
+                if (scale < 1)
+                    fontSize = (self.defaultTextSize / 1); //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
+                else
+                    fontSize = (self.defaultTextSize / (scaleCoef * 1.3));
 
-            var nodes = self.data.nodes.get();
-            nodes.forEach(function (node) {
-                if (node.size) {
-                    if (!node.originalSize)
-                        node.originalSize = node.size
-                    size = node.originalSize * scaleCoef
-                }
-                if (!node.hiddenLabel)
-                    node.hiddenLabel = node.label
-                var shape = node.shape;
-                if (!shape)
-                    shape = self.defaultNodeShape;
-                if (shape != "box") {
-
-                    if (scale > self.showNodesLabelMinScale) {
-                        node.label = node.hiddenLabel;
-                        node.size = size;
-                        node.font = {size: fontSize}
-                        self.labelsVisible = true;
-
-
-                    } else {
-                        node.label = null;
-                        node.size = size;
-                        node.font = {size: fontSize}
-
+                var nodes = self.data.nodes.get();
+                nodes.forEach(function (node) {
+                    if (node.size) {
+                        if (!node.originalSize)
+                            node.originalSize = node.size
+                        size = node.originalSize * scaleCoef
                     }
+                    if (!node.hiddenLabel)
+                        node.hiddenLabel = node.label
+                    var shape = node.shape;
+                    if (!shape)
+                        shape = self.defaultNodeShape;
+                    if (shape != "box") {
 
-                    //nodes.push(node);
-                }
-            })
-            self.data.nodes.update(nodes)
+                        if (scale > self.showNodesLabelMinScale) {
+                            node.label = node.hiddenLabel;
+                            node.size = size;
+                            node.font = {size: fontSize}
+                            self.labelsVisible = true;
 
+
+                        } else {
+                            node.label = null;
+                            node.size = size;
+                            node.font = {size: fontSize}
+
+                        }
+
+                        //nodes.push(node);
+                    }
+                })
+                self.data.nodes.update(nodes)
+
+            }
+            self.currentScale = scale;
         }
-        self.currentScale = scale;
-    }
 
     self.getExistingIdsMap = function (nodesOnly) {
         var existingVisjsIds = {}

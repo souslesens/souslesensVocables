@@ -451,7 +451,7 @@ var SourceBrowser = (function () {
 
             var indexes
             options.parentlabels = true
-            if (schemaType == "OWL") {
+            if (true || schemaType == "OWL") {
                 SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
 
 

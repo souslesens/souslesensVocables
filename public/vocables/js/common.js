@@ -663,6 +663,13 @@ var common = (function () {
 
         }
 
+        self.decapitalizeLabel=function(label){
+            var altLabel = label.replace(/[A-Z]/g, function (maj) {
+                return " " + maj
+            })
+            return altLabel.trim();
+        }
+
         /**
          * https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
          *
@@ -969,10 +976,16 @@ var common = (function () {
         }
 
 
+
+
+
         return self;
 
 
     }
+
+
+
 )()
 
 common.dateToRDFString(new Date())

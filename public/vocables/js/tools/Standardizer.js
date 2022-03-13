@@ -415,10 +415,8 @@ var Standardizer = (function () {
             var words = text.split("\n")
             var words2 = ""
             words.forEach(function (word) {
-                var word2 = word.replace(/[A-Z]/g, function (maj) {
-                    return " " + maj
-                })
-                word2 = word2.trim();
+                common.decapitalizeLabel(word)
+                var word2 =  common.decapitalizeLabel(word)
 
                 words2 += (word2 + "\n")
 

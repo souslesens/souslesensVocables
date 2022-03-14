@@ -664,6 +664,8 @@ var common = (function () {
         }
 
         self.decapitalizeLabel=function(label){
+            if(!label.replace)
+                var x=3
             var altLabel = label.replace(/[A-Z]/g, function (maj) {
                 return " " + maj
             })

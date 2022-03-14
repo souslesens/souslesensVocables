@@ -1878,12 +1878,13 @@ var Standardizer = (function () {
                     if (err)
                         return alert(err)
                     var entities = []
-
+                    if(!result.forEach ||  result.length==0)
+                        return MainController.UI.message("no result)");
                     result.forEach(function (item) {
                         if (!item.hits || !item.hits.hits)
                             return;
                         item.hits.hits.forEach(function (hit) {
-                            if (hit._index == self.currentSource.toLowerCase())
+                            if (self.currentSource && hit._index == self.currentSource.toLowerCase())
                                 return
                             var entity = {
                                 index: hit._index,

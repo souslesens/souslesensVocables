@@ -182,6 +182,14 @@ var TE_AssetConfigurator = (function () {
                     SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
                 }
             }
+
+            items.sameAsQualities = {
+                label: "Same as Qualities",
+                action: function (e) {// pb avec source
+                    TE_AssetConfigurator.showNodeQualities(self.currentTreeNode, 'tree')
+                }
+
+            }
             return items
 
         }
@@ -301,8 +309,6 @@ var TE_AssetConfigurator = (function () {
             //  self.currentGraphNode = node
 
 
-
-
         }
         self.addToGraph = function (visjsData) {
             if (visjsGraph.isGraphNotEmpty()) {
@@ -365,7 +371,7 @@ var TE_AssetConfigurator = (function () {
                 }
 
                 options.dndCtrlFn = function (startNode, endNode, point) {
-                    if(confirm ("Create relation between "+startNode.data.label+" and "+endNode.data.label ))
+                    if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label))
                         self.createRelation(startNode, endNode, function (err, visjsData) {
                         })
 
@@ -442,7 +448,9 @@ var TE_AssetConfigurator = (function () {
 
                 var html = "    <span  class=\"popupMenuItem\"onclick=\"TE_AssetConfigurator.deleteSelectedObject()();\"> Delete</span>" +
                     "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.showInfos();\">Node infos</span>" +
-                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.rename();\">Rename</span>"
+                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.rename();\">Rename</span>" +
+                    "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\" TE_AssetConfigurator.showNodeQualities(null,'graph');\">SameAsQualities</span>"
+
             }
             $("#graphPopupDiv").html(html);
             self.currentGraphNode = node;
@@ -678,13 +686,13 @@ var TE_AssetConfigurator = (function () {
                 var fromNode = visjsGraph.data.nodes.get(edge.from)
                 var toNode = visjsGraph.data.nodes.get(edge.to)
                 if (fromNode.data.aspect == "Component" && toNode.data.aspect == "Component") {
-                    var fromNodeData=fromNode.data
-                    fromNodeData.level=toNode.level + 1
+                    var fromNodeData = fromNode.data
+                    fromNodeData.level = toNode.level + 1
                     var newNodes = [
                         {
                             id: fromNode.id,
                             level: toNode.level + 1,
-                            data:fromNodeData
+                            data: fromNodeData
 
                         }
                     ]
@@ -1107,25 +1115,31 @@ var TE_AssetConfigurator = (function () {
         }
 
 
-        self.showNodeQualities = function (node) {
-            if (!node)
-                node = self.currentGraphNode
-            if (node.data.sameAdIds) {
-                Sparql_OWL.getObjectRestrictions("CFIHOS_1_5_PLUS", node.data.sameAdIds, {filter: "Filter (?prop=<http://www.w3.org/2002/07/owl#sameAs"}, function (err, result) {
+        self.showNodeQualities = function (node, origin) {
+            $("#TE_AssetConfigurator_ProprertiesDiv").html("")
+            if (!node) {
+                if (origin == "graph")
+                    node = self.currentGraphNode
+                else if (origin == "tree")
+                    node = self.currentTreeNode
+            }
+            if (node.data.sameAsIds) {
+                Sparql_OWL.getObjectRestrictions("CFIHOS_1_5_PLUS", node.data.sameAsIds, {},function (err, result) {
                     if (err)
                         return MainController.UI.message(err.responseText)
 
-                    var html = "Properties CFIHOS <br><table" >
 
+                    var html = "Properties CFIHOS <br><table>"
 
                         result.forEach(function (item) {
-                            html += "<tr><td>item.value.value</td><td></td></tr>"
+                            html += "<tr><td>"+item.propLabel.value+"</td><td>"+item.valueLabel.value+"</td></tr>"
                         })
-
-
+                    html +="</table>"
                     $("#TE_AssetConfigurator_ProprertiesDiv").html(html)
-
                 })
+
+
+
 
             }
 

@@ -8,15 +8,27 @@
     / / / font-weight: bold;
     }
 
-    .TE_AssetConfigurator_assetPanelTreeContainer{
-        width: 350px; height: 600px;overflow: auto;
+    .TE_AssetConfigurator_assetPanelTreeContainer {
+        width: 350px;
+        height: 600px;
+        overflow: auto;
     }
-#TE_AssetConfigurator_ProprertiesDiv{
-    width: 350px;
-    max-height: 600px;
-    background-color: #dde;
-    overflow: auto;
-}
+
+    #TE_AssetConfigurator_ProprertiesDiv {
+        width: 350px;
+        max-height: 360px;
+        background-color: #dde;
+        overflow: auto;
+    }
+
+    .TE_AssetConfigurator_panel {
+
+    }
+
+    .RDSassetTreeNode {
+        color: #09a4f3;
+
+    }
 
 </style>
 
@@ -61,10 +73,9 @@
 
                 <td>
                     <button onclick="TE_AssetConfigurator.deleteSelectedObject()">Delete Selected</button>
-                </td>
-
-                <td>
                     <button onclick="TE_AssetConfigurator.clearAll()">Clear All</button>
+                    <button onclick="TE_AssetConfigurator.clusterComponents()">Cluster Components</button>
+
                 </td>
             </tr>
 
@@ -73,9 +84,9 @@
         <br>
         <div id="AssetConfigurator_graphHOverDiv" style="width:100%"></div>
         <br>
-        <div id="AssetConfigurator_NodeInfosDiv"></div>
-       <!-- <button onclick="TE_AssetConfigurator.showNodeQualities()"> Show node Qualities</button>-->
-        <div id="TE_AssetConfigurator_ProprertiesDiv"></div>
+        <div class="TE_AssetConfigurator_panel" id="AssetConfigurator_NodeInfosDiv"></div>
+        <!-- <button onclick="TE_AssetConfigurator.showNodeQualities()"> Show node Qualities</button>-->
+        <div class="TE_AssetConfigurator_panel" id="TE_AssetConfigurator_ProprertiesDiv"></div>
     </div>
     <div id="TE_AssetConfigurator_AssetsTab">
         <div>
@@ -85,9 +96,9 @@
             <option>absheron</option>
             <option>Moho_N</option>
         </select>
-        <div class="TE_AssetConfigurator_assetPanelTreeContainer" >
-            <div id="TE_AssetConfigurator_assetPanelTreeDiv"></div>
-        </div>
+            <div class="TE_AssetConfigurator_assetPanelTreeContainer">
+                <div id="TE_AssetConfigurator_assetPanelTreeDiv"></div>
+            </div>
 
+        </div>
     </div>
-</div>

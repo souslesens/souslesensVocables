@@ -1,7 +1,8 @@
 var TE_AssetDataManager = (function () {
 
     var self = {}
-
+    var  assetTreeDistinctNodes = {}
+    var graphAssetNodes;
     self.loadAsset = function (asset) {
         if (asset == "")
             return;
@@ -30,11 +31,11 @@ var TE_AssetDataManager = (function () {
     }
 
     self.getFunctionalLocations = function (table) {
-
+         graphAssetNodes=TE_AssetConfigurator.asset.getLinkedAssetNodesMap()
 
         var limit = 100000
 
-        var sqlQuery = " select distinct concat('A_',id) as id,location1,location2 from " + table +
+        var sqlQuery = " select distinct concat('',id) as id,location1,location2 from " + table +
             " where (location4 is null or location4='')"
         ""// " where (location3 is null or location3='') and (location2 is not null and location2 !='')";
 
@@ -44,18 +45,22 @@ var TE_AssetDataManager = (function () {
                 return MainController.UI.message(err)
             var jstreeData = []
             assetTreeDistinctNodes = {}
+
             data.forEach(function (item) {
 
                 if (!item.location1)
                     return
                 if (!assetTreeDistinctNodes[item.location1]) {
+                    var text=item.location1
+                    if(graphAssetNodes["A_"+item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text+" </span>"
                     assetTreeDistinctNodes[item.location1] = 1
                     jstreeData.push({
                         id: item.location1,
                         text: item.location1,
                         parent: "#",
                         data: {
-                            FunctionalLocationCode: item.location1,
+                            FunctionalLocationCode: text,
                             id: item.location1,
                             label: item.location1,
                             type: "location",
@@ -66,11 +71,15 @@ var TE_AssetDataManager = (function () {
                 }
                 if (!assetTreeDistinctNodes[item.location2]) {
                     assetTreeDistinctNodes[item.location2] = 1
-
+                    if(item.id=="684")
+                        var x=3
+                    var text=item.location2
+                    if(graphAssetNodes["A_"+item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text+" </span>"
                     jstreeData.push({
                         //  id: item.location1 + "/" + item.location2,
                         id: item.id,
-                        text: item.location2,
+                        text:text,
                         parent: item.location1,
                         data: {
                             FunctionalLocationCode: item.location1 + "/" + item.location2,
@@ -108,7 +117,7 @@ var TE_AssetDataManager = (function () {
         items.nodeInfos = {
             label: "Node infos",
             action: function (e) {// pb avec source
-                TE_AssetDataManager.self.showAssetNodeInfos(self.currentTreeNode)
+                TE_AssetDataManager.showAssetNodeInfos(self.currentTreeNode)
             }
         }
 
@@ -116,6 +125,12 @@ var TE_AssetDataManager = (function () {
             label: "Associate to RDS node",
             action: function (e) {// pb avec source
                 TE_AssetConfigurator.asset.associateAssetNode(self.currentTreeNode.data,)
+            }
+        }
+        items.showOnGraph = {
+            label: "ShowOnGraph",
+            action: function (e) {// pb avec source
+                TE_AssetConfigurator.asset.focus(self.currentTreeNode.data.id)
             }
         }
         return items
@@ -138,6 +153,8 @@ var TE_AssetDataManager = (function () {
     }
 
     self.openAssetTreeNode = function (node, level, callback) {
+
+
         var limit = 100000
         var parentData = node.data;
         var sqlQuery
@@ -167,9 +184,14 @@ var TE_AssetDataManager = (function () {
                 //  var childId = nodeId + "/" + common.formatUriToJqueryId(item.functionalLocationDescription)
                 if (!assetTreeDistinctNodes[item.id]) {
                     assetTreeDistinctNodes[item.id] = 1
+                    if(item.id=="684")
+                        var x=3
+                    var text=item[self.currentFLcolumn]
+                    if(graphAssetNodes["A_"+item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text+" </span>"
                     jstreeData.push({
-                        id: "A_" + item.id,
-                        text: item[self.currentFLcolumn],
+                        id: "" + item.id,
+                        text: text ,
                         parent: node.id,
                         type: "owl:Class",
                         data: data

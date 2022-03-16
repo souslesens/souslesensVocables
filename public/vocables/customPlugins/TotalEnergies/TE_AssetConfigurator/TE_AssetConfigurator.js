@@ -2,7 +2,8 @@ var TE_AssetConfigurator = (function () {
         var self = {}
         self.currentSource = "TSF-RDS-OG-81346"
         self.displayedDivsMap = {}
-        self.objectsMap = {}
+        self.assetNodeShape = "dot"
+
         self.systemsMap = {
 
 
@@ -90,7 +91,7 @@ var TE_AssetConfigurator = (function () {
                     $(this).val("")
                 })
                 //  self.initSytemsTree();
-                self.initSytemsSelect()
+                self.initAllSystemsDiv()
 
                 Config.sources[self.currentSource].controller = Sparql_OWL
                 visjsGraph.clearGraph()
@@ -116,7 +117,7 @@ var TE_AssetConfigurator = (function () {
             $("#accordion").accordion("option", {active: 2});
 
         }
-        self.initSytemsSelect = function () {
+        self.initAllSystemsDiv = function () {
 
 
             var htmlAspects = []
@@ -134,7 +135,13 @@ var TE_AssetConfigurator = (function () {
 
             var html = ""
             for (var key in htmlAspects) {
-                html += "<b>" + key + "</b>"
+                var suffix = ""
+                if (key == "Location")
+                    suffix = " (point)"
+                if (key == "Construction work")
+                    suffix = " (site)"
+
+                html += "<b>" + key + suffix + "</b>"
                 html += "<div id='" + key + "'  class='AssetConfigurator_AspectDiv'' style='background-color: " + htmlAspects[key].color + " '>" +
 
                     htmlAspects[key].html +
@@ -175,6 +182,8 @@ var TE_AssetConfigurator = (function () {
                     TE_AssetConfigurator.addNode(self.currentTreeNode)
                 }
             }
+
+
 
             items.nodeInfos = {
                 label: "Node infos",
@@ -246,10 +255,26 @@ var TE_AssetConfigurator = (function () {
             return options
         }
 
+        self.getNodeNewSequenceNumber = function (systemId, objId) {
+            var nodes = visjsGraph.data.nodes.get()
+            var maxNumber = 1
+            nodes.forEach(function (node) {
+                if (node.data && node.data.system == systemId && node.data.id == objId)
+                    maxNumber = Math.max(maxNumber, node.data.number || 1)
+            })
+            return maxNumber + 1
+
+
+        }
+
         self.addNode = function (node) {
             $("#AssetConfigurator_treeInfosDiv").html("");
             /*  if (node.parents.length + 1 < self.currentSystem.leafLevel)
                         return $("#AssetConfigurator_treeInfosDiv").html("not allowed , select a descendant")*/
+            if (!self.currentGraphNode && self.node.data.aspect == "Component")
+                return alert("select a node to link  this node with")
+
+
             $("#AssetConfigurator_treeInfosDiv").html("adding " + node.data.label);
 
             if (!self.currentSystem) {
@@ -265,15 +290,6 @@ var TE_AssetConfigurator = (function () {
             node.data.aspect = self.systemsMap[self.currentSystem].aspect
 
 
-            if (!self.objectsMap[node.data.id]) {
-                self.objectsMap[node.data.id] = {counter: 0, items: []}
-            }
-            var counter = self.objectsMap[node.data.id].counter + 1
-            self.objectsMap[node.data.id].counter = counter;
-
-
-            node.data.number = counter
-
             var existingNodes = visjsGraph.getExistingIdsMap()
             var visjsData = {nodes: [], edges: []}
             var visjsId = common.getRandomHexaId(10);
@@ -287,14 +303,12 @@ var TE_AssetConfigurator = (function () {
             node.data.definition = self.systemsMap[self.currentSystem].items[node.data.id].definition
             node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example
             node.data.code = code
-            node.data.number = counter
+            node.data.number = self.getNodeNewSequenceNumber(self.currentSystem, node.data.id);
             var node = {
                 id: visjsId,
-                label: code + counter,
+                label: code + node.data.number,
                 data: node.data,
                 level: level,
-                shape: "square",
-                size: 10,
                 color: self.systemsMap[self.currentSystem].color
             }
             visjsData.nodes.push(node)
@@ -323,8 +337,8 @@ var TE_AssetConfigurator = (function () {
                     "layout": {
                         "hierarchical": {
                             "enabled": true,
-                            "levelSeparation": 120,
-                            "nodeSpacing": 150,
+                            "levelSeparation": 70,
+                            "nodeSpacing": 100,
                             "sortMethod": "directed"
                         }
                     },
@@ -344,7 +358,8 @@ var TE_AssetConfigurator = (function () {
                             forceDirection: "verical",
 
                             roundness: 0.4,
-                        }
+                        },
+                        font: {align: "middle", size: 10}
                     },
                     nodes: {
                         chosen: {
@@ -352,6 +367,12 @@ var TE_AssetConfigurator = (function () {
                                 if (selected)
                                     values.color = "red";
                             }
+                        },
+                        size: 5,
+                        shape: "square",
+                        "font": {
+                            "size": 12,
+
                         }
                     },
                     /*  manipulation: {
@@ -382,6 +403,9 @@ var TE_AssetConfigurator = (function () {
 
 
                 }
+                options.onClusterClickFn = function (clusterId, point, options) {
+                    visjsGraph.network.openCluster(clusterId)
+                }
                 options.onHoverNodeFn = function (node, point, options) {
 
                     self.showGraphNodeInfos(node)
@@ -405,17 +429,20 @@ var TE_AssetConfigurator = (function () {
 
 
         self.showGraphNodeInfos = function (node) {
-            self.getNodeClassificationTree(node.data.id, function (err, parentsMap) {
+            self.getNodeClassificationTree(node.data, function (err, parentsMap) {
                 if (err)
                     return MainController.UI.message(err)
-                var parentsStr = "<ol>"
+                var color = self.systemsMap[node.data.system].color
+                var parentsStr = "<ul>"
                 var i = 0
+                var sep = ""
                 for (var key in parentsMap) {
-                    parentsStr += "<li>" + parentsMap[key] + "</li>"
-
+                    parentsStr += "<li style='font-size: 10px;text-indent:" + (10 * i) + "px'>" + sep + parentsMap[key] + "</li>"
+                    i++;
+                    // sep+="    "
                 }
-                parentsStr += "<li>" + node.data.label + "</li>"
-                parentsStr += "</ol>"
+                parentsStr += "<li style='text-indent:" + (10 * i) + "px;'>" + sep + node.data.label + "</li>"
+                parentsStr += "</ul>"
 
                 var nodeTags = self.getNodeTag(node)
                 var html = "<table>"
@@ -450,6 +477,7 @@ var TE_AssetConfigurator = (function () {
                     "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.showInfos();\">Node infos</span>" +
                     "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"TE_AssetConfigurator.graphActions.rename();\">Rename</span>" +
                     "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\" TE_AssetConfigurator.showNodeQualities(null,'graph');\">SameAsQualities</span>"
+
 
             }
             $("#graphPopupDiv").html(html);
@@ -523,6 +551,8 @@ var TE_AssetConfigurator = (function () {
 
 
         self.getNodeTag = function (targetNode) {
+
+
             if (!targetNode)
                 return;
             var edges = visjsGraph.data.edges.get()
@@ -530,10 +560,11 @@ var TE_AssetConfigurator = (function () {
             if (edges.length < 1)
                 return {
                     locationTag: "-" + targetNode.data.code + targetNode.data.number,
-                    functionTag: "-" + targetNode.data.code + targetNode.data.number
+                    functionTag: "-" + targetNode.data.code + targetNode.data.number,
+                    CWtag: "-" + targetNode.data.code + targetNode.data.number
                 }
 
-            nodeAncestors = [targetNode.id]
+
             var recursePaths = function (nodeId) {
                 edges.forEach(function (edge) {
                     if (edge.from == nodeId) {
@@ -544,8 +575,10 @@ var TE_AssetConfigurator = (function () {
 
 
             }
+            var startNode = targetNode.id
 
-            recursePaths(targetNode.id)
+            var nodeAncestors = [startNode]
+            recursePaths(startNode)
 
             nodeAncestors.reverse()
 
@@ -566,6 +599,7 @@ var TE_AssetConfigurator = (function () {
                 if (node.data.aspect == "Component") {
                     locationTag += "-" + node.data.code + node.data.number
                     functionTag += "-" + node.data.code + node.data.number
+                    CWtag += "-" + node.data.code + node.data.number
                 } else {
 
                     if (node.data.aspect != targetNode.data.aspect && targetNode.data.aspect != "Component")
@@ -590,7 +624,7 @@ var TE_AssetConfigurator = (function () {
             })
 
 
-            return {functionTag: functionTag, locationTag: locationTag, CWtag}
+            return {functionTag: functionTag, locationTag: locationTag, CWtag: CWtag}
 
         }
 
@@ -739,6 +773,7 @@ var TE_AssetConfigurator = (function () {
 
 
         self.saveGraph = function (isNewGraph) {
+            self.switchLabelsAndCodesInGraph("codes")
             if (isNewGraph) {
                 var graphName = prompt("graph name")
                 if (graphName) {
@@ -753,29 +788,24 @@ var TE_AssetConfigurator = (function () {
         }
         self.loadGraph = function (graphName) {
             visjsGraph.clearGraph()
-            self.objectsMap = {}
+
             self.currentGraphName = graphName
-            var displayMode = $("#TE_AssetConfigurator_displayLabelsMode").val()
+            //  var displayMode = $("#TE_AssetConfigurator_displayLabelsMode").val()
+            var displayMode = "codes"
             visjsGraph.loadGraph(graphName, false, function (err, visjsData) {
-                visjsData.nodes.forEach(function (node) {
-                    if (displayMode == "codes") {
-                        node.label = node.data.code || node.data.label
-                    } else if (displayMode == "labels") {
-                        node.label = node.data.label
-
-                    } else if (displayMode == "individuals") {
-                        var assetNode = node.data["assetNode"]
-                        if (assetNode) {
-                            node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
-                        }
-
-                    }
-                    if (!self.objectsMap[node.data.id])
-                        self.objectsMap[node.data.id] = {items: [], counter: 0}
-                    self.objectsMap[node.data.id].counter = Math.max(self.objectsMap[node.data.id].counter, node.data.number)
-                    self.objectsMap[node.data.id].items.push(node)
+                visjsData.nodes.sort(function (a, b) {
+                    if (a.label > b.label)
+                        return 1;
+                    if (a.label < b.label)
+                        return -1
+                    return 0;
                 })
                 self.addToGraph(visjsData)
+                setTimeout(function () {
+                    self.switchLabelsAndCodesInGraph(displayMode, visjsData.nodes)
+                }, 100)
+
+
             })
         }
 
@@ -794,15 +824,29 @@ var TE_AssetConfigurator = (function () {
         }
 
 
-        self.getNodeClassificationTree = function (nodeId, callback) {
+        self.getNodeClassificationTree = function (nodeData, callback) {
             var matchingHits;
             var parentIdsMap = {};
             async.series([
                 function (callbackSeries) {
                     var queryObj = {
                         query: {
-                            "term": {
-                                "id.keyword": nodeId,
+                            "bool": {
+                                "must": [{
+                                    "term": {
+                                        "id.keyword": nodeData.id,
+
+                                    }
+                                },
+
+                                    {
+                                        "term":
+                                            {
+                                                "parents.keyword": nodeData.system
+                                            }
+
+                                    }
+                                ]
 
                             }
                         }
@@ -830,7 +874,13 @@ var TE_AssetConfigurator = (function () {
                         if (err)
                             return callbackSeries(err)
                         hits.forEach(function (hit) {
-                            parentIdsMap[hit._source.id] = hit._source.label
+                            var code = ""
+                            if (hit._source.skoslabels.length > 0)
+                                code = hit._source.skoslabels[0]
+                            var label = hit._source.label;
+                            if (label.indexOf("http") > -1)
+                                label = Sparql_common.getLabelFromURI(label)
+                            parentIdsMap[hit._source.id] = code + " " + label
                         })
                         callbackSeries()
                     })
@@ -852,6 +902,12 @@ var TE_AssetConfigurator = (function () {
                                 "bool": {
                                     "must": []
                                 }
+                            },"from": from,
+                            "size": size,
+                            "_source": {
+                                "excludes": [
+                                    "attachment.content"
+                                ]
                             }
                         }
                         if (word) {
@@ -873,6 +929,8 @@ var TE_AssetConfigurator = (function () {
 
                                     }
                                 })
+
+
 
 
                         }
@@ -1043,8 +1101,9 @@ var TE_AssetConfigurator = (function () {
                             })
 
                         })
-                        var options = self.getJstreeOptions()
-                        options.openAll = true;
+                        var options = self.getJstreeOptions();
+                        if (word)
+                            options.openAll = true;
                         common.jstree.loadJsTree("TE_AssetConfigurator_81346TreeDiv", jstreeData, options)
 
                     }
@@ -1058,62 +1117,142 @@ var TE_AssetConfigurator = (function () {
             )
         }
 
-        self.switchLabelsAndCodesInGraph = function (value) {
-            var nodes = visjsGraph.data.nodes.get();
-            var newNodes = []
+        self.switchLabelsAndCodesInGraph = function (value, nodes) {
+
+            if (!nodes)
+                nodes = visjsGraph.data.nodes.get();
+            // var newNodes = []
             var visjsData = {nodes: [], edges: []}
             var existingNodes = visjsGraph.getExistingIdsMap()
+            var assetVisjsData = {nodes: [], edges: []}
             nodes.forEach(function (node) {
                 if (!node.data)
                     return;
                 var label
-                if (value == "codes")
+                if (value == "codes" || value == "individuals")
                     label = node.data.code + node.data.number;
 
-                else
+                else if (value == "labels")
                     label = node.data.label;
 
+                visjsData.nodes.push({id: node.id, label: label})
+
                 if (value == "individuals" && node.data.assetNode) {
-                    var assetNode = node.data.assetNode
-                    label = TE_AssetDataManager.getAssetNodeLabel(assetNode)
-                    // label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
 
+                    var assetNodeVisJsData = self.geAssetNodeVisjsData(node, existingNodes)
+                    visjsData.nodes = visjsData.nodes.concat(assetNodeVisJsData.nodes)
+                    visjsData.edges = visjsData.edges.concat(assetNodeVisJsData.edges)
 
-                    var assetNodeId = "I_" + assetNode.id
-                    if (!existingNodes[assetNodeId]) {
-                        existingNodes[assetNodeId] = 1
-                        visjsData.nodes.push({
-                            id: assetNodeId,
-                            label: label,
-                            level: node.level + 0.5,
-                            shape: "dot",
-                            color: "blue",
-                            size: 10,
-                            data: node.data
-                        })
-                        var edgeId = node.id + "_" + assetNodeId;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: node.id,
-                                to: assetNodeId,
-                                length: 50
-                            })
+                } else {
+                    var allNodes = visjsGraph.data.nodes.get()
+                    allNodes.forEach(function (node) {
+                        if (node.shape == self.assetNodeShape) {
+                            if (assetVisjsData.nodes.indexOf(node.id) < 0)
+                                assetVisjsData.nodes.push(node.id)
                         }
+                    })
+                    var allEdges = visjsGraph.data.edges.get()
+                    allEdges.forEach(function (edge) {
+                        if (assetVisjsData.nodes.indexOf(edge.from) > -1 || assetVisjsData.nodes.indexOf(edge.to) > -1)
+                            assetVisjsData.edges.push(edge.id)
 
-                    }
+                    })
 
-                    newNodes.push({id: node.id, label: label})
 
                 }
             })
+
+            var existingNodes = visjsGraph.getExistingIdsMap()
             visjsGraph.data.nodes.update(visjsData.nodes)
             visjsGraph.data.edges.update(visjsData.edges)
-            // visjsGraph.data.nodes.update(newNodes)
+
+            if (assetVisjsData.nodes.length > 0)
+                setTimeout(function () {
+                    visjsGraph.data.nodes.remove(assetVisjsData.nodes)
+                    visjsGraph.data.edges.remove(assetVisjsData.edges)
+                }, 200)
+
 
         }
+        self.geAssetNodeVisjsData = function (RDSnode, existingNodes, draw) {
+            var visjsData = {nodes: [], edges: []}
+            var assetNode = RDSnode.data.assetNode
+            if (!existingNodes)
+                existingNodes = visjsGraph.getExistingIdsMap()
+            if (!existingNodes[assetNodeId]) {
+                var label = TE_AssetDataManager.getAssetNodeLabel(assetNode)
 
+                var assetNodeId = "I_" + assetNode.id
+                existingNodes[assetNodeId] = 1
+                var data = RDSnode.data
+
+                visjsData.nodes.push({
+                    id: assetNodeId,
+                    label: label,
+                    level: RDSnode.level + 0.5,
+                    shape: self.assetNodeShape,
+                    color: "#09a4f3",
+                    size: 5,
+
+                    data: data,
+                    font: {size: 10, color: "#09a4f3", "background": "#ddd"}
+                })
+                var edgeId = assetNodeId + "_" + RDSnode.id;
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1
+                    visjsData.edges.push({
+                        id: edgeId,
+                        to: RDSnode.id,
+                        from: assetNodeId,
+
+                    })
+                }
+                if (draw)
+                    self.addToGraph(visjsData)
+
+            }
+            return visjsData;
+        }
+
+        self.clusterComponents = function () {
+
+            var clusterOptionsByData;
+            var nodes = visjsGraph.data.nodes.get()
+            var clustersMap = {}
+            nodes.forEach(function (node) {
+                if (node.data.aspect == "Component") {
+                    var key = node.data.id + "_" + node.data.level
+                    if (!clustersMap[key]) {
+                        clustersMap[key] = []
+                        clustersMap[key].label = node.data.code
+                        clustersMap[key].level = node.data.level
+                    }
+                    clustersMap[key].push(node.id)
+
+                }
+            })
+            for (var key in clustersMap) {
+
+                clusterOptionsByData = {
+                    joinCondition: function (childOptions) {
+                        return clustersMap[key].indexOf(childOptions.id) > -1
+                    },
+                    processProperties: function (clusterOptions, childNodes, childEdges) {
+                        clusterOptions.mass = childNodes.length;
+                        return clusterOptions;
+                    },
+                    clusterNodeProperties: {
+                        id: key,
+                        borderWidth: 3,
+                        shape: "box",
+                        color: "#09a4f3",
+                        label: clustersMap[key].label,
+                        level: clustersMap[key].level
+                    },
+                };
+                visjsGraph.network.cluster(clusterOptionsByData);
+            }
+        }
 
         self.showNodeQualities = function (node, origin) {
             $("#TE_AssetConfigurator_ProprertiesDiv").html("")
@@ -1124,21 +1263,19 @@ var TE_AssetConfigurator = (function () {
                     node = self.currentTreeNode
             }
             if (node.data.sameAsIds) {
-                Sparql_OWL.getObjectRestrictions("CFIHOS_1_5_PLUS", node.data.sameAsIds, {},function (err, result) {
+                Sparql_OWL.getObjectRestrictions("CFIHOS_1_5_PLUS", node.data.sameAsIds, {}, function (err, result) {
                     if (err)
                         return MainController.UI.message(err.responseText)
 
 
                     var html = "Properties CFIHOS <br><table>"
 
-                        result.forEach(function (item) {
-                            html += "<tr><td>"+item.propLabel.value+"</td><td>"+item.valueLabel.value+"</td></tr>"
-                        })
-                    html +="</table>"
+                    result.forEach(function (item) {
+                        html += "<tr><td>" + item.propLabel.value + "</td><td>" + item.valueLabel.value + "</td></tr>"
+                    })
+                    html += "</table>"
                     $("#TE_AssetConfigurator_ProprertiesDiv").html(html)
                 })
-
-
 
 
             }
@@ -1239,7 +1376,28 @@ var TE_AssetConfigurator = (function () {
                     id: self.currentGraphNode.id,
                     data: rdsNodeData
                 })
+                var visjsData = self.geAssetNodeVisjsData({data: rdsNodeData}, null, true)
+                self.addToGraph(visjsData)
 
+            },
+            getLinkedAssetNodesMap: function () {
+                var assetNodesMap = {}
+                var nodes = visjsGraph.data.nodes.get()
+                nodes.forEach(function (node) {
+                    if (node.data.assetNode)
+                        assetNodesMap["A_" + node.data.assetNode.id] = node
+                })
+                return assetNodesMap;
+            },
+            focus: function (assetNodeId) {
+                var nodes = visjsGraph.data.nodes.get()
+                nodes.forEach(function (node) {
+                    if (node.data.assetNode && node.data.assetNode.id == assetNodeId) {
+                        self.currentGraphNode = node;
+                        visjsGraph.searchNode(node.id)
+                    }
+
+                })
             }
         }
 

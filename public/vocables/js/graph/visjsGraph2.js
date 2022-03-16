@@ -72,7 +72,7 @@ var visjsGraph = (function () {
             nodes: {
                 shape: 'dot',
                 size: 12,
-                chosen:{node:true}
+                chosen: {node: true}
                 // scaling:{min:6,max:20}
             },
             edges: {
@@ -170,12 +170,14 @@ var visjsGraph = (function () {
         });
 
         self.network.on("click", function (params) {
-            console.log( self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y))
+            console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y))
             self.processClicks(params, _options)
 
         }).on("hoverNode", function (params) {
             var nodeId = params.node;
             var node = self.data.nodes.get(nodeId);
+            if (!node)
+                return console.log("hoverNode :no node ")
             node._graphPosition = params.pointer.DOM;
             var point = params.pointer.DOM;
             self.context.currentNode = node;
@@ -226,18 +228,18 @@ var visjsGraph = (function () {
 
             })
 
-            .on("controlNodeDragging",function(params){
+            .on("controlNodeDragging", function (params) {
 
             })
             .on("dragEnd", function (params) {
-                if(params.event.srcEvent.ctrlKey && options.dndCtrlFn ){
-                    var dropCtrlNodeId= self.network.getNodeAt(params.pointer.DOM)
-                    if(!dropCtrlNodeId)
-                        return ;
-                    var startNode= self.data.nodes.get(params.nodes[0])
-                    var endNode= self.data.nodes.get(dropCtrlNodeId)
+                if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
+                    var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM)
+                    if (!dropCtrlNodeId)
+                        return;
+                    var startNode = self.data.nodes.get(params.nodes[0])
+                    var endNode = self.data.nodes.get(dropCtrlNodeId)
 
-                    options.dndCtrlFn(startNode,endNode, params.pointer.DOM)
+                    options.dndCtrlFn(startNode, endNode, params.pointer.DOM)
 
                 }
 
@@ -459,19 +461,19 @@ var visjsGraph = (function () {
         }
     }
 
-    self.removeOtherNodesFromGraph=function(nodeId){
+    self.removeOtherNodesFromGraph = function (nodeId) {
 
         var nodes = visjsGraph.data.nodes.get();
-        var nodeIds=[]
+        var nodeIds = []
         nodes.forEach(function (node) {
-            if(node.id!= nodeId)
+            if (node.id != nodeId)
                 nodeIds.push(node.id)
         })
         visjsGraph.data.nodes.remove(nodeIds);
         var edges = visjsGraph.data.edges.get();
-        var edgesIds=[]
+        var edgesIds = []
         edges.forEach(function (edge) {
-            if(nodeIds.indexOf(edge.from)>-1 || nodeIds.indexOf(edge.to)>-1)
+            if (nodeIds.indexOf(edge.from) > -1 || nodeIds.indexOf(edge.to) > -1)
                 edgesIds.push(edge.id)
         })
         visjsGraph.data.edges.remove(edgesIds);
@@ -678,18 +680,24 @@ var visjsGraph = (function () {
 
         // select node
         else if (params.nodes.length == 1) {
-
-            var nodeId = params.nodes[0];
-            var node = self.data.nodes.get(nodeId);
-            node._graphPosition = params.pointer.DOM;
-            var point = params.pointer.DOM;
-            self.context.currentNode = node;
             var options = {
                 dbleClick: isDbleClick,
                 ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
                 altKey: (params.event.srcEvent.altKey ? 1 : 0),
                 shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
             }
+            var point = params.pointer.DOM;
+            var nodeId = params.nodes[0];
+            var node = self.data.nodes.get(nodeId);
+            if (!node && self.network.isCluster(nodeId)) {
+                if (_options.onClusterClickFn)
+                    return _options.onClusterClickFn(nodeId, point, options)
+            }
+
+            node._graphPosition = params.pointer.DOM;
+
+            self.context.currentNode = node;
+
             if (_options.onclickFn)
                 _options.onclickFn(node, point, options)
 
@@ -807,19 +815,30 @@ var visjsGraph = (function () {
     }
 
 
-    self.searchNode = function () {
-        var word = $("#visjsGraph_searchInput").val()
-        if (word == "")
-            return;
+    self.searchNode = function (id, word) {
+
+     /*   if (word === null && !id)
+            return;*/
+        if (word == "") {
+            word = $("#visjsGraph_searchInput").val()
+            if (word == "")
+                return;
+        }
+
         var nodes = visjsGraph.data.nodes.get()
         var matches = []
         var newNodes = []
         nodes.forEach(function (node) {
             var shape = "dot"
             var size = self.defaultNodeSize
-
-
-            if (node.data && node.data.label && node.data.label.toLowerCase().indexOf(word.toLowerCase()) > -1) {
+            var ok = false
+            if (word) {
+                ok = node.data && node.data.label && node.data.label.toLowerCase().indexOf(word.toLowerCase()) > -1
+            }
+            if (id) {
+                ok = (node.id == id)
+            }
+            if (ok) {
                 shape = "star"
                 size = 14
                 matches.push(node.id)

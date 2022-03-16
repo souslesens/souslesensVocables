@@ -9,18 +9,22 @@ fs.mkdirSync('config/users', options={"recursive": true})
 // config/users/users.json
 const usersPath = "config/users/users.json"
 if (!fs.existsSync(usersPath)) {
-  const USERNAME = process.env.USER_USERNAME;
-  const PASSWORD = process.env.USER_PASSWORD;
+  const USERNAME = process.env.USER_USERNAME || "admin";
+  const PASSWORD = process.env.USER_PASSWORD || "admin";
 
   // const HASH_PASSWORD = bcrypt.hashSync(PASSWORD, 10);
 
   const user_json = {
-    USERNAME: {
+    [USERNAME]: {
+      "id": USERNAME,
       "login": USERNAME,
       "password": PASSWORD,
       "groups": [
         "admin"
-      ]
+      ],
+      "source": "json",
+      "_type": "user",
+      "name": USERNAME,
     }
   }
 
@@ -97,7 +101,7 @@ if (!fs.existsSync(profilesPath)) {
 }
 
 
-// config/profiles.json
+// config/sources.json
 const sourcesPath = "config/sources.json"
 const sourcesTemplatePath = "config_templates/sources.json.default"
 if (!fs.existsSync(sourcesPath)) {

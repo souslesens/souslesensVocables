@@ -16,8 +16,8 @@
     "test": "cypress open"
   },
   "devDependencies": {
-    "cypress": "^9.5.1",
-    "prettier": "^2.5.1"
+    "cypress": "^9.5.2",
+    "prettier": "^2.6.0"
   },
   "dependencies": {
     "@futpib/tika-server-client": "0.0.5",
@@ -47,7 +47,7 @@
     "imap": "^0.8.19",
     "inflected": "^2.1.0",
     "js2xmlparser": "^4.0.2",
-    "jsoneditor": "^9.7.3",
+    "jsoneditor": "^9.7.4",
     "latest": "^0.2.0",
     "lemmatizer": "0.0.1",
     "libmime": "^5.0.0",
@@ -60,12 +60,12 @@
     "morgan": "~1.10.0",
     "mssql": "^8.0.2",
     "mysql": "^2.18.1",
-    "n3": "^1.13.0",
+    "n3": "^1.14.0",
     "ndjson": "^2.0.0",
     "node-schedule": "^2.1.0",
     "nodemon": "^2.0.15",
-    "npm": "^8.5.3",
-    "npm-check-updates": "^12.5.2",
+    "npm": "^8.5.4",
+    "npm-check-updates": "^12.5.3",
     "passport": "^0.5.2",
     "passport-keycloak-oauth2-oidc": "^1.0.5",
     "passport-local": "^1.0.0",
@@ -82,12 +82,12 @@
     "streams": "^0.1.0",
     "superagent": "^7.1.1",
     "superagent-proxy": "^3.0.0",
-    "tika-server": "^1.2.11",
+    "tika-server": "^1.2.12",
     "ulid": "^2.3.0",
     "unzipper": "^0.10.11",
     "util": "^0.12.4",
     "winston": "^3.6.0",
-    "xlsx": "^0.18.3",
+    "xlsx": "^0.18.4",
     "xmldom": "^0.6.0",
     "xslt-processor": "^0.11.5"
   }

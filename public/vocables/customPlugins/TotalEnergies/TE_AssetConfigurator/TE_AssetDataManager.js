@@ -1,7 +1,7 @@
 var TE_AssetDataManager = (function () {
 
     var self = {}
-    var  assetTreeDistinctNodes = {}
+    var assetTreeDistinctNodes = {}
     var graphAssetNodes;
     self.loadAsset = function (asset) {
         if (asset == "")
@@ -27,11 +27,68 @@ var TE_AssetDataManager = (function () {
         } else {
             self.currentTable_14224Field = null
         }
-        self.getFunctionalLocations(asset)
+        var allJstreeData = [
+
+            {
+                id: "Equipments",
+                text: "Equipments",
+                parent: "#"
+            },
+            {
+                id: "Instruments",
+                text: "Instruments",
+                parent: "#"
+            },
+            {
+                id: "Lines",
+                text: "Lines",
+                parent: "#"
+            }
+
+
+        ]
+        async.series([
+                function (callback) {
+                    self.getEquipments("equipments", "Equipments", function (err, jstreeData) {
+                        if (err)
+                            return callback(err)
+                        allJstreeData = allJstreeData.concat(jstreeData)
+                        callback()
+                    })
+                },
+
+
+                function (callback) {
+                  return  callback()
+                    self.getLines("lines", "Lines", function (err, jstreeData) {
+                        if (err)
+                            return callback(err)
+                        allJstreeData = allJstreeData.concat(jstreeData)
+                        callback()
+                    })
+                }
+            ], function (err) {
+                if (err)
+                    return MainController.UI.message(err)
+                var options = {
+                    openAll: false,
+                    selectTreeNodeFn: function (event, obj) {
+                        self.currentTreeNode = obj.node
+                        var level = self.currentTreeNode.parents.length + 1
+                        self.openAssetTreeNode(self.currentTreeNode, level)
+                    },
+
+                    contextMenu: TE_AssetDataManager.getAssetJstreeContextMenu()
+                }
+                common.jstree.loadJsTree("TE_AssetConfigurator_assetPanelTreeDiv", allJstreeData, options);
+            }
+        )
+
     }
 
-    self.getFunctionalLocations = function (table) {
-         graphAssetNodes=TE_AssetConfigurator.asset.getLinkedAssetNodesMap()
+
+    self.getEquipments = function (table, parentNode, callback) {
+        graphAssetNodes = TE_AssetConfigurator.asset.getLinkedAssetNodesMap()
 
         var limit = 100000
 
@@ -51,14 +108,14 @@ var TE_AssetDataManager = (function () {
                 if (!item.location1)
                     return
                 if (!assetTreeDistinctNodes[item.location1]) {
-                    var text=item.location1
-                    if(graphAssetNodes["A_"+item.id])
-                        text = "<span class='RDSassetTreeNode'>" + text+" </span>"
+                    var text = item.location1
+                    if (graphAssetNodes && graphAssetNodes["A_" + item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text + " </span>"
                     assetTreeDistinctNodes[item.location1] = 1
                     jstreeData.push({
                         id: item.location1,
                         text: item.location1,
-                        parent: "#",
+                        parent: parentNode,
                         data: {
                             FunctionalLocationCode: text,
                             id: item.location1,
@@ -71,15 +128,15 @@ var TE_AssetDataManager = (function () {
                 }
                 if (!assetTreeDistinctNodes[item.location2]) {
                     assetTreeDistinctNodes[item.location2] = 1
-                    if(item.id=="684")
-                        var x=3
-                    var text=item.location2
-                    if(graphAssetNodes["A_"+item.id])
-                        text = "<span class='RDSassetTreeNode'>" + text+" </span>"
+                    if (item.id == "684")
+                        var x = 3
+                    var text = item.location2
+                    if (graphAssetNodes && graphAssetNodes["A_" + item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text + " </span>"
                     jstreeData.push({
                         //  id: item.location1 + "/" + item.location2,
                         id: item.id,
-                        text:text,
+                        text: text,
                         parent: item.location1,
                         data: {
                             FunctionalLocationCode: item.location1 + "/" + item.location2,
@@ -96,17 +153,78 @@ var TE_AssetDataManager = (function () {
 
             })
 
-            var options = {
-                openAll: true,
-                selectTreeNodeFn: function (event, obj) {
-                    self.currentTreeNode = obj.node
-                    var level = self.currentTreeNode.parents.length + 1
-                    self.openAssetTreeNode(self.currentTreeNode, level)
-                },
+            return callback(null, jstreeData)
+        })
 
-                contextMenu: TE_AssetDataManager.getAssetJstreeContextMenu()
-            }
-            common.jstree.loadJsTree("TE_AssetConfigurator_assetPanelTreeDiv", jstreeData, options);
+    }
+    self.getLines = function (table, parentNode, callback) {
+        return
+        graphAssetNodes = TE_AssetConfigurator.asset.getLinkedAssetNodesMap()
+
+        var limit = 100000
+
+        var sqlQuery = " select distinct LineId,Fluid from" + table +
+            " where (location4 is null or location4='')"
+
+
+
+        self.querySQLserver(sqlQuery, function (err, data) {
+            if (err)
+                return MainController.UI.message(err)
+            var jstreeData = []
+            assetTreeDistinctNodes = {}
+
+            data.forEach(function (item) {
+
+                if (!item.LineId)
+                    return
+                if (!assetTreeDistinctNodes[item.location1]) {
+                    var text = item.location1
+                    if (graphAssetNodes && graphAssetNodes["A_" + item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text + " </span>"
+                    assetTreeDistinctNodes[item.location1] = 1
+                    jstreeData.push({
+                        id: item.location1,
+                        text: item.location1,
+                        parent: parentNode,
+                        data: {
+                            FunctionalLocationCode: text,
+                            id: item.location1,
+                            label: item.location1,
+                            type: "location",
+                        }
+
+
+                    })
+                }
+                if (!assetTreeDistinctNodes[item.location2]) {
+                    assetTreeDistinctNodes[item.location2] = 1
+                    if (item.id == "684")
+                        var x = 3
+                    var text = item.location2
+                    if (graphAssetNodes && graphAssetNodes["A_" + item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text + " </span>"
+                    jstreeData.push({
+                        //  id: item.location1 + "/" + item.location2,
+                        id: item.id,
+                        text: text,
+                        parent: item.location1,
+                        data: {
+                            FunctionalLocationCode: item.location1 + "/" + item.location2,
+                            // id: item.location1 + "/" + item.location2,
+                            id: item.id,
+                            label: item.location2,
+                            type: "location",
+                        }
+
+
+                    })
+                }
+
+
+            })
+
+            return callback(null, jstreeData)
         })
 
     }
@@ -131,6 +249,12 @@ var TE_AssetDataManager = (function () {
             label: "ShowOnGraph",
             action: function (e) {// pb avec source
                 TE_AssetConfigurator.asset.focus(self.currentTreeNode.data.id)
+            }
+        }
+        items.addToPID = {
+            label: "addToPID",
+            action: function (e) {// pb avec source
+                TE_AssetDataManager.addToPID(self.currentTreeNode.data.id)
             }
         }
         return items
@@ -184,14 +308,14 @@ var TE_AssetDataManager = (function () {
                 //  var childId = nodeId + "/" + common.formatUriToJqueryId(item.functionalLocationDescription)
                 if (!assetTreeDistinctNodes[item.id]) {
                     assetTreeDistinctNodes[item.id] = 1
-                    if(item.id=="684")
-                        var x=3
-                    var text=item[self.currentFLcolumn]
-                    if(graphAssetNodes["A_"+item.id])
-                        text = "<span class='RDSassetTreeNode'>" + text+" </span>"
+                    if (item.id == "684")
+                        var x = 3
+                    var text = item[self.currentFLcolumn] + (item.FullTag || "")
+                    if (graphAssetNodes && graphAssetNodes["A_" + item.id])
+                        text = "<span class='RDSassetTreeNode'>" + text + " </span>"
                     jstreeData.push({
                         id: "" + item.id,
-                        text: text ,
+                        text: text,
                         parent: node.id,
                         type: "owl:Class",
                         data: data
@@ -286,7 +410,135 @@ var TE_AssetDataManager = (function () {
 
 
     }
+    self.loadPIDgraph = function () {
+        var options = {}
+        options.onclickFn = function (node, point, options) {
+            var nodes = visjsGraph.data.nodes.get()
+            MainController.UI.hidePopup("graphPopupDiv")
+            self.currentGraphNode = node
+            MainController.UI.message(JSON.stringify(point))
+        }
+        options.onClusterClickFn = function (clusterId, point, options) {
+            visjsGraph.network.openCluster(clusterId)
+        }
+        options.onHoverNodeFn = function (node, point, options) {
 
+        }
+        options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus
+        options.manipulation = {
+            enabled: true
+        }
+        /* options.nodes = {
+             fixed: {x: true, y: true}
+         }*/
+        options.interaction = {
+            zoomView: false,
+            dragNodes: true,
+            dragView: false
+        }
+        // options.noFit=true
+        /*   options.manipulation= {
+               enabled: {edges: true}
+           }*/
+
+        /*{ addNode: function(nodeData,callback) {
+   if(!TE_AssetDataManager.currentTreeNode)
+       return select("an asset node first");
+
+   nodeData.label = TE_AssetDataManager.getAssetNodeLabel(TE_AssetDataManager.currentTreeNode);
+   nodeData.id ="A_"+TE_AssetDataManager.currentTreeNode.id;
+   nodeData.shape="box"
+   nodeData.color="#09a4f3";
+   nodeData.data={id:TE_AssetDataManager.currentTreeNode.id}
+   callback(nodeData);
+}}
+}
+}*/
+        var positionNode = {id: "PP", shape: "star", color: "red"}
+        var visjsData = {nodes: [], edges: []}
+
+        var assetDataLabel = $("#TE_AssetDataManager_assetDataSelect").val()
+        if (!assetDataLabel) {
+            visjsGraph.draw("graphDiv", visjsData, options, function () {
+                setTimeout(function () {
+
+                    $("div.vis-network").addClass("canvasBG")
+                }, 5)
+            })
+        } else {
+
+            visjsGraph.loadGraph("PID_" + assetDataLabel + ".json", false, function (err, visjsData) {
+                visjsGraph.draw("graphDiv", visjsData, options, function () {
+                    setTimeout(function () {
+                        $("div.vis-network").addClass("canvasBG")
+                        visjsGraph.network.focus("CenterNode")
+                        //  visjsGraph.network.setScale(1)
+                        /*  var p=visjsGraph.network.getViewPosition()
+                          var scale=visjsGraph.network.getScale()
+                      visjsGraph.network.moveTo(
+                          {
+                              offset: {x:-p.x, y:-p.y},
+                              scale: 1,
+
+                          })
+                        //  visjsGraph.network.fit()
+                     //var xx=visjsGraph.network.getViewPosition()
+                       /*   var newNodes = []
+                          visjsData.nodes.forEach(function (item) {
+                              newNodes.push({
+                                  id: item.id,
+                                  x: item.x,
+                                  y: item.y,
+                                  fixed:{x:true,y:true}
+                              })
+
+                          })
+                          visjsGraph.data.nodes.update(newNodes)*/
+
+
+                    }, 50)
+                })
+            })
+        }
+    }
+
+    self.addToPID = function (node) {
+        //   var positions = visjsGraph.network.getPositions(["PP"])
+        var visjsData = {nodes: [], edges: []}
+        visjsData.nodes.push({
+
+            label: TE_AssetDataManager.getAssetNodeLabel(TE_AssetDataManager.currentTreeNode.data),
+            id: "A_" + TE_AssetDataManager.currentTreeNode.id,
+            shape: "box",
+            color: "#09a4f3",
+            data: {id: TE_AssetDataManager.currentTreeNode.id},
+            // fixed: {x: true, y: true},
+            x: 0,
+            y: 0,
+
+        })
+
+        visjsGraph.data.nodes.update(visjsData.nodes)
+
+    }
+    self.savePIDgraph = function (node) {
+        if (!visjsGraph.data.nodes.get("CenterNode"))
+            visjsGraph.data.nodes.add({
+                id: "CenterNode",
+                shape: "dot",
+                size: "1px"
+            })
+
+        if (visjsGraph.isGraphNotEmpty()) {
+            var assetDataLabel = $("#TE_AssetDataManager_assetDataSelect").val()
+
+            if (assetDataLabel) {
+                visjsGraph.saveGraph("PID_" + assetDataLabel, true)
+
+            }
+
+        }
+    }
 
     return self;
 

@@ -256,6 +256,8 @@ var TE_AssetConfigurator = (function () {
         }
 
         self.getNodeNewSequenceNumber = function (systemId, objId) {
+            if(!visjsGraph.data || visjsGraph.data.nodes)
+                return 1;
             var nodes = visjsGraph.data.nodes.get()
             var maxNumber = 1
             nodes.forEach(function (node) {
@@ -271,7 +273,7 @@ var TE_AssetConfigurator = (function () {
             $("#AssetConfigurator_treeInfosDiv").html("");
             /*  if (node.parents.length + 1 < self.currentSystem.leafLevel)
                         return $("#AssetConfigurator_treeInfosDiv").html("not allowed , select a descendant")*/
-            if (!self.currentGraphNode && self.node.data.aspect == "Component")
+            if (!self.currentGraphNode && node.data.aspect == "Component")
                 return alert("select a node to link  this node with")
 
 
@@ -324,7 +326,8 @@ var TE_AssetConfigurator = (function () {
 
 
         }
-        self.addToGraph = function (visjsData) {
+        self.addToGraph = function (visjsData,_options) {
+            $("div.vis-network").removeClass("canvasBG")
             if (visjsGraph.isGraphNotEmpty()) {
                 //  if (Object.keys(visjsGraph.getExistingIdsMap()).length>0) {
                 visjsGraph.data.nodes.add(visjsData.nodes)
@@ -375,21 +378,24 @@ var TE_AssetConfigurator = (function () {
 
                         }
                     },
-                    /*  manipulation: {
-                          enabled:false,
-                          addEdge: function(edgeData,callback) {
-                              if (edgeData.from === edgeData.to) {
-                                  var r = confirm("Do you want to connect the node to itself?");
-                                  if (r === true) {
-                                      callback(edgeData);
-                                  }
-                              }
-                              else {
-                                  callback(edgeData);
-                              }
-                          }
-                      }*/
+
                 }
+                if (_options && _options.manipulation)
+                    options.manipulation={
+                        enabled: { addNode: function(nodeData,callback) {
+                          if(!TE_AssetDataManager.currentTreeNode)
+                              return select("an asset node first");
+
+                                nodeData.label = TE_AssetDataManager.getAssetNodeLabel(TE_AssetDataManager.currentTreeNode);
+                                nodeData.id ="A_"+TE_AssetDataManager.currentTreeNode.id;
+                                nodeData.shape="box"
+                                nodeData.color="#09a4f3";
+                                nodeData.data={id:TE_AssetDataManager.currentTreeNode.id}
+                                callback(nodeData);
+                            }}
+                    }
+
+
 
                 options.dndCtrlFn = function (startNode, endNode, point) {
                     if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label))
@@ -530,7 +536,7 @@ var TE_AssetConfigurator = (function () {
 
         }
         self.deleteSelectedEdge = function () {
-            visjsGraph.data.edge.remove(self.currentGraphNode.id)
+            visjsGraph.data.edges.remove(self.currentGraphNode.id)
             /*  if (self.currentDisplayDivId) {
                   delete self.displayedDivsMap[self.currentDisplayDivId]
                   $("#" + self.currentDisplayDivId).remove();
@@ -895,6 +901,7 @@ var TE_AssetConfigurator = (function () {
         self.searchInCurrentSystem = function (word) {
             var matchingHits
             var parentIdsMap = {}
+            var size=200
             async.series([
                     function (callbackSeries) {
                         var queryObj = {
@@ -902,7 +909,7 @@ var TE_AssetConfigurator = (function () {
                                 "bool": {
                                     "must": []
                                 }
-                            },"from": from,
+                            },"from": 0,
                             "size": size,
                             "_source": {
                                 "excludes": [
@@ -1381,10 +1388,12 @@ var TE_AssetConfigurator = (function () {
 
             },
             getLinkedAssetNodesMap: function () {
+                if(! visjsGraph.data || !visjsGraph.data.nodes)
+                    return {};
                 var assetNodesMap = {}
                 var nodes = visjsGraph.data.nodes.get()
                 nodes.forEach(function (node) {
-                    if (node.data.assetNode)
+                    if (node.data && node.data.assetNode)
                         assetNodesMap["A_" + node.data.assetNode.id] = node
                 })
                 return assetNodesMap;
@@ -1400,6 +1409,7 @@ var TE_AssetConfigurator = (function () {
                 })
             }
         }
+
 
 
         return self;

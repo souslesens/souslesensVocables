@@ -86,30 +86,7 @@ var visjsGraph = (function () {
             options[key] = _options[key]
         }
 
-        /*  if (_options.simulationTimeOut)
-              self.simulationTimeOut = _options.simulationTimeOut
-          if (_options.nodes) {
-              options.nodes = _options.nodes
-          }
-          if (_options.edges) {
-              options.edges = _options.edges
-          }
 
-
-          if (_options.groups) {
-              options.groups = _options.groups
-          }
-
-          if (_options.nodes) {
-              options.nodes = _options.nodes
-          }
-
-          if (_options.edges) {
-              options.edges = _options.edges
-          }
-          if (_options.physics) {
-              options.physics = _options.physics
-          }*/
         if (_options.layoutHierarchical) {
 
             options.layout = {
@@ -123,12 +100,19 @@ var visjsGraph = (function () {
         self.globalOptions = options
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
+
+
         // self.network.startSimulation()
         window.setTimeout(function () {
+
+                return;
+
+
             if (!_options.layoutHierarchical) {
                 if (!self.network.stopSimulation)
                     return;
                 self.network.stopSimulation();
+                if(!_options.noFit)
                 self.network.fit()
                 self.simulationOn = false;
                 if (_options.afterDrawing)
@@ -228,8 +212,10 @@ var visjsGraph = (function () {
 
             })
 
-            .on("controlNodeDragging", function (params) {
-
+            .on("dragging", function (params) {
+               /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
+                return false;
+                }*/
             })
             .on("dragEnd", function (params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
@@ -935,7 +921,8 @@ var visjsGraph = (function () {
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
                 var data = JSON.parse(result.result);
-                var positions = data.positions
+                var positions = data.positions;
+                var options=data.context.options;
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = {}
                 if (addToCurrentGraph)
@@ -943,9 +930,10 @@ var visjsGraph = (function () {
                 data.nodes.forEach(function (node) {
                     if (!existingNodes[node.id]) {
                         existingNodes[node.id] = 1
-                        if (node.fixed && positions[node.id]) {
+                        if ( ((node.fixed && positions[node.id])|| options.nodes.fixed)) {
                             node.x = positions[node.id].x;
                             node.y = positions[node.id].y;
+                            node.fixed={x:true,y:true};
                         }
                         visjsData.nodes.push(node)
                     }

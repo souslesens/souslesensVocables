@@ -930,6 +930,11 @@ WHERE {
             if (Config.sources[sourceLabel].schemaType == "OWL") {
                 parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
                 conceptType = "owl:Class"
+            }
+            if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
+                parentType = "rdf:type"
+                conceptType = null
+
 
             } else if (Config.sources[sourceLabel].schemaType == "SKOS") {
                 parentType = "skos:broader"
@@ -958,7 +963,7 @@ WHERE {
                     var limitSize = 500
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports,true)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -971,12 +976,13 @@ WHERE {
                         "  ?concept " + parentType + " ?firstParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
                         "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
                         "OPTIONAL{?concept skos:altLabel ?skosAltLabel}. " +
-                        "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. " +
+                        "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. "
 
+                    if (conceptType) {
+                        query += "?concept rdf:type " + conceptType + ". "
 
-                        "?concept rdf:type " + conceptType + ". "
-
-                    query += "?firstParent rdf:type " + conceptType + ". "
+                        query += "?firstParent rdf:type " + conceptType + ". "
+                    }
 
                     if (options.filter)
                         query += " " + options.filter + " "
@@ -1024,7 +1030,7 @@ WHERE {
                         else if (item.skosAltLabel)
                             conceptLabel = item.skosAltLabel.value
                         else
-                            conceptLabel =Sparql_common.getLabelFromURI(item.concept.value)
+                            conceptLabel = Sparql_common.getLabelFromURI(item.concept.value)
                         return conceptLabel;
                     }
 
@@ -1034,19 +1040,17 @@ WHERE {
                             skosLabelsMap[item.concept.value] = []
                         var conceptLabel = getConceptLabel(item)
 
-                        if(!conceptLabel)
+                        if (!conceptLabel)
                             return;
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
                         if (decapitalizedLabel != conceptLabel) {
                             skosLabelsMap[item.concept.value].push(conceptLabel)
-                            conceptLabel=decapitalizedLabel
+                            conceptLabel = decapitalizedLabel
 
                         }
                         if (!allLabels[item.concept.value]) {
                             allLabels[item.concept.value] = conceptLabel
                         }
-
-
 
 
                         if (item.skosLabel)
@@ -1055,7 +1059,7 @@ WHERE {
                         if (item.code)
                             if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0)
                                 skosLabelsMap[item.concept.value].push(item.code.value)
-                        if(item.skosAltLabel)
+                        if (item.skosAltLabel)
                             if (skosLabelsMap[item.concept.value].indexOf(item.skosAltLabel.value) < 0)
                                 skosLabelsMap[item.concept.value].push(item.skosAltLabel.value)
 
@@ -1064,11 +1068,11 @@ WHERE {
 
                     allData.forEach(function (item) {
                         var conceptLabel = getConceptLabel(item)
-                        if(!conceptLabel)
+                        if (!conceptLabel)
                             return;
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
                         if (decapitalizedLabel != conceptLabel) {
-                            conceptLabel=decapitalizedLabel
+                            conceptLabel = decapitalizedLabel
                         }
                         if (!allClassesMap[item.concept.value]) {
                             allClassesMap[item.concept.value] = {

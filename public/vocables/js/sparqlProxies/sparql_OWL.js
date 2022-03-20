@@ -67,9 +67,10 @@ var Sparql_OWL = (function () {
             var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "prefix owl: <http://www.w3.org/2002/07/owl#>" +
-                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {?topConcept rdf:type owl:Class." +
-                strFilterTopConcept +
-                " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
+                "select   distinct ?topConcept  ?topConceptLabel  " + fromStr + "  where {"
+            if(Config.sources[sourceLabel].schemaType!="KNOWLEDGE_GRAPH")
+                query +="?topConcept rdf:type owl:Class."
+            query +=strFilterTopConcept +" OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"
             if (options.filterCollections)
                 query += "?collection skos:member ?aConcept. ?aConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?topConcept." + Sparql_common.setFilter("collection", options.filterCollections)
             query += "}order by ?topConceptLabel "
@@ -392,7 +393,7 @@ var Sparql_OWL = (function () {
                 self.graphUri = Config.sources[sourceLabel].graphUri;
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-                var fromStr = Sparql_common.getFromStr(sourceLabel)
+                var fromStr = Sparql_common.getFromStr(sourceLabel,false,true,true)
 
 
                 var query =
@@ -636,7 +637,7 @@ var Sparql_OWL = (function () {
                 options.selectGraph = false //!!!!!!!!!!!!!!PB cannot have graph when concept ands value are not in the same graph
 
                 //   fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
-                fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
+                fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports,true)
             } else {
                 fromStr = ""
 

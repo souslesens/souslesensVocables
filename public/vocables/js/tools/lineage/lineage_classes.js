@@ -1594,7 +1594,8 @@ var Lineage_classes = (function () {
 
 
         self.drawRestrictions = function (source, classIds, descendants, withoutImports, options) {
-
+if(!options)
+    options={}
             if (!classIds) {
                 if (!source)
                     source = Lineage_common.currentSource
@@ -2377,7 +2378,8 @@ var Lineage_classes = (function () {
             init: function () {
 
                 self.graphDecoration.operationsMap = {
-                    "colorNodesByTopType": Lineage_classes.graphDecoration.colorGraphNodesByType
+                    "colorNodesByType": Lineage_classes.graphDecoration.colorGraphNodesByType,
+                    "colorNodesByPart14TopType": Lineage_classes.graphDecoration.colorNodesByPart14TopType
                 }
                 var operations = Object.keys(self.graphDecoration.operationsMap)
                 common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true)
@@ -2396,51 +2398,58 @@ var Lineage_classes = (function () {
                 })
 
             },
-            listGraphNodeTypes: function (ids, callback) {
-
-                var sourceLabel = Lineage_classes.mainSource
-
+            listGraphNodeTypes: function (ids,part14TopTypes, callback) {
                 if (!ids || ids.length == 0)
                     return;
-                var strFrom = Sparql_common.getFromStr(sourceLabel, null, true)
-                var query =
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "SELECT distinct ?x ?type  " + strFrom + "  WHERE {\n" +
-                    "  ?x rdfs:subClass*/rdf:type ?type.\n" +
-                    "  filter (regex(str(?type),\"part14\") && ?type !=  <http://standards.iso.org/iso/15926/part14/Thing>)\n"
-                if (ids) {
-                    query += Sparql_common.setFilter("x", ids)
-                }
+                var sourceLabel = Lineage_classes.mainSource
 
-                query += "}"
 
-                var sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                var url = sparql_url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
-                    if (err) {
-                        return callback(err)
+
+
+                    var strFrom = Sparql_common.getFromStr(sourceLabel, null, true,true)
+                    var query =
+                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                        "SELECT distinct ?x ?type  " + strFrom + "  WHERE {\n"
+                    if(part14TopTypes) {
+                        query += "  ?x rdfs:subClass*/rdf:type ?type.\n" +
+                            "  filter (regex(str(?type),\"part14\") && ?type !=  <http://standards.iso.org/iso/15926/part14/Thing>)\n"
+                    }else{
+                        query += "  ?x rdf:type ?type."
                     }
+                        query += Sparql_common.setFilter("x", ids)
 
-                    return callback(null, result.results.bindings)
+
+                    query += "}"
+
+                    var sparql_url = Config.sources[sourceLabel].sparql_server.url;
+                    var url = sparql_url + "?format=json&query=";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {source: sourceLabel}, function (err, result) {
+                        if (err) {
+                            return callback(err)
+                        }
+
+                        return callback(null, result.results.bindings)
 
 
-                })
+                    })
 
             }
-            , colorGraphNodesByType: function () {
+            ,colorNodesByPart14TopType:function (){
+                self.graphDecoration.colorGraphNodesByType(true)
+            }
+            , colorGraphNodesByType: function (part14TopTypes) {
 
                 var existingNodes = visjsGraph.getExistingIdsMap(true)
                 var ids = Object.keys(existingNodes);
-                self.graphDecoration.listGraphNodeTypes(ids, function (err, result) {
+                self.graphDecoration.listGraphNodeTypes(ids,part14TopTypes, function (err, result) {
                     if (err)
                         return alert(err)
                     var nodesTypesMap = {}
                     var colorsMap = {}
                     result.forEach(function (item) {
 
-                        if (item.x.value == "http://data.total.com/resource/tsf/maintenance/romain_14224/VE")
-                            var x = 3
+
                         if (!colorsMap[item.type.value]) {
                             colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length]
                         }
@@ -2470,24 +2479,10 @@ var Lineage_classes = (function () {
                     visjsGraph.data.nodes.update(newNodes)
 
 
-                    var xOffset = -(visjsGraph.canvasDimension.w / 2) + 20
-                    var yOffset = -(visjsGraph.canvasDimension.h / 2) + 20
-                    var yStep = 50
                     var legendNodes = []
                     var str = ""
                     for (var type in colorsMap) {
                         str += "<div class='Lineage_sourceLabelDiv' style='background-color:" + colorsMap[type] + "'>" + Sparql_common.getLabelFromURI(type) + "</div>"
-
-                        /*   legendNodes.push({
-                               id: "legend_" + type,
-                               label: Sparql_common.getLabelFromURI(type),
-                               shape: "dot",
-                               color: colorsMap[type],
-                               fixed: {x: true, y: true},
-                               x: xOffset,
-                               y: yOffset,
-                           })
-                           yOffset += yStep*/
 
                     }
                     $("#Lineage_classes_graphDecoration_legendDiv").html(str)

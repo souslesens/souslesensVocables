@@ -410,6 +410,8 @@ var Sparql_generic = (function () {
         }
 
         self.insertTriples = function (sourceLabel, triples, options, callback) {
+            if (!options)
+                options = {}
             var graphUri = Config.sources[sourceLabel].graphUri
             if (Array.isArray(graphUri))
                 graphUri = graphUri[0]
@@ -426,7 +428,8 @@ var Sparql_generic = (function () {
                 insertTriplesStr +
                 "  }"
 
-
+            if (options.getSparqlOnly)
+                return callback(null, query)
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
@@ -930,8 +933,7 @@ WHERE {
             if (Config.sources[sourceLabel].schemaType == "OWL") {
                 parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
                 conceptType = "owl:Class"
-            }
-            if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
+            } else if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
                 parentType = "rdf:type"
                 conceptType = null
 
@@ -963,7 +965,7 @@ WHERE {
                     var limitSize = 500
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports,true)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -997,7 +999,7 @@ WHERE {
                         query2 += " limit " + (limitSize + 1) + " offset " + offset
 
                         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                        var url = self.sparql_url //+ "?format=json&timeout=20000&debug=onquery=";
+                        var url = self.sparql_url + "?format=json&timeout=20000&debug=on&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
                             if (err)
                                 return callbackWhilst(err);
@@ -1022,6 +1024,7 @@ WHERE {
                     var skosLabelsMap = {}
 
                     function getConceptLabel(item) {
+
                         var conceptLabel = null;
                         if (item.conceptLabel)
                             conceptLabel = item.conceptLabel.value

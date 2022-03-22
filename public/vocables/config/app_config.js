@@ -193,6 +193,13 @@ var Config = (function () {
         toolDescriptionImg: null
     }
 
+    self.tools["KGpropertyFilter"] = {
+        label: "KGpropertyFilter",
+        noSource: 1,
+        controller: KGpropertyFilter,
+        toolDescriptionImg: null
+    }
+
 
     self.tools["TE_14224_browser"] = {
         label: "TE_14224_browser",

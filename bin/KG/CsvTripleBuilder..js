@@ -50,6 +50,7 @@ var CsvTripleBuilder = {
             "skos:example": "string",
             //   "cfihos:status": "string",
             "iso14224:priority": "string",
+            "slsv:hasCode": "string",
 
             "rdf:type": "uri",
             "part14:functionalPartOf": "uri",

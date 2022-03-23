@@ -51,6 +51,7 @@ var KGcreator = (function () {
 
 
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
+            self.loadCsvDirs()
 
         })
 
@@ -62,6 +63,26 @@ var KGcreator = (function () {
         $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
         })
         $("#accordion").accordion("option", {active: 2});
+    }
+
+    self.loadCsvDirs=function(){
+        var payload = {
+            listDirFiles: 1,
+            dir: "CSV/"
+        }
+        $.ajax({
+            type: "POST",
+            url: Config.serverUrl,
+            data: payload,
+            dataType: "json",
+            success: function (result, textStatus, jqXHR) {
+
+                common.fillSelectOptions("KGcreator_csvDirsSelect",result,true)
+
+            }, error: function (err) {
+                alert(err.responseText)
+            }
+        })
     }
 
     self.listFiles = function () {
@@ -136,7 +157,7 @@ var KGcreator = (function () {
         // load csv columns
         var payload = {
             readCsv: 1,
-            dir: "CSV/CFIHOS_V1.5_RDL",
+            dir: "CSV/"+ self.currentCsvDir,
             fileName: obj.node.id,
             options: JSON.stringify({lines: 100})
         }
@@ -480,7 +501,7 @@ var KGcreator = (function () {
             var p = err.message.substring(err.message.indexOf("position") + 9)
             var x = $("#KGcreator_mainJsonDisplay").val()
             var y = $("#KGcreator_mainJsonDisplay")
-            alert(err.responseText)
+            alert(err.message)
         }
         self.currentJsonObject = data;
         var payload = {
@@ -526,7 +547,7 @@ var KGcreator = (function () {
             })
 
         } catch (err) {
-            alert(err.responseText)
+            alert(err.message)
         }
     }
     self.clearMappings = function () {

@@ -340,6 +340,13 @@ var util = {
 
         return callback(null, dirFilesMap);
     },
+    decapitalizeLabel:function(label){
+
+        var altLabel = label.replace(/[A-Z]/g, function (maj) {
+            return " " + maj
+        })
+        return altLabel.trim();
+    }
 };
 
 module.exports = util;

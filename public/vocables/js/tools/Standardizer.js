@@ -415,10 +415,8 @@ var Standardizer = (function () {
             var words = text.split("\n")
             var words2 = ""
             words.forEach(function (word) {
-                var word2 = word.replace(/[A-Z]/g, function (maj) {
-                    return " " + maj
-                })
-                word2 = word2.trim();
+                common.decapitalizeLabel(word)
+                var word2 =  common.decapitalizeLabel(word)
 
                 words2 += (word2 + "\n")
 
@@ -1880,12 +1878,13 @@ var Standardizer = (function () {
                     if (err)
                         return alert(err)
                     var entities = []
-
+                    if(!result.forEach ||  result.length==0)
+                        return MainController.UI.message("no result)");
                     result.forEach(function (item) {
                         if (!item.hits || !item.hits.hits)
                             return;
                         item.hits.hits.forEach(function (hit) {
-                            if (hit._index == self.currentSource.toLowerCase())
+                            if (self.currentSource && hit._index == self.currentSource.toLowerCase())
                                 return
                             var entity = {
                                 index: hit._index,

@@ -12,7 +12,9 @@ var Admin = (function () {
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportNT()'>export NT </button>" +
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
             " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
-            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>"
+            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>"+
+            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.createDecapitalizedLabelTriples()'>createDecapitalizedLabelTriples </button>"
+
 
         $("#sourceDivControlPanelDiv").html(html)
     }
@@ -241,6 +243,21 @@ var Admin = (function () {
         })
 
 
+    }
+
+    self.createDecapitalizedLabelTriples=function(){
+        var sources = $('#sourcesTreeDiv').jstree(true).get_checked();
+        if (sources.length != 1)
+            return alert("select a single source")
+
+        var sourceLabel = sources[0]
+        Sparql_generic.createDecapitalizedLabelTriples(sourceLabel,function(err,result){   if (err) {
+            return MainController.UI.message(err, true)
+
+        }
+            return MainController.UI.message(result +" skos:altLabels created", true)
+
+        })
     }
 
 

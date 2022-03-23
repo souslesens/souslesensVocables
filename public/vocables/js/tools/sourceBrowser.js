@@ -26,6 +26,7 @@ var SourceBrowser = (function () {
             MainController.currentSource = sourceLabel;
             OwlSchema.currentSourceSchema = null;
             self.currentTargetDiv = "currentSourceTreeDiv"
+            $("#GenericTools_searchSchemaType").val(Config.sources[sourceLabel].schemaType)
             $("#accordion").accordion("option", {active: 2});
             self.showThesaurusTopConcepts(sourceLabel,)
             $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
@@ -410,6 +411,9 @@ var SourceBrowser = (function () {
 
             if (!term || term == "")
                 return alert(" enter a word ")
+            if(term.indexOf("*")>-1)
+                $("#GenericTools_allExactMatchSearchCBX").removeProp("checked")
+            term=term.toLowerCase()
             var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
             var searchAllSources = $("#GenericTools_searchInAllSources").prop("checked")
 
@@ -450,115 +454,115 @@ var SourceBrowser = (function () {
 
             var indexes
             options.parentlabels = true
-            SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
+            if (true || schemaType == "OWL") {
+                SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
 
 
-                self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, result) {
-                    if (err)
-                        return alert(err)
+                    self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, result) {
+                        if (err)
+                            return alert(err)
+
+                    })
+
 
                 })
+            } else if (schemaType == "SKOS") {
 
 
-            })
+                async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
 
+                    // setTimeout(function () {
+                    MainController.UI.message("searching in " + sourceLabel)
+                    // }, 100)
+                    if (!term)
+                        term = $("#GenericTools_searchTermInput").val()
 
-            return;
-
-
-            async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
-
-                // setTimeout(function () {
-                MainController.UI.message("searching in " + sourceLabel)
-                // }, 100)
-                if (!term)
-                    term = $("#GenericTools_searchTermInput").val()
-
-                if (!term || term == "")
-                    return
-                var options2 = {
-                    term: term,
-                    rootId: sourceLabel,
-                    exactMatch: exactMatch,
-                    limit: Config.searchLimit,
-                }
-                var type = Config.sources[sourceLabel].schemaType
-
-                SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
-                    if (err) {
-                        MainController.UI.message(err.responseText)
-                        var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
-                        jstreeData.push({
-                            id: sourceLabel,
-                            text: text,
-                            parent: "#",
-                            data: {source: sourceLabel, id: sourceLabel, label: text}
-                        })
-                    } else {
-
-                        var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
-
-                        jstreeData.push({
-                            id: sourceLabel,
-                            text: text,
-                            parent: "#",
-                            type: type,
-                            data: {source: sourceLabel, id: sourceLabel, label: text}
-                        })
-                        result.forEach(function (item) {
-                            if (!uniqueIds[item.id]) {
-                                uniqueIds[item.id] = 1
-                                jstreeData.push(item)
-
-                            }
-                        })
+                    if (!term || term == "")
+                        return
+                    var options2 = {
+                        term: term,
+                        rootId: sourceLabel,
+                        exactMatch: exactMatch,
+                        limit: Config.searchLimit,
                     }
-                    callbackEach();
-                })
+                    var type = Config.sources[sourceLabel].schemaType
+
+                    SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
+                        if (err) {
+                            MainController.UI.message(err.responseText)
+                            var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
+                            jstreeData.push({
+                                id: sourceLabel,
+                                text: text,
+                                parent: "#",
+                                data: {source: sourceLabel, id: sourceLabel, label: text}
+                            })
+                        } else {
+
+                            var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
+
+                            jstreeData.push({
+                                id: sourceLabel,
+                                text: text,
+                                parent: "#",
+                                type: type,
+                                data: {source: sourceLabel, id: sourceLabel, label: text}
+                            })
+                            result.forEach(function (item) {
+                                if (!uniqueIds[item.id]) {
+                                    uniqueIds[item.id] = 1
+                                    jstreeData.push(item)
+
+                                }
+                            })
+                        }
+                        callbackEach();
+                    })
 
 
-            }, function (err) {
-                $("#accordion").accordion("option", {active: 2});
-                var html = "<div id='" + self.currentTargetDiv + "'></div>"
-
-                if ($("#" + self.currentTargetDiv).length == 0) {
+                }, function (err) {
+                    $("#accordion").accordion("option", {active: 2});
                     var html = "<div id='" + self.currentTargetDiv + "'></div>"
-                    $("#actionDiv").html(html);
-                }
-                $("#" + self.currentTargetDiv).html(html)
 
-                MainController.UI.message("Search Done")
-
-
-                var jstreeOptions = {
-
-                    openAll: true,
-                    selectTreeNodeFn: function (event, obj) {
-                        SourceBrowser.currentTreeNode = obj.node;
-
-                        if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
-
-
-                        self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
-                    },
-                    contextMenu: function () {
-                        if (Config.tools[MainController.currentTool].controller.contextMenuFn)
-                            return Config.tools[MainController.currentTool].controller.contextMenuFn()
-                        else
-                            return self.getJstreeConceptsContextMenu()
+                    if ($("#" + self.currentTargetDiv).length == 0) {
+                        var html = "<div id='" + self.currentTargetDiv + "'></div>"
+                        $("#actionDiv").html(html);
                     }
-                }
+                    $("#" + self.currentTargetDiv).html(html)
 
-                common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
-                setTimeout(function () {
-                    MainController.UI.updateActionDivLabel("Multi source search :" + term)
-                    MainController.UI.message("");
-                    $("#waitImg").css("display", "none");
+                    MainController.UI.message("Search Done")
 
-                }, 200)
 
-            })
+                    var jstreeOptions = {
+
+                        openAll: true,
+                        selectTreeNodeFn: function (event, obj) {
+                            SourceBrowser.currentTreeNode = obj.node;
+
+                            if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
+                                return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+
+
+                            self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
+                        },
+                        contextMenu: function () {
+                            if (Config.tools[MainController.currentTool].controller.contextMenuFn)
+                                return Config.tools[MainController.currentTool].controller.contextMenuFn()
+                            else
+                                return self.getJstreeConceptsContextMenu()
+                        }
+                    }
+
+                    common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
+                    setTimeout(function () {
+                        MainController.UI.updateActionDivLabel("Multi source search :" + term)
+                        MainController.UI.message("");
+                        $("#waitImg").css("display", "none");
+
+                    }, 200)
+
+                })
+            }
 
 
         }
@@ -792,7 +796,7 @@ var SourceBrowser = (function () {
 
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions)
             setTimeout(function () {
-              //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
+                //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
                 MainController.UI.message("");
                 $("#waitImg").css("display", "none");
                 $('#' + targetDiv).jstree(true).open_all();
@@ -1375,7 +1379,7 @@ var SourceBrowser = (function () {
 
 
         self.indexObjectIfNew = function () {
-            if (true || self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
+            if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
                 SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, result) {
                     if (err)
                         return alert(err)

@@ -40,7 +40,7 @@ KGbrowserCustom.initsuperClassesPalette()
         $("#accordion").accordion("option", {active: 1});
         MainController.UI.openRightPanel()
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html",function(){
-            self.jstree.load.loadAdlsList();
+
            // self.jstree.load.loadOneModel();
             //  self.loadAdlJstree()
           //  self.jstree.load.loadRdl();
@@ -48,7 +48,9 @@ KGbrowserCustom.initsuperClassesPalette()
 
             SourceBrowser.currentTargetDiv = "KGbrowserItemsjsTreeDiv"
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL")
-            $("#sourcesTreeDiv").load("snippets/KG/KGbrowser.html");
+            $("#sourcesTreeDiv").load("snippets/KG/KGbrowser.html",function( ){
+                self.jstree.load.loadAdlsList();
+            } );
             if(callback)
                 callback()
         });

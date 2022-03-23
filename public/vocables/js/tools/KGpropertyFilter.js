@@ -1,27 +1,47 @@
 var KGpropertyFilter = (function () {
         var self = {}
         self.currentSource = "CFIHOS_1_5_PLUS"
+        self.propertyFilteringSource = "TSF-PROPERTY-FILTERING"
 
-
-      self.aspectMap={
-            "Discipline":"http://data.totalenergies.com/resource/ontology/appliesToDiscipline",
-          "LifeCycle":"http://data.totalenergies.com/resource/ontology/appliesToLifeCycleStatus",
-          "StakeHolder":"http://data.totalenergies.com/resource/ontology/appliesToStakeHolderFilter",
-
-
-
-      }
 
         self.onLoaded = function () {
 
+            Config.sources[self.propertyFilteringSource] = {
+                "isDictionary": true,
+                "editable": true,
+                "graphUri": "http://data.total.com/resource/tsf/property-filtering/",
+                "imports": [],
+                "sparql_server": {
+                    "url": "_default"
+                },
+                "controller": "Sparql_OWL",
+                "schemaType": "OWL",
 
+            };
+            var graphUri = Config.sources[self.propertyFilteringSource].graphUri
+            self.aspectMap = {
+                "Discipline": graphUri + "appliesToDiscipline",
+                "LifeCycle": graphUri + "appliesToLifeCycleStatus",
+                "StakeHolder": graphUri + "appliesToStakeHolderFilter",
+
+
+            }
             $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function () {
                 self.loadClassesProperties()
             })
 
             $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function () {
+                $("#KGcreator_centralPanelTabs").tabs({
+                    activate: function (e, ui) {
+                        self.currentOwlType = "Class"
+                        var divId = ui.newPanel.selector;
+                        if (divId == "#LineageTypesTab") {
+
+                        }
+                    }
+                })
                 self.initCentralPanel()
-                self.mainJsonEditor = new JsonEditor('#KGpropertyFilter_mainJsonDisplay', {});
+
             })
 
             $("#accordion").accordion("option", {active: 2});
@@ -31,7 +51,7 @@ var KGpropertyFilter = (function () {
         self.loadClassesProperties = function () {
             var classIds = [
                 "http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClass/CFIHOS-30000521"]
-           // classIds = null
+            // classIds = null
 
 
             var options = {filter: "  FILTER (?prop=<http://standards.iso.org/iso/15926/part14/hasQuality>)"}
@@ -50,7 +70,7 @@ var KGpropertyFilter = (function () {
                             text: item.conceptLabel.value,
                             parent: "#",
                             data: {
-                                type:"class",
+                                type: "class",
                                 id: item.concept.value,
                                 label: item.conceptLabel.value,
                             }
@@ -65,10 +85,10 @@ var KGpropertyFilter = (function () {
                             text: item.valueLabel.value,
                             parent: item.concept.value,
                             data: {
-                                type:"property",
+                                type: "property",
                                 propId: item.value.value,
                                 propLabel: item.valueLabel.value,
-                                retrictionId:item.node.value
+                                retrictionId: item.node.value
                             }
                         })
                     }
@@ -81,7 +101,7 @@ var KGpropertyFilter = (function () {
                     contextMenu: KGpropertyFilter.getPropertyTreeContextMenu(),
 
                 }
-                common.array.sort(jstreeData,"text")
+                common.array.sort(jstreeData, "text")
                 common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options)
 
 
@@ -91,8 +111,14 @@ var KGpropertyFilter = (function () {
 
         self.onPropertyNodeClicked = function (event, obj) {
             self.currentPropertyNode = obj.node
+            if (self.currentPropertyNode.parents.length > 1)
+                self.currentClassId = self.currentPropertyNode.parents[1]
+            else
+                self.currentClassId = self.currentPropertyNode.id
             $("#KGpropertyFilter_currentPropertyDiv").css("display", "block")
             $("#KGpropertyFilter_currentPropertySpan").html(obj.node.text)
+            $("#KGpropertyFilter_currentPropertySpan2").html(obj.node.text)
+
 
         }
         self.getPropertyTreeContextMenu = function () {
@@ -105,75 +131,82 @@ var KGpropertyFilter = (function () {
 
 
         self.associateFiltersToPropertyRestriction = function () {
-            var propertyObj = $("#KGpropertyFilter_propertiesTreeDiv").jstree().get_selected(true)[0]
+
             var existingNodesArray = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#")
             var existingNodes = {}
             existingNodesArray.forEach(function (item) {
                 existingNodes[item] = 1
             })
-            if (!propertyObj || propertyObj.parents.length < 2)
-                return alert(" Select a property")
-            var classId = propertyObj.parent
 
-            function execute(label, selectId) {
-                var items = $("#" + selectId).val()
-                var jstreedata = []
-                var jstreedata2 = []
-                var aspectId = propertyObj.id + "_" + label
-                if (!existingNodes[aspectId]) {
-                    existingNodes[aspectId] = 1
-                    jstreedata.push({
-                        id: aspectId,
-                        text: label,
-                        parent: propertyObj.id,
-                        data:{
-                            type: "aspect",value:label}
-                    })
-                }
+            var propertyObjs = $("#KGpropertyFilter_propertiesTreeDiv").jstree().get_selected(true)
+            propertyObjs.forEach(function (propertyObj) {
+                if (!propertyObj || propertyObj.parents.length < 2)
+                    return alert(" Select a property")
+                var classId = propertyObj.parent
 
-
-                $("#" + selectId + " option:selected").each(function () {
-                    var label = $(this).text();
-                    var id = $(this).val();
-                    var filterId = aspectId + "_" + id
-                    if (!existingNodes[filterId]) {
-                        existingNodes[filterId] = 1
-                        jstreedata2.push({
-                            id: filterId,
-                            text: label,
-                            parent: aspectId,
-                            data:{type: "filterClass",
-                                retrictionId:propertyObj.data.id,
-                                aspectKey:label,
-                                aspectClassId:id}
+                function execute(filterType, selectId) {
+                    var items = $("#" + selectId).val()
+                    var jstreedata = []
+                    var jstreedata2 = []
+                    var aspectId = propertyObj.id + "_" + filterType
+                    if (!existingNodes[aspectId]) {
+                        existingNodes[aspectId] = 1
+                        jstreedata.push({
+                            id: aspectId,
+                            text: filterType,
+                            parent: propertyObj.id,
+                            data: {
+                                type: "aspect", value: filterType
+                            }
                         })
                     }
 
-                })
-                if (jstreedata.length > 0)
-                    common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", propertyObj.id, jstreedata)
-                common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", aspectId, jstreedata2)
-            }
+
+                    $("#" + selectId + " option:selected").each(function () {
+                        var label = $(this).text();
+                        var id = $(this).val();
+                        var filterId = aspectId + "_" + id
+                        if (!existingNodes[filterId]) {
+                            existingNodes[filterId] = 1
+                            jstreedata2.push({
+                                id: filterId,
+                                text: label,
+                                parent: aspectId,
+                                data: {
+                                    type: "filterClass",
+                                    retrictionId: propertyObj.data.retrictionId,
+                                    aspectKey: filterType,
+                                    aspectClassId: id
+                                }
+                            })
+                        }
+
+                    })
+                    if (jstreedata.length > 0)
+                        common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", propertyObj.id, jstreedata)
+                    common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", aspectId, jstreedata2)
+                }
 
 
-            execute("LifeCycle", "KGpropertyFilter_lifeCycleSelect")
-            execute("Discipline", "KGpropertyFilter_disciplineSelect")
-            execute("StakeHolder", "KGpropertyFilter_stakeHolderSelect")
+                execute("LifeCycle", "KGpropertyFilter_lifeCycleSelect")
+                execute("Discipline", "KGpropertyFilter_disciplineSelect")
+                execute("StakeHolder", "KGpropertyFilter_stakeHolderSelect")
+            })
 
 
         }
 
-        self.generateRestrictionFilterTriples=function(){
+        self.generateRestrictionFilterTriples = function () {
             var existingNodesArray = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", false, "#")
-            var triples=[]
-            existingNodesArray.forEach(function(node){
-                if( node.data.type=="filterClass"){
+            var triples = []
+            existingNodesArray.forEach(function (node) {
+                if (node.data.type == "filterClass") {
 
 
                     triples.push({
-                        subject:node.data.retrictionId,
-                        predicate:self.aspectMap[node.data.aspectKey],
-                        object:node.data.aspectClassId
+                        subject: node.data.retrictionId,
+                        predicate: self.aspectMap[node.data.aspectKey],
+                        object: node.data.aspectClassId
 
                     })
 
@@ -181,33 +214,116 @@ var KGpropertyFilter = (function () {
 
             })
 
-            Sparql_generic.insertTriples(self.currentSource,triples, {getSparqlOnly:true},function(err,result){
-
+            Sparql_generic.insertTriples(self.propertyFilteringSource, triples, {getSparqlOnly: false}, function (err, result) {
+                if (err)
+                    return alert(err.responseText)
+                MainController.UI.message(result+" filters created ")
             })
 
 
-          //  existingNodesArray.
+            //  existingNodesArray.
 
         }
 
 
         self.initCentralPanel = function () {
+
+
             self.getLifeCycleItems(function (err, result) {
-                common.array.sort(result,"label")
+                common.array.sort(result, "label")
                 common.fillSelectOptions("KGpropertyFilter_lifeCycleSelect", result, true, "label", "id")
+                common.fillSelectOptions("KGpropertyFilter_lifeCycleSelect2", result, true, "label", "id")
             })
 
             self.getDisciplines(function (err, result) {
-                common.array.sort(result,"label")
+                common.array.sort(result, "label")
                 common.fillSelectOptions("KGpropertyFilter_disciplineSelect", result, true, "label", "id")
+                common.fillSelectOptions("KGpropertyFilter_disciplineSelect2", result, true, "label", "id")
             })
 
             self.getStakeHolder(function (err, result) {
-                common.array.sort(result,"label")
+                common.array.sort(result, "label")
                 common.fillSelectOptions("KGpropertyFilter_stakeHolderSelect", result, true, "label", "id")
+                common.fillSelectOptions("KGpropertyFilter_stakeHolderSelect2", result, true, "label", "id")
             })
+
+
         }
         self.onSelectFilter = function () {
+
+        }
+
+
+        self.client = {
+
+            filterProperties: function (allClasses) {
+                var classId = null;
+                if (!allClasses)
+                    classId = self.currentClassId
+
+
+                var sparql = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
+                    "  ?class rdfs:subClassOf ?restriction .\n" +
+                    "  ?class rdfs:label ?classLabel.\n" +
+                    "  ?restriction rdf:type owl:Restriction.\n" +
+                    "  ?restriction ?aspect ?filterId.\n" +
+                    " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
+                    " ?restriction owl:someValuesFrom ?property.\n" +
+                    "   ?property rdfs:label ?propertyLabel.\n"
+
+                if (classId)
+                    sparql += "   filter (?class=<" + classId + ">)"
+
+                function addFilters(aspect, selectId) {
+                    var filterId = $("#" + selectId).val();
+                    if(!filterId)
+                        return;
+                    var predicate = self.aspectMap[aspect]
+                    sparql += " filter ( ?aspect=<" + predicate + "> &&  ?filterId=<" + filterId + ">  )"
+
+
+                }
+
+                addFilters("LifeCycle", "KGpropertyFilter_lifeCycleSelect2")
+                addFilters("Discipline", "KGpropertyFilter_disciplineSelect2")
+                addFilters("StakeHolder", "KGpropertyFilter_stakeHolderSelect2")
+
+                sparql +="} limit 10000"
+                var url = Config.sources[self.currentSource].sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, sparql, "", {source: self.currentSource}, function (err, result) {
+
+
+                    if (err) {
+                        return callback(err)
+                    }
+
+                    var columns=[
+                        {title: "Class", defaultContent: ""},
+                        {title: "Property", defaultContent: ""},
+                        {title: "ClassUri", defaultContent: ""},
+                        {title: "PropertyUri", defaultContent: ""},
+
+                    ]
+                    var dataset=[]
+                    result.results.bindings.forEach(function(item){
+                        dataset.push([
+                            item.classLabel.value,
+                            item.propertyLabel.value,
+                            item.class.value,
+                            item.property.value,
+
+
+                        ])
+
+
+                    })
+                    Export.showDataTable("KGpropertyFilter_filteringResult", columns,dataset)
+                })
+            }
+
 
         }
 
@@ -718,4 +834,5 @@ var KGpropertyFilter = (function () {
     }
 
 
-)()
+)
+()

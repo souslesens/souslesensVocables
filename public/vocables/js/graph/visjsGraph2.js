@@ -44,8 +44,7 @@ var visjsGraph = (function () {
         self.currentContext = {divId: divId, options: _options, callback: callback}
         if (!_options)
             _options = {}
-        if (_options.simulationTimeOut)
-            self.simulationTimeOut = _options.simulationTimeOut
+
         self.legendLabels = self.legendLabels.concat(visjsData.labels)
         var container = document.getElementById(divId);
 
@@ -61,9 +60,9 @@ var visjsGraph = (function () {
             nodes: nodesDataSet,
             edges: edgesDataSet
         };
-        self.canvasDimension={
-           w:$("#" + divId).width(),
-            h:($("#" + divId).height() - 50)
+        self.canvasDimension = {
+            w: $("#" + divId).width(),
+            h: ($("#" + divId).height() - 50)
         }
         var options = {
 
@@ -73,6 +72,7 @@ var visjsGraph = (function () {
             nodes: {
                 shape: 'dot',
                 size: 12,
+                chosen: {node: true}
                 // scaling:{min:6,max:20}
             },
             edges: {
@@ -81,12 +81,11 @@ var visjsGraph = (function () {
             layout: {improvedLayout: false}
 
         };
-        if (_options.nodes) {
-            options.nodes = _options.nodes
+
+        for (var key in _options) {
+            options[key] = _options[key]
         }
-        if (_options.edges) {
-            options.edges = _options.edges
-        }
+
 
         if (_options.layoutHierarchical) {
 
@@ -97,30 +96,23 @@ var visjsGraph = (function () {
         } else {
             $("#visjsGraph_layoutSelect").val("")
         }
-        if (_options.groups) {
-            options.groups = _options.groups
-        }
-
-        if (_options.nodes) {
-            options.nodes = _options.nodes
-        }
-
-        if (_options.edges) {
-            options.edges = _options.edges
-        }
-        if (_options.physics) {
-            options.physics = _options.physics
-        }
 
         self.globalOptions = options
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
+
+
         // self.network.startSimulation()
         window.setTimeout(function () {
+
+                return;
+
+
             if (!_options.layoutHierarchical) {
                 if (!self.network.stopSimulation)
                     return;
                 self.network.stopSimulation();
+                if(!_options.noFit)
                 self.network.fit()
                 self.simulationOn = false;
                 if (_options.afterDrawing)
@@ -162,11 +154,14 @@ var visjsGraph = (function () {
         });
 
         self.network.on("click", function (params) {
+            console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y))
             self.processClicks(params, _options)
 
         }).on("hoverNode", function (params) {
             var nodeId = params.node;
             var node = self.data.nodes.get(nodeId);
+            if (!node)
+                return console.log("hoverNode :no node ")
             node._graphPosition = params.pointer.DOM;
             var point = params.pointer.DOM;
             self.context.currentNode = node;
@@ -216,20 +211,40 @@ var visjsGraph = (function () {
                 visjsGraph.data.nodes.update(newNodes)
 
             })
+
+            .on("dragging", function (params) {
+               /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
+                return false;
+                }*/
+            })
             .on("dragEnd", function (params) {
+                if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
+                    var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM)
+                    if (!dropCtrlNodeId)
+                        return;
+                    var startNode = self.data.nodes.get(params.nodes[0])
+                    var endNode = self.data.nodes.get(dropCtrlNodeId)
+
+                    options.dndCtrlFn(startNode, endNode, params.pointer.DOM)
+
+                }
+
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
                          return;*/
 
                     var nodeId = params.nodes[0]
+                    var nodeObj = self.data.nodes.get(nodeId)
+
                     self.lastMovedNode = nodeId
                     //   var nodes = self.data.nodes.getIds();
                     var newNodes = [];
                     var fixed = true;
                     if (params.event.srcEvent.altKey)
                         fixed = false;
+                    var newNode = {id: nodeId, fixed: fixed}
+                    newNodes.push(newNode)
 
-                    newNodes.push({id: nodeId, fixed: fixed})
 
                     visjsGraph.data.nodes.update(newNodes)
 
@@ -271,10 +286,7 @@ var visjsGraph = (function () {
                 html += " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>"
 
                 html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>"
-                html+="<div id='visjsConfigureDiv' style='overflow: auto'></div>"
-
-
-
+                html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>"
 
 
                 if (false)
@@ -435,57 +447,76 @@ var visjsGraph = (function () {
         }
     }
 
+    self.removeOtherNodesFromGraph = function (nodeId) {
 
-    self.onScaleChange = function () {
-        // return;
-        var scale = self.network.getScale();
-        if (!self.currentScale || Math.abs(scale - self.currentScale) > .01) {
+        var nodes = visjsGraph.data.nodes.get();
+        var nodeIds = []
+        nodes.forEach(function (node) {
+            if (node.id != nodeId)
+                nodeIds.push(node.id)
+        })
+        visjsGraph.data.nodes.remove(nodeIds);
+        var edges = visjsGraph.data.edges.get();
+        var edgesIds = []
+        edges.forEach(function (edge) {
+            if (nodeIds.indexOf(edge.from) > -1 || nodeIds.indexOf(edge.to) > -1)
+                edgesIds.push(edge.id)
+        })
+        visjsGraph.data.edges.remove(edgesIds);
 
-            var scaleCoef = scale >= 1 ? (scale * .9) : (scale * 2)
-
-            var size = self.defaultNodeSize / scaleCoef;
-            var fontSize = (self.defaultTextSize / (scaleCoef));
-            if (scale < 1)
-                fontSize = (self.defaultTextSize / 1); //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
-            else
-                fontSize = (self.defaultTextSize / (scaleCoef * 1.3));
-
-            var nodes = self.data.nodes.get();
-            nodes.forEach(function (node) {
-                if (node.size) {
-                    if (!node.originalSize)
-                        node.originalSize = node.size
-                    size = node.originalSize * scaleCoef
-                }
-                if (!node.hiddenLabel)
-                    node.hiddenLabel = node.label
-                var shape = node.shape;
-                if (!shape)
-                    shape = self.defaultNodeShape;
-                if (shape != "box") {
-
-                    if (scale > self.showNodesLabelMinScale) {
-                        node.label = node.hiddenLabel;
-                        node.size = size;
-                        node.font = {size: fontSize}
-                        self.labelsVisible = true;
+    },
 
 
-                    } else {
-                        node.label = null;
-                        node.size = size;
-                        node.font = {size: fontSize}
+        self.onScaleChange = function () {
+            // return;
+            var scale = self.network.getScale();
+            if (!self.currentScale || Math.abs(scale - self.currentScale) > .01) {
 
+                var scaleCoef = scale >= 1 ? (scale * .9) : (scale * 2)
+
+                var size = self.defaultNodeSize / scaleCoef;
+                var fontSize = (self.defaultTextSize / (scaleCoef));
+                if (scale < 1)
+                    fontSize = (self.defaultTextSize / 1); //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
+                else
+                    fontSize = (self.defaultTextSize / (scaleCoef * 1.3));
+
+                var nodes = self.data.nodes.get();
+                nodes.forEach(function (node) {
+                    if (node.size) {
+                        if (!node.originalSize)
+                            node.originalSize = node.size
+                        size = node.originalSize * scaleCoef
                     }
+                    if (!node.hiddenLabel)
+                        node.hiddenLabel = node.label
+                    var shape = node.shape;
+                    if (!shape)
+                        shape = self.defaultNodeShape;
+                    if (shape != "box") {
 
-                    //nodes.push(node);
-                }
-            })
-            self.data.nodes.update(nodes)
+                        if (scale > self.showNodesLabelMinScale) {
+                            node.label = node.hiddenLabel;
+                            node.size = size;
+                            node.font = {size: fontSize}
+                            self.labelsVisible = true;
 
+
+                        } else {
+                            node.label = null;
+                            node.size = size;
+                            node.font = {size: fontSize}
+
+                        }
+
+                        //nodes.push(node);
+                    }
+                })
+                self.data.nodes.update(nodes)
+
+            }
+            self.currentScale = scale;
         }
-        self.currentScale = scale;
-    }
 
     self.getExistingIdsMap = function (nodesOnly) {
         var existingVisjsIds = {}
@@ -498,6 +529,11 @@ var visjsGraph = (function () {
             existingVisjsIds[id] = 1;
         })
         return existingVisjsIds;
+    }
+
+    self.isGraphNotEmpty = function () {
+        // if(visjsGraph.isGraphNotEmpty()){
+        return Object.keys(visjsGraph.getExistingIdsMap()).length > 0
     }
 
 
@@ -630,18 +666,24 @@ var visjsGraph = (function () {
 
         // select node
         else if (params.nodes.length == 1) {
-
-            var nodeId = params.nodes[0];
-            var node = self.data.nodes.get(nodeId);
-            node._graphPosition = params.pointer.DOM;
-            var point = params.pointer.DOM;
-            self.context.currentNode = node;
             var options = {
                 dbleClick: isDbleClick,
                 ctrlKey: (params.event.srcEvent.ctrlKey ? 1 : 0),
                 altKey: (params.event.srcEvent.altKey ? 1 : 0),
                 shiftKey: (params.event.srcEvent.shiftKey ? 1 : 0),
             }
+            var point = params.pointer.DOM;
+            var nodeId = params.nodes[0];
+            var node = self.data.nodes.get(nodeId);
+            if (!node && self.network.isCluster(nodeId)) {
+                if (_options.onClusterClickFn)
+                    return _options.onClusterClickFn(nodeId, point, options)
+            }
+
+            node._graphPosition = params.pointer.DOM;
+
+            self.context.currentNode = node;
+
             if (_options.onclickFn)
                 _options.onclickFn(node, point, options)
 
@@ -759,19 +801,30 @@ var visjsGraph = (function () {
     }
 
 
-    self.searchNode = function () {
-        var word = $("#visjsGraph_searchInput").val()
-        if (word == "")
-            return;
+    self.searchNode = function (id, word) {
+
+     /*   if (word === null && !id)
+            return;*/
+        if (word == "") {
+            word = $("#visjsGraph_searchInput").val()
+            if (word == "")
+                return;
+        }
+
         var nodes = visjsGraph.data.nodes.get()
         var matches = []
         var newNodes = []
         nodes.forEach(function (node) {
             var shape = "dot"
             var size = self.defaultNodeSize
-
-
-            if (node.data && node.data.label && node.data.label.toLowerCase().indexOf(word.toLowerCase()) > -1) {
+            var ok = false
+            if (word) {
+                ok = node.data && node.data.label && node.data.label.toLowerCase().indexOf(word.toLowerCase()) > -1
+            }
+            if (id) {
+                ok = (node.id == id)
+            }
+            if (ok) {
                 shape = "star"
                 size = 14
                 matches.push(node.id)
@@ -795,17 +848,19 @@ var visjsGraph = (function () {
     }
 
 
-    self.saveGraph = function () {
+    self.saveGraph = function (fileName, raw) {
         if (!self.currentContext)
             return;
         var nodes = visjsGraph.data.nodes.get()
         var positions = self.network.getPositions()
 
-        for (var key in self.currentContext.options) {
-            if (key.indexOf("Fn") > 0) {
-                self.currentContext.options[key] = self.currentContext.options[key].toString();
-            }
+        if (!raw) {
+            for (var key in self.currentContext.options) {
+                if (key.indexOf("Fn") > 0) {
+                    self.currentContext.options[key] = self.currentContext.options[key].toString();
+                }
 
+            }
         }
         var data = {
             nodes: visjsGraph.data.nodes.get(),
@@ -813,11 +868,12 @@ var visjsGraph = (function () {
             context: self.currentContext,
             positions: positions
         }
-
-        var fileName = prompt("graph name")
+        if (!fileName)
+            fileName = prompt("graph name")
         if (!fileName || fileName == "")
             return;
-        fileName = fileName + ".json"
+        if (fileName.indexOf(".json") < 0)
+            fileName = fileName + ".json"
         var payload = {
             fileName: fileName,
             data: data
@@ -841,8 +897,8 @@ var visjsGraph = (function () {
         $("#VisJsGraph_message").html(message)
     }
 
-    self.loadGraph = function (fileName) {
-        if (!self.currentContext)
+    self.loadGraph = function (fileName, add, callback) {
+        if (false && !self.currentContext)
             return;
         if (!fileName)
             fileName = $("#visjsGraph_savedGraphsSelect").val()
@@ -858,7 +914,8 @@ var visjsGraph = (function () {
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
                 var data = JSON.parse(result.result);
-                var positions = data.positions
+                var positions = data.positions;
+                var options=data.context.options;
                 var visjsData = {nodes: [], edges: []}
                 var existingNodes = {}
                 if (addToCurrentGraph)
@@ -866,9 +923,10 @@ var visjsGraph = (function () {
                 data.nodes.forEach(function (node) {
                     if (!existingNodes[node.id]) {
                         existingNodes[node.id] = 1
-                        if (node.fixed && positions[node.id]) {
+                        if ( ((node.fixed && positions[node.id])|| options.nodes.fixed)) {
                             node.x = positions[node.id].x;
                             node.y = positions[node.id].y;
+                            node.fixed={x:true,y:true};
                         }
                         visjsData.nodes.push(node)
                     }
@@ -881,8 +939,11 @@ var visjsGraph = (function () {
                     }
                 })
 
+                if (callback)
+                    return callback(null, visjsData)
 
-                if (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0) {
+
+                if (add || (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0)) {
                     self.data.nodes.add(visjsData.nodes)
                     self.data.edges.add(visjsData.edges)
                     self.message("")
@@ -897,7 +958,15 @@ var visjsGraph = (function () {
                             context.options[key] = eval(key + "=" + context.options[key]);
                         }
                     }
-                    self.draw(context.divId, visjsData, context.options, context.callback)
+                    if (context.callback)
+                        callback = context.callback
+                    if (self.isGraphNotEmpty()) {
+                        self.data.edges.add(visjsData.edges)
+                        self.data.nodes.add(visjsData.nodes)
+
+                    } else {
+                        self.draw(context.divId, visjsData, context.options, callback)
+                    }
                     self.message("")
                 }
 
@@ -909,7 +978,7 @@ var visjsGraph = (function () {
 
 
     }
-    self.listSavedGraphs = function () {
+    self.listSavedGraphs = function (callback) {
         if (!Config || !Config.serverUrl)
             return
 
@@ -919,32 +988,34 @@ var visjsGraph = (function () {
             data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
+                if (callback)
+                    return callback(null, result)
                 common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true)
             }, error(err) {
+                if (callback)
+                    return callback(err)
                 return alert(err)
             }
         })
     }
 
 
-    self.showGraphConfig=function() {
+    self.showGraphConfig = function () {
 
         $("#visjsConfigureDiv").dialog({
-         //   autoOpen: false,
-         height: 700,
+            //   autoOpen: false,
+            height: 700,
             width: 550,
             modal: false,
             title: "Graph parameters",
-            position: { my: "left top", at: "right top", }
+            position: {my: "left top", at: "right top",}
         })
 
 
-
-    //    $('#graphConfigDiv').dialog("open")
-
+        //    $('#graphConfigDiv').dialog("open")
 
 
-        setTimeout(function(){
+        setTimeout(function () {
             // these are all options in full.
             var options = {
                 configure: {
@@ -957,7 +1028,7 @@ var visjsGraph = (function () {
             }
 
             visjsGraph.network.setOptions(options);
-        },500)
+        }, 500)
     }
 
 

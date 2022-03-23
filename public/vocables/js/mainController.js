@@ -278,8 +278,6 @@ var MainController = (function () {
 
 
                 var group = Config.sources[sourceLabel].group
-                if (sourceLabel.indexOf("CFIHOS_READI-REMOTE") > -1)
-                    var x = 3
                 if (group) {
                     var subGroups = group.split("/")
                     subGroups.forEach(function (subGroup, index) {
@@ -348,7 +346,7 @@ var MainController = (function () {
                         }
                     } else {
                         self.currentSource = obj.node.id;
-                        MainController.UI.onSourceSelect()
+                        MainController.UI.onSourceSelect(obj.event)
                     }
 
                 }
@@ -459,7 +457,7 @@ var MainController = (function () {
 
         },
 
-        onSourceSelect: function () {
+        onSourceSelect: function (event) {
 
             if (Config.tools[self.currentTool].multiSources) {
 
@@ -471,7 +469,7 @@ var MainController = (function () {
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource)
             var controller = Config.tools[self.currentTool].controller
             if (controller.onSourceSelect)
-                controller.onSourceSelect(self.currentSource)
+                controller.onSourceSelect(self.currentSource,event)
 
 
         },
@@ -500,8 +498,14 @@ var MainController = (function () {
 
             } else {//close->open (if not allready opened)
                 if (currentCentralPanelWidth != self.UI.initialGraphDivWitdh) {
+                   /* $("#leftPanelDiv").css("width", "20VW")
+                    $("#rightPanelDiv").css("width", "20VW")
+                    $("#centralPanelDiv").css("width", "60VW")
+                    $("#graphDiv").css("width", "60VW")
+ return*/
 
                     $("#rightPanelDiv").css("display", "flex")
+
                     $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth)
                     $("#graphDiv").animate({width: self.UI.initialGraphDivWitdh - rightPanelWidth})
                     setTimeout(function () {

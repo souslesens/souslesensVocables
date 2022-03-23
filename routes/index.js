@@ -5,18 +5,19 @@ const promiseFs = require("fs").promises;
 var path = require("path");
 var passport = require("passport");
 
-var elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
-var authentication = require(path.resolve("bin/authentication..js"));
-var logger = require(path.resolve("bin/logger..js"));
-var httpProxy = require(path.resolve("bin/httpProxy."));
-var mediawikiTaggger = require(path.resolve("bin/mediawiki/mediawikiTagger."));
-var RDF_IO = require(path.resolve("bin/RDF_IO."));
-var KGcontroller = require(path.resolve("bin/KG/KGcontroller."));
-var DataController = require(path.resolve("bin/dataController."));
-var KGbuilder = require(path.resolve("bin/KG/KGbuilder."));
-var DirContentAnnotator = require(path.resolve("bin/annotator/dirContentAnnotator."));
-var configManager = require(path.resolve("bin/configManager."));
-var DictionariesManager = require(path.resolve("bin/KG/dictionariesManager."));
+var elasticRestProxy = require("../bin/elasticRestProxy.");
+var authentication = require("../bin/authentication.");
+var logger = require("../bin/logger.");
+var httpProxy = require("../bin/httpProxy.");
+var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.");
+var RDF_IO = require("../bin/RDF_IO.");
+var KGcontroller = require("../bin/KG/KGcontroller.");
+var DataController = require("../bin/dataController.");
+var KGbuilder = require("../bin/KG/KGbuilder.");
+var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
+var configManager = require("../bin/configManager.");
+var DictionariesManager = require("../bin/KG/dictionariesManager.");
+var CsvTripleBuilder = require("../bin/KG/CsvTripleBuilder.");
 
 const config = require(path.resolve("config/mainConfig.json"));
 const users = require(path.resolve("config/users/users.json"));
@@ -93,7 +94,6 @@ router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
     function (req, response) {
-
         if (req.body.getBlenderSources) {
             configManager.getBlenderSources({}, function (err, result) {
                 processResponse(response, err, result);
@@ -165,6 +165,21 @@ router.post(
 
         if (req.body.uploadOntologyFromOwlFile) {
             RDF_IO.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+        if (req.body.readCsv) {
+            DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+        if (req.body.createTriplesFromCsv) {
+            CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+                processResponse(response, err, result);
+            });
+        }
+        if (req.body.clearGraph) {
+            CsvTripleBuilder.clearGraph(req.body.clearGraph, req.body.sparqlServerUrl || null, function (err, result) {
                 processResponse(response, err, result);
             });
         }

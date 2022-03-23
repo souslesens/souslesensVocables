@@ -1,0 +1,96 @@
+<script src="js/external/jquery/jquery.json-editor.min.js"></script>
+<!--<script src="js/external/jsoneditor.js"></script>>-->
+<!--script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script-->
+
+
+<style>
+    .KGpropertyFilter_tripleInput {
+        width: 200px;
+        margin: 3px;
+        padding: 3px;
+        border: #6e2500 solid 1px;
+        border-radius: 3px;
+    }
+
+    .KGpropertyFilter_tripleDiv {
+        width: 400px;
+        margin: 3px;
+        padding: 3px;
+        border: #6e2500 solid 1px;
+        border-radius: 3px;
+        display: flex;
+        flex-direction: column;
+
+    }
+
+    .KGpropertyFilter_filterSelect{
+        widthWWW:300px
+    }
+
+    .KGpropertyFilter_fileWithMappings {
+        color: #0000ff;
+    }
+
+</style>
+<div id="KGpropertyFilter_currentPropertyDiv" style="font-weight:bold;display: none;border: #0000cc solid 2px" >
+    <span id="KGpropertyFilter_currentPropertySpan"></span>
+<button  onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()">Associate Filters</button>
+</div>
+<div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+
+    <div class="KGpropertyFilter_tripleDiv">
+        LifeCycle filters <br>
+        <select size="35" class="KGpropertyFilter_filterSelect" multiple=true id="KGpropertyFilter_lifeCycleSelect" onchange="KGpropertyFilter.onSelectFilter('lifeCycle',$(this).val())"></select>
+        <div><button onclick="KGpropertyFilter.getAssociatedProperties('KGpropertyFilter_filterSelect')">Show Associated Properties</button></div>
+    </div>
+    <div class="KGpropertyFilter_tripleDiv">
+        Discipline filters <br>
+        <select size="35"   class="KGpropertyFilter_filterSelect"multiple=true id="KGpropertyFilter_disciplineSelect" onchange="KGpropertyFilter.onSelectFilter('discipline',$(this).val())"></select>
+        <div><button onclick="KGpropertyFilter.getAssociatedProperties('KGpropertyFilter_disciplineSelect')">Show Associated Properties</button></div>
+    </div>
+    <div class="KGpropertyFilter_tripleDiv">
+        Stake holder filters <br>
+        <select size="35"  class="KGpropertyFilter_filterSelect" multiple=true id="KGpropertyFilter_stakeHolderSelect" onchange="KGpropertyFilter.onSelectFilter('stakeHolder',$(this).val())"></select>
+        <div><button onclick="KGpropertyFilter.getAssociatedProperties('KGpropertyFilter_stakeHolderSelect')">Show Associated Properties</button></div>
+    </div>
+
+
+
+
+</div>
+
+<div style="width:50%;display: flex;flex-direction: column; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+    <!--textarea id="KGcreator_tripleTA" style="width: 100%;height:100px;"></textarea>-->
+
+    <pre id="KGpropertyFilter_mainJsonDisplay" style="width: 100%;height:500px;"></pre>
+</div>
+
+
+<!--
+<div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+
+    <div style="width:50%;display: flex;flex-direction: column; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
+
+        <pre id="KGpropertyFilter_mainJsonDisplay" style="width: 100%;height:500px;"></pre>
+
+
+
+        <div>
+            <button onclick="KGpropertyFilter.saveMappings()">Save</button>
+            <button onclick="KGpropertyFilter.copyMappings()">Copy</button>
+            <button onclick="KGpropertyFilter.clearMappings()">Clear</button>
+            <button onclick="KGpropertyFilter.createTriples(true)">View Sample triples</button>
+            <button onclick="KGpropertyFilter.createTriples()">Create triples</button>
+            <button onclick="KGpropertyFilter.clearGraph()">Clear graph</button>
+
+        </div>
+    </div>
+    <textarea style="width:50%;height: 600px;overflow: auto" id="KGpropertyFilter_dataSampleDiv"></textarea>
+</div>
+-->
+
+
+<div id="KGpropertyFilter_dialogDiv">
+
+
+</div>

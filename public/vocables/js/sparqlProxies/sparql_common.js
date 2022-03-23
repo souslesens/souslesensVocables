@@ -235,7 +235,7 @@ var Sparql_common = (function () {
     }
 
 
-    self.getFromStr = function (source, named, withoutImports) {
+    self.getFromStr = function (source, named, withoutImports,excludeDictionaries) {
         var from = " FROM "
         if (named)
             from += " NAMED"
@@ -256,11 +256,23 @@ var Sparql_common = (function () {
             var imports = Config.sources[source].imports;
             if (imports) {
                 imports.forEach(function (source2) {
+                    if(! Config.sources[source2])
+                        return  console.log(source2 +"not found")
                     var importGraphUri = Config.sources[source2].graphUri
                     fromStr += from + "  <" + importGraphUri + "> "
                 })
             }
+
         }
+
+        if(!excludeDictionaries){
+            for( var source in Config.sources){
+                if(Config.sources[source].isDictionary)
+                    fromStr += from + "  <" +  Config.sources[source].graphUri + "> "
+            }
+        }
+
+
         return fromStr;
     }
 

@@ -391,7 +391,7 @@ var Sparql_generic = (function () {
             else if (item.object.indexOf('http') == 0 || item.valueType == "uri")
                 objectStr = "<" + item.object + ">"
             else if ((p = item.object.indexOf("^")) > 0) {//types
-                objectStr ="\"'" + item.object.substring(0, p) + "'" + item.object.substring(p)+"\""
+                objectStr = "\"'" + item.object.substring(0, p) + "'" + item.object.substring(p) + "\""
             } else {
                 var langStr = "";
                 if (item.lang)
@@ -407,29 +407,11 @@ var Sparql_generic = (function () {
                 return subjectStr + ' <' + item.predicate + '> ' + objectStr + '. ';
 
 
-            /*   if (typeof item === "string")
-                   return item
-
-
-               var valueStr = ""
-               if (item.valueType == "uri")
-                   valueStr = "<" + item.object + ">"
-               else {
-                   var langStr = "";
-                   if (item.lang)
-                       langStr = "@" + item.lang
-                   valueStr = "'" + item.object + "'" + langStr
-               }
-
-               var p = item.predicate.indexOf("^")
-               if (p == 0) {
-                   var predicate = item.predicate.substring(1)
-                   return valueStr + ' <' + predicate + '> <' + item.subject + '>. ';
-               } else
-                   return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';*/
         }
 
-        self.insertTriples = function (sourceLabel, triples,options, callback) {
+        self.insertTriples = function (sourceLabel, triples, options, callback) {
+            if (!options)
+                options = {}
             var graphUri = Config.sources[sourceLabel].graphUri
             if (Array.isArray(graphUri))
                 graphUri = graphUri[0]
@@ -446,7 +428,8 @@ var Sparql_generic = (function () {
                 insertTriplesStr +
                 "  }"
 
-
+            if (options.getSparqlOnly)
+                return callback(null, query)
             // console.log(query)
             url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
@@ -480,9 +463,7 @@ WHERE {
              */
 
 
-         return
-
-
+            return
 
 
             var graphUri = Config.sources[sourceLabel].graphUri
@@ -950,22 +931,26 @@ WHERE {
             var parentType;
             var conceptType;
             if (Config.sources[sourceLabel].schemaType == "OWL") {
-                 parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
-                 conceptType = "owl:Class"
+                parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel)
+                conceptType = "owl:Class"
+            } else if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
+                parentType = "rdf:type"
+                conceptType = null
 
-            }else if (Config.sources[sourceLabel].schemaType == "SKOS") {
+
+            } else if (Config.sources[sourceLabel].schemaType == "SKOS") {
                 parentType = "skos:broader"
-                conceptType="skos:Concept"
+                conceptType = "skos:Concept"
             } else if (options.parentType) {
                 parentType = options.parentType
                 if (parentType == "rdfs:subPropertyOf")
                     conceptType:"owl:ObjectProperty"
-            }else{
+            } else {
                 return alert("no schema type")
             }
 
             var allClassesMap = {}
-            var allLabels={}
+            var allLabels = {}
             var allData = []
 
 
@@ -980,7 +965,7 @@ WHERE {
                     var limitSize = 500
                     var offset = 0
 
-                    var fromStr = Sparql_common.getFromStr(sourceLabel,false, options.withoutImports)
+                    var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true)
 
                     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -989,15 +974,18 @@ WHERE {
                         "SELECT distinct * " +
                         fromStr +
                         " WHERE {" +
-                     //   "  ?concept " + parentType + "+ ?parent.OPTIONAL{?concept rdfs:label ?conceptLabel}.OPTIONAL{?parent rdfs:label ?parentLabel.?parent rdf:type " + conceptType + ". } " +
-                     //   "  ?concept " + parentType + "+ ?anyParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
+
                         "  ?concept " + parentType + " ?firstParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
                         "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
+                        "OPTIONAL{?concept skos:altLabel ?skosAltLabel}. " +
+                        "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. "
 
-                        "?concept rdf:type " + conceptType + ". "
-                 //   query += "  FILTER (!isBlank(?parent)) "
-                    query += "?firstParent rdf:type " + conceptType + ". "
-                       // "?concept rdfs:subClassOf ?firstParent.?firstParent rdf:type owl:Class."
+                    if (conceptType) {
+                        query += "?concept rdf:type " + conceptType + ". "
+
+                        query += "?firstParent rdf:type " + conceptType + ". "
+                    }
+
                     if (options.filter)
                         query += " " + options.filter + " "
 
@@ -1008,10 +996,10 @@ WHERE {
 
                     }, function (callbackWhilst) {
                         var query2 = "" + query;
-                        query2 += " limit " + (limitSize+1) + " offset " + offset
+                        query2 += " limit " + (limitSize + 1) + " offset " + offset
 
                         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                        var url = self.sparql_url + "?format=json&timeout=20000&debug=onquery=";
+                        var url = self.sparql_url + "?format=json&timeout=20000&debug=on&query=";
                         Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", {source: sourceLabel}, function (err, result) {
                             if (err)
                                 return callbackWhilst(err);
@@ -1034,26 +1022,65 @@ WHERE {
                 //format result
                 function (callbackSeries) {
                     var skosLabelsMap = {}
-                    allData.forEach(function (item) {
 
-                        if(!allLabels[item.concept.value]){
-                            allLabels[item.concept.value]= item.conceptLabel ? item.conceptLabel.value : null
+                    function getConceptLabel(item) {
+
+                        var conceptLabel = null;
+                        if (item.conceptLabel)
+                            conceptLabel = item.conceptLabel.value
+                        else if (item.skosLabel)
+                            conceptLabel = item.skosLabel.value
+                        else if (item.skosAltLabel)
+                            conceptLabel = item.skosAltLabel.value
+                        else
+                            conceptLabel = Sparql_common.getLabelFromURI(item.concept.value)
+                        return conceptLabel;
+                    }
+
+
+                    allData.forEach(function (item) {
+                        if (!skosLabelsMap[item.concept.value])
+                            skosLabelsMap[item.concept.value] = []
+                        var conceptLabel = getConceptLabel(item)
+
+                        if (!conceptLabel)
+                            return;
+                        var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
+                        if (decapitalizedLabel != conceptLabel) {
+                            skosLabelsMap[item.concept.value].push(conceptLabel)
+                            conceptLabel = decapitalizedLabel
+
+                        }
+                        if (!allLabels[item.concept.value]) {
+                            allLabels[item.concept.value] = conceptLabel
                         }
 
-                        if (!skosLabelsMap[item.concept.value])
-                            skosLabelsMap[item.concept.value] =[]
+
                         if (item.skosLabel)
                             if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0)
                                 skosLabelsMap[item.concept.value].push(item.skosLabel.value)
+                        if (item.code)
+                            if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0)
+                                skosLabelsMap[item.concept.value].push(item.code.value)
+                        if (item.skosAltLabel)
+                            if (skosLabelsMap[item.concept.value].indexOf(item.skosAltLabel.value) < 0)
+                                skosLabelsMap[item.concept.value].push(item.skosAltLabel.value)
+
 
                     })
 
                     allData.forEach(function (item) {
-
+                        var conceptLabel = getConceptLabel(item)
+                        if (!conceptLabel)
+                            return;
+                        var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
+                        if (decapitalizedLabel != conceptLabel) {
+                            conceptLabel = decapitalizedLabel
+                        }
                         if (!allClassesMap[item.concept.value]) {
                             allClassesMap[item.concept.value] = {
                                 id: item.concept.value,
-                                label: item.conceptLabel ? item.conceptLabel.value : null,
+                                label: conceptLabel,
                                 skoslabels: skosLabelsMap[item.concept.value],
                                 parent: item.firstParent.value,
                                 parents: [],
@@ -1093,23 +1120,69 @@ WHERE {
                         var parentArray = obj.parents;
                         parentArray.push(sourceLabel)
                         parentArray = parentArray.reverse()
-                     /*   var str = ""
-                        parentArray.forEach(function (parent, index) {
-                            if (index > 0)
-                                str += "|"
-                            str += parent;
-                        })*/
+                        /*   var str = ""
+                           parentArray.forEach(function (parent, index) {
+                               if (index > 0)
+                                   str += "|"
+                               str += parent;
+                           })*/
                         delete allClassesMap[key].parent
                         allClassesMap[key].parents = parentArray;
                     }
                     callbackSeries()
                 }
             ], function (err) {
-                return callback(err, {classesMap: allClassesMap,labels:allLabels})
+                return callback(err, {classesMap: allClassesMap, labels: allLabels})
             })
 
 
         }
+
+        self.createDecapitalizedLabelTriples = function (source, callback) {
+            Sparql_generic.getItems(source, {}, function (err, result) {
+                if (err)
+                    return callback(err);
+                var total = 0
+                var slices = common.array.slice(result, 100)
+                async.eachSeries(slices, function (slice, callbackEach) {
+
+                    var triples = []
+
+                    slice.forEach(function (item) {
+                        if (item.conceptLabel) {
+                            var decapitalizedLabel = common.decapitalizeLabel(item.conceptLabel.value);
+                            if (decapitalizedLabel == item.conceptLabel.value)
+                                return;
+
+
+                            triples.push({
+                                subject: item.concept.value,
+                                predicate: "http://www.w3.org/2004/02/skos/core#altLabel",
+                                object: decapitalizedLabel
+                            })
+                        }
+                    })
+
+                    if (triples.length == 0)
+                        return callbackEach
+                    self.insertTriples(source, triples, null, function (err, result) {
+                        total += result
+                        console.log(total + " inserted")
+
+                        callbackEach(err)
+                    })
+
+
+                }, function (err) {
+                    if (err)
+                        return callback(err)
+                    return callback(err, total)
+                })
+
+            })
+
+        }
+
 
         return self;
     }

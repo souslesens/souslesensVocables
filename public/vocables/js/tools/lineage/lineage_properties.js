@@ -46,22 +46,17 @@ Lineage_properties = (function () {
 
                 },
 
-                /*  drawPredicateTriples: {
-                      label: "Draw predicate triples",
-                      action: function (e) {// pb avec source
-                          setTimeout(function () {
-                              self.drawPredicateTriples(self.currentTreeNode)
-                          }, 200)
-                      }
-
-                  }*/
+              
 
             }
             if (MainController.currentTool == "lineage") {
                 items.graphNode = {
                     label: "graph Node",
                     action: function (e) {// pb avec source
-                        self.drawProperty(self.currentTreeNode.data)
+                        if(Config.sources[self.currentTreeNode.data.source].schemaType=="OWL")
+                        self.drawObjectProperty(self.currentTreeNode.data)
+                        else if(Config.sources[self.currentTreeNode.data.source].schemaType=="KNOWLEDGE_GRAPH")
+                            self.drawIndividualsProperty(self.currentTreeNode.data)
                         //   Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
 
                     }
@@ -128,7 +123,7 @@ Lineage_properties = (function () {
             if(!obj  || !obj.node)
                 return;
             self.currentTreeNode = obj.node
-            if(node.children  && node.children.length>0)
+            if(obj.node.children  && obj.node.children.length>0)
                 return;
             self.openNode(obj.node);
 
@@ -176,46 +171,164 @@ Lineage_properties = (function () {
 
             if (!options)
                 options = {}
-            if (words && words != "")
+            if (true || words && words != "")
                 options.filter = Sparql_common.setFilter("prop", null, words, {})
             else {
                 options.inheritedProperties = 1
             }
-            Sparql_OWL.getObjectProperties(source, ids, options, function (err, result) {
-                if (err)
-                    return callback(err);
-                var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
-                var distinctIds = {}
-                var jstreeData = []
-                data.forEach(function (item) {
-                    if (!distinctIds[item.prop.value]) {
-                        distinctIds[item.prop.value] = 1
+            if (Config.sources[source].schemaType == "OWL") {
+                Sparql_OWL.getObjectProperties(source, ids, options, function (err, result) {
+                    if (err)
+                        return callback(err);
+                    var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
+                    var distinctIds = {}
+                    var jstreeData = []
+                    data.forEach(function (item) {
+                        if (!distinctIds[item.prop.value]) {
+                            distinctIds[item.prop.value] = 1
 
-                        var parent = source;
-                        if (item.subProp)
-                            parent = item.subProp.value;
-                        jstreeData.push({
-                            text: item.propLabel.value,
-                            id: item.prop.value,
-                            parent: parent,
-                            data: {
-                                label: item.propLabel.value,
+                            var parent = source;
+                            if (item.subProp)
+                                parent = item.subProp.value;
+                            jstreeData.push({
+                                text: item.propLabel.value,
                                 id: item.prop.value,
                                 parent: parent,
-                                type: "http://www.w3.org/2002/07/owl#ObjectProperty",
-                                source: source
+                                data: {
+                                    label: item.propLabel.value,
+                                    id: item.prop.value,
+                                    parent: parent,
+                                    type: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                                    source: source
+                                }
+                            })
+                        }
+                    })
+                    callback(null, jstreeData)
+
+
+                })
+            }
+           else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
+               var options={distinct:"property"}
+                Sparql_OWL.getIndividualProperties  (source, null, null, null, options, function (err, result) {
+
+                    if (err)
+                        return callback(err);
+                    var distinctIds = {}
+                    var jstreeData = []
+                    var parent="#"
+                    result.forEach(function (item) {
+                        if (!distinctIds[item.property.value]) {
+                            distinctIds[item.property.value] = 1
+
+                            var parent = source;
+                            jstreeData.push({
+                                text: item.propertyLabel.value,
+                                id: item.property.value,
+                                parent: parent,
+                                data: {
+                                    label: item.propertyLabel.value,
+                                    id: item.property.value,
+                                    parent: parent,
+                                    type: "http://www.w3.org/2002/07/owl#Property",
+                                    source: source
+                                }
+                            })
+                        }
+                    })
+                    callback(null, jstreeData)
+
+
+                })
+            }
+        }
+    self.drawIndividualsProperty = function (nodeData) {
+        var nodes=null;
+      if(visjsGraph.isGraphNotEmpty()){
+         var nodes=visjsGraph.data.nodes.getIds()
+      }
+
+        Sparql_OWL.getIndividualProperties  (nodeData.source, nodes, nodeData.id, null, {}, function (err, result) {
+
+            if (err)
+                return callback(err);
+            var visjsData = {nodes: [], edges: []}
+            var existingNodes = visjsGraph.getExistingIdsMap()
+            var color=Lineage_classes.getSourceColor(nodeData.source)
+            result.forEach(function (item) {
+
+                    if (!existingNodes[item.subject.value]) {
+                        existingNodes[item.subject.value] = 1;
+                        visjsData.nodes.push({
+                            id: item.subject.value,
+                            label: item.subjectLabel.value,
+                            shape: "dot",
+                            size: Lineage_classes.defaultShapeSize,
+                            color: color,
+                            data: {
+                                source: nodeData.source,
+                                id: item.subject.value,
+                                label: item.subject.value,
                             }
                         })
                     }
-                })
-                callback(null, jstreeData)
+                if (!existingNodes[item.object.value]) {
+                    existingNodes[item.object.value] = 1;
+                    visjsData.nodes.push({
+                        id: item.object.value,
+                        label: item.objectLabel.value,
+                        shape: "dot",
+                        size: Lineage_classes.defaultShapeSize,
+                        color: color,
+                        data: {
+                            source: nodeData.source,
+                            id: item.object.value,
+                            label: item.object.value,
+                        }
+                    })
+                }
+                        var edgeId = item.subject.value + "_"+item.property.value+ "_" + item.object.value
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1
+
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: item.subject.value,
+                                to: item.object.value,
+                                data: {propertyId: item.property.value, source: nodeData.source},
+
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "solid",
+                                        scaleFactor: 0.5
+                                    },
+                                },
+                                color: Lineage_classes.propertyColors
+
+                            })
+                        }
 
 
-            })
-        }
+                    })
+            if (visjsGraph.isGraphNotEmpty()) {
+                visjsGraph.data.nodes.add(visjsData.nodes)
+                visjsGraph.data.edges.add(visjsData.edges)
+            } else {
+                var options = {}
+                visjsGraph.draw("graphDiv", visjsData, options)
+
+            }
+            visjsGraph.network.fit()
+            $("#waitImg").css("display", "none");
+
+        })
 
 
-        self.drawProperty = function (nodeData) {
+    }
+
+        self.drawObjectProperty = function (nodeData) {
             Sparql_OWL.getPropertyClasses(nodeData.source, nodeData.id, {}, function (err, result) {
                 if (err) {
                     alert(err.responseText)
@@ -451,7 +564,7 @@ Lineage_properties = (function () {
                 })
 
 
-                if (visjsGraph.data && visjsGraph.data.nodes) {
+                if(visjsGraph.isGraphNotEmpty()){
                     visjsGraph.data.nodes.update(visjsData.nodes)
                     visjsGraph.data.edges.update(visjsData.edges)
                 } else {

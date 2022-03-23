@@ -3,7 +3,7 @@ Lineage_relations = (function () {
     var self = {}
     self.graphUriSourceMap = {}
     self.projectedGraphsMap = {}
-    self.maxRelationToDraw=1000
+    self.maxRelationToDraw = 5000
 
     self.init = function () {
         var sources = []
@@ -14,12 +14,19 @@ Lineage_relations = (function () {
         sources.sort()
         if (!sources || sources.length == 0)
             return;
+        if(Object.keys(visjsGraph.getExistingIdsMap().length==0))
+            $("#LineageRelations_nodesSelectionSelect").val("All Nodes")
+
+
         common.fillSelectOptions("LineageRelations_setExactMatchSameAsSourceSelect", sources, true)
         common.fillSelectOptions("LineageRelations_propertiesSelect", [], true)
-        var statusList = ["candidate", " reference"]
-        common.fillSelectOptions("LineageRelations_statusSelect", statusList, true)
+        var statusList = [{id:"http://data.souslesens.org/status/candidate",label:"candidate"}, {id:"http://data.souslesens.org/status/reference",label:"reference"}]
+        common.fillSelectOptions("LineageRelations_statusSelect", statusList, true,"label","id")
         var provenances = ["manual", " auto_exactMatch"]
         common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true)
+        var withoutImports = 0
+        if (Config.sources[source].isDictionary)
+            withoutImports = 1
         Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {
             withoutImports: 0,
             someValuesFrom: 1,
@@ -29,16 +36,22 @@ Lineage_relations = (function () {
                 return alert(err)
             var x = result
             var props = [];
+            var asSamAsProp = false
             result.forEach(function (item) {
+                if (item.prop.value.indexOf("sameAs") > -1)
+                    asSamAsProp = true;
                 props.push({id: item.prop.value, label: item.propLabel.value})
             })
-            props.sort(function(a,b){
-                if(a.label>b.label)
+            props.sort(function (a, b) {
+                if (a.label > b.label)
                     return 1;
-                if(a.label<b.label)
+                if (a.label < b.label)
                     return -1;
                 return 0
             })
+            if (!asSamAsProp)
+                props.splice(0, 0, {id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs"})
+
             common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id")
             // self.initProjectedGraphs()
         })
@@ -74,7 +87,7 @@ Lineage_relations = (function () {
                 source = self.graphUriSourceMap[graphUri]
             }
         })
-       // console.log(uri + "_" + source)
+        // console.log(uri + "_" + source)
         return source
     }
 
@@ -88,30 +101,32 @@ Lineage_relations = (function () {
             if (Config.sources[selectedNode.id]) {// selection of source in graph
                 Lineage_classes.setCurrentSource(selectedNode.id)
                 selectedNodes = null
-                return callback(null,selectedNodes)
+                return callback(null, selectedNodes)
 
             }
-           selectedNodes = [selectedNode.id]
+            selectedNodes = [selectedNode.id]
             Sparql_generic.getNodeChildren(Lineage_common.currentSource, null, selectedNode.id, 3, null, function (err, result) {
                 if (err)
                     callback(err)
                 result.forEach(function (item) {
                     selectedNodes.push(item.child1.value)
                 })
-                return callback(null,selectedNodes)
+                return callback(null, selectedNodes)
             })
 
+        } else if (selectionMode == "currentGraphNodes") {
+            var selectedNodes = visjsGraph.data.nodes.getIds()
+            return callback(null, selectedNodes)
         } else {
             selectedNodes = null
-            return callback(null,selectedNodes)
+            return callback(null, selectedNodes)
         }
 
 
     }
     self.getExistingRestrictions = function (currentSource, callback) {
-
         function formatResult(result) {
-            restrictions=[]
+            restrictions = []
             result.forEach(function (item) {
                 var domain, range, domainLabel, rangeLabel, prop, propLabel, node, domainSourceLabel,
                     rangeSourceLabel
@@ -129,9 +144,9 @@ Lineage_relations = (function () {
                     propLabel = item.propLabel.value
                 if (item.node)
                     node = item.node.value
-               /* if (item.g) {
-                    domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
-                }*/
+                /* if (item.g) {
+                     domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
+                 }*/
                 if (item.domainSourceLabel) {
                     domainSourceLabel = item.domainSourceLabel.value
                 }
@@ -139,7 +154,7 @@ Lineage_relations = (function () {
                     rangeSourceLabel = item.rangeSourceLabel.value
                 }
 
-                restrictions.push({
+                var obj = {
 
                     domain: domain,
                     domainLabel: domainLabel,
@@ -151,50 +166,64 @@ Lineage_relations = (function () {
                     rangeSourceLabel: rangeSourceLabel,
                     domainSourceLabel: domainSourceLabel
 
-                })
-
-                restrictions.sort(function(a,b){
-                  return (a.propLabel>b.prop)
-                })
-
-
-
-
-
+                }
+                if (currentSource == Config.dictionarySource) {
+                    obj.creator = item.creator ? item.creator.value : null;
+                    obj.status = item.status ? item.status.value : null;
+                    obj.provenance = item.provenance ? item.provenance.value : null;
+                    obj.creationDate = item.creationDate ? item.creationDate.value : nul;
+                }
+                restrictions.push(obj);
             })
+
+
+            restrictions.sort(function (a, b) {
+                return (a.propLabel > b.prop)
+            })
+
             return restrictions
         }
-
-
-
 
         var restrictions = []
         var filter = ""
         var propertyFilter = $("#LineageRelations_propertiesSelect").val()
-        $("#LineageRelations_propertiesSelect").val("")
+        var creatorFilter = $("#LineageRelations_creatorSelect").val()
+        var statusFilter = $("#LineageRelations_statusSelect").val()
+        var provenanceFilter = $("#LineageRelations_provenanceSelect").val()
+
+        // $("#LineageRelations_propertiesSelect").val("")
         if (propertyFilter && propertyFilter != "")
             filter += " filter (?prop=<" + propertyFilter + ">)"
+        if (creatorFilter && creatorFilter != "")
+            filter += " filter (?creator='" + creatorFilter + "')"
+        if (statusFilter && statusFilter != "")
+            filter += " filter (?status=<" + statusFilter + ">)"
+        if (provenanceFilter && provenanceFilter != "")
+            filter += " filter (?provenance='" + provenanceFilter + "')"
+
+
         self.getFromSourceSelection(function (err, selectedNodes) {
             if (err)
                 return callback(err)
 
-            if(selectedNodes==null){
+            if (selectedNodes == null) {
                 Sparql_OWL.getObjectRestrictions(currentSource, null, {
                     withoutImports: 0,
                     someValuesFrom: 1,
                     filter: filter,
-                    selectGraph:true
+                    selectGraph: true,
+                    getMetadata: currentSource == Config.dictionarySource
 
                 }, function (err, result) {
                     if (err)
                         return callback(err)
 
-                    restrictions=formatResult(result)
-                    callback(null,restrictions)
+                    restrictions = formatResult(result)
+                    callback(null, restrictions)
 
                 })
 
-            }else {
+            } else {
 
 
                 var slices = common.array.slice(selectedNodes, 200)
@@ -203,7 +232,8 @@ Lineage_relations = (function () {
                         withoutImports: 0,
                         someValuesFrom: 1,
                         filter: filter,
-                        selectGraph:true
+                        selectGraph: true,
+                        getMetadata: currentSource == Config.dictionarySource
 
                     }, function (err, result) {
                         if (err)
@@ -218,9 +248,9 @@ Lineage_relations = (function () {
                     callback(null, restrictions)
                 })
             }
+
         })
     }
-
 
 
     self.showRestrictions = function (output, relations, toLabelsMap) {
@@ -235,21 +265,21 @@ Lineage_relations = (function () {
                 if (relations)
                     return callbackSeries()
                 self.getExistingRestrictions(currentSource, function (err, restrictions) {
-                    if(err)
+                    if (err)
                         return callbackSeries(err)
-                    relations=restrictions
+                    relations = restrictions
                     return callbackSeries()
                 })
             },
-             function (callbackSeries) {
-            if(!relations || relations.length==0)
-                return callbackSeries("no relations found")
-            if(relations.length>self.maxRelationToDraw)
-                return callbackSeries("Cannot draw : too many relations "+relations.length +" max "+self.maxRelationToDraw)
-                    else
-                return callbackSeries()
-             }
-,
+            function (callbackSeries) {
+                if (!relations || relations.length == 0)
+                    return callbackSeries("no relations found")
+                if (relations.length > self.maxRelationToDraw)
+                    return callbackSeries("Cannot draw : too many relations " + relations.length + " max " + self.maxRelationToDraw)
+                else
+                    return callbackSeries()
+            }
+            ,
             function (callbackSeries) {
                 var sources
                 sources = Config.sources[currentSource].imports
@@ -266,11 +296,13 @@ Lineage_relations = (function () {
 
             function (callbackSeries) {
 
-                var existingNodes = visjsGraph.getExistingIdsMap()
+                var existingNodes
                 var jstreeData = [];
                 var visjsData = {nodes: [], edges: []}
+                var tableData = {columns: [], data: []}
                 var sameAsLevel = 1;
                 if (relations && toLabelsMap && output == "visjs") {// get ancestors first if called by projectCurrrentSourceOnSource
+                    existingNodes = visjsGraph.getExistingIdsMap()
                     visjsData = self.getRestrictionAncestorsVisjsData(relations, toLabelsMap, output)
                     visjsData.nodes.forEach(function (node) {
                         existingNodes[node.id] = 1
@@ -280,7 +312,8 @@ Lineage_relations = (function () {
                     })
                     sameAsLevel = visjsData.maxLevel + 1;
 
-                }
+                } else
+                    existingNodes = {}
 
 
                 var color;
@@ -288,7 +321,7 @@ Lineage_relations = (function () {
                 var size = Lineage_classes.defaultShapeSize
 
 
-                relations.forEach(function (item) {
+                relations.forEach(function (item, index) {
 
                     var prop;
                     if (item.propLabel)
@@ -344,7 +377,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: item.domain,
                                 label: item.domainLabel,
-                               shadow:Lineage_classes.nodeShadow, shape: shape,
+                                shadow: Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(domainSource),
@@ -358,8 +391,58 @@ Lineage_relations = (function () {
                         }
                     }
 
+                    if (output == "table") {
+                        if (index == 0) {
+                            tableData.columns = [
+                                {
+                                    title: "action", render: function (datum, type, row) {
 
-                    if (output == "jstree") {
+                                        return "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  Lineage_relations.dictionaryValidation.validateSameAsCandidate (\"" + row[0] + "\")'>V</button>" +
+                                            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='   Lineage_relations.dictionaryValidation.rejectSameAsCandidate (\"" + row[0] + "\")'>R</button>"
+                                        //  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='   Lineage_relations.dictionaryValidation.SameAsCandidateInfos (\"" + row[0] + "\")'>R</button>"
+                                    },
+                                    width: '75px'
+                                },
+
+                                {title: "domainSource", defaultContent: ""},
+                                {title: "domainLabel", defaultContent: ""},
+                                {title: "propLabel", defaultContent: ""},
+                                {title: "rangeSource", defaultContent: ""},
+                                {title: "rangeLabel", defaultContent: ""}
+                            ]
+                            if (currentSource == Config.dictionarySource) {
+                                tableData.columns.push({title: "status", defaultContent: ""})
+                                tableData.columns.push({title: "provenance", defaultContent: ""})
+                                tableData.columns.push({title: "creator", defaultContent: ""})
+                                tableData.columns.push({title: "creationDate", defaultContent: ""})
+
+
+                            }
+                        }
+
+
+                        var line = [
+                            item.node,
+                            item.domainSourceLabel,
+                            item.domainLabel,
+                            item.propLabel,
+                            item.rangeSourceLabel,
+                            item.rangeLabel
+                        ]
+                        if (currentSource == Config.dictionarySource) {
+                            line = line.concat([
+                                item.status,
+                                item.provenance,
+                                item.creator,
+                                item.creationDate
+
+                            ])
+                        }
+
+                        tableData.data.push(line);
+
+
+                    } else if (output == "jstree") {
                         var nodeId = item.domain + "_" + prop + "_" + item.range
                         if (!existingNodes[nodeId]) {
                             existingNodes[nodeId] = 1
@@ -368,6 +451,7 @@ Lineage_relations = (function () {
                                 text: prop + "_" + rangeSource + "." + item.rangeLabel,
                                 parent: item.domain,
                                 data: {
+
                                     id: nodeId,
                                     label: prop + "_" + rangeSource + "." + item.rangeLabel,
                                     source: rangeSource,
@@ -380,7 +464,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: item.range,
                                 label: item.rangeLabel,
-                               shadow:Lineage_classes.nodeShadow, shape: shape,
+                                shadow: Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: sameAsLevel,
                                 color: Lineage_classes.getSourceColor(rangeSource),
@@ -394,15 +478,17 @@ Lineage_relations = (function () {
                         }
                         var propSource = Lineage_classes.mainSource
                         var edgeId = item.node
-                        var edgeId = item.domain+"_"+item.prop+"_"+item.range
+                        var edgeId = item.domain + "_" + item.prop + "_" + item.range
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1
                             visjsData.edges.push({
-                                id:edgeId,
+                                id: edgeId,
                                 from: item.range,
                                 to: item.domain,
-                                data: {id: item.node,propertyId: item.prop, source: propSource,  id:edgeId,
-                                    from: item.range},
+                                data: {
+                                    id: item.node, propertyId: item.prop, source: propSource, id: edgeId,
+                                    from: item.range
+                                },
                                 arrows: {
                                     from: {
                                         enabled: true,
@@ -412,7 +498,7 @@ Lineage_relations = (function () {
                                     length: 30,
                                 },
 
-                                width:3,
+                                width: 3,
 
                                 label: "<i>" + prop + "</i>",
                                 font: {multi: true, size: 10},
@@ -430,13 +516,34 @@ Lineage_relations = (function () {
 
 
                 })
-                if (visjsGraph.data && visjsGraph.data.nodes) {
-                    visjsGraph.data.nodes.update(visjsData.nodes)
-                    visjsGraph.data.edges.update(visjsData.edges)
-                } else {
+                if (output == "jstree") {
 
-                    var options = {layoutHierarchical: 1}
-                    Lineage_classes.drawNewGraph(visjsData, options)
+
+                    $("#mainDialogDiv").dialog("open")
+                    $("#mainDialogDiv").load("snippets/lineage/listRelationsDialog.html", function () {
+
+                        var options = {
+                            openAll: true,
+                            selectTreeNodeFn: function () {
+                            }
+                        }
+                        common.jstree.loadJsTree("LineageRelation_listRelationDiv", jstreeData, options)
+                    })
+
+                } else if (output == "table") {
+
+                    Export.showDataTable(null, tableData.columns, tableData.data)
+
+
+                } else if (output == "visjs") {
+                    if (visjsGraph.isGraphNotEmpty()) {
+                        visjsGraph.data.nodes.update(visjsData.nodes)
+                        visjsGraph.data.edges.update(visjsData.edges)
+                    } else {
+
+                        var options = {layoutHierarchical: 1}
+                        Lineage_classes.drawNewGraph(visjsData, options)
+                    }
                 }
 
                 callbackSeries()
@@ -446,7 +553,7 @@ Lineage_relations = (function () {
                 callbackSeries()
             }
         ], function (err) {
-            if(err)
+            if (err)
                 return alert(err)
             MainController.UI.message("DONE", true)
         })
@@ -495,7 +602,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: parentId,
                                 label: parentId,
-                               shadow:Lineage_classes.nodeShadow, shape: "box",
+                                shadow: Lineage_classes.nodeShadow, shape: "box",
                                 level: index,
 
                                 color: Lineage_classes.getSourceColor(ancestorsSource),
@@ -511,7 +618,7 @@ Lineage_relations = (function () {
                             visjsData.nodes.push({
                                 id: parentId,
                                 label: labelsMap[parentId],
-                               shadow:Lineage_classes.nodeShadow, shape: shape,
+                                shadow: Lineage_classes.nodeShadow, shape: shape,
                                 size: size,
                                 level: index,
                                 color: Lineage_classes.getSourceColor(restriction.rangeSourceLabel),
@@ -560,7 +667,7 @@ Lineage_relations = (function () {
 
 
     self.projectSameAsRestrictionsOnSource = function (orphans) {
-        if(orphans)
+        if (orphans)
             return alert("Coming soon...")
         if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked"))
             Lineage_classes.initUI()
@@ -802,7 +909,22 @@ Lineage_relations = (function () {
 
     }
 
+    self.dictionaryValidation = {
+        validateSameAsCandidate: function (nodeId) {
+
+        },
+        rejectSameAsCandidate: function (nodeId) {
+
+        },
+        sameAsCandidateInfos: function (nodeId) {
+
+        }
+
+
+    }
+
 
     return self;
 
-})()
+})
+()

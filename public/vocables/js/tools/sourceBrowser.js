@@ -26,6 +26,7 @@ var SourceBrowser = (function () {
             MainController.currentSource = sourceLabel;
             OwlSchema.currentSourceSchema = null;
             self.currentTargetDiv = "currentSourceTreeDiv"
+            $("#GenericTools_searchSchemaType").val(Config.sources[sourceLabel].schemaType)
             $("#accordion").accordion("option", {active: 2});
             self.showThesaurusTopConcepts(sourceLabel,)
             $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> " +
@@ -54,11 +55,11 @@ var SourceBrowser = (function () {
             else
                 source = MainController.currentSource// coming from  specific tool current surce
             self.currentTreeNode = obj.node;
-            if (self.propertiesMap.event.ctrlKey)
-                self.copyNode(self.propertiesMap.event);
+            if (obj.event.ctrlKey)
+                self.copyNode(self.currentTreeNode);
 
 
-            if (true || self.propertiesMap.event.ctrlKey) {
+            if (true || obj.event.ctrlKey) {
                 self.editThesaurusConceptInfos(source, obj.node)
             }
             {
@@ -127,8 +128,11 @@ var SourceBrowser = (function () {
 
 
                 var jsTreeOptions = options;
-                jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu()
-                jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
+                if (!options.contextMenu)
+                    jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu()
+                if (!options.selectTreeNodeFn)
+                    jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
+
                 jsTreeOptions.source = sourceLabel;
 
                 TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions)
@@ -264,14 +268,14 @@ var SourceBrowser = (function () {
                 }
 
             }
-        /*    items.toDataTable = {
-                label: "export to Table",
-                action: function (e) {// pb avec source
-                    Export.exportTeeToDataTable()
+            /*    items.toDataTable = {
+                    label: "export to Table",
+                    action: function (e) {// pb avec source
+                        Export.exportTeeToDataTable()
 
-                }
+                    }
 
-            }*/
+                }*/
 
             items.exportAllDescendants = {
                 label: "Export all descendants",
@@ -288,7 +292,7 @@ var SourceBrowser = (function () {
         self.exportAllDescendants = function () {
             var parentId = self.currentTreeNode.data.id
             var indexes = [self.currentTreeNode.data.source.toLowerCase()]
-            Export.exportAllDescendants(parentId,{},indexes)
+            Export.exportAllDescendants(parentId, {}, indexes)
         }
 
 
@@ -312,10 +316,17 @@ var SourceBrowser = (function () {
                 }
                 if (options.beforeDrawingFn)
                     options.beforeDrawingFn(result)
-                TreeController.drawOrUpdateTree(divId, result, node.id, "child1", {
+                var jsTreeOptions = {
                     source: sourceLabel,
                     type: node.data.type
-                })
+                }
+                if (options.optionalData) {
+
+                    jsTreeOptions.optionalData = options.optionalData
+
+                }
+                TreeController.drawOrUpdateTree(divId, result, node.id, "child1", jsTreeOptions)
+
                 $("#waitImg").css("display", "none");
 
             })
@@ -400,6 +411,9 @@ var SourceBrowser = (function () {
 
             if (!term || term == "")
                 return alert(" enter a word ")
+            if(term.indexOf("*")>-1)
+                $("#GenericTools_allExactMatchSearchCBX").removeProp("checked")
+            term=term.toLowerCase()
             var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
             var searchAllSources = $("#GenericTools_searchInAllSources").prop("checked")
 
@@ -439,228 +453,116 @@ var SourceBrowser = (function () {
                 mode = "exactMatch"
 
             var indexes
-
-            SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, {parentlabels: true}, function (err, result) {
-                if (err)
-                    return alert(err)
-
-
-                var existingNodes = {}
-                var jstreeData = []
-                var parentIdsLabelsMap = result.parentIdsLabelsMap;
-
-                result.forEach(function (item) {
-                    var term = item.label.toLowerCase()
-                    var matches = item.matches
-                    for (var source in matches) {
-                        var items = matches[source]
+            options.parentlabels = true
+            if (true || schemaType == "OWL") {
+                SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
 
 
-                        items.sort(function (a, b) {
-                            if (a.label > b.label)
-                                return 1
-                            if (b.label > a.label)
-                                return -1
-                            return 0;
-                        })
+                    self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, result) {
+                        if (err)
+                            return alert(err)
 
-
-                        items.forEach(function (match) {
-                            /*   if(match.label.toLowerCase().indexOf(term)<0 )
-                                   return*/
-
-                            if (match.parents) {//} && match.parents.split) {
-
-                                var parentId = ""
-                                var parents = match.parents;//.split("|")
-                                var nodeId = ""
-                                if(! parents.forEach)
-                                    return;
-                                parents.forEach(function (aClass, indexParent) {
-                                    if (aClass == "")
-                                        return
-
-                                    var label = parentIdsLabelsMap[aClass]
-                                    if (typeof label == "object")
-                                        label = Sparql_common.getLabelFromURI(aClass)
-                                    if (indexParent > 0) {
-                                        parentId += parents[indexParent - 1]
-                                    } else {
-                                        parentId = "#"
-                                        label = "<span class='searched_conceptSource'>" + source + "</span>"
-                                    }
-
-                                    nodeId = parentId + aClass
-
-
-                                    if (!existingNodes[nodeId]) {
-                                        existingNodes[nodeId] = 1;
-                                        jstreeData.push({
-                                            id: nodeId,
-                                            text: label,
-                                            parent: parentId,
-                                            data: {
-                                                id: aClass,
-                                                label: label,
-                                                source: source
-                                            }
-                                        })
-                                    }
-                                })
-
-                            } else {
-                                nodeId = source;
-                            }
-                            var leafId = nodeId + match.id
-                            if (!existingNodes[leafId]) {
-                                existingNodes[leafId] = 1;
-                                jstreeData.push({
-                                    id: leafId,
-                                    text: "<span class='searched_concept'>" + match.label + "</span>",
-                                    parent: nodeId,
-                                    data: {
-                                        id: match.id,
-                                        label: match.label,
-                                        source: source
-                                    }
-                                })
-                            }
-
-                        })
-
-
-                    }
+                    })
 
 
                 })
-
-                var jstreeOptions = {
-
-                    openAll: true, selectTreeNodeFn: function (event, obj) {
-                        SourceBrowser.currentTreeNode = obj.node;
-
-                        if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+            } else if (schemaType == "SKOS") {
 
 
-                        self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
-                    },
-                    contextMenu: function () {
-                        if (Config.tools[MainController.currentTool].controller.contextMenuFn)
-                            return Config.tools[MainController.currentTool].controller.contextMenuFn()
-                        else
-                            return self.getJstreeConceptsContextMenu()
+                async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
+
+                    // setTimeout(function () {
+                    MainController.UI.message("searching in " + sourceLabel)
+                    // }, 100)
+                    if (!term)
+                        term = $("#GenericTools_searchTermInput").val()
+
+                    if (!term || term == "")
+                        return
+                    var options2 = {
+                        term: term,
+                        rootId: sourceLabel,
+                        exactMatch: exactMatch,
+                        limit: Config.searchLimit,
                     }
-                }
+                    var type = Config.sources[sourceLabel].schemaType
 
-                common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
-                setTimeout(function () {
-                    MainController.UI.updateActionDivLabel("Multi source search :" + term)
-                    MainController.UI.message("");
-                    $("#waitImg").css("display", "none");
-                    $('#' + self.currentTargetDiv).jstree(true).open_all();
+                    SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
+                        if (err) {
+                            MainController.UI.message(err.responseText)
+                            var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
+                            jstreeData.push({
+                                id: sourceLabel,
+                                text: text,
+                                parent: "#",
+                                data: {source: sourceLabel, id: sourceLabel, label: text}
+                            })
+                        } else {
 
-                }, 200)
+                            var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
 
-            })
+                            jstreeData.push({
+                                id: sourceLabel,
+                                text: text,
+                                parent: "#",
+                                type: type,
+                                data: {source: sourceLabel, id: sourceLabel, label: text}
+                            })
+                            result.forEach(function (item) {
+                                if (!uniqueIds[item.id]) {
+                                    uniqueIds[item.id] = 1
+                                    jstreeData.push(item)
 
-
-            return;
-
-
-            async.eachSeries(searchedSources, function (sourceLabel, callbackEach) {
-
-                // setTimeout(function () {
-                MainController.UI.message("searching in " + sourceLabel)
-                // }, 100)
-                if (!term)
-                    term = $("#GenericTools_searchTermInput").val()
-
-                if (!term || term == "")
-                    return
-                var options2 = {
-                    term: term,
-                    rootId: sourceLabel,
-                    exactMatch: exactMatch,
-                    limit: Config.searchLimit,
-                }
-                var type = Config.sources[sourceLabel].schemaType
-
-                SourceBrowser.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
-                    if (err) {
-                        MainController.UI.message(err.responseText)
-                        var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>"
-                        jstreeData.push({
-                            id: sourceLabel,
-                            text: text,
-                            parent: "#",
-                            data: {source: sourceLabel, id: sourceLabel, label: text}
-                        })
-                    } else {
-
-                        var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>"
-
-                        jstreeData.push({
-                            id: sourceLabel,
-                            text: text,
-                            parent: "#",
-                            type: type,
-                            data: {source: sourceLabel, id: sourceLabel, label: text}
-                        })
-                        result.forEach(function (item) {
-                            if (!uniqueIds[item.id]) {
-                                uniqueIds[item.id] = 1
-                                jstreeData.push(item)
-
-                            }
-                        })
-                    }
-                    callbackEach();
-                })
+                                }
+                            })
+                        }
+                        callbackEach();
+                    })
 
 
-            }, function (err) {
-                $("#accordion").accordion("option", {active: 2});
-                var html = "<div id='" + self.currentTargetDiv + "'></div>"
-
-                if ($("#" + self.currentTargetDiv).length == 0) {
+                }, function (err) {
+                    $("#accordion").accordion("option", {active: 2});
                     var html = "<div id='" + self.currentTargetDiv + "'></div>"
-                    $("#actionDiv").html(html);
-                }
-                $("#" + self.currentTargetDiv).html(html)
 
-                MainController.UI.message("Search Done")
-
-
-                var jstreeOptions = {
-
-                    openAll: true,
-                    selectTreeNodeFn: function (event, obj) {
-                        SourceBrowser.currentTreeNode = obj.node;
-
-                        if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
-                            return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
-
-
-                        self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
-                    },
-                    contextMenu: function () {
-                        if (Config.tools[MainController.currentTool].controller.contextMenuFn)
-                            return Config.tools[MainController.currentTool].controller.contextMenuFn()
-                        else
-                            return self.getJstreeConceptsContextMenu()
+                    if ($("#" + self.currentTargetDiv).length == 0) {
+                        var html = "<div id='" + self.currentTargetDiv + "'></div>"
+                        $("#actionDiv").html(html);
                     }
-                }
+                    $("#" + self.currentTargetDiv).html(html)
 
-                common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
-                setTimeout(function () {
-                    MainController.UI.updateActionDivLabel("Multi source search :" + term)
-                    MainController.UI.message("");
-                    $("#waitImg").css("display", "none");
+                    MainController.UI.message("Search Done")
 
-                }, 200)
 
-            })
+                    var jstreeOptions = {
+
+                        openAll: true,
+                        selectTreeNodeFn: function (event, obj) {
+                            SourceBrowser.currentTreeNode = obj.node;
+
+                            if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
+                                return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+
+
+                            self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
+                        },
+                        contextMenu: function () {
+                            if (Config.tools[MainController.currentTool].controller.contextMenuFn)
+                                return Config.tools[MainController.currentTool].controller.contextMenuFn()
+                            else
+                                return self.getJstreeConceptsContextMenu()
+                        }
+                    }
+
+                    common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, jstreeOptions)
+                    setTimeout(function () {
+                        MainController.UI.updateActionDivLabel("Multi source search :" + term)
+                        MainController.UI.message("");
+                        $("#waitImg").css("display", "none");
+
+                    }, 200)
+
+                })
+            }
 
 
         }
@@ -780,6 +682,126 @@ var SourceBrowser = (function () {
             })
 
 
+        }
+
+        self.searchResultToJstree = function (targetDiv, result, options, callback) {
+            var existingNodes = {}
+            var jstreeData = []
+            var parentIdsLabelsMap = result.parentIdsLabelsMap;
+
+            result.forEach(function (item) {
+                var term = item.label.toLowerCase()
+                var matches = item.matches
+                for (var source in matches) {
+                    var items = matches[source]
+
+
+                    items.sort(function (a, b) {
+                        if (a.label > b.label)
+                            return 1
+                        if (b.label > a.label)
+                            return -1
+                        return 0;
+                    })
+
+
+                    items.forEach(function (match) {
+                        /*   if(match.label.toLowerCase().indexOf(term)<0 )
+                               return*/
+
+                        if (match.parents) {//} && match.parents.split) {
+
+                            var parentId = ""
+                            var parents = match.parents;//.split("|")
+                            var nodeId = ""
+                            if (!parents.forEach)
+                                return;
+                            parents.forEach(function (aClass, indexParent) {
+                                if (aClass == "")
+                                    return
+
+                                var label = parentIdsLabelsMap[aClass]
+                                if (typeof label == "object")
+                                    label = Sparql_common.getLabelFromURI(aClass)
+                                if (indexParent > 0) {
+                                    parentId += parents[indexParent - 1]
+                                } else {
+                                    parentId = "#"
+                                    label = "<span class='searched_conceptSource'>" + source + "</span>"
+                                }
+
+                                nodeId = parentId + aClass
+
+
+                                if (!existingNodes[nodeId]) {
+                                    existingNodes[nodeId] = 1;
+                                    jstreeData.push({
+                                        id: nodeId,
+                                        text: label,
+                                        parent: parentId,
+                                        data: {
+                                            id: aClass,
+                                            label: label,
+                                            source: source
+                                        }
+                                    })
+                                }
+                            })
+
+                        } else {
+                            nodeId = source;
+                        }
+                        var leafId = nodeId + match.id
+                        if (!existingNodes[leafId]) {
+                            existingNodes[leafId] = 1;
+                            jstreeData.push({
+                                id: leafId,
+                                text: "<span class='searched_concept'>" + match.label + "</span>",
+                                parent: nodeId,
+                                data: {
+                                    id: match.id,
+                                    label: match.label,
+                                    source: source
+                                }
+                            })
+                        }
+
+                    })
+
+
+                }
+
+
+            })
+
+            var jstreeOptions = {
+
+                openAll: true, selectTreeNodeFn: function (event, obj) {
+                    SourceBrowser.currentTreeNode = obj.node;
+
+                    if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn)
+                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+
+
+                    self.editThesaurusConceptInfos(obj.node.data.source, obj.node)
+                },
+                contextMenu: function () {
+                    if (Config.tools[MainController.currentTool].controller.contextMenuFn)
+                        return Config.tools[MainController.currentTool].controller.contextMenuFn()
+                    else
+                        return self.getJstreeConceptsContextMenu()
+                }
+            }
+
+
+            common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions)
+            setTimeout(function () {
+                //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
+                MainController.UI.message("");
+                $("#waitImg").css("display", "none");
+                $('#' + targetDiv).jstree(true).open_all();
+
+            }, 200)
         }
 
 
@@ -1047,7 +1069,7 @@ var SourceBrowser = (function () {
                         var valuesStr = ""
                         values.forEach(function (value, index) {
                             var optionalStr = ""
-                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.currentSource].editable > -1) {
+                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1) {
                                 var propUri = self.propertiesMap.properties[key].propUri
                                 optionalStr = "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
                                     " onclick=\"SourceBrowser.deletePropertyValue('" + propUri + "','" + value + "')\">X</button>"
@@ -1214,11 +1236,11 @@ var SourceBrowser = (function () {
                 result.forEach(function (item) {
                     str += "<tr class='infos_table'>"
 
-                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel?item.sourceClassLabel.value:Sparql_common.getLabelFromURI(item.sourceClass.value) + "</td>"
+                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel ? item.sourceClassLabel.value : Sparql_common.getLabelFromURI(item.sourceClass.value) + "</td>"
 
                     str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</td>"
 
-                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" +  item.targetClassLabel?item.targetClassLabel.value:Sparql_common.getLabelFromURI(item.targetClass.value)  + "</td>"
+                    str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" + item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value) + "</td>"
 
 
                     str += "</tr>"
@@ -1357,7 +1379,7 @@ var SourceBrowser = (function () {
 
 
         self.indexObjectIfNew = function () {
-            if (true || self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
+            if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
                 SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, result) {
                     if (err)
                         return alert(err)

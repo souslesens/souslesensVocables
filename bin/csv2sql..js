@@ -24,7 +24,6 @@ Csv2Sql = {
             result.headers.forEach(function (header) {
                 if (header != "")
                     if (!fields[header]) {
-                        if (header == "catalogProfile") var x = 3;
                         result.data.forEach(function (slice) {
                             slice.forEach(function (line) {
                                 if (fields[header]) return;
@@ -67,12 +66,12 @@ Csv2Sql = {
         });
     },
 
-    getInsert: function (filePath, tableName, fields, callback) {
+    getInsert: function (filePath, dbName, tableName, fields, callback) {
         Csv2Sql.readCsv(filePath, 1000, function (err, result) {
             if (err) return callback(err);
             var sliceIndex = 0;
             var totalRecords = 0;
-            var sliceSize = 100;
+            var sliceSize =100;
             var slices = util.sliceArray(result.data[0], sliceSize);
 
             async.eachSeries(
@@ -106,7 +105,7 @@ Csv2Sql = {
                     });
                     insertStr = insertStr.substring(0, insertStr.length - 1);
 
-                    sql.getData("data14224", insertStr, function (err, result) {
+                    sql.getData(dbName, insertStr, function (err, result) {
                         if (err) {
                             console.log("error slice " + sliceIndex + "  " + err);
                             return callbackEach();
@@ -147,7 +146,25 @@ var tableName = "Maintenance_girassol";
 var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
 var tableName = "Wordorder_girassol";
 
+var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N.csv";
+var tableName = "moho_north_fl";
+
+var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\systems.txt";
+var tableName = "systems";
+
+
+
+
+
+var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_instruments.csv";
+var tableName = "instruments";
+
+var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_lines.txt";
+var tableName = "lines";
+
+var dbName = "evolen";
+
 Csv2Sql.getColumns(input, tableName, function (err, result) {
     var createSql = result.createSql;
-    Csv2Sql.getInsert(input, tableName, result.fieldsDecription, function (err, result) {});
+    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (err, result) {});
 });

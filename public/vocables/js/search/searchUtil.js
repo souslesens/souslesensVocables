@@ -62,7 +62,7 @@ var SearchUtil = (function () {
                                     return callbackSeries()
                                 }
 
-                                self.listSourcesAllLabels(fromSource.toLowerCase(), offset, size, function (err, hits) {
+                                self.getSourceLabels(fromSource.toLowerCase(), null, offset, size, function (err, hits) {
                                     if (err)
                                         return callbackWhilst(err)
                                     resultSize = hits.length
@@ -133,14 +133,14 @@ var SearchUtil = (function () {
                                                 parents: toHit._source.parents
                                             })
                                             var parentsArray = toHit._source.parents;
-                                            if (Array.isArray(parentsArray) ) {//} && toHit._source.parents.split) {
-                                              //.split("|")
+                                            if (Array.isArray(parentsArray)) {//} && toHit._source.parents.split) {
+                                                //.split("|")
                                                 parentsArray.forEach(function (parent, indexParent) {
                                                     if (indexParent > 0 && !parentsMap[parent])
                                                         parentsMap[parent] = {}
                                                 })
-                                            }else{
-                                                var x=3
+                                            } else {
+                                                var x = 3
                                             }
 
                                         })
@@ -209,33 +209,65 @@ var SearchUtil = (function () {
         }
 
 
-        self.listSourcesAllLabels = function (index, offset, size, callback) {
+        self.getSourceLabels = function (index, ids, offset, size, callback) {
             if (!offset)
                 offset = 0
             if (!size)
-                size = 1000
+                size = 10000
 
-            var queryObj = {"match_all": {}}
-            var query = {
-                "query": queryObj,
-                "from": offset,
-                "size": size,
-                "_source": {
-                    "excludes": [
-                        "attachment.content"
-                    ]
+            if (ids) {
+
+                size = ids.length + 10
+                var str = ""
+                var header = {"index": index}
+                ids.forEach(function (id) {
+                    var query = {
+                        query: {
+                            "term": {
+                                "id.keyword": id,
+                            }
+                        }
+                    }
+                    str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
+                })
+
+                ElasticSearchProxy.executeMsearch(str, function (err, result) {
+                    if (err) {
+                        return callback(err)
+                    }
+                    var hits = []
+                    result.forEach(function (item) {
+                        if (item.hits.hits.length > 0)
+                            hits.push(item.hits.hits[0])
+                    })
+                    return callback(null, hits)
+                })
+
+
+            } else {
+                var queryObj = {"match_all": {}}
+
+                var query = {
+                    "query": queryObj,
+                    "from": offset,
+                    "size": size,
+                    "_source": {
+                        "excludes": [
+                            "attachment.content"
+                        ]
+                    }
+                    , "sort": {
+                        "label.keyword": {"order": "asc"}
+                    }
                 }
-                , "sort": {
-                    "label.keyword": {"order": "asc"}
-                }
+
+                ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+                    if (err) {
+                        return callback(err)
+                    }
+                    return callback(null, result.hits ? result.hits.hits : [])
+                })
             }
-
-            ElasticSearchProxy.queryElastic(query, index, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, result.hits ? result.hits.hits : [])
-            })
         }
 
 
@@ -285,15 +317,7 @@ var SearchUtil = (function () {
                                         }
                                     }
                                 },
-                                {
-                                    "wildcard": {
-                                        "label": {
-                                            "value": word,
-                                            "boost": 1.0,
-                                            "rewrite": "constant_score"
-                                        }
-                                    }
-                                }
+
                             ]
                         }
                     }
@@ -346,7 +370,7 @@ var SearchUtil = (function () {
             async.eachSeries(slices, function (wordSlice, callbackEach) {
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
-                    if(!word)
+                    if (!word)
                         return;
                     var wordQuery = self.getWordBulkQuery(word, mode, indexes)
                     bulQueryStr += wordQuery;
@@ -549,10 +573,10 @@ var SearchUtil = (function () {
 
                         function (callbackWhilst) {
 
-                            self.listSourcesAllLabels(indexes[0], offset, size, function (err, hits) {
+                            self.getSourceLabels(indexes[0], null, offset, size, function (err, hits) {
                                 if (err)
                                     return callbackWhilst(err);
-                             //
+                                //
                                 resultSize = hits.length
                                 offset += size
                                 hits.forEach(function (hit) {
@@ -565,7 +589,7 @@ var SearchUtil = (function () {
                             })
 
                         }, function (err) {
-                                return callbackSeries(err)
+                            return callbackSeries(err)
 
                         })
                 }
@@ -574,6 +598,9 @@ var SearchUtil = (function () {
             })
 
         }
+
+
+
 
 
         return self;

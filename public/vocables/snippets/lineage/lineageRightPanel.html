@@ -64,8 +64,11 @@
 
                 Nodes Selection
                 <select  style="width:300px" id="LineageRelations_nodesSelectionSelect">
-                    <option value="allNodes">All Nodes</option>
+                    <option value="currentGraphNodes">Current Graph Nodes</option>
                     <option value="selectedNodeDescendants">Selected node descendants</option>
+                    <option value="allNodes">All Nodes</option>
+
+
                 </select>
 
             </div>
@@ -95,14 +98,16 @@
                     </div>
 
                     Restrictions
-                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('jstree')">List all</button>
-                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('visjs')">Graph all</button>
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('table')">List</button>
+                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('visjs')">Graph </button>
                     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportRestrictions()">Export</button>
 
                 </div>
 
             </div>
             <div> </div>
+
+            <!--
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">Projection</div>
                 on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
@@ -110,9 +115,9 @@
                 <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
                 <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
                 <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
-                <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>-->
+                <!__ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>__>
 
-            </div>
+            </div>-->
             <div> </div>
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">ProjectedGraphs</div>

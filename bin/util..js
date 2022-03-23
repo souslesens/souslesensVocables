@@ -194,8 +194,11 @@ var util = {
 
         if (forUri) {
             str = str.replace(/ /gm, "_");
-            str = str.replace(/\-/gm, "_");
+            //  str = str.replace(/\-/gm, "_");
             str = str.replace(/:/gm, "_");
+
+            str = encodeURIComponent(str);
+            str = str.replace(/%2F/gm, "/");
         }
 
         return str;
@@ -337,6 +340,13 @@ var util = {
 
         return callback(null, dirFilesMap);
     },
+    decapitalizeLabel:function(label){
+
+        var altLabel = label.replace(/[A-Z]/g, function (maj) {
+            return " " + maj
+        })
+        return altLabel.trim();
+    }
 };
 
 module.exports = util;

@@ -1,0 +1,59 @@
+
+<style>
+
+    .TE_114224_browser_leftPanelClassDiv {
+        display: flex;
+        flex-direction: column;
+        border: #6e2500 solid 1px;
+        background-color: #ddd;
+        height: 200px;
+    }
+    .TE_114224_browser_assetPanelTreeContainer{
+        height: 600px;overflow: auto;
+    }
+    .TE_114224_browser_title{
+        font-weight: bold ;
+        background-color: #ccc;
+
+    }
+
+</style>
+
+
+
+</div>
+
+<div style="width:400px; margin-left: 10px;">
+    14224 Browser
+    <div>
+        Asset <select onchange="TE_14224_browser.loadAsset($(this).val())">
+        <option></option>
+        <option>girassol</option>
+        <option>absheron</option>
+    </select>
+        <button onclick="TE_14224_browser.clearGraph()">Clear graph</button>
+        <button onclick="TE_14224_browser.drawAssetNodesParents()">draw parents</button>
+    </div>
+    <div class="TE_114224_browser_assetPanelTreeContainer" >
+        <div id="TE_114224_browser_assetPanelTreeDiv"></div>
+    </div>
+
+
+
+  <!--  <div  id="TE_114224_browser_filtersContainerDiv" style="display: flex;flex-direction: column; ">
+
+
+
+     <div>
+            Level <select id="TE_114224_browser_levelsSelect" size="8">
+        </select>
+        </div>
+        <div>
+            <input id="TE_114224_browser_wordInput" style="width: 300px"><button onclick="TE_14224_browser.Search()"></button>
+        </div>
+
+
+    </div>-->
+
+
+</div>

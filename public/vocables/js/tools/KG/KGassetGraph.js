@@ -476,15 +476,15 @@ var KGassetGraph = (function () {
                                     color = "#ffe0aa"
                                 }
 
-                                var imageUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[subject].group.toLowerCase() + ".png"
+                               // var imageUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[subject].group.toLowerCase() + ".png"
                                 var obj = {
                                     id: subject,
                                     label: label,
-                                    // shape: shape,
-                                    image: imageUrl,
+                                     shape: shape,
+                                    //image: imageUrl,
                                    // size:25,
                                     imagePadding:3,
-                                    shape: "circularImage",
+                                  //  shape: "circularImage",
                                     font: {bold: true, size: 18, color: color},
                                     fixed:true,
                                     color: color,
@@ -550,16 +550,16 @@ var KGassetGraph = (function () {
                                             shape = "star"
                                             color = "#ffe0aa"
                                         }
-                                        var imageUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[object].group.toLowerCase() + ".png"
+                                       // var imageUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[object].group.toLowerCase() + ".png"
                                         visjsData.nodes.push({
                                             id: object,
                                             label: label,
-                                            //  shape: shape,
+                                              shape: shape,
                                             imagePadding:3,
                                             color: color,
-                                            image: imageUrl,
+                                           // image: imageUrl,
                                             fixed:true,
-                                            shape: "circularImage",
+                                          //  shape: "circularImage",
                                             font: {bold: true, size: 18, color: color},
                                             data: {
                                                 id: object,

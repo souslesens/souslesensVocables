@@ -96,6 +96,11 @@
     <script src="js/tools/admin.js"></script>
     <script src="js/tools/Config.js"></script>
 
+    <script src="js/tools/KGcreator.js"></script>
+    <script src="js/tools/KGpropertyFilter.js"></script>
+
+
+
     <script src="js/tools/ontologiesStats.js"></script>
 
 
@@ -103,7 +108,11 @@
 <!-----------private tools--------------->
     <script src="js/customPluginController.js"></script>
 
-  <script src="customPlugins/TotalEnergies/TE_14224_browser.js"></script>
+  <script src="customPlugins/TotalEnergies/TE_14224_browser/TE_14224_browser.js"></script>
+    <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetConfigurator.js"></script>
+    <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetDataManager.js"></script>
+    <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
+
 
 
 
@@ -137,6 +146,9 @@
     <script src="js/sparqlProxies/sparql_NPD.js"></script>
     <script src="js/tools/orchestrator.js"></script>
     <script src="js/search/searchUtil.js"></script>
+
+
+
 
     <script src="js/external/socket.io.js"></script>
 
@@ -334,6 +346,7 @@
             padding: 2px;
             max-width: 400px;
             text-align: right;
+            width:250px;
         }
 
         .detailsCellValue {
@@ -387,8 +400,10 @@
         .popupMenuItem {
             border: #3b13ef 1px solid;
             border-radius: 3px;
-            padding: 2px;
-            margin: 2px;
+          //  padding: 2px;
+           // margin: 2px;
+            margin: 1px;
+            background-color: azure;
 
         }
         .mainDialogDiv{

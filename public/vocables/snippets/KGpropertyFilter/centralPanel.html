@@ -47,11 +47,21 @@
         </div>
         <div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
 
+            <div id="KGpropertyFilter_filteringResult"></div>
+  <!--
+
             <div class="KGpropertyFilter_tripleDiv">
                 LifeCycle filters <br>
-                <select size="35" class="KGpropertyFilter_filterSelect" multiple=true
-                        id="KGpropertyFilter_lifeCycleSelect"
-                        onchange="KGpropertyFilter.onSelectFilter('lifeCycle',$(this).val())"></select>
+                <div class="jstreeContainer"
+                     id="KGpropertyFilter_lifeCycleTree"></div>
+
+
+            </div>
+            <div class="KGpropertyFilter_tripleDiv">
+                LifeCycle filters <br>
+                <div class="jstreeContainer"
+                     id="KGpropertyFilter_disciplineTree"></div>
+
 
             </div>
             <div class="KGpropertyFilter_tripleDiv">
@@ -64,13 +74,14 @@
             <div class="KGpropertyFilter_tripleDiv">
                 Stake holder filters <br>
                 <select size="35" class="KGpropertyFilter_filterSelect" multiple=true
-                        id="KGpropertyFilter_stakeHolderSelect"
-                        onchange="KGpropertyFilter.onSelectFilter('stakeHolder',$(this).val())"></select>
+                        id="KGpropertyFilter_organizationSelect"
+                        onchange="KGpropertyFilter.onSelectFilter('organization',$(this).val())"></select>
 
             </div>
 
 
         </div>
+        -->
     </div>
 
 
@@ -78,13 +89,24 @@
 
         <div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
 
+
+            <!--
             <div class="KGpropertyFilter_tripleDiv">
                 LifeCycle filters <br>
-                <select class="KGpropertyFilter_filterSelect"
-                        id="KGpropertyFilter_lifeCycleSelect2"
-                        onchange="KGpropertyFilter.onSelectFilter('lifeCycle',$(this).val())"></select>
+                <div class="jstreeContainer"
+                     id="KGpropertyFilter_lifeCycleTree2"></div>
+
 
             </div>
+            <div class="KGpropertyFilter_tripleDiv">
+                LifeCycle filters <br>
+                <div class="jstreeContainer"
+                     id="KGpropertyFilter_disciplineTree2"></div>
+
+
+            </div>
+
+
             <div class="KGpropertyFilter_tripleDiv">
                 Discipline filters <br>
                 <select class="KGpropertyFilter_filterSelect"
@@ -95,8 +117,8 @@
             <div class="KGpropertyFilter_tripleDiv">
                 Stake holder filters <br>
                 <select class="KGpropertyFilter_filterSelect"
-                        id="KGpropertyFilter_stakeHolderSelect2"
-                        onchange="KGpropertyFilter.onSelectFilter('stakeHolder',$(this).val())"></select>
+                        id="KGpropertyFilter_organizationSelect2"
+                        onchange="KGpropertyFilter.onSelectFilter('organization',$(this).val())"></select>
 
             </div>
             <div>
@@ -105,9 +127,9 @@
             </div>
 
         </div>
-        <div id="KGpropertyFilter_filteringResult">
 
-        </div>
+        -->
+
 
     </div>
 </div>

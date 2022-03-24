@@ -4,11 +4,9 @@
 
 The first step before starting coding is to create an issue describing the feature/bugfix. Assign yourself to the issue. Set also the kanban project and a sprint milestone. When you start to work n the issue, move it to the `In progress` column of the [kanban](https://github.com/souslesens/souslesensVocables/projects/1).
 
-
 ## Create a development branch from master
 
 Create a branch from the master branch. Don't forget to pull the latest commit before create your branch.
-
 
 ```bash
 # Go to master branch
@@ -26,7 +24,6 @@ A---B---C master
          \
           feature/my-new-feature
 ```
-
 
 ## git add git commit git push
 
@@ -47,7 +44,6 @@ A---B---C master
          \
           D---E feature/my-new-feature
 ```
-
 
 ## Rebase your branch to the master head
 
@@ -82,16 +78,13 @@ A---B---C---F master
               D---E feature/my-new-feature
 ```
 
-
 ## Pull request
 
 Once your feature is stable, make a [pull request again the master branch](https://github.com/souslesens/souslesensVocables/pulls).
 
-
 ## Review
 
 Wait for another member on the team to review the change on case you break something.
-
 
 ## Merge
 

@@ -35,82 +35,67 @@
       background-image: url('images/2022-03-17_08-23-52.png');
 
     }
-
 </style>
 
-<div id="TE_AssetConfigurator_Tabs" style="width:360px;">
-
+<div id="TE_AssetConfigurator_Tabs" style="width: 360px">
     <ul>
         <li><a href="#TE_AssetConfigurator_graphTab">Graph</a></li>
 
         <li><a href="#TE_AssetConfigurator_AssetsTab">Assets</a></li>
-
-
     </ul>
 
-
     <div class="" id="TE_AssetConfigurator_graphTab">
-
-
-        Graphs <select id="TE_AssetConfigurator_savedGraphsSelect"
-                       onchange="TE_AssetConfigurator.loadGraph($(this).val())"></select>
+        Graphs
+        <select id="TE_AssetConfigurator_savedGraphsSelect" onchange="TE_AssetConfigurator.loadGraph($(this).val())"></select>
         <table>
-
-
             <tr>
                 <td>
                     <button onclick="TE_AssetConfigurator.saveGraph()">Save</button>
 
                     <button onclick="TE_AssetConfigurator.saveGraph(true)">Save new</button>
-
                 </td>
             </tr>
 
-
             <tr>
                 <td>
-                    show <select id="TE_AssetConfigurator_displayLabelsMode"
-                                 onchange="TE_AssetConfigurator.switchLabelsAndCodesInGraph($(this).val())">
-                    <option>codes</option>
-                    <option>labels</option>
-                    <option>individuals</option>
-                </select>
+                    show
+                    <select id="TE_AssetConfigurator_displayLabelsMode" onchange="TE_AssetConfigurator.switchLabelsAndCodesInGraph($(this).val())">
+                        <option>codes</option>
+                        <option>labels</option>
+                        <option>individuals</option>
+                    </select>
                 </td>
 
                 <td>
                     <button onclick="TE_AssetConfigurator.deleteSelectedObject()">Delete Selected</button>
                     <button onclick="TE_AssetConfigurator.clearAll()">Clear All</button>
                     <button onclick="TE_AssetConfigurator.clusterComponents()">Cluster Components</button>
-
                 </td>
             </tr>
-
-
         </table>
-        <br>
-        <div id="AssetConfigurator_graphHOverDiv" style="width:100%"></div>
-        <br>
+        <br />
+        <div id="AssetConfigurator_graphHOverDiv" style="width: 100%"></div>
+        <br />
         <div class="TE_AssetConfigurator_panel" id="AssetConfigurator_NodeInfosDiv"></div>
         <!-- <button onclick="TE_AssetConfigurator.showNodeQualities()"> Show node Qualities</button>-->
         <div class="TE_AssetConfigurator_panel" id="TE_AssetConfigurator_ProprertiesDiv"></div>
     </div>
     <div id="TE_AssetConfigurator_AssetsTab">
-
         <div>
-            Asset <select id="TE_AssetDataManager_assetDataSelect" onchange="TE_AssetDataManager.loadAsset($(this).val())">
-            <option></option>
-            <option>girassol</option>
-            <option>absheron</option>
-            <option>Moho_N</option>
-        </select>
-            <br>
+            Asset
+            <select id="TE_AssetDataManager_assetDataSelect" onchange="TE_AssetDataManager.loadAsset($(this).val())">
+                <option></option>
+                <option>girassol</option>
+                <option>absheron</option>
+                <option>Moho_N</option>
+            </select>
+            <br />
             <button onclick="TE_AssetDataManager.loadPIDgraph()">open P&ID graph</button>
             <button onclick="TE_AssetDataManager.savePIDgraph()">save P&ID graph</button>
-<br>
+            <br />
             <div class="TE_AssetConfigurator_assetPanelTreeContainer">
                 <div id="TE_AssetConfigurator_assetPanelTreeDiv"></div>
             </div>
-
         </div>
     </div>
 </div>

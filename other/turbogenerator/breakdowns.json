@@ -1,54 +1,50 @@
 {
-  "mappings": [
+    "mappings": [
+        {
+            "subject": "breakdown.uri1",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "breakdown.uri2",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "breakdown.uri3",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "breakdown.uri4",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "breakdown.uri5",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "breakdown.uri1",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "object": "breakdown.uri2"
+        },
+        {
+            "subject": "breakdown.uri2",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "object": "breakdown.uri3"
+        },
+        {
+            "subject": "breakdown.uri3",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "object": "breakdown.uri4"
+        },
 
-
-    {
-      "subject": "breakdown.uri1",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "breakdown.uri2",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "breakdown.uri3",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "breakdown.uri4",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "breakdown.uri5",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "breakdown.uri1",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.uri2"
-    },
-    {
-      "subject": "breakdown.uri2",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.uri3"
-    },
-    {
-      "subject": "breakdown.uri3",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.uri4"
-    },
-
-    {
-      "subject": "breakdown.uri4",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
-      "object": "breakdown.uri5"
-    }
-
-
-  ]
+        {
+            "subject": "breakdown.uri4",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "object": "breakdown.uri5"
+        }
+    ]
 }

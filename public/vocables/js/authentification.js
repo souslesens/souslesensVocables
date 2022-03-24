@@ -9,14 +9,12 @@
  */
 
 var authentication = (function () {
-
-    var self = {}
-// pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir Config version antérieure déployéee
+    var self = {};
+    // pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir Config version antérieure déployéee
     // self.authenticationUrl = "../authentication";
     var authenticationDBUrl = Config.serverUrl;
     self.userIndexes = [];
     self.currentUser = {};
-
 
     self.init = function (activate) {
         // Redirect to login if user is not logged
@@ -25,30 +23,28 @@ var authentication = (function () {
             url: "/api/v1/auth/check",
             success: function (data) {
                 if (!data.logged) {
-                    location.href = '/login';
+                    location.href = "/login";
                 } else {
                     var url = window.location.host;
                     authentication.currentUser = {
                         identifiant: data.user.login,
                         login: data.user.login,
                         groupes: data.user.groups,
-                    }
-                    $('#user-username').html(" " + authentication.currentUser.identifiant);
+                    };
+                    $("#user-username").html(" " + authentication.currentUser.identifiant);
                     if (data.authSource == "keycloak") {
-                      $('#manage-account').attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
+                        $("#manage-account").attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
                     } else {
                         console.log("hide account management");
                         $("#manage-account-li").hide();
                     }
 
-                    MainController.onAfterLogin()
-                    if (typeof sparql_abstract !== 'undefined')
-                    sparql_abstract.initSources()
-
+                    MainController.onAfterLogin();
+                    if (typeof sparql_abstract !== "undefined") sparql_abstract.initSources();
                 }
-            }
+            },
         });
-    }
+    };
 
     self.logout = function () {
         $.ajax({
@@ -56,9 +52,9 @@ var authentication = (function () {
             url: "/api/v1/auth/logout",
             success: function (data) {
                 location.href = data.redirect;
-            }
+            },
         });
-    }
+    };
 
     return self;
-})()
+})();

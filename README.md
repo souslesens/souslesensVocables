@@ -10,8 +10,8 @@
 
 It has functionalites to :
 
-- read : visualize, navigate and export
-- edit : create , modify, aggregate
+-   read : visualize, navigate and export
+-   edit : create , modify, aggregate
 
 both on SKOS or OWL resources
 
@@ -21,9 +21,9 @@ Annotate tool allows annotate textual corpus with several registered lexical res
 
 souslesensVocable needs the following prerequisites:
 
-- Nodejs
-- A sparql endpoint with public access
-- optional: elasticSearch, Spacy server
+-   Nodejs
+-   A sparql endpoint with public access
+-   optional: elasticSearch, Spacy server
 
 ### Nodejs
 
@@ -93,8 +93,8 @@ App is available at [localhost:3010/vocables](http://localhost:3010/vocables)
 
 souslesensVocable is deployed with Docker and docker-compose. The following services are included in the docker-compose stack:
 
-- souslesensVocable
-- Virtuoso
+-   souslesensVocable
+-   Virtuoso
 
 Copy `docker-compose.yaml` and `env.template` to your production server and create a `.env` file.
 

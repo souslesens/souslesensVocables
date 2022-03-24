@@ -92,25 +92,24 @@ openapi.initialize({
             return Promise.resolve(true);
         },
         restrictAdmin: function (req, scopes, definition) {
+            currentUser = userManager.getUser(req.user);
 
-          currentUser = userManager.getUser(req.user)
+            if (!currentUser.logged) {
+                throw {
+                    status: 401,
+                    message: "You must authenticate to access this ressource.",
+                };
+            }
 
-          if (!currentUser.logged) {
-            throw {
-                status: 401,
-                message: "You must authenticate to access this ressource.",
-            };
-          }
+            if (!currentUser.user.groups.includes("admin")) {
+                throw {
+                    status: 401,
+                    message: "You must be admin to access this ressource.",
+                };
+            }
 
-          if (!currentUser.user.groups.includes("admin")) {
-            throw {
-                status: 401,
-                message: "You must be admin to access this ressource.",
-            };
-          }
-
-          return Promise.resolve(true);
-        }
+            return Promise.resolve(true);
+        },
     },
 });
 

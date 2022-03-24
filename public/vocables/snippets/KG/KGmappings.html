@@ -9,7 +9,6 @@
     .mappingTriple {
         background-color: #dda;
 
-
         border: #372806 solid 1px;
         border-radius: 3px;
         display: flex;
@@ -24,7 +23,6 @@
         border-radius: 3px;
         border: #372806 solid 1px;
         background-color: #eee;
-
     }
 
     .mappingTripleSelected {
@@ -36,7 +34,6 @@
         display: flex;
         justify-content: center;
         font: 14px verdana bold;
-
     }
 
     #KGmappings_mappingsTriplesTA {
@@ -62,7 +59,6 @@
     }
 
     .dataSample_type {
-
         border-color: darkorange;
         background-color: #515185;
         color: white;
@@ -70,7 +66,6 @@
         font-size: 12px;
     }
     .dataSample_type li {
-
         text-align: left;
     }
 
@@ -81,39 +76,26 @@
     .dataSample_cellValue {
         font: normal 8px Verdana;
     }
-    .dataSample_join{
+    .dataSample_join {
         border-color: blue;
     }
 
-    .datasample_type_selected{
+    .datasample_type_selected {
         background-color: #86d5f8;
     }
-
-
-
 </style>
 
-<div class="KGmappings_panel" id="KGmappings_MappingsPanel" style="width:100%">
+<div class="KGmappings_panel" id="KGmappings_MappingsPanel" style="width: 100%">
+    <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGmappings.displayMappings()">display Mappings</button>-->
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGmappings.clearMappings()">clear</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGmappings.displayMappings()">display Mappings</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGmappings_saveMappingsButton" onclick="KGmappings.saveMappings()">save Mappings</button>
 
-
-   <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGmappings.displayMappings()">display Mappings</button>-->
-    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGmappings.clearMappings()">clear</button>
-    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGmappings.displayMappings()">display Mappings</button>
-    <button class='btn btn-sm my-1 py-0 btn-outline-primary' id='KGmappings_saveMappingsButton' onclick="KGmappings.saveMappings()">save Mappings</button>
-
-    <span style='color:green;font-weight: bold' id="KGmappings_mappingInfos"></span>
-    <div id="KGmappings_dataSampleDiv" style="width:100%;height: 300px;overflow: auto"></div>
+    <span style="color: green; font-weight: bold" id="KGmappings_mappingInfos"></span>
+    <div id="KGmappings_dataSampleDiv" style="width: 100%; height: 300px; overflow: auto"></div>
 </div>
 
-    <div class="KGmappings_panel" id="KGmappings_graph" style="width:100%;height:500px;">
+<div class="KGmappings_panel" id="KGmappings_graph" style="width: 100%; height: 500px"></div>
 
-
-</div>
-
-
-<div  id="KGmappings_AdvancedMappingDialogDiv">
-   div height: 800,
-    width: 1000,
-
-</div>
-<div  id="KGassetGraphDiv" style="width:1000px;height: 600px"></div>
+<div id="KGmappings_AdvancedMappingDialogDiv">div height: 800, width: 1000,</div>
+<div id="KGassetGraphDiv" style="width: 1000px; height: 600px"></div>

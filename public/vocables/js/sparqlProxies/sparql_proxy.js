@@ -16,35 +16,32 @@ var Sparql_proxy = (function () {
         var limit = Config.queryLimit;
         var resultSize = 1;
         var allData = {
-            results: {bindings: []}
-        }
+            results: { bindings: [] },
+        };
 
-        var p = query.toLowerCase().indexOf("limit")
-        if (p > -1)
-            var query = query.substring(0, p)
+        var p = query.toLowerCase().indexOf("limit");
+        if (p > -1) var query = query.substring(0, p);
         query += " LIMIT " + limit;
 
-
         async.whilst(
-            function (callbackTest) {//test
+            function (callbackTest) {
+                //test
                 return resultSize > 0;
             },
-            function (callbackWhilst) {//iterate
+            function (callbackWhilst) {
+                //iterate
 
-                var queryCursor = query + " OFFSET " + offset
-
+                var queryCursor = query + " OFFSET " + offset;
 
                 var body = {
-                    params: {query: queryCursor},
+                    params: { query: queryCursor },
                     headers: {
-                        "Accept": "application/sparql-results+json",
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    }
-                }
-
+                        Accept: "application/sparql-results+json",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                };
 
                 $("#waitImg").css("display", "block");
-
 
                 //   url="http://vps475829.ovh.net:8890/sparql"
                 var payload = {
@@ -52,8 +49,7 @@ var Sparql_proxy = (function () {
                     url: url,
                     body: body,
                     POST: true,
-
-                }
+                };
                 $.ajax({
                     type: "POST",
                     url: Config.serverUrl,
@@ -67,97 +63,76 @@ var Sparql_proxy = (function () {
                         var xx = data;
 
                         callbackWhilst(null, data);
-                        resultSize = data.results.bindings.length
+                        resultSize = data.results.bindings.length;
                         allData.results.bindings = allData.results.bindings.concat(data.results.bindings);
                         offset += limit;
-
-                    }
-                    , error: function (err) {
+                    },
+                    error: function (err) {
                         $("#messageDiv").html(err.responseText);
 
                         $("#waitImg").css("display", "none");
-                        console.log(JSON.stringify(err))
-                        console.log(JSON.stringify(query))
-                        return callbackWhilst(err)
-
-                    }
-
+                        console.log(JSON.stringify(err));
+                        console.log(JSON.stringify(query));
+                        return callbackWhilst(err);
+                    },
                 });
-
             },
             function (err) {
-                callback(err, allData)
-
-            })
-    }
-
+                callback(err, allData);
+            }
+        );
+    };
 
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
-        if(url.indexOf("_default")==0)
-            url=Config.default_sparql_url;
+        if (url.indexOf("_default") == 0) url = Config.default_sparql_url;
 
         self.currentQuery = query;
-    //  common.copyTextToClipboard(query)
-        if (!options)
-            options = {}
-
+        //  common.copyTextToClipboard(query)
+        if (!options) options = {};
 
         $("#waitImg").css("display", "block");
 
-
         var payload = {
             httpProxy: 1,
-            options: {}
-        }
-        if(!queryOptions)
-            queryOptions=""
+            options: {},
+        };
+        if (!queryOptions) queryOptions = "";
 
-        var sourceParams
-        if (options.source)
-            sourceParams = Config.sources[options.source];
-        else
-            sourceParams = Config.sources[MainController.currentSource];
+        var sourceParams;
+        if (options.source) sourceParams = Config.sources[options.source];
+        else sourceParams = Config.sources[MainController.currentSource];
 
-
-        var useProxy=false;
-        if(url.indexOf(Config.default_sparql_url)==0)
-            useProxy=true;
-
+        var useProxy = false;
+        if (url.indexOf(Config.default_sparql_url) == 0) useProxy = true;
 
         if (sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
             payload.GET = true;
             var query2 = encodeURIComponent(query);
-            query2 = query2.replace(/%2B/g, "+").trim()
-            payload.url = url + query2 + queryOptions
+            query2 = query2.replace(/%2B/g, "+").trim();
+            payload.url = url + query2 + queryOptions;
             if (sourceParams.sparql_server.headers) {
-                payload.options = JSON.stringify({headers: sourceParams.sparql_server.headers,useProxy:useProxy})
+                payload.options = JSON.stringify({ headers: sourceParams.sparql_server.headers, useProxy: useProxy });
             }
-
-        } else {//POST
+        } else {
+            //POST
             payload.POST = true;
-            var headers = {}
+            var headers = {};
             if (sourceParams.sparql_server.headers) {
-                body = JSON.stringify({headers: sourceParams.server.headers})
-
-
+                body = JSON.stringify({ headers: sourceParams.server.headers });
             }
-            if(sourceParams && sourceParams.sparql_server.type=="fuseki")
-                url=url.replace("&query=","")
-
+            if (sourceParams && sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
 
             headers["Accept"] = "application/sparql-results+json";
-            headers["Content-Type"] = "application/x-www-form-urlencoded"
+            headers["Content-Type"] = "application/x-www-form-urlencoded";
             var body = {
-                params: {query: query,useProxy:useProxy},
+                params: { query: query, useProxy: useProxy },
                 headers: headers,
-
-
-            }
+            };
 
             payload.body = JSON.stringify(body);
-            payload.url = url+ queryOptions
+            payload.url = url + queryOptions;
         }
-//console.log(options.source +"  "+payload.url)
+        //console.log(options.source +"  "+payload.url)
         $.ajax({
             type: "POST",
             url: Config.serverUrl,
@@ -168,39 +143,29 @@ var Sparql_proxy = (function () {
              },*/
 
             success: function (data, textStatus, jqXHR) {
+                if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
 
+                if (!data.results) return callback(null, { results: { bindings: [] } });
 
-                if (data.result && typeof data.result != "object")
-                    data = JSON.parse(data.result.trim())
-
-                if (!data.results)
-                    return callback(null, {results: {bindings: []}});
-
-
-                callback(null, data)
-
-            }
-            , error: function (err) {
-                if (err.responseText.indexOf("Virtuoso 42000") > -1) { //Virtuoso 42000 The estimated execution time
-                    alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data")
-                } else
-                    MainController.UI.message(err.responseText);
+                callback(null, data);
+            },
+            error: function (err) {
+                if (err.responseText.indexOf("Virtuoso 42000") > -1) {
+                    //Virtuoso 42000 The estimated execution time
+                    alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
+                } else MainController.UI.message(err.responseText);
 
                 $("#waitImg").css("display", "none");
-                console.log(JSON.stringify(err))
-                console.log(JSON.stringify(query))
+                console.log(JSON.stringify(err));
+                console.log(JSON.stringify(query));
                 MainController.UI.message(err.responseText);
                 if (callback) {
-                    return callback(err)
+                    return callback(err);
                 }
-                return (err);
-            }
-
+                return err;
+            },
         });
-    }
-
+    };
 
     return self;
-
-
-})()
+})();

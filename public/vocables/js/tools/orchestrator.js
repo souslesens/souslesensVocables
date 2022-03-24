@@ -1,60 +1,41 @@
-const broadcastChannel = new BroadcastChannel('SLSV');
-
+const broadcastChannel = new BroadcastChannel("SLSV");
 
 broadcastChannel.onmessage = function (ev) {
-
     if (ev.data.initStandardizerWords) {
-        var data = ev.data.initStandardizerWords
+        var data = ev.data.initStandardizerWords;
 
-        MainController.UI.initTool("Standardizer",function(err,result) {
-            ;
-
+        MainController.UI.initTool("Standardizer", function (err, result) {
             //  setTimeout(function () {
             var str = "";
             data.forEach(function (item) {
-                str += item + "\n"
-            })
-            $("#Standardizer_wordsTA").val(str)
+                str += item + "\n";
+            });
+            $("#Standardizer_wordsTA").val(str);
 
             //  }, 500)
-        })
-
-
-    }
-
-
-
-    else if (ev.data.showStandardizerResultsInLineage) {
+        });
+    } else if (ev.data.showStandardizerResultsInLineage) {
         var classUrisBySource = ev.data.showStandardizerResultsInLineage;
 
-        MainController.UI.initTool("lineage",function(err,result) {
+        MainController.UI.initTool("lineage", function (err, result) {
             //  setTimeout(function () {
             var i = 0;
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
-
-                if (i++ == 0)
-                    MainController.currentSource = source
-                MainController.UI.onSourceSelect()
+                if (i++ == 0) MainController.currentSource = source;
+                MainController.UI.onSourceSelect();
                 Lineage_classes.addParentsToGraph(source, classUrisBySource[source], function (err) {
-                    if (err)
-                        return alert(err)
-                    callbackEach()
-                })
-
-            })
+                    if (err) return alert(err);
+                    callbackEach();
+                });
+            });
             //   }, 500)
-        })
+        });
     }
 
-
     //  alert(ev);
-}
+};
 var Orchestrator = (function () {
-
-    var self = {}
-
+    var self = {};
 
     return self;
-
-
-})()
+})();

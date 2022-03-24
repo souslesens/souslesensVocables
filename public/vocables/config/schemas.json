@@ -1,69 +1,45 @@
-
-
-
 {
-  "": {
-    "sparql_url": "_default",
-    "graphUri": "http://www.w3.org/2004/02/skos/core/",
-    "label": "skos",
-    "isOntology":false,
-    "allSubclasses": true,
-    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
-    "labelProperty":  "http://www.w3.org/2004/02/skos/core#prefLabel",
-    "newObject": {
-      "treeChildrenClasses": {
-        "http://www.w3.org/2004/02/skos/core#Concept": "http://www.w3.org/2004/02/skos/core#Concept",
-        "http://www.w3.org/2004/02/skos/core#ConceptScheme": "http://www.w3.org/2004/02/skos/core#Concept"
-      },
+    "": {
+        "sparql_url": "_default",
+        "graphUri": "http://www.w3.org/2004/02/skos/core/",
+        "label": "skos",
+        "isOntology": false,
+        "allSubclasses": true,
+        "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+        "labelProperty": "http://www.w3.org/2004/02/skos/core#prefLabel",
+        "newObject": {
+            "treeChildrenClasses": {
+                "http://www.w3.org/2004/02/skos/core#Concept": "http://www.w3.org/2004/02/skos/core#Concept",
+                "http://www.w3.org/2004/02/skos/core#ConceptScheme": "http://www.w3.org/2004/02/skos/core#Concept"
+            },
 
-      "treeParentProperty": "http://www.w3.org/2004/02/skos/core#broader",
-      "mandatoryProperties": [
-        "http://www.w3.org/2004/02/skos/core#prefLabel"
-      ]
+            "treeParentProperty": "http://www.w3.org/2004/02/skos/core#broader",
+            "mandatoryProperties": ["http://www.w3.org/2004/02/skos/core#prefLabel"]
+        }
+    },
+
+    "OWLXXX": {
+        "sparql_url": "_default",
+        "graphUri": "http://data.total.com/resource/one-model/rdfsOwlSimplified/",
+        "label": "OWL",
+        "isOntology": true,
+        "newSourceTopClass": "http://www.w3.org/2002/07/owl#Class",
+        "newObject": {
+            "treeChildrenClasses": {},
+            "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            "mandatoryProperties": ["http://www.w3.org/2000/01/rdf-schema#label"]
+        }
+    },
+    "NPDX": {
+        "sparql_url": "_default",
+        "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
+        "label": "NPD",
+        "isOntology": true,
+        "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+        "newObject": {
+            "treeChildrenClasses": {},
+            "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            "mandatoryProperties": ["http://www.w3.org/2000/01/rdf-schema#label"]
+        }
     }
-  },
-
-  "OWLXXX": {
-    "sparql_url": "_default",
-    "graphUri":"http://data.total.com/resource/one-model/rdfsOwlSimplified/",
-    "label": "OWL",
-    "isOntology":true,
-    "newSourceTopClass": "http://www.w3.org/2002/07/owl#Class",
-    "newObject": {
-      "treeChildrenClasses": {
-      },
-      "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-      "mandatoryProperties": [
-        "http://www.w3.org/2000/01/rdf-schema#label"
-      ]
-    }
-  },
- "NPDX": {
-    "sparql_url": "_default",
-    "graphUri": "http://sws.ifi.uio.no/vocab/npd-v2/",
-    "label": "NPD",
-    "isOntology":true,
-    "newSourceTopClass": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
-    "newObject": {
-      "treeChildrenClasses": {
-      },
-      "newObjectParentProperty": "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-      "mandatoryProperties": [
-        "http://www.w3.org/2000/01/rdf-schema#label"
-      ]
-    }
-  }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-

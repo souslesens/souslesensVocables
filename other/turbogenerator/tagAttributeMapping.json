@@ -1,44 +1,44 @@
 {
-  "mappings": [
-    {
-      "subject": "tag_attribute.TagId",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "tag_attribute.AttributeID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
-    },
-    {
-      "subject": "tag_attribute.AttributeID",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "tag_attribute.FromValue"
-    },
-    {
-      "subject": "tag_attribute.AttributeID",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "tag_attribute.ToValue"
-    },
-    {
-      "subject": "tag_attribute.AttributeID",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "tag_attribute.UnitOfMeasureID"
-    },
-    {
-      "subject": "tag_attribute.AttributeID",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "tag_attribute.Status"
-    },
-    {
-      "subject": "tag_attribute.AttributeID",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "tag_attribute.Source"
-    },
-    {
-      "subject": "tag_attribute.TagId",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
-      "object": "tag_attribute.AttributeID"
-    }
-  ]
+    "mappings": [
+        {
+            "subject": "tag_attribute.TagId",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
+        },
+        {
+            "subject": "tag_attribute.AttributeID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+        },
+        {
+            "subject": "tag_attribute.AttributeID",
+            "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+            "object": "tag_attribute.FromValue"
+        },
+        {
+            "subject": "tag_attribute.AttributeID",
+            "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+            "object": "tag_attribute.ToValue"
+        },
+        {
+            "subject": "tag_attribute.AttributeID",
+            "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+            "object": "tag_attribute.UnitOfMeasureID"
+        },
+        {
+            "subject": "tag_attribute.AttributeID",
+            "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+            "object": "tag_attribute.Status"
+        },
+        {
+            "subject": "tag_attribute.AttributeID",
+            "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+            "object": "tag_attribute.Source"
+        },
+        {
+            "subject": "tag_attribute.TagId",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+            "object": "tag_attribute.AttributeID"
+        }
+    ]
 }

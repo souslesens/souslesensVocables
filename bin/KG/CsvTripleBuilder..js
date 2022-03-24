@@ -36,7 +36,7 @@ var CsvTripleBuilder = {
     createTriples: function (mappings, graphUri, sparqlServerUrl, options, callback) {
         //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
         var totalTriples = 0;
-        var errors=""
+        var errors = "";
         var existingNodes = {};
         var propertiesTypeMap = {
             "rdfs:label": "string",
@@ -343,7 +343,6 @@ var CsvTripleBuilder = {
 
                         //write triples
                         function (callbackSeries) {
-
                             if (options.sampleSize) {
                                 var sampleTriples = triples.slice(0, options.sampleSize);
                                 return callback(null, sampleTriples);
@@ -353,25 +352,23 @@ var CsvTripleBuilder = {
 
                             var slices = util.sliceArray(triples, 200);
 
-                            var sliceIndex=0
+                            var sliceIndex = 0;
                             async.eachSeries(
                                 slices,
                                 function (slice, callbackEach) {
                                     CsvTripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                         if (err) {
                                             var x = sparqlServerUrl;
-                                            errors+=err+" slice "+sliceIndex+"\n"
+                                            errors += err + " slice " + sliceIndex + "\n";
                                             return callbackEach(err);
                                         }
-                                        sliceIndex+=1
+                                        sliceIndex += 1;
                                         totalTriples += result;
 
                                         callbackEach();
                                     });
                                 },
                                 function (err) {
-
-
                                     callbackSeries();
                                 }
                             );
@@ -384,10 +381,9 @@ var CsvTripleBuilder = {
                 );
             },
             function (err) {
-                if (callback){
-                    var message=("------------ created triples "+ totalTriples  );
-                    return callback(errors? +"    ERRORS"+ errors:null,message);
-
+                if (callback) {
+                    var message = "------------ created triples " + totalTriples;
+                    return callback(errors ? +"    ERRORS" + errors : null, message);
                 }
             }
         );

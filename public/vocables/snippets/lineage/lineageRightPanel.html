@@ -11,68 +11,46 @@
     .Lineage_propertiesTree {
         width: inherit !important;
     }
-
 </style>
 <div>
-
-
-    <div id="Lineage_Tabs" style="width:360px;">
-
+    <div id="Lineage_Tabs" style="width: 360px">
         <ul>
             <li><a href="#Lineage_ClassesTab">Classes</a></li>
 
             <li><a href="#LineagePropertiesTab">Properties</a></li>
             <li><a href="#LineageRelationsTab">Relations</a></li>
-
         </ul>
 
-
         <div class="" id="Lineage_ClassesTab">
-
-            <div id="GenericTools_searchAllDiv" style="height: 50px;margin-bottom: 10px"></div>
-            <div id="Lineage_sourceLabelDiv"
-                 style="font-size:14px ;color:#372806;font-weight: bold;background-color: #bdbdbd"></div>
-            <div class="jstreeContainer" style="width:90%">
+            <div id="GenericTools_searchAllDiv" style="height: 50px; margin-bottom: 10px"></div>
+            <div id="Lineage_sourceLabelDiv" style="font-size: 14px; color: #372806; font-weight: bold; background-color: #bdbdbd"></div>
+            <div class="jstreeContainer" style="width: 90%">
                 <div id="LineagejsTreeDiv"></div>
             </div>
         </div>
 
-
         <div id="LineagePropertiesTab">
             <div>
-                <input id='LineageProperties_searchAllSourcesTermInput' style="width: 200px" value="">
-                <button class='btn btn-sm my-1 py-0 btn-outline-primary' id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>
-                    Search
-                </button>
-                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
+                <input id="LineageProperties_searchAllSourcesTermInput" style="width: 200px" value="" />
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="LineageProperties_onSearchAllInput" onclick="Lineage_properties.searchAllSourcesTerm()">Search</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
             </div>
-            <div>
-                <input type='checkbox' id='LineageProperties_allExactMatchSearchCBX'>Exact Match
-
-            </div>
-            <div class="jstreeContainer" style="width:90%">
+            <div><input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match</div>
+            <div class="jstreeContainer" style="width: 90%">
                 <div class="jstree" id="Lineage_propertiesTree"></div>
             </div>
-
-
         </div>
-        <div id="LineageRelationsTab" style="display: flex;flex-direction: column;">
+        <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
             <div class="lineage_actionDiv">
-<div class="lineage_actionDiv_title">Selection</div>
-                <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))"
-                       id="Lineage_classes_showImportsCBX"> imports
-
-                Nodes Selection
-                <select  style="width:300px" id="LineageRelations_nodesSelectionSelect">
+                <div class="lineage_actionDiv_title">Selection</div>
+                <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" /> imports Nodes Selection
+                <select style="width: 300px" id="LineageRelations_nodesSelectionSelect">
                     <option value="currentGraphNodes">Current Graph Nodes</option>
                     <option value="selectedNodeDescendants">Selected node descendants</option>
                     <option value="allNodes">All Nodes</option>
-
-
                 </select>
-
             </div>
-            <div> </div>
+            <div></div>
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">Existing relations</div>
                 <div>
@@ -81,31 +59,33 @@
                      <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
                      <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportProperties()">Export</button>
                      <br>-->
-                    <div> filters
+                    <div>
+                        filters
                         <div>
-                            Properties <select style="width:300px" id="LineageRelations_propertiesSelect"></select>
+                            Properties
+                            <select style="width: 300px" id="LineageRelations_propertiesSelect"></select>
                         </div>
                         <div>
-                            Status <select  style="width:300px" id="LineageRelations_statusSelect"></select>
+                            Status
+                            <select style="width: 300px" id="LineageRelations_statusSelect"></select>
                         </div>
                         <div>
-                            Provenance <select style="width:300px" id="LineageRelations_provenanceSelect"></select>
+                            Provenance
+                            <select style="width: 300px" id="LineageRelations_provenanceSelect"></select>
                         </div>
                         <div>
-                            Creator <select style="width:300px" id="LineageRelations_creatorSelect"></select>
+                            Creator
+                            <select style="width: 300px" id="LineageRelations_creatorSelect"></select>
                         </div>
-
                     </div>
 
                     Restrictions
-                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('table')">List</button>
-                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showRestrictions('visjs')">Graph </button>
-                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportRestrictions()">Export</button>
-
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('table')">List</button>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('visjs')">Graph</button>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.exportRestrictions()">Export</button>
                 </div>
-
             </div>
-            <div> </div>
+            <div></div>
 
             <!--
             <div class="lineage_actionDiv">
@@ -118,7 +98,7 @@
                 <!__ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>__>
 
             </div>-->
-            <div> </div>
+            <div></div>
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">ProjectedGraphs</div>
 
@@ -131,23 +111,16 @@
             <!--  <div class="jstreeContainer" style="width:90%">
                   <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
               </div>-->
-            <div class="jstreeContainer" style="width:90%">
+            <div class="jstreeContainer" style="width: 90%">
                 <div class="jstree" id="Lineage_relationsTree"></div>
             </div>
         </div>
     </div>
-
-
 </div>
 
-
 <script>
-    SourceBrowser.targetDiv = "LineagejsTreeDiv"
-    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html",function () {
-        $("#GenericTools_searchInAllSources").prop("checked", false)
-
-    })
-
-
-
+    SourceBrowser.targetDiv = "LineagejsTreeDiv";
+    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function () {
+        $("#GenericTools_searchInAllSources").prop("checked", false);
+    });
 </script>

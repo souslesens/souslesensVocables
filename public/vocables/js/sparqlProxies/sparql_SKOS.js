@@ -11,35 +11,32 @@
  */
 
 var Sparql_SKOS = (function () {
-        var source = "";
+    var source = "";
 
-        self.getTopConcepts = function (sourceLabel, options, callback) {
+    self.getTopConcepts = function (sourceLabel, options, callback) {
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
+        query += sourceVariables.prefixesStr;
+        query += " select distinct ?topConcept ?topConceptLabel " + sourceVariables.fromStr + "  WHERE {";
+        query += sourceVariables.topConceptFilter;
+        query += "?topConcept " + sourceVariables.prefLabelPredicate + " ?topConceptLabel.";
+        if (sourceVariables.lang && !options.noLang) query += "filter(lang(?topConceptLabel )='" + sourceVariables.lang + "')";
 
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
-            query += sourceVariables.prefixesStr
-            query += " select distinct ?topConcept ?topConceptLabel " + sourceVariables.fromStr + "  WHERE {"
-            query += sourceVariables.topConceptFilter;
-            query += "?topConcept " + sourceVariables.prefLabelPredicate + " ?topConceptLabel.";
-            if (sourceVariables.lang && !options.noLang)
-                query += "filter(lang(?topConceptLabel )='" + sourceVariables.lang + "')"
+        if (options.filterCollections) query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + Sparql_common.getUriFilter("collection", options.filterCollections);
 
-            if (options.filterCollections)
-                query += "?collection skos:member ?aconcept. ?aConcept skos:broader* ?topConcept." + Sparql_common.getUriFilter("collection", options.filterCollections)
+        query += "  } ORDER BY ?topConceptLabel ";
+        query += "limit " + sourceVariables.limit + " ";
 
-            query += "  } ORDER BY ?topConceptLabel ";
-            query += "limit " + sourceVariables.limit + " ";
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept");
+            return callback(null, result.results.bindings);
+        });
+    };
 
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept")
-                return callback(null, result.results.bindings)
-            })
-        }
-
-        /**
+    /**
          *
          * request example with collection filtering
          PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?conceptLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?concept.
@@ -69,112 +66,108 @@ var Sparql_SKOS = (function () {
             callback
          */
 
+    self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
+        $("#waitImg").css("display", "block");
 
-        self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
-            $("#waitImg").css("display", "block");
-
-
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var filterStr = Sparql_common.setFilter("concept", ids, words, options)
-            if (filterStr == "")
-                return alert("no parent specified for getNodeChildren ")
-            if (!options) {
-                options = {depth: 0}
-            }
-
-
-            var query = "";
-            query += sourceVariables.prefixesStr;
-            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
-
-            query += "?child1 " + sourceVariables.broaderPredicate + " ?concept." +
-                "OPTIONAL{ ?child1 " + sourceVariables.prefLabelPredicate + " ?child1Label. ";
-            if (sourceVariables.lang && !options.noLang)
-                query += "filter( lang(?child1Label)=\"" + sourceVariables.lang + "\")"
-            query += "}"
-            query += filterStr;
-            query += "OPTIONAL{?child1 rdf:type ?child1Type.}"
-
-
-            descendantsDepth = Math.min(descendantsDepth, sourceVariables.optionalDepth);
-            for (var i = 1; i < descendantsDepth; i++) {
-
-                query += "OPTIONAL { ?child" + (i + 1) + " " + sourceVariables.broaderPredicate + " ?child" + i + "." +
-                    "OPTIONAL{?child" + (i + 1) + " " + sourceVariables.prefLabelPredicate + "  ?child" + (i + 1) + "Label."
-                if (sourceVariables.lang && !options.noLang)
-                    query += "filter( lang(?child" + (i + 1) + "Label)=\"" + sourceVariables.lang + "\")"
-                query += "}"
-                query += "OPTIONAL {?child" + (i + 1) + " rdf:type ?child" + (i + 1) + "Type.}"
-            }
-            for (var i = 1; i < descendantsDepth; i++) {
-                query += "} "
-            }
-
-
-            query += "} ";
-            query += "limit " + sourceVariables.limit + " ";
-
-
-
-
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-
-
-                if (err) {
-                    return callback(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"])
-
-                result.results.bindings = Sparql_generic.sortBindings(result.results.bindings, "child1Label")
-                return callback(null, result.results.bindings);
-            })
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var filterStr = Sparql_common.setFilter("concept", ids, words, options);
+        if (filterStr == "") return alert("no parent specified for getNodeChildren ");
+        if (!options) {
+            options = { depth: 0 };
         }
 
+        var query = "";
+        query += sourceVariables.prefixesStr;
+        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
 
-        self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
-            $("#waitImg").css("display", "block");
+        query += "?child1 " + sourceVariables.broaderPredicate + " ?concept." + "OPTIONAL{ ?child1 " + sourceVariables.prefLabelPredicate + " ?child1Label. ";
+        if (sourceVariables.lang && !options.noLang) query += 'filter( lang(?child1Label)="' + sourceVariables.lang + '")';
+        query += "}";
+        query += filterStr;
+        query += "OPTIONAL{?child1 rdf:type ?child1Type.}";
 
+        descendantsDepth = Math.min(descendantsDepth, sourceVariables.optionalDepth);
+        for (var i = 1; i < descendantsDepth; i++) {
+            query +=
+                "OPTIONAL { ?child" +
+                (i + 1) +
+                " " +
+                sourceVariables.broaderPredicate +
+                " ?child" +
+                i +
+                "." +
+                "OPTIONAL{?child" +
+                (i + 1) +
+                " " +
+                sourceVariables.prefLabelPredicate +
+                "  ?child" +
+                (i + 1) +
+                "Label.";
+            if (sourceVariables.lang && !options.noLang) query += "filter( lang(?child" + (i + 1) + 'Label)="' + sourceVariables.lang + '")';
+            query += "}";
+            query += "OPTIONAL {?child" + (i + 1) + " rdf:type ?child" + (i + 1) + "Type.}";
+        }
+        for (var i = 1; i < descendantsDepth; i++) {
+            query += "} ";
+        }
 
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var filterStr = ""
-            if (options && options.filter) {
+        query += "} ";
+        query += "limit " + sourceVariables.limit + " ";
 
-                if (options.filter.predicates) {
-                    filterStr = Sparql_common.setFilter("predicate", options.filter.predicates)
-                }
-
-
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
             }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"]);
 
-            var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
-                "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            result.results.bindings = Sparql_generic.sortBindings(result.results.bindings, "child1Label");
+            return callback(null, result.results.bindings);
+        });
+    };
+
+    self.getCollectionNodes = function (sourceLabel, collection, options, callback) {
+        $("#waitImg").css("display", "block");
+
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var filterStr = "";
+        if (options && options.filter) {
+            if (options.filter.predicates) {
+                filterStr = Sparql_common.setFilter("predicate", options.filter.predicates);
+            }
+        }
+
+        var query =
+            " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
+            "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
+            "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+            " select  distinct * " +
+            sourceVariables.fromStr +
+            "   WHERE { " +
+            " ?subject ?predicate ?object. " +
+            filterStr +
+            "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})";
+
+        if (!collection || collection == "") {
+            query += "}";
+            query += " limit " + sourceVariables.limit + " ";
+        } else {
+            query =
+                " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
                 "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                " select  distinct * " + sourceVariables.fromStr + "   WHERE { " +
-                " ?subject ?predicate ?object. " + filterStr +
-                "?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection})"
-
-
-            if (!collection || collection == "") {
-
-                query += "}";
-                query += " limit " + sourceVariables.limit + " ";
-            } else {
-
-                query=" PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-                    "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-                    " select  distinct *  "+sourceVariables.fromStr+"   WHERE { " +
-                    " ?subject ?predicate ?object.  FILTER ( ?predicate in( skos:prefLabel,skos:broader) )" +
-                    "  ?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection}) " +
-                    "  ?collection skos:member* ?acollection. " +
-                   Sparql_common.getUriFilter("collection", collection) +
-                    "?acollection rdf:type skos:Collection.    ?acollection skos:member ?subject0. " +
-                    " ?subject (^skos:broader+|skos:broader?) ?subject0." +
-                    "   ?collection skos:prefLabel ?collectionLabel. " +
-                    "  ?acollection skos:prefLabel ?acollectionLabel. " +
-                    "  ?subject skos:prefLabel ?subjectLabel." +
-                    "filter( lang(?subjectLabel)='en')" +
-                    "} limit 10000"
+                " select  distinct *  " +
+                sourceVariables.fromStr +
+                "   WHERE { " +
+                " ?subject ?predicate ?object.  FILTER ( ?predicate in( skos:prefLabel,skos:broader) )" +
+                "  ?subject rdf:type ?type. filter( not exists {?subject rdf:type skos:Collection}) " +
+                "  ?collection skos:member* ?acollection. " +
+                Sparql_common.getUriFilter("collection", collection) +
+                "?acollection rdf:type skos:Collection.    ?acollection skos:member ?subject0. " +
+                " ?subject (^skos:broader+|skos:broader?) ?subject0." +
+                "   ?collection skos:prefLabel ?collectionLabel. " +
+                "  ?acollection skos:prefLabel ?acollectionLabel. " +
+                "  ?subject skos:prefLabel ?subjectLabel." +
+                "filter( lang(?subjectLabel)='en')" +
+                "} limit 10000";
             /*    query += "   ?collection skos:member* ?acollection. " + Sparql_common.getUriFilter("collection", collection) +
                     "?acollection rdf:type skos:Collection.    ?acollection skos:member/(^skos:broader+|skos:broader*) ?subject.  " +
                     "   ?collection skos:prefLabel ?collectionLabel." +
@@ -184,508 +177,456 @@ var Sparql_SKOS = (function () {
 
                     "}"
                      query += " limit " + sourceVariables.limit + " ";*/
-            }
-
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-
-
-                if (err) {
-                    return callback(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"])
-                return callback(null, result.results.bindings);
-            })
         }
 
-        self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
-            $("#waitImg").css("display", "block");
-
-            if (!options) {
-                options = {depth: 0}
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
             }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "predicate"]);
+            return callback(null, result.results.bindings);
+        });
+    };
 
-            options.source = sourceLabel
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var filterStr = Sparql_common.setFilter("concept", ids, words, options)
-            var query = "";
-            query += sourceVariables.prefixesStr;
-            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {{"
+    self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
+        $("#waitImg").css("display", "block");
 
-            var labelPredicate= sourceVariables.prefLabelPredicate
-            if ( options.searchAltLabels)
-                labelPredicate= sourceVariables.prefLabelPredicate + "|skos:altLabel"
-            query += "?concept " + labelPredicate + " ?conceptLabel. ";
-            if (sourceVariables.lang && sourceVariables.lang != "" && !options.noLang)
-                query += "filter( lang(?conceptLabel)=\"" + sourceVariables.lang + "\")"
-            query += filterStr;
-            query += "OPTIONAL{?concept rdf:type ?type.}"
-
-
-            ancestorsDepth = Math.min(ancestorsDepth, sourceVariables.optionalDepth);
-            for (var i = 1; i <= ancestorsDepth; i++) {
-                if (i == 1) {
-                    query += "  OPTIONAL{?concept " + sourceVariables.broaderPredicate + " ?broader" + i + "." +
-                        "?broader" + (i) + " " + sourceVariables.prefLabelPredicate + " ?broader" + (i) + "Label."
-                    if (sourceVariables.lang)
-                        query += "filter(lang(?broader" + (i) + "Label)=\"" + sourceVariables.lang + "\")"
-
-                } else {
-                    query += "OPTIONAL { ?broader" + (i - 1) + " " + sourceVariables.broaderPredicate + " ?broader" + i + "." +
-                        "?broader" + (i) + " " + sourceVariables.prefLabelPredicate + " ?broader" + (i) + "Label."
-                    if (sourceVariables.lang && !options.noLang)
-                        query += "filter( lang(?broader" + (i) + "Label)=\"" + sourceVariables.lang + "\")"
-
-                }
-                query += "?broader" + (i) + " rdf:type ?type."
-
-            }
-
-
-            for (var i = 0; i < ancestorsDepth; i++) {
-                query += "} "
-            }
-
-
-            query += "  }";
-
-            if (options.filterCollections) {
-                query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections)
-            }
-            var limit = options.limit || Config.queryLimit;
-            query += "}limit " + limit + " ";
-
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, options, function (err, result) {
-
-                if (err) {
-                    return callback(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "broader"])
-                return callback(null, result.results.bindings);
-            })
+        if (!options) {
+            options = { depth: 0 };
         }
 
+        options.source = sourceLabel;
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var filterStr = Sparql_common.setFilter("concept", ids, words, options);
+        var query = "";
+        query += sourceVariables.prefixesStr;
+        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {{";
 
-        self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
-            $("#waitImg").css("display", "block");
-            if (!options)
-                options = {}
-            options.source = sourceLabel;
-            if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
-                Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
-                    callback(err, result);
-                })
-                return;
+        var labelPredicate = sourceVariables.prefLabelPredicate;
+        if (options.searchAltLabels) labelPredicate = sourceVariables.prefLabelPredicate + "|skos:altLabel";
+        query += "?concept " + labelPredicate + " ?conceptLabel. ";
+        if (sourceVariables.lang && sourceVariables.lang != "" && !options.noLang) query += 'filter( lang(?conceptLabel)="' + sourceVariables.lang + '")';
+        query += filterStr;
+        query += "OPTIONAL{?concept rdf:type ?type.}";
+
+        ancestorsDepth = Math.min(ancestorsDepth, sourceVariables.optionalDepth);
+        for (var i = 1; i <= ancestorsDepth; i++) {
+            if (i == 1) {
+                query += "  OPTIONAL{?concept " + sourceVariables.broaderPredicate + " ?broader" + i + "." + "?broader" + i + " " + sourceVariables.prefLabelPredicate + " ?broader" + i + "Label.";
+                if (sourceVariables.lang) query += "filter(lang(?broader" + i + 'Label)="' + sourceVariables.lang + '")';
+            } else {
+                query +=
+                    "OPTIONAL { ?broader" +
+                    (i - 1) +
+                    " " +
+                    sourceVariables.broaderPredicate +
+                    " ?broader" +
+                    i +
+                    "." +
+                    "?broader" +
+                    i +
+                    " " +
+                    sourceVariables.prefLabelPredicate +
+                    " ?broader" +
+                    i +
+                    "Label.";
+                if (sourceVariables.lang && !options.noLang) query += "filter( lang(?broader" + i + 'Label)="' + sourceVariables.lang + '")';
             }
-
-
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var filter = Sparql_common.getUriFilter("id", conceptId);
-            if (options.propertyFilter) {
-                filter += Sparql_common.getUriFilter("prop", options.propertyFilter);
-            }
-
-            var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                " select distinct * " + sourceVariables.fromStr + "  WHERE {" +
-                " ?id ?prop ?value. "
-            if (options.getValuesLabels)
-                query += "  Optional {?value skos:prefLabel ?valueLabel filter(lang(?valueLabel)='en')} Optional {?prop skos:prefLabel ?propLabel } "
-            query += filter + "} limit 10000";
-
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, options, function (err, result) {
-
-
-                if (err) {
-                    return callback(err);
-                }
-                return callback(null, result.results.bindings)
-
-
-            })
+            query += "?broader" + i + " rdf:type ?type.";
         }
 
+        for (var i = 0; i < ancestorsDepth; i++) {
+            query += "} ";
+        }
 
-        self.getItems = function (sourceLabel, options, callback) {
+        query += "  }";
 
-            $("#waitImg").css("display", "block");
-            if (!options) {
-                options = {}
+        if (options.filterCollections) {
+            query += "MINUS {?collection skos:member* ?aCollection.?acollection skos:member ?broader" + Sparql_common.getUriFilter("collection", options.filterCollections);
+        }
+        var limit = options.limit || Config.queryLimit;
+        query += "}limit " + limit + " ";
+
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, options, function (err, result) {
+            if (err) {
+                return callback(err);
             }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "broader"]);
+            return callback(null, result.results.bindings);
+        });
+    };
 
-            if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
+    self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
+        $("#waitImg").css("display", "block");
+        if (!options) options = {};
+        options.source = sourceLabel;
+        if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
+            Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
+                callback(err, result);
+            });
+            return;
+        }
 
-                Config.sources[sourceLabel].controller.getItems(sourceLabel, options, function (err, result) {
-                    callback(err, result);
-                })
-                return;
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var filter = Sparql_common.getUriFilter("id", conceptId);
+        if (options.propertyFilter) {
+            filter += Sparql_common.getUriFilter("prop", options.propertyFilter);
+        }
+
+        var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" + " select distinct * " + sourceVariables.fromStr + "  WHERE {" + " ?id ?prop ?value. ";
+        if (options.getValuesLabels) query += "  Optional {?value skos:prefLabel ?valueLabel filter(lang(?valueLabel)='en')} Optional {?prop skos:prefLabel ?propLabel } ";
+        query += filter + "} limit 10000";
+
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, options, function (err, result) {
+            if (err) {
+                return callback(err);
             }
+            return callback(null, result.results.bindings);
+        });
+    };
 
-
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var query = "";
-            query += sourceVariables.prefixesStr
-            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {  ?concept ?x ?y. "
-            query += "OPTIONAL {?concept " + sourceVariables.prefLabelPredicate + " ?conceptLabel.}";
-
-            if (options.filter)
-                query += options.filter;
-
-
-            if (sourceVariables.lang)
-                query += "filter(lang(?conceptLabel )='" + sourceVariables.lang + "')"
-
-            if (options.filterCollections)
-                query += "?collection skos:member ?concept. " + Sparql_common.getUriFilter("collection", options.filterCollections)
-
-            query += "  } ";
-            query += "limit " + sourceVariables.limit + " ";
-
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-
-
-                if (err) {
-                    return callback(err)
-                }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "concept")
-                return callback(null, result.results.bindings)
-
-            })
+    self.getItems = function (sourceLabel, options, callback) {
+        $("#waitImg").css("display", "block");
+        if (!options) {
+            options = {};
         }
 
+        if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
+            Config.sources[sourceLabel].controller.getItems(sourceLabel, options, function (err, result) {
+                callback(err, result);
+            });
+            return;
+        }
 
-        /*******************************************end basic requests (mode read) **************************************************************/
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var query = "";
+        query += sourceVariables.prefixesStr;
+        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {  ?concept ?x ?y. ";
+        query += "OPTIONAL {?concept " + sourceVariables.prefLabelPredicate + " ?conceptLabel.}";
 
-        self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
-            if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
-                Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, {source: sourceLabel}, function (err, result) {
-                    callback(err, result);
-                })
-                return;
+        if (options.filter) query += options.filter;
+
+        if (sourceVariables.lang) query += "filter(lang(?conceptLabel )='" + sourceVariables.lang + "')";
+
+        if (options.filterCollections) query += "?collection skos:member ?concept. " + Sparql_common.getUriFilter("collection", options.filterCollections);
+
+        query += "  } ";
+        query += "limit " + sourceVariables.limit + " ";
+
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
             }
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "concept");
+            return callback(null, result.results.bindings);
+        });
+    };
 
-            var query = "";
-            query += sourceVariables.prefixesStr;
-            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
-            query += "  ?concept " + sourceVariables.broaderPredicate + "* ?broader." +
-                "filter (?concept=<" + id + ">) " +
-                "?broader " + sourceVariables.prefLabelPredicate + " ?broaderLabel." +
-                "?broader rdf:type ?type."
-            if (false && sourceVariables.lang)
-                query += "filter( lang(?broaderLabel)=\"" + sourceVariables.lang + "\")"
-            query += "  }";
-            query += "limit " + sourceVariables.limit + " ";
+    /*******************************************end basic requests (mode read) **************************************************************/
 
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, result.results.bindings);
-            })
-
+    self.getSingleNodeAllGenealogy = function (sourceLabel, id, callback) {
+        if (Config.sources[sourceLabel].controllerName != "Sparql_SKOS") {
+            Config.sources[sourceLabel].controller.getTopConcepts(sourceLabel, { source: sourceLabel }, function (err, result) {
+                callback(err, result);
+            });
+            return;
         }
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
 
-        self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var query = "";
+        query += sourceVariables.prefixesStr;
+        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
+        query +=
+            "  ?concept " +
+            sourceVariables.broaderPredicate +
+            "* ?broader." +
+            "filter (?concept=<" +
+            id +
+            ">) " +
+            "?broader " +
+            sourceVariables.prefLabelPredicate +
+            " ?broaderLabel." +
+            "?broader rdf:type ?type.";
+        if (false && sourceVariables.lang) query += 'filter( lang(?broaderLabel)="' + sourceVariables.lang + '")';
+        query += "  }";
+        query += "limit " + sourceVariables.limit + " ";
 
-            var query = "";
-            query += sourceVariables.prefixesStr;
-            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {"
-            query += "  ?concept ^" + sourceVariables.broaderPredicate + "*|" + sourceVariables.narrowerPredicate + "* ?narrower." +
-                "filter (?concept=<" + id + ">) " +
-                "?narrower " + sourceVariables.prefLabelPredicate + " ?narrowerLabel." +
-                "?narrower rdf:type ?type."
-            if (false && sourceVariables.lang)
-                query += "filter( lang(?narrowerLabel)=\"" + sourceVariables.lang + "\")"
-            query += "  }";
-            query += "limit " + sourceVariables.limit + " ";
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
 
+    self.getSingleNodeAllDescendants = function (sourceLabel, id, callback) {
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
 
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, result.results.bindings);
-            })
+        var query = "";
+        query += sourceVariables.prefixesStr;
+        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
+        query +=
+            "  ?concept ^" +
+            sourceVariables.broaderPredicate +
+            "*|" +
+            sourceVariables.narrowerPredicate +
+            "* ?narrower." +
+            "filter (?concept=<" +
+            id +
+            ">) " +
+            "?narrower " +
+            sourceVariables.prefLabelPredicate +
+            " ?narrowerLabel." +
+            "?narrower rdf:type ?type.";
+        if (false && sourceVariables.lang) query += 'filter( lang(?narrowerLabel)="' + sourceVariables.lang + '")';
+        query += "  }";
+        query += "limit " + sourceVariables.limit + " ";
 
-        }
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
 
-        self.getNodeLabel = function (sourceLabel, id, callback) {
+    self.getNodeLabel = function (sourceLabel, id, callback) {
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var query = "";
+        query += sourceVariables.prefixesStr;
+        query +=
+            " select distinct * " +
+            sourceVariables.fromStr +
+            "  WHERE {" +
+            "?concept   rdf:type   ?type." +
+            "?concept " +
+            sourceVariables.prefLabelPredicate +
+            " ?conceptLabel." +
+            "filter (?concept=<" +
+            id +
+            ">) ";
+        if (sourceVariables.lang) query += 'filter( lang(?conceptLabel)="' + sourceVariables.lang + '")';
 
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var query = "";
-            query += sourceVariables.prefixesStr;
-            query += " select distinct * " + sourceVariables.fromStr + "  WHERE {" +
-                "?concept   rdf:type   ?type." +
-                "?concept " + sourceVariables.prefLabelPredicate + " ?conceptLabel." +
-                "filter (?concept=<" + id + ">) "
-            if (sourceVariables.lang)
-                query += "filter( lang(?conceptLabel)=\"" + sourceVariables.lang + "\")"
+        query += "}limit " + sourceVariables.limit + " ";
 
-            query += "}limit " + sourceVariables.limit + " ";
+        Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
 
-
-            Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-                if (err) {
-                    return callback(err)
-                }
-                return callback(null, result.results.bindings);
-            })
-        }
-
-
-        self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
-
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var sliceSize = 2000;
-            var slices = common.array.slice(subjectIds, sliceSize);
-            var triples = [];
-            async.eachSeries(slices, function (slice, callbackEach) {
+    self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var sliceSize = 2000;
+        var slices = common.array.slice(subjectIds, sliceSize);
+        var triples = [];
+        async.eachSeries(
+            slices,
+            function (slice, callbackEach) {
                 var filterStr = "(";
                 slice.forEach(function (item, index) {
-                    if (index > 0)
-                        filterStr += ","
-                    filterStr += "<" + item + ">"
-                })
-                filterStr += ")"
+                    if (index > 0) filterStr += ",";
+                    filterStr += "<" + item + ">";
+                });
+                filterStr += ")";
 
-                var query = " select    distinct * " + sourceVariables.fromStr + "  WHERE {" +
-                    "?subject ?prop ?value. FILTER (?subject in" + filterStr + ")} limit " + sliceSize + 1;
-                Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
+                var query = " select    distinct * " + sourceVariables.fromStr + "  WHERE {" + "?subject ?prop ?value. FILTER (?subject in" + filterStr + ")} limit " + sliceSize + 1;
+                Sparql_proxy.querySPARQL_GET_proxy(sourceVariables.url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
-                    triples = triples.concat(result.results.bindings)
-                    return callbackEach()
+                    triples = triples.concat(result.results.bindings);
+                    return callbackEach();
+                });
+            },
+            function (err) {
+                return callback(err, triples);
+            }
+        );
+    };
 
+    self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
+        if (!subjectUri && !subjectUri && !subjectUri) return call("no subject predicate and object filter : cannot delete");
 
-                })
+        var filterStr = "";
+        if (subjectUri) filterStr += Sparql_common.getUriFilter("s", subjectUri);
+        if (predicateUri) filterStr += Sparql_common.getUriFilter("p", predicateUri);
+        if (objectUri) filterStr += Sparql_common.getUriFilter("o", objectUri);
 
-            }, function (err) {
-                return callback(err, triples)
-            })
+        var query = "with <" + Config.sources[sourceLabel].graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
+
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings);
+        });
+    };
+
+    self.triplesObjectToString = function (item) {
+        var valueStr = "";
+        if (item.valueType == "uri") valueStr = "<" + item.object + ">";
+        else {
+            var langStr = "";
+            if (item.sourceVariables.lang) langStr = "@" + item.sourceVariables.lang;
+            valueStr = "'" + item.object + "'" + langStr;
         }
 
+        var p = item.predicate.indexOf("^");
+        if (p == 0) {
+            var predicate = item.predicate.substring(1);
+            return valueStr + " <" + predicate + "> <" + item.subject + ">. ";
+        } else return "<" + item.subject + "> <" + item.predicate + "> " + valueStr + ". ";
+    };
 
-        self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
-            if (!subjectUri && !subjectUri && !subjectUri)
-                return call("no subject predicate and object filter : cannot delete")
+    self.insertTriples = function (sourceLabel, triples, callback) {
+        var graphUri = Config.sources[sourceLabel].graphUri;
+        var insertTriplesStr = "";
+        triples.forEach(function (item, index) {
+            insertTriplesStr += self.triplesObjectToString(item);
+        });
 
+        var query = " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
-            var filterStr = "";
-            if (subjectUri)
-                filterStr += Sparql_common.getUriFilter("s", subjectUri)
-            if (predicateUri)
-                filterStr += Sparql_common.getUriFilter("p", predicateUri)
-            if (objectUri)
-                filterStr += Sparql_common.getUriFilter("o", objectUri)
+        // console.log(query)
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+            return callback(err);
+        });
+    };
 
-            var query = "with <" + Config.sources[sourceLabel].graphUri + "> " +
-                " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}"
+    self.update = function (sourceLabel, triples, callback) {
+        var graphUri = Config.sources[sourceLabel].graphUri;
+        var deleteTriplesStr = "";
+        var insertTriplesStr = "";
+        var subject;
+        triples.forEach(function (item, index) {
+            if (!subject) subject = item.subject;
+            insertTriplesStr += self.triplesObjectToString(item);
+        });
+        deleteTriplesStr += "<?s ?p ?o.";
+        var query =
+            " WITH GRAPH  <" +
+            graphUri +
+            ">  " +
+            "DELETE" +
+            "{  " +
+            "?s ?p ?o." +
+            "  }" +
+            "WHERE" +
+            "  {" +
+            "?s ?p ?o. filter (?s=<" +
+            subject +
+            ">)" +
+            "  };" +
+            "" +
+            "INSERT DATA" +
+            "  {" +
+            insertTriplesStr +
+            "  }";
 
-            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, sourceVariables.queryOptions, {source: sourceLabel}, function (err, result) {
-                if (err) {
-                    return callback(err);
+        // console.log(query)
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+            return callback(err);
+        });
+    };
+
+    self.deleteGraph = function (sourceLabel, callback) {
+        graphUri = Config.sources[sourceLabel].graphUri;
+
+        var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}";
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+            return callback(err);
+        });
+    };
+
+    self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
+        var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
+        var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
+        var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, result) {
+            return callback(err);
+        });
+    };
+
+    self.setBindingsOptionalProperties = function (bindings, _field, options) {
+        if (!options) options = {};
+        bindings.forEach(function (item) {
+            for (var i = 0; i < 20; i++) {
+                var iStr = "" + i;
+                if (i == 0) iStr = "";
+                var field = _field + "" + iStr;
+                if (!item[field]) {
+                    break;
                 }
-                return callback(null, result.results.bindings)
-
-            })
-
-        }
-
-        self.triplesObjectToString = function (item) {
-            var valueStr = ""
-            if (item.valueType == "uri")
-                valueStr = "<" + item.object + ">"
-            else {
-                var langStr = "";
-                if (item.sourceVariables.lang)
-                    langStr = "@" + item.sourceVariables.lang
-                valueStr = "'" + item.object + "'" + langStr
+                if (!item[field + "Type"]) {
+                    if (options.type) item[field + "Type"] = { value: options.type };
+                    else item[field + "Type"] = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                }
+                var id = item[field].value;
+                if (!item[field + "Label"]) {
+                    var p = id.lastIndexOf("#");
+                    if (p > -1) item[field + "Label"] = { value: id.substring(p + 1) };
+                    else {
+                        p = id.lastIndexOf("/");
+                        item[field + "Label"] = { value: id.substring(p + 1) };
+                    }
+                }
             }
 
-            var p = item.predicate.indexOf("^")
-            if (p == 0) {
-                var predicate = item.predicate.substring(1)
-                return valueStr + ' <' + predicate + '> <' + item.subject + '>. ';
-            } else
-                return "<" + item.subject + '> <' + item.predicate + '> ' + valueStr + '. ';
-        }
+            //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
+        });
+        return bindings;
+    };
 
-        self.insertTriples = function (sourceLabel, triples, callback) {
-            var graphUri = Config.sources[sourceLabel].graphUri
-            var insertTriplesStr = "";
-            triples.forEach(function (item, index) {
+    self.getSourceLangsList = function (sourceLabel, callback) {
+        var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
+        var query =
+            " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
+            " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            " PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
+            "  select  distinct ?language " +
+            sourceVariables.fromStr +
+            "   WHERE" +
+            " { ?p skos:prefLabel ?o.   BIND( LANG(?o) AS ?language). } limit 1000";
 
-                insertTriplesStr += self.triplesObjectToString(item);
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+            if (err) return callback(err);
+            var langs = [];
+            result.results.bindings.forEach(function (item) {
+                langs.push(item.language.value);
+            });
+            return callback(null, langs);
+        });
+    };
 
-            })
+    var defaultPredicates = {
+        prefixes: [
+            " terms:<http://purl.org/dc/terms/>",
+            " rdfs:<http://www.w3.org/2000/01/rdf-schema#>",
+            " rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+            " skos:<http://www.w3.org/2004/02/skos/core#>",
+            " elements:<http://purl.org/dc/elements/1.1/>",
+        ],
+        //  sourceVariables.topConceptFilter: "?topConcept rdf:type ?type. filter(?type in( <http://www.w3.org/2004/02/skos/core#ConceptScheme>,<http://www.w3.org/2004/02/skos/core#Collection>))"
 
-            var query = " WITH GRAPH  <" + graphUri + ">  " +
-                "INSERT DATA" +
-                "  {" +
-                insertTriplesStr +
-                "  }"
+        topConceptFilter: "?topConcept rdf:type ?topConceptType. filter(?topConceptType in( <http://www.w3.org/2004/02/skos/core#ConceptScheme>))",
 
+        broaderPredicate: "skos:broader",
+        narrowerPredicate: "skos:narrower",
+        broader: "skos:broader",
+        prefLabel: "skos:prefLabel",
+        altLabel: "skos:altLabel",
+        limit: 10000,
+        optionalDepth: 5,
+    };
+    self.defaultPredicates = defaultPredicates;
 
-            // console.log(query)
-            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
-                return callback(err);
-            })
-        }
-
-
-        self.update = function (sourceLabel, triples, callback) {
-            var graphUri = Config.sources[sourceLabel].graphUri
-            var deleteTriplesStr = "";
-            var insertTriplesStr = "";
-            var subject;
-            triples.forEach(function (item, index) {
-
-                if (!subject)
-                    subject = item.subject;
-                insertTriplesStr += self.triplesObjectToString(item);
-
-            })
-            deleteTriplesStr += "<?s ?p ?o.";
-            var query = " WITH GRAPH  <" + graphUri + ">  " +
-                "DELETE" +
-                "{  " +
-                "?s ?p ?o." +
-                "  }" +
-                "WHERE" +
-                "  {" +
-                "?s ?p ?o. filter (?s=<" + subject + ">)" +
-                "  };" +
-                "" +
-                "INSERT DATA" +
-                "  {" +
-                insertTriplesStr +
-                "  }"
-
-
-            // console.log(query)
-            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
-                return callback(err);
-            })
-        }
-
-        self.deleteGraph = function (sourceLabel, callback) {
-            graphUri = Config.sources[sourceLabel].graphUri
-
-
-            var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}"
-            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
-                return callback(err);
-            })
-        }
-
-        self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
-            var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
-            var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;"
-            var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: fromSourceLabel}, function (err, result) {
-                return callback(err);
-            })
-
-        }
-
-
-        self.setBindingsOptionalProperties = function (bindings, _field, options) {
-            if (!options)
-                options = {}
-            bindings.forEach(function (item) {
-
-                for (var i = 0; i < 20; i++) {
-                    var iStr = "" + i;
-                    if (i == 0)
-                        iStr = ""
-                    var field = _field + "" + iStr;
-                    if (!item[field]) {
-                        break;
-                    }
-                    if (!item[field + "Type"]) {
-                        if (options.type)
-                            item[field + "Type"] = {value: options.type}
-                        else
-                            item[field + "Type"] = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                    }
-                    var id = item[field].value
-                    if (!item[field + "Label"]) {
-                        var p = id.lastIndexOf("#")
-                        if (p > -1)
-                            item[field + "Label"] = {value: id.substring(p + 1)}
-                        else {
-                            p = id.lastIndexOf("/")
-                            item[field + "Label"] = {value: id.substring(p + 1)}
-                        }
-
-
-                    }
-
-                }
-
-                //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
-            })
-            return bindings;
-
-
-        }
-
-        self.getSourceLangsList=function(sourceLabel, callback){
-            var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-            var query=" PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#>" +
-                " PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                " PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>" +
-                "  select  distinct ?language "+sourceVariables.fromStr+"   WHERE" +
-                " { ?p skos:prefLabel ?o.   BIND( LANG(?o) AS ?language). } limit 1000"
-
-            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {source: sourceLabel}, function (err, result) {
-                if(err)
-                return callback(err);
-                var langs=[]
-                result.results.bindings.forEach(function(item){
-                    langs.push(item.language.value)
-                })
-                return callback(null,langs)
-            })
-        }
-
-
-        var defaultPredicates = {
-            prefixes: [" terms:<http://purl.org/dc/terms/>",
-                " rdfs:<http://www.w3.org/2000/01/rdf-schema#>",
-                " rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-                " skos:<http://www.w3.org/2004/02/skos/core#>",
-                " elements:<http://purl.org/dc/elements/1.1/>"
-
-            ],
-            //  sourceVariables.topConceptFilter: "?topConcept rdf:type ?type. filter(?type in( <http://www.w3.org/2004/02/skos/core#ConceptScheme>,<http://www.w3.org/2004/02/skos/core#Collection>))"
-
-            topConceptFilter: "?topConcept rdf:type ?topConceptType. filter(?topConceptType in( <http://www.w3.org/2004/02/skos/core#ConceptScheme>))"
-
-            , broaderPredicate: "skos:broader"
-            , narrowerPredicate: "skos:narrower"
-            , broader: "skos:broader"
-            , prefLabel: "skos:prefLabel"
-            , altLabel: "skos:altLabel",
-            limit: 10000,
-            optionalDepth: 5
-
-        }
-        self.defaultPredicates = defaultPredicates;
-
-
-        return self;
-    }
-)
-()
+    return self;
+})();

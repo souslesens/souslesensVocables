@@ -13,101 +13,75 @@ var Clipboard = (function () {
     var content = [];
 
     self.copy = function (data, element, event) {
+        if (false && !data.source) return console.log("copied data has no source property " + data.label);
 
+        data.tool = MainController.currentTool;
+        data.date = new Date();
 
-if(false && !data.source)
-    return console.log("copied data has no source property "+data.label)
-
-        data.tool = MainController.currentTool
-        data.date = new Date()
-
-
-
-        if(!event.alt) {
-            content = [data]
-            $(".clipboardSelected").removeClass("clipboardSelected")
+        if (!event.alt) {
+            content = [data];
+            $(".clipboardSelected").removeClass("clipboardSelected");
+        } else {
+            content.push(data);
         }
-        else{
-            content.push(data)
-
-
-        }
-
 
         if (element) {
             if (element === "_visjsNode") {
-                blinkVisjsNode(data.id,data.initialShape);
+                blinkVisjsNode(data.id, data.initialShape);
             } else {
-                var elt = document.getElementById(element)
+                var elt = document.getElementById(element);
                 if (elt) {
-                    $(elt).addClass("clipboardSelected")
+                    $(elt).addClass("clipboardSelected");
                 }
             }
         }
-
-
-    }
+    };
 
     self.getContent = function () {
         return content;
-
-    }
-
+    };
 
     self.clear = function () {
-        $(".clipboardSelected").removeClass("clipboardSelected")
+        $(".clipboardSelected").removeClass("clipboardSelected");
 
         blinkVisjsNode(null);
-        content = []
-    }
+        content = [];
+    };
 
-
-    blinkVisjsNode = function (selectedNodeId,initialShape) {
-        var hidden = true
+    blinkVisjsNode = function (selectedNodeId, initialShape) {
+        var hidden = true;
         var setInt;
-if(!initialShape)
-    initialShape="box"
+        if (!initialShape) initialShape = "box";
 
         function nodeFlash(nodeId, _stop) {
-
-            stopInterv = _stop//!!! variable globale
+            stopInterv = _stop; //!!! variable globale
             setInt = setInterval(function () {
                 if (stopInterv && !hidden && setInt) {
-                    clearInterval(setInt)
+                    clearInterval(setInt);
                     visjsGraph.data.nodes.update({
-                        id: nodeId, hidden: hidden
+                        id: nodeId,
+                        hidden: hidden,
                     });
-                    hidden = !hidden
+                    hidden = !hidden;
                 }
-
             }, 500);
         }
 
-
         var newNodes = [];
-        if(!visjsGraph.data)
-            return;
-        if(! visjsGraph.data ||  !visjsGraph.data.nodes)
-            return
+        if (!visjsGraph.data) return;
+        if (!visjsGraph.data || !visjsGraph.data.nodes) return;
         visjsGraph.data.nodes.getIds().forEach(function (id) {
-            var newNode = {id: id, hidden: false}
+            var newNode = { id: id, hidden: false };
             if (selectedNodeId && selectedNodeId == id) {
                 newNode.shape = "star";
+            } else newNode.shape = initialShape;
 
-            } else
-                newNode.shape = initialShape;
-
-            newNodes.push(newNode)
-
-        })
-        visjsGraph.data.nodes.update(newNodes)
-        if (selectedNodeId)
-            nodeFlash(selectedNodeId)
-        else
-            nodeFlash(content.id, true)
-
-    }
-
+            newNodes.push(newNode);
+        });
+        visjsGraph.data.nodes.update(newNodes);
+        if (selectedNodeId) nodeFlash(selectedNodeId);
+        else nodeFlash(content.id, true);
+    };
 
     return self;
-})()
+})();

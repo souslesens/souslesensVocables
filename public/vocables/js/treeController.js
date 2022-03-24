@@ -9,38 +9,35 @@
  */
 
 var TreeController = (function () {
-
     var self = {};
 
-
     self.drawOrUpdateTree = function (treeDivId, data, parentNodeId, childNodeVar, jsTreeOptions, callback) {
-        if (!jsTreeOptions)
-            jsTreeOptions = {}
+        if (!jsTreeOptions) jsTreeOptions = {};
 
         var jstreeData = [];
-        var existingNodes = {}
+        var existingNodes = {};
         data.forEach(function (item) {
-
-            var typeObj = item[childNodeVar + "Type"]
-            if (!typeObj) {// force concept Type
-                typeObj = {value: "http://www.w3.org/2004/02/skos/core#Concept"}
-                console.log("node " + item[childNodeVar].value + " has no type")
+            var typeObj = item[childNodeVar + "Type"];
+            if (!typeObj) {
+                // force concept Type
+                typeObj = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                console.log("node " + item[childNodeVar].value + " has no type");
             }
 
             var type = typeObj.value;
-            var cssType = type.substring(type.lastIndexOf("#") + 1)
+            var cssType = type.substring(type.lastIndexOf("#") + 1);
 
-          var  jstreeType = jsTreeOptions.type || null
+            var jstreeType = jsTreeOptions.type || null;
             if (childNodeVar && item[childNodeVar]) {
                 var childNodeId = item[childNodeVar].value;
 
                 if (!existingNodes[childNodeId]) {
                     existingNodes[childNodeId] = 1;
 
-                    var childNodeLabel = common.getItemLabel(item, childNodeVar)
+                    var childNodeLabel = common.getItemLabel(item, childNodeVar);
 
                     if (true || jsTreeOptions.labelClass) {
-                        var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>"
+                        var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
                     }
 
                     var child = {
@@ -48,36 +45,25 @@ var TreeController = (function () {
                         id: childNodeId + "_" + common.getRandomHexaId(4),
                         text: label,
                         type: jstreeType,
-                        data: {type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId,}
-
+                        data: { type: type, source: jsTreeOptions.source, label: childNodeLabel, id: childNodeId },
+                    };
+                    if (jsTreeOptions.optionalData) {
+                        for (var key in jsTreeOptions.optionalData) {
+                            child.data[key] = jsTreeOptions.optionalData[key];
+                        }
                     }
-                if(jsTreeOptions.optionalData){
-                    for(var key in jsTreeOptions.optionalData){
-                        child.data[key]=jsTreeOptions.optionalData[key]
-                    }
-                }
                     jstreeData.push(child);
-
-
                 }
-
-
             }
-
-
-        })
-
+        });
 
         if (parentNodeId == "#") {
-            common.jstree.loadJsTree(treeDivId, jstreeData, jsTreeOptions, callback)
-
+            common.jstree.loadJsTree(treeDivId, jstreeData, jsTreeOptions, callback);
         } else {
-            common.jstree.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions)
+            common.jstree.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions);
         }
         $("#waitImg").css("display", "none");
-
-
-    }
+    };
 
     /*  a revoir
     self.toCsv = function (topNode,treeDivId,resultDivId) {
@@ -135,7 +121,5 @@ var TreeController = (function () {
 
     }*/
 
-
     return self;
-
 })();

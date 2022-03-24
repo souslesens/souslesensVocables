@@ -1,11 +1,9 @@
 //https://github.com/justinharrell/vis-svg
 
-
-var SVGexport=(function(){
-    var self={}
+var SVGexport = (function () {
+    var self = {};
 
     self.toSVG = function (network) {
-
         C2S.prototype.circle = CanvasRenderingContext2D.prototype.circle;
         C2S.prototype.square = CanvasRenderingContext2D.prototype.square;
         C2S.prototype.triangle = CanvasRenderingContext2D.prototype.triangle;
@@ -24,43 +22,43 @@ var SVGexport=(function(){
             var ctx = new C2S({
                 width: networkContainer.clientWidth,
                 height: networkContainer.clientWidth,
-                embedImages: true
+                embedImages: true,
             });
 
             var canvasProto = network.canvas.__proto__;
             var currentGetContext = canvasProto.getContext;
             canvasProto.getContext = function () {
                 return ctx;
-            }
+            };
             var svgOptions = {
                 nodes: {
                     shapeProperties: {
-                        interpolation: false //so images are not scaled svg will get full image
+                        interpolation: false, //so images are not scaled svg will get full image
                     },
-                    scaling: {label: {drawThreshold: 0}},
-                    font: {color: '#000000'}
+                    scaling: { label: { drawThreshold: 0 } },
+                    font: { color: "#000000" },
                 },
                 edges: {
-                    scaling: {label: {drawThreshold: 0}}
-                }
+                    scaling: { label: { drawThreshold: 0 } },
+                },
             };
 
             var options = {
                 nodes: {
-                    borderWidth:4,
-                    size:30,
+                    borderWidth: 4,
+                    size: 30,
                     color: {
-                        border: '#406897',
-                        background: '#6AAFFF'
+                        border: "#406897",
+                        background: "#6AAFFF",
                     },
-                    font:{color:'#eeeeee'},
+                    font: { color: "#eeeeee" },
                     shapeProperties: {
-                        useBorderWithImage:true
-                    }
+                        useBorderWithImage: true,
+                    },
                 },
                 edges: {
-                    color: 'lightgray'
-                }
+                    color: "lightgray",
+                },
             };
             network.setOptions(svgOptions);
             network.redraw();
@@ -73,13 +71,12 @@ var SVGexport=(function(){
         }
 
         function showSvg(svg) {
-            var svgBlob = new Blob([svg], {type: 'image/svg+xml'});
+            var svgBlob = new Blob([svg], { type: "image/svg+xml" });
             openBlob(svgBlob, "network.svg");
         }
 
         function openBlob(blob, fileName) {
             if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-
                 //blobToDataURL(blob, function(dataurl){window.open(dataurl);});
                 window.navigator.msSaveOrOpenBlob(blob, fileName);
             } else {
@@ -95,38 +92,14 @@ var SVGexport=(function(){
                 a.download = fileName;
                 a.click();
                 setTimeout(function () {
-                        // For Firefox it is necessary to delay revoking the ObjectURL
-                        window.URL.revokeObjectURL(data);
-                    }
-                    , 100);
+                    // For Firefox it is necessary to delay revoking the ObjectURL
+                    window.URL.revokeObjectURL(data);
+                }, 100);
             }
         }
 
-        exportSvg()
-
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        exportSvg();
+    };
 
     return self;
-
-
-
-
-
-})()
+})();

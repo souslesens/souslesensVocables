@@ -1,6 +1,6 @@
 import { Mode, Msg_ } from "./Component/SourcesTable";
-import { Msg } from './Admin';
-import React from 'react';
+import { Msg } from "./Admin";
+import React from "react";
 declare function getSources(): Promise<Source[]>;
 export declare function putSources(body: Source[]): Promise<Source[]>;
 export declare function saveSource(body: Source, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>): Promise<void>;

@@ -1,65 +1,58 @@
 var CustomPluginController = (function () {
+    var self = {};
+    self.rootDir = "customPlugins/";
+    self.typeUrisIcons = {};
+    self.pluginDir;
+    self.customTools = self.init = function (customPlugins, callback) {
+        self.pluginDir = customPlugins[0];
 
-    var self = {}
-    self.rootDir = "customPlugins/"
-    self.typeUrisIcons={}
-    self.pluginDir
-    self.customTools=
-    self.init= function (customPlugins, callback) {
-        self.pluginDir =customPlugins[0]
-
-        if (self.pluginDir ) {
+        if (self.pluginDir) {
             $.ajax({
                 type: "GET",
                 url: "/getJsonFile",
-                data: {filePath: self.rootDir+ self.pluginDir + "/manifest.json"},
+                data: { filePath: self.rootDir + self.pluginDir + "/manifest.json" },
                 dataType: "json",
                 success: function (data, textStatus, jqXHR) {
-
-                    if(data.uri_icons){
-                       for( var uri in data.uri_icons){
-                            self.typeUrisIcons[uri]=data.uri_icons[uri]
+                    if (data.uri_icons) {
+                        for (var uri in data.uri_icons) {
+                            self.typeUrisIcons[uri] = data.uri_icons[uri];
                         }
                     }
-                    if(data.tools){
-                    async.eachSeries(  data.tools,function(tool,callbackEach) {
+                    if (data.tools) {
+                        async.eachSeries(
+                            data.tools,
+                            function (tool, callbackEach) {
+                                $.getScript("customPlugins/" + self.pluginDir + "/" + tool.controller + ".js", function (data, textStatus, jqxhr) {
+                                    Config.tools[tool.label] = tool;
+                                    if (true) {
+                                        var script = document.createElement("script");
+                                        script = eval(data);
+                                    }
+                                    tool.controller = eval(tool.controller);
 
-                            $.getScript("customPlugins/"+self.pluginDir+"/"+tool.controller+".js", function (data, textStatus, jqxhr) {
-                                Config.tools[tool.label] = tool
-                            if( true) {
-                                var script = document.createElement('script');
-                                script = eval(data);
+                                    callbackEach();
+                                });
+                            },
+                            function (err) {
+                                return callback(err);
                             }
-                                tool.controller=eval(tool.controller)
-
-
-                           callbackEach()
-
-                            })
-
-                        },function(err){
-                     return callback(err);
-                    })
-
-
+                        );
                     }
-
-                }
-                , error(err) {
-                    return callback(err)
-                }
-            })
+                },
+                error(err) {
+                    return callback(err);
+                },
+            });
         } else {
-            callback()
+            callback();
         }
-    }
+    };
 
-    self.setGraphNodesIcons=function() {
-        if (!self.pluginDir)
-            self.pluginDir="TotalEnergies";
+    self.setGraphNodesIcons = function () {
+        if (!self.pluginDir) self.pluginDir = "TotalEnergies";
         //  var nodes=visjsGraph.data.nodes.get();
-        var newNodes = []
-        self.path = self.rootDir + self.pluginDir + "/"
+        var newNodes = [];
+        self.path = self.rootDir + self.pluginDir + "/";
 
         var nodeIds = visjsGraph.data.nodes.getIds();
         /*     nodeIds.forEach(function(nodeId){
@@ -75,26 +68,24 @@ var CustomPluginController = (function () {
 
         setTimeout(function () {
             Sparql_OWL.getNodesTypes(Lineage_classes.mainSource, nodeIds, function (err, result) {
-                if (err)
-                    return console.log(err)
+                if (err) return console.log(err);
                 result.forEach(function (item) {
-                    var newNode = {id: item.concept.value}
+                    var newNode = { id: item.concept.value };
                     if (Lineage_classes.sourcesGraphUriMap[item.g.value]) {
-                        var source = Lineage_classes.sourcesGraphUriMap[item.g.value].name
-                        if (Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].imports && Config.sources[Lineage_classes.mainSource].imports.indexOf(source) > -1)// only those in the imports of mainSource
-                            var node = visjsGraph.data.nodes.get(item.concept.value)
-                        if (node)
-                            node.data.source = source
+                        var source = Lineage_classes.sourcesGraphUriMap[item.g.value].name;
+                        if (Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].imports && Config.sources[Lineage_classes.mainSource].imports.indexOf(source) > -1)
+                            // only those in the imports of mainSource
+                            var node = visjsGraph.data.nodes.get(item.concept.value);
+                        if (node) node.data.source = source;
                     }
-
 
                     if (self.typeUrisIcons[item.type.value]) {
                         newNode.image = self.path + self.typeUrisIcons[item.type.value];
                         newNode.shape = "circularImage";
-                       // newNode.shape = "image";
+                        // newNode.shape = "image";
                         newNode.size = 10;
-                        newNode.borderWidth = 4
-                      //  newNode.imagePadding = 4
+                        newNode.borderWidth = 4;
+                        //  newNode.imagePadding = 4
                         /* newNodes.push({
                              id:item.concept.value,
                              image:path+self.typeUrisIcons[item.type.value],
@@ -104,19 +95,11 @@ var CustomPluginController = (function () {
 
                         newNodes.push(newNode);
                     }
-
-                })
-                visjsGraph.data.nodes.update(newNodes)
-
-            })
-
-
-        }, 200)
-    }
-
+                });
+                visjsGraph.data.nodes.update(newNodes);
+            });
+        }, 200);
+    };
 
     return self;
-
-
-})()
-
+})();

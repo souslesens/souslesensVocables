@@ -1,52 +1,55 @@
-const path = require('path');
-const fs = require('fs');
-const ulid = require('ulid');
-const sources = path.resolve('config/sources.json');
-const profiles = path.resolve('config/profiles.json');
-const users = path.resolve('config/users/users.json');
-const tests = path.resolve('config/users/test.json');
+const path = require("path");
+const fs = require("fs");
+const ulid = require("ulid");
+const sources = path.resolve("config/sources.json");
+const profiles = path.resolve("config/profiles.json");
+const users = path.resolve("config/users/users.json");
+const tests = path.resolve("config/users/test.json");
 const bcrypt = require("bcrypt");
 
 async function sanitize(ressource) {
     try {
         fs.readFile(ressource, (err, data) => {
-            const parsedData = JSON.parse(data)
-            const sanitizedData =
-                Object.fromEntries(Object.entries(parsedData)
-                    .map(([key, val]) => addFields(key, val)))
+            const parsedData = JSON.parse(data);
+            const sanitizedData = Object.fromEntries(Object.entries(parsedData).map(([key, val]) => addFields(key, val)));
             //.reduce((obj, item) => ({ ...obj, [item.id]: item }), {})
             fs.writeFile(ressource, JSON.stringify(sanitizedData, null, 2), (err) => {
-                if (err) { console.log(err) }
-                console.log('Data successfully sanitized')
-            })
-        })
-    }
-    catch (e) {
-        console.log("Err:", e)
+                if (err) {
+                    console.log(err);
+                }
+                console.log("Data successfully sanitized");
+            });
+        });
+    } catch (e) {
+        console.log("Err:", e);
     }
 }
 
 function hashPasswords() {
     try {
         fs.readFile(users, (err, data) => {
-            const hashedPassword = Object.fromEntries(Object.entries(JSON.parse(data)).map(([key, val]) => val.password && !val.password.startsWith("$2b$") ? ([key, { ...val, password: bcrypt.hashSync(val.password, 10) }]) : [key, val]));
+            const hashedPassword = Object.fromEntries(
+                Object.entries(JSON.parse(data)).map(([key, val]) => (val.password && !val.password.startsWith("$2b$") ? [key, { ...val, password: bcrypt.hashSync(val.password, 10) }] : [key, val]))
+            );
             fs.writeFile(users, JSON.stringify(hashedPassword, null, 2), (err) => {
-                if (err) { console.log(err) } else {
-                    console.log("Password successfully hashed", hashedPassword)
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log("Password successfully hashed", hashedPassword);
                 }
-            })
-        })
+            });
+        });
     } catch (e) {
-        console.log("Err:", e)
+        console.log("Err:", e);
     }
 }
 
 function addFields(key, val) {
     const id = ulid.ulid();
-    const addId = val.hasOwnProperty("id") ? val : { ...val, id: id }
-    const addName = addId.hasOwnProperty("name") ? val : { ...val, name: key }
+    const addId = val.hasOwnProperty("id") ? val : { ...val, id: id };
+    const addName = addId.hasOwnProperty("name") ? val : { ...val, name: key };
 
-    return ([id, addName])
+    return [id, addName];
 }
 sanitize(sources);
 sanitize(profiles);

@@ -8,275 +8,211 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 var Sparql_common = (function () {
-
-
     var self = {};
     self.withoutImports = false;
 
     var checkClosingBrackets = function (str) {
-        var c1 = (str.match(/\(/g) || []).length
-        var c2 = (str.match(/\)/g) || []).length
-        return c1 == c2
-    }
+        var c1 = (str.match(/\(/g) || []).length;
+        var c2 = (str.match(/\)/g) || []).length;
+        return c1 == c2;
+    };
 
     self.setFilter = function (varName, ids, words, options) {
-        if (!ids && !words)
-            return "";
+        if (!ids && !words) return "";
 
-        if (!words && ids.length == 0)
-            return "";
-        if (!ids && words.length == 0)
-            return "";
+        if (!words && ids.length == 0) return "";
+        if (!ids && words.length == 0) return "";
 
         function formatWord(str) {
             if (!checkClosingBrackets(str)) {
-                str = str.replace(/[\(\)]/g, "")
+                str = str.replace(/[\(\)]/g, "");
             }
-            return self.formatStringForTriple(str)
+            return self.formatStringForTriple(str);
             /*   var str = str.replace(/\\/g, "")
                str = str.replace(/\(/gm, "")
                str = str.replace(/\)/gm, "")
                str = str.replace(/\[/gm, "")
                str = str.replace(/\]/gm, "")*/
 
-            return str
+            return str;
         }
 
+        if (!options) options = {};
+        var filter = ";";
 
-        if (!options)
-            options = {}
-        var filter = ";"
-
-
-        var varNames
+        var varNames;
         if (!Array.isArray(varName)) {
-            varNames = [varName]
+            varNames = [varName];
         } else {
-            varNames = varName
+            varNames = varName;
         }
 
-        var filters = []
+        var filters = [];
         varNames.forEach(function (varName) {
             if (words) {
                 if (Array.isArray(words)) {
-                    if (words.length == 0)
-                        return "";
-                    if (words[0] == null)
-                        return ""
-                    var conceptWordStr = ""
+                    if (words.length == 0) return "";
+                    if (words[0] == null) return "";
+                    var conceptWordStr = "";
                     words.forEach(function (word, index) {
-
                         if (word.length > 1) {
-                            if (conceptWordStr != "")
-                                conceptWordStr += "|"
-                            if (options.exactMatch)
-                                conceptWordStr += "^" + formatWord(word) + "$";
-                            else
-                                conceptWordStr += "" + formatWord(word) + "";
+                            if (conceptWordStr != "") conceptWordStr += "|";
+                            if (options.exactMatch) conceptWordStr += "^" + formatWord(word) + "$";
+                            else conceptWordStr += "" + formatWord(word) + "";
                         }
-                    })
-                    filters.push("regex(?" + varName + "Label , \"" + conceptWordStr + "\",\"i\") ");
+                    });
+                    filters.push("regex(?" + varName + 'Label , "' + conceptWordStr + '","i") ');
                 } else {
-                    if (words == null)
-                        return "";
+                    if (words == null) return "";
 
                     if (!options.exactMatch) {
-                        filters.push("regex(?" + varName + "Label, \"" + words + "\", \"i\")");
+                        filters.push("regex(?" + varName + 'Label, "' + words + '", "i")');
                     } else {
-                        filters.push(" regex(?" + varName + "Label, \"^" + words + "$\", \"i\")");
+                        filters.push(" regex(?" + varName + 'Label, "^' + words + '$", "i")');
                     }
                 }
             } else if (ids) {
-
-
                 if (Array.isArray(ids)) {
-                    if (ids.length == 0)
-                        return "";
-                    var p = ids.indexOf("#")
-                    if (p > -1)
-                        ids.splice(p, 1)
-                    if (ids[0] == null)
-                        return ""
-                    var conceptIdsStr = ""
+                    if (ids.length == 0) return "";
+                    var p = ids.indexOf("#");
+                    if (p > -1) ids.splice(p, 1);
+                    if (ids[0] == null) return "";
+                    var conceptIdsStr = "";
                     ids.forEach(function (id, index) {
-                        if(!id.indexOf)
-                            var x=3
-                      //  if(id.indexOf("http")!=0)
-                       if (id.match && !id.match(/.+:.+|http.+/))
-                            return
+                        if (!id.indexOf) var x = 3;
+                        //  if(id.indexOf("http")!=0)
+                        if (id.match && !id.match(/.+:.+|http.+/)) return;
                         if (id != "") {
-                            if (conceptIdsStr != "")
-                                conceptIdsStr += ","
-                            if (id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1)
-                                conceptIdsStr += "<" + id + ">"
-                            else
-                                conceptIdsStr += id
+                            if (conceptIdsStr != "") conceptIdsStr += ",";
+                            if (id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1) conceptIdsStr += "<" + id + ">";
+                            else conceptIdsStr += id;
                         }
-                    })
+                    });
 
                     filters.push(" ?" + varName + " in( " + conceptIdsStr + ")");
                 } else {
-                    if (ids == null)
-                        return "";
-                    if (ids.indexOf("http") > -1 || ids.indexOf("nodeID://") > -1)
-                        filters.push(" ?" + varName + " =<" + ids + ">");
-                    else
-                        filters.push(" ?" + varName + " =" + ids);
-
+                    if (ids == null) return "";
+                    if (ids.indexOf("http") > -1 || ids.indexOf("nodeID://") > -1) filters.push(" ?" + varName + " =<" + ids + ">");
+                    else filters.push(" ?" + varName + " =" + ids);
                 }
-
-
             } else {
                 return "";
             }
-        })
+        });
 
-        filter = " FILTER ("
+        filter = " FILTER (";
         filters.forEach(function (filterStr, index) {
-            if (index > 0)
-                filter += " || "
-            filter += filterStr
-
-        })
-        filter += " ) "
+            if (index > 0) filter += " || ";
+            filter += filterStr;
+        });
+        filter += " ) ";
 
         return filter;
-    }
-
+    };
 
     self.getUriFilter = function (varName, uri) {
-        var filterStr = ""
-        var isLiteral=true
+        var filterStr = "";
+        var isLiteral = true;
 
         if (Array.isArray(uri)) {
-            var str = ""
+            var str = "";
             uri.forEach(function (item, index) {
-                if (index > 0)
-                    str += ","
-                var isLiteral=true
-                if(item.indexOf("http")==0 || (item.indexOf(":")>0 && uri.indexOf(" ")<0))
-                    isLiteral=false
-                if(isLiteral)
-                    str += "'" + item + "'"
-                else
-                str += "<" + item + ">"
-            })
-            filterStr = "filter (?" + varName + " in (" + str + "))"
-
+                if (index > 0) str += ",";
+                var isLiteral = true;
+                if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && uri.indexOf(" ") < 0)) isLiteral = false;
+                if (isLiteral) str += "'" + item + "'";
+                else str += "<" + item + ">";
+            });
+            filterStr = "filter (?" + varName + " in (" + str + "))";
         } else {
-            var isLiteral=true
-            if(uri.indexOf("http")==0 || (uri.indexOf(":")>0 && uri.indexOf(" ")<0))
-                isLiteral=false
-            if(isLiteral)
-                filterStr += "filter( ?" + varName + "='" + uri + "')."
-            else
-            filterStr += "filter( ?" + varName + "=<" + uri + ">)."
+            var isLiteral = true;
+            if (uri.indexOf("http") == 0 || (uri.indexOf(":") > 0 && uri.indexOf(" ") < 0)) isLiteral = false;
+            if (isLiteral) filterStr += "filter( ?" + varName + "='" + uri + "').";
+            else filterStr += "filter( ?" + varName + "=<" + uri + ">).";
         }
         return filterStr;
-    }
-
+    };
 
     self.formatString = function (str, forUri) {
         return self.formatStringForTriple(str, forUri);
-    }
-
+    };
 
     self.formatStringForTriple = function (str, forUri) {
-        if (!str || !str.replace)
-            return null;
-        if (str.indexOf('$') > -1)
-            var x = 3
-        str = str.trim()
-        str = str.replace(/\\/gm, "")
-        str = str.replace(/"/gm, "\\\"")
+        if (!str || !str.replace) return null;
+        if (str.indexOf("$") > -1) var x = 3;
+        str = str.trim();
+        str = str.replace(/\\/gm, "");
+        str = str.replace(/"/gm, '\\"');
         // str = str.replace(/;/gm, "\\\;")
         //  str = str.replace(/\n/gm, "\\\\n")
-        str = str.replace(/\n/gm, "\\\\n")
+        str = str.replace(/\n/gm, "\\\\n");
         //  str = str.replace(/\r/gm, "\\\\r")
-        str = str.replace(/\r/gm, "")
-        str = str.replace(/\t/gm, "\\\\t")
-        str = str.replace(/\$/gm, "\\\$")
+        str = str.replace(/\r/gm, "");
+        str = str.replace(/\t/gm, "\\\\t");
+        str = str.replace(/\$/gm, "\\$");
         //   str = str.replace(/\(/gm, "\\\(")
         //   str = str.replace(/\)/gm, "\\\)")
 
-        str = str.replace(/\\xa0/gm, " ")
-        str = str.replace(/'/gm, "\\\'")
+        str = str.replace(/\\xa0/gm, " ");
+        str = str.replace(/'/gm, "\\'");
         if (forUri) {
-            str = str.replace(/ /gm, "_")
-            str = str.replace(/-/gm, "_")
-            str = str.replace(/\//gm, "_")
+            str = str.replace(/ /gm, "_");
+            str = str.replace(/-/gm, "_");
+            str = str.replace(/\//gm, "_");
         }
 
-
         return str;
-    }
-
+    };
 
     self.formatUrl = function (str) {
-        str = str.replace(/%\d*/gm, "_")
+        str = str.replace(/%\d*/gm, "_");
 
         return str;
-    }
+    };
 
     self.getLabelFromURI = function (id) {
+        if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id]) return OwlSchema.currentSourceSchema.labelsMap[id];
 
-        if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id])
-            return OwlSchema.currentSourceSchema.labelsMap[id];
-
-        var p = id.lastIndexOf("#")
-        if (p > -1)
-            return id.substring(p + 1)
+        var p = id.lastIndexOf("#");
+        if (p > -1) return id.substring(p + 1);
         else {
-            var p = id.lastIndexOf("/")
-            return id.substring(p + 1)
+            var p = id.lastIndexOf("/");
+            return id.substring(p + 1);
         }
+    };
 
+    self.getFromStr = function (source, named, withoutImports, excludeDictionaries) {
+        var from = " FROM ";
+        if (named) from += " NAMED";
 
-    }
-
-
-    self.getFromStr = function (source, named, withoutImports,excludeDictionaries) {
-        var from = " FROM "
-        if (named)
-            from += " NAMED"
-
-        var fromStr = ""
-        var graphUris = Config.sources[source].graphUri
-        if (!graphUris || graphUris == "")
-            return ""
-        if (!Array.isArray(graphUris))
-            graphUris = [graphUris]
+        var fromStr = "";
+        var graphUris = Config.sources[source].graphUri;
+        if (!graphUris || graphUris == "") return "";
+        if (!Array.isArray(graphUris)) graphUris = [graphUris];
 
         graphUris.forEach(function (graphUri, index) {
-            fromStr += from + "  <" + graphUri + "> "
-        })
-        if (withoutImports===undefined)
-            withoutImports = self.withoutImports
+            fromStr += from + "  <" + graphUri + "> ";
+        });
+        if (withoutImports === undefined) withoutImports = self.withoutImports;
         if (!withoutImports) {
             var imports = Config.sources[source].imports;
             if (imports) {
                 imports.forEach(function (source2) {
-                    if(! Config.sources[source2])
-                        return  console.log(source2 +"not found")
-                    var importGraphUri = Config.sources[source2].graphUri
-                    fromStr += from + "  <" + importGraphUri + "> "
-                })
-            }
-
-        }
-
-        if(!excludeDictionaries){
-            for( var source in Config.sources){
-                if(Config.sources[source].isDictionary)
-                    fromStr += from + "  <" +  Config.sources[source].graphUri + "> "
+                    if (!Config.sources[source2]) return console.log(source2 + "not found");
+                    var importGraphUri = Config.sources[source2].graphUri;
+                    fromStr += from + "  <" + importGraphUri + "> ";
+                });
             }
         }
 
+        if (!excludeDictionaries) {
+            for (var source in Config.sources) {
+                if (Config.sources[source].isDictionary) fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
+            }
+        }
 
         return fromStr;
-    }
+    };
 
     return self;
-
-
-})()
+})();

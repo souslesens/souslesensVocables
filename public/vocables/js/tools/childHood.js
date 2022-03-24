@@ -9,176 +9,141 @@
  */
 
 var ChildHood = (function () {
-    var self = {context: {}}
+    var self = { context: {} };
 
-    var colorsMap = {}
+    var colorsMap = {};
     var conceptsMap = {};
     var sourceLabels = [];
 
-
-
-
     self.onSourceSelect = function () {
-        var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='ChildHood.showActionPanel()'>OK</button>"
-        $("#sourceDivControlPanelDiv").html(html)
-
-    }
-
-
-
+        var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='ChildHood.showActionPanel()'>OK</button>";
+        $("#sourceDivControlPanelDiv").html(html);
+    };
 
     self.showActionPanel = function () {
         self.initsourceLabels();
-        $("#actionDivContolPanelDiv").html("")
-        $("#actionDiv").load("snippets/childHood.html")
-        $("#accordion").accordion("option", {active: 2});
-
-    }
-
+        $("#actionDivContolPanelDiv").html("");
+        $("#actionDiv").load("snippets/childHood.html");
+        $("#accordion").accordion("option", { active: 2 });
+    };
 
     self.initsourceLabels = function () {
-
         var jsTreesourceLabels = $("#sourcesTreeDiv").jstree(true).get_checked();
-        sourceLabels = []
+        sourceLabels = [];
         jsTreesourceLabels.forEach(function (sourceId) {
-            if (!Config.sources[sourceId].color)
-                Config.sources[sourceId].color = common.palette[Object.keys(sourceLabels).length];
-            sourceLabels.push(sourceId)
-        })
-    }
-
-
-
+            if (!Config.sources[sourceId].color) Config.sources[sourceId].color = common.palette[Object.keys(sourceLabels).length];
+            sourceLabels.push(sourceId);
+        });
+    };
 
     self.displayGraph = function (direction) {
-        var depth = parseInt($("#ChildHood_depth").val())
-        self.initsourceLabels()
+        var depth = parseInt($("#ChildHood_depth").val());
+        self.initsourceLabels();
 
-        var allNodes = {}
-        async.eachSeries(sourceLabels, function (sourceLabel, callbackEach) {
-
-            var sourceNodes = []
-            allNodes[sourceLabel] = sourceNodes
-            async.series([
-
-                //get TopConcepts
-                function (callbackSeries) {
-                    Sparql_generic.getTopConcepts(sourceLabel, null, function (err, result) {
-                        if (err)
-                            return callbackSeries(err);
-                        result.forEach(function (item) {
-                            sourceNodes.push({
-                                id: item.topConcept.value,
-                                label: item.topConceptLabel.value,
-                                level: 0,
-                                parent: sourceLabel
-                            })
-
-                        })
-                        callbackSeries()
-                    })
-
-                },
-
-                //get TopConcepts
-                function (callbackSeries) {
-                    var ids = [];
-                    sourceNodes.forEach(function (item) {
-                        ids.push(item.id)
-                    })
-                    Sparql_generic.getNodeChildren(sourceLabel, null, ids, depth, null, function (err, result) {
-
-                        if (err)
-                            return callbackSeries(err);
-                        result.forEach(function (item) {
-                            for (var i = 1; i <= depth; i++) {
-                                if (item["child" + i]) {
-                                    var parent;
-                                    if (i == 1)
-                                        parent = item.concept.value;
-                                    else
-                                        parent = item["child" + (i - 1)].value
-
+        var allNodes = {};
+        async.eachSeries(
+            sourceLabels,
+            function (sourceLabel, callbackEach) {
+                var sourceNodes = [];
+                allNodes[sourceLabel] = sourceNodes;
+                async.series(
+                    [
+                        //get TopConcepts
+                        function (callbackSeries) {
+                            Sparql_generic.getTopConcepts(sourceLabel, null, function (err, result) {
+                                if (err) return callbackSeries(err);
+                                result.forEach(function (item) {
                                     sourceNodes.push({
-                                        id: item["child" + i].value,
-                                        label: item["child" + i + "Label"].value,
-                                        level: i,
-                                        parent: parent
-                                    })
-                                }
-                            }
+                                        id: item.topConcept.value,
+                                        label: item.topConceptLabel.value,
+                                        level: 0,
+                                        parent: sourceLabel,
+                                    });
+                                });
+                                callbackSeries();
+                            });
+                        },
 
-                        })
-                        callbackSeries()
-                    })
+                        //get TopConcepts
+                        function (callbackSeries) {
+                            var ids = [];
+                            sourceNodes.forEach(function (item) {
+                                ids.push(item.id);
+                            });
+                            Sparql_generic.getNodeChildren(sourceLabel, null, ids, depth, null, function (err, result) {
+                                if (err) return callbackSeries(err);
+                                result.forEach(function (item) {
+                                    for (var i = 1; i <= depth; i++) {
+                                        if (item["child" + i]) {
+                                            var parent;
+                                            if (i == 1) parent = item.concept.value;
+                                            else parent = item["child" + (i - 1)].value;
 
-                },
+                                            sourceNodes.push({
+                                                id: item["child" + i].value,
+                                                label: item["child" + i + "Label"].value,
+                                                level: i,
+                                                parent: parent,
+                                            });
+                                        }
+                                    }
+                                });
+                                callbackSeries();
+                            });
+                        },
+                    ],
+                    function (err) {
+                        callbackEach(err);
+                    }
+                );
+            },
+            function (err) {
+                if (err) return MainController.UI.message(err);
+                self.drawGraph(allNodes);
+            }
+        );
+    };
 
+    self.drawGraph = function (allNodesMap) {
+        var visjsData = { nodes: [], edges: [] };
+        var allIds = {};
 
-            ], function (err) {
-                callbackEach(err);
-            })
-
-
-        }, function (err) {
-            if (err)
-                return MainController.UI.message(err);
-            self.drawGraph( allNodes);
-        })
-
-
-    }
-
-
-    self.drawGraph=function(allNodesMap)   {
-        var visjsData={nodes:[],edges:[]};
-        var allIds={}
-
-        var colors=[""]
-        for(var source in allNodesMap){
-            var color=colorsMap[source];
+        var colors = [""];
+        for (var source in allNodesMap) {
+            var color = colorsMap[source];
             visjsData.nodes.push({
                 id: source,
-                label:source,
-                shape:"box",
-                color:color
-            })
-            allNodesMap[source].forEach(function(item){
-                var label=null;
-                if(item.level<2)
-                    label=item.label
-                if(!allIds[item.id]) {
-                    allIds[item.id]=1
+                label: source,
+                shape: "box",
+                color: color,
+            });
+            allNodesMap[source].forEach(function (item) {
+                var label = null;
+                if (item.level < 2) label = item.label;
+                if (!allIds[item.id]) {
+                    allIds[item.id] = 1;
                     visjsData.nodes.push({
                         id: item.id,
-                       label: label,
-                        color:  common.palette[10+item.level]
-                    })
+                        label: label,
+                        color: common.palette[10 + item.level],
+                    });
                 }
-                var edgeId=item.id+"_"+item.parent
-                if(!allIds[edgeId]) {
-                    allIds[edgeId] = 1
+                var edgeId = item.id + "_" + item.parent;
+                if (!allIds[edgeId]) {
+                    allIds[edgeId] = 1;
                     visjsData.edges.push({
                         id: edgeId,
                         from: item.id,
-                        to: item.parent
-                    })
+                        to: item.parent,
+                    });
                 }
-
-            })
-
+            });
         }
 
-        visjsGraph.draw("graphDiv", visjsData)
+        visjsGraph.draw("graphDiv", visjsData);
+    };
 
-
-
-
-
-    }
-
-
-/*
+    /*
         var maxDepth = 5
 
         drawRootNode = function (word) {
@@ -359,8 +324,5 @@ var ChildHood = (function () {
 
     }*/
 
-
     return self;
-
-
-})()
+})();

@@ -1,6 +1,6 @@
-import { Msg } from './Admin';
-import { Msg_, Mode } from '../src/Component/UsersTable';
-import React from 'react';
+import { Msg } from "./Admin";
+import { Msg_, Mode } from "../src/Component/UsersTable";
+import React from "react";
 declare function getUsers(url: string): Promise<User[]>;
 declare function putUsers(url: string, body: User[]): Promise<User[]>;
 declare function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>): Promise<void>;

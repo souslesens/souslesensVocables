@@ -1,10 +1,10 @@
 import * as React from "react";
-import { RD } from 'srd';
-import { User as User } from './User';
-import { Profile } from './Profile';
+import { RD } from "srd";
+import { User as User } from "./User";
+import { Profile } from "./Profile";
 import { Source } from "./Source";
 import { Config } from "./Config";
-import { Log } from './Log';
+import { Log } from "./Log";
 declare type Model = {
     users: RD<string, User[]>;
     profiles: RD<string, Profile[]>;
@@ -14,7 +14,7 @@ declare type Model = {
     isModalOpen: boolean;
     currentEditionTab: EditionTab;
 };
-declare type EditionTab = 'UsersEdition' | 'ProfilesEdition' | 'SourcesEdition' | 'Logs';
+declare type EditionTab = "UsersEdition" | "ProfilesEdition" | "SourcesEdition" | "Logs";
 declare type UpadtedFieldPayload = {
     id: string;
     fieldName: string;
@@ -25,34 +25,34 @@ declare function useModel(): {
     updateModel: React.Dispatch<Msg>;
 };
 declare type Msg = {
-    type: 'ServerRespondedWithUsers';
+    type: "ServerRespondedWithUsers";
     payload: RD<string, User[]>;
 } | {
-    type: 'ServerRespondedWithProfiles';
+    type: "ServerRespondedWithProfiles";
     payload: RD<string, Profile[]>;
 } | {
-    type: 'ServerRespondedWithSources';
+    type: "ServerRespondedWithSources";
     payload: RD<string, Source[]>;
 } | {
-    type: 'ServerRespondedWithConfig';
+    type: "ServerRespondedWithConfig";
     payload: RD<string, Config>;
 } | {
-    type: 'ServerRespondedWithLogs';
+    type: "ServerRespondedWithLogs";
     payload: RD<string, Log[]>;
 } | {
-    type: 'UserUpdatedField';
+    type: "UserUpdatedField";
     payload: UpadtedFieldPayload;
 } | {
-    type: 'UserClickedSaveChanges';
+    type: "UserClickedSaveChanges";
     payload: {};
 } | {
-    type: 'UserChangedModalState';
+    type: "UserChangedModalState";
     payload: boolean;
 } | {
-    type: 'UserClickedAddUser';
+    type: "UserClickedAddUser";
     payload: string;
 } | {
-    type: 'UserClickedNewTab';
+    type: "UserClickedNewTab";
     payload: number;
 };
 declare const Admin: () => JSX.Element;

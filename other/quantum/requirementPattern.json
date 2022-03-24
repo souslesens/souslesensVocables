@@ -1,97 +1,81 @@
 {
-  "mappings": [
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "https://w3id.org/requirement-ontology/rdl/REQ_0008"
-    },
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
-      "object": "typicalassemblypattern.Code"
-    },
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "typicalassemblypattern.Name"
-    },
+    "mappings": [
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "https://w3id.org/requirement-ontology/rdl/REQ_0008"
+        },
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "http://www.w3.org/2002/07/owl#DatatypeProperty",
+            "object": "typicalassemblypattern.Code"
+        },
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+            "object": "typicalassemblypattern.Name"
+        },
 
+        {
+            "subject": "typicalassemblypattern.TypicalAssemblyRequirementID",
+            "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0018",
+            "object": "typicalassemblypattern.ID"
+        },
 
+        {
+            "subject": "typicalassemblypattern.TypicalAssemblyRequirementID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "https://w3id.org/requirement-ontology/rdl/REQ_0011"
+        },
 
+        {
+            "subject": "typicalassemblypattern.TypicalAssemblyRequirementID",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+            "object": "typicalassemblypattern.TypicalAssemblyRequirementID_Lookup"
+        },
 
-    {
-      "subject": "typicalassemblypattern.TypicalAssemblyRequirementID",
-      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0018",
-      "object": "typicalassemblypattern.ID"
-    },
+        {
+            "subject": "typicalassemblypattern.PrimaryFunctionalClassID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "typicalassemblypattern.PrimaryAttributeID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+        },
 
+        {
+            "subject": "typicalassemblypattern.LinkFunctionalClassID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+        },
+        {
+            "subject": "typicalassemblypattern.LinkAttributeID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
+        },
 
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0021",
+            "object": "typicalassemblypattern.PrimaryFunctionalClassID"
+        },
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0021",
+            "object": "typicalassemblypattern.PrimaryAttributeID"
+        },
 
-
-
-    {
-      "subject": "typicalassemblypattern.TypicalAssemblyRequirementID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "https://w3id.org/requirement-ontology/rdl/REQ_0011"
-    },
-
-
-
-    {
-      "subject": "typicalassemblypattern.TypicalAssemblyRequirementID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "typicalassemblypattern.TypicalAssemblyRequirementID_Lookup"
-    },
-
-
-    {
-      "subject": "typicalassemblypattern.PrimaryFunctionalClassID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "typicalassemblypattern.PrimaryAttributeID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
-    },
-
-
-    {
-      "subject": "typicalassemblypattern.LinkFunctionalClassID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
-    },
-    {
-      "subject": "typicalassemblypattern.LinkAttributeID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
-    },
-
-
-
-
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0021",
-      "object": "typicalassemblypattern.PrimaryFunctionalClassID"
-    },
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0021",
-      "object": "typicalassemblypattern.PrimaryAttributeID"
-    },
-
-
-
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0020",
-      "object": "typicalassemblypattern.LinkFunctionalClassID"
-    },
-    {
-      "subject": "typicalassemblypattern.ID",
-      "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0020",
-      "object": "typicalassemblypattern.LinkAttributeID"
-    }
-  ]
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0020",
+            "object": "typicalassemblypattern.LinkFunctionalClassID"
+        },
+        {
+            "subject": "typicalassemblypattern.ID",
+            "predicate": "https://w3id.org/requirement-ontology/rdl/REQ_0020",
+            "object": "typicalassemblypattern.LinkAttributeID"
+        }
+    ]
 }

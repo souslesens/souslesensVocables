@@ -1,6 +1,5 @@
-var GraphMlExport=(function(){
-
-    var self={}
+var GraphMlExport = (function () {
+    var self = {};
     /*
 
 
@@ -29,69 +28,66 @@ var GraphMlExport=(function(){
 
      */
 
-   self.VisjsDataToGraphMl=function(visjsData){
-        var xml="<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+    self.VisjsDataToGraphMl = function (visjsData) {
+        var xml =
+            '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' +
             "<graphml\n" +
-            " xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n" +
-            " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-            " xmlns:y=\"http://www.yworks.com/xml/graphml\"\n" +
-            " xmlns:yed=\"http://www.yworks.com/xml/yed/3\"\n" +
-            " xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd\">"
+            ' xmlns="http://graphml.graphdrawing.org/xmlns"\n' +
+            ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n' +
+            ' xmlns:y="http://www.yworks.com/xml/graphml"\n' +
+            ' xmlns:yed="http://www.yworks.com/xml/yed/3"\n' +
+            ' xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd">';
 
+        xml += '  <key for="node" id="d1" yfiles.type="nodegraphics"/>' + ' <graph edgedefault="directed" id="G">';
 
-       xml+="  <key for=\"node\" id=\"d1\" yfiles.type=\"nodegraphics\"/>" +
-           " <graph edgedefault=\"directed\" id=\"G\">"
+        visjsData.nodes.forEach(function (node) {
+            xml +=
+                ' \n<node id="' +
+                node.id +
+                '">\n' +
+                '  <data key="d1">\n' +
+                "        <y:ShapeNode>\n" +
+                '          <y:Shape type="roundrectangle"/>                              <!-- node shape -->\n' +
+                '          <y:Geometry height="30.0" width="' +
+                node.label.length * 7 +
+                ".0" +
+                '" x="0.0" y="0.0"/> <!-- position and size -->\n' +
+                '          <y:Fill color="' +
+                node.color +
+                '" transparent="false"/>            <!-- fill color -->\n' +
+                '          <y:BorderStyle color="#000000" type="line" width="1.0"/> <!-- border -->\n' +
+                "          <y:NodeLabel>" +
+                node.label +
+                "</y:NodeLabel>                    <!-- label text -->\n" +
+                "        </y:ShapeNode>\n" +
+                "      </data>" +
+                "</node>\n";
+        });
 
-
-
-       visjsData.nodes.forEach(function(node){
-           xml+=" \n<node id=\""+node.id+"\">\n" +
-               "  <data key=\"d1\">\n" +
-               "        <y:ShapeNode>\n" +
-               "          <y:Shape type=\"roundrectangle\"/>                              <!-- node shape -->\n" +
-               "          <y:Geometry height=\"30.0\" width=\""+node.label.length*7+".0"+"\" x=\"0.0\" y=\"0.0\"/> <!-- position and size -->\n" +
-               "          <y:Fill color=\""+node.color+"\" transparent=\"false\"/>            <!-- fill color -->\n" +
-               "          <y:BorderStyle color=\"#000000\" type=\"line\" width=\"1.0\"/> <!-- border -->\n" +
-               "          <y:NodeLabel>"+node.label+"</y:NodeLabel>                    <!-- label text -->\n" +
-               "        </y:ShapeNode>\n" +
-               "      </data>"+
-               "</node>\n"
-
-       })
-
-       visjsData.edges.forEach(function(edge){
-           xml+="     <edge source=\""+edge.from+"\" target=\""+edge.to+"\">\n" +
-               " <data key=\"d8\"/>\n" +
-               "      <data key=\"d9\">\n" +
-               "        <y:PolyLineEdge>\n" +
-               "          <y:Path sx=\"-55.0\" sy=\"0.0\" tx=\"47.5\" ty=\"0.0\"/>\n" +
-               "          <y:LineStyle color=\"#000000\" type=\"line\" width=\"1.0\"/>\n" +
-               "          <y:Arrows source=\"none\" target=\"standard\"/>\n" +
-               "          <y:EdgeLabel>"+edge.label+"</y:EdgeLabel>\n" +
-               "          <y:BendStyle smoothed=\"false\"/>\n" +
-               "        </y:PolyLineEdge>\n" +
-               "      </data>"+
-               "</edge>\n"
-
-       })
-       xml+=" </graph>\n" +
-           "</graphml>"
-       return xml
-
-
-
-   }
-
-
-
-
-
-
+        visjsData.edges.forEach(function (edge) {
+            xml +=
+                '     <edge source="' +
+                edge.from +
+                '" target="' +
+                edge.to +
+                '">\n' +
+                ' <data key="d8"/>\n' +
+                '      <data key="d9">\n' +
+                "        <y:PolyLineEdge>\n" +
+                '          <y:Path sx="-55.0" sy="0.0" tx="47.5" ty="0.0"/>\n' +
+                '          <y:LineStyle color="#000000" type="line" width="1.0"/>\n' +
+                '          <y:Arrows source="none" target="standard"/>\n' +
+                "          <y:EdgeLabel>" +
+                edge.label +
+                "</y:EdgeLabel>\n" +
+                '          <y:BendStyle smoothed="false"/>\n' +
+                "        </y:PolyLineEdge>\n" +
+                "      </data>" +
+                "</edge>\n";
+        });
+        xml += " </graph>\n" + "</graphml>";
+        return xml;
+    };
 
     return self;
-
-
-
-
-
-})()
+})();

@@ -1,106 +1,103 @@
 const path = require("path");
 const dirContentAnnotator = require(path.resolve("bin/annotator/dirContentAnnotator."));
 
-module.exports = function() {
-  let operations = {
-    GET, POST
-  };
+module.exports = function () {
+    let operations = {
+        GET,
+        POST,
+    };
 
-  function GET(req, res, next) {
+    function GET(req, res, next) {
+        const group = req.query.group ? req.query.group : "all";
 
-    const group = req.query.group ? req.query.group : "all"
-
-    dirContentAnnotator.getAnnotatedCorpusList(group, function (err, result) {
-      if (err) {
-        return res.status(400).json({error: err})
-      }
-      return res.status(200).json(result)
-    });
-  }
-
-  function POST(req, res, next) {
-
-    dirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, req.body.sources, req.body.corpusName, req.body.options, function (err, result) {
-        if (err) {
-          return res.status(400).json({error: err})
-        }
-        return res.status(200).json(result)
-    });
-  }
-
-  GET.apiDoc = {
-
-    security: [{loginScheme: []}],
-    summary: 'Retrive annotate corpus list',
-    description: "Retrive annotate corpus list",
-    operationId: 'Retrive annotate corpus list',
-    parameters: [
-      {
-        name: 'group',
-        description: "group",
-        in: 'query',
-        type: "string",
-        required: false
-      }
-    ],
-
-    responses: {
-      200: {
-        description: 'Results',
-        schema: {
-          type: 'object',
-        }
-      },
-    }
-  }
-
-  POST.apiDoc = {
-
-    security: [{loginScheme: []}],
-    summary: 'Annotate corpus',
-    description: "Annotate corpus",
-    operationId: 'Annotate corpus',
-    parameters: [
-      {
-        name: 'body',
-        description: "body",
-        in: 'body',
-        schema: {
-          type: 'object',
-          properties: {
-            corpusPath: {
-              type: "string",
-            },
-            corpusName: {
-              type: "string",
-            },
-            options: {
-              type: 'object',
-              properties: {
-                exactMatch: {
-                  type: "boolean"
-                }
-              }
-            },
-            sources: {
-              type: "array",
-              items: {
-                $ref: "#/definitions/Source"
-              }
+        dirContentAnnotator.getAnnotatedCorpusList(group, function (err, result) {
+            if (err) {
+                return res.status(400).json({ error: err });
             }
-          }
-        }
-      }
-    ],
-    responses: {
-      200: {
-        description: 'Results',
-        schema: {
-          type: 'string',
-        }
-      },
+            return res.status(200).json(result);
+        });
     }
-  }
 
-  return operations;
-}
+    function POST(req, res, next) {
+        dirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, req.body.sources, req.body.corpusName, req.body.options, function (err, result) {
+            if (err) {
+                return res.status(400).json({ error: err });
+            }
+            return res.status(200).json(result);
+        });
+    }
+
+    GET.apiDoc = {
+        security: [{ loginScheme: [] }],
+        summary: "Retrive annotate corpus list",
+        description: "Retrive annotate corpus list",
+        operationId: "Retrive annotate corpus list",
+        parameters: [
+            {
+                name: "group",
+                description: "group",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+        ],
+
+        responses: {
+            200: {
+                description: "Results",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+    };
+
+    POST.apiDoc = {
+        security: [{ loginScheme: [] }],
+        summary: "Annotate corpus",
+        description: "Annotate corpus",
+        operationId: "Annotate corpus",
+        parameters: [
+            {
+                name: "body",
+                description: "body",
+                in: "body",
+                schema: {
+                    type: "object",
+                    properties: {
+                        corpusPath: {
+                            type: "string",
+                        },
+                        corpusName: {
+                            type: "string",
+                        },
+                        options: {
+                            type: "object",
+                            properties: {
+                                exactMatch: {
+                                    type: "boolean",
+                                },
+                            },
+                        },
+                        sources: {
+                            type: "array",
+                            items: {
+                                $ref: "#/definitions/Source",
+                            },
+                        },
+                    },
+                },
+            },
+        ],
+        responses: {
+            200: {
+                description: "Results",
+                schema: {
+                    type: "string",
+                },
+            },
+        },
+    };
+
+    return operations;
+};

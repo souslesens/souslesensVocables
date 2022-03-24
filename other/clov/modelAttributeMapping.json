@@ -1,10 +1,9 @@
 {
-  "mappings": [
-    {
-      "subject": "model_attribute.ModelID",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
-      "object": "model_attribute.AttributeID"
-    }
-
-  ]
+    "mappings": [
+        {
+            "subject": "model_attribute.ModelID",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+            "object": "model_attribute.AttributeID"
+        }
+    ]
 }

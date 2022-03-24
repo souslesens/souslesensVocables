@@ -258,7 +258,7 @@ var Sparql_OWL = (function () {
 
 
             //   query += "?concept rdf:type ?type. "
-            query += "?concept rdf:type owl:Class. "
+            query += "?concept rdf:type* owl:Class. "
             if (words) {
                 query += " ?concept rdfs:label ?conceptLabel."
             } else {

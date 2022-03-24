@@ -452,7 +452,7 @@ var SearchUtil = (function () {
                         result.classesMap[key].parents = result.classesMap[key].parents;//.split("|")
                         classesArray.push(result.classesMap[key])
                     }
-                    var slices = common.array.slice(classesArray, 100)
+                    var slices = common.array.slice(classesArray, 50)
                     async.eachSeries(slices, function (data, callbackEach) {
                             var replaceIndex = false
                             if ((index++) == 0)

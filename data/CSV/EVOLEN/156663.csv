@@ -1,0 +1,25 @@
+code1	level1	code2	level2
+1	APPRAISE	11	Economic viability
+2	SELECT	21	Facilities selection
+2	SELECT	22	Process selection
+2	SELECT	23	Delivery selection
+3	DEFINE	31	Facilities definition specification
+3	DEFINE	32	Process  definition specification
+3	DEFINE	33	Delivery definition specification
+3	DEFINE	34	Utilities  definition specification
+3	DEFINE	35	Manning  definition specification
+4	EXECUTE	41	Vendor selection
+4	EXECUTE	42	Equipment selection
+4	EXECUTE	43	Logistics support analysis
+4	EXECUTE	44	Completion strategy
+4	EXECUTE	45	Inspection & maintenance strategy
+4	EXECUTE	46	Sparing & repair strategy
+4	EXECUTE	47	Procurement
+5	OPERATE	51	Maintenance optimization
+5	OPERATE	52	Repair & spares optimization
+5	OPERATE	53	Production & process optimization
+5	OPERATE	54	Reservoir management optimisation
+5	OPERATE	55	Modification options & screening
+5	OPERATE	56	Disposal strategy & review
+6	ABANDON	61	Well shutdown & abandonment
+6	ABANDON	62	Facilities disposal & abandonment

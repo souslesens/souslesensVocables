@@ -980,7 +980,10 @@ WHERE {
                         "OPTIONAL{?concept skos:altLabel ?skosAltLabel}. " +
                         "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. "
 
-                    if (conceptType) {
+
+
+
+                    if (false && conceptType) {
                         query += "?concept rdf:type " + conceptType + ". "
 
                         query += "?firstParent rdf:type " + conceptType + ". "
@@ -988,6 +991,9 @@ WHERE {
 
                     if (options.filter)
                         query += " " + options.filter + " "
+
+                    query += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}"
+
 
                     query += "}"
 

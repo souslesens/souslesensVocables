@@ -125,7 +125,7 @@ var common = (function () {
                     'dnd': options.dnd,
                     "search": options.searchPlugin,
                     "checkbox": {
-                        tie_selection: false,
+                        tie_selection: options.tie_selection,
                         whole_node: false
                     },
                     types: common.jstree.types,

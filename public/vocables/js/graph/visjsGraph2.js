@@ -843,7 +843,6 @@ var visjsGraph = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",
-            data: payload,
             dataType: "json",
             success: function (result, textStatus, jqXHR) {
                 if (callback) return callback(null, result);

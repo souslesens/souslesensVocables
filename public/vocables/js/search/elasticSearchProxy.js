@@ -17,7 +17,8 @@ var ElasticSearchProxy = (function () {
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/elasticsearch/query",
-            data: payload,
+            data: JSON.stringify(payload),
+            contentType: "application/json",
             dataType: "json",
             success: function (data, textStatus, jqXHR) {
                 var xx = data;

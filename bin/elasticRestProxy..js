@@ -60,7 +60,7 @@ var elasticRestProxy = {
                     return callback(null, result);
                 });
             } else {
-                callback(null, body);
+                callback(null, JSON.parse(body));
             }
         });
     },

@@ -92,7 +92,6 @@ type Msg =
 
 function update(model: Model, msg: Msg): Model {
     const unwrappedUsers: User[] = SRD.unwrap([], identity, model.users);
-    console.log(msg);
     switch (msg.type) {
         case "ServerRespondedWithUsers":
             return { ...model, users: msg.payload };

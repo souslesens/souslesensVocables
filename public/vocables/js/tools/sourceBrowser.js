@@ -45,7 +45,8 @@ var SourceBrowser = (function () {
 
     self.selectTreeNodeFn = function (event, obj) {
         var source;
-        if (obj.node.data && obj.node.data.source) source = obj.node.data && obj.node.data.source; // coming from search all sources
+        if (obj.node.data && obj.node.data.source) source = obj.node.data && obj.node.data.source;
+        // coming from search all sources
         else source = MainController.currentSource; // coming from  specific tool current surce
         self.currentTreeNode = obj.node;
         if (obj.event.ctrlKey) self.copyNode(self.currentTreeNode);

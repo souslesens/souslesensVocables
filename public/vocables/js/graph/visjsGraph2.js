@@ -412,7 +412,8 @@ var visjsGraph = (function () {
 
                 var size = self.defaultNodeSize / scaleCoef;
                 var fontSize = self.defaultTextSize / scaleCoef;
-                if (scale < 1) fontSize = self.defaultTextSize / 1; //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
+                if (scale < 1) fontSize = self.defaultTextSize / 1;
+                //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
                 else fontSize = self.defaultTextSize / (scaleCoef * 1.3);
 
                 var nodes = self.data.nodes.get();

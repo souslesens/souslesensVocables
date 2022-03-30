@@ -335,7 +335,8 @@ var KGbrowserGraph = (function () {
             "Select  distinct * " +
             fromStr +
             " where {";
-        if (inverse == "false") query += " <" + self.currentGraphNode.data.id + "> <" + predicate + "> ?obj .?obj rdf:type ?objType."; // filter (?objType=<" + objectClass + ">)"
+        if (inverse == "false") query += " <" + self.currentGraphNode.data.id + "> <" + predicate + "> ?obj .?obj rdf:type ?objType.";
+        // filter (?objType=<" + objectClass + ">)"
         else query += " ?obj <" + predicate + "> <" + self.currentGraphNode.data.id + "> .?obj rdf:type ?objType. "; //filter (?objType=<" + objectClass + ">)"
         query += " optional {?obj rdfs:label ?objLabel}  " + "} ORDER by ?objLabel LIMIT " + Config.KG.queryLimit;
 

@@ -41,7 +41,8 @@ var Standardizer = (function () {
 
                 var options = {
                     contextMenu: Standardizer.getSourcesJstreeContextMenu(),
-                    selectTreeNodeFn: Standardizer.onselectSourcesTreeNodeFn
+                    selectTreeNodeFn: Standardizer.onselectSourcesTreeNodeFn,
+                    tie_selection: false
                 }
                 MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL"], options);
                 sources.sort()
@@ -228,11 +229,10 @@ var Standardizer = (function () {
                 }
 
 
-
                 if (!entitiesMap[word]) {
                     entitiesMap[word] = []
-                    entitiesMap[word].divId=common.getRandomHexaId(10)
-                    entitiesMap[word].sourceObject=obj
+                    entitiesMap[word].divId = common.getRandomHexaId(10)
+                    entitiesMap[word].sourceObject = obj
                 }
                 if (!data[index] || !data[index].hits)
                     return;
@@ -287,7 +287,7 @@ var Standardizer = (function () {
                                 self.matrixIndexRankingsMap[indexName] = 0
                             self.matrixIndexRankingsMap[indexName] += 1
 
-                        }else{
+                        } else {
 
                         }
                         self.matrixWordsMap.entities[word].push(entitiesMap[word][indexName] || null)
@@ -308,8 +308,8 @@ var Standardizer = (function () {
                     else
                         hasMatchesClassStr = " matrixWordExactMatch"
 
-                    var wordDivId =  entitiesMap[word].divId
-                    self.matrixDivsMap[wordDivId] = {word:word,sourceObject: entitiesMap[word].sourceObject}
+                    var wordDivId = entitiesMap[word].divId
+                    self.matrixDivsMap[wordDivId] = {word: word, sourceObject: entitiesMap[word].sourceObject}
 
                     rowHtml += "<div id='" + wordDivId + "' class='matrixRowTitle " + hasMatchesClassStr + "'>" + word + "</div>"
                     rowHtml += cellHtml + "</div>"
@@ -416,7 +416,7 @@ var Standardizer = (function () {
             var words2 = ""
             words.forEach(function (word) {
                 common.decapitalizeLabel(word)
-                var word2 =  common.decapitalizeLabel(word)
+                var word2 = common.decapitalizeLabel(word)
 
                 words2 += (word2 + "\n")
 
@@ -619,7 +619,7 @@ var Standardizer = (function () {
             var word = self.matrixDivsMap[this.id].word
             self.fuzzyMatches.currentFuzzyWord = word
             self.fuzzyMatches.currentFuzzyDiv = this.id
-            self.fuzzyMatches.currentSourceObject= self.matrixDivsMap[this.id].sourceObject
+            self.fuzzyMatches.currentSourceObject = self.matrixDivsMap[this.id].sourceObject
             self.fuzzyMatches.currentFuzzyWord = word
             self.showFuzzyMatchSearch(word)
 
@@ -647,7 +647,9 @@ var Standardizer = (function () {
         self.showFuzzyMatchSearch = function (word) {
             var html = 'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
                 'onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,\'Standardizer_searchResulDiv2\')">' +
-                "<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
+                "<br><input type='checkbox' id='Standardizer_fuzzySearchAllsourcesCBX'>All sources" +
+                "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>"
+            //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
             html += '<div id="Standardizer_searchResulDiv2" </div>'
             $("#Standardizer_matrixCellDataDiv").html(html);
             setTimeout(function () {
@@ -937,7 +939,7 @@ var Standardizer = (function () {
 
 
         self.drawSunBurst = function (searchResultArray, words, options, callback) {
-        //    return;
+            //    return;
             if ({options})
                 options = {}
 
@@ -1730,6 +1732,7 @@ var Standardizer = (function () {
                     var options = {
                         selectTreeNodeFn: Standardizer.bestMatches.onTreeNodeClick
                     }
+
                     common.jstree.loadJsTree(treeDivId, jstreeData, options, function (err) {
                         common.jstree.openNodeDescendants(treeDivId, "#", 8)
 
@@ -1864,6 +1867,10 @@ var Standardizer = (function () {
                 words = [words]
             }
 
+            var filteredIndexes = $("#Standardizer_fuzzySearchAllsourcesCBX").prop("checked")
+            if (!indexes && !filteredIndexes) {
+                indexes = self.getSelectedIndexes(true)
+            }
 
             var size = 200
             var slices = common.array.slice(words, size)
@@ -1878,7 +1885,7 @@ var Standardizer = (function () {
                     if (err)
                         return alert(err)
                     var entities = []
-                    if(!result.forEach ||  result.length==0)
+                    if (!result.forEach || result.length == 0)
                         return MainController.UI.message("no result)");
                     result.forEach(function (item) {
                         if (!item.hits || !item.hits.hits)
@@ -1973,6 +1980,23 @@ var Standardizer = (function () {
 
         }
 
+        self.clearFuzzyMatch = function () {
+            if (!self.fuzzyMatches.currentSourceObject)
+                return;
+
+            var itemIndexes = []
+            self.fuzzyMatches.forEach(function (item, index) {
+                if (item.sourceNode.id == self.fuzzyMatches.currentSourceObject.id) {
+                    $("#" + item.divId).removeClass("matrixWordFuzzyMatch")
+                    itemIndexes.push(index)
+                }
+            })
+            itemIndexes.forEach(function (index) {
+                self.fuzzyMatches.splice(index, 1)
+            })
+
+        }
+
 
         self.extractText = function () {
             $("#Standardizer_wordsTA").val("")
@@ -2060,7 +2084,11 @@ var Standardizer = (function () {
 
         self.selectAsFuzzyMatch = function (source, itemId) {
             var item = self.currentSearchedResultsMap[itemId]
-            self.fuzzyMatches.push({sourceNode:self.fuzzyMatches.currentSourceObject, targetNode:{word: self.fuzzyMatches.currentFuzzyWord, source: source, id: item.id,label:item.label}})
+            self.fuzzyMatches.push({
+                divId: self.fuzzyMatches.currentFuzzyDiv,
+                sourceNode: self.fuzzyMatches.currentSourceObject,
+                targetNode: {word: self.fuzzyMatches.currentFuzzyWord, source: source, id: item.id, label: item.label,}
+            })
             $("#" + self.fuzzyMatches.currentFuzzyDiv).addClass("matrixWordFuzzyMatch")
 
 
@@ -2244,7 +2272,7 @@ var Standardizer = (function () {
         self.createSameAsRelations = function (type) {
             var relations = [];
             var targetSources = []
-            var dictionarySourceLabel=Config.dictionarySource
+            var dictionarySourceLabel = Config.dictionarySource
 
             if (type == "exactMatch") {
 
@@ -2302,7 +2330,7 @@ var Standardizer = (function () {
             }
 
 
-            if (!confirm("create " + relations.length + " relations sameAs in "+dictionarySourceLabel))
+            if (!confirm("create " + relations.length + " relations sameAs in " + dictionarySourceLabel))
                 return;
 
             var sliceLength = 10
@@ -2314,7 +2342,7 @@ var Standardizer = (function () {
                     return callbackSeries();
 
                     async.eachSeries(targetSources, function (targetSource, callbackEach) {
-                        if(Config.sources[dictionarySourceLabel].imports.indexOf(targetSource))
+                        if (Config.sources[dictionarySourceLabel].imports.indexOf(targetSource))
                             return callbackEach()
                         MainController.UI.message(" adding " + targetSource + " in   dictionarySourceLabel imports");
                         Lineage_blend.addImportToCurrentSource("dictionarySourceLabel", targetSource, function (err, result) {
@@ -2322,7 +2350,7 @@ var Standardizer = (function () {
 
                             //  return alert(" coming soon");
                         })
-                    },function(err){
+                    }, function (err) {
                         callbackSeries(err);
                     })
                 },
@@ -2330,7 +2358,7 @@ var Standardizer = (function () {
 
 
                     var slices = common.array.slice(relations, sliceLength)
-                    MainController.UI.message(" Creating relations  in +"+dictionarySourceLabel+"...");
+                    MainController.UI.message(" Creating relations  in +" + dictionarySourceLabel + "...");
                     async.eachSeries(slices, function (slice, callbackEach) {
                         Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, result) {
                             if (err)
@@ -2342,7 +2370,7 @@ var Standardizer = (function () {
                                    })*/
 
                             totalCreated += sliceLength
-                            MainController.UI.message(totalCreated + " relations created in "+dictionarySourceLabel);
+                            MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel);
 
                             return callbackEach()
                         })
@@ -2356,7 +2384,7 @@ var Standardizer = (function () {
                 if (err)
                     return alert(err)
 
-                MainController.UI.message(totalCreated + " relations created in "+dictionarySourceLabel, true)
+                MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true)
             })
         }
 

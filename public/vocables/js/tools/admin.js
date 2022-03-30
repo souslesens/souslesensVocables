@@ -17,6 +17,7 @@ var Admin = (function () {
 
 
         $("#sourceDivControlPanelDiv").html(html)
+
     }
 
     self.onSourceSelect = function () {

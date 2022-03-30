@@ -1,0 +1,710 @@
+line	table	item	code	propId	Name	Description	type	physicalQuantity	ListId	UnitCodeList	Priority	
+604	133	 distribution	EP	1001	AC/DC	ACDCAC/DC				Codes	High	
+771	153	Electrical submersible pumps	ESP	1002	Acceptable minimum bending rating	Power cable and MLE	PQ	length		Metres	High	
+486	112	 Nozzles	NO	1003	Actuation	Specify	List		1079	Fusible bulb, solder, external	Medium	
+453	109	 Valves	VA	1004	Actuation - closing	Type of actuation force	List		1061	Electrical, hydraulic, pneumatic, mechanical (spring), manual, combinations, none	Medium	
+452	109	 Valves	VA	1005	Actuation - opening	Type of actuation force	List		1061	Electrical, hydraulic, pneumatic, mechanical (spring), manual, combinations, none	High	
+451	109	 Valves	VA	1006	Actuation principle	Actuator operating principle	List		1152	Single-acting, double-acting, actuation by line/ process pressure, actuation by gravity	Medium	
+162	54	 Cranes	CR	1007	A-frame height	Specify	PQ	length		Metres	Low	
+97	42	 turbines	ST	1008	Air inlet filtration type	Type				Free text	Low	
+135	48	 turbines	ST	1008	Air inlet filtration type	Type				Free text	Low	
+12	29	 engines	CE	1009	Air-inlet filtration type	Type				Free text	Low	
+326	83	 UPS	UP	1010	Ambient temperature	Operating temperature range				Minimum and maximum temperature in degrees Celsius	Low	
+769	153	Electrical submersible pumps	ESP	1011	Ampacity coefficients	Power cable and MLE				Specify [numeric value]	High	
+774	153	Electrical submersible pumps	ESP	1011	Ampacity coefficients	Pothead	PQ	electrical current / amperage		Amps	High	
+849	167	 (BOP)	BO	1012	Annular preventers - manufacturer (and model)	Specify				Specify	High	
+878	171	 (BOP)	BO	1012	Annular preventers - manufacturer (and model)	Specify				Specify	High	
+850	167	 (BOP)	BO	1013	Annular preventers, pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	High	
+879	171	 (BOP)	BO	1013	Annular preventers, pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	High	
+272	74	 Turrets	TU	1014	Application	Main use	List		1067	External loading, external production/injection, internal loading, internal production/ injection	High	
+315	83	 UPS	UP	1014	Application	What equipment the UPS is applied for	List		1033	Circuit breaker, control systems, safety systems, telecommunication	High	
+378	93	 converters	FC	1014	Application	Where applied	List		1039	Compressor application, subsea, downhole, process, drilling, utility	High	
+410	101	 devices	IP	1014	Application	Where applied	List		1138	Process control, emergency shutdown, process shutdown, pressure reduction, bypass, blowdown, monitoring, combined	High	
+436	108	 Valves	VA	1014	Application	Specify function in the process	List		1008	Annulus (X-mas tree), blowdown, bypass, injection, X-over, Deluge, ESD, ESD/PSD, PSD, HIPPS, swab, wing, relief, control, choke	High	
+468	112	 Nozzles	NO	1014	Application	Where in the process applied	List		1046	Deluge, sprinkler	High	
+503	118	control	CS	1014	Application	Where used	List		1089	HIPPS, manifold, SSIV, pump, wellhead, X-mas tree, multi-purpose	Medium	
+550	126	 Risers	PR	1014	Application	What type of platform	List		1074	Fixed, floating, buoy	Medium	
+636	139	 pipelines	SL	1014	Application	Classify	List		1161	Subsea to onshoreSubsea intra-fieldOffshore facilities to onshoreIntercontinental export pipelinesExport lines to offloading	High	
+906	180	 fixation	JF	1014	Application	Classify	List		1066	Exploration drillingProduction drilling/completion on subsea templateWell intervention on subsea templateProduction drilling/completion on wellhead platformWell intervention on wellhead platformService jack-up for AccommodationService jack-up for Heavy liftService jack-up for Geotechnical surveys	High	
+428	104	 units	CL	1015	Application - control logic	Where used	List		1031	Centralized, distributed, man-machine interface	Medium	
+104	45	 Pumps	PU	1016	Application - pump	Where applied	List		1023	Booster, supply, injection, transfer, lift, dosage, disperse, cooling, drilling, other	Medium	
+591	130	 pumps	SP	1016	Application - pump	Where applied	List		1022	Booster, injection, active cooling	Medium	
+522	122	 trees	XT	1017	Artificial lift well	Type of artificial lift in the well	List		1080	Gas lift, ESP, PCP, none	High	
+783	156	Surface wellhead and X-mas trees	XD	1017	Artificial lift well	Type of artificial lift in the well	List		1080	Gas lift, ESP, PCP, none	High	
+540	123	 trees	XT	1018	Asphaltenes	Specify	Bool			Yes/no	Low	
+570	127	 Risers	PR	1018	Asphaltenes	Specify	Bool			Yes/no	Low	
+632	136	 vessels	SV	1018	Asphaltenes	Specify	Bool			Yes/No	Low	
+182	55	 Cranes	CR	1019	Automatic overload protection system (AOPS)	Installed or not	Bool			Yes/No	High	
+492	115	 Lifeboats	LB	1020	Automatic release	Automatic release of lifeboat release hook	List		1115	No, Yes	Medium	
+94	42	 turbines	ST	1021	Backup starting system	Specify if relevant	List		1059	Electric, hydraulic, pneumatic	Low	
+133	48	 turbines	ST	1021	Backup starting system	Specify if relevant	List		1059	Electric, hydraulic, pneumatic	Low	
+330	83	 UPS	UP	1022	Battery backup time	The time during which the battery can supply rated output power to the inverter	PQ	time		Minutes	Medium	
+334	84	 UPS	UP	1023	Battery earth-fault monitoring	Specify				Common, individual, N.A.	Low	
+332	83	 UPS	UP	1024	Battery technology	Type of	List		1112	NiCd, Pb-acid, other	Medium	
+121	45	 Pumps	PU	1025	Bearing support	Type	List		1134	Overhung, between bearings, pump casing, split sleeve	Low	
+229	65	 vessels	VE	1026	Body material	Specify type or code				Free text	Low	
+626	136	 vessels	SV	1026	Body material	Specify type or code				Free text	Low	
+32	33	 Compressors	CO	1027	Body type	Type	List		1170	Vertical split case (barrel type), axial split case	Low	
+112	45	 Pumps	PU	1027	Body type	Barrel, split casing, etc.	List		1016	Barrel, split case, axial split, cartridge,	Low	
+169	54	 Cranes	CR	1028	Boom total weight	Specify	PQ	weight		Metric tonnes	Low	
+164	54	 Cranes	CR	1029	Boom, max. angle	Specify	PQ	degrees		Degrees	Low	
+163	54	 Cranes	CR	1030	Boom, min. angle	Specify	PQ	degrees		Degrees	Low	
+834	166	 (BOP)	BO	1031	BOP manufacturer/supplier	Specify				Free text	High	
+867	170	 (BOP)	BO	1031	BOP manufacturer/supplier	Specify				Free text	High	
+493	115	 Lifeboats	LB	1032	Breathing air capacity	Breathing air capacity	PQ	time		Minutes	Medium	
+494	115	 Lifeboats	LB	1033	Breathing air system	Breathing air system?	List		1115	No, Yes	High	
+150	51	 expanders	TE	1034	Casing-split type	Type	List		1093	Horizontal/vertical	Low	
+413	101	 devices	IP	1035	Category	Main category	List		1165	Transmitter, transducer, switch, pushbutton	High	
+857	167	 (BOP)	BO	1036	Choke-and-kill valve - manufacturer (and model)	Specify				Specify	Medium	
+884	171	 (BOP)	BO	1036	Choke-and-kill valve - manufacturer (and model)	Specify				Specify	Medium	
+683	145	(TR-SCSSV	TR-SCSSV	1037	Closure principle		List		1015	BallFlapper (conventional)Flapper (curved)PoppetOtherUnknown	Medium	
+710	147	 DHSV/WRSCSSV	WR-SCSSV	1037	Closure principle		List		1015	BallFlapper (conventional)Flapper (curved)PoppetOtherUnknown	Medium	
+429	104	 units	CL	1038	CLU redundancy configuration	Specify if there are redundant Control logic units (CLUs) installed	Bool			Yes/No	Low	
+557	127	 Risers	PR	1039	Coating	External and internal				Specify	Low	
+16	32	 Compressors	CO	1040	Compressed medium	Gas or air compressor	List		1081	Gas, air	High	
+770	153	Electrical submersible pumps	ESP	1041	Conductor Size	Power cable and MLE	PQ	length		Millimetres	High	
+482	112	 Nozzles	NO	1042	Connection size	Specify	PQ	length		Millimetres (inches)	High	
+184	55	 Cranes	CR	1043	Constant tension	Installed or not	Bool			Yes/No	Low	
+265	71	 Winches	WI	1044	Constant tensioning system	As applicable	Bool			Yes/No	Low	
+528	123	 trees	XT	1045	Control principle	Defines the control principle for X-mas tree functions and actuators					Low	
+699	146	(TR-SCSSV	TR-SCSSV	1045	Control principle		List		1095	HydraulicHydraulic with nitrogen charge as add-on power sourceHydraulic with balance line for deep settingElectromagnetic with downhole power sourceSolenoid-operated with electric cableOtherUnknown	Medium	
+733	149	DHSV/WR-SCSSV	WR-SCSSV	1045	Control principle		List		1095	HydraulicHydraulic with nitrogen charge as add-on power sourceHydraulic with balance line for deep settingElectromagnetic with downhole power sourceSolenoid-operated with electric cableOtherUnknown	Medium	
+794	157	Surface wellhead and X-mas trees	XD	1045	Control principle	Defines the control principle for X-mas tree (valve) functions and actuators				Note 1	High	
+383	93	 converters	FC	1046	Converter type	Describes whether the rectifier provides power back into the supply system	List		1131	One, two or four quadrant	Medium	
+327	83	 UPS	UP	1047	Cooling method	Specify	List		1171	Water, air, others	Medium	
+389	94	 converters	FC	1048	Cooling system design	What cooling mechanisms are used for the VSDS, transformers, braking resistors and enclosures	List		1102	Liquid cooling, air forced cooling. (Indicate most dominant since there in practice often is a combination of the two)	High	
+374	93	 converters	FC	1049	Corresponding driven unit	Equipment unit (electric motor) which the Frequency Converter is connected to				Tag	Medium	
+558	127	 Risers	PR	1050	Corrosion inhibitor		Bool			Yes/no	Low	
+39	33	 Compressors	CO	1051	Coupling	Type	List		1071	Fixed, flexible, hydraulic, disconnect	Low	
+49	36	 generators	EG	1051	Coupling	Specify (fixed, flexible, etc.)	List		1071	Fixed, flexible, hydraulic, disconnect	Low	
+116	45	 Pumps	PU	1051	Coupling	Coupling	List		1072	Fixed, flexible, hydraulic, magnetic, disconnect	Low	
+260	71	 Winches	WI	1051	Coupling	Type	List		1049	Disconnect, fixed, flexible, hydraulic	Low	
+8	29	 engines	CE	1052	Cylinder configuration	Type	List		1099	Inline, vee, flat	Low	
+41	33	 Compressors	CO	1052	Cylinder configuration		List		1098	Inline, opposed, V, W	Low	
+42	33	 Compressors	CO	1053	Cylinder orientation		List		1091	Horizontal, vertical, inclined	Low	
+57	36	 generators	EG	1054	Degree of protection	Protection class in accordance with IEC 60529				IP	Low	
+80	39	 motors	EM	1054	Degree of protection	Protection class in accordance with IEC 60529				Specify	Medium	
+325	83	 UPS	UP	1054	Degree of protection	Protection class in accordance with IEC 60529				IP code	Medium	
+349	87	 transformers	PT	1054	Degree of protection	Protection class in accordance with IEC 60529				Code as in IEC 60529:2001, Clause 4	Low	
+368	90	 Switchgear	SG	1054	Degree of protection	Environmental protection for the cabinet				IP rating	Low	
+90	42	 turbines	ST	1055	De-rating	Specify if permanently de-rated or not	Bool			Yes/No	Medium	
+755	153	Electrical submersible pumps	ESP	1056	Design performance curve	Mechanical gas separator				Performance Curve	Low	
+750	153	Electrical submersible pumps	ESP	1057	Design performance curves - water only	Pump and gas handler				Pump curve	Low	
+239	68	 Piping	PI	1058	Design pressure	Max. allowable pressure	PQ	pressure		Pascal (bar)	High	
+287	77	 Swivels	SW	1058	Design pressure		PQ	pressure		Pascal (bar)	Medium	
+302	80	 tanks	TA	1058	Design pressure	Maximum positive gauge pressure	PQ	pressure		Pascal (bar)	High	
+521	122	 trees	XT	1058	Design pressure	Pressure rating of wellhead and X-mas tree	PQ	pressure		Pascal (bar)	High	
+618	136	 vessels	SV	1058	Design pressure	Specify	PQ	pressure		Pascal (bar)	High	
+782	156	Surface wellhead and X-mas trees	XD	1058	Design pressure	Pressure rating of wellhead and X-mas tree	PQ	pressure		Pascal (bar)	High	
+301	80	 tanks	TA	1059	Design standard	Design standard	List		1155	Standard / edition / addendum	Medium	
+288	77	 Swivels	SW	1060	Design temperature		PQ	temperature		Degrees Celsius	Low	
+619	136	 vessels	SV	1060	Design temperature	Specify	PQ	temperature		Degrees Celsius	High	
+622	136	 vessels	SV	1061	Design throughput	Specify	PQ	volume flow rate		Sm3/d	Medium	
+303	80	 tanks	TA	1062	Design vacuum	Maximum partial vacuum	PQ	pressure		Pascal (bar)	High	
+400	97	 detectors	FG	1063	Detector communication	Type	List		1044	Conventional, addressable (one-way), smart (two-way)	Medium	
+421	101	 devices	IP	1063	Detector communication	Type	List		1044	Conventional, addressable (one-way), smart (two-way)	Medium	
+236	68	 Piping	PI	1064	Diameter	Outer diameter	PQ	length		Millimetres	High	
+775	153	Electrical submersible pumps	ESP	1065	Differential pressure performance	Pothead	PQ	pressure		Psi	High	
+838	167	 (BOP)	BO	1066	Dimension	Specify (inner diameter)	PQ	length		Millimetres (inches)	Medium	
+868	170	 (BOP)	BO	1066	Dimension	Specify (inner diameter)	PQ	length		Millimetres (inches)	Medium	
+21	32	 Compressors	CO	1067	Discharge pressure	Design - last stage	PQ	pressure		Pascal (bar)	High	
+22	32	 Compressors	CO	1067	Discharge pressure	Operating - last stage	PQ	pressure		Pascal (bar)	Medium	
+109	45	 Pumps	PU	1068	Discharge pressure - design	Design pressure	PQ	pressure		Pascal (bar)	High	
+581	130	 pumps	SP	1068	Discharge pressure - design		PQ	pressure		Pascal (barg.)	High	
+25	32	 Compressors	CO	1069	Discharge temperature	Design	PQ	temperature		Degrees Celsius	Medium	
+26	32	 Compressors	CO	1069	Discharge temperature	Operating	PQ	temperature		Degrees Celsius	Low	
+477	112	 Nozzles	NO	1069	Discharge temperature	At operating condition	PQ	temperature		Degrees Celsius	Low	
+3	29	 engines	CE	1070	Driven unit	Driven unit (equipment class, type and identification code)				Specify	High	
+127	48	 turbines	ST	1070	Driven unit	Equipment class, type and identification code	List		1040	Compressor, crane, generator, pump, winch, etc.	High	
+255	71	 Winches	WI	1071	Drum capacity	Max. drum capacity	PQ	length		Metres	Low	
+256	71	 Winches	WI	1072	Drum diameter		PQ	length		Metres	Low	
+677	144	(TR-SCSSV	TR-SCSSV	1073	Effective length	Length occupied by the item in the string, exclusive of pin/box	PQ	length		Metres	High	
+348	87	 transformers	PT	1074	Efficiency	Efficiency factor (?À)	Number			Number = 1	Medium	
+899	174	 intervention)	WC	1075	Elastomer type	Specify elastomer type for equipment with dynamic and static sealing elements.				Text	High	
+292	77	 Swivels	SW	1076	Electric power	Power swivels only	PQ	power		Kilowatt	Medium	
+808	162	 drives	TD	1077	Electrical supply requirements (applicable for electric drives only)	Voltage	PQ	electrical tension / voltage		Volt	High	
+809	162	 drives	TD	1077	Electrical supply requirements (applicable for electric drives only)	Current	PQ	electrical current / amperage		Ampere	High	
+829	163	 drives	TD	1078	Elevator link hanger capacity	Capacity	PQ	mass		Kilogram	High	
+628	136	 vessels	SV	1079	Emulsions	Specify	Bool			Yes/No	Low	
+289	77	 Swivels	SW	1080	Enclosure	Type of enclosure	List		1036	Closed compartment, naturally ventilated	Medium	
+206	61	 boilers	HB	1081	Energy source	Type of heating energy	List		1062	Electricity, exhaust gas, fuel gas, hot oil, liquid fuel, steam	High	
+13	29	 engines	CE	1082	Engine- aspiration type	Type of engine aspiration	List		1168	Turbo, natural	Medium	
+117	45	 Pumps	PU	1083	Environment	Submerged or dry-mounted					Medium	
+397	97	 detectors	FG	1083	Environment	Exposure	List		1147	Severe, moderate, low, unknown a	High	
+404	97	 detectors	FG	1084	Environment classification:     Severe not enclosed and/or outdoor							
+685	145	(TR-SCSSV	TR-SCSSV	1085	Equalizing feature		List		1173	With equalizing featureWithout equalizing featureUnknown	Low	
+717	148	 DHSV/WRSCSSV	WR-SCSSV	1085	Equalizing feature		List		1173	With equalizing featureWithout equalizing featureUnknown	Low	
+611	136	 vessels	SV	1086	Equipment application	Where used	List		1119	Oil processing, Condensate processing, Gas (re-)injection Gas processing, Gas treatment, Water (re-)injection, Liquid/gas separation, Liquid/Gas/Solid separation	High	
+740	152	Electrical submersible pumps	ESP	1087	ESP Application	Type of application	List		1132	Onshore wellTopsides well (dry tree completion)Subsea well (subsea well completion)Seafloor (Caisson)Horizontal pump system (HPS)	High	
+55	36	 generators	EG	1088	Excitation control	Type	List		1011	Automatic, manual	Medium	
+56	36	 generators	EG	1089	Excitation type	Brushless/slip-ring	List		1027	Brushless, slip-ring	Medium	
+475	112	 Nozzles	NO	1090	F luid handled - nozzles	Main fluid only	List		1137	Potable water, sea water, Inergen, CO2	Medium	
+458	109	 Valves	VA	1091	Fail-safe principle pilot valve	Fail-safe principle	List		1065	Energized, de-energized	Low	
+460	109	 Valves	VA	1092	Fail-safe principle solenoid valve	Fail-safe principle	List		1065	Energized, de-energized	Low	
+420	101	 devices	IP	1093	Fault tolerance	Response at failure	Bool			Yes/No	High	
+431	104	 units	CL	1093	Fault tolerance	Response at failure	Bool			Yes/No	High	
+401	97	 detectors	FG	1094	Fault tolerance b	Response at failure	Bool			Yes/No	Medium	
+23	32	 Compressors	CO	1095	Flow rate	Design	PQ	volume flow rate		Metres cubed per hour	High	
+24	32	 Compressors	CO	1095	Flow rate	Operating	PQ	volume flow rate		Metres cubed per hour	Low	
+479	112	 Nozzles	NO	1095	Flow rate	Specify	PQ	volume flow rate		Litres per minute	Medium	
+819	162	 drives	TD	1096	Flow utilities	Hydraulic flow	PQ	volume flow rate		Litres per minute	Low	
+820	162	 drives	TD	1096	Flow utilities	Air flow	PQ	volume flow rate		Litres per minute	Low	
+152	51	 expanders	TE	1097	Flow-control turbine	Type	List		1169	Variable nozzles, nozzle-group valves, throttle valve, fixed inlet	Low	
+442	108	 Valves	VA	1098	Flowing pressure	Normal operating pressure (inlet)	PQ	pressure		Pascal (bar)	Medium	
+478	112	 Nozzles	NO	1098	Flowing pressure	Specify	PQ	pressure		Pascal (bar)	Medium	
+568	127	 Risers	PR	1099	Fluid conducted	Main fluid only: oil, gas, condensate, injection water	List		1126	Oil, gas, condensate, injection water, oil and gas, gas and condensate, oil/gas/ water, CO2, gas and water, produced water	High	
+641	139	 pipelines	SL	1099	Fluid conducted	-	List		1128	Oil, gas, condensate, oil and gas, gas and condensate, oil/gas/water, CO2	High	
+103	45	 Pumps	PU	1100	Fluid corrosive/erosive	Classify as shown in footnote a	List		1019	Benign, moderate, severe	Medium	
+241	68	 Piping	PI	1100	Fluid corrosive/erosive	Classify as shown in the footnote a	List		1019	Benign, moderate, severe	Medium	
+535	123	 trees	XT	1101	Fluid corrosiveness	Classify as shown in the footnote a	List		1111	Neutral, sweet, sour	High	
+569	127	 Risers	PR	1101	Fluid corrosiveness	Classify as shown in footnote a	List		1111	Neutral, sweet, sour	High	
+593	130	 pumps	SP	1101	Fluid corrosiveness	Classify as shown in footnote a	List		1111	Neutral, sweet, sour	High	
+614	136	 vessels	SV	1101	Fluid corrosiveness	Classify as shown	List		1111	Neutral, Sweet, Sour	High	
+649	140	 pipelines	SL	1101	Fluid corrosiveness	Classify	List		1035	CleanBenignModerateSevere	High	
+741	152	Electrical submersible pumps	ESP	1101	Fluid corrosiveness	Neutral, Sweet, Sour				Specify	High	
+795	157	Surface wellhead and X-mas trees	XD	1101	Fluid corrosiveness	Fluid corrosiveness	List		1018	Benign, clean, moderate, severe, unknown	Medium	
+441	108	 Valves	VA	1102	Fluid corrosiveness/ erosiveness	Classify as shown in the footnote a	List		1019	Benign, moderate, severe	Medium	
+476	112	 Nozzles	NO	1102	Fluid corrosiveness/ erosiveness	Classify as shown in the footnote a	List		1019	Benign, moderate, severe	Medium	
+536	123	 trees	XT	1103	Fluid erosiveness	Erosiveness of the well fluid	List		1018	Benign, clean, moderate, severe, unknown	Medium	
+613	136	 vessels	SV	1103	Fluid erosiveness	Classify as shown	List		1034	Clean, benign , moderate, severe	High	
+650	140	 pipelines	SL	1103	Fluid erosiveness	Classify	List		1035	CleanBenignModerateSevere	Medium	
+796	157	Surface wellhead and X-mas trees	XD	1103	Fluid erosiveness	Erosiveness of the well fluid	List		1018	Benign, clean, moderate, severe, unknown	Medium	
+902	174	 intervention)	WC	1104	Fluid exposure	Main fluids only	List		1120	Oil, gas, condensate, brine, CO2, H2S	High	
+102	45	 Pumps	PU	1105	Fluid handled	Type	List		1123	Oil, gas, condensate, freshwater, steam, sea water, crude oil, oily water, flare gas, fuel gas, water/glycol, methanol, nitrogen, chemicals, hydrocarbon-combined, gas/oil, gas/condensate, oil/water, gas/ oil/water, LNG, drilling mud, drilling cement, other	High	
+240	68	 Piping	PI	1105	Fluid handled	Type	List		1124	Oil, gas, condensate, freshwater, steam, sea water, crude oil, oily water, flare gas, fuel gas, water/glycol, methanol, nitrogen, chemicals, hydrocarbon-combined, gas/oil, gas/condensate, oil/water, gas/oil/water	High	
+439	108	 Valves	VA	1105	Fluid handled	Main fluid only	List		1121	Oil, gas, condensate, freshwater, steam, sea water, crude oil, oily water, flare gas, fuel gas, water/glycol, methanol, nitrogen, chemicals, hydrocarbon combined, gas/oil, gas/condensate, oil/water, gas/ oil/water, NGL, LPG, LNG, slurry, etc.	High	
+592	130	 pumps	SP	1105	Fluid handled	Main fluid only: oil, gas, condensate, injection water	List		1127	Oil, gas, condensate, injection water, oil and gas, gas and condensate, oil/gas/water, CO2, gas and water, produced water, cooling medium	High	
+742	152	Electrical submersible pumps	ESP	1105	Fluid handled	Main fluid only: oil, gas, condensate, injection water	List		1126	Oil, gas, condensate, injection water, oil and gas, gas and condensate, oil/gas/ water, CO2, gas and water, produced water	High	
+793	157	Surface wellhead and X-mas trees	XD	1106	Fluid produced / injected	Fluid produced / injected	List		1006	Air, chemicals, condensate, crude oil, flare gas, freshwater, fuel gas, gas, gas+condensate, gas+oil, gas+oil+water, combined hydrocarbons, methanol, nitrogen, oil, oil+water, oily water, sea water, treaded sea water, steam, unknown, water/glycol	High	
+534	123	 trees	XT	1107	Fluid produced/injected	Main fluid only: oil, gas, condensate, injection water	List		1126	Oil, gas, condensate, injection water, oil and gas, gas and condensate, oil/gas/ water, CO2, gas and water, produced water	High	
+440	108	 Valves	VA	1108	Fluid temperature	Operating temperature main fluid	PQ	temperature		Degrees Celsius	Medium	
+481	112	 Nozzles	NO	1108	Fluid temperature	Specify	PQ	temperature		Degrees Celsius	Low	
+274	74	 Turrets	TU	1109	Fluid transmission	Fluid-transfer method	List		1052	Dragged chain, jumper, swivel	High	
+222	65	 vessels	VE	1110	Fluid(s)	Main fluid	List		1122	Oil, gas, condensate, freshwater, steam, sea water, crude oil, oily water, flare gas, fuel gas, water/glycol, methanol, nitrogen, chemicals, hydrocarbon combined, gas/oil, gas/condensate, oil/water, gas/oil/water	High	
+615	136	 vessels	SV	1110	Fluid(s)	Main fluid	List		1084	Gas/oil/water, gas/oil, gas/condensate, oil/water, oily water, water/glycol, methanol, chemicals	High	
+190	58	 exchangers	HE	1111	Fluid, cold side	Fluid type	List		1125	Oil, gas, condensate, freshwater, steam, sea water, crude oil, oily water, flare gas, water/glycol, methanol, nitrogen, chemicals, hydrocarbon, air	High	
+189	58	 exchangers	HE	1112	Fluid, hot side	Fluid type	List		1125	Oil, gas, condensate, freshwater, steam, sea water, crude oil, oily water, flare gas, water/glycol, methanol, nitrogen, chemicals, hydrocarbon, air	High	
+411	101	 devices	IP	1113	Fluid/gas corrosiveness/ erosiveness	Classify as explained in footnote a	List		1019	Benign, moderate, severe	Medium	
+498	115	 Lifeboats	LB	1114	Free-fall lifeboat installation height	Height above sea level	PQ	length		M	High	
+51	36	 generators	EG	1115	Frequency	Design frequency	PQ	frequency		Hertz	Low	
+342	87	 transformers	PT	1115	Frequency	Rated frequency	PQ	frequency		Hertz	Low	
+320	83	 UPS	UP	1116	Frequency variation	Input frequency	Number			Percent	Low	
+11	29	 engines	CE	1117	Fuel	Type	List		1082	Gas, light oil, medium oil, heavy oil, dual	Low	
+95	42	 turbines	ST	1117	Fuel	Fuel type	List		1083	Gas, oil-light, oil-medium, oil-heavy, dual	Medium	
+134	48	 turbines	ST	1117	Fuel	Fuel type	List		1083	Gas, oil-light, oil-medium, oil-heavy, dual	Medium	
+395	97	 detectors	FG	1118	Functional characteristics							
+408	101	 devices	IP	1118	Functional characteristics							
+147	51	 expanders	TE	1119	Gas corrosiveness/ erosiveness	Specify as shown in the footnote a	List		1019	Benign, moderate, severe	Medium	
+18	32	 Compressors	CO	1120	Gas handled	Average molar mass  (specific gravity ?ù 28,96)	PQ	density		Grams per mole	Medium	
+146	51	 expanders	TE	1120	Gas handled	A v e r a g e m o l a r m a s s (specific gravity ?ù 28,96)	PQ	density		Grams per mole	Low	
+561	127	 Risers	PR	1121	Gas lift	If installed or not	Bool			Yes/no	Low	
+65	36	 generators	EG	1122	Generator cooling	Type	List		1007	Air/air, air/water, open ventilated	Low	
+369	90	 Switchgear	SG	1123	Hazardous area rating	EEX hazardous area rating according to IEC 60079				Specify	Medium	
+390	94	 converters	FC	1123	Hazardous area rating	EEX Hazardous area rating in according with IEC 60079				Specify	High	
+469	112	 Nozzles	NO	1124	Hazards protection	Type of protection	List		1060	Electrical, Ex, fuel oil, glycol, HC gas, hydrogen gas, lubricants, methanol, combustibles, radioactivity, toxic gas, toxic liquid	High	
+207	61	 boilers	HB	1125	Heated/boiled medium	Type of fluid being heated/boiled	List		1109	MEG, TEG, HC-based heating medium, water, water/TEG	High	
+217	61	 boilers	HB	1126	Heater type	Direct-fired only	List		1025	Box, cabin, cylindrical	Low	
+648	140	 pipelines	SL	1127	Heating system	-	Bool			Yes/No	High	
+192	58	 exchangers	HE	1128	Heat-transfer area		PQ	surface		Metres squared	Medium	
+178	54	 Cranes	CR	1129	Heave compensation system	Installed or not	Bool			Yes/No	Low	
+266	71	 Winches	WI	1129	Heave compensation system	As applicable	Bool			Yes/No	Low	
+173	54	 Cranes	CR	1130	Hoist speed 1	At max. load	PQ	speed		Metres per second	Medium	
+174	54	 Cranes	CR	1131	Hoist speed 2	At no load	PQ	speed		Metres per second	Low	
+907	180	 fixation	JF	1132	Holding capacity survival	Survival holding capacity	PQ	weight		Tonnes	Medium	
+761	153	Electrical submersible pumps	ESP	1133	Horsepower requirement	Seal chamber section	PQ	power		HP	High	
+753	153	Electrical submersible pumps	ESP	1134	Housing pressure rating	Pump and gas handler	PQ	pressure		Psi	High	
+543	123	 trees	XT	1135	Hydrate formation	Specify	Bool			Yes/no	Low	
+573	127	 Risers	PR	1135	Hydrate formation	Specify	Bool			Yes/no	Low	
+629	136	 vessels	SV	1135	Hydrate formation	Specify	Bool			Yes/No	Low	
+166	54	 Cranes	CR	1136	Hydraulic operating medium	Hydraulic fluid type	List		1129	Oil-based, synthetic-based, water-based	Low	
+167	54	 Cranes	CR	1137	Hydraulic operating pressure	Specify	PQ	pressure		Pascal (bar)	Low	
+805	162	 drives	TD	1138	Hydraulic power requirements (applicable for hydraulic drives only)	Pressure	PQ	pressure		Pascal (bar)	High	
+806	162	 drives	TD	1138	Hydraulic power requirements (applicable for hydraulic drives only)	Flow rate	PQ	volume flow rate		Litres per minute	High	
+10	29	 engines	CE	1139	Ignition system	Otto, diesel	List		1038	Compression ignition (diesel), spark plugs	Medium	
+384	93	 converters	FC	1140	Incoming transformer connections	Describes the input connection, whether a transformer is used and its design intent	List		1158	Step up, step down, isolating, phase shifting	Medium	
+391	94	 converters	FC	1141	Ingress protection rating	Ingress protection rating in according with IEC 60529				Specify	Medium	
+143	51	 expanders	TE	1142	Inlet flow	Design inlet flow, turbine	PQ	Kilograms per hour		Kilograms per hour	Medium	
+145	51	 expanders	TE	1143	Inlet pressure	Design inlet pressure, turbine	PQ	pressure		Pascal (bar)	Medium	
+144	51	 expanders	TE	1144	Inlet temperature	Design inlet temperature, turbine	PQ	temperature		Degrees Celsius	Medium	
+209	61	 boilers	HB	1144	Inlet temperature	Design value	PQ	temperature		Degrees Celsius	Medium	
+317	83	 UPS	UP	1145	Input frequency	Rated input	List		1001	50 Hz or 60 Hz	High	
+826	163	 drives	TD	1146	Inside BOP design pressure	Pressure	PQ	pressure		Pascal (bar)	Low	
+517	122	 trees	XT	1147	Install/retrieve guide	Guideline/guideline-less, diver-assisted and diver-less lay-away	List		1087	Guideline, guideline-less	High	
+474	112	 Nozzles	NO	1148	Installation category	How installed	List		1041	Concealed, horizontal sidewall, pendent, recessed, upright, vertical sidewall	Low	
+865	170	 (BOP)	BO	1149	Installation type	Specify	List		1145	Semi-submersible, jack-up, TLP, onshore, other	Medium	
+841	167	 (BOP)	BO	1150	Installed location/ recorded water depth	Specify	PQ	length		Foot (metres)	Medium	
+871	170	 (BOP)	BO	1150	Installed location/ recorded water depth	Specify	PQ	length		Foot (metres)	Medium	
+243	68	 Piping	PI	1151	Insulated	Specify	Bool			Yes/No	Low	
+60	36	 generators	EG	1152	Insulation class - rotor	Insulation class in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Medium	
+78	39	 motors	EM	1153	Insulation class - rotor a	Insulation class in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Medium	
+58	36	 generators	EG	1154	Insulation class - stator	Insulation class in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Medium	
+76	39	 motors	EM	1154	Insulation class - stator	Insulation class in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Medium	
+34	33	 Compressors	CO	1155	Intercooler fitted	Specify if cooler is fitted	Bool			Yes/no	Medium	
+232	65	 vessels	VE	1156	Internals	Design principle	List		1013	Baffles, trays, grid plate, demister, heat coil, diverter, de-sander, combined	Low	
+398	97	 detectors	FG	1157	Item characteristics							
+412	101	 devices	IP	1157	Item characteristics							
+918	180	 fixation	JF	1158	Jacking frame type	Jacking frame type	List		1073	Fixed, floating	Medium	
+908	180	 fixation	JF	1159	Jacking load emergency	Emergency jacking load	PQ	weight		Tonnes	Low	
+909	180	 fixation	JF	1160	Jacking load rated	Rated jacking load	PQ	weight		Tonnes	Medium	
+238	68	 Piping	PI	1161	Length	Total length	PQ	length		Metres	High	
+667	142	 completion	WE	1161	Length	Provide length for any tubular equipment	PQ	length		Meters or feet	High	
+709	147	 DHSV/WRSCSSV	WR-SCSSV	1161	Length		PQ	length		Metres	High	
+354	87	 transformers	PT	1162	Level of insulation	Insulation in accordance with IEC 60076-3	PQ	electrical tension / voltage		Kilovolts	High	
+616	136	 vessels	SV	1163	Liquid/gas boosting	Main fluid	Bool			Yes/No	Medium	
+852	167	 (BOP)	BO	1164	LMRP connector - manufacturer and model	Specify				Specify	High	
+853	167	 (BOP)	BO	1165	LMRP connector pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	Medium	
+396	97	 detectors	FG	1166	Location on installation	Where installed	List		1053	Drill floor, wellhead, process, auxiliary, mud processing, power generation, utility, control room, auxiliary room, living quarter	High	
+409	101	 devices	IP	1166	Location on installation	Where installed	List		1053	Drill floor, wellhead, process, auxiliary, mud processing, power generation, utility, control room, auxiliary room, living quarter	High	
+470	112	 Nozzles	NO	1167	Location on plant	Where located in the plant	List		1005	Air inlet, compressor, diesel engine, drilling, electric motor, FW inlet, gas-metering, generator, header, heat exchanger, living qt., mud-processing, pigging station, pipeline, pump, separator, turbine, utility, vessel, wellhead, wellhead flowline, wellhead injection line, X-mas tree	High	
+766	153	Electrical submersible pumps	ESP	1168	Locked rotor current, torque and power factor	Motor	PQ	electrical current / amperage		Amps	High	
+64	36	 generators	EG	1169	Lubrication of bearings	Type of bearing lubrication	List		1086	Grease, oil bath, pressurized oil, oil ring	Low	
+261	71	 Winches	WI	1169	Lubrication of bearings	Type				Specify	Low	
+161	54	 Cranes	CR	1170	Main boom length	Specify	PQ	length		Metres	Medium	
+435	108	 Valves	VA	1171	Main function	Main functional category	List		1076	Flow control, on/off, non-return, Pressure relief, instrument or hydraulic control	High	
+861	167	 (BOP)	BO	1172	Make and version of control system	Specify				Specify	High	
+888	171	 (BOP)	BO	1172	Make and version of control system	Specify				Specify	High	
+183	55	 Cranes	CR	1173	Manual overload protection system (MOPS)	Installed or not	Bool			Yes/No	High	
+510	119	control	CS	1174	Manufacturer	Specify					Free text	High
+560	127	 Risers	PR	1174	Manufacturer	Specify					High	
+588	130	 pumps	SP	1174	Manufacturer	Specify				Specify	High	
+676	144	(TR-SCSSV	TR-SCSSV	1174	Manufacturer					All major oilfield equipment manufacturers	High	
+893	174	 intervention)	WC	1174	Manufacturer	Specify				Text	High	
+454	109	 Valves	VA	1175	Manufactur-er - actuator	Name of actuator manufacturer				Specify	Low	
+455	109	 Valves	VA	1176	Manufacturer - pilot valve	Name of pilot-valve manufacturer				Specify	Low	
+456	109	 Valves	VA	1177	Manufactur-er - solenoid valve	Name of solenoid-valve manufacturer				Specify	Low	
+662	142	 completion	WE	1178	Manufacturer a	Specify				Text	High	
+708	147	 DHSV/WRSCSSV	WR-SCSSV	1178	Manufacturer a					All major oilfield equipment manufacturers	High	
+664	142	 completion	WE	1179	Manufacturers part number a	Provide identifier which uniquely identifies equipment with identical design attributes				Text/numeric	High	
+732	149	DHSV/WR-SCSSV	WR-SCSSV	1180	Material spec. for       closure device       seat       flowtube/piston					Code list of metallic materials	High	
+698	146	(TR-SCSSV	TR-SCSSV	1181	Material spec. for      closure device      seat      flowtube/piston	Material used for the most vital valve parts. ÔÇÿSeat here means seat for closure device.				Code list of metallic materials	High	
+254	71	 Winches	WI	1182	Max. capacity	Max. load capacity	PQ	volume		Metric tonnes	Medium	
+172	54	 Cranes	CR	1183	Max. moment	Cranes max. moment	PQ	moment of force		Tonne*metre	High	
+171	54	 Cranes	CR	1184	Max. operating swing	Turning range (total)	PQ	degrees		Degrees	Medium	
+253	71	 Winches	WI	1185	Max. output	Max. input power - design	PQ	power		Kilowatt	High	
+745	152	Electrical submersible pumps	ESP	1186	Maximum flow capacity rating	Bolt on discharge head	PQ	volume flow rate		Blpd	Medium	
+754	153	Electrical submersible pumps	ESP	1186	Maximum flow capacity rating	Bolt on intake	PQ	volume flow rate		Blpd	Low	
+751	153	Electrical submersible pumps	ESP	1187	Maximum GVF rating	Pump and gas handler	Number			%	Medium	
+687	145	(TR-SCSSV	TR-SCSSV	1188	Maximum OD						Medium	
+719	148	 DHSV/WRSCSSV	WR-SCSSV	1188	Maximum OD						Medium	
+638	139	 pipelines	SL	1189	Maximum water depth	Specify	PQ	length		Metres	Medium	
+335	84	 UPS	UP	1190	Method of ventilation	Specify	List		1077	Forced, natural	Low	
+688	145	(TR-SCSSV	TR-SCSSV	1191	Minimum ID						Medium	
+720	148	 DHSV/WRSCSSV	WR-SCSSV	1191	Minimum ID						Medium	
+759	153	Electrical submersible pumps	ESP	1192	Minimum operating speed for thrust bearing	Seal chamber section	PQ	angular velocity		Revolutions per minute, rpm, or Frequency	Low	
+673	144	(TR-SCSSV	TR-SCSSV	1193	Model	Give unique item model designation				Characters	High	
+705	147	 DHSV/WRSCSSV	WR-SCSSV	1194	Model a	Give unique item model designation				Characters (25)	High	
+663	142	 completion	WE	1195	Model name a	Give unique item model designation				Specify	High	
+511	119	control	CS	1196	Model type	Specify					Free text	Low
+589	130	 pumps	SP	1196	Model type	Specify				Specify	Low	
+739	152	Electrical submersible pumps	ESP	1196	Model type	Specify				Specify	Low	
+866	170	 (BOP)	BO	1197	Mooring	Specify	List		1051	DP, anchored, no	Medium	
+807	162	 drives	TD	1198	Motor category (applicable for electric drives only)	Specify type	List		1097	Induction, synchronous	High	
+765	153	Electrical submersible pumps	ESP	1199	Motor operating internal temperature limits	Motor	PQ	temperature		Degrees Celsius	High	
+762	153	Electrical submersible pumps	ESP	1200	Motor performance parameters	Motor				Performance curve	High	
+75	39	 motors	EM	1201	Motor type	Type	List		1096	Induction, commutator (d.c.), synchronous	Medium	
+763	153	Electrical submersible pumps	ESP	1202	Motor voltage for minimum current	Motor	PQ	electrical current / amperage		Amps	High	
+764	153	Electrical submersible pumps	ESP	1203	Motor winding temperature rise	Motor	PQ	temperature		Degrees Celsius	High	
+825	163	 drives	TD	1204	Mud pressure capacity	Pressure	PQ	pressure		Pascal (bar)	Low	
+531	123	 trees	XT	1205	Mudline suspension system	Define whether a mudline suspension system exists	Bool			Yes/no	Low	
+788	157	Surface wellhead and X-mas trees	XD	1205	Mudline suspension system	Define whether a mudline system suspension exists	Bool			Yes/no	Low	
+532	123	 trees	XT	1206	Multilateral well	Define	Bool			Yes/no	Low	
+512	119	control	CS	1207	Multilateral wells	Specify					Yes/no	Low
+497	115	 Lifeboats	LB	1208	Nautical speed rated	Rated nautical speed	PQ	speed		Knots	Medium	
+263	71	 Winches	WI	1209	No. of drums	Number	Number			Number	Low	
+666	142	 completion	WE	1210	Nominal size	Specify nominal size (size class) of equipment	PQ	length		mm or feet	Medium	
+686	145	(TR-SCSSV	TR-SCSSV	1210	Nominal size						High	
+718	148	 DHSV/WRSCSSV	WR-SCSSV	1210	Nominal Size						High	
+811	162	 drives	TD	1211	Normal operating power	Power	PQ	power		Kilowatt	High	
+82	39	 motors	EM	1212	Not relevant for induction motors.See IEC 60079 (all parts).							
+96	42	 turbines	ST	1213	NOx abatement	Type of abatement control	List		1156	Steam, water, dry (e.g. dry low emission), none (e.g. single annular combustor)	High	
+472	112	 Nozzles	NO	1214	Nozzle length	Specify	PQ	length		Millimetres	High	
+471	112	 Nozzles	NO	1215	Nozzle mate-rial	Specify	List		1026	Brass, chrome-plated, electrode-less nickel-plated, lead-coated, stainless steel	High	
+487	112	 Nozzles	NO	1216	Nozzle screen	Whether or not installed	Bool			Yes/No	Low	
+473	112	 Nozzles	NO	1217	Nozzle width	Specify	PQ	length		Millimetres	High	
+760	153	Electrical submersible pumps	ESP	1218	Number and severity of pressure cycles	Seal chamber section				Specify	High	
+279	74	 Turrets	TU	1219	Number of anchor lines		Number			Number	High	
+851	167	 (BOP)	BO	1220	Number of annular preventers	Specify	Number			Number	Medium	
+880	171	 (BOP)	BO	1220	Number of annular preventers	Specify	Number			Number	Medium	
+336	84	 UPS	UP	1221	Number of battery banks	Specify	Number			Number	Medium	
+846	167	 (BOP)	BO	1222	Number of blind rams	Specify	Number			Number	Medium	
+847	167	 (BOP)	BO	1223	Number of blind shear rams	Specify	Number			Number	Medium	
+231	65	 vessels	VE	1224	Number of branches	Pressurized connections only	Number			Number	Low	
+218	61	 boilers	HB	1225	Number of burners		Number			Number	Low	
+848	167	 (BOP)	BO	1226	Number of casing shear rams	Specify	Number			Number	Medium	
+30	33	 Compressors	CO	1227	Number of casings	Number of casings in the train	Number			Integer	High	
+858	167	 (BOP)	BO	1228	Number of choke-and-kill valves	Specify	Number			Number	Medium	
+885	171	 (BOP)	BO	1228	Number of choke-and-kill valves	Specify	Number			Number	Medium	
+367	90	 Switchgear	SG	1229	Number of circuits	Number of outgoing connections	Number			Number	Medium	
+523	122	 trees	XT	1230	Number of connections	Number of lines connected to the tree block	Number			Number	Low	
+692	145	(TR-SCSSV	TR-SCSSV	1231	Number of control lines	Total number of control lines attached to valve				Numeric	Low	
+724	148	 DHSV/WRSCSSV	WR-SCSSV	1231	Number of control lines	Total number of control lines attached to valve	Number			Number	Low	
+7	29	 engines	CE	1232	Number of cylinders	Specify number of cylinders	Number			Integer	Low	
+804	162	 drives	TD	1233	Number of drives (applicable for hydraulic drives only)	Specify number	Number			Number	High	
+844	167	 (BOP)	BO	1234	Number of fixed pipe rams	Specify	Number			Number	Medium	
+246	68	 Piping	PI	1235	Number of flanges	Specify	Number			Number	Low	
+845	167	 (BOP)	BO	1236	Number of flexible pipe rams	Specify	Number			Number	Medium	
+286	77	 Swivels	SW	1237	Number of paths	For power and signal swivels no. of paths is defined as no. of services	Number			Number	High	
+353	87	 transformers	PT	1238	Number of phases	1-phase or 3-phase	Number			Number	High	
+318	83	 UPS	UP	1239	Number of phases input voltage	1-phase or 3-phase	Number			Number	High	
+323	83	 UPS	UP	1240	Number of phases output voltage	1-phase or 3-phase	Number			Number	High	
+691	145	(TR-SCSSV	TR-SCSSV	1241	Number of pistons	Total number of pistons in valve.				Numeric	Low	
+723	148	 DHSV/WRSCSSV	WR-SCSSV	1241	Number of pistons	Total number of pistons in valve	Number			Number	Low	
+606	133	 distribution	EP	1242	Number of power consumers	0 - 99	Number			#	High	
+877	171	 (BOP)	BO	1243	Number of ram preventers	Specify	Number			Number	Medium	
+277	74	 Turrets	TU	1244	Number of risers		Number			Number	High	
+92	42	 turbines	ST	1245	Number of shafts	Specify number	List		1000	1, 2, 3	Medium	
+131	48	 turbines	ST	1245	Number of shafts	Specify number	Number			Number	Medium	
+31	33	 Compressors	CO	1246	Number of stages	Number of compressor stages (not impellers) in this train	Number			Integer	Medium	
+111	45	 Pumps	PU	1246	Number of stages	Centrifugal: number of impellers (in all stages)Reciprocating: number of cylindersRotary: number of rotors	Number			Number	Low	
+149	51	 expanders	TE	1246	Number of stages	Number of stages (in series)	Number			Number	Low	
+586	130	 pumps	SP	1246	Number of stages		Number			Number	Low	
+647	140	 pipelines	SL	1247	Number of T-connections	Specify	Number			Number	Medium	
+213	61	 boilers	HB	1248	Number of tubes	Specify	Number			Number	Medium	
+200	58	 exchangers	HE	1249	Number of tubes/plates		Number			Number	Low	
+278	74	 Turrets	TU	1250	Number of umbilicals		Number			Number	High	
+244	68	 Piping	PI	1251	Number of valves	Number of valves installed on the pipe length considered	Number			Number	Medium	
+856	167	 (BOP)	BO	1252	Number of wellhead connections	Specify total number of times the BOP has been run and (re-) latched to the wellhead during surveillance period	Number			Number	Medium	
+883	171	 (BOP)	BO	1252	Number of wellhead connections	Specify total number of times the BOP has been run and (re-) latched to the wellhead during surveillance period	Number			Number	Medium	
+382	93	 converters	FC	1253	Operating frequency range	Normal range of output frequency	PQ	frequency		Hertz	Low	
+89	42	 turbines	ST	1254	Operating profile	Utilization profile	List		1017	Base load, peak load, load-sharing backup, emergency/reserve	High	
+757	153	Electrical submersible pumps	ESP	1255	Operation deviation limits	Seal chamber section				Specify [numeric value]	High	
+230	65	 vessels	VE	1256	Orientation	Specify	List		1092	Horizontal, vertical, spherical	Low	
+625	136	 vessels	SV	1256	Orientation	Specify	List		1092	Horizontal, vertical, spherical	Medium	
+210	61	 boilers	HB	1257	Outlet temperature	Design value	PQ	temperature		Degrees Celsius	Medium	
+385	93	 converters	FC	1258	Output conditioning	Describes the output connection, whether output conditioning is used or a step up transformer	List		1133	Output filters, step up transformers	Medium	
+322	83	 UPS	UP	1259	Output frequency	Rated output	List		1002	50 Hz, 60 Hz or DC	High	
+910	180	 fixation	JF	1260	Output torque	Gear box output torque	PQ	moment of force		N/m	Medium	
+160	54	 Cranes	CR	1261	Overall maximum height	Specify	PQ	length		Metres	Low	
+457	109	 Valves	VA	1262	P i lot-v a lve configuration	Number and configuration (applicable for pilot-operated valves only)	List		1154	Specify, e.g. 1 ?ù 3/2 (= single 3/2 pilot valve), 2 ?ù 4/3 (= double 4/3 pilot valve)	Low	
+44	33	 Compressors	CO	1263	Packing type		List		1103	Lubricated, dry	Low	
+216	61	 boilers	HB	1263	Packing type					Specify	High	
+675	144	(TR-SCSSV	TR-SCSSV	1264	Part number (manuf.)						High	
+707	147	 DHSV/WRSCSSV	WR-SCSSV	1265	Part number (manuf.) a						High	
+674	144	(TR-SCSSV	TR-SCSSV	1266	Part number (operator)						Medium	
+706	147	 DHSV/WRSCSSV	WR-SCSSV	1266	Part number (operator)						Medium	
+495	115	 Lifeboats	LB	1267	Personnel capacity	Personnel capacity (count)				Each	High	
+529	123	 trees	XT	1268	Piggable	Specify if piggable or not	Bool			Yes/no	Low	
+911	180	 fixation	JF	1269	Pinions count	Number of pinions				Each	Medium	
+562	127	 Risers	PR	1270	Pipe diameter		PQ	length		Millimetres	Medium	
+242	68	 Piping	PI	1271	Pipe material	Specify	List		1030	Carbon steel, stainless steel, alloy type, composite, titanium etc.	Medium	
+563	127	 Risers	PR	1271	Pipe material	Specify	List		1157	Steel, composite, titanium, clad/lined	Medium	
+646	140	 pipelines	SL	1272	Pipeline buried	Specify if part or entire pipeline is buried.	Bool			Yes/No	High	
+640	139	 pipelines	SL	1273	Pipeline diameter	Nominal outer diameter (OD)	PQ	length		Millimetre	Medium	
+639	139	 pipelines	SL	1274	Pipeline length	-	PQ	length		Metres	High	
+690	145	(TR-SCSSV	TR-SCSSV	1275	Piston type		List		1142	RodConcentricRod and concentricOtherUnknown	High	
+722	148	 DHSV/WRSCSSV	WR-SCSSV	1275	Piston type		List		1142	RodConcentricRod and concentricOtherUnknown	High	
+29	33	 Compressors	CO	1276	Polytropic head		PQ	Kilojoules per kilogram		Kilojoules per kilogram	Low	
+27	32	 Compressors	CO	1277	Power	Design power	PQ	power		Kilowatt	High	
+4	29	 engines	CE	1278	Power - design	Maximum rated output (design)	PQ	power		Kilowatt	High	
+53	36	 generators	EG	1278	Power - design	Design power	PQ	electrical tension / voltage		Kilovolts	High	
+70	39	 motors	EM	1278	Power - design	Max. output (design)	PQ	power		Kilowatt	Medium	
+87	42	 turbines	ST	1278	Power - design	ISO power rating	PQ	power		Kilowatt	High	
+106	45	 Pumps	PU	1278	Power - design	Design/rated power of pump	PQ	power		Kilowatt	High	
+128	48	 turbines	ST	1278	Power - design	ISO power rating	PQ	power		Kilowatt	High	
+140	51	 expanders	TE	1278	Power - design	Max. design output power	PQ	power		Kilowatt	High	
+346	87	 transformers	PT	1278	Power - design	Rated power	PQ	Kilovolt*amperes		Kilovolt*amperes	High	
+380	93	 converters	FC	1278	Power - design	Design/rated power of the system	List		1101	Kilowatts (kW), Megawatts (MW), MegaVoltAmpere (MVA)	High	
+584	130	 pumps	SP	1278	Power - design	Driver power	PQ	power		Kilowatt	High	
+5	29	 engines	CE	1279	Power - operating	Specify the approximate power at which the unit has been operated for most of the surveillance time	PQ	power		Kilowatt	High	
+71	39	 motors	EM	1279	Power - operating	Specify the approximate power at which the unit has been operated for most of the surveillance time	PQ	power		Kilowatt	Low	
+88	42	 turbines	ST	1279	Power - operating	Specify the approximate power at which the unit has been operated for most of the surveillance time.	PQ	power		Kilowatt	Medium	
+129	48	 turbines	ST	1279	Power - operating	Specify the approximate power at which the unit has been operated for most of the surveillance time.	PQ	power		Kilowatt	Medium	
+141	51	 expanders	TE	1279	Power - operating	Specify the approximate power at which the unit has been operated for most of the surveillance time.	PQ	power		Kilowatt	Low	
+54	36	 generators	EG	1280	Power factor	cos¤å	Number			Number	Low	
+347	87	 transformers	PT	1280	Power factor	Cos ¤å	Number			Number	Low	
+912	180	 fixation	JF	1281	Power operating	Power - operating	PQ	power		Kilowatts, KW	Medium	
+223	65	 vessels	VE	1282	Pressure - design	Design pressure	PQ	pressure		Pascal (bar)	High	
+651	140	 pipelines	SL	1282	Pressure - design	Design pressure	PQ	pressure		Pascal (bar)	High	
+225	65	 vessels	VE	1283	Pressure - operating	Operating pressure	PQ	pressure		Pascal (bar)	Medium	
+617	136	 vessels	SV	1283	Pressure - operating	Specify	PQ	pressure		Pascal (bar)	Medium	
+652	140	 pipelines	SL	1283	Pressure - operating	Operating pressure	PQ	pressure		Pascal (bar)	Medium	
+901	174	 intervention)	WC	1284	Pressure exposure	Operational pressures encountered	PQ	pressure		Pascal (bar, psi)	High	
+689	145	(TR-SCSSV	TR-SCSSV	1285	Pressure rating						Low	
+721	148	 DHSV/WRSCSSV	WR-SCSSV	1285	Pressure rating						Low	
+746	152	Electrical submersible pumps	ESP	1285	Pressure rating	Bolt on discharge head	PQ	pressure		Psi	High	
+840	167	 (BOP)	BO	1285	Pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	High	
+870	170	 (BOP)	BO	1285	Pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	High	
+900	174	 intervention)	WC	1285	Pressure rating	Working pressure rating	PQ	pressure		Pascal (bar, psi)	High	
+817	162	 drives	TD	1286	Pressure utilities	Hydraulic pressure	PQ	pressure		Pascal (bar)	Low	
+818	162	 drives	TD	1286	Pressure utilities	Air pressure	PQ	pressure		Pascal (bar)	Low	
+195	58	 exchangers	HE	1287	Pressure, cold side	Design pressure	PQ	pressure		Pascal (bar)	Medium	
+194	58	 exchangers	HE	1288	Pressure, hot side	Design pressure	PQ	pressure		Pascal (bar)	Medium	
+343	87	 transformers	PT	1289	Primary voltage	Rated voltage	PQ	electrical tension / voltage		Kilovolts	High	
+290	77	 Swivels	SW	1290	Produced-fluid corrosiveness	Type of service	List		1164	Sweet service, sour service	Medium	
+300	80	 tanks	TA	1291	Product specific gravity	Relative density	Number			Number	Medium	
+519	122	 trees	XT	1292	Protection type	Over-trawlable, trawl-catching, etc.	List		1166	Trawl-catching, trawl-deflecting, none	High	
+564	127	 Risers	PR	1293	Protection, corrosion	Specify	List		1004	Active, passive	Medium	
+565	127	 Risers	PR	1294	Protection, mechanical	Specify	List		1100	I-tube, J-tube, riser shaft penetration	Medium	
+105	45	 Pumps	PU	1295	Pump - design	Design characteristic	List		1012	Axial, radial, composite, diaphragm, plunger, piston, screw, vane, gear, lobe	High	
+118	45	 Pumps	PU	1296	Pump cooling	Specify if separate cooling system is installed	Bool			Yes/No	Low	
+587	130	 pumps	SP	1297	Pump coupling		List		1070	Fixed, flexible, hydraulic	Low	
+590	130	 pumps	SP	1298	Pump design	Design characteristic	List		1012	Axial, radial, composite, diaphragm, plunger, piston, screw, vane, gear, lobe	High	
+583	130	 pumps	SP	1299	Pump driver	Type of driver	List		1057	Electric motor, turbine, hydraulic motor	High	
+752	153	Electrical submersible pumps	ESP	1300	Pump stage thrust	Pump and gas handler	PQ	weight		Pounds, lbs	High	
+36	33	 Compressors	CO	1301	Radial bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+62	36	 generators	EG	1301	Radial bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+119	45	 Pumps	PU	1301	Radial bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+153	51	 expanders	TE	1301	Radial bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+262	71	 Winches	WI	1301	Radial bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+594	130	 pumps	SP	1302	Radial bearing type	Specify	List		1104	Magnetic, roller, sliding	Low	
+842	167	 (BOP)	BO	1303	Ram preventers - manufacturer (and model)	Specify				Specify	High	
+875	171	 (BOP)	BO	1303	Ram preventers - manufacturer (and model)	Specify				Specify	High	
+843	167	 (BOP)	BO	1304	Ram preventers, pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	High	
+876	171	 (BOP)	BO	1304	Ram preventers, pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	High	
+362	90	 Switchgear	SG	1305	Rated busbar current	Maximum continuously current at specified conditions	PQ	electrical current / amperage		Amperes	High	
+364	90	 Switchgear	SG	1306	Rated duration of short circuit	The interval of time in which the switchgear shall withstand specified short time withstand current	PQ	time		Seconds	Low	
+366	90	 Switchgear	SG	1307	Rated frequency	Normal operation frequency	PQ	frequency		Hertz	High	
+191	58	 exchangers	HE	1308	Rated heat transfer	Design value	PQ	power		Kilowatt	Medium	
+208	61	 boilers	HB	1308	Rated heat transfer	Design value	PQ	power		Kilowatt	High	
+324	83	 UPS	UP	1309	Rated output load and power factor	Apparent power and power factor in nominal operations	PQ	Kilovolt*amperes/cos?		Kilovolt*amperes/cos?	High	
+810	162	 drives	TD	1310	Rated power	Max. output	PQ	power		Kilowatt	High	
+363	90	 Switchgear	SG	1311	Rated short time withstand current	The rms value of the short circuit current which the switchgear shall withstand during the specified time	PQ	electrical current / amperage		Kilo Amperes (kA)	Low	
+361	90	 Switchgear	SG	1312	Rated system voltage	Expected operation voltage	PQ	electrical tension / voltage		Volts, AC or DC	High	
+331	83	 UPS	UP	1313	Recharge time	The time to recharge the battery to 90 % capacity	PQ	time		Hours	Medium	
+40	33	 Compressors	CO	1314	Reciprocating compressors only	Type	List		1071	Fixed, flexible, hydraulic, disconnect		
+329	83	 UPS	UP	1315	Rectifier/inverter bypass system	The type of bypass switch	List		1105	Manual, static	Medium	
+506	118	control	CS	1316	Redundancy		Bool			Yes/no	Medium	
+267	71	 Winches	WI	1317	Regeneration of power	As applicable	Bool			Yes/No	Low	
+132	48	 turbines	ST	1318	Regulating system	Specify type	List		1063	Electronic, hydraulic	Medium	
+700	146	(TR-SCSSV	TR-SCSSV	1319	Remarks					Character field	Low	
+734	149	DHSV/WR-SCSSV	WR-SCSSV	1319	Remarks					Character field	Low	
+268	71	 Winches	WI	1320	Remote control	As applicable	Bool			Yes/No	Low	
+621	136	 vessels	SV	1321	Retention time	Specify	PQ	time		Minutes	Medium	
+824	163	 drives	TD	1322	Retractable dolly frame	Specify	Bool			Yes/no	Low	
+612	136	 vessels	SV	1323	Retrievable	Retrievability of the subsea pressure vessel	Bool			Yes/No	High	
+833	166	 (BOP)	BO	1324	Rig mooring	Specify	List		1050	DP, Anchored	Medium	
+832	166	 (BOP)	BO	1325	Rig type	Specify	List		1144	Semi-submersible, Drill ship, Jackup, etc.	Medium	
+566	127	 Risers	PR	1326	Riser layout	Specify	List		1078	Free hanging, Lazy S, lazy wave, pliant wave, steep S, steep wave	Medium	
+551	126	 Risers	PR	1327	Riser length		PQ	length		Metres	High	
+276	74	 Turrets	TU	1328	Riser termination	Type	List		1075	Flanged, quick connect, quick disconnect, welded	High	
+311	80	 tanks	TA	1329	Roof material	Specify type or code				Specify	Medium	
+275	74	 Turrets	TU	1330	Rotation system		List		1004	Active, passive	High	
+170	54	 Cranes	CR	1331	Safe working load (SWL)	Cranes safe working load	PQ	volume		Metric tonnes	High	
+291	77	 Swivels	SW	1332	Sand production	Measured or estimated sand production	PQ	density		Grams per cubic metre	Low	
+544	123	 trees	XT	1332	Sand production	Specify	Bool			Yes/no	Low	
+574	127	 Risers	PR	1332	Sand production	Specify	Bool			Yes/no	Low	
+627	136	 vessels	SV	1332	Sand production	Specify	Bool			Yes/No	Low	
+541	123	 trees	XT	1333	Scale formation	Specify	Bool			Yes/no	Low	
+571	127	 Risers	PR	1333	Scale formation	Specify	Bool			Yes/no	Low	
+631	136	 vessels	SV	1333	Scale formation	Specify	Bool			Yes/No	Low	
+697	146	(TR-SCSSV	TR-SCSSV	1334	Seal configuration and type	Describe configuration and materials used in dynamic and static seals				Character field	Low	
+726	148	 DHSV/WRSCSSV	WR-SCSSV	1334	Seal configuration and type	Describe configuration and materials used in dynamic and static seals				Character field	Low	
+450	109	 Valves	VA	1335	Seat design	Type of seat design	List		1153	Soft seated, metal-to-metal seated	Medium	
+725	148	 DHSV/WRSCSSV	WR-SCSSV	1336	Secondar y control line function		List		1117	Not installedBalance linePermanent lockoutTemporary lockoutNormal operationOtherUnknown	Low	
+696	146	(TR-SCSSV	TR-SCSSV	1337	Secondary control line function		List		1117	Not installedBalance linePermanent lockoutTemporary lockoutNormal operationOtherUnknown	Low	
+862	167	 (BOP)	BO	1338	Secondary control system	Specify				Specify	Medium	
+889	171	 (BOP)	BO	1338	Secondary control system	Specify				Specify	Medium	
+344	87	 transformers	PT	1339	Secondary voltage	Rated voltage	PQ	electrical tension / voltage		Kilovolts	High	
+402	97	 detectors	FG	1340	Self-test feature	Degree of self-testing	List		1113	No self-test, automatic loop test, built-in test, combined	Medium	
+422	101	 devices	IP	1340	Self-test feature	Degree of self-testing	List		1113	No self-test, automatic loop test, built-in test, combined	High	
+430	104	 units	CL	1340	Self-test feature	Degree of self-testing	List		1114	No self-test, automatic-loop test, builtin test, combined	High	
+399	97	 detectors	FG	1341	Sensing principle	Type	List		1069	Fire:Ionization, optical, IR, UV, IR/UV, rate rise, rate comp., fixed temp., fusible plug, camera, multisensor (optical/heat) Gas:Catalytic, electrochemical, photoelectrochemical, photoelectric beam, IR, UV, acoustic, camera, aspirating, optical beam, solid state	High	
+414	101	 devices	IP	1341	Sensing principle	Applicable for pressure sensors only	List		1021	Bonded strain, semiconductor, strain, piezoelectric, electromechanical, capacitance, reluctance, oscillating wire	High	
+415	101	 devices	IP	1341	Sensing principle	Applicable for level sensors only	List		1047	Differential-pressure cell, capacitance, conductive, displacement, diaphragm, sonic, optical, microwave, radio frequency, nuclear	High	
+419	101	 devices	IP	1342	Sensor voting, k out of Y (only as relevant)	At least k out of the total number, Y, of sensors shall provide signal to initiate control/safety action. k and Y shall be entered						
+665	142	 completion	WE	1343	Serial number a	Provide serial number which uniquely identifies equipment (on a per equipment basis)				Text	High/medium	
+744	152	Electrical submersible pumps	ESP	1344	Shaft coupling rating	All, where applicable	PQ	power		Horse power HP	High	
+113	45	 Pumps	PU	1345	Shaft orientation		List		1090	Horizontal, vertical	Low	
+596	130	 pumps	SP	1345	Shaft orientation	Specify	List		1090	Horizontal, vertical	Low	
+743	152	Electrical submersible pumps	ESP	1346	Shaft power rating	All, where applicable	PQ	power		Horse power HP	High	
+35	33	 Compressors	CO	1347	Shaft seal system	Separate, combined, dry, etc.	List		1146	Separate, combined, dry	High	
+597	130	 pumps	SP	1348	Shaft seal type	Specify	List		1055	Dry, gland, labyrinth, mechanical, oil, packed combined	Low	
+33	33	 Compressors	CO	1349	Shaft sealing	Type	List		1107	Mechanical, oil, dry gas-packed, dry gland, labyrinth, combined	Low	
+114	45	 Pumps	PU	1349	Shaft sealing	Type	List		1106	Mechanical, oil seal, dry gas, packed, gland, dry seal, labyrinth, combined	Low	
+151	51	 expanders	TE	1349	Shaft sealing	Type	List		1108	Mechanical, oil, seal, dry gas, packed, gland, dry seal, labyrinth, combined	Low	
+310	80	 tanks	TA	1350	Shell material	Specify type or code				Specify	Medium	
+447	109	 Valves	VA	1351	Shut-off pressure	Maximum differential pressure when valve closed (design)For PSVs: set-point opening pressure	PQ	pressure		Pascal (bar)	Low	
+480	112	 Nozzles	NO	1351	Shut-off pressure	Maximum differential pressure when valve closed (design)For safety pressure-relief valves: setpoint opening pressure	PQ	pressure		Pascal (bar)	Low	
+438	108	 Valves	VA	1352	Size	Internal diameter	PQ	length		Millimetres (inches)	Medium	
+839	167	 (BOP)	BO	1352	Size	Height and mass	PQ	length		Millimetres (inches), kilograms (tons)	Low	
+869	170	 (BOP)	BO	1352	Size	Height and mass	PQ	length		Millimetres (inches), kilograms (tons)	Low	
+897	174	 intervention)	WC	1352	Size	Nominal size (bore)	PQ	length		Millimetres (inches)	High	
+198	58	 exchangers	HE	1353	Size - diameter	External	PQ	length		Millimetres	Medium	
+211	61	 boilers	HB	1353	Size - diameter	Specify	PQ	length		Millimetres	Medium	
+227	65	 vessels	VE	1353	Size - diameter	External	PQ	length		Millimetres	Medium	
+305	80	 tanks	TA	1353	Size - diameter	Nominal diameter	PQ	length		Metres	Medium	
+623	136	 vessels	SV	1353	Size - diameter	External	PQ	length		Metres	Medium	
+306	80	 tanks	TA	1354	Size - height	Nominal height	PQ	length		Metres	Medium	
+199	58	 exchangers	HE	1355	Size - length	External	PQ	length		Metres	Medium	
+212	61	 boilers	HB	1355	Size - length	Specify	PQ	length		Metres	Medium	
+228	65	 vessels	VE	1355	Size - length	External	PQ	length		Metres	Medium	
+624	136	 vessels	SV	1355	Size - length	External	PQ	length		Metres	Medium	
+530	123	 trees	XT	1356	Size of tree	Dimensions and mass		length		Metres, kilograms	Low	
+165	54	 Cranes	CR	1357	Slew bearing type	Specify	List		1042	Conical, roller	High	
+175	54	 Cranes	CR	1358	Slewing speed 1	At max. load	PQ	angular velocity		Degrees per second	Medium	
+176	54	 Cranes	CR	1359	Slewing speed 2	At no load	PQ	angular velocity		Degrees per second	Low	
+459	109	 Valves	VA	1360	Solenoid-valve configuration	Number and configuration (applicable for solenoid-operated valves only)	List		1154	Specify, e.g. 1 ?ù 3/2 (= single 3/2 pilot valve), 2 ?ù 4/3 (= double 4/3 pilot valve)	Low	
+6	29	 engines	CE	1361	Speed	Design speed	PQ	angular velocity		Revolutions per minute	High	
+38	33	 Compressors	CO	1361	Speed	Design speed	PQ	angular velocity		Revolutions per minute	Low	
+50	36	 generators	EG	1361	Speed	Synchronous	PQ	angular velocity		Revolutions per minute	Medium	
+73	39	 motors	EM	1361	Speed	Design speed	PQ	angular velocity		Revolutions per minute	Medium	
+91	42	 turbines	ST	1361	Speed	Design speed (power shaft)	PQ	angular velocity		Revolutions per minute	Medium	
+110	45	 Pumps	PU	1361	Speed	Design speed	PQ	angular velocity		Revolutions per minute or strokes per minute	Medium	
+130	48	 turbines	ST	1361	Speed	Design speed (power shaft)	PQ	angular velocity		Revolutions per minute	Medium	
+142	51	 expanders	TE	1361	Speed	Design speed	PQ	angular velocity		Revolutions per minute	Medium	
+585	130	 pumps	SP	1361	Speed	Design value	PQ	angular velocity		Revolutions per minute	Low	
+812	162	 drives	TD	1361	Speed	Max. speed	PQ	angular velocity		Revolutions per minute	High	
+813	162	 drives	TD	1361	Speed	Normal speed	PQ	angular velocity		Revolutions per minute	High	
+258	71	 Winches	WI	1362	Speed - design	Max. operating speed	PQ	angular velocity		Revolutions per minute	High	
+913	180	 fixation	JF	1363	Speed hoist - max load	Hoist speed at max load	PQ	speed		Metres per second, m/s	Medium	
+914	180	 fixation	JF	1364	Speed hoist - no load	Hoist speed at no load	PQ	speed		Metres per second, m/s	Low	
+915	180	 fixation	JF	1365	Speed input shaft	Speed _input_shaft	PQ	angular velocity		Revolutions per minute ,rpm	Low	
+916	180	 fixation	JF	1366	Speed output shaft	Speed_output_shaft	PQ	angular velocity		Revolutions per minute ,rpm	Low	
+264	71	 Winches	WI	1367	Spooling device	As applicable	Bool			Yes/No	Low	
+484	112	 Nozzles	NO	1368	Spray angle	Specify	PQ	degrees		Degrees	Medium	
+485	112	 Nozzles	NO	1369	Spray type	Specify	List		1054	Droplets, mist	Medium	
+496	115	 Lifeboats	LB	1370	Sprinkler system	Sprinkler system?	List		1115	No, Yes	High	
+9	29	 engines	CE	1371	Starting system	Type	List		1059	Electric, hydraulic, pneumatic	Medium	
+93	42	 turbines	ST	1371	Starting system	Specify main starting system	List		1059	Electric, hydraulic, pneumatic	High	
+449	109	 Valves	VA	1372	Stem sealing	Type	List		1159	Stuffing box, duplex, lip seal, O-ring	High	
+299	80	 tanks	TA	1373	Stored product(s)	Main product(s)	List		1045	Crude oil, oily water, gasoline, diesel, methanol, water, refrigerated LPG, refrigerated LNG, chemicals	High	
+19	32	 Compressors	CO	1374	Suction pressure	Design - first stage	PQ	pressure		Pascal (bar)	Medium	
+20	32	 Compressors	CO	1374	Suction pressure	Operating - first stage	PQ	pressure		Pascal (bar)	Low	
+108	45	 Pumps	PU	1375	Suction pressure - design	Design pressure	PQ	pressure		Pascal (bar)	Medium	
+582	130	 pumps	SP	1375	Suction pressure - design		PQ	pressure		Pascal (barg.)	Medium	
+379	93	 converters	FC	1376	Supply voltage	Supply voltage	PQ	electrical tension / voltage		Volts	Low	
+370	90	 Switchgear	SG	1377	Switches/Breaker rating	Switches/Breaker rating (A)				Specify	Low	
+360	90	 Switchgear	SG	1378	System application	Description of the switchboard application (services supplied)	List		1043	Control system, safety system	Medium	
+375	93	 converters	FC	1379	System identification	System identification number	Number			Number	High	
+316	83	 UPS	UP	1380	System input voltage	Input voltage	PQ	electrical tension / voltage		Volt	High	
+321	83	 UPS	UP	1381	System output voltage	Output voltage	PQ	electrical tension / voltage		Volt	High	
+559	127	 Risers	PR	1382	Temperature	Design value	PQ	temperature		Degrees Celsius	Low	
+224	65	 vessels	VE	1383	Temperature - design	Design temperature	PQ	temperature		Degrees Celsius	Low	
+307	80	 tanks	TA	1383	Temperature - design	Maximum design temperature	PQ	temperature		Degrees Celsius	High	
+308	80	 tanks	TA	1383	Temperature - design	Minimum design temperature	PQ	temperature		Degrees Celsius	High	
+653	140	 pipelines	SL	1383	Temperature - design	Design temperature	PQ	temperature		Degrees Celsius	Medium	
+226	65	 vessels	VE	1384	Temperature - operating	Operating temperature	PQ	temperature		Degrees Celsius	Low	
+309	80	 tanks	TA	1384	Temperature - operating	Operating temperature	PQ	temperature		Degrees Celsius	Medium	
+620	136	 vessels	SV	1384	Temperature - operating	Specify	PQ	temperature		Degrees Celsius	Medium	
+196	58	 exchangers	HE	1385	Temperature drop, hot side	Operating	PQ	temperature		Degrees Celsius	Low	
+768	153	Electrical submersible pumps	ESP	1386	Temperature rating	Power cable and MLE	PQ	temperature		Degrees Celsius	High	
+773	153	Electrical submersible pumps	ESP	1386	Temperature rating	Pothead	PQ	temperature		Degrees Celsius	High	
+351	87	 transformers	PT	1387	Temperature rise	In accordance with IEC 60076-2	PQ	temperature		Degrees Celsius	Low	
+61	36	 generators	EG	1388	Temperature rise - rotor	Temperature rise in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Medium	
+79	39	 motors	EM	1389	Temperature rise - rotor a	Temperature rise in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Medium	
+59	36	 generators	EG	1390	Temperature rise - stator	Temperature rise in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Low	
+77	39	 motors	EM	1390	Temperature rise - stator	Temperature rise in accordance with IEC 60034-1	List		1174	Y, A, E, B, F, H	Low	
+197	58	 exchangers	HE	1391	Temperature rise, cold side	Operating	PQ	temperature		Degrees Celsius	Low	
+350	87	 transformers	PT	1392	Thermal class designation	Thermal class in accordance with IEC 60085	List		1175	Y, A, E, B, F, H, 200, 220, 250	Medium	
+776	153	Electrical submersible pumps	ESP	1393	Thermal cycling performance	Pothead	PQ			N/A	High	
+355	87	 transformers	PT	1394	Three-phase transformer connection	Type and combination of connections (vector groups) as star, delta, etc. in accordance with IEC 60076-1				Code as recommended in IEC 600761:2000, Annex D	High	
+37	33	 Compressors	CO	1395	Thrust bearing	Specify as relevant in comment field whether any thrust pressure regulator is installed	List		1010	Antifrictional, journal, magnetic	Low	
+63	36	 generators	EG	1395	Thrust bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+120	45	 Pumps	PU	1395	Thrust bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+154	51	 expanders	TE	1395	Thrust bearing	Type	List		1010	Antifrictional, journal, magnetic	Low	
+595	130	 pumps	SP	1396	Thrust bearing type	Specify	List		1104	Magnetic, roller, sliding	Low	
+758	153	Electrical submersible pumps	ESP	1397	Thrust load bearing capacity	Seal chamber section	PQ	weight		Pounds, lbs	High	
+814	162	 drives	TD	1398	Torque	Max. torque	PQ	moment of force		Newton*metre	High	
+815	162	 drives	TD	1398	Torque	At normal speed	PQ	moment of force		Newton*metre	High	
+917	180	 fixation	JF	1399	Torque brake	Brake torque	PQ	moment of force		N/m	Low	
+827	163	 drives	TD	1400	Torque wrench capacity	Diameter	PQ	length		Millimetres	Low	
+828	163	 drives	TD	1400	Torque wrench capacity	Torque	PQ	moment of force		Newton*metre	Low	
+168	54	 Cranes	CR	1401	Total unit weight	Specify	PQ	volume		Metric tonnes	Medium	
+352	87	 transformers	PT	1402	Transformer cooling	Type in accordance with IEC 60076-2				Code as in IEC 60076-2:1993, Clause 3	High	
+605	133	 distribution	EP	1403	Transmission distance	0 - 999	PQ	length		km	High	
+603	133	 distribution	EP	1404	Transmission power	0 - 99,999	PQ	power		kVA	High	
+115	45	 Pumps	PU	1405	Transmission type	Type	List		1048	Direct, gear, integral	Low	
+259	71	 Winches	WI	1405	Transmission type	Type	List		1048	Direct, gear, integral	Low	
+598	130	 pumps	SP	1405	Transmission type	Specify	List		1048	Direct, gear, integral	Low	
+602	133	 distribution	EP	1406	Transmission voltage a	0 - 9,999	PQ	electrical tension / voltage		kV	High	
+462	109	 Valves	VA	1407	Trim type	Type (applicable for control valves only)	List		1116	Noise reduction, anti-cavitation, multi-stage, single-stage	High	
+215	61	 boilers	HB	1408	Tube coil configuration	Specify	List		1088	Helical, horizontal, single-pass, spiral, split-pass, vertical	Low	
+214	61	 boilers	HB	1409	Tube material	Specify				Specify	Low	
+201	58	 exchangers	HE	1410	Tube/plate material	Specify material type in tubes/plates.				Free text	Medium	
+273	74	 Turrets	TU	1411	Turret location	Where installed on the vessel	List		1024	Bow, stern, behind living quarter	High	
+637	139	 pipelines	SL	1412	Type	Classify	List		1139	Production, injection		
+377	93	 converters	FC	1413	Type of commutation	Describe as per code list	List		1143	Self-commutated, line/load commutated	Low	
+898	174	 intervention)	WC	1414	Type of connections	Specify				Text	High	
+504	118	control	CS	1415	Type of control fluid		List		1130	Oil-based, water-based	Medium	
+859	167	 (BOP)	BO	1415	Type of control fluid	Specify	List		1130	Oil-based, water-based	High	
+886	171	 (BOP)	BO	1415	Type of control fluid	Specify	List		1130	Oil-based, water-based	High	
+505	118	control	CS	1416	Type of control system		List		1037	Closed, open	Medium	
+860	167	 (BOP)	BO	1416	Type of control system	Specify	List		1110	Multiplexed, pilot hydraulic, other	High	
+887	171	 (BOP)	BO	1416	Type of control system	Specify	List		1110	Multiplexed, pilot hydraulic, other	High	
+148	51	 expanders	TE	1417	Type of design	Type	List		1032	Centrifugal, axial	Medium	
+69	39	 motors	EM	1418	Type of driven unit	Equipment class, type and identification code				Specify	High	
+86	42	 turbines	ST	1418	Type of driven unit	Characteristics of the driven subsystem	List		1085	Generator drive, mechanical drive, auxiliaries, other	High	
+139	51	 expanders	TE	1418	Type of driven unit	Equipment class, type and identification code				Specify	High	
+17	32	 Compressors	CO	1419	Type of driver	Driver unit (equipment class, type and identification code)				Specify	High	
+48	36	 generators	EG	1419	Type of driver	Equipment class, type and identification code				Specify	High	
+101	45	 Pumps	PU	1419	Type of driver	Equipment class, type and identification code				Specify	High	
+159	54	 Cranes	CR	1419	Type of driver	Driver unit (equipment class, type and identification code)				Specify	High	
+251	71	 Winches	WI	1419	Type of driver	Equipment class, type and code				Specify	High	
+803	162	 drives	TD	1419	Type of driver	Specify type	List		1058	Electric, hydraulic	High	
+356	87	 transformers	PT	1420	Type of dry transformer winding	Specify if the windings are encapsulated in solid insulation. Cast resin is an example of solid insulation.	List		1064	Encapsulated/not encapsulated	Medium	
+81	39	 motors	EM	1421	Type of Ex protection	Explosion classification category, e.g. Ex(d), Ex(e) b				e.g. Ex(d), Ex(e)	High	
+403	97	 detectors	FG	1421	Type of Ex protection	Explosion classification category, e.g. Ex(d), Ex(e) c	List		1176	Ex(d), Ex(e), Ex(i), none	Low	
+483	112	 Nozzles	NO	1422	Type of nozzle end	Specify	List		1020	Bolted flange, clamped flange, screwed, welded	Medium	
+607	133	 distribution	EP	1423	Type of power consumers	Type of power consumers	List		1160	Subsea pump, subsea compressor, subsea heater, subsea cooler	High	
+423	101	 devices	IP	1424	Type of protection	Explosion classification category, e.g. Ex(d), Ex(e) b	List		1176	Ex(d), Ex(e), Ex(i), None	Low	
+245	68	 Piping	PI	1425	Type of valves	Specify valve category	List		1141	PSV, ESD, HIPPS, manual, etc.	Low	
+789	157	Surface wellhead and X-mas trees	XD	1426	Type of well	Type of tie-back solution	List		1118	Offshore, SPAR, TLP, Onshore, l, HPHT, SAGD, Shale gas, Shale oil	High	
+895	174	 intervention)	WC	1427	Unit function	Functional description of unit				Text	High	
+894	174	 intervention)	WC	1428	Unit identification	Manufacturer model/part/serial number				Number or name	High	
+896	174	 intervention)	WC	1429	Unit type	Type of unit (ram, gate valve, ball valve, etc.)				Text	High	
+328	83	 UPS	UP	1430	UPS string system	The numbers of UPS systems which are working in parallel	List		1056	Dual, single, triple	Medium	
+28	32	 Compressors	CO	1431	Utilization	Percent utilization compared to design	Number			Percent	Medium	
+193	58	 exchangers	HE	1431	Utilization	Used/rated heat transfer	Number			Percent	Medium	
+107	45	 Pumps	PU	1432	Utilization of capacity	Normal operating/design capacity	Number			Percent	Medium	
+365	90	 Switchgear	SG	1432	Utilization of capacity	Normal operating/design capacity	Number			%	High	
+381	93	 converters	FC	1432	Utilization of capacity	Normal operating/design capacity	Number			%	Medium	
+539	123	 trees	XT	1433	Valve actuation	Classify	List		1094	Hydraulic, Electrical, Manual	Medium	
+656	140	 pipelines	SL	1433	Valve actuation	Classify	List		1094	Hydraulic, Electrical, Manual	High	
+537	123	 trees	XT	1434	Valve application	X-mas tree valve function	List		1009	Annulus master (AMV), Annulus swab (ASV), Annulus wing (AWV), Injection wing (IWV), Injection master (IMV), Injection swab (ISV), Production master (PMV), Production swab, Production wing (PWV), Crossover (XOV)	High	
+575	127	 Risers	PR	1434	Valve application	Riser base valve function	List		1135	Pipeline isolation, SSIV b, HIPPS	High	
+654	140	 pipelines	SL	1434	Valve application	Pipeline valve function	List		1136	Pipeline isolationSSIV a	High	
+797	157	Surface wellhead and X-mas trees	XD	1434	Valve application	X-mas tree valve function	List		1163	Swab (SV), Production wing (PWV), Kill (KV), Upper master (UMV), Lower master (LMV), Annulus (AV)	High	
+684	145	(TR-SCSSV	TR-SCSSV	1435	Valve configuration		List		1150	Single valve (s.v.)Single valve with insert capability within valveSingle valve with separate nipple/control line for insert valvesUpper valve in ÔÇ£hotÔÇØ backup tandem conceptLower valve in ÔÇ£hotÔÇØ backup tandem conceptUpper valve in ÔÇ£coldÔÇØ backup tandem conceptLower valve in ÔÇ£coldÔÇØ backup tandem conceptUpper valve in hybrid tandem concept	Low	
+716	148	 DHSV/WRSCSSV	WR-SCSSV	1435	Valve configuration		List		1149	Single valve (s.v)Single valve with insert capability within valve Single v. with sep. nipple/contr.l. for insert v.Upper valve in ÔÇ£hotÔÇØ backup tandem conceptLower valve in ÔÇ£hotÔÇØ backup tandem conceptUpper valve in ÔÇ£coldÔÇØ backup tandem conceptLower valve in ÔÇ£coldÔÇØ backup tandem conceptUpper valve in hybrid tandem concept	Low	
+538	123	 trees	XT	1436	Valve design class	Type of X-mas tree valve design	List		1014	Ball, Butterfly, Diaphragm, Double expanding gate, Flapper, Gate, Needle, Piston, Ram, Swing	High	
+576	127	 Risers	PR	1436	Valve design class	Type of riser base valve design	List		1148	Side-entry ball, top-entry ball, double expanding gate (DEG), slab gate, wedge gate, check	High	
+655	140	 pipelines	SL	1436	Valve design class	Type of pipeline valve design	List		1148	Side-entry ball, top-entry ball, double expanding gate (DEG), slab gate, wedge gate, check	High	
+798	157	Surface wellhead and X-mas trees	XD	1436	Valve design class	Type of valve design	List		1014	Ball, Butterfly, Diaphragm, Double expanding gate, Flapper, Gate, Needle, Piston, Ram, Swing	High	
+461	109	 Valves	VA	1437	Valve fail-safe position	Fail-safe position	List		1068	Fail-open, Fail-close, Fail-as-is	High	
+658	140	 pipelines	SL	1437	Valve fail-safe position	Fail-safe-position	List		1068	Fail-open, Fail-close, Fail-as-is	High	
+463	109	 Valves	VA	1438	Valve leakage class	Specify according to applicable reference standard (e.g. for valves complying with API Spec 6D, see ISO 5208:2015)				ISO 5208:2015, Annex A, Table 4	High	
+657	140	 pipelines	SL	1439	Valve location	Specify location of pipeline valves	List		1162	Subsea, topside, landfall/ onshore	High	
+448	109	 Valves	VA	1440	Valve material	Type	List		1029	Carbon steel (CS), stainless steel (SST), duplex, alloy type, composite, titanium	High	
+682	145	(TR-SCSSV	TR-SCSSV	1441	Valve type		List		1167	Tubing-retrievableTubing-retrievable with wireline-retrievable brainOtherUnknown	Medium	
+72	39	 motors	EM	1442	Variable speed	Specify if installed or not	Bool			Yes/No	Low	
+281	74	 Turrets	TU	1443	Vessel displacement		PQ	volume		Metric tonnes	Medium	
+52	36	 generators	EG	1444	Voltage	Design voltage	PQ	electrical tension / voltage		Kilovolts	High	
+74	39	 motors	EM	1444	Voltage	Design voltage	PQ	electrical tension / voltage		Volts	Medium	
+293	77	 Swivels	SW	1445	Voltage - power	Power swivels only a	PQ	electrical tension / voltage		Volt	Medium	
+345	87	 transformers	PT	1446	Voltage additional windings	Rated voltage tertiary or further windings	PQ	electrical tension / voltage		Kilovolts	High	
+767	153	Electrical submersible pumps	ESP	1447	Voltage rating	Power cable and MLE	PQ	electrical tension / voltage		Volt	High	
+772	153	Electrical submersible pumps	ESP	1447	Voltage rating	Pothead	PQ	electrical tension / voltage		Volt	High	
+294	77	 Swivels	SW	1448	Voltage signal	Signal swivels only a	PQ	electrical tension / voltage		Volt	Medium	
+376	93	 converters	FC	1449	Voltage type	Design characteristic	List		1003	AC, DC	High	
+319	83	 UPS	UP	1450	Voltage variation	Input voltage	Number			Percent	Low	
+304	80	 tanks	TA	1451	Volume	Nominal liquid capacity	PQ	volume		Cubic metres	Medium	
+756	153	Electrical submersible pumps	ESP	1452	Volume contraction capacity	Seal chamber section	PQ	volume		Litres	High	
+237	68	 Piping	PI	1453	Wall thickness	Specify	PQ	length		Millimetres	Medium	
+567	127	 Risers	PR	1453	Wall thickness	Specify	PQ	length		Millimetres	Low	
+520	122	 trees	XT	1454	Water depth		PQ	length		Metres	High	
+280	74	 Turrets	TU	1455	Wave height	Significant height - design value	PQ	length		Meters	Medium	
+542	123	 trees	XT	1456	Wax formation	Specify	Bool			Yes/no	Low	
+572	127	 Risers	PR	1456	Wax formation	Specify	Bool			Yes/no	Low	
+630	136	 vessels	SV	1456	Wax formation	Specify	Bool			Yes/No	Low	
+533	123	 trees	XT	1457	Well flow rate	Representative well flow rate (production or injection)				Specify	Medium	
+792	157	Surface wellhead and X-mas trees	XD	1457	Well flow rate	Representative well flow rate (production or injection)				Specify	Medium	
+781	156	Surface wellhead and X-mas trees	XD	1458	Well function	Function of the well	List		1140	Production, injection, disposal	High	
+780	156	Surface wellhead and X-mas trees	XD	1459	Well identification no	Well identification no - operator description				Specify	High	
+502	118	control	CS	1460	Well identification number	Operator description				Number or name	High	
+516	122	 trees	XT	1460	Well identification number	Operator description				Number or name	High	
+549	126	 Risers	PR	1460	Well identification number	Operator description				Number or name	High	
+580	130	 pumps	SP	1460	Well identification number	Operator description				Number or name	High	
+738	152	Electrical submersible pumps	ESP	1460	Well identification number	Operator description				Number or name	High	
+518	122	 trees	XT	1461	Well type	Production, injection	List		1139	Production, injection	High	
+854	167	 (BOP)	BO	1462	Wellhead connector - manufacturer (and model)	Specify				Specify	High	
+881	171	 (BOP)	BO	1462	Wellhead connector - manufacturer (and model)	Specify				Specify	High	
+855	167	 (BOP)	BO	1463	Wellhead connector pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	Medium	
+882	171	 (BOP)	BO	1463	Wellhead connector pressure rating	Specify	PQ	pressure		Pascal (pounds per square inch)	Medium	
+790	157	Surface wellhead and X-mas trees	XD	1464	Wellhead flowing pressure	Representative operational wellhead flowing pressure	PQ	pressure		Psi	Low	
+791	157	Surface wellhead and X-mas trees	XD	1465	Wellhead flowing temperature	Representative operational wellhead flowing temperature	PQ	temperature		Degrees Celsius	Low	
+437	108	 Valves	VA	1466	Where mounted	Equipment on which the valve is installed	List		1172	Wellhead, X-mas tree, wellhead flow line, wellhead injection line, pump, turbine, generator, separator, heat exchanger, vessel, header, electric motor, diesel motor, turboexpander, drilling, pipeline, mud process, utility, living quarter, air inlet, riser	High	
+177	54	 Cranes	CR	1467	WHIP crane	Installed or not	Bool			Yes/No	Low	
+257	71	 Winches	WI	1468	Wire diameter	Wire/line thickness	PQ	length		Millimetres	Low	
+252	71	 Winches	WI	1469	Wire/chain type	Type of hoisting line	List		1028	Cable, chain, rope, umbilical, wire	High	
+552	126	 Risers	PR	1470	Working pressure		PQ	pressure		Pascal (bar)	Medium	
+43	33	 Compressors	CO	1471	Working principle		List		1151	Single-acting, double-acting	Low	

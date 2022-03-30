@@ -149,9 +149,18 @@ var CsvTripleBuilder = {
 
                             var emptyMappings = 0;
                             lines.forEach(function (line, indexLine) {
+
+                                //clean line content
+                                for(var key in line){
+                                    line[key]=util.formatStringForTriple(line[key])
+                                }
+
                                 var hasDirectSuperClass = false;
                                 var subjectStr = null;
                                 var objectStr = null;
+
+
+
 
                                 mapping.tripleModels.forEach(function (item) {
                                     subjectStr = null;

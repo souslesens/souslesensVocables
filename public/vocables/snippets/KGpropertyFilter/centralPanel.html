@@ -2,7 +2,6 @@
 <!--<script src="js/external/jsoneditor.js"></script>>-->
 <!--script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script-->
 
-
 <style>
     .KGpropertyFilter_tripleInput {
         width: 200px;
@@ -20,35 +19,30 @@
         border-radius: 3px;
         display: flex;
         flex-direction: column;
-
     }
 
     .KGpropertyFilter_filterSelect {
-        widthWWW: 300px
+        widthwww: 300px;
     }
 
     .KGpropertyFilter_fileWithMappings {
         color: #0000ff;
     }
-
 </style>
-<div id="KGcreator_centralPanelTabs" style="width:100%;">
-
+<div id="KGcreator_centralPanelTabs" style="width: 100%">
     <ul>
         <li style="background-color: beige"><a href="#KGcreator_ConfigureTab">Configure filters</a></li>
         <li style="background-color: #d9bb73"><a href="#KGcreator_PropertiesSetTab">Use Properties sets</a></li>
-
     </ul>
     <div id="KGcreator_ConfigureTab">
-        <div id="KGpropertyFilter_currentPropertyDiv" style="font-weight:bold;display: none;border: #0000cc solid 2px">
+        <div id="KGpropertyFilter_currentPropertyDiv" style="font-weight: bold; display: none; border: #0000cc solid 2px">
             <span id="KGpropertyFilter_currentPropertySpan"></span>
             <button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()">Associate Filters</button>
-            <button onclick="KGpropertyFilter.generateRestrictionFilterTriples()">Save to dictionary</button>
+            <button onclick="KGpropertyFilter.saveNewRestrictionFilterTriples()">Save Filters</button>
         </div>
-        <div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
-
+        <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
             <div id="KGpropertyFilter_filteringResult"></div>
-  <!--
+            <!--
 
             <div class="KGpropertyFilter_tripleDiv">
                 LifeCycle filters <br>
@@ -81,16 +75,11 @@
 
 
         </div>
-        -->
-    </div>
+        --></div>
 
-
-    <div id="KGcreator_PropertiesSetTab">
-
-        <div style="display: flex;flex-direction: row; border: #6e2500 solid 1px;  border-radius: 3px;   margin: 3px; padding: 3px;">
-
-
-            <!--
+        <div id="KGcreator_PropertiesSetTab">
+            <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
+                <!--
             <div class="KGpropertyFilter_tripleDiv">
                 LifeCycle filters <br>
                 <div class="jstreeContainer"
@@ -129,13 +118,9 @@
         </div>
 
         -->
+            </div>
+        </div>
 
-
+        <div id="KGpropertyFilter_dialogDiv"></div>
     </div>
-</div>
-
-
-<div id="KGpropertyFilter_dialogDiv">
-
-
 </div>

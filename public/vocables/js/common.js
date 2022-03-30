@@ -64,6 +64,15 @@ var common = (function () {
                     "li_attr": {style: "color:#ccc"},
                     "icon": "../icons/externalObject.png"
                 },
+                "Class": {
+                    "li_attr": {style: "color:black"},
+                    "icon": "../icons/class.png",
+
+                },
+                "Property": {
+                    "li_attr": {style: "color:black"},
+                    "icon": "../icons/property.png"
+                },
 
             },
             loadJsTree: function (jstreeDiv, jstreeData, options, callback) {
@@ -157,14 +166,32 @@ var common = (function () {
                         options.onOpenNodeFn(evt, obj);
                     }
 
-                }) .on("check_node.jstree", function (evt, obj) {
-
-                    if (options.onCheckNodeFn) {
-                        options.onCheckNodeFn(evt, obj);
+                }).on(' after_open.jstree', function (evt, obj) {
+                    self.jstree.setTreeAppearance()
+                    if (options.onAfterOpenNodeFn) {
+                        options.onAfterOpenNodeFn(evt, obj);
                     }
 
+                })
 
-                }).on("uncheck_node.jstree", function (evt, obj) {
+
+                    .on("enable_checkbox.jstree", function (evt, obj) {
+
+                        if (options.onCheckNodeFn) {
+                            options.onCheckNodeFn(evt, obj);
+                        }
+
+
+                    })
+                    .on("check_node.jstree", function (evt, obj) {
+
+                        if (options.onCheckNodeFn) {
+                            options.onCheckNodeFn(evt, obj);
+                        }
+
+
+                    })
+                    .on("uncheck_node.jstree", function (evt, obj) {
 
 
                     if (options.onUncheckNodeFn) {
@@ -226,19 +253,19 @@ var common = (function () {
                 $("#" + jstreeDiv).jstree("destroy").empty();
             },
 
-            addNodesToJstree: function (jstreeDiv, parentNodeId, jstreeData, options) {
+            addNodesToJstree: function (jstreeDiv, _parentNodeId, jstreeData, options) {
                 if (!options)
                     options = {}
                 var position = "first"
                 if (options.positionLast)
                     position = "last"
                 jstreeData.forEach(function (node) {
-                    var parentNode = parentNodeId;
+                    var parentNodeId = _parentNodeId;
 
-                    if (!parentNodeId)
+                    if (!_parentNodeId)
                         parentNodeId = node.parent;
 
-                    if (!parentNode)
+                    if (!parentNodeId)
                         return;
 
                     if (parentNodeId == node.id)
@@ -273,13 +300,12 @@ var common = (function () {
                         descendants.splice(index, 1);
                     }
                 }
-               /* descendants.forEach(function(item){
-                    $("#" + jstreeDiv).jstree(true).delete_node(item)
-                })*/
+                /* descendants.forEach(function(item){
+                     $("#" + jstreeDiv).jstree(true).delete_node(item)
+                 })*/
                 try {
                     $("#" + jstreeDiv).jstree(true).delete_node(descendants)
-                }
-                catch(e){
+                } catch (e) {
                     console.log(e)
                 }
 
@@ -562,34 +588,34 @@ var common = (function () {
             }
             ,
             //to be finished ???
-            pivotTable: function(array) {
-            var matrix = []
-            var countCols = 0
-            var countLines = array.length
-            array.forEach(function (line, lineIndex) {
-                var mLine = []
-                countCols = Math.max(countCols, line.length)
-                line.forEach(function (cell, lineIndex) {
-                    mLine.push(cell)
+            pivotTable: function (array) {
+                var matrix = []
+                var countCols = 0
+                var countLines = array.length
+                array.forEach(function (line, lineIndex) {
+                    var mLine = []
+                    countCols = Math.max(countCols, line.length)
+                    line.forEach(function (cell, lineIndex) {
+                        mLine.push(cell)
+
+                    })
+                    matrix.push(mLine)
 
                 })
-                matrix.push(mLine)
 
-            })
-
-            var x = matrix
-            var matrix2 = []
-            for (var i = 0; i < countCols; i++) {
-                var col = []
-                for (var j = 0; j < countLines; j++) {
-                    col.push(matrix[j][i])
+                var x = matrix
+                var matrix2 = []
+                for (var i = 0; i < countCols; i++) {
+                    var col = []
+                    for (var j = 0; j < countLines; j++) {
+                        col.push(matrix[j][i])
+                    }
+                    matrix2.push(col)
                 }
-                matrix2.push(col)
-            }
 
-            var x = matrix2
-            return matrix2
-        }
+                var x = matrix2
+                return matrix2
+            }
         }
 
 
@@ -663,13 +689,13 @@ var common = (function () {
 
         }
 
-        self.decapitalizeLabel=function(label){
-            if(!label.match(/[a-z]/))
+        self.decapitalizeLabel = function (label) {
+            if (!label.match(/[a-z]/))
                 return label
-            if(label=="LEVEL TRANSMITTER")
-                var x=3
-            if(!label.replace)
-                var x=3
+            if (label == "LEVEL TRANSMITTER")
+                var x = 3
+            if (!label.replace)
+                var x = 3
             var altLabel = label.replace(/[A-Z]/g, function (maj) {
                 return " " + maj
             })
@@ -982,14 +1008,10 @@ var common = (function () {
         }
 
 
-
-
-
         return self;
 
 
     }
-
 
 
 )()

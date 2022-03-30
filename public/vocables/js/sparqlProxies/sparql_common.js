@@ -19,6 +19,19 @@ var Sparql_common = (function () {
         return c1 == c2
     }
 
+    self.getBindingsValues=function(bindings){
+        var values = []
+       bindings.forEach(function (item) {
+            var obj = {}
+            for (var key in item) {
+                obj[key] = item[key].value
+            }
+            values.push(obj);
+        })
+        return values
+    }
+
+
     self.setFilter = function (varName, ids, words, options) {
         if (!ids && !words)
             return "";
@@ -102,12 +115,12 @@ var Sparql_common = (function () {
                         if(!id.indexOf)
                             var x=3
                       //  if(id.indexOf("http")!=0)
-                       if (id.match && !id.match(/.+:.+|http.+/))
+                       if (id.match && !id.match(/.+:.+|http.+|_:+/))
                             return
                         if (id != "") {
                             if (conceptIdsStr != "")
                                 conceptIdsStr += ","
-                            if (id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1)
+                            if (id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1)
                                 conceptIdsStr += "<" + id + ">"
                             else
                                 conceptIdsStr += id
@@ -235,7 +248,10 @@ var Sparql_common = (function () {
     }
 
 
-    self.getFromStr = function (source, named, withoutImports,excludeDictionaries) {
+    self.getFromStr = function (source, named, withoutImports,options) {
+
+        if(!options)
+            options={}
         var from = " FROM "
         if (named)
             from += " NAMED"
@@ -265,12 +281,22 @@ var Sparql_common = (function () {
 
         }
 
-        if(!excludeDictionaries){
+       /* if(!excludeDictionaries ){
             for( var source in Config.sources){
                 if(Config.sources[source].isDictionary)
                     fromStr += from + "  <" +  Config.sources[source].graphUri + "> "
             }
+        }*/
+        if(options.includeSources){
+            if(!Array.isArray(options.includeSources))
+                options.includeSources=[options.includeSources]
+            options.includeSources.forEach(function(source){
+            var importGraphUri = Config.sources[source].graphUri
+            fromStr += from + "  <" + importGraphUri + "> "
+            })
         }
+
+
 
 
         return fromStr;

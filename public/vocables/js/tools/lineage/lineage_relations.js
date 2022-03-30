@@ -202,6 +202,9 @@ Lineage_relations = (function () {
             filter += " filter (?provenance='" + provenanceFilter + "')"
 
 
+        var includeSources=null;
+        if(propertyFilter=="http://www.w3.org/2002/07/owl#sameAs")
+            includeSources="TSF-DICTIONARY"
         self.getFromSourceSelection(function (err, selectedNodes) {
             if (err)
                 return callback(err)
@@ -212,7 +215,7 @@ Lineage_relations = (function () {
                     someValuesFrom: 1,
                     filter: filter,
                     selectGraph: true,
-                    getMetadata: currentSource == Config.dictionarySource
+                    includeSources:includeSources
 
                 }, function (err, result) {
                     if (err)

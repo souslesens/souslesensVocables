@@ -115,6 +115,7 @@ var Sparql_OWL = (function () {
                 "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "select   distinct * " + fromStr + " where {" +
                 "?child1 " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?concept.  FILTER (!isBlank(?concept)) " + strFilter +
+                "OPTIONAL {?concept rdfs:label ?conceptLabel.}"+
                 "OPTIONAL {?child1 rdfs:label ?child1Label.}"
             if (false && options.skipRestrictions) {
                 query += " filter ( NOT EXISTS {?child1 " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?superClass.?superClass rdf:type owl:Restriction}) "
@@ -637,7 +638,7 @@ var Sparql_OWL = (function () {
                 options.selectGraph = false //!!!!!!!!!!!!!!PB cannot have graph when concept ands value are not in the same graph
 
                 //   fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports)
-                fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports,true)
+                fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports,options)
             } else {
                 fromStr = ""
 

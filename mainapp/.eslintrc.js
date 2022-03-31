@@ -30,6 +30,7 @@ module.exports = {
         jest: true,
         node: true,
     },
+    ignorePatterns: ["static/*"],
 
     parserOptions: {
         ecmaVersion: 2018,

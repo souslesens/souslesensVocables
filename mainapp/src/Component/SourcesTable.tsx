@@ -1,9 +1,9 @@
-import { RadioGroup, Box, CircularProgress, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack, SliderValueLabel } from "@mui/material";
+import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
-import { Source, saveSource, putSources, defaultSource, DataSource, deleteSource } from "../Source";
-import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel, MenuItem, Modal, Radio, Select, TextField } from "@material-ui/core";
+import { SRD } from "srd";
+import { Source, saveSource, defaultSource, deleteSource } from "../Source";
+import { Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Modal, Select, TextField } from "@material-ui/core";
 import { identity, style } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -11,7 +11,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
-    const unwrappedSources = SRD.unwrap([], identity, model.sources);
 
     const [filteringChars, setFilteringChars] = React.useState("");
 
@@ -149,13 +148,13 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [msg.payload.checkboxName]: msg.payload.value } };
 
         case Type.UserUpdatedPredicates:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["predicates"]: msg.payload } };
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, predicates: msg.payload } };
 
         case Type.UserUpdatedDataSource:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["dataSource"]: msg.payload } };
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, dataSource: msg.payload } };
 
         case Type.UserUpdatedsparql_server:
-            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, ["sparql_server"]: msg.payload } };
+            return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, sparql_server: msg.payload } };
 
         case Type.ResetSource:
             switch (msg.payload) {

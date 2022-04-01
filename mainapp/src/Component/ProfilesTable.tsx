@@ -125,7 +125,7 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [_fieldToUpdate]: msg.payload.value ? "ALL" : [] } };
 
         case Type.UserUpdatedBlenderLevel:
-            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, ["blender"]: { contextMenuActionStartLevel: msg.payload } } };
+            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, blender: { contextMenuActionStartLevel: msg.payload } } };
 
         case Type.ResetProfile:
             switch (msg.payload) {

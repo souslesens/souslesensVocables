@@ -44,7 +44,7 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
 async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${profile.id}`, { method: "delete" });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as { message: string; ressources: Profile[] };
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(ressources)) });
         } else {
@@ -55,10 +55,10 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
     }
 }
 
-export async function putProfiles(body: Profile[]): Promise<Profile[]> {
+async function putProfiles(body: Profile[]): Promise<Profile[]> {
     const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
     const response = await fetch("/profiles", { method: "put", body: JSON.stringify(usersToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
-    const json = await response.json();
+    const json = (await response.json()) as { message: string; ressources: Profile[] };
     const entries: [string, ProfileJson][] = Object.entries(json);
     const decodedEntries = entries.map(([key, val]) => decodeProfile(key, val));
 

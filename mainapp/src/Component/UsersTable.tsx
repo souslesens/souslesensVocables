@@ -16,7 +16,7 @@ const UsersTable = () => {
 
     const renderUsers = SRD.match(
         {
-            notAsked: () => <p>Let's fetch some data!</p>,
+            notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -149,9 +149,9 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const saveSources = () => {
         if (create) {
-            putUsersBis(userModel.userForm, Mode.Creation, updateModel, update);
+            void putUsersBis(userModel.userForm, Mode.Creation, updateModel, update);
         } else {
-            putUsersBis(userModel.userForm, Mode.Edition, updateModel, update);
+            void putUsersBis(userModel.userForm, Mode.Edition, updateModel, update);
         }
     };
 

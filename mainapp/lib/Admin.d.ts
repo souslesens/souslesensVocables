@@ -1,6 +1,6 @@
 import * as React from "react";
 import { RD } from "srd";
-import { User as User } from "./User";
+import { User } from "./User";
 import { Profile } from "./Profile";
 import { Source } from "./Source";
 import { Config } from "./Config";

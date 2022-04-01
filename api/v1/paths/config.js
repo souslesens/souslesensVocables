@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        result = {
+        const result = {
             auth: config.auth,
             default_lang: config.default_lang,
             default_sparql_url: config.default_sparql_url,

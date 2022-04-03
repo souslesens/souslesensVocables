@@ -170,6 +170,7 @@ var visjsGraph = (function () {
         });
 
         self.network.on("click", function (params) {
+           console.log( self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y))
             self.processClicks(params, _options)
 
         }).on("hoverNode", function (params) {
@@ -224,7 +225,22 @@ var visjsGraph = (function () {
                 visjsGraph.data.nodes.update(newNodes)
 
             })
+
+            .on("controlNodeDragging",function(params){
+
+            })
             .on("dragEnd", function (params) {
+                if(params.event.srcEvent.ctrlKey && options.dndCtrlFn ){
+                    var dropCtrlNodeId= self.network.getNodeAt(params.pointer.DOM)
+                    if(!dropCtrlNodeId)
+                        return ;
+                   var startNode= self.data.nodes.get(params.nodes[0])
+                    var endNode= self.data.nodes.get(dropCtrlNodeId)
+
+                    options.dndCtrlFn(startNode,endNode, params.pointer.DOM)
+
+                }
+
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
                          return;*/

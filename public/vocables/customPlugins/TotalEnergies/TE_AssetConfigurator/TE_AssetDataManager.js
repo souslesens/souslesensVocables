@@ -121,7 +121,21 @@ var TE_AssetDataManager = (function () {
         return items
 
     }
+    self.getAssetNodeLabel = function (assetNode) {
 
+        if (assetNode.FullTag)
+            return assetNode.FullTag + " "
+        if (assetNode.location3)
+            return assetNode.location3 + " "
+        if (assetNode.location2)
+            return assetNode.location2 + " "
+        if (assetNode.location1)
+            return assetNode.location1 + " "
+        else
+            return assetNode.FunctionalLocationCode
+
+        label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3
+    }
 
     self.openAssetTreeNode = function (node, level, callback) {
         var limit = 100000

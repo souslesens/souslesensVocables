@@ -32,7 +32,7 @@ var DataController = {
         if (!options) options = {};
 
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        if (!fs.existsSync(filePath)) return callback("file does not exist", null);
+        if (!fs.existsSync(filePath)) return callback("file "+filePath  +"does not exist", null);
         csvCrawler.readCsv({ filePath: filePath }, options.lines || 100000, function (err, result) {
             if (err) return callback(err);
             var data = result.data;

@@ -356,7 +356,7 @@ var Export = (function () {
                 columns: cols,
 
                 // async: false,
-                "pageLength": 10,
+                "pageLength": 15,
                 dom: buttons,
                 /*buttons: [
                     'copy', 'csv', 'excel', 'pdf', 'print'

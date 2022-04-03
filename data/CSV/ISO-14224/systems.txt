@@ -1,0 +1,12 @@
+superClass	id	label1	label2
+http://standards.iso.org/iso/15926/part14/System	Rotating	Rotating-A.2.2	Rotating
+http://standards.iso.org/iso/15926/part14/System	Mechanical	Mechanical-A.2.3	Mechanical
+http://standards.iso.org/iso/15926/part14/System	Electrical	Electrical-A.2.4	Electrical
+http://standards.iso.org/iso/15926/part14/System	Safety_and_Control	SafetyAndControl-A.2.5	Safety and Control
+http://standards.iso.org/iso/15926/part14/System	Subsea	Subsea-A.2.6	Subsea
+http://standards.iso.org/iso/15926/part14/System	Well_Completion	WellCompletion-A.2.7	Well Completion
+http://standards.iso.org/iso/15926/part14/System	Drilling	Drilling-A.2.8	Drilling
+http://standards.iso.org/iso/15926/part14/System	Well_Intervention	WellIntervention-A.2.9	Well Intervention
+http://standards.iso.org/iso/15926/part14/System	Marine	Marine-A.2.10	Marine
+http://standards.iso.org/iso/15926/part14/System	Utilities	Utilities-A.2.11	Utilities
+http://standards.iso.org/iso/15926/part14/System	Auxiliaries	Auxiliaries-A.2.12	Auxiliaries

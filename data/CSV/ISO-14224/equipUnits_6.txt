@@ -1,0 +1,285 @@
+system	superClass	id	label1	label2
+Safety and Control	EC	EC-ACC	EC-ACC	Access Control Reader
+Safety and Control	TC	TC-ANT	TC-ANT	Antenna
+Safety and Control	EC	EC-BER	EC-BER	Berthing aid system
+Rotating	BL	BL-AX	BL-AX	Blowers and fans - Axial
+Rotating	BL	BL-BL	BL-BL	Blowers and fans - Blower
+Rotating	BL	BL-CE	BL-CE	Blowers and fans - Centrifugal
+Rotating	CF	CF-CE	CF-CE	Centrifuges - Centrifugal Separator
+Marine	AM	AM-CS	AM-CS	Chain stopper OLT / Turret
+Marine	AM	AM-PS	AM-PS	Combined Windlass and Mooring Winch
+Rotating	CE	CE-DE	CE-DE	Combustion engines - Diesel engine
+Rotating	CE	CE-GE	CE-GE	Combustion engines - Otto (gas) engine
+Rotating	CE	CE-AIR	CE-AIR	Compressed Air Engine
+Rotating	CO	CO-AX	CO-AX	Compressors - Axial
+Rotating	CO	CO-CE	CO-CE	Compressors - Centrifugal
+Rotating	CO	CO-RE	CO-RE	Compressors - Reciprocating
+Rotating	CO	CO-SC	CO-SC	Compressors - Screw
+Safety and Control	CL	CL-PC	CL-PC	Control logic units - Computer
+Safety and Control	CL	CL-DC	CL-DC	Control logic units - Distributed control unit
+Safety and Control	CL	CL-PA	CL-PA	Control logic units - Programmable automation controller (PAC)
+Safety and Control	CL	CL-LC	CL-LC	Control logic units - Programmable logic controller (PLC)
+Safety and Control	CL	CL-RL	CL-RL	Control logic units - Relay
+Safety and Control	CL	CL-SL	CL-SL	Control logic units - Single-loop controller
+Safety and Control	CL	CL-SS	CL-SS	Control logic units - Solid state
+Mechanical	CV	CV-CV	CV-CV	Conveyors and elevators - Conveyor
+Mechanical	CV	CV-GT	CV-GT	Conveyors and elevators - Static & Equiped Monorail (Incl. Gantry...)
+Mechanical	CR	CR-DO	CR-DO	Cranes - Diesel hydraulic operated
+Mechanical	CR	CR-HO	CR-HO	Cranes - Electro-hydraulic operated
+Safety and Control	ER	ER-DSD	ER-DSD	Descent to Sea Device
+Well Completion	WE	WE-TR	WE-TR	Downhole well completion - Tubing-retrievable, surface-controlled subsurface safety valve (TR-SCSSV)
+Well Completion	WE	WE-WR	WE-WR	Downhole well completion - Wireline-retrievable (WR) type DHSV/WR-SCSSV
+Rotating	EG	EG-MD	EG-MD	Electric generators - Engine driven, e.g. diesel engine, gas engine
+Rotating	EG	EG-TD	EG-TD	Electric generators - Gas-turbine driven
+Rotating	EG	EG-SD	EG-SD	Electric generators - Steam-turbine driven
+Rotating	EG	EG-TE	EG-TE	Electric generators - Turboexpander
+Rotating	EM	EM-AC	EM-AC	Electric motors - Alternating current
+Rotating	EM	EM-DC	EM-DC	Electric motors - Direct current
+Well Completion	ESP	ESP-AC	ESP-AC	Electrical submersible pumps - Alternative current
+Well Completion	ESP	ESP-CE	ESP-CE	Electrical submersible pumps - Centrifugal
+Well Completion	ESP	ESP-RO	ESP-RO	Electrical submersible pumps - Rotary
+Safety and Control	ER	ER-ESC	ER-ESC	Escape routes and access ways
+Safety and Control	LB	LB-FRC	LB-FRC	Fast Rescue Boat (FRC)
+Mechanical	FS	FS-AIR	FS-AIR	Filters and strainers - Air Filter
+Mechanical	FS	FS-CRT	FS-CRT	Filters and strainers - Cartridge Filter
+Mechanical	FS	FS-CRS	FS-CRS	Filters and strainers - Coarse Filter
+Mechanical	FS	FS-DPX	FS-DPX	Filters and strainers - Duplex Filter
+Mechanical	FS	FS-MBN	FS-MBN	Filters and strainers - Membrane Filter
+Mechanical	FS	FS-SCN	FS-SCN	Filters and strainers - Screen Filter
+Mechanical	FS	FS-MSH	FS-MSH	Filters and strainers - Strainer Filter
+Safety and Control	FG	FG-BF	FG-BF	Fire and gas detectors - Flame
+Safety and Control	FG	FG-BH	FG-BH	Fire and gas detectors - Heat
+Safety and Control	FG	FG-AB	FG-AB	Fire and gas detectors - Hydrocarbon
+Safety and Control	FG	FG-BM	FG-BM	Fire and gas detectors - Manual pushbutton
+Safety and Control	FG	FG-BA	FG-BA	Fire and gas detectors - Others
+Safety and Control	FG	FG-BS	FG-BS	Fire and gas detectors - Smoke/Combustion
+Safety and Control	FG	FG-AS	FG-AS	Fire and gas detectors - Toxic gases
+Safety and Control	FF	FF-EXT	FF-EXT	Fire Extinguisher
+Safety and Control	FF	FF-HD	FF-HD	Fire Hydrant
+Safety and Control	FF	FF-MN	FF-MN	Fire Monitor
+Safety and Control	FF	FF-WAT	FF-WAT	Fire Water System (Ring)
+Safety and Control	ER	ER-FIQ	ER-FIQ	Fireman Equipment
+Safety and Control	TC	TC-FIX	TC-FIX	Fix Transmitter Receiver
+Safety and Control	FI	FI-FL	FI-FL	Flare ignition - Flare Structure
+Utilities	FE	FE-BR	FE-BR	Flare ignition equipment - Burner Flare
+Safety and Control	FF	FF-FM	FF-FM	Foam Package
+Electrical	FC	FC-HV	FC-HV	Frequency converters - High voltage
+Electrical	FC	FC-LV	FC-LV	Frequency converters - Low voltage
+Safety and Control	FF	FF-CAB	FF-CAB	Fully equipped fire cabinets
+Rotating	GT	GT-AD	GT-AD	Gas turbines - Aero-derivative
+Rotating	GT	GT-HD	GT-HD	Gas turbines - Heavy duty
+Rotating	GT	GT-IN	GT-IN	Gas turbines - Industrial
+Mechanical	HE	HE-AC	HE-AC	Heat exchangers - Air-cooled
+Mechanical	HE	HE-BY	HE-BY	Heat exchangers - Bayonet
+Mechanical	HE	HE-DP	HE-DP	Heat exchangers - Double pipe
+Mechanical	HE	HE-P	HE-P	Heat exchangers - Plate
+Mechanical	HE	HE-PF	HE-PF	Heat exchangers - Plate fin
+Mechanical	HE	HE-PC	HE-PC	Heat exchangers - Printed circuit
+Mechanical	HE	HE-ST	HE-ST	Heat exchangers - Shell and tube
+Mechanical	HE	HE-S	HE-S	Heat exchangers - Spiral
+Mechanical	HE	HE-SW	HE-SW	Heat exchangers - Spiral-wound
+Mechanical	HB	HB-DF	HB-DF	Heaters and boilers - Direct-fired heater
+Mechanical	HB	HB-EB	HB-EB	Heaters and boilers - Electric boiler
+Mechanical	HB	HB-EH	HB-EH	Heaters and boilers - Electric heater
+Mechanical	HB	HB-FB	HB-FB	Heaters and boilers - HC-fired boiler
+Mechanical	HB	HB-HT	HB-HT	Heaters and boilers - Heater treater
+Mechanical	HB	HB-IF	HB-IF	Heaters and boilers - Indirect HC-fired heater
+Mechanical	HB	HB-NF	HB-NF	Heaters and boilers - Non-HC-fired boiler
+Safety and Control	ER	ER-HCT	ER-HCT	Helicopter Crash Kit
+Electrical	PC	PC-HVA	PC-HVA	High Voltage Cable AC
+Electrical	PC	PC-HVD	PC-HVD	High Voltage Cable DC (HVDC)
+Safety and Control	EC	EC-HRN	EC-HRN	Horn
+Safety and Control	FF	FF-HS	FF-HS	Hose reels for Fire Fighting
+Auxiliaries	HV	HV-ACU	HV-ACU	HVAC equipment - Air Cooling Unit
+Auxiliaries	HV	HV-CVB	HV-CVB	HVAC equipment - Constant Volume Box (CAV)
+Auxiliaries	HV	HV-MST	HV-MST	HVAC equipment - Dehumidifier
+Auxiliaries	HV	HV-DCT	HV-DCT	HVAC equipment - Duct access
+Auxiliaries	HV	HV-EB	HV-EB	HVAC equipment - Electric Boiler
+Auxiliaries	HV	HV-FCU	HV-FCU	HVAC equipment - Fan Coil Unit (Small Unit)
+Auxiliaries	HV	HV-EH	HV-EH	HVAC equipment - Fins heater HVACand defrosting GALLEY
+Auxiliaries	HV	HV-RFD	HV-RFD	HVAC equipment - Fire Damper
+Auxiliaries	HV	HV-CAT	HV-CAT	HVAC equipment - HVAC Catering, Cold Room, mortuary room
+Auxiliaries	HV	HV-GAL	HV-GAL	HVAC equipment - Kitchen hood
+Auxiliaries	HV	HV-RCU	HV-RCU	HVAC equipment - Regrigerating Condensing Unit
+Auxiliaries	HV	HV-DP	HV-DP	HVAC equipment - Shut-off and Balancing Damper
+Rotating	CE	CE-HYD	CE-HYD	Hydraulic Engine
+Safety and Control	ER	ER-SIS	ER-SIS	Immersion Suits
+Safety and Control	ER	ER-IBA	ER-IBA	Individual breathing apparatus
+Safety and Control	IP	IP-AN	IP-AN	Input devices - Analyser
+Safety and Control	IP	IP-CO	IP-CO	Input devices - Corrosion
+Safety and Control	IP	IP-DI	IP-DI	Input devices - Displacement
+Safety and Control	IP	IP-FS	IP-FS	Input devices - Flow
+Safety and Control	IP	IP-LS	IP-LS	Input devices - Level
+Safety and Control	IP	IP-LP	IP-LP	Input devices - Limit switch
+Safety and Control	IP	IP-PB	IP-PB	Input devices - On/off (pushbutton)
+Safety and Control	IP	IP-OT	IP-OT	Input devices - Others
+Safety and Control	IP	IP-PS	IP-PS	Input devices - Pressure
+Safety and Control	IP	IP-SP	IP-SP	Input devices - Speed
+Safety and Control	IP	IP-TS	IP-TS	Input devices - Temperature
+Safety and Control	IP	IP-VI	IP-VI	Input devices - Vibration
+Safety and Control	IP	IP-WE	IP-WE	Input devices - Weight
+Marine	JF	JF-CL	JF-CL	Jacking and fixation - Columnar legs
+Marine	JF	JF-TL	JF-TL	Jacking and fixation - Open-truss legs
+Safety and Control	ER	ER-SK	ER-SK	Life Saving, First Aid, Protection
+Safety and Control	LB	LB-DL	LB-DL	Lifeboats - Davit launched
+Safety and Control	LB	LB-FF	LB-FF	Lifeboats - Free fall
+Safety and Control	LB	LB-RFT	LB-RFT	Liferaft
+Rotating	LE	LE-CE	LE-CE	Liquid expanders  - Centrifugal
+Rotating	LE	LE-LQ	LE-LQ	Liquid expanders  - Water/Hydraulic
+Mechanical	LA	LA-LA	LA-LA	Loading arms - Generic Loading Arm
+Safety and Control	ER	ER-MOB	ER-MOB	Man Overboard Buoy
+Marine	MD	MD-QC	MD-QC	Marine disconnection equipment - QC/DC
+Safety and Control	EC	EC-MET	EC-MET	Meteo Station
+Rotating	MI	MI-MI	MI-MI	Mixers - Mixer and Agitator
+Safety and Control	FF	FF-FMM	FF-FMM	Mobile Foam Extinguisher
+Safety and Control	TC	TC-MOB	TC-MOB	Mobile Transmitter Receiver
+Marine	AM	AM-MC	AM-MC	Mooring Chain (Surface)
+Marine	AM	AM-FRL	AM-FRL	Mooring Fairlead
+Marine	AM	AM-FON	AM-FON	Mooring Foundation
+Marine	AM	AM-TS	AM-TS	Mooring Tensionner
+Marine	AM	AM-WR	AM-WR	Mooring Wire
+Safety and Control	EC	EC-LGT	EC-LGT	Navigation Lighting
+Safety and Control	EC	EC-DSS	EC-DSS	Navigation security system (GMDSS)
+Safety and Control	NO	NO-DN	NO-DN	Nozzles - Deluge
+Safety and Control	NO	NO-GA	NO-GA	Nozzles - Gaseous
+Safety and Control	NO	NO-SR	NO-SR	Nozzles - Sprinkler
+Safety and Control	NO	NO-WM	NO-WM	Nozzles - Water mist
+Safety and Control	ER	ER-LFJ	ER-LFJ	Offshore personal life-saving appliances
+Safety and Control	ER	ER-DOR	ER-DOR	Passive fire protection systems
+Mechanical	PI	PI-CA	PI-CA	Piping - Carbon steels
+Mechanical	PI	PI-LO	PI-LO	Piping - High-strength low-alloy steels
+Mechanical	PI	PI-PO	PI-PO	Piping - Polymers including fibre-reinforced
+Mechanical	PI	PI-ST	PI-ST	Piping - Stainless steels
+Mechanical	PI	PI-TI	PI-TI	Piping - Titanium
+Safety and Control	ER	ER-OSK	ER-OSK	Pollution suppress eqt (oil spill kit)
+Safety and Control	ER	ER-PDG	ER-PDG	Portable gas detectors
+Safety and Control	TC	TC-POR	TC-POR	Portable Transmitter Receiver
+Electrical	PT	PT-DT	PT-DT	Power transformers - Dry
+Electrical	PT	PT-OT	PT-OT	Power transformers - Oil immersed
+Mechanical	VE	VE-AD	VE-AD	Pressure vessels - Adsorber
+Mechanical	VE	VE-CA	VE-CA	Pressure vessels - Coalescer
+Mechanical	VE	VE-CO	VE-CO	Pressure vessels - Contactor
+Mechanical	VE	VE-CY	VE-CY	Pressure vessels - Cyclone
+Mechanical	VE	VE-DA	VE-DA	Pressure vessels - De-aerator
+Mechanical	VE	VE-DC	VE-DC	Pressure vessels - Distillation column
+Mechanical	VE	VE-DR	VE-DR	Pressure vessels - Dryer
+Mechanical	VE	VE-FD	VE-FD	Pressure vessels - Flash drum
+Mechanical	VE	VE-HY	VE-HY	Pressure vessels - Hydrocyclone
+Mechanical	VE	VE-PT	VE-PT	Pressure vessels - Pig trap
+Mechanical	VE	VE-RE	VE-RE	Pressure vessels - Reactor
+Mechanical	VE	VE-SA	VE-SA	Pressure vessels - Saturator
+Mechanical	VE	VE-SB	VE-SB	Pressure vessels - Scrubber
+Mechanical	VE	VE-SE	VE-SE	Pressure vessels - Separator
+Mechanical	VE	VE-SC	VE-SC	Pressure vessels - Slug catcher
+Mechanical	VE	VE-SP	VE-SP	Pressure vessels - Stripper
+Mechanical	VE	VE-SD	VE-SD	Pressure vessels - Surge drum
+Mechanical	VE	VE-TR	VE-TR	Pressure vessels - Transportable Cylinder
+Safety and Control	EC	EC-PA	EC-PA	Public Adress
+Safety and Control	EC	EC-PAL	EC-PAL	Public Adress Loudspeaker
+Rotating	PU	PU-CE	PU-CE	Pumps - Centrifugal
+Rotating	PU	PU-RE	PU-RE	Pumps - Reciprocating
+Rotating	PU	PU-RO	PU-RO	Pumps - Rotary
+Safety and Control	EC	EC-RAD	EC-RAD	Radar
+Safety and Control	EC	EC-BEC	EC-BEC	Radio Beacon
+Marine	AM	AM-RPS	AM-RPS	Riser Pulling system
+Subsea	PR	PR-FL	PR-FL	Risers - Flexible
+Subsea	PR	PR-RI	PR-RI	Risers - Rigid
+Safety and Control	ER	ER-SHW	ER-SHW	Safety showers and eye showers
+Safety and Control	ER	ER-SRT	ER-SRT	Search and Rescue (SART & EPIRB)
+Mechanical	SI	SI-VHM	SI-VHM	Silos - Vertical/Horizontal Metallic Silo
+Safety and Control	ER	ER-SMH	ER-SMH	Smoke Hoods
+Mechanical	SE	SE-ST	SE-ST	Steam ejectors - Standard Ejector
+Rotating	ST	ST-MS	ST-MS	Steam turbines - Multi-stage
+Rotating	ST	ST-SS	ST-SS	Steam turbines - Single-stage
+Mechanical	TA	TA-DP	TA-DP	Storage tanks - Diaphragm
+Mechanical	TA	TA-EF	TA-EF	Storage tanks - External Floating Roof
+Mechanical	TA	TA-IF	TA-IF	Storage tanks - Fixed Roof with Internal Floating Roof
+Mechanical	TA	TA-FR	TA-FR	Storage tanks - Fixed-Roof
+Mechanical	TA	TA-LR	TA-LR	Storage tanks - Lifting Roof
+Mechanical	TA	TA-RL	TA-RL	Storage tanks - Roofless
+Drilling	BO	BO-MX	BO-MX	Subsea blowout preventers (BOP) - Multiplexed electro-hydraulic
+Drilling	BO	BO-PH	BO-PH	Subsea blowout preventers (BOP) - Piloted hydraulic
+Subsea	EP	EP-MC	EP-MC	Subsea electrical power distribution - Multiple consumer
+Subsea	EP	EP-SD	EP-SD	Subsea electrical power distribution - Single consumer with subsea stepdown
+Subsea	EP	EP-SU	EP-SU	Subsea electrical power distribution - Single consumer without subsea stepdown
+Subsea	SL	SL-FL	SL-FL	Subsea pipelines - Flexible
+Subsea	SL	SL-RI	SL-RI	Subsea pipelines - Rigid
+Subsea	SV	SV-CA	SV-CA	Subsea pressure vessels - Coalescer
+Subsea	SV	SV-CY	SV-CY	Subsea pressure vessels - Cyclone
+Subsea	SV	SV-HY	SV-HY	Subsea pressure vessels - Hydrocyclone
+Subsea	SV	SV-SB	SV-SB	Subsea pressure vessels - Scrubber
+Subsea	SV	SV-SE	SV-SE	Subsea pressure vessels - Separator
+Subsea	SV	SV-SC	SV-SC	Subsea pressure vessels - Slug catcher
+Subsea	SV	SV-SD	SV-SD	Subsea pressure vessels - Surge drum
+Subsea	CS	CS-EH	CS-EH	Subsea production control - Direct electro-hydraulic
+Subsea	CS	CS-DH	CS-DH	Subsea production control - Direct hydraulic
+Subsea	CS	CS-PH	CS-PH	Subsea production control - Discrete pilot hydraulic
+Subsea	CS	CS-MX	CS-MX	Subsea production control - Multiplexed electro-hydraulic
+Subsea	CS	CS-SH	CS-SH	Subsea production control - Sequential piloted hydraulic
+Subsea	CS	CS-TH	CS-TH	Subsea production control - Telemetric hydraulic
+Subsea	SP	SP-CE	SP-CE	Subsea pumps - Centrifugal
+Subsea	SP	SP-RE	SP-RE	Subsea pumps - Reciprocating
+Subsea	SP	SP-RO	SP-RO	Subsea pumps - Rotary
+Well Intervention	OI	OI-WO	OI-WO	Subsea well intervention: Open water intervention - Full workover (tree mode)
+Well Intervention	OI	OI-WC	OI-WC	Subsea well intervention: Open water intervention - Well completion
+Well Intervention	OI	OI-WI	OI-WI	Subsea well intervention: Open water intervention - Well intervention - open sea (tree mode)
+Subsea	XT	XT-HX	XT-HX	Subsea wellhead and X-mas trees - Horizontal
+Subsea	XT	XT-VX	XT-VX	Subsea wellhead and X-mas trees - Vertical
+Drilling	BT	BT-MX	BT-MX	Surface blowout preventers (BOP) - Multiplexed electro-hydraulic
+Drilling	BT	BT-PH	BT-PH	Surface blowout preventers (BOP) - Piloted hydraulic
+Well Intervention	WC	WC-W1	WC-W1	Surface well control equipment (for well intervention) - Coiled tubing
+Well Intervention	WC	WC-W2	WC-W2	Surface well control equipment (for well intervention) - Snubbing
+Well Intervention	WC	WC-W3	WC-W3	Surface well control equipment (for well intervention) - Wireline
+Well Completion	XD	WD-HO	WD-HO	Surface wellhead and X-mas trees - Horizontal
+Well Completion	XD	WD-VE	WD-VE	Surface wellhead and X-mas trees - Vertical
+Electrical	SG	SG-DR	SG-DR	Switchgear - Electrical Drawer
+Electrical	SG	SG-HA	SG-HA	Switchgear - High voltage air insulated
+Electrical	SG	SG-HG	SG-HG	Switchgear - High voltage gas insulated
+Electrical	SG	SG-LV	SG-LV	Switchgear - Low voltage
+Electrical	SG	SG-OV	SG-OV	Switchgear - Oil and vacuum insulated
+Mechanical	SW	SW-AX	SW-AX	Swivels - Axial
+Mechanical	SW	SW-ES	SW-ES	Swivels - Electric/signal
+Mechanical	SW	SW-TO	SW-TO	Swivels - Toroidal
+Safety and Control	TC	TC-COM	TC-COM	Telecommunication Equipment
+Drilling	TD	TD-ED	TD-ED	Top drives - Electrically driven
+Drilling	TD	TD-HD	TD-HD	Top drives - Hydraulically driven
+Safety and Control	TC	TC-MST	TC-MST	Tower Mast
+Rotating	TE	TE-AX	TE-AX	Turbo expanders - Axial
+Rotating	TE	TE-CE	TE-CE	Turbo expanders - Centrifugal
+Mechanical	TU	TU-DT	TU-DT	Turrets - Disconnectable turrets
+Mechanical	TU	TU-PT	TU-PT	Turrets - Permanent turrets
+Electrical	UP	UP-UB	UP-UB	Uninterruptible power supply - Dual UPS with standby bypass Rectifier supplied from emergency power
+Electrical	UP	UP-UD	UP-UD	Uninterruptible power supply - Dual UPS without bypass Rectifier supplied from emergency power
+Electrical	UP	UP-US	UP-US	Uninterruptible power supply - Single UPS with bypass Rectifier supplied from emergency power
+Electrical	UP	UP-UT	UP-UT	Uninterruptible power supply - Single UPS without bypass Rectifier supplied from emergency power
+Electrical	UP	UP-SP	UP-SP	Uninterruptible power supply - Solar Panel
+Safety and Control	VA	VA-AF	VA-AF	Valves - Axial flow
+Safety and Control	VA	VA-BA	VA-BA	Valves - Ball
+Safety and Control	VA	VA-BP	VA-BP	Valves - Butterfly
+Safety and Control	VA	VA-CH	VA-CH	Valves - Check
+Safety and Control	VA	VA-DI	VA-DI	Valves - Diaphragm
+Safety and Control	VA	VA-DC	VA-DC	Valves - Disc
+Safety and Control	VA	VA-ES	VA-ES	Valves - External sleeve
+Safety and Control	VA	VA-FL	VA-FL	Valves - Flapper
+Safety and Control	VA	VA-GA	VA-GA	Valves - Gate
+Safety and Control	VA	VA-GE	VA-GE	Valves - Generic
+Safety and Control	VA	VA-GL	VA-GL	Valves - Globe
+Safety and Control	VA	VA-MO	VA-MO	Valves - Multiple orifice
+Safety and Control	VA	VA-NE	VA-NE	Valves - Needle
+Safety and Control	VA	VA-OH	VA-OH	Valves - Others
+Safety and Control	VA	VA-PI	VA-PI	Valves - Pinch
+Safety and Control	VA	VA-PG	VA-PG	Valves - Plug
+Safety and Control	VA	VA-PC	VA-PC	Valves - Plug and cage
+Safety and Control	VA	VA-SC	VA-SC	Valves - PSV-conventional
+Safety and Control	VA	VA-SB	VA-SB	Valves - PSV-conventional with bellow
+Safety and Control	VA	VA-SP	VA-SP	Valves - PSV-pilot operated
+Safety and Control	VA	VA-SV	VA-SV	Valves - PSV-vacuum relief
+Safety and Control	VA	VA-WA	VA-WA	Valves - Three-way
+Safety and Control	EC	EC-CCT	EC-CCT	Video Camera
+Safety and Control	FF	FF-ALM	FF-ALM	Visual and Audible Alarm (F&G)
+Safety and Control	EC	EC-VAA	EC-VAA	Visual and Audible Alarm (Process)
+Mechanical	WI	WI-EW	WI-EW	Winches - Electric winch
+Mechanical	WI	WI-HW	WI-HW	Winches - Hydraulic winch
+Mechanical	WI	WI-MH	WI-MH	Winches - Manual Hoist
+Mechanical	WI	WI-PH	WI-PH	Winches - Powered Hoist
+Safety and Control	EC	EC-WDI	EC-WDI	Wind Direction Indicator - Socket

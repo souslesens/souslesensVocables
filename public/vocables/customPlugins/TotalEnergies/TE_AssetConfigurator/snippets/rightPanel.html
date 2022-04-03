@@ -14,6 +14,27 @@
         overflow: auto;
     }
 
+    #TE_AssetConfigurator_ProprertiesDiv {
+        width: 350px;
+        max-height: 360px;
+        background-color: #dde;
+        overflow: auto;
+    }
+
+    .TE_AssetConfigurator_panel {
+
+    }
+
+    .RDSassetTreeNode {
+        color: #09a4f3;
+
+    }
+    .canvasBG {
+       // background-color: red;
+      //  opacity :0.5;
+      background-image: url('images/2022-03-17_08-23-52.png');
+
+    }
 
 </style>
 
@@ -39,9 +60,9 @@
             <tr>
                 <td>
                     <button onclick="TE_AssetConfigurator.saveGraph()">Save</button>
-                </td>
-                <td>
+
                     <button onclick="TE_AssetConfigurator.saveGraph(true)">Save new</button>
+
                 </td>
             </tr>
 
@@ -58,10 +79,9 @@
 
                 <td>
                     <button onclick="TE_AssetConfigurator.deleteSelectedObject()">Delete Selected</button>
-                </td>
-
-                <td>
                     <button onclick="TE_AssetConfigurator.clearAll()">Clear All</button>
+                    <button onclick="TE_AssetConfigurator.clusterComponents()">Cluster Components</button>
+
                 </td>
             </tr>
 
@@ -70,24 +90,26 @@
         <br>
         <div id="AssetConfigurator_graphHOverDiv" style="width:100%"></div>
         <br>
-        <div id="AssetConfigurator_NodeInfosDiv"></div>
-
-        <button onclick="TE_AssetConfigurator.showNodeQualities()"> Show node Qualities</button>
-        <div class="TE_AssetConfigurator_ProprertiesDiv"></div>
+        <div class="TE_AssetConfigurator_panel" id="AssetConfigurator_NodeInfosDiv"></div>
+        <!-- <button onclick="TE_AssetConfigurator.showNodeQualities()"> Show node Qualities</button>-->
+        <div class="TE_AssetConfigurator_panel" id="TE_AssetConfigurator_ProprertiesDiv"></div>
     </div>
     <div id="TE_AssetConfigurator_AssetsTab">
+
         <div>
-            Asset <select onchange="TE_AssetDataManager.loadAsset($(this).val())">
+            Asset <select id="TE_AssetDataManager_assetDataSelect" onchange="TE_AssetDataManager.loadAsset($(this).val())">
             <option></option>
             <option>girassol</option>
             <option>absheron</option>
             <option>Moho_N</option>
         </select>
+            <br>
+            <button onclick="TE_AssetDataManager.loadPIDgraph()">open P&ID graph</button>
+            <button onclick="TE_AssetDataManager.savePIDgraph()">save P&ID graph</button>
+<br>
             <div class="TE_AssetConfigurator_assetPanelTreeContainer">
                 <div id="TE_AssetConfigurator_assetPanelTreeDiv"></div>
             </div>
-
-
 
         </div>
     </div>

@@ -411,6 +411,9 @@ var SourceBrowser = (function () {
 
             if (!term || term == "")
                 return alert(" enter a word ")
+            if(term.indexOf("*")>-1)
+                $("#GenericTools_allExactMatchSearchCBX").removeProp("checked")
+            term=term.toLowerCase()
             var exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked")
             var searchAllSources = $("#GenericTools_searchInAllSources").prop("checked")
 
@@ -451,7 +454,7 @@ var SourceBrowser = (function () {
 
             var indexes
             options.parentlabels = true
-            if (schemaType == "OWL") {
+            if (true || schemaType == "OWL") {
                 SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
 
 
@@ -1376,7 +1379,7 @@ var SourceBrowser = (function () {
 
 
         self.indexObjectIfNew = function () {
-            if (true || self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
+            if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
                 SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, result) {
                     if (err)
                         return alert(err)

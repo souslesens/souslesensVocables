@@ -21,6 +21,7 @@ var TreeController = (function () {
             if (!typeObj) {
                 // force concept Type
                 typeObj = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                // eslint-disable-next-line no-console
                 console.log("node " + item[childNodeVar].value + " has no type");
             }
 
@@ -36,9 +37,10 @@ var TreeController = (function () {
 
                     var childNodeLabel = common.getItemLabel(item, childNodeVar);
 
-                    if (true || jsTreeOptions.labelClass) {
-                        var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
-                    }
+                    // PROBLEM
+                    //if (true || jsTreeOptions.labelClass) {
+                    var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
+                    //}
 
                     var child = {
                         parent: parentNodeId,

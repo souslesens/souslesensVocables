@@ -25,7 +25,7 @@ var Sparql_common = (function () {
 
         function formatWord(str) {
             if (!checkClosingBrackets(str)) {
-                str = str.replace(/[\(\)]/g, "");
+                str = str.replace(/[()]/g, "");
             }
             return self.formatStringForTriple(str);
             /*   var str = str.replace(/\\/g, "")
@@ -33,8 +33,6 @@ var Sparql_common = (function () {
                str = str.replace(/\)/gm, "")
                str = str.replace(/\[/gm, "")
                str = str.replace(/\]/gm, "")*/
-
-            return str;
         }
 
         if (!options) options = {};
@@ -125,7 +123,7 @@ var Sparql_common = (function () {
             });
             filterStr = "filter (?" + varName + " in (" + str + "))";
         } else {
-            var isLiteral = true;
+            isLiteral = true;
             if (uri.indexOf("http") == 0 || (uri.indexOf(":") > 0 && uri.indexOf(" ") < 0)) isLiteral = false;
             if (isLiteral) filterStr += "filter( ?" + varName + "='" + uri + "').";
             else filterStr += "filter( ?" + varName + "=<" + uri + ">).";
@@ -176,7 +174,7 @@ var Sparql_common = (function () {
         var p = id.lastIndexOf("#");
         if (p > -1) return id.substring(p + 1);
         else {
-            var p = id.lastIndexOf("/");
+            p = id.lastIndexOf("/");
             return id.substring(p + 1);
         }
     };
@@ -198,6 +196,7 @@ var Sparql_common = (function () {
             var imports = Config.sources[source].imports;
             if (imports) {
                 imports.forEach(function (source2) {
+                    // eslint-disable-next-line no-console
                     if (!Config.sources[source2]) return console.log(source2 + "not found");
                     var importGraphUri = Config.sources[source2].graphUri;
                     fromStr += from + "  <" + importGraphUri + "> ";
@@ -206,7 +205,7 @@ var Sparql_common = (function () {
         }
 
         if (!excludeDictionaries) {
-            for (var source in Config.sources) {
+            for (source in Config.sources) {
                 if (Config.sources[source].isDictionary) fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
             }
         }

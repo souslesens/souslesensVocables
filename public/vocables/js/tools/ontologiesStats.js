@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -56,6 +57,7 @@ var OntologiesStats = (function () {
             },
             function (err) {
                 if (err) MainController.UI.message(err);
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(resultArray, null, 2));
                 $("#graphDiv").html(JSON.stringify(resultArray, null, 2));
                 MainController.UI.message("Done");
@@ -248,7 +250,7 @@ var OntologiesStats = (function () {
         }
         str += "\n";
 
-        for (var keyFrom in sources) {
+        for (keyFrom in sources) {
             var total = sources[keyFrom].total;
             str += keyFrom + "\t" + total;
 

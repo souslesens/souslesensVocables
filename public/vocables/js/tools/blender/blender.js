@@ -45,7 +45,7 @@ var Blender = (function () {
                     }
 
                     self.availableSources = [];
-                    for (var key in Config.sources) {
+                    for (key in Config.sources) {
                         if (Config.sources[key].editable && Config.sources[key].schemaType == "SKOS") {
                             self.availableSources.push(key);
                             if (!Config.sources[key].controllerName) {
@@ -72,6 +72,7 @@ var Blender = (function () {
                 },
                 error: function (err) {
                     alert("cannot load blender Sources");
+                    // eslint-disable-next-line no-console
                     console.log(err);
                 },
             });
@@ -227,13 +228,13 @@ var Blender = (function () {
             var currentNodeLevel = Blender.currentDNDstartNode.parents.length;
             var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel;
             if (currentNodeLevel < allowedLevels) return false;
+            // eslint-disable-next-line no-console
             console.log(operation);
             Blender.currentDNDoperation = {
                 operation: operation,
                 node: node,
                 parent: parent,
                 position: position,
-                more,
                 more,
             };
 
@@ -260,7 +261,6 @@ var Blender = (function () {
                     }
                     Clipboard.copy(
                         {
-                            type: "node",
                             id: self.currentTreeNode.data.id,
                             label: self.currentTreeNode.text,
                             source: self.currentSource,
@@ -271,7 +271,7 @@ var Blender = (function () {
                     );
                 }
 
-                if (false && self.currentTreeNode.children.length == 0) ExternalReferences.openNarrowMatchNodes(self.currentSource, self.currentTreeNode);
+                // if (false && self.currentTreeNode.children.length == 0) ExternalReferences.openNarrowMatchNodes(self.currentSource, self.currentTreeNode);
             }
             //  $.jstree.defaults.contextmenu.items = self.getJstreeConceptsContextMenu();
         });
@@ -301,15 +301,15 @@ var Blender = (function () {
             return menuItems;
         } else {
             var clipboard = Clipboard.getContent();
-            if (true || clipboard.length == 0) {
-                menuItems.toCollection = {
-                    label: "<span class='blender_assignCollection'>to Collection</span>",
-                    action: function (e) {
-                        // pb avec source
-                        Blender.menuActions.toCollection(e);
-                    },
-                };
-            }
+            //if (true || clipboard.length == 0) {
+            menuItems.toCollection = {
+                label: "<span class='blender_assignCollection'>to Collection</span>",
+                action: function (e) {
+                    // pb avec source
+                    Blender.menuActions.toCollection(e);
+                },
+            };
+            //}
 
             if (clipboard.length > 0 && clipboard[0].type == "node") {
                 menuItems.pasteNode = {
@@ -464,7 +464,7 @@ var Blender = (function () {
             }
 
             if (Config.sources[nodeData.source].schemaType.indexOf("SKOS") > -1) {
-                var broaderPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                broaderPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
                 execMoveQuery(nodeData.id, broaderPredicate, oldParentData.id, newParentData.id, function (err, result) {
                     return processCallBack(err, result);
                 });
@@ -503,7 +503,7 @@ var Blender = (function () {
         deleteNode: function (type, node, silently) {
             if (!type) alert(" no type");
 
-            var node;
+            node;
             var treeDivId;
 
             if (type == "concept") {
@@ -950,7 +950,7 @@ var Blender = (function () {
                 }
             } else if (type == "collection") {
                 self.nodeEdition.openDialog();
-                var type = "http://www.w3.org/2004/02/skos/core#Collection";
+                type = "http://www.w3.org/2004/02/skos/core#Collection";
                 SourceEditor.editNode("Blender_nodeEditionDiv", self.currentSource, Collection.currentTreeNode.data.id, type, false);
             } else if (type == "class") {
                 var owlType = "http://www.w3.org/2000/01/rdf-schema#Class";
@@ -998,7 +998,7 @@ var Blender = (function () {
                 ];
             } else if (type == "collection") {
                 parentNode = Collection.currentTreeNode;
-                var type = "http://www.w3.org/2004/02/skos/core#Collection";
+                type = "http://www.w3.org/2004/02/skos/core#Collection";
                 parentProperty = "^" + Collection.broaderProperty;
                 mandatoryProps = ["http://www.w3.org/2004/02/skos/core#prefLabel"];
                 childClass = "http://www.w3.org/2004/02/skos/core#Collection";
@@ -1112,7 +1112,9 @@ var Blender = (function () {
         "Blender_conceptTreeDiv";
     };
 
-    self.copyTriples = function () {};
+    self.copyTriples = function () {
+        // Pass
+    };
 
     self.export = function () {
         Export.showExportDatDialog(self.currentSource, "BLENDER", {});
@@ -1338,6 +1340,7 @@ var Blender = (function () {
                 },
                 error: function (err) {
                     alert("cannot create source");
+                    // eslint-disable-next-line no-console
                     console.log(err);
                 },
             });
@@ -1368,6 +1371,7 @@ var Blender = (function () {
                         },
                         error: function (err) {
                             alert("cannot delete source");
+                            // eslint-disable-next-line no-console
                             console.log(err);
                         },
                     });

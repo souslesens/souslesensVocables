@@ -51,11 +51,7 @@ var SourceBrowser = (function () {
         self.currentTreeNode = obj.node;
         if (obj.event.ctrlKey) self.copyNode(self.currentTreeNode);
 
-        if (true || obj.event.ctrlKey) {
-            self.editThesaurusConceptInfos(source, obj.node);
-        }
-        {
-        }
+        self.editThesaurusConceptInfos(source, obj.node);
     };
 
     self.copyNode = function (event, node) {
@@ -300,6 +296,7 @@ var SourceBrowser = (function () {
             if (!lang) lang = $("#detailsLangSelect_" + property).val();
             if ($("#detailsLangDiv_" + property + "_" + lang).html()) $("#detailsLangDiv_" + property + "_" + lang).css("display", "block");
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.log(err);
         }
     };
@@ -341,7 +338,9 @@ var SourceBrowser = (function () {
 
         var term = $("#GenericTools_searchAllSourcesTermInput").val();
         var selectedSources = [];
-        if ($("#searchAll_sourcesTree").jstree(true)) var selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+        if ($("#searchAll_sourcesTree").jstree(true)) {
+            selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+        }
 
         if (!term || term == "") return alert(" enter a word ");
         if (term.indexOf("*") > -1) $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
@@ -380,6 +379,8 @@ var SourceBrowser = (function () {
 
         var indexes;
         options.parentlabels = true;
+        // PROBLEM
+        // eslint-disable-next-line no-constant-condition
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
                 self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, result) {
@@ -415,7 +416,7 @@ var SourceBrowser = (function () {
                                 data: { source: sourceLabel, id: sourceLabel, label: text },
                             });
                         } else {
-                            var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
+                            text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
 
                             jstreeData.push({
                                 id: sourceLabel,
@@ -439,7 +440,7 @@ var SourceBrowser = (function () {
                     var html = "<div id='" + self.currentTargetDiv + "'></div>";
 
                     if ($("#" + self.currentTargetDiv).length == 0) {
-                        var html = "<div id='" + self.currentTargetDiv + "'></div>";
+                        html = "<div id='" + self.currentTargetDiv + "'></div>";
                         $("#actionDiv").html(html);
                     }
                     $("#" + self.currentTargetDiv).html(html);
@@ -512,9 +513,9 @@ var SourceBrowser = (function () {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
                         var id = item["broader" + i].value;
-                        if (false && id.indexOf("nodeID://") > -1)
-                            //skip anonym nodes
-                            return;
+                        //if (false && id.indexOf("nodeID://") > -1)
+                        //skip anonym nodes
+                        //  return;
                         var jstreeId = item["broader" + i].jstreeId;
                         if (!existingNodes[jstreeId]) {
                             existingNodes[jstreeId] = 1;
@@ -538,11 +539,11 @@ var SourceBrowser = (function () {
                     }
                 }
 
-                var jstreeId = item.concept.jstreeId;
+                jstreeId = item.concept.jstreeId;
                 if (!existingNodes[jstreeId]) {
                     existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>";
-                    var id = item.concept.value;
+                    id = item.concept.value;
                     self.currentFoundIds.push(id);
 
                     var broader1 = item["broader1"];
@@ -770,15 +771,15 @@ var SourceBrowser = (function () {
                     if (type != "http://www.w3.org/2002/07/owl#Class") {
                         return callbackSeries();
                     }
-                    self.showNamedIndividualProperties(sourceLabel, nodeId, function (err, result) {
+                    self.showNamedIndividualProperties(sourceLabel, nodeId, function (err) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    if (false && type != "http://www.w3.org/2002/07/owl#Class") {
-                        return callbackSeries();
-                    }
-                    self.showClassRestrictions(sourceLabel, [nodeId], options, function (err, result) {
+                    // if (false && type != "http://www.w3.org/2002/07/owl#Class") {
+                    //     return callbackSeries();
+                    // }
+                    self.showClassRestrictions(sourceLabel, [nodeId], options, function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -926,11 +927,11 @@ var SourceBrowser = (function () {
                         var langDivs = "";
 
                         for (var lang in self.propertiesMap.properties[key].langValues) {
-                            var values = self.propertiesMap.properties[key].langValues[lang];
+                            values = self.propertiesMap.properties[key].langValues[lang];
                             var selected = "";
                             if (lang == defaultLang) selected = "selected";
                             propNameSelect += "<option " + selected + ">" + lang + "</option> ";
-                            var valuesStr = "";
+                            valuesStr = "";
                             values.forEach(function (value, index) {
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value]) value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
@@ -985,7 +986,7 @@ var SourceBrowser = (function () {
 
                 var targetClassStr = "any";
                 if (item.value) {
-                    var targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                    targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
                 }
                 str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
 
@@ -1017,6 +1018,7 @@ var SourceBrowser = (function () {
             var data = result.results.bindings;
 
             if (data.length == 0) {
+                return;
             } else {
                 var str = "<b>NamedIndividuals</b><br><table>";
 
@@ -1173,7 +1175,7 @@ var SourceBrowser = (function () {
 
                 $("#searchAllDialogDiv").dialog("open");
                 var options = {
-                    selectTreeNodeFn: function () {},
+                    selectTreeNodeFn: null,
                 };
                 self.searchableSourcesTreeIsInitialized = true;
                 MainController.UI.showSources("searchAll_sourcesTree", true, sources, ["OWL"], options);

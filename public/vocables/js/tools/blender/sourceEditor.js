@@ -181,7 +181,7 @@ var SourceEditor = (function () {
                             editingObject.inverseObjectProperties[prop] = nodeProps["^" + prop];
                         }
                     }
-                    for (var prop in editingObject.annotations) {
+                    for (prop in editingObject.annotations) {
                         if (nodeProps[prop]) editingObject.annotations[prop].value = nodeProps[prop];
                     }
 
@@ -207,7 +207,7 @@ var SourceEditor = (function () {
                         var annotationsList = Object.keys(OwlSchema.currentSourceSchema.classes[type].annotations).sort();
                         // common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true, "label", "id")
                         common.fillSelectOptions("SourceEditor_NewObjectAnnotationSelect", annotationsList, true);
-                        for (var key in editingObject.annotations) {
+                        for (key in editingObject.annotations) {
                             if (editingObject.annotations[key].value) self.drawObjectValue("annotations", key, editingObject, "SourceEditor_ObjectAnnotationsTableDiv");
                         }
                     });

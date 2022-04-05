@@ -13,7 +13,6 @@ var Individuals = (function () {
     self.currentSource = null;
     self.prefixes = {
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdfs",
         "http://www.w3.org/2002/07/owl#": "owl",
         "http://data.total.com/resource/one-model/ontology/": "total",
     };
@@ -248,7 +247,7 @@ var Individuals = (function () {
                                             existingNodes[id] = 1;
                                             var label = item["child" + i + "Label"].value;
 
-                                            var obj = {
+                                            obj = {
                                                 id: id,
                                                 text: label,
                                                 parent: i == 1 ? item.concept.value : item["child" + (i - 1)].value,
@@ -401,7 +400,7 @@ var Individuals = (function () {
     };
 
     self.loadXlsModel = function (path) {
-        var path = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BCmodel.json";
+        path = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BCmodel.json";
         var payload = {
             triplesGenerator: 1,
             getJsonModel: path,
@@ -446,7 +445,9 @@ var Individuals = (function () {
             },
             error: function (err) {
                 $("#waitImg").css("display", "none");
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(err));
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(query));
                 MainController.UI.message(err.responseText);
             },

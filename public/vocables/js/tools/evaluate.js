@@ -42,14 +42,20 @@ var Evaluate = (function () {
         });
     };
 
-    self.showActionPanel = function () {};
+    self.showActionPanel = function () {
+        // Pass
+    };
 
     self.showNewCorpusDialog = function () {
         $("#mainDialogDiv").load("snippets/evaluate/annotateDialog.html");
         $("#mainDialogDiv").dialog("open");
         var options = {
-            contextMenu: function () {},
-            selectTreeNodeFn: function () {},
+            contextMenu: function () {
+                // Pass
+            },
+            selectTreeNodeFn: function () {
+                // Pass
+            },
         };
         setTimeout(function () {
             MainController.UI.showSources("annotate_resourcesTreeDiv", true, null, null, options, function () {
@@ -356,7 +362,7 @@ var Evaluate = (function () {
                                             }
                                         } else {
                                             var previousBroaderId = item["broader" + (i - 1)].value;
-                                            var edgeId = previousBroaderId + "_" + broaderId;
+                                            edgeId = previousBroaderId + "_" + broaderId;
                                             if (!existingNode[edgeId]) {
                                                 existingNode[edgeId] = 1;
                                                 visjsData.edges.push({
@@ -371,7 +377,7 @@ var Evaluate = (function () {
                                         var nextBroaderId = item["broader" + (i + 1)];
                                         if (!nextBroaderId) {
                                             //  var previousBroaderId = item["broader" + (i - 1)].value
-                                            var edgeId = source + "_" + broaderId;
+                                            edgeId = source + "_" + broaderId;
                                             if (!existingNode[edgeId]) {
                                                 existingNode[edgeId] = 1;
                                                 visjsData.edges.push({

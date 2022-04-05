@@ -28,6 +28,11 @@ const user = {
                   .find((user) => user.login == reqUser.login)
             : {};
 
+        if (findUser === undefined) {
+            console.log("could not find logged user ", reqUser);
+            throw "could not find logged user " + reqUser;
+        }
+
         const result = {
             logged: config.disableAuth ? true : logged,
             user: config.disableAuth

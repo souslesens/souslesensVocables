@@ -17,7 +17,7 @@
     },
     "devDependencies": {
         "cypress": "^9.5.3",
-        "prettier": "^2.6.1"
+        "prettier": "^2.6.2"
     },
     "dependencies": {
         "@futpib/tika-server-client": "0.0.5",
@@ -66,8 +66,8 @@
         "ndjson": "^2.0.0",
         "node-schedule": "^2.1.0",
         "nodemon": "^2.0.15",
-        "npm": "^8.5.5",
-        "npm-check-updates": "^12.5.4",
+        "npm": "^8.6.0",
+        "npm-check-updates": "^12.5.7",
         "passport": "^0.5.2",
         "passport-keycloak-oauth2-oidc": "^1.0.5",
         "passport-local": "^1.0.0",

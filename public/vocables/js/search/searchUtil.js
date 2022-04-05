@@ -237,7 +237,7 @@ var SearchUtil = (function () {
 
         self.getWordBulkQuery = function (word, mode, indexes) {
             var field = "label.keyword";
-            if (word.indexOf && word.indexOf("http://") == 0) var field = "id.keyword";
+            if (word.indexOf && word.indexOf("http://") == 0) field = "id.keyword";
             var queryObj;
             if (!mode || mode == "exactMatch") {
                 queryObj = {
@@ -373,12 +373,10 @@ var SearchUtil = (function () {
                 Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
                     if (err) {
                         return callbackEachSource(err);
-                        MainController.UI.message(err, true);
                     }
                     var index = 0;
                     var classesArray = [];
                     for (var key in result.classesMap) {
-                        result.classesMap[key].parents = result.classesMap[key].parents; //.split("|")
                         classesArray.push(result.classesMap[key]);
                     }
                     var slices = common.array.slice(classesArray, 50);
@@ -414,7 +412,7 @@ var SearchUtil = (function () {
 
     self.addObjectsToIndex = function (sourceLabel, ids, callback) {
         var filter = " filter (?concept =<" + self.currentNodeId + ">) ";
-        var filter = Sparql_common.setFilter("concept", ids);
+        filter = Sparql_common.setFilter("concept", ids);
         Sparql_generic.getSourceTaxonomy(sourceLabel, { filter: filter }, function (err, result) {
             var classesArray = [];
             for (var key in result.classesMap) {

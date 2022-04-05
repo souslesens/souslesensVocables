@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -69,7 +70,7 @@ var Sparql_ISO_15926_part4 = (function () {
         for (var i = 1; i < descendantsDepth; i++) {
             query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." + "OPTIONAL{?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
         }
-        for (var i = 1; i < descendantsDepth; i++) {
+        for (i = 1; i < descendantsDepth; i++) {
             query += "} ";
         }
 
@@ -125,7 +126,7 @@ var Sparql_ISO_15926_part4 = (function () {
             }
         }
 
-        for (var i = 1; i < ancestorsDepth; i++) {
+        for (i = 1; i < ancestorsDepth; i++) {
             query += "} ";
         }
 

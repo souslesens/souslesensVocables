@@ -67,7 +67,7 @@ var Sparql_INDIVIDUALS = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        fromStr = Sparql_common.getFromStr(sourceLabel);
 
         var query = "select * " + fromStr + " where {<" + conceptId + "> ?prop ?value. } ";
         (" }");
@@ -147,7 +147,7 @@ var Sparql_INDIVIDUALS = (function () {
         query += "OPTIONAL {?obj rdf:type ?objType.}";
 
         if (options.filter) query += options.filter;
-        if (options.lang) query += "filter(lang(?subLabel )='" + lang + "')";
+        if (options.lang) query += "filter(lang(?subLabel )='" + options.lang + "')";
 
         query += "  } ";
         (" }");
@@ -214,7 +214,7 @@ var Sparql_INDIVIDUALS = (function () {
             selectStr = "  ?prop ?rangeType ?domainType  (count(?range) as ?nRanges) (count(?domain) as ?nDomains)  ";
             groupByStr = " GROUP BY  ?prop ?rangeType ?domainType  ";
         }
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        fromStr = Sparql_common.getFromStr(sourceLabel);
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             "select " +

@@ -14,7 +14,7 @@
 var Sparql_generic = (function () {
     var self = {};
     self.slicesSize = 25;
-    sourcesVariables = {};
+    var sourcesVariables = {};
 
     self.getSourceVariables = function (sourceLabel) {
         source = Config.sources[sourceLabel];
@@ -24,7 +24,6 @@ var Sparql_generic = (function () {
                 defaultPredicates = Sparql_SKOS.defaultPredicates;
             }
 
-            var source = "";
             var graphUri = "";
             var predicates = "";
             var prefixesStr = "";
@@ -234,7 +233,6 @@ var Sparql_generic = (function () {
             sourceVariables.prefLabelPredicate +
             " ?broaderLabel." +
             "?broader rdf:type ?type.";
-        if (false && lang) query += 'filter( lang(?broaderLabel)="' + lang + '")';
         query += "  }";
         query += "limit " + sourceVariables.limit + " ";
 
@@ -265,7 +263,6 @@ var Sparql_generic = (function () {
             sourceVariables.prefLabelPredicate +
             " ?narrowerLabel." +
             "?narrower rdf:type ?type.";
-        if (false && sourceVariables.lang) query += 'filter( lang(?narrowerLabel)="' + lang + '")';
         query += "  }";
         query += "limit " + sourceVariables.limit + " ";
 
@@ -386,7 +383,7 @@ var Sparql_generic = (function () {
         var graphUri = Config.sources[sourceLabel].graphUri;
         if (Array.isArray(graphUri)) graphUri = graphUri[0];
         var insertTriplesStr = "";
-        triples.forEach(function (item, index) {
+        triples.forEach(function (item, _index) {
             insertTriplesStr += self.triplesObjectToString(item);
         });
 
@@ -394,13 +391,13 @@ var Sparql_generic = (function () {
 
         if (options.getSparqlOnly) return callback(null, query);
         // console.log(query)
-        url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err, triples.length);
         });
     };
 
-    self.update = function (sourceLabel, triples, callback) {
+    self.update = function (_sourceLabel, _triples, _callback) {
         /*
 
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -423,50 +420,15 @@ WHERE {
              */
 
         return;
-
-        var graphUri = Config.sources[sourceLabel].graphUri;
-        var deleteTriplesStr = "";
-        var insertTriplesStr = "";
-        var subject;
-        triples.forEach(function (item, index) {
-            if (!subject) subject = item.subject;
-            insertTriplesStr += self.triplesObjectToString(item);
-        });
-        deleteTriplesStr += "<?s ?p ?o.";
-        var query =
-            " WITH GRAPH  <" +
-            graphUri +
-            ">  " +
-            "DELETE" +
-            "{  " +
-            "?s ?p ?o." +
-            "  }" +
-            "WHERE" +
-            "  {" +
-            "?s ?p ?o. filter (?s=<" +
-            subject +
-            ">)" +
-            "  };" +
-            "" +
-            "INSERT DATA" +
-            "  {" +
-            insertTriplesStr +
-            "  }";
-
-        // console.log(query)
-        url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
-            return callback(err);
-        });
     };
 
     self.deleteGraph = function (sourceLabel, callback) {
-        graphUri = Config.sources[sourceLabel].graphUri;
+        var graphUri = Config.sources[sourceLabel].graphUri;
 
         var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}";
 
-        url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err);
         });
     };
@@ -474,8 +436,8 @@ WHERE {
     self.copyGraph = function (fromSourceLabel, toGraphUri, callback) {
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
         var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
-        url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, result) {
+        var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, _result) {
             return callback(err);
         });
     };
@@ -493,7 +455,7 @@ WHERE {
             fromStr +
             " WHERE {?s ?p ?o. optional{?p ?x ?pLabel. filter(?x in (skos:prefLabel,rdfs:label))}}";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (_err, result) {
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["p"]);
             return callback(null, result.results.bindings);
         });
@@ -512,11 +474,11 @@ WHERE {
         var targetSchemaType = Config.sources[fromSourceLabel].schemaType;
         var urisMap = {};
 
-        function getTargetUri(sourceUri, sourceItem) {
+        function getTargetUri(sourceUri, _sourceItem) {
             var targetUri = urisMap[sourceUri];
             if (!targetUri) {
                 if (!options.keepOriginalUris) {
-                    var targetUri = " <" + toGraphUri + common.getRandomHexaId(10) + ">";
+                    targetUri = " <" + toGraphUri + common.getRandomHexaId(10) + ">";
                     urisMap[sourceUri] = targetUri;
                     if (options.addExactMatchPredicate) {
                         var exactMatchPredicate;
@@ -529,7 +491,7 @@ WHERE {
                         var parentPredicate;
                         if (targetSchemaType == "SKOS") parentPredicate = "http://www.w3.org/2004/02/skos/core#broader";
                         else parentPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
-                        var triple = targetUri + " <" + parentPredicate + "> <" + options.setParentNode.targetUri + "> .";
+                        triple = targetUri + " <" + parentPredicate + "> <" + options.setParentNode.targetUri + "> .";
                         newTriples.push(triple);
                     }
                     var newTargetType = null;
@@ -539,7 +501,7 @@ WHERE {
                         newTargetType = "http://www.w3.org/2002/07/owl#Class";
                     }
                     if (newTargetType) {
-                        var triple = targetUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + newTargetType + "> .";
+                        triple = targetUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + newTargetType + "> .";
                         newTriples.push(triple);
                     }
                 } else {
@@ -613,7 +575,7 @@ WHERE {
                             var query = " WITH GRAPH  <" + toGraphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
                             var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, _result) {
                                 return callbackEach(err);
                             });
                         },
@@ -629,7 +591,7 @@ WHERE {
         );
     };
 
-    self.sortBindings = function (bindings, field, options) {
+    self.sortBindings = function (bindings, field, _options) {
         bindings.sort(function (a, b) {
             var aValue = a[field] ? a[field].value : "";
             var bValue = b[field] ? b[field].value : "";
@@ -725,7 +687,7 @@ WHERE {
                         " ?obj rdf:type owl:Class.\n" +
                         "} ";
                     async.whilst(
-                        function (test) {
+                        function (_test) {
                             return resultSize > 0;
                         },
                         function (callbackWhilst) {
@@ -745,7 +707,8 @@ WHERE {
                                 callbackWhilst();
                             });
                         },
-                        function (err) {
+                        function (_err) {
+                            // eslint-disable-next-line no-console
                             console.log(totalCount);
                             callbackSeries();
                         }
@@ -755,57 +718,52 @@ WHERE {
                 function (callbackSeries) {
                     //set each class parent
 
-                    if (true) {
-                        var parentChildrenMap = {};
-                        rawData.forEach(function (item) {
-                            if (!allClassesMap[item.sub.value]) {
-                                allClassesMap[item.sub.value] = {
-                                    id: item.sub.value,
-                                    label: item.subLabel.value,
-                                    children: [],
-                                    parents: "",
-                                };
-                            }
-                            if (!parentChildrenMap[item.obj.value]) parentChildrenMap[item.obj.value] = [];
-                            parentChildrenMap[item.obj.value].push(item.sub.value);
-                        });
+                    var parentChildrenMap = {};
+                    rawData.forEach(function (item) {
+                        if (!allClassesMap[item.sub.value]) {
+                            allClassesMap[item.sub.value] = {
+                                id: item.sub.value,
+                                label: item.subLabel.value,
+                                children: [],
+                                parents: "",
+                            };
+                        }
+                        if (!parentChildrenMap[item.obj.value]) parentChildrenMap[item.obj.value] = [];
+                        parentChildrenMap[item.obj.value].push(item.sub.value);
+                    });
 
-                        var x = Object.keys(allClassesMap).length;
-                        var y = Object.keys(parentChildrenMap).length;
+                    var x = Object.keys(allClassesMap).length;
+                    var y = Object.keys(parentChildrenMap).length;
 
-                        taxonomy = {
-                            id: sourceLabel,
-                            label: sourceLabel,
-                            children: [],
-                        };
+                    taxonomy = {
+                        id: sourceLabel,
+                        label: sourceLabel,
+                        children: [],
+                    };
 
-                        parentChildrenMap[sourceLabel] = [];
+                    parentChildrenMap[sourceLabel] = [];
 
-                        topClasses.forEach(function (item) {
-                            parentChildrenMap[sourceLabel].push(item.topConcept.value);
-                        });
+                    topClasses.forEach(function (item) {
+                        parentChildrenMap[sourceLabel].push(item.topConcept.value);
+                    });
 
-                        if (true) {
-                            var count = 0;
+                    var count = 0;
 
-                            function recurseChildren(str, classId) {
-                                if (parentChildrenMap[classId]) {
-                                    str += classId + "|";
-                                    parentChildrenMap[classId].forEach(function (childId) {
-                                        if (allClassesMap[childId]) {
-                                            allClassesMap[childId].parents = str;
-                                        }
-                                        recurseChildren(str, childId);
-                                    });
-                                } else {
+                    function recurseChildren(str, classId) {
+                        if (parentChildrenMap[classId]) {
+                            str += classId + "|";
+                            parentChildrenMap[classId].forEach(function (childId) {
+                                if (allClassesMap[childId]) {
+                                    allClassesMap[childId].parents = str;
                                 }
-                            }
-
-                            recurseChildren("", sourceLabel);
-
-                            //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
+                                recurseChildren(str, childId);
+                            });
                         }
                     }
+
+                    recurseChildren("", sourceLabel);
+
+                    //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
 
                     var x = allClassesMap;
 
@@ -869,12 +827,6 @@ WHERE {
                         "OPTIONAL{?concept skos:altLabel ?skosAltLabel}. " +
                         "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. ";
 
-                    if (false && conceptType) {
-                        query += "?concept rdf:type " + conceptType + ". ";
-
-                        query += "?firstParent rdf:type " + conceptType + ". ";
-                    }
-
                     if (options.filter) query += " " + options.filter + " ";
 
                     query += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
@@ -882,7 +834,7 @@ WHERE {
                     query += "}";
 
                     async.whilst(
-                        function (test) {
+                        function (_test) {
                             return resultSize > 0;
                         },
                         function (callbackWhilst) {
@@ -902,7 +854,7 @@ WHERE {
                                 callbackWhilst();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
@@ -1027,6 +979,7 @@ WHERE {
                     if (triples.length == 0) return callbackEach;
                     self.insertTriples(source, triples, null, function (err, result) {
                         total += result;
+                        // eslint-disable-next-line no-console
                         console.log(total + " inserted");
 
                         callbackEach(err);

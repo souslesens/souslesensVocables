@@ -159,6 +159,7 @@ var Genealogy = (function () {
                 if (direction == "ancestors") {
                     //  sparql_abstract.getGenealogy(concept.source.id, concept.id, {exactMatch: true}, function (err, result) {
                     Sparql_generic.getNodeParents(item.sourceId, null, conceptId, maxDepth, { exactMatch: true }, function (err, result) {
+                        // eslint-disable-next-line no-console
                         if (err) return console.log(err);
                         if (!result || !result.forEach) return;
                         self.addGenealogyGraph(item.sourceId, self.context.currentWord, result, maxDepth);
@@ -166,6 +167,7 @@ var Genealogy = (function () {
                 } else if (direction == "children") {
                     self.drawSourceRootNode(self.context.currentWord, item);
                     sparql_abstract.getChildren(item.source, item.id, {}, function (err, result) {
+                        // eslint-disable-next-line no-console
                         if (err) return console.log(err);
                         self.addChildrenNodesToGraph(item, result);
                     });
@@ -241,6 +243,7 @@ var Genealogy = (function () {
         drawChildren: function () {
             self.graphActions.hidePopup();
             Sparql_generic.getNodeChildren(self.graphActions.currentNode.data.source, null, self.graphActions.currentNode.id, 2, {}, function (err, result) {
+                // eslint-disable-next-line no-console
                 if (err) return console.log(err);
                 self.currentChildren = {};
                 result.forEach(function (item) {

@@ -107,7 +107,7 @@ var Sparql_SKOS = (function () {
             query += "}";
             query += "OPTIONAL {?child" + (i + 1) + " rdf:type ?child" + (i + 1) + "Type.}";
         }
-        for (var i = 1; i < descendantsDepth; i++) {
+        for (i = 1; i < descendantsDepth; i++) {
             query += "} ";
         }
 
@@ -235,7 +235,7 @@ var Sparql_SKOS = (function () {
             query += "?broader" + i + " rdf:type ?type.";
         }
 
-        for (var i = 0; i < ancestorsDepth; i++) {
+        for (i = 0; i < ancestorsDepth; i++) {
             query += "} ";
         }
 
@@ -347,7 +347,6 @@ var Sparql_SKOS = (function () {
             sourceVariables.prefLabelPredicate +
             " ?broaderLabel." +
             "?broader rdf:type ?type.";
-        if (false && sourceVariables.lang) query += 'filter( lang(?broaderLabel)="' + sourceVariables.lang + '")';
         query += "  }";
         query += "limit " + sourceVariables.limit + " ";
 
@@ -378,7 +377,6 @@ var Sparql_SKOS = (function () {
             sourceVariables.prefLabelPredicate +
             " ?narrowerLabel." +
             "?narrower rdf:type ?type.";
-        if (false && sourceVariables.lang) query += 'filter( lang(?narrowerLabel)="' + sourceVariables.lang + '")';
         query += "  }";
         query += "limit " + sourceVariables.limit + " ";
 
@@ -536,7 +534,7 @@ var Sparql_SKOS = (function () {
     };
 
     self.deleteGraph = function (sourceLabel, callback) {
-        graphUri = Config.sources[sourceLabel].graphUri;
+        var graphUri = Config.sources[sourceLabel].graphUri;
 
         var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";

@@ -32,15 +32,17 @@ var KGbrowserBI = (function () {
                 if (result.results.bindings.length > Config.KG.queryLimit) alert("Too many values found : > " + result.results.bindings.length);
                 var data = [];
                 result.results.bindings.forEach(function (item) {
-                    if (true) {
-                        try {
-                            data.push({ id: item.sub.value, val: parseFloat(item.obj.value) });
-                        } catch (e) {
-                            console.log(item.obj.value);
-                        }
-                    } else if (item.datatype && item.datatype == "http://www.w3.org/2001/XMLSchema#float") data.push({ id: item.sub.value, val: parseFloat(item.obj.value) });
-                    else if (item.datatype && item.datatype == "http://www.w3.org/2001/XMLSchema#integer") data.push({ id: item.sub.value, val: parseInt(item.obj.value) });
-                    else return;
+                    //if (true) {
+                    try {
+                        data.push({ id: item.sub.value, val: parseFloat(item.obj.value) });
+                    } catch (e) {
+                        // eslint-disable-next-line no-console
+                        console.log(item.obj.value);
+                    }
+                    //}
+                    // else if (item.datatype && item.datatype == "http://www.w3.org/2001/XMLSchema#float") data.push({ id: item.sub.value, val: parseFloat(item.obj.value) });
+                    // else if (item.datatype && item.datatype == "http://www.w3.org/2001/XMLSchema#integer") data.push({ id: item.sub.value, val: parseInt(item.obj.value) });
+                    // else return;
                 });
                 var nClasses = 4;
 

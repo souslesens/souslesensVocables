@@ -9,9 +9,11 @@ var KGmappingData = (function () {
         var adls = [];
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
+            // eslint-disable-next-line no-console
             if (!sourceObj.schemaType) console.log(key);
 
             if (sourceObj.schemaType.indexOf("KNOWLEDGE_GRAPH") > -1) {
+                // eslint-disable-next-line no-console
                 if (!sourceObj.dataSource || !sourceObj.dataSource.dbName) console.log("KNOWLEDGE_GRAPH source " + key + " should have a datasource declared");
                 else {
                     var dbName = sourceObj.dataSource.dbName;
@@ -73,6 +75,7 @@ var KGmappingData = (function () {
 
     self.showModelJstree = function (data) {
         if (self.currentMappingsMap) {
+            // Pass
         } else {
             self.currentMappingsMap = {};
         }
@@ -93,7 +96,6 @@ var KGmappingData = (function () {
             nodeData.id = key.toLowerCase();
             nodeData.adlTable = key;
             nodeData.label = key;
-            source: data[key].source;
 
             modelJstreeData.push({
                 id: key.toLowerCase().replace(/\./g, "_"),
@@ -149,6 +151,7 @@ var KGmappingData = (function () {
                 success: function (result, textStatus, jqXHR) {
                     return callback(null, result.data);
 
+                    // eslint-disable-next-line no-unreachable
                     for (var key in result.data) {
                         var obj = result.data[key];
 
@@ -168,8 +171,8 @@ var KGmappingData = (function () {
                     }
 
                     //color of labels
-                    for (var key in result.data) {
-                        var table = result.data[key].adlTable.toLowerCase();
+                    for (key in result.data) {
+                        table = result.data[key].adlTable.toLowerCase();
                         var anchor = $("#" + table.replace(/\./g, "_") + "_anchor");
                         if (result.data[key].build) anchor.css("color", "#cc51ee");
                         else anchor.css("color", "#86d5f8");
@@ -340,7 +343,9 @@ var KGmappingData = (function () {
                     (self.sampleData[table] = data), displaySampleData(self.sampleData[table]);
                 },
 
-                error: function (err) {},
+                error: function (err) {
+                    // Pass
+                },
             });
         }
     };

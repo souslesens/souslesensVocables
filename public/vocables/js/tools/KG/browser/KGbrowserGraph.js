@@ -92,11 +92,6 @@ var KGbrowserGraph = (function () {
             var visjsData = { nodes: [], edges: [] };
 
             var color = "#ddd";
-            if (false && KGbrowserQuery.currentNode) {
-                var color = Lineage_classes.getPropertyColor(KGbrowserQuery.currentNode.id);
-                var color = KGbrowserQuery.model[nodeId];
-            }
-
             visjsGraph.data.nodes.remove(nodeId);
 
             //   var color = "#ffe0aa"
@@ -203,7 +198,7 @@ var KGbrowserGraph = (function () {
                             }
                         }
                     } else if (filter.predicate && filter.predicate.subject == type) {
-                        var target = item[filter.varName.substring(1)];
+                        target = item[filter.varName.substring(1)];
                         if (target && target.value != id) {
                             target = target.value;
                             edgeId = target + "_" + id;
@@ -400,7 +395,6 @@ var KGbrowserGraph = (function () {
                     color: color,
                     data: {
                         type: item.objType.value,
-                        source: KGbrowser.currentSource,
                         id: objId,
                         label: item.objLabel.value,
                         source: KGbrowser.currentSource,
@@ -562,7 +556,7 @@ var KGbrowserGraph = (function () {
         setGraphNodesTree: function (classesMap) {
             if (!classesMap) {
                 var nodes = visjsGraph.data.nodes.get();
-                var classesMap = {};
+                classesMap = {};
                 nodes.forEach(function (item, index) {
                     if (!classesMap[item.data.type]) classesMap[item.data.type] = [];
                     classesMap[item.data.type].push({ id: item.data.id, label: item.data.label });

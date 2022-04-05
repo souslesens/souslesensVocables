@@ -286,13 +286,10 @@ var KGadvancedMapping = (function () {
             var aData = self.self.currentdictionaryEntryEntities[$(a).attr("id")];
             var bData = self.self.currentdictionaryEntryEntities[$(b).attr("id")];
 
-            if (a.index == index) var a = aData.sources.indexOf(source);
-            var b = bData.sources.indexOf(source);
+            if (a.index == index) a = aData.sources.indexOf(source);
+            b = bData.sources.indexOf(source);
             if (!aData.sources) var x = 3;
             return b - a;
-            if (a >= 0 && b < 0) return -1;
-            if (b >= 0 && a < 0) return -1;
-            return 0;
         });
         $("#KGadvancedMapping_dictionaryMappingContainerDiv").html(divList);
     };
@@ -325,7 +322,7 @@ var KGadvancedMapping = (function () {
             }
 
             var html = "";
-            for (var source in entity) {
+            for (source in entity) {
                 html += "<b>" + source + "</b>";
 
                 html += "<br><table>";
@@ -376,7 +373,7 @@ var KGadvancedMapping = (function () {
                 },
             };
         } else if (queryType == "moreLikeThis") {
-            var queryObj = {
+            queryObj = {
                 more_like_this: {
                     fields: ["label"],
                     like: expression,
@@ -663,18 +660,6 @@ var KGadvancedMapping = (function () {
         }, 500);
 
         return;
-        if (!KGmappingData.currentColumn) return alert("no column selected");
-        KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
-            MainController.UI.initTool("Standardizer");
-            setTimeout(function () {
-                var str = "";
-                result.forEach(function (item) {
-                    str += item + "\n";
-                });
-                $("#Standardizer_wordsTA").val(str);
-            }, 500);
-            if (err) return callback(err);
-        });
     };
     return self;
 })();

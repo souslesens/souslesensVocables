@@ -153,7 +153,9 @@ var KGmappingGraph = (function () {
             });
 
             KGmappingGraph.isAssigningProperty = true;
-            setTimeout(function () {});
+            setTimeout(function () {
+                // Pass
+            });
         },
 
         cancelAssociation: function () {
@@ -207,7 +209,6 @@ var KGmappingGraph = (function () {
                     var options = {
                         onclickFn: function (node, event) {
                             return;
-                            if (node) self.currentNode = node;
                         },
                         onRightClickFn: self.graphActions.showGraphPopupMenu,
                         keepNodePositionOnDrag: 1,

@@ -10,6 +10,7 @@ var KGbrowser = (function () {
 
     self.getPropertyColor = function (type, palette) {
         return KGbrowserCustom.superClassesMap(type);
+        // eslint-disable-next-line no-unreachable
         if (!palette) palette = "paletteIntense";
         if (!typeColors[type]) typeColors[type] = common[palette][Object.keys(typeColors).length];
         return typeColors[type];
@@ -71,7 +72,7 @@ var KGbrowser = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    Sparql_schema.getClasses(schema, null, function (err, result) {
+                    Sparql_schema.getClasses(schema, null, function (_err, result) {
                         result.forEach(function (item) {
                             var classLabel = null;
                             if (item.classLabel) classLabel = item.classLabel.value;
@@ -84,7 +85,7 @@ var KGbrowser = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    Sparql_schema.getRestrictions(schema, null, function (err, result) {
+                    Sparql_schema.getRestrictions(schema, null, function (_err, result) {
                         result.forEach(function (item) {
                             self.OneModelDictionary[item.domain.value] = item.domainLabel.value;
                             self.OneModelDictionary[item.prop.value] = item.propLabel.value;
@@ -129,16 +130,6 @@ var KGbrowser = (function () {
                 var existingNodes = {};
                 var jstreeData = [];
                 result.forEach(function (item) {
-                    if (false && !existingNodes[item.type.value]) {
-                        // type makes query execution longer
-                        existingNodes[item.type.value] = 1;
-                        jstreeData.push({
-                            id: item.type.value,
-                            text: item.type.value,
-                            parent: self.currentSource,
-                            data: { type: "type" },
-                        });
-                    }
                     if (!existingNodes[item.sub.value]) {
                         existingNodes[item.sub.value] = 1;
                         jstreeData.push({
@@ -148,7 +139,6 @@ var KGbrowser = (function () {
                             data: {
                                 sourceType: "adl",
                                 role: "sub|obj",
-                                source: self.currentSource,
                                 id: item.sub.value,
                                 label: item.objLabel.value,
                                 source: self.currentSource,
@@ -218,7 +208,7 @@ var KGbrowser = (function () {
 
     self.jstree = {
         events: {
-            onSelectNodeRdl: function (event, obj) {
+            onSelectNodeRdl: function (_event, obj) {
                 //   KGbrowser.currentJstreeNode = obj.node;
                 if (obj.node.children.length == 0)
                     KGbrowser.getRdlJstreeData(obj.node.data.id, obj.node.data.type, function (err, result) {
@@ -227,7 +217,7 @@ var KGbrowser = (function () {
                     });
                 $("#KGbrowser_rdlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("KGbrowser_rdlJstreeDiv");
             },
-            onSelectNodeAdlList: function (event, data) {
+            onSelectNodeAdlList: function (_event, data) {
                 self.currentJstreeNode = data.node;
                 $("#KGbrowserItemsjsTreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("KGbrowserItemsjsTreeDiv");
                 if (data.node.parent != "#") {
@@ -244,19 +234,19 @@ var KGbrowser = (function () {
                 self.adlModelCache = {};
                 self.queryTypesArray = [];
             },
-            onSelectNodeOneModel: function (e, obj) {
+            onSelectNodeOneModel: function (_e, obj) {
                 KGbrowser.currentJstreeNode = obj.node;
                 //   KGbrowser.currentJstreeNode = obj.node;
                 $("#KGbrowser_oneModelJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("KGbrowser_oneModelJstreeDiv");
             },
-            onSelectNodeAdl: function (e, obj) {
+            onSelectNodeAdl: function (_e, obj) {
                 KGbrowser.currentJstreeNode = obj.node;
                 self.queryMode = "graph";
                 self.query.showQueryParamsDialog({ x: w - 100, y: h / 3 });
                 $("#KGbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeConceptsContextMenu("KGbrowser_adlJstreeDiv");
             },
 
-            onSelectNodeQuery: function (e, obj) {
+            onSelectNodeQuery: function (_e, obj) {
                 KGbrowser.currentJstreeQueryNode = obj.node;
                 $("#KGbrowser_adlJstreeDiv").jstree(true).settings.contextmenu.items = self.jstree.getJstreeQueryContextMenu();
             },
@@ -280,7 +270,9 @@ var KGbrowser = (function () {
                     selectTreeNodeFn: self.jstree.events.onSelectNodeAdlList,
                     contextMenu: self.jstree.getJstreeConceptsContextMenu("KGbrowserItemsjsTreeDiv"),
                 };
-                common.jstree.loadJsTree("KGbrowserItemsjsTreeDiv", jstreeData, options, function (err, result) {});
+                common.jstree.loadJsTree("KGbrowserItemsjsTreeDiv", jstreeData, options, function (_err, _result) {
+                    // Pass
+                });
             },
             loadOneModel: function () {
                 var jstreeData = [
@@ -328,8 +320,7 @@ var KGbrowser = (function () {
                                         var parent;
                                         if (item.concept.value.indexOf("008") > -1) var x = 3;
                                         self.OneModelDictionary[item.concept.value] = item.conceptLabel.value;
-                                        if (true || i == 1) parent = topAspect.id;
-                                        else parent = item["child" + (i - 1)].value;
+                                        parent = topAspect.id;
 
                                         if (item["child" + i] && !item["child" + (i + 1)]) {
                                             self.OneModelDictionary[item["child" + i].value] = item["child" + i + "Label"].value;
@@ -360,11 +351,13 @@ var KGbrowser = (function () {
 
                             openAll: true,
                         };
-                        common.jstree.loadJsTree("KGbrowser_oneModelJstreeDiv", jstreeData, options, function (err, result) {});
+                        common.jstree.loadJsTree("KGbrowser_oneModelJstreeDiv", jstreeData, options, function (_err, _result) {
+                            // Pass
+                        });
                     }
                 );
             },
-            loadRdl: function (aspectNode) {
+            loadRdl: function (_aspectNode) {
                 var topObjects = {
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
                         label: "Functional Objects",
@@ -412,7 +405,7 @@ var KGbrowser = (function () {
                             callbackEach();
                         });
                     },
-                    function (err) {
+                    function (_err) {
                         var options = {
                             selectTreeNodeFn: self.jstree.events.onSelectNodeRdl,
                             contextMenu: self.jstree.getJstreeConceptsContextMenu("KGbrowser_rdlJstreeDiv"),
@@ -423,105 +416,10 @@ var KGbrowser = (function () {
             },
             loadAdl: function (node) {
                 return KGbrowserQuery.loadAdl(node);
-
-                if (!self.currentSource) {
-                    return alert("select a source");
-                }
-
-                var jstreeData = [];
-
-                async.series(
-                    [
-                        function (callbackSeries) {
-                            if (self.adlJstreeData) {
-                                jstreeData = self.adlJstreeData;
-                            }
-                            self.query.getOneModelDescription(function (err, result) {
-                                if (err) MainController.UI.message(err);
-
-                                for (var key in result.allObjectsMap) {
-                                    var item = result.allObjectsMap[key];
-                                    if (item.type == "Class") {
-                                        if (!item.parent) item.parent = "#";
-                                        jstreeData.push({
-                                            id: key,
-                                            parent: item.parent,
-                                            text: item.label,
-                                            data: {
-                                                sourceType: "adl",
-                                                role: "sub|obj",
-                                                source: self.currentSource,
-                                                id: key,
-                                                label: item.label,
-                                            },
-                                        });
-                                    }
-                                }
-                                self.adlJstreeData = jstreeData;
-                                callbackSeries();
-                            });
-                        },
-
-                        function (callbackSeries) {
-                            self.query.getKGclassesList(self.currentSource, function (err, adlClasses) {
-                                if (err) return callbackSeries();
-                                var jstreeDataFiltered = [];
-                                var map = {};
-                                jstreeData.forEach(function (item) {
-                                    if (adlClasses.indexOf(item.id) > -1) {
-                                        item.used = 1;
-                                        var color = self.getPropertyColor(item.id);
-                                        item.text = "<span style='color: " + color + "'>" + item.data.label + "</span>";
-                                    }
-                                    map[item.id] = item;
-                                });
-
-                                function recurseParents(id) {
-                                    if (map[id].used && map[map[id].parent]) {
-                                        map[map[id].parent].used = 1;
-                                        recurseParents(map[id].parent);
-                                    }
-                                }
-
-                                jstreeData.forEach(function (item) {
-                                    if (item.used) {
-                                        recurseParents(item.id);
-                                    }
-                                });
-
-                                var uniqueIds = {};
-
-                                jstreeData.forEach(function (item) {
-                                    if (item.used && !uniqueIds[item.id]) {
-                                        uniqueIds[item.id] = 1;
-                                        jstreeDataFiltered.push(item);
-                                    }
-                                });
-
-                                jstreeData.forEach(function (item) {
-                                    if (!uniqueIds[item.parent]) item.parent = "#";
-                                });
-                                jstreeData = jstreeDataFiltered;
-                                callbackSeries();
-                            });
-                        },
-                    ],
-                    function (err) {
-                        var options = {
-                            selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
-                            openAll: true,
-                            doNotAdjustDimensions: true,
-                            contextMenu: self.jstree.getJstreeConceptsContextMenu("KGbrowser_adlJstreeDiv"),
-                        };
-                        //  common.fillSelectOptions("KGbrowser_searchAllSourcestypeSelect", typesArray, true)
-                        common.jstree.loadJsTree("KGbrowser_adlJstreeDiv", jstreeData, options);
-                        $("#KGbrowser_Tabs").tabs("option", "active", 0);
-                    }
-                );
             },
         },
         updateAdlTree: function (node) {
-            self.query.getAdlModel(node.data.id, self.currentSource, "subjectOrObject", function (err, result) {
+            self.query.getAdlModel(node.data.id, self.currentSource, "subjectOrObject", function (_err, result) {
                 var jstreeData = [];
 
                 var existingNodes = {};
@@ -576,66 +474,6 @@ var KGbrowser = (function () {
                     }
                 });
 
-                if (false) {
-                    result.forEach(function (item) {
-                        var targetNode;
-
-                        var role;
-
-                        if (node.data.id != item.subType.value) {
-                            targetNode = item.subType;
-                        } else {
-                            targetNode = item.objType;
-                        }
-                        if (!existingNodes[node.data.id]) {
-                            existingNodes[node.data.id] = 1;
-                            jstreeData.push({
-                                id: node.data.id,
-                                text: "<span class='adlNode' style='color: " + self.getPropertyColor(node.data.id) + "'>" + node.data.label + "</span>",
-                                parent: "#",
-                                data: node.data,
-                            });
-                        }
-
-                        if (!existingNodes[item.prop.value]) {
-                            existingNodes[item.prop.value] = 1;
-                            if (!self.oneModelDescription.allObjectsMap[item.prop.value]) self.oneModelDescription.allObjectsMap[item.prop.value] = { label: item.prop.value };
-                            jstreeData.push({
-                                id: item.prop.value,
-                                text: self.oneModelDescription.allObjectsMap[item.prop.value].label,
-                                parent: node.data.id,
-                                data: {
-                                    role: "prop",
-                                    id: item.prop.value,
-                                    label: self.oneModelDescription.allObjectsMap[item.prop.value].label,
-                                    source: self.currentSource,
-                                },
-                            });
-                        }
-                        if (!existingNodes[targetNode.value]) {
-                            existingNodes[targetNode.value] = 1;
-                            if (!self.oneModelDescription.allObjectsMap[targetNode.value]) self.oneModelDescription.allObjectsMap[targetNode.value] = { label: targetNode.value };
-                            jstreeData.push({
-                                id: targetNode.value,
-                                text:
-                                    "<span class='adlNode' style='color: " +
-                                    self.getPropertyColor(targetNode.value) +
-                                    "'>" +
-                                    self.oneModelDescription.allObjectsMap[targetNode.value].label +
-                                    "</span>",
-                                parent: item.prop.value,
-                                data: {
-                                    role: "sub|obj",
-                                    property: item.prop.value,
-                                    id: targetNode.value,
-                                    label: self.oneModelDescription.allObjectsMap[targetNode.value].label,
-                                    source: self.currentSource,
-                                },
-                            });
-                        }
-                    });
-                }
-
                 if (isNewTree) {
                     var options = {
                         selectTreeNodeFn: self.jstree.events.onSelectNodeAdl,
@@ -650,7 +488,7 @@ var KGbrowser = (function () {
                 }
             });
         },
-        getJstreeConceptsContextMenu: function (jstreeDivId) {
+        getJstreeConceptsContextMenu: function (_jstreeDivId) {
             // return {}
             var items = {};
             /*  if (!self.currentJstreeNode)
@@ -660,54 +498,51 @@ var KGbrowser = (function () {
             MainController.UI.message("");
             //     if (jstreeDivId && $(jstreeDivId).jstree(true))
             //  self.currentJstreeNode = $(jstreeDivId).jstree(true).get_selected(true)
-            if (true || type == "") {
-                items.addFilteredNodesToQuery = {
-                    label: "add to query",
-                    action: function (e, xx) {
-                        // pb avec source
-                        if (!self.currentSource) return alert("select a source");
-                        self.queryMode = "query";
-                        self.query.addNodeToQueryTree(self.currentJstreeNode);
-                        ///  self.query.showQueryParamsDialog(e.position, "query")
-                    },
-                };
-                items.addFilteredNodesToGraph = {
-                    label: "graph filtered nodes",
-                    action: function (e, xx) {
-                        // pb avec source
-                        if (!self.currentSource) return alert("select a source");
-                        self.queryMode = "graph";
-                        self.query.showQueryParamsDialog(e.position);
-                    },
-                };
-                items.nodeInfos = {
-                    label: "node infos",
-                    action: function (e, xx) {
-                        // pb avec source
-                        self.showNodeInfos();
-                    },
-                };
+            items.addFilteredNodesToQuery = {
+                label: "add to query",
+                action: function (_e, _xx) {
+                    // pb avec source
+                    if (!self.currentSource) return alert("select a source");
+                    self.queryMode = "query";
+                    self.query.addNodeToQueryTree(self.currentJstreeNode);
+                    ///  self.query.showQueryParamsDialog(e.position, "query")
+                },
+            };
+            items.addFilteredNodesToGraph = {
+                label: "graph filtered nodes",
+                action: function (e, _xx) {
+                    // pb avec source
+                    if (!self.currentSource) return alert("select a source");
+                    self.queryMode = "graph";
+                    self.query.showQueryParamsDialog(e.position);
+                },
+            };
+            items.nodeInfos = {
+                label: "node infos",
+                action: function (_e, _xx) {
+                    // pb avec source
+                    self.showNodeInfos();
+                },
+            };
 
-                items.removeNodesFromGraph = {
-                    label: "remove nodes from graph",
-                    action: function (e) {
-                        // pb avec source
-                        self.jstree.menuActions.removeNodesFromGraph(self.currentJstreeNode);
-                    },
-                };
-            }
+            items.removeNodesFromGraph = {
+                label: "remove nodes from graph",
+                action: function (_e) {
+                    // pb avec source
+                    self.jstree.menuActions.removeNodesFromGraph(self.currentJstreeNode);
+                },
+            };
+
             return items;
         },
 
-        getJstreeQueryContextMenu: function (jstreeDivId) {
+        getJstreeQueryContextMenu: function (_jstreeDivId) {
             var items = {};
 
             $("#waitImg").css("display", "none");
             MainController.UI.message("");
 
             var node = self.currentJstreeQueryNode;
-            if (false && !node) return items;
-            if (false && node.parents.length == 1) return items;
 
             (items.addFilter = {
                 label: "add filter",
@@ -718,7 +553,7 @@ var KGbrowser = (function () {
             }),
                 (items.removeFilter = {
                     label: "remove filter",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
                         self.jstree.menuActions.removeQueryFilter();
                     },
@@ -734,7 +569,9 @@ var KGbrowser = (function () {
                     KGbrowserGraph.drawGraph(node);
                 }
             },
-            removeNodesFromGraph: function (node) {},
+            removeNodesFromGraph: function (_node) {
+                // Path
+            },
             addQueryFilter: function (position) {
                 var properties = [KGbrowser.currentJstreeQueryNode.data];
                 common.fillSelectOptions("KGbrowserQueryParams_property", properties, false, "label", "id");
@@ -840,7 +677,6 @@ var KGbrowser = (function () {
                 function (err) {
                     if (err) return callback(err);
                     return callback(null, model);
-                    return;
                 }
             );
         },
@@ -867,37 +703,9 @@ var KGbrowser = (function () {
             });
         },
         showQueryParamsDialog: function (position) {
-            if (false && KGbrowser.currentGraphNodeSelection) {
-                self.currentQueryDialogField = null;
-
-                if (true) {
-                    self.classes[self.curr];
-
-                    return;
-                }
-
-                $("#KGbrowserQueryParams_property").empty();
-                var possibleTypes = KGbrowser.query.getAdlModel(
-                    KGbrowser.currentGraphNodeSelection.data.type,
-                    KGbrowser.currentGraphNodeSelection.data.source,
-                    "subjectOrObject",
-                    function (err, result) {
-                        if (err) return alert(err);
-
-                        var types = [];
-                        result.forEach(function (item) {
-                            if (types.indexOf(item.subType.value) < 0) types.push({ id: item.subType.value, label: self.OneModelDictionary[item.subType.value] });
-                            if (item.objType.value && types.indexOf(item.objType.value) < 0) types.push({ id: item.objType.value, label: self.OneModelDictionary[item.objType.value] });
-                        });
-                        $("#KGbrowserQueryParams_typeSelect").css("display", "block");
-                        common.fillSelectOptions("KGbrowserQueryParams_typeSelect,true", types, true, "label", "id");
-                    }
-                );
-            } else {
-                self.currentQueryDialogField = self.currentJstreeNode.data.id;
-                self.query.showNodeProperties(self.currentJstreeNode);
-                $("#KGbrowserQueryParams_typeSelect").css("display", "none");
-            }
+            self.currentQueryDialogField = self.currentJstreeNode.data.id;
+            self.query.showNodeProperties(self.currentJstreeNode);
+            $("#KGbrowserQueryParams_typeSelect").css("display", "none");
 
             $("#KGbrowserQueryParamsDialog").css("left", position.x - 200);
             $("#KGbrowserQueryParamsDialog").css("top", position.y);
@@ -911,7 +719,7 @@ var KGbrowser = (function () {
         },
 
         showNodeProperties: function (node) {
-            self.query.getNodeProperties(node, function (err, properties) {
+            self.query.getNodeProperties(node, function (_err, properties) {
                 var withBlankOption = false;
                 if (properties.length > 1) withBlankOption = true;
                 $("#KGbrowserQueryParams_type").html(node.data.label);
@@ -973,7 +781,7 @@ var KGbrowser = (function () {
         onQueryParamsDialogCancel: function () {
             $("#KGbrowserQueryParamsDialog").css("display", "none");
         },
-        addNodeToQueryTree: function (node, prop) {
+        addNodeToQueryTree: function (node, _prop) {
             self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
                 var isNewTree = $("#KGbrowser_queryTreeDiv").is(":empty");
                 var existingNodes = [];
@@ -1027,7 +835,7 @@ var KGbrowser = (function () {
                 });
 
                 if (isNewTree) {
-                    var options = {
+                    options = {
                         selectTreeNodeFn: self.jstree.events.onSelectNodeQuery,
                         contextMenu: self.jstree.getJstreeQueryContextMenu("KGbrowser_queryTreeDiv"),
 
@@ -1042,20 +850,6 @@ var KGbrowser = (function () {
         },
         addFilterToQueryTree: function (filterObj) {
             return;
-            var propId = KGbrowser.currentJstreeNode.id;
-            var id = "filter_" + common.getRandomHexaId(5);
-            var jstreeData = [
-                {
-                    id: id,
-                    text: filterObj.label,
-                    parent: propId,
-                    data: { type: "propertyFilter", content: filterObj.content },
-                },
-            ];
-            common.jstree.addNodesToJstree("KGbrowser_queryTreeDiv", propId, jstreeData);
-            setTimeout(function () {
-                $("#KGbrowser_queryTreeDiv").jstree(true).select_node(id);
-            }, 200);
         },
         listQueryParamsDialogFieldValues() {
             var field = self.currentJstreeNode.data.id;
@@ -1132,7 +926,6 @@ var KGbrowser = (function () {
             var allNodes = common.jstree.getjsTreeNodes("KGbrowser_queryTreeDiv");
             var nodesMap = {};
             allNodes.forEach(function (item) {
-                console.log(item.id);
                 if ($("#KGbrowser_queryTreeDiv").jstree(true).is_checked(item.id)) item.inResult = true;
                 nodesMap[item.data.id] = item;
             });
@@ -1147,6 +940,7 @@ var KGbrowser = (function () {
             var sources = [self.currentSource];
 
             function getVarName(str) {
+                // eslint-disable-next-line no-control-regex
                 return "?" + str.replace(/[^\x00-\x7F]/g, "_").replace("-", "_");
             }
 
@@ -1222,9 +1016,9 @@ var KGbrowser = (function () {
                 result.head.vars.forEach(function (item) {
                     cols.push({ title: item });
                 });
-                result.results.bindings.forEach(function (item, indexRow) {
+                result.results.bindings.forEach(function (item, _indexRow) {
                     var line = [];
-                    result.head.vars.forEach(function (col, indexCol) {
+                    result.head.vars.forEach(function (col, _indexCol) {
                         if (item[col]) line.push(item[col].value);
                         else line.push("");
                     });
@@ -1234,7 +1028,9 @@ var KGbrowser = (function () {
                 return callback(null, result.results.bindings.length);
             });
         },
-        executeSqlQuery: function () {},
+        executeSqlQuery: function () {
+            // Pass
+        },
         showQueryResultInDataTable: function (dataSet, cols) {
             $("#mainDialogDiv").dialog("open");
 

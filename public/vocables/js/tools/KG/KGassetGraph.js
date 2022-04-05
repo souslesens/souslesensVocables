@@ -88,6 +88,7 @@ var KGassetGraph = (function () {
                                 }
                                 subjectId = subjectBis;
                             } else {
+                                // Pass
                             }
                         }
 
@@ -129,7 +130,7 @@ var KGassetGraph = (function () {
                             predicates[mapping.predicate][mapping.subject].push(mapping.object);
                         }
 
-                        var color = "#eee8dd";
+                        color = "#eee8dd";
 
                         if (mapping.predicate.indexOf("DataTypeProperty") > -1) color = "red";
                         if (subjectObj.column == "id") borderWidth = 6;
@@ -152,15 +153,15 @@ var KGassetGraph = (function () {
 
                         if (!existingNodes[objectId] || objectId.indexOf("xsd") > -1) {
                             existingNodes[objectId] = 1;
-                            var label = objectId;
-                            var modelObj = mappingsData.model[objectId];
+                            label = objectId;
+                            modelObj = mappingsData.model[objectId];
                             if (modelObj) label = modelObj.label;
-                            var shape = "box";
-                            var color = "#eee8dd";
+                            shape = "box";
+                            color = "#eee8dd";
 
                             if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                                 shape = "box";
-                                var colorKey = "";
+                                colorKey = "";
                                 if (mappingsData.model[objectId] && mappingsData.model[objectId].parents.indexOf("ONE-MODEL") > -1) {
                                     colorKey = "KGmappings_OneModelTree";
                                 } else if (objectId.indexOf("xsd") > -1) {
@@ -184,13 +185,13 @@ var KGassetGraph = (function () {
                                 widthConstraint: true,
                             });
                         }
-                        var edgeId = subjectId + "_" + mapping.predicate + "_" + objectId;
+                        edgeId = subjectId + "_" + mapping.predicate + "_" + objectId;
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
-                            var label = null;
+                            label = null;
                             if (mapping.predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                                 label = mapping.predicate;
-                                var modelObj = mappingsData.model[mapping.predicate];
+                                modelObj = mappingsData.model[mapping.predicate];
                                 if (modelObj) label = modelObj.label;
                                 else {
                                     var p = label.lastIndexOf("#");
@@ -369,7 +370,6 @@ var KGassetGraph = (function () {
                 },
 
                 function (callbackSeries) {
-                    if (false && Object.keys(self.classes).length > Config.KG.browserMaxClassesToDrawClassesGraph) return callbackSeries();
                     var existingNodes = {};
                     var newParents = [];
                     var topNodeId;
@@ -443,7 +443,6 @@ var KGassetGraph = (function () {
                                         var label = self.model[object].label;
                                         var countStr = "";
                                         if (self.buildClasses[subject]) countStr = " (" + self.buildClasses[subject].count + ")";
-                                        label = label; //+ countStr
                                         var color = options.nodeColor || self.buildClasses[object].color;
                                         if (!options.nodeColor) self.model[object].color = color;
                                         var shape = "box";
@@ -481,41 +480,40 @@ var KGassetGraph = (function () {
                 if (err) return alert(err);
 
                 MainController.UI.message("Drawing model graph");
-                if (true || visjsData.nodes.length <= Config.KG.browserMaxClassesToDrawClassesGraph) {
-                    if (!options) options = {};
-                    options.keepNodePositionOnDrag = true;
-                    options.layoutHierarchical = {
-                        direction: "UD",
-                        //   levelSeparation: 50,
-                        nodeSpacing: 150,
-                        levelSeparation: 100,
-                        sortMethod: "hubsize",
-                        //  sortMethod:"directed",
-                        //   shakeTowards:"roots"
-                    };
+                if (!options) options = {};
+                options.keepNodePositionOnDrag = true;
+                options.layoutHierarchical = {
+                    direction: "UD",
+                    //   levelSeparation: 50,
+                    nodeSpacing: 150,
+                    levelSeparation: 100,
+                    sortMethod: "hubsize",
+                    //  sortMethod:"directed",
+                    //   shakeTowards:"roots"
+                };
 
-                    if (!graphDiv) {
-                        graphDiv = "KGmappings_GlobalGraph";
-                        $("#KGassetGraphDiv").dialog("option", "title", "Asset Classes and properties");
-                        $("#KGassetGraphDiv").dialog("open");
-                        setTimeout(function () {
-                            $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>");
-                            // $("#mainDialogDiv").height()
-
-                            if (visjsData.nodes.length < Config.KG.browserMaxClassesToDrawClassesGraph) {
-                                visjsGraph.draw(graphDiv, visjsData, options);
-                                visjsGraph.network.fit();
-                            }
-                        });
-                    } else {
-                        //  $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>")
+                if (!graphDiv) {
+                    graphDiv = "KGmappings_GlobalGraph";
+                    $("#KGassetGraphDiv").dialog("option", "title", "Asset Classes and properties");
+                    $("#KGassetGraphDiv").dialog("open");
+                    setTimeout(function () {
+                        $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>");
                         // $("#mainDialogDiv").height()
+
                         if (visjsData.nodes.length < Config.KG.browserMaxClassesToDrawClassesGraph) {
                             visjsGraph.draw(graphDiv, visjsData, options);
                             visjsGraph.network.fit();
                         }
+                    });
+                } else {
+                    //  $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>")
+                    // $("#mainDialogDiv").height()
+                    if (visjsData.nodes.length < Config.KG.browserMaxClassesToDrawClassesGraph) {
+                        visjsGraph.draw(graphDiv, visjsData, options);
+                        visjsGraph.network.fit();
                     }
                 }
+
                 if (!self.model["http://www.w3.org/2000/01/rdf-schema#label"]) self.model["http://www.w3.org/2000/01/rdf-schema#label"] = { label: "label" };
 
                 MainController.UI.message("", true);

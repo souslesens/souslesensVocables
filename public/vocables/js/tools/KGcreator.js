@@ -35,7 +35,9 @@ var KGcreator = (function () {
         $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
             self.initCentralPanel();
         });
-        $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {});
+        $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
+            // Pass
+        });
         $("#accordion").accordion("option", { active: 2 });
     };
 
@@ -527,12 +529,12 @@ var KGcreator = (function () {
         }
         var options = {};
         if (test) {
-            var options = {
+            options = {
                 deleteOldGraph: false,
                 sampleSize: 500,
             };
         } else {
-            var options = {
+            options = {
                 deleteOldGraph: false,
             };
         }

@@ -109,43 +109,28 @@ var KGbrowserQuery = (function () {
                     }
                 });
             }
-            if (true || withInverse) {
-                //inverse
-                for (var subject in classes) {
-                    for (var predicate in classes[subject]) {
-                        classes[subject][predicate].forEach(function (object) {
-                            if (predicate.indexOf("label") > -1) return;
-                            if (predicate.indexOf("type") > -1) return;
-                            if (object == classId) {
-                                if (!uniquePredicates["^" + predicate + object]) {
-                                    uniquePredicates["^" + predicate + object] = 1;
-                                    if (false) {
-                                        var label = KGbrowserQuery.model[subject].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[classId].label;
-                                        var id = subject + "|" + predicate + "|" + classId;
-                                        retainedPredicates.push({
-                                            predicate: predicate,
-                                            inverse: true,
-                                            subject: subject,
-                                            object: classId,
-                                            id: id,
-                                            label: label,
-                                        });
-                                    } else {
-                                        var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label;
-                                        var id = classId + "|" + predicate + "|" + subject;
-                                        retainedPredicates.push({
-                                            predicate: predicate,
-                                            inverse: true,
-                                            subject: classId,
-                                            object: subject,
-                                            id: id,
-                                            label: label,
-                                        });
-                                    }
-                                }
+            //inverse
+            for (var subject in classes) {
+                for (predicate in classes[subject]) {
+                    classes[subject][predicate].forEach(function (object) {
+                        if (predicate.indexOf("label") > -1) return;
+                        if (predicate.indexOf("type") > -1) return;
+                        if (object == classId) {
+                            if (!uniquePredicates["^" + predicate + object]) {
+                                uniquePredicates["^" + predicate + object] = 1;
+                                var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label;
+                                var id = classId + "|" + predicate + "|" + subject;
+                                retainedPredicates.push({
+                                    predicate: predicate,
+                                    inverse: true,
+                                    subject: classId,
+                                    object: subject,
+                                    id: id,
+                                    label: label,
+                                });
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         });
@@ -176,17 +161,15 @@ var KGbrowserQuery = (function () {
                 });
             }
         }
-        if (true || properties.length == 0) {
-            properties.push({
-                propertyLabel: "label",
-                property: "http://www.w3.org/2000/01/rdf-schema#label",
-            });
+        properties.push({
+            propertyLabel: "label",
+            property: "http://www.w3.org/2000/01/rdf-schema#label",
+        });
 
-            /*   Sparql_OWL.getItems(KGbrowser.currentSource, {
+        /*   Sparql_OWL.getItems(KGbrowser.currentSource, {
                        filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
                    }, function (err, result) {
                    })*/
-        }
         var withBlankOption = false;
         if (properties.length > 1) withBlankOption = true;
         $("#KGbrowserQueryParams_type").html(node.data.label);
@@ -244,7 +227,9 @@ var KGbrowserQuery = (function () {
             self.query.showNodeProperties({ data: { type: type, id: type, label: self.OneModelDictionary[type] } });
         });
 
-    self.onOperatorSelect = function (operator) {};
+    self.onOperatorSelect = function (operator) {
+        // Pass
+    };
 
     self.onQueryParamsDialogValidate = function (logicalMode) {
         var predicate = $("#KGbrowserQueryParams_predicateSelect").val();
@@ -450,7 +435,7 @@ var KGbrowserQuery = (function () {
             });
 
             if (isNewTree) {
-                var options = {
+                options = {
                     selectTreeNodeFn: self.jstree.events.onSelectNodeQuery,
                     contextMenu: self.jstree.getJstreeQueryContextMenu("KGbrowser_queryTreeDiv"),
 
@@ -813,21 +798,19 @@ var KGbrowserQuery = (function () {
 
         var where = "";
 
-        if (true || self.existPath) {
-            self.queryFilterNodes.forEach(function (item, index) {
-                where += item.filter + "\n";
-                if (index == 0) return;
-                if (index == 1) {
-                    fromNode = self.queryFilterNodes[index - 1];
-                    toNode = self.queryFilterNodes[index];
-                    where += GraphTraversal.getShortestPaths(fromNode, toNode, self.classes);
-                } else {
-                    toNode = self.queryFilterNodes[index];
-                    where += GraphTraversal.addNodeToPath(toNode, self.classes, self.queryFilterNodes.length);
-                    where += toNode.filter + "\n";
-                }
-            });
-        }
+        self.queryFilterNodes.forEach(function (item, index) {
+            where += item.filter + "\n";
+            if (index == 0) return;
+            if (index == 1) {
+                fromNode = self.queryFilterNodes[index - 1];
+                toNode = self.queryFilterNodes[index];
+                where += GraphTraversal.getShortestPaths(fromNode, toNode, self.classes);
+            } else {
+                toNode = self.queryFilterNodes[index];
+                where += GraphTraversal.addNodeToPath(toNode, self.classes, self.queryFilterNodes.length);
+                where += toNode.filter + "\n";
+            }
+        });
 
         /*  self.queryFilterNodes.forEach(function (filterNode) {
                 where += filterNode.filter + "\n"
@@ -1056,50 +1039,3 @@ var KGbrowserQuery = (function () {
 
     return self;
 })();
-
-if (false) {
-    var path1 =
-        "^<http://standards.iso.org/iso/15926/part14/hasQuality>/^<http://standards.iso.org/iso/15926/part14/representedBy>/<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/^<http://standards.iso.org/iso/15926/part14/hasSubLocation> ?FacilitySector_1.";
-    var path2 =
-        " <http://standards.iso.org/iso/15926/part14/hasSubLocation>/^<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/<http://standards.iso.org/iso/15926/part14/concretizedBy>/<http://w3id.org/readi/rdl/D101001101> ?organization_0.";
-
-    var shortestPathQueriesStack = [path1, path2];
-    var query = "";
-    var varIndex = 0;
-    var allPropertiesMap = {};
-    var predicatesMap = {};
-    shortestPathQueriesStack.forEach(function (path, index) {
-        var regex = /<(.[^>]*)>/gm;
-        var predicates;
-
-        while ((predicates = regex.exec(path)) != null) {
-            var property = predicates[1];
-            if (!predicatesMap[index]) predicatesMap[index] = [];
-            predicatesMap[index].push(property);
-
-            if (!allPropertiesMap[property]) allPropertiesMap[property] = 0;
-            allPropertiesMap[property] += 1;
-        }
-    });
-
-    var indexProperty = 0;
-    for (var property in allPropertiesMap) {
-        indexProperty++;
-        shortestPathQueriesStack.forEach(function (path, indexPath) {
-            var count = allPropertiesMap[property];
-            if (count > 1) {
-                var varName = " ?Q" + indexProperty;
-                varName = varName + ". " + varName + " ";
-                var p = predicatesMap[indexPath].indexOf(property);
-                if (p > 0 && p < predicatesMap[indexPath].length - 1) {
-                    if (predicatesMap[indexPath].indexOf("^") > -1) {
-                        predicatesMap[indexPath][p] = varName + predicatesMap[indexPath][p];
-                    } else {
-                        predicatesMap[indexPath][p] = predicatesMap[indexPath][p] + varName;
-                    }
-                }
-            }
-        });
-    }
-    var x = predicatesMap;
-}

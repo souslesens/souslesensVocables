@@ -14,7 +14,9 @@ var Admin = (function () {
         $("#sourceDivControlPanelDiv").html(html);
     };
 
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
     self.refreshIndexes = function () {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
         if (!sources || sources.length == 0) return alert(" no source selected");
@@ -64,7 +66,9 @@ var Admin = (function () {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
         if (sources.length != 1) return alert("select a single source");
 
-        Sparql_generic.getSourceTaxonomy(sources[0], null, function (err, result) {});
+        Sparql_generic.getSourceTaxonomy(sources[0], null, function (err, result) {
+            // Pass
+        });
     };
 
     self.getUserAllowedSources = function (sourcesSelection) {
@@ -85,9 +89,13 @@ var Admin = (function () {
             });
         return sources;
     };
-    self.ShowProfilesSourcesMatrix = function () {};
+    self.ShowProfilesSourcesMatrix = function () {
+        // Pass
+    };
 
-    self.ShowUsersSourcesMatrix = function () {};
+    self.ShowUsersSourcesMatrix = function () {
+        // Pass
+    };
 
     self.showUserSources = function (callback) {
         var str = "";
@@ -95,7 +103,7 @@ var Admin = (function () {
         Object.keys(Config.sources)
             .sort()
             .forEach(function (sourceLabel, index) {
-                if (false && Config.sources[sourceLabel].isDraft) return;
+                //if (false && Config.sources[sourceLabel].isDraft) return;
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
                 if (
                     (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||

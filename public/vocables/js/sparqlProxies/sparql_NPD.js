@@ -120,7 +120,7 @@ var Sparql_NPD = (function () {
             }
         }
 
-        for (var i = 1; i < ancestorsDepth; i++) {
+        for (i = 1; i < ancestorsDepth; i++) {
             query += "} ";
         }
 
@@ -185,7 +185,9 @@ var Sparql_NPD = (function () {
                 $("#messageDiv").html(err.responseText);
 
                 $("#waitImg").css("display", "none");
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(err));
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(query));
                 if (callback) {
                     return callback(err);

@@ -229,7 +229,9 @@ var OwlEditor = (function () {
                     callbackSeries();
                 },
             ],
-            function (err) {}
+            function (err) {
+                return null;
+            }
         );
     };
 
@@ -246,7 +248,8 @@ var OwlEditor = (function () {
 
         $("#owlEditor_messageDiv").html("");
         if (obj.node.parent != "#") {
-            if (true || obj.node.data.type == "owl:Class") self.editingNodeMap = {};
+            // PROBLEM
+            self.editingNodeMap = {};
             self.showPropertiesDiv(obj.node.data.type, self.currentNode.data);
         }
     };
@@ -332,7 +335,7 @@ var OwlEditor = (function () {
                         }
 
                         var value = item.value.value;
-                        var array = value.split("#");
+                        array = value.split("#");
                         if (prefixes[array[0]]) value = prefixes[array[0]] + ":" + array[1];
 
                         var valueLabel = "";
@@ -354,7 +357,7 @@ var OwlEditor = (function () {
                             valuesArray.push(self.currentNode.data.values[key]);
                         }
                         var subClassesArray = [];
-                        for (var key in self.currentNode.data.subClasses) {
+                        for (key in self.currentNode.data.subClasses) {
                             subClassesArray.push(self.currentNode.data.subClasses[key]);
                         }
 
@@ -446,9 +449,9 @@ var OwlEditor = (function () {
             var objectData = self.editingNodeMap[divId].objectData;
             var subjectData = self.editingNodeMap[divId].subjectData;
             var array = self.editingNodeMap[divId].range.split("_");
-            var type = array[0].replace(/\-/g, ":");
+            var type = array[0].replace(/-/g, ":");
 
-            var predicate = array[1].replace(/\-/g, ":");
+            var predicate = array[1].replace(/-/g, ":");
 
             var subjectUri;
             objectData.forEach(function (item) {

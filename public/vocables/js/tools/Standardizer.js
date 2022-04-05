@@ -9,7 +9,9 @@ var Standardizer = (function () {
     self.currentAction = null;
     self.fuzzyMatches = [];
 
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
     self.onLoaded = function (callback) {
         $("#actionDiv").html("");
         $("#graphDiv").html("");
@@ -22,7 +24,9 @@ var Standardizer = (function () {
         });
         MainController.UI.toogleRightPanel(true);
         $("#rightPanelDiv").html("");
-        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html", function () {});
+        $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html", function () {
+            // Pass
+        });
 
         $("#graphDiv").html("");
 
@@ -73,7 +77,7 @@ var Standardizer = (function () {
             type: "get",
             url: Config.apiUrl + "/elasticsearch/indices",
             dataType: "json",
-            success: function (indexes, textStatus, jqXHR) {
+            success: function (indexes, _textStatus, _jqXHR) {
                 var sources = [];
 
                 Admin.showUserSources(function (userSources) {
@@ -81,6 +85,7 @@ var Standardizer = (function () {
                         if (userSources.index) var sourceLabel = "" + source;
 
                         if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
+                            // Pass
                         } else {
                             indexes.forEach(function (indexName) {
                                 if (indexName == source.toLowerCase()) {
@@ -108,7 +113,7 @@ var Standardizer = (function () {
         var size = 200;
         var queryResultsSize = 5000;
         var classesMap = {};
-        var slices;
+        slices;
         if (classUris) slices = common.array.slice(classUris, size);
         async.eachSeries(
             slices,
@@ -231,6 +236,7 @@ var Standardizer = (function () {
                         if (!self.matrixIndexRankingsMap[indexName]) self.matrixIndexRankingsMap[indexName] = 0;
                         self.matrixIndexRankingsMap[indexName] += 1;
                     } else {
+                        // Pass
                     }
                     self.matrixWordsMap.entities[word].push(entitiesMap[word][indexName] || null);
                     self.matrixDivsMap[divId].word = word;
@@ -306,7 +312,7 @@ var Standardizer = (function () {
 
             var options = {
                 targetDiv: "Standardizer_filterClassesTree",
-                selectTreeNodeFn: function (evt, obj) {
+                selectTreeNodeFn: function (_evt, obj) {
                     var node = obj.node;
                     SourceBrowser.openTreeNode("Standardizer_filterClassesTree", self.currentSource, node);
                 },
@@ -373,7 +379,7 @@ var Standardizer = (function () {
                 var indexes = self.getSelectedIndexes();
 
                 self.currentWordsCount += words.length;
-                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (_err, result) {
                     var html = self.processMatrixResult(words, result, indexes);
                     MainController.UI.message(" processed items: " + totalProcessed);
                     $("#KGmapping_matrixContainer").append(html);
@@ -392,7 +398,9 @@ var Standardizer = (function () {
                     $(".matrixWordExactMatch").bind("click", Standardizer.onMatrixWordExactMatchClick);
                     self.showMatchesIndexRanking();
                     self.searchResultArray = searchResultArray;
-                    self.drawSunBurst(searchResultArray, words, {}, function (err) {});
+                    self.drawSunBurst(searchResultArray, words, {}, function (_err) {
+                        // Pass
+                    });
                 }, 500);
             }
         );
@@ -435,7 +443,7 @@ var Standardizer = (function () {
         var allWords = [];
 
         async.whilst(
-            function (test) {
+            function (_test) {
                 return resultSize > 0;
             },
             function (callbackWhilst) {
@@ -489,22 +497,24 @@ var Standardizer = (function () {
                     self.showMatchesIndexRanking();
 
                     self.searchResultArray = searchResultArray;
-                    self.drawSunBurst(searchResultArray, allWords, {}, function (err) {});
+                    self.drawSunBurst(searchResultArray, allWords, {}, function (_err) {
+                        // Pass
+                    });
                 }, 500);
             }
         );
     };
 
-    self.onMatrixCellClick = function (event) {
+    self.onMatrixCellClick = function (_event) {
         var cellData = self.matrixDivsMap[this.id];
         self.editCellData(cellData);
     };
 
-    self.onMatrixWordExactMatchClick = function (event) {
+    self.onMatrixWordExactMatchClick = function (_event) {
         var cellData = self.matrixDivsMap[this.id];
         //  self.editCellData(cellData)
     };
-    self.onMatrixWordNoMatchClick = function (event) {
+    self.onMatrixWordNoMatchClick = function (_event) {
         var word = self.matrixDivsMap[this.id].word;
         self.fuzzyMatches.currentFuzzyWord = word;
         self.fuzzyMatches.currentFuzzyDiv = this.id;
@@ -555,7 +565,7 @@ var Standardizer = (function () {
         MainController.UI.message("", true);
     };
 
-    self.editCandidateValues = function (columnValueDivId, searchedText) {
+    self.editCandidateValues = function (columnValueDivId, _searchedText) {
         KGadvancedMapping.currentColumnValueDivId = columnValueDivId;
         var columnValue = KGadvancedMapping.currentColumnValueDivIds[columnValueDivId].value;
         $("#KGadvancedMapping_searchEntitiesInput").val(columnValue);
@@ -568,7 +578,7 @@ var Standardizer = (function () {
             }
 
             var html = "";
-            for (var source in entity) {
+            for (source in entity) {
                 html += "<b>" + source + "</b>";
 
                 html += "<br><table>";
@@ -595,8 +605,12 @@ var Standardizer = (function () {
         }
     };
 
-    self.setAsReference = function (referenceId) {};
-    self.removeAsReference = function (referenceId) {};
+    self.setAsReference = function (_referenceId) {
+        // Pass
+    };
+    self.removeAsReference = function (_referenceId) {
+        // Pass
+    };
 
     self.exportMappings = function () {
         var columns = [];
@@ -618,9 +632,9 @@ var Standardizer = (function () {
         }
 
         for (var columnValueDivId in KGadvancedMapping.matchCandidates) {
-            var item = KGadvancedMapping.matchCandidates[columnValueDivId];
+            item = KGadvancedMapping.matchCandidates[columnValueDivId];
             item.target.status = "similar";
-            var source = Config.Standardizer.elasticIndexesSourcesMap[item.target.index];
+            source = Config.Standardizer.elasticIndexesSourcesMap[item.target.index];
             if (!sourcesMap[source]) sourcesMap[source] = [];
             sourcesMap[source].push(item);
         }
@@ -664,7 +678,7 @@ var Standardizer = (function () {
                     callbackEachSource();
                 });
             },
-            function (err) {
+            function (_err) {
                 MainController.UI.message("building table");
                 var keys = ["term", "status", "index", "classLabel", "classId", "score"];
                 if (exportAncestors) {
@@ -761,15 +775,15 @@ var Standardizer = (function () {
 
     self.generateSourceDictionary = function (sourceLabel) {
         if (Config.sources[sourceLabel].schemaType == "OWL") {
-            Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, result) {
+            Sparql_OWL.getDictionary(sourceLabel, {}, null, function (err, _result) {
                 if (err) MainController.UI.message(err, true);
             });
         }
     };
 
-    self.drawSunBurst = function (searchResultArray, words, options, callback) {
+    self.drawSunBurst = function (searchResultArray, words, _options, _callback) {
         //    return;
-        if ({ options }) options = {};
+        _options = {};
 
         var sunburstDivId = "Standardizer_sunburstDiv";
         //  var graphDivId = "Standardizer_graphDiv"
@@ -850,7 +864,7 @@ var Standardizer = (function () {
                 function (callbackSeries) {
                     //get labels
                     var indexes = self.getSelectedIndexes();
-                    Standardizer.getClassesLabels(classUris, indexes, function (err, result) {
+                    Standardizer.getClassesLabels(classUris, indexes, function (_err, result) {
                         self.classUriLabelMap = result;
                         callbackSeries();
                     });
@@ -895,7 +909,7 @@ var Standardizer = (function () {
                         orphanChildren.push({ name: orphan, children: [] });
                     });
                     hierarchy.push({ name: "orphans", children: orphanChildren });
-                    var root = { name: "matches", children: hierarchy };
+                    root = { name: "matches", children: hierarchy };
 
                     if (!sunburstDivId) return callbackSeries();
                     var options = {
@@ -972,11 +986,12 @@ var Standardizer = (function () {
 
                     recurse(self.hierarchy, 0);
 
+                    // eslint-disable-next-line no-constant-condition
                     if (true) {
                         // add cluster nodes with  leafs linked to hierarchies
 
                         var pairs = {};
-                        self.searchResultArray.forEach(function (item, itemIndex) {
+                        self.searchResultArray.forEach(function (item, _itemIndex) {
                             if (!item.hits) return;
                             var hits = item.hits.hits;
                             if (hits.length == 0) return;
@@ -1009,6 +1024,7 @@ var Standardizer = (function () {
                         var x = -100;
                         var xoffset = 100;
                         for (var key in pairs) {
+                            // eslint-disable-next-line no-constant-condition
                             if (true) {
                                 if (!existingNodes[key]) {
                                     existingNodes[key] = 1;
@@ -1035,7 +1051,7 @@ var Standardizer = (function () {
                                         to: array[0],
                                     });
                                 }
-                                var edgeId = array[1] + "_" + key;
+                                edgeId = array[1] + "_" + key;
                                 if (!existingNodes[edgeId]) {
                                     existingNodes[edgeId] = 1;
                                     visjsData.edges.push({
@@ -1045,9 +1061,9 @@ var Standardizer = (function () {
                                     });
                                 }
                             } else {
-                                var array = key.split("|");
+                                array = key.split("|");
 
-                                var edgeId = array[0] + "_" + array[1];
+                                edgeId = array[0] + "_" + array[1];
                                 if (!existingNodes[edgeId]) {
                                     existingNodes[edgeId] = 1;
                                     visjsData.edges.push({
@@ -1061,6 +1077,7 @@ var Standardizer = (function () {
                             }
                         }
                     }
+                    // eslint-disable-next-line no-constant-condition
                     if (false) {
                         var html = "";
                         var row0 = "<td>&nbsp;</td>";
@@ -1114,11 +1131,13 @@ var Standardizer = (function () {
                 },
             ],
 
-            function (err) {}
+            function (_err) {
+                // Pass
+            }
         );
     };
 
-    self.generateElasticIndex = function (sourceLabel, callback) {
+    self.generateElasticIndex = function (sourceLabel, _callback) {
         var totalLines = 0;
 
         var processor = function (data, replaceIndex, callback) {
@@ -1136,7 +1155,7 @@ var Standardizer = (function () {
                 url: Config.apiUrl + "/elasticsearch/indexsource",
                 data: payload,
                 dataType: "json",
-                success: function (data2, textStatus, jqXHR) {
+                success: function (_data2, _textStatus, _jqXHR) {
                     totalLines += data.length;
                     MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
                     callback(null, data);
@@ -1148,8 +1167,8 @@ var Standardizer = (function () {
         };
     };
 
-    self.drawBestMatches = function (words, indexes, options, callback) {
-        if ({ options }) options = {};
+    self.drawBestMatches = function (words, indexes, _options, _callback) {
+        _options = {};
 
         var sunburstDivId = "Standardizer_sunburstDiv";
         var graphDivId = "Standardizer_graphDiv";
@@ -1260,7 +1279,7 @@ var Standardizer = (function () {
 
                 function (callbackSeries) {
                     //get labels
-                    Standardizer.getClassesLabels(classUris, indexes, function (err, result) {
+                    Standardizer.getClassesLabels(classUris, indexes, function (_err, result) {
                         self.classUriLabelMap = result;
                         callbackSeries();
                     });
@@ -1316,7 +1335,7 @@ var Standardizer = (function () {
                                 },
                             });
 
-                            var edgeId = node.parent + "_" + node.id;
+                            edgeId = node.parent + "_" + node.id;
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1;
                                 visjsData.edges.push({
@@ -1348,7 +1367,7 @@ var Standardizer = (function () {
                             words: orphans,
                         },
                     };
-                    var edgeId = "orphans" + "_#";
+                    edgeId = "orphans" + "_#";
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
                         visjsData.edges.push({
@@ -1363,7 +1382,7 @@ var Standardizer = (function () {
 
                             nodes: {
                                 scaling: {
-                                    customScalingFunction: function (min, max, total, value) {
+                                    customScalingFunction: function (_min, _max, total, value) {
                                         return value / total;
                                     },
                                     min: 5,
@@ -1457,7 +1476,7 @@ var Standardizer = (function () {
                     var options = {
                         selectTreeNodeFn: Standardizer.bestMatches.onTreeNodeClick,
                     };
-                    common.jstree.loadJsTree(treeDivId, jstreeData, options, function (err) {
+                    common.jstree.loadJsTree(treeDivId, jstreeData, options, function (_err) {
                         common.jstree.openNodeDescendants(treeDivId, "#", 8);
                     });
                     callbackSeries();
@@ -1504,7 +1523,7 @@ var Standardizer = (function () {
                         orphanChildren.push({ name: orphan, children: [] });
                     });
                     hierarchy.push({ name: "orphans", children: orphanChildren });
-                    var root = { name: "matches", children: hierarchy };
+                    root = { name: "matches", children: hierarchy };
 
                     if (!sunburstDivId) return callbackSeries();
                     var options = {
@@ -1514,19 +1533,20 @@ var Standardizer = (function () {
                     return callbackSeries();
                 },
             ],
-            function (err) {
+            function (_err) {
                 return "DONE";
             }
         );
     };
     self.bestMatches = {
-        onNodeClick: function (node, point, options) {
+        onNodeClick: function (node, _point, _options) {
             if (node) {
                 // $("#Standardizer_rightJstreeDiv").jstree().show_node(node.id)
                 $("#Standardizer_rightJstreeDiv").jstree().open_node(node.id);
             }
 
             return;
+            // eslint-disable-next-line no-unreachable
             if (!node || !node.data) return;
             var html = "<div><a target ='blank' href='" + node.data.id + "'>" + node.data.label + "</a></div>";
             html += "<ul>";
@@ -1537,20 +1557,22 @@ var Standardizer = (function () {
                 });
             }
 
+            // eslint-disable-next-line no-unreachable
             if (node.data.words) {
                 node.data.words.forEach(function (word) {
                     html += "<li>" + word + "</li>";
                 });
             }
 
+            // eslint-disable-next-line no-unreachable
             html += "</ul>";
             $("#bestMatchesInfosDiv").html(html);
         },
 
-        onTreeNodeClick: function (event, obj) {
+        onTreeNodeClick: function (_event, obj) {
             var node = obj.node;
             var source = self.indexSourcesMap[node.data.index];
-            if ((node.data.type = "orphan")) {
+            if (node.data.type == "orphan") {
                 // orphans
                 $("#Standardizer_searchEntitiesInput").val(node.data.text);
             } else SourceBrowser.showNodeInfos(source, node.data.id, "mainDialogDiv");
@@ -1604,7 +1626,7 @@ var Standardizer = (function () {
                             title: "source",
                             defaultContent: "",
                             width: "100px",
-                            render: function (datum, type, row) {
+                            render: function (_datum, _type, row) {
                                 var indexStr = row[0];
                                 if (indexStr.length > 25) indexStr = indexStr.substring(0, 25);
                                 return "<span style='width:100px;background-color: " + Lineage_classes.getSourceColor(row[0]) + ";' class='standardizer_entitySource'>" + indexStr + "</span>";
@@ -1613,7 +1635,7 @@ var Standardizer = (function () {
                         cols.push({ title: "word", defaultContent: "", width: "150px" });
                         cols.push({
                             title: "action",
-                            render: function (datum, type, row) {
+                            render: function (_datum, _type, row) {
                                 return (
                                     "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  SourceBrowser.showNodeInfos (\"" +
                                     row[0] +
@@ -1641,7 +1663,7 @@ var Standardizer = (function () {
                     callbackEach();
                 });
             },
-            function (err) {
+            function (_err) {
                 // $("#" + resultDiv).html(html)
                 $("#" + resultDiv).html();
                 $("#" + resultDiv).html("<table id='dataTableDiv'></table>");
@@ -1702,7 +1724,7 @@ var Standardizer = (function () {
                     url: Config.apiUrl + "/annotator/spacyextract",
                     data: payload,
                     dataType: "json",
-                    success: function (tokens, textStatus, jqXHR) {
+                    success: function (tokens, _textStatus, _jqXHR) {
                         var percent = Math.round(((++index * chunkSize) / textSize) * 100);
                         MainController.UI.message("extracting nouns : " + percent + "%", true);
                         tokens.forEach(function (word) {
@@ -1769,7 +1791,7 @@ var Standardizer = (function () {
                     callbackEach();
                 });
             },
-            function (err) {
+            function (_err) {
                 var distinctNodes = {};
                 var html = "<table style='border:1px solid brown'>";
 
@@ -1795,7 +1817,7 @@ var Standardizer = (function () {
 
         items.compareSource = {
             label: "Compare all",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 Standardizer.initAction("compareSource");
             },
@@ -1803,14 +1825,14 @@ var Standardizer = (function () {
 
         items.compareSourceFilter = {
             label: "Compare...",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 Standardizer.initAction("compareSourceFilter");
             },
         };
         return items;
     };
-    self.onselectSourcesTreeNodeFn = function (event, obj) {
+    self.onselectSourcesTreeNodeFn = function (_event, obj) {
         self.currentSource = obj.node.id;
     };
 
@@ -1820,7 +1842,7 @@ var Standardizer = (function () {
             var indexes = [];
             var classUrisBySource = {};
 
-            self.searchResultArray.forEach(function (item, itemIndex) {
+            self.searchResultArray.forEach(function (item, _itemIndex) {
                 var hits = item.hits.hits;
                 if (hits.length == 0) return;
                 hits.forEach(function (hit) {
@@ -1835,12 +1857,14 @@ var Standardizer = (function () {
 
         return;
 
+        // eslint-disable-next-line no-unreachable
         MainController.UI.initTool("lineage");
         setTimeout(function () {
             var i = 0;
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
                 if (i++ == 0) MainController.currentSource = source;
                 MainController.UI.onSourceSelect();
+                // eslint-disable-next-line no-undef
                 Lineage_classes.addParentsToGraph(source, classUrisBySource[index], function (err) {
                     if (err) return alert(err);
                     callbackEach();
@@ -1850,7 +1874,9 @@ var Standardizer = (function () {
     };
 
     self.drawAncestors = function () {
-        self.searchResultArray.forEach(function (item, itemIndex) {});
+        self.searchResultArray.forEach(function (_item, _itemIndex) {
+            // Pass
+        });
     };
 
     self.exportExactMatchMatrix = function (callback) {
@@ -1952,12 +1978,13 @@ var Standardizer = (function () {
                 function (callbackSeries) {
                     return callbackSeries();
 
+                    // eslint-disable-next-line no-unreachable
                     async.eachSeries(
                         targetSources,
                         function (targetSource, callbackEach) {
                             if (Config.sources[dictionarySourceLabel].imports.indexOf(targetSource)) return callbackEach();
                             MainController.UI.message(" adding " + targetSource + " in   dictionarySourceLabel imports");
-                            Lineage_blend.addImportToCurrentSource("dictionarySourceLabel", targetSource, function (err, result) {
+                            Lineage_blend.addImportToCurrentSource("dictionarySourceLabel", targetSource, function (err, _result) {
                                 return callbackEach(err);
 
                                 //  return alert(" coming soon");
@@ -1974,7 +2001,7 @@ var Standardizer = (function () {
                     async.eachSeries(
                         slices,
                         function (slice, callbackEach) {
-                            Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, result) {
+                            Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, _result) {
                                 if (err) return callbackEach(err);
                                 /*   slice.forEach(function(relation){
                                var labelTriples=[
@@ -1988,7 +2015,7 @@ var Standardizer = (function () {
                                 return callbackEach();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );

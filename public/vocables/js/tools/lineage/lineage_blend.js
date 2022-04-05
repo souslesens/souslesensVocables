@@ -72,7 +72,7 @@ var Lineage_blend = (function () {
 
         if (sourceNode == targetNode) return "source node and target node must be distinct ";
 
-        var createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked");
+        createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked");
 
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?")) return;
         self.createRelation(type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, function (err, result) {
@@ -485,7 +485,9 @@ var Lineage_blend = (function () {
     };
 
     self.createNode = function () {
-        SourceBrowser.showNodeInfos(Lineage_classes.mainSource, null, "mainDialogDiv", null, function (err, result) {});
+        SourceBrowser.showNodeInfos(Lineage_classes.mainSource, null, "mainDialogDiv", null, function (err, result) {
+            // pass
+        });
     };
 
     self.initAllowedPropertiesForRelation = function () {

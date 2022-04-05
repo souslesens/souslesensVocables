@@ -11,6 +11,7 @@ var SQLquery = (function () {
         var adls = [];
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
+            // eslint-disable-next-line no-console
             if (!sourceObj.schemaType) console.log(key);
             if (sourceObj.schemaType.indexOf("INDIVIDUAL") > -1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
                 adls.push({ id: key, label: key });
@@ -42,7 +43,9 @@ var SQLquery = (function () {
                 (self.sampleData[table] = data), displaySampleData(self.sampleData[table]);
             },
 
-            error: function (err) {},
+            error: function (err) {
+                // pass
+            },
         });
     };
 

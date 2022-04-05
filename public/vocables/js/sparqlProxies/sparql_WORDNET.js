@@ -26,7 +26,9 @@ var Sparql_WORDNET = (function () {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings.forEach(function (item) {});
+            result.results.bindings.forEach(function (item) {
+                // Pass
+            });
             return callback(null, result.results.bindings);
         });
     };

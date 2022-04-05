@@ -6,7 +6,8 @@ socket.on("annotate", function (data) {
     Evaluate.serverMessage(data);
 });
 socket.on("hello", function (data) {
-    var x = console.log("socket channel established");
+    // eslint-disable-next-line no-console
+    console.log("socket channel established");
 });
 
 socket.on("connect", function (data) {

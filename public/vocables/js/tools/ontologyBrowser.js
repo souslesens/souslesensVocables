@@ -36,7 +36,9 @@ var OntologyBrowser = (function () {
         // $("#graphDiv").load("snippets/OntologyBrowser.html")
     };
 
-    self.onSourceSelect = function (sourceLabel) {};
+    self.onSourceSelect = function (sourceLabel) {
+        return null;
+    };
 
     /********************************************************************************************************************************/
 
@@ -124,17 +126,18 @@ var OntologyBrowser = (function () {
                         });
                     },
                     function (callbackSeries) {
+                        // PROBLEM
                         // use anonymNodes properties
                         return callbackSeries();
-                        var schema = Config.sources[MainController.currentSource].schema;
-                        Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, classId, function (err, result) {
-                            result.forEach(function (item) {
-                                if (!item.range) return;
-                                if (!properties[item.property.value]) properties[item.property.value] = { id: item.property.value, label: item.property.value };
-                                properties[item.property.value].range = item.range.value;
-                            });
-                            return callbackSeries();
-                        });
+                        // var schema = Config.sources[MainController.currentSource].schema;
+                        // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, classId, function (err, result) {
+                        //     result.forEach(function (item) {
+                        //         if (!item.range) return;
+                        //         if (!properties[item.property.value]) properties[item.property.value] = { id: item.property.value, label: item.property.value };
+                        //         properties[item.property.value].range = item.range.value;
+                        //     });
+                        //     return callbackSeries();
+                        // });
                     },
 
                     function (callbackSeries) {
@@ -185,7 +188,7 @@ var OntologyBrowser = (function () {
                                     color: self.classColors[property.range],
                                     data: {},
                                 });
-                                var edgeId = classId + "_" + property.range;
+                                edgeId = classId + "_" + property.range;
                                 visjsData.edges.push({
                                     id: edgeId,
                                     from: classId,
@@ -460,7 +463,6 @@ var OntologyBrowser = (function () {
                 // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
 
                 var propertyNodes = [];
-                var propertyNodes = [];
                 var classNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId]);
 
                 if (index > 0) {
@@ -512,9 +514,9 @@ var OntologyBrowser = (function () {
                         if (range.indexOf("string") > -1) {
                             if (operator == "contains") query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "','i')) ";
                             else if (operator == "beginsWith") query += "FILTER (REGEX(?" + propertyNode.text + ",'^" + value + "','i')) ";
-                            else if (operator == "beginsWith") query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "$','i')) ";
                             else query += "FILTER (?" + propertyNode.text + operator + "'" + value + "'" + ")";
                         } else if (value.indexOf("http") > 0) {
+                            //pass
                         } else {
                             query += "FILTER (?" + propertyNode.text + operator + value + ")";
                         }
@@ -526,7 +528,7 @@ var OntologyBrowser = (function () {
                 });
             });
             var fromStr = "FROM <http://sws.ifi.uio.no/vocab/npd-v2/> FROM <http://sws.ifi.uio.no/data/npd-v2/> ";
-            var query =
+            query =
                 " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                 "Select " +
                 selectStr +

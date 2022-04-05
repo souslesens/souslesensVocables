@@ -169,7 +169,9 @@ var OwlSchema = (function () {
                             callbackSeries();
                         });
                     } else if (schemaType == "OWL") {
-                        Sparql_OWL.schema.getObjectProperties(classId, function (err, result) {});
+                        Sparql_OWL.schema.getObjectProperties(classId, function (err, result) {
+                            return null;
+                        });
                     } else {
                         return callbackSeries("Schema type " + schemaType + " not supported");
                     }
@@ -218,7 +220,9 @@ var OwlSchema = (function () {
                             callbackSeries();
                         });
                     } else if (schemaType == "OWL") {
-                        Sparql_OWL.schema.getObjectProperties(function (err, result) {});
+                        Sparql_OWL.schema.getObjectProperties(function (err, result) {
+                            return null;
+                        });
                     } else {
                         return callbackSeries("Schema type " + schemaType + " not supported");
                     }

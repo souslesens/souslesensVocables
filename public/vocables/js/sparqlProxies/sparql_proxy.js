@@ -20,7 +20,7 @@ var Sparql_proxy = (function () {
         };
 
         var p = query.toLowerCase().indexOf("limit");
-        if (p > -1) var query = query.substring(0, p);
+        if (p > -1) query = query.substring(0, p);
         query += " LIMIT " + limit;
 
         async.whilst(
@@ -71,7 +71,9 @@ var Sparql_proxy = (function () {
                         $("#messageDiv").html(err.responseText);
 
                         $("#waitImg").css("display", "none");
+                        // eslint-disable-next-line no-console
                         console.log(JSON.stringify(err));
+                        // eslint-disable-next-line no-console
                         console.log(JSON.stringify(query));
                         return callbackWhilst(err);
                     },
@@ -156,7 +158,9 @@ var Sparql_proxy = (function () {
                 } else MainController.UI.message(err.responseText);
 
                 $("#waitImg").css("display", "none");
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(err));
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(query));
                 MainController.UI.message(err.responseText);
                 if (callback) {

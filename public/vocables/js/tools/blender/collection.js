@@ -105,6 +105,7 @@ var Collection = (function () {
 
         $("#Blender_collectionTreeDiv").jstree(true).settings.contextmenu.items = Collection.getJstreeContextMenu();
         if (Blender.displayMode == "centralPanelDiv") {
+            // Pass
         }
         if (propertiesMap.event.ctrlKey) {
             self.filterConcepts();
@@ -147,7 +148,9 @@ var Collection = (function () {
             return (self.currentCandidateNode = null);
         });
     };
-    self.unAssignConcepts = function () {};
+    self.unAssignConcepts = function () {
+        // Pass
+    };
     self.filterConcepts = function () {
         $(".blender_collectionFilter").remove();
         var collection = Collection.currentTreeNode;
@@ -155,7 +158,8 @@ var Collection = (function () {
         var options = {
             filterCollections: collection.data.id,
         };
-        if (true || !self.currentCollectionFilter) self.currentCollectionFilter = [];
+        // if (true || !self.currentCollectionFilter) self.currentCollectionFilter = [];
+        self.currentCollectionFilter = [];
         //  self.currentCollectionFilter.push(collection.id)
         self.currentCollectionFilter = collection.data.id;
 
@@ -248,12 +252,12 @@ var Collection = (function () {
                 " WHERE {" +
                 "?collection rdf:type  ?collectionType. filter( ?collectionType =skos:Collection). " +
                 "?collection skos:prefLabel ?collectionLabel.";
-            if (false && variables.lang) query += 'filter( lang(?collectionLabel)="' + variables.lang + '")';
+            // if (false && variables.lang) query += 'filter( lang(?collectionLabel)="' + variables.lang + '")';
             if (!options.all) query += "FILTER (  NOT EXISTS {?child skos:member ?collection})";
 
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
 
-            var options = {
+            options = {
                 source: sourceLabel,
             };
 
@@ -291,7 +295,7 @@ var Collection = (function () {
 
             query += "}" + "limit " + variables.limit;
 
-            var options = {
+            options = {
                 source: sourceLabel,
             };
             Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, "", options, function (err, result) {

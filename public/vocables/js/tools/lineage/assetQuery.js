@@ -216,7 +216,9 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                        MainController.UI.showPopup(point, "graphPopupDiv")*/
                 },
             ],
-            function (err) {}
+            function (err) {
+                // pass
+            }
         );
     };
 
@@ -388,9 +390,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 common.jstree.addNodesToJstree("KGquery_queryTreeDiv", KGquery.currentNode.id, jstreeData);
             }
         },
-        resetFilters: function () {
-            $("#KGquery_queryTreeDiv").html("");
-        },
         showNodeInfo: function () {
             SourceBrowser.showNodeInfos(MainController.currentSource, KGquery.currentProperty.id, "mainDialogDiv");
         },
@@ -519,7 +518,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
 
                     var propertyNodes = [];
-                    var propertyNodes = [];
                     var classNode = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", [classNodeId]);
 
                     if (index > 0) {
@@ -571,9 +569,9 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                             if (range.indexOf("string") > -1) {
                                 if (operator == "contains") query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "','i')) ";
                                 else if (operator == "beginsWith") query += "FILTER (REGEX(?" + propertyNode.text + ",'^" + value + "','i')) ";
-                                else if (operator == "beginsWith") query += "FILTER (REGEX(?" + propertyNode.text + ",'" + value + "$','i')) ";
                                 else query += "FILTER (?" + propertyNode.text + operator + "'" + value + "'" + ")";
                             } else if (value.indexOf("http") > 0) {
+                                // pass
                             } else {
                                 query += "FILTER (?" + propertyNode.text + operator + value + ")";
                             }
@@ -585,7 +583,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     });
                 });
                 var fromStr = "FROM <http://sws.ifi.uio.no/vocab/npd-v2/> FROM <http://sws.ifi.uio.no/data/npd-v2/> ";
-                var query =
+                query =
                     " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl:<http://www.w3.org/2002/07/owl#> " +
                     "Select " +
                     selectStr +
@@ -641,7 +639,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     var query = "";
                     if (!showIds) selectStr = " ";
 
-                    formatVariableName = function (str) {
+                    var formatVariableName = function (str) {
                         return str.replace(/ /g, "_");
                     };
 
@@ -683,7 +681,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 $.ajax({
                     type: "POST",
                     url: Config.serverUrl,
-                    data: payload,
                     data: "json",
                     /* beforeSend: function(request) {
                              request.setRequestHeader('Age', '10000');

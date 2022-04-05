@@ -1,4 +1,4 @@
-var TreeMap = (function () {
+export var TreeMap = (function () {
     var self = {};
     self.flare = {
         name: "flare",
@@ -1646,7 +1646,7 @@ var TreeMap = (function () {
         ],
     };
 
-    self.onClick = function (aaa, bb, ccc) {
+    self.onClick = function (aaa) {
         click(aaa);
     };
     self.draw2 = function (data) {
@@ -1853,7 +1853,7 @@ var TreeMap = (function () {
                 var divId = d3.selectAll("#treeMapDiv")[0];
                 divId = d3.selectAll("#treeMapDiv")[0];
                 divId = "treeMapDiv";
-                var chart = Treemap(data, divId, {
+                var _ = Treemap(data, divId, {
                     value: (d) => d.size, // size of each node (file); null for internal nodes (folders)
                     group: (d, n) => n.ancestors().slice(-2)[0].data.name, // e.g., "animate" in flare/animate/Easing; color
                     label: (d, n) => [...d.name.split(/(?=[A-Z][a-z])/g), n.value.toLocaleString("en")].join("\n"),

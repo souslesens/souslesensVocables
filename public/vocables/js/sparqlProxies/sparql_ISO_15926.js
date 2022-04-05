@@ -63,7 +63,7 @@ var Sparql_ISO_15926 = (function () {
         for (var i = 1; i < descendantsDepth; i++) {
             query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." + "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
         }
-        for (var i = 1; i < descendantsDepth; i++) {
+        for (i = 1; i < descendantsDepth; i++) {
             query += "} ";
         }
 
@@ -125,7 +125,7 @@ var Sparql_ISO_15926 = (function () {
             }
         }
 
-        for (var i = 1; i < ancestorsDepth; i++) {
+        for (i = 1; i < ancestorsDepth; i++) {
             query += "} ";
         }
 
@@ -196,7 +196,9 @@ var Sparql_ISO_15926 = (function () {
                 $("#messageDiv").html(err.responseText);
 
                 $("#waitImg").css("display", "none");
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(err));
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(query));
                 if (callback) {
                     return callback(err);

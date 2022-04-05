@@ -17,7 +17,9 @@ var Annotator = (function () {
         $("#sourceDivControlPanelDiv").html(html);
     };
 
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
 
     self.showActionPanel = function () {
         self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked();
@@ -26,7 +28,9 @@ var Annotator = (function () {
         $("#accordion").accordion("option", { active: 2 });
     };
 
-    self.uploadAndaAnnotate = function () {};
+    self.uploadAndaAnnotate = function () {
+        // Pass
+    };
     self.annotate = function () {
         $("#waitImg").css("display", "block");
         MainController.UI.message("querying Spacy library (can take time...)");
@@ -100,7 +104,7 @@ var Annotator = (function () {
         $("#Annotator_AnnotationResultDiv").html(html);
         $(".Annotator_entitySpan").bind("click", Annotator.onNodeClick);
 
-        var html = "";
+        html = "";
         var uniqueMissingNouns = {};
         data.missingNouns.forEach(function (item) {
             if (!uniqueMissingNouns[item]) {

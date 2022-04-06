@@ -80,7 +80,6 @@ var SourceMatcher = (function () {
         var sourceConceptsCount = 0;
         var sourceConceptsProcessed = 0;
         var targetConceptsCount = 0;
-        var bindings = [];
         var allSourceConcepts = [];
         var commonConceptsMap = {};
         $("#dialogDiv").dialog("close");
@@ -160,16 +159,12 @@ var SourceMatcher = (function () {
                         sourceConceptsSlices,
                         function (sourceConcepts, callbackEach) {
                             sourceConceptsProcessed = sourceConcepts.length;
-                            var words = [];
-                            sourceConcepts.forEach(function (concept, index) {
-                                words.push(concept.label.replace(/[-"]/g, ""));
-                            });
+                            var words = sourceConcepts.map((concept) => concept.label.replace(/[-"]/g, ""));
 
                             Sparql_generic.getNodeParents(toSourceId, words, null, targetConceptAggrDepth, { exactMatch: true }, function (err, result) {
                                 if (err) {
                                     return callbackEach(err);
                                 }
-                                var ids = [];
                                 targetConceptsCount += result.length;
 
                                 result.forEach(function (item) {
@@ -228,7 +223,6 @@ var SourceMatcher = (function () {
                                 if (err) {
                                     return callbackSeriesSourceBroaders(err);
                                 }
-                                var sourceBroaders = [];
                                 result.forEach(function (item) {
                                     var sourceBroaders = [];
                                     for (var i = 1; i < 8; i++) {
@@ -247,7 +241,7 @@ var SourceMatcher = (function () {
                                 callbackSeriesSourceBroaders();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             return callbackSeries();
                         }
                     );

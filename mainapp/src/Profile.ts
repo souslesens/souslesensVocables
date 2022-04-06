@@ -55,16 +55,6 @@ async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>)
     }
 }
 
-async function putProfiles(body: Profile[]): Promise<Profile[]> {
-    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
-    const response = await fetch("/profiles", { method: "put", body: JSON.stringify(usersToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
-    const json = (await response.json()) as { message: string; ressources: Profile[] };
-    const entries: [string, ProfileJson][] = Object.entries(json);
-    const decodedEntries = entries.map(([key, val]) => decodeProfile(key, val));
-
-    return decodedEntries;
-}
-
 type ProfileJson = {
     id?: string;
     name?: string;

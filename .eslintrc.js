@@ -66,6 +66,7 @@ module.exports = {
                 SourceEditor: "readable",
                 Sparql_INDIVIDUALS: "readable",
                 Sparql_ISO_15926: "readable",
+                Sparql_ISO_15926_part4: "readable",
                 Sparql_OWL: "readable",
                 Sparql_SKOS: "readable",
                 Sparql_common: "readable",

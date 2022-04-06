@@ -9,14 +9,14 @@ module.exports = function () {
         GET,
     };
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
         req.body.infos += "," + ip;
         logger.info(req.body.infos);
         return res.status(200).json({ done: true });
     }
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         const logsArray = fs
             .readFileSync(path.resolve(config.logDir + "/vocables.log"))
             .toString()

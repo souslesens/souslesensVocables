@@ -1,10 +1,8 @@
 const path = require("path");
-const fs = require("fs");
 const ulid = require("ulid");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash");
-const { rest } = require("lodash");
 const { readRessource, writeRessource, ressourceFetched, ressourceUpdated, responseSchema, ressourceCreated } = require("./utils");
 
 module.exports = function () {
@@ -13,7 +11,7 @@ module.exports = function () {
         POST,
         PUT,
     };
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         const profiles = await readRessource(profilesJSON, res);
         // I need to have the db indexed by a unique id.
         //const sanitizedDB = await writeRessource(profilesJSON, profiles, res)
@@ -21,7 +19,7 @@ module.exports = function () {
         ressourceFetched(res, profiles);
     }
 
-    async function PUT(req, res, next) {
+    async function PUT(req, res, _next) {
         const updatedProfile = req.body;
         try {
             const objectToUpdateKey = Object.keys(req.body)[0];
@@ -38,12 +36,12 @@ module.exports = function () {
         }
     }
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const profileToAdd = req.body;
         //        const successfullyCreated = newProfiles[req.params.id]
         try {
             const oldProfiles = await readRessource(profilesJSON, res);
-            const profileDoesntExist = !oldProfiles.hasOwnProperty(Object.keys(profileToAdd)[0]);
+            const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
             const newProfiles = { ...oldProfiles, ...profileToAdd };
             if (profileDoesntExist) {
                 const saved = await writeRessource(profilesJSON, newProfiles, res);
@@ -83,7 +81,7 @@ module.exports = function () {
     return operations;
 };
 
-function sanitizeDB(profiles) {
+function _sanitizeDB(profiles) {
     const sanitized = Object.entries(profiles).map(([key, val]) => {
         let id = ulid();
         if (!val.id) {

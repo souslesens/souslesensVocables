@@ -7,7 +7,7 @@ module.exports = function () {
         POST,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         const group = req.query.group ? req.query.group : "all";
 
         dirContentAnnotator.getAnnotatedCorpusList(group, function (err, result) {
@@ -18,7 +18,7 @@ module.exports = function () {
         });
     }
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         dirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, req.body.sources, req.body.corpusName, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });

@@ -1,10 +1,9 @@
-const { clearCache } = require("ejs");
 const fs = require("fs");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 
-async function writeRessource(pathToRessource, newRessource, res) {
+async function writeRessource(pathToRessource, newRessource, _res) {
     try {
         const savedFile = await writeFile(pathToRessource, JSON.stringify(newRessource, null, 2)).then(async () => await readFile(pathToRessource));
         return JSON.parse(savedFile);
@@ -13,7 +12,7 @@ async function writeRessource(pathToRessource, newRessource, res) {
     }
 }
 
-async function readRessource(pathToRessource, res) {
+async function readRessource(pathToRessource, _res) {
     try {
         const file = await readFile(pathToRessource);
         return JSON.parse(file);

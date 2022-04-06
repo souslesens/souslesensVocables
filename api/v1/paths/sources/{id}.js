@@ -33,7 +33,7 @@ module.exports = function () {
 
     // }
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         fs.readFile(profilesJSON, "utf8", (err, data) => {
             if (err) {
                 res.status(500).json({ message: "I couldn't read profiles.json" });
@@ -48,8 +48,8 @@ module.exports = function () {
             }
         });
     }
-    async function DELETE(req, res, next) {
-        const profiles = await readFile(profilesJSON).catch((err) => res.status(500).json(e));
+    async function DELETE(req, res, _next) {
+        const profiles = await readFile(profilesJSON).catch((err) => res.status(500).json(err));
         const oldProfiles = JSON.parse(profiles);
         const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles;
         const successfullyDeleted = JSON.stringify(remainingProfiles) !== JSON.stringify(oldProfiles);
@@ -62,7 +62,7 @@ module.exports = function () {
                 })
             );
 
-            const updatedProfiles = await readFile(profilesJSON).catch((err) => res.status(500).json({ message: "Couldn't read profiles json" }));
+            const updatedProfiles = await readFile(profilesJSON).catch((_err) => res.status(500).json({ message: "Couldn't read profiles json" }));
             res.status(200).json({
                 message: `${req.params.id} successfully deleted`,
                 ressources: JSON.parse(updatedProfiles),

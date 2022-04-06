@@ -6,7 +6,7 @@ module.exports = function () {
         POST,
     };
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         kGbuilder.buidlKG(req.body.mappingFileNames, req.body.sparqlServerUrl, req.body.adlGraphUri, req.body.replaceGraph, req.body.dataSource, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });

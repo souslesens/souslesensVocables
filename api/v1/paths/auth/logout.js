@@ -6,9 +6,9 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         config.disableAuth ? null : req.logout();
-        result = {
+        const result = {
             redirect:
                 config.auth == "keycloak" ? config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl : "/login",
         };

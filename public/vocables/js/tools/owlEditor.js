@@ -218,7 +218,7 @@ var OwlEditor = (function () {
 
                     var options = { selectTreeNodeFn: OwlEditor.onSelectTreeNode };
 
-                    common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (err, result) {
+                    common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (_err, _result) {
                         if (jstreeData.length < 300)
                             $("#" + jstreeDivId)
                                 .jstree()
@@ -229,17 +229,17 @@ var OwlEditor = (function () {
                     callbackSeries();
                 },
             ],
-            function (err) {
+            function (_err) {
                 return null;
             }
         );
     };
 
-    self.onSelectTreeNode = function (event, obj) {
+    self.onSelectTreeNode = function (_event, obj) {
         if (obj.node.data.type.indexOf("imported") == 0) {
             var html = "<div class='OwlEditorItemSubjectUri'> " + obj.node.data.label + " imported (not editable)" + "</div><div id='owlEditor_ImportedObjInfosDiv'></div>";
             $("#owlEditor_propertiesDiv").html(html);
-            Sparql_generic.getNodeInfos(self.currentSourceData.name, obj.node.data.id, {}, function (err, result) {
+            Sparql_generic.getNodeInfos(self.currentSourceData.name, obj.node.data.id, {}, function (_err, result) {
                 SourceEditor.showNodeInfos("owlEditor_ImportedObjInfosDiv", null, obj.node.data.id, result);
             });
             return;
@@ -316,12 +316,12 @@ var OwlEditor = (function () {
             if (self.currentNode.data.isNew && $("#owl-Class_rdfs-subClassOf").length) {
                 $("#owl-Class_rdfs-subClassOf").val(self.currentNode.data.parent);
             }
-            $(".newPropertyInput").bind("blur", function (event) {
+            $(".newPropertyInput").bind("blur", function (_event) {
                 self.onAddPropertyButton($(this).attr("id"));
             });
 
             if (nodeData) {
-                Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeData.id, {}, function (err, result) {
+                Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeData.id, {}, function (_err, result) {
                     var propsMap = {};
                     self.readOnlyPredicates = [];
                     result.forEach(function (item) {
@@ -371,13 +371,8 @@ var OwlEditor = (function () {
                             //if uri is prefixed
                             propsMap[prop].forEach(function (editingData) {
                                 rangeInpuId = (type + "_" + prop).replace(/:/g, "-");
-
-                                try {
-                                    if ($("#OwlEditorItemPropertyDiv_" + rangeInpuId).length) {
-                                        self.addProperty(rangeInpuId, nodeData, editingData);
-                                    }
-                                } catch (e) {
-                                    var x = 3;
+                                if ($("#OwlEditorItemPropertyDiv_" + rangeInpuId).length) {
+                                    self.addProperty(rangeInpuId, nodeData, editingData);
                                 }
                             });
                         } else {
@@ -449,7 +444,6 @@ var OwlEditor = (function () {
             var objectData = self.editingNodeMap[divId].objectData;
             var subjectData = self.editingNodeMap[divId].subjectData;
             var array = self.editingNodeMap[divId].range.split("_");
-            var type = array[0].replace(/-/g, ":");
 
             var predicate = array[1].replace(/-/g, ":");
 
@@ -475,8 +469,6 @@ var OwlEditor = (function () {
                 triples.push(triple);
             });
         }
-
-        var x = triples;
 
         function tripleToStr(triple) {
             var str = "<" + triple.subject + "> " + triple.predicate + " ";
@@ -517,7 +509,7 @@ var OwlEditor = (function () {
 
         query += " }";
 
-        Sparql_proxy.querySPARQL_GET_proxy(Config.sources[self.currentSourceData.name].sparql_server.url, query, "", { source: self.currentSourceData.name }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(Config.sources[self.currentSourceData.name].sparql_server.url, query, "", { source: self.currentSourceData.name }, function (err, _result) {
             if (err) return $("#owlEditor_messageDiv").html(err);
 
             $("#owlEditor_messageDiv").html(" data saved");

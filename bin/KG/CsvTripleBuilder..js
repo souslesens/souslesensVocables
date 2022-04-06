@@ -4,7 +4,6 @@ var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
-var UML2OWLparser = require("../../other/UML2OWLparser");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 var ConfigManager = require("../configManager.");
@@ -147,9 +146,7 @@ var CsvTripleBuilder = {
                                 return target;
                             }
 
-                            var emptyMappings = 0;
-                            lines.forEach(function (line, indexLine) {
-                                var hasDirectSuperClass = false;
+                            lines.forEach(function (line) {
                                 var subjectStr = null;
                                 var objectStr = null;
 
@@ -157,7 +154,6 @@ var CsvTripleBuilder = {
                                     subjectStr = null;
                                     objectStr = null;
 
-                                    if (line[item.s] == "CFIHOS-30000310") var x = 3;
                                     //get value for Subject
                                     {
                                         if (item.s_type == "fixed") subjectStr = item.s;
@@ -172,7 +168,6 @@ var CsvTripleBuilder = {
                                         }
 
                                         if (item.lookup_s) {
-                                            if (subjectStr == "IT and telecom equipment") var x = 3;
                                             var lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                             if (!lookupValue) {
                                                 console.log("missing lookup_s: " + line[item.s]);

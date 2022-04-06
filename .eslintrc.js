@@ -1,5 +1,3 @@
-const { read } = require("xlsx");
-
 module.exports = {
     parser: "@typescript-eslint/parser",
     settings: {
@@ -11,6 +9,7 @@ module.exports = {
 
     rules: {
         "no-console": ["error", { allow: ["error", "warn"] }],
+        "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true, varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
     },
     overrides: [
         {
@@ -174,7 +173,6 @@ module.exports = {
                         },
                     },
                 ],
-                "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true, varsIgnorePattern: "^_" }],
                 "@typescript-eslint/explicit-function-return-type": "off",
                 "@typescript-eslint/no-explicit-any": "off",
                 "@typescript-eslint/ban-types": [

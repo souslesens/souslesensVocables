@@ -56,10 +56,9 @@ var Annotator = (function () {
                      request.setRequestHeader('Age', '10000');
                  },*/
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 MainController.UI.message("");
                 $("#waitImg").css("display", "none");
-                var x = data;
                 self.showAnnotationResult(data);
             },
 
@@ -133,11 +132,6 @@ var Annotator = (function () {
         var source = array[1];
         id = array[2];
         SourceBrowser.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
-        /*  Sparql_generic.getNodeInfos(source, id, null, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err)
-                SourceEditor.showNodeInfos("Annotator_EntityDetailsDiv", "en", id, result);
-            })*/
         Sparql_generic.getSingleNodeAllGenealogy(source, id, function (err, result) {
             if (err) return MainController.UI.message(err);
 

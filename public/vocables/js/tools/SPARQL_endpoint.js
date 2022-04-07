@@ -34,7 +34,7 @@ var SPARQL_endpoint = (function () {
         if (!method) method = "POST";
         var url2 = "/slsv?SPARQLquery=1&url=" + url + "&graphUri=" + graphUri + "&method=" + method + "&t=" + new Date() / 1;
 
-        const yasgui = new Yasgui(document.getElementById("yasgui"), {
+        new Yasgui(document.getElementById("yasgui"), {
             requestConfig: { endpoint: url2 },
             copyEndpointOnNewTab: false,
         });

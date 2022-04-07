@@ -28,13 +28,13 @@ var SourceEditor = (function () {
         return {
             addChild: {
                 label: "add Child",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     SourceEditor.onAddNewObject("graphDiv", self.editingObject);
                 },
             },
             delete: {
                 label: "Delete",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     SourceEditor.deleteEditingObject();
                 },
             },
@@ -43,7 +43,7 @@ var SourceEditor = (function () {
     self.onSourceSelect = function (sourceLabel) {
         MainController.currentSource = sourceLabel;
         self.currentSourceUri = Config.sources[sourceLabel].graphUri;
-        OwlSchema.initSourceSchema(sourceLabel, function (err, result) {
+        OwlSchema.initSourceSchema(sourceLabel, function (err, _result) {
             if (err) return MainController.UI.message(err);
             var contextMenu = self.getJstreeConceptsContextMenu();
             SourceBrowser.showThesaurusTopConcepts(sourceLabel, {
@@ -92,7 +92,7 @@ var SourceEditor = (function () {
             if (!classId) classId = $("#SourceEditor_NewClassSelect").val();
 
             var initData = _initData;
-            OwlSchema.getClassDescription(sourceLabel, classId, function (err, result) {
+            OwlSchema.getClassDescription(sourceLabel, classId, function (err, _result) {
                 if (err) return MainController.UI.message(err);
 
                 $("#SourceEditor_NewClassSelect").val("");
@@ -115,10 +115,7 @@ var SourceEditor = (function () {
         return nodeId;
     };
 
-    self.editjstreeNode = function (event, obj, initData) {
-        var type;
-        if (!obj.node.data || !obj.node.data.type) type = "http://www.w3.org/2004/02/skos/core#Concept";
-        else type = obj.node.data.type;
+    self.editjstreeNode = function (_event, obj, initData) {
         self.editNode("SourceEditor_mainDiv", MainController.currentSource, obj.node, initData);
     };
 
@@ -132,7 +129,7 @@ var SourceEditor = (function () {
             [
                 //initClassPropsAndAnnotations for type
                 function (callbackSeries) {
-                    OwlSchema.getClassDescription(source, type, function (err, result) {
+                    OwlSchema.getClassDescription(source, type, function (err, _result) {
                         return callbackSeries(err);
                     });
                 },
@@ -188,7 +185,7 @@ var SourceEditor = (function () {
                     return callbackSeries();
                 },
                 //draw node data
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     $("#" + divId).html("");
                     $("#" + divId).load("snippets/sourceEditor.html", function () {
                         $("#SourceEditor_mainDiv").css("display", "block");
@@ -231,7 +228,7 @@ var SourceEditor = (function () {
      * @param editingObject
      * @return {string}
      */
-    self.drawObjectValue = function (metaType, key, editingObject, parentDiv, focus, newValue) {
+    self.drawObjectValue = function (metaType, key, editingObject, parentDiv, _focus, newValue) {
         var type = editingObject.type;
         var values = [];
         if (newValue) {
@@ -246,7 +243,7 @@ var SourceEditor = (function () {
 
         var keyLabel = editingObject[metaType][key].label;
         var html = "";
-        values.forEach(function (value, indexValue) {
+        values.forEach(function (value, _indexValue) {
             var langStr = "";
             if (value["xml:lang"]) {
                 langStr = "<input class='SourceEditor_lang' value='" + value["xml:lang"] + "'>";
@@ -307,7 +304,7 @@ var SourceEditor = (function () {
 
         self.editingObject.errors = [];
 
-        $(".SourceEditor_input_TR").each(function (e, x) {
+        $(".SourceEditor_input_TR").each(function (_e, _x) {
             predicate = $(this).attr("id").substring(17);
 
             var value = $(this).find(".SourceEditor_value").val();
@@ -348,7 +345,7 @@ var SourceEditor = (function () {
             });
         }
 
-        Sparql_generic.update(self.editingObject.source, triples, function (err, result) {
+        Sparql_generic.update(self.editingObject.source, triples, function (err, _result) {
             if (err) {
                 MainController.UI.message(err);
                 if (callback) return callback(err);
@@ -379,7 +376,7 @@ var SourceEditor = (function () {
             .get_node(self.editingObject.about).children;
         if (children.length > 0) return alert("cannot delete node with children");
 
-        Sparql_generic.deleteTriples(MainController.currentSource, self.editingObject.about, null, null, function (err, result) {
+        Sparql_generic.deleteTriples(MainController.currentSource, self.editingObject.about, null, null, function (err, _result) {
             if (err) MainController.UI.message(err);
             $("#" + SourceBrowser.currentTargetDiv)
                 .jstree(true)

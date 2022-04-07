@@ -5,7 +5,6 @@ var KGassetGraph = (function () {
     self.getAssetGlobalMappings = function (assetLabel, callback) {
         if (!assetLabel) assetLabel = $("#KGmappings_DatabaseSelect").val();
 
-        var assetMappings = {};
         var builtClasses = {};
         var visjsData = { nodes: [], edges: [] };
         var predicates = {};
@@ -28,7 +27,7 @@ var KGassetGraph = (function () {
                         url: Config.apiUrl + "/kg/assets/" + assetLabel,
                         dataType: "json",
 
-                        success: function (data, textStatus, jqXHR) {
+                        success: function (data, _textStatus, _jqXHR) {
                             mappingsData = data;
                             return callbackSeries();
                         },
@@ -56,8 +55,6 @@ var KGassetGraph = (function () {
                     });
 
                     mappingsData.mappings.forEach(function (mapping) {
-                        if (mapping.subject.indexOf("functionalclass") > -1) var x = 3;
-
                         if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                             if (!classes[mapping.subject]) classes[mapping.subject] = mapping.object;
                         }
@@ -268,27 +265,16 @@ var KGassetGraph = (function () {
             if (err) return MainController.UI.message(err);
             var visjsData = result.visjsData;
             var options = {
-                selectNodeFn: function (node, event) {
+                selectNodeFn: function (node, _event) {
                     if (node) self.currentNode = node;
                 },
-                //  onRightClickFn: self.graphActions.showGraphPopupMenu,
                 keepNodePositionOnDrag: 1,
                 simulationTimeOut: 10000,
-
-                /*    "physics": {
-                        "barnesHut": {
-                            "gravitationalConstant": -34200,
-                            "centralGravity": 0.35,
-                            "springLength": 400
-                        },
-                        "minVelocity": 0.75
-                    }*/
             };
             $("#KGassetGraphDiv").dialog("option", "title", "Global Tables mappings");
             $("#KGassetGraphDiv").dialog("open");
             setTimeout(function () {
                 $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>");
-                // $("#mainDialogDiv").height()
                 visjsGraph.draw("KGmappings_GlobalGraph", visjsData, options);
                 visjsGraph.network.fit();
             });
@@ -312,8 +298,6 @@ var KGassetGraph = (function () {
             [
                 //get adl types Stats
                 function (callbackSeries) {
-                    var filterClassesStr = "";
-
                     self.buildClasses = {};
                     KGassetGraph.getBuiltMappingsStats(source, function (err, result) {
                         if (err) return callbackSeries(err);
@@ -327,11 +311,10 @@ var KGassetGraph = (function () {
                         return callbackSeries();
                     }
 
-                    KGassetGraph.getAssetGlobalMappings(source, function (err, result) {
+                    KGassetGraph.getAssetGlobalMappings(source, function (_err, result) {
                         KGbrowserCustom.initsuperClassesPalette();
                         self.model = result.model;
                         for (var predicate in result.predicates) {
-                            if (predicate.indexOf("REQ") > -1) var x = 0;
                             for (var subject in result.predicates[predicate]) {
                                 if (!self.buildClasses[subject]) {
                                     //var color = Lineage_classes.getPropertyColor(subject)
@@ -371,14 +354,10 @@ var KGassetGraph = (function () {
 
                 function (callbackSeries) {
                     var existingNodes = {};
-                    var newParents = [];
-                    var topNodeId;
                     for (var subject in self.classes) {
                         if (subject.indexOf("xsd:") < 0) {
                             if (!existingNodes[subject]) {
                                 existingNodes[subject] = 1;
-                                var countStr = "";
-                                if (self.buildClasses[subject]) countStr = " (" + self.buildClasses[subject].count + ")";
                                 var label = self.model[subject].label; //+ countStr;
                                 var color = options.nodeColor || self.buildClasses[subject].color;
                                 if (!options.nodeColor) self.model[subject].color = color;
@@ -389,15 +368,11 @@ var KGassetGraph = (function () {
                                     color = "#ffe0aa";
                                 }
 
-                                // var imageUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[subject].group.toLowerCase() + ".png"
                                 var obj = {
                                     id: subject,
                                     label: label,
                                     shape: shape,
-                                    //image: imageUrl,
-                                    // size:25,
                                     imagePadding: 3,
-                                    //  shape: "circularImage",
                                     font: { bold: true, size: 18, color: color },
                                     fixed: true,
                                     color: color,
@@ -429,20 +404,12 @@ var KGassetGraph = (function () {
                                             font: { bold: false, ital: 1, size: 12, color: "#aaa" },
                                             label: predicateLabel,
                                             arrows: { to: true },
-                                            /*   smooth: {
-                                                type: "cubicBezier",
-                                                forceDirection: "vertical",
-
-                                                roundness: 0.4,
-                                            }*/
                                         });
                                     }
 
                                     if (!existingNodes[object]) {
                                         existingNodes[object] = 1;
                                         var label = self.model[object].label;
-                                        var countStr = "";
-                                        if (self.buildClasses[subject]) countStr = " (" + self.buildClasses[subject].count + ")";
                                         var color = options.nodeColor || self.buildClasses[object].color;
                                         if (!options.nodeColor) self.model[object].color = color;
                                         var shape = "box";
@@ -450,16 +417,13 @@ var KGassetGraph = (function () {
                                             shape = "star";
                                             color = "#ffe0aa";
                                         }
-                                        // var imageUrl = KGbrowserCustom.iconsDir + KGbrowserCustom.superClassesMap[object].group.toLowerCase() + ".png"
                                         visjsData.nodes.push({
                                             id: object,
                                             label: label,
                                             shape: shape,
                                             imagePadding: 3,
                                             color: color,
-                                            // image: imageUrl,
                                             fixed: true,
-                                            //  shape: "circularImage",
                                             font: { bold: true, size: 18, color: color },
                                             data: {
                                                 id: object,
@@ -484,12 +448,9 @@ var KGassetGraph = (function () {
                 options.keepNodePositionOnDrag = true;
                 options.layoutHierarchical = {
                     direction: "UD",
-                    //   levelSeparation: 50,
                     nodeSpacing: 150,
                     levelSeparation: 100,
                     sortMethod: "hubsize",
-                    //  sortMethod:"directed",
-                    //   shakeTowards:"roots"
                 };
 
                 if (!graphDiv) {
@@ -498,7 +459,6 @@ var KGassetGraph = (function () {
                     $("#KGassetGraphDiv").dialog("open");
                     setTimeout(function () {
                         $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>");
-                        // $("#mainDialogDiv").height()
 
                         if (visjsData.nodes.length < Config.KG.browserMaxClassesToDrawClassesGraph) {
                             visjsGraph.draw(graphDiv, visjsData, options);
@@ -506,8 +466,6 @@ var KGassetGraph = (function () {
                         }
                     });
                 } else {
-                    //  $("#KGassetGraphDiv").html("<div id='KGmappings_GlobalGraph' style='width:100%;height:90%'></div>")
-                    // $("#mainDialogDiv").height()
                     if (visjsData.nodes.length < Config.KG.browserMaxClassesToDrawClassesGraph) {
                         visjsGraph.draw(graphDiv, visjsData, options);
                         visjsGraph.network.fit();
@@ -604,7 +562,7 @@ var KGassetGraph = (function () {
                                 callbackEach();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             ids.forEach(function (id) {
                                 if (!model[id]) model[id] = { label: Sparql_common.getLabelFromURI(id) };
                             });

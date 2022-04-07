@@ -10,7 +10,6 @@
 
 var Blender = (function () {
     var self = {};
-    var isLoaded = false;
     self.modifiedNodes = [];
     self.tempGraph;
     self.availableSources = [];
@@ -39,7 +38,7 @@ var Blender = (function () {
                 url: Config.serverUrl,
                 data: payload,
                 dataType: "json",
-                success: function (data, textStatus, jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     for (var key in data) {
                         Config.sources[key] = data[key];
                     }
@@ -64,7 +63,7 @@ var Blender = (function () {
                         modal: true,
                     });
                     $("#Blender_tabs").tabs({
-                        activate: function (event, ui) {
+                        activate: function (_event, _ui) {
                             self.currentTab = $("#Blender_tabs").tabs("option", "active");
                         },
                     });
@@ -92,12 +91,11 @@ var Blender = (function () {
         }
 
         self.currentSource = source;
-        //  MainController.searchedSource = self.currentSource
 
         async.series(
             [
                 function (callbackSeries) {
-                    OwlSchema.initSourceSchema(source, function (err, result) {
+                    OwlSchema.initSourceSchema(source, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -118,7 +116,7 @@ var Blender = (function () {
                         },
                     };
 
-                    Sparql_generic.copyGraph(source, Config.sources[self.currentSource].graphUri, function (err, result) {
+                    Sparql_generic.copyGraph(source, Config.sources[self.currentSource].graphUri, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -126,11 +124,11 @@ var Blender = (function () {
                 function (callbackSeries) {
                     if (Blender.currentSource)
                         if (Config.Blender.openTaxonomyTreeOnLoad && Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) {
-                            self.showFilteredTaxonomyTree(Config.Blender.openTaxonomyTreeOnLoad, function (err, result) {
+                            self.showFilteredTaxonomyTree(Config.Blender.openTaxonomyTreeOnLoad, function (err, _result) {
                                 callbackSeries(err);
                             });
                         } else {
-                            self.showTopConcepts(null, function (err, result) {
+                            self.showTopConcepts(null, function (err, _result) {
                                 callbackSeries(err);
                             });
                         }
@@ -168,7 +166,7 @@ var Blender = (function () {
 
         var newGraphUri = prompt("newGraphUri");
         if (newGraphUri && newGraphUri != "")
-            Sparql_generic.copyGraph(self.currentSource, newGraphUri, function (err, result) {
+            Sparql_generic.copyGraph(self.currentSource, newGraphUri, function (err, _result) {
                 if (err) return MainController.UI.message(err);
                 MainController.UI.message("graph Copied");
             });
@@ -201,7 +199,7 @@ var Blender = (function () {
     };
 
     (self.dnd = {
-        drag_start: function (data, element, helper, event) {
+        drag_start: function (_data, element, _helper, _event) {
             // Blender.currentDNDstartNodeParentId=Blender.currentTreeNode.parent
             Blender.currentDNDstartNodeId = element.data.nodes[0];
 
@@ -210,16 +208,16 @@ var Blender = (function () {
 
             return true;
         },
-        drag_move: function (data, element, helper, event) {
+        drag_move: function (_data, _element, _helper, _event) {
             return false;
         },
-        drag_stop: function (data, element, helper, event) {
+        drag_stop: function (_data, _element, _helper, _event) {
             if (!Blender.currentDNDoperation) return false;
             var currentNodeLevel = Blender.currentDNDoperation.parent.parents.length;
             var allowedLevels = Config.currentProfile.blender.contextMenuActionStartLevel;
             if (currentNodeLevel < allowedLevels) return false;
 
-            Blender.menuActions.dropNode(function (err, result) {
+            Blender.menuActions.dropNode(function (_err, _result) {
                 return true;
             });
             return true;
@@ -241,7 +239,7 @@ var Blender = (function () {
             return true;
         },
     }),
-        (self.selectTreeNodeFn = function (event, propertiesMap) {
+        (self.selectTreeNodeFn = function (_event, propertiesMap) {
             if (propertiesMap) {
                 self.currentTreeNode = propertiesMap.node;
                 $("#Blender_conceptTreeDiv").jstree(true).settings.contextmenu.items = self.getJstreeConceptsContextMenu();
@@ -270,10 +268,7 @@ var Blender = (function () {
                         propertiesMap.event
                     );
                 }
-
-                // if (false && self.currentTreeNode.children.length == 0) ExternalReferences.openNarrowMatchNodes(self.currentSource, self.currentTreeNode);
             }
-            //  $.jstree.defaults.contextmenu.items = self.getJstreeConceptsContextMenu();
         });
 
     self.getJstreeConceptsContextMenu = function () {
@@ -288,13 +283,13 @@ var Blender = (function () {
         if (currentNodeLevel < allowedLevels) {
             menuItems.forbidden = {
                 label: "!...",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     alert("Modifications not allowed at this level");
                 },
             };
             menuItems.nodeInfos = {
                 label: "Show Node infos",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv");
                 },
             };
@@ -325,41 +320,18 @@ var Blender = (function () {
                                 self.menuActions.pasteClipboardNodes(null, 0);
                             },
                         },
-                        /*   pasteProperties: {
-                                   label: "some properties...",
-                                   action: function () {
-                                       self.menuActions.pasteClipboardNodeProperties()
-                                       ;
-                                   },
-                               }
-                               ,*/
                         pasteDescendants: {
                             label: "<span class='blender_pasteNode'>descendants</span>",
-                            action: function (obj, sss, cc) {
+                            action: function (_obj, _sss, _cc) {
                                 self.menuActions.pasteClipboardNodes(null, Config.Blender.pasteDescendantsMaxDepth);
                             },
                         },
-                        /*  pasteAsReference: {
-                                  label: " reference",
-                                  action: function (obj, sss, cc) {
-                                      ExternalReferences.pasteAsReference()
-                                      ;
-                                  },
-                              },*/
-
-                        /*   pasteAscendants: {
-                                   label: "ascendants",
-                                   action: function (obj, sss, cc) {
-                                       self.menuActions.pasteClipboardNodeAscendants()
-                                       ;
-                                   },
-                               }*/
                     },
                 };
             } else if (clipboard.length > 0 && clipboard[0].type == "word") {
                 menuItems.pasteDescendants = {
                     label: " create concept " + Clipboard.getContent()[0].text,
-                    action: function (obj, sss, cc) {
+                    action: function (_obj, _sss, _cc) {
                         self.menuActions.createConceptFromWord();
                     },
                 };
@@ -367,35 +339,35 @@ var Blender = (function () {
 
             menuItems.editNode = {
                 label: "Edit node",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     self.nodeEdition.editNode("concept");
                 },
             };
 
             menuItems.deleteNode = {
                 label: "Delete node",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     self.menuActions.deleteNode("concept");
                 },
             };
 
             menuItems.copyNode = {
                 label: "Copy Node",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     self.menuActions.copyNode("concept");
                 },
             };
 
             menuItems.cutNode = {
                 label: "Cut Node",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     self.menuActions.cutNode("concept");
                 },
             };
 
             menuItems.addChildNodeNode = {
                 label: "Create child",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     self.nodeEdition.createChildNode(null, "concept");
                 },
             };
@@ -413,7 +385,7 @@ var Blender = (function () {
     };
 
     self.menuActions = {
-        toCollection: function (event) {
+        toCollection: function (_event) {
             Collection.currentCandidateNode = self.currentTreeNode;
             $("#Blender_tabs").tabs("option", "active", 1);
         },
@@ -435,7 +407,7 @@ var Blender = (function () {
             }
 
             function execMoveQuery(subject, broaderPredicate, oldParentId, newParentId, callback) {
-                Sparql_generic.deleteTriples(self.currentSource, subject, broaderPredicate, oldParentId, function (err, result) {
+                Sparql_generic.deleteTriples(self.currentSource, subject, broaderPredicate, oldParentId, function (err, _result) {
                     if (err) {
                         return callback(err);
                     }
@@ -445,7 +417,7 @@ var Blender = (function () {
                         object: newParentId,
                         valueType: "uri",
                     };
-                    Sparql_generic.insertTriples(self.currentSource, [triple], null, function (err, result) {
+                    Sparql_generic.insertTriples(self.currentSource, [triple], null, function (err, _result) {
                         if (err) {
                             callback(err);
                         }
@@ -454,7 +426,7 @@ var Blender = (function () {
                 });
             }
 
-            function processCallBack(err, result) {
+            function processCallBack(err, _result) {
                 if (err) {
                     MainController.UI.message(err);
                     return false;
@@ -481,7 +453,7 @@ var Blender = (function () {
                             object: nodeData.id,
                             valueType: "uri",
                         };
-                        Sparql_generic.insertTriples(self.currentSource, [triple], null, function (err, result) {
+                        Sparql_generic.insertTriples(self.currentSource, [triple], null, function (err, _result) {
                             if (err) {
                                 callback(err);
                             }
@@ -528,7 +500,7 @@ var Blender = (function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                var subjectsIds = result.forEach(function (item) {
+                                result.forEach(function (item) {
                                     nodeIdsToDelete.push(item.narrower.value);
                                 });
                                 callbackSeries();
@@ -543,7 +515,7 @@ var Blender = (function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                var subjectsIds = result.forEach(function (item) {
+                                result.forEach(function (item) {
                                     nodeIdsToDelete.push(item.narrower.value);
                                 });
                                 callbackSeries();
@@ -551,7 +523,7 @@ var Blender = (function () {
                         },
 
                         function (callbackSeries) {
-                            Sparql_generic.deleteTriples(self.currentSource, nodeIdsToDelete, null, null, function (err, result) {
+                            Sparql_generic.deleteTriples(self.currentSource, nodeIdsToDelete, null, null, function (err, _result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -562,7 +534,7 @@ var Blender = (function () {
                             // delete members triple in parentNode
                             if (type == "concept") return callbackSeries();
 
-                            Sparql_generic.deleteTriples(self.currentSource, node.parent, "http://www.w3.org/2004/02/skos/core#member", node.data.id, function (err, result) {
+                            Sparql_generic.deleteTriples(self.currentSource, node.parent, "http://www.w3.org/2004/02/skos/core#member", node.data.id, function (err, _result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
@@ -592,7 +564,7 @@ var Blender = (function () {
             }
         },
 
-        cutNode: function (type) {
+        cutNode: function (_type) {
             Clipboard.copy(
                 {
                     type: "node",
@@ -606,7 +578,7 @@ var Blender = (function () {
                 event
             );
         },
-        copyNode: function (type) {
+        copyNode: function (_type) {
             Clipboard.copy(
                 {
                     type: "node",
@@ -626,9 +598,6 @@ var Blender = (function () {
             if (!options) {
                 options = {};
             }
-            var oldId;
-            var newId;
-            var label;
             var cancel = false;
 
             var toParentNode;
@@ -654,7 +623,7 @@ var Blender = (function () {
                 }
                 var query = " WITH GRAPH  <" + targetSourceObj.graphUri + ">  INSERT DATA {" + triples + "  }";
                 var url = Config.sources[toParentNode.source].sparql_server.url + "?format=json&query=";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: toParentNode.source }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: toParentNode.source }, function (err, _result) {
                     if (err) {
                         return MainController.UI.message(err);
                     }
@@ -677,7 +646,7 @@ var Blender = (function () {
                         [
                             function (callbackSeries) {
                                 if (depth > 0) MainController.UI.message("searching node and its children");
-                                Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (err, result) {
+                                Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (_err, result) {
                                     sourceNodesId[fromNodeData.id] = 1;
                                     result.forEach(function (item) {
                                         if (!sourceNodesId[item.concept.value]) {
@@ -701,7 +670,6 @@ var Blender = (function () {
                             //check nodes with same label in target taxonomy
                             function (callbackSeries) {
                                 if (fromDataArray[0].cut) return callbackSeries();
-                                var fromIds = Object.keys(sourceNodesId);
                                 var filterStr = Sparql_common.setFilter("concept", null, Object.keys(sourceNodesLabels), null, { exactMatch: true });
                                 Sparql_generic.getItems(toParentNode.source, { filter: filterStr }, function (err, result) {
                                     if (err) return callbackSeries(err);
@@ -757,7 +725,7 @@ var Blender = (function () {
                                 };
 
                                 MainController.UI.message("copying " + fromIds.length + " nodes from source " + fromNodeData.source + " in source " + toParentNode.source);
-                                Sparql_generic.copyNodes(fromNodeData.source, toGraphUri, fromIds, options, function (err, result) {
+                                Sparql_generic.copyNodes(fromNodeData.source, toGraphUri, fromIds, options, function (err, _result) {
                                     if (err) {
                                         alert(err);
                                         return callbackSeries();
@@ -772,12 +740,12 @@ var Blender = (function () {
                                 });
                             },
                         ],
-                        function (err) {
+                        function (_err) {
                             return callbackEach();
                         }
                     );
                 },
-                function (err) {
+                function (_err) {
                     if (callback) return callback();
                     else {
                         if (!cancel) MainController.UI.message("nodes copied");
@@ -878,7 +846,6 @@ var Blender = (function () {
                 }
                 ,*/
         pasteClipboardNodeProperties: function () {
-            var data = Clipboard.getContent();
             Clipboard.clear();
         },
         createConceptFromWord: function () {
@@ -966,15 +933,12 @@ var Blender = (function () {
             var parentNode;
             var parentProperty;
             var mandatoryProps;
-            var childClass;
-            var treeDivId;
 
             if (type == "concept") {
                 parentNode = self.currentTreeNode;
                 parentProperty = OwlSchema.currentSourceSchema.newObject.treeParentProperty;
                 mandatoryProps = OwlSchema.currentSourceSchema.newObject.mandatoryProperties;
                 //childClass = OwlSchema.currentSourceSchema.newObject.treeChildrenClasses[parentNode.data.type];
-                treeDivId = "Blender_conceptTreeDiv";
                 type = "http://www.w3.org/2004/02/skos/core#Concept";
                 if (self.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#ConceptScheme")
                     initData["http://www.w3.org/2004/02/skos/core#topConceptOf"] = [
@@ -1001,8 +965,6 @@ var Blender = (function () {
                 type = "http://www.w3.org/2004/02/skos/core#Collection";
                 parentProperty = "^" + Collection.broaderProperty;
                 mandatoryProps = ["http://www.w3.org/2004/02/skos/core#prefLabel"];
-                childClass = "http://www.w3.org/2004/02/skos/core#Collection";
-                treeDivId = "Blender_collectionTreeDiv";
                 initData["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"] = [
                     {
                         value: "http://www.w3.org/2004/02/skos/core#Collection",
@@ -1027,7 +989,6 @@ var Blender = (function () {
         openDialog: function () {
             $("#Blender_PopupEditDiv").dialog("open");
 
-            /*  $(".ui-dialog-titlebar-close").css("display", "none")*/
             $("#Blender_PopupEditButtonsDiv").css("display", "block");
         },
 
@@ -1048,19 +1009,15 @@ var Blender = (function () {
                     return false;
                 }
 
-                var treeDiv, currentNodeId;
-                currentNodeId = "#";
+                var treeDiv;
 
                 if (editingObject.type.indexOf("Concept") > 0) {
                     treeDiv = "Blender_conceptTreeDiv";
-                    if (Blender.currentTreeNode) currentNodeId = Blender.currentTreeNode.data.id;
                 }
                 if (editingObject.type.indexOf("Collection") > 0) {
                     treeDiv = "Blender_collectionTreeDiv";
-                    if (Collection.currentTreeNode) currentNodeId = Collection.currentTreeNode.data.id;
                 }
 
-                // var parent = editingObject.parent || "#"
                 var parentNode = $("#" + treeDiv)
                     .jstree(true)
                     .get_selected(true)[0];
@@ -1082,7 +1039,6 @@ var Blender = (function () {
                     ];
 
                     common.jstree.addNodesToJstree(treeDiv, parentNode, jsTreeData, {});
-                    //  $("#" + treeDiv).jstree(true).open_node(currentNodeId);
                 } else {
                     if (editingObject.nodeLabel) {
                         var nodeJstreeId = $("#" + treeDiv)
@@ -1092,9 +1048,6 @@ var Blender = (function () {
                         $("#" + treeDiv)
                             .jstree(true)
                             .rename_node(nodeJstreeId, editingObject.nodeLabel);
-                        /*   var parentNodeId = $("#" + treeDiv).jstree(true).get_selected(true)[0]
-                               parentNodeId=parentNodeId.parent
-                               $("#" + treeDiv).jstree(true).refresh_node(parentNodeId)*/
 
                         common.jstree.setTreeAppearance();
                     }
@@ -1236,17 +1189,14 @@ var Blender = (function () {
                 var orphanBroaders = [];
                 for (var key in dataMap) {
                     var id;
-                    var jsTreeId;
                     var parent;
                     var item = dataMap[key];
                     if (item.broader) {
-                        jsTreeId = key + common.getRandomHexaId(3);
                         id = key;
                         parent = item.broader;
                         if (!dataMap[parent]) orphanBroaders.push(parent);
                     } else {
                         parent = "#";
-                        jsTreeId = item.broader + common.getRandomHexaId(3);
                         id = key;
                     }
                     jstreeData.push({
@@ -1272,8 +1222,6 @@ var Blender = (function () {
 
     self.sourcesManager = {
         setSourceUriPrefixValue: function () {
-            var oldUri = $("#blenderNewSource_resourceGraphUriInput").val();
-            // if(oldUri=="")
             var name = $("#blenderNewSource_resourceNameInput").val();
             name = Sparql_common.formatStringForTriple(name, true);
             var uri = Config.defaultNewUriRoot + name + "/";
@@ -1332,8 +1280,8 @@ var Blender = (function () {
                 url: Config.serverUrl,
                 data: payload,
                 dataType: "json",
-                success: function (data, textStatus, jqXHR) {
-                    self.onLoaded(function (err) {
+                success: function (_data, _textStatus, _jqXHR) {
+                    self.onLoaded(function (_err) {
                         self.onSourceSelect(name);
                         $("#Blender_SourcesSelect").val(name);
                     });
@@ -1364,15 +1312,14 @@ var Blender = (function () {
                         url: Config.serverUrl,
                         data: payload,
                         dataType: "json",
-                        success: function (data, textStatus, jqXHR) {
+                        success: function (_data, _textStatus, _jqXHR) {
                             $('#Blender_SourcesSelect option[value="' + source + '"]').remove();
 
                             common.jstree.clear("Blender_conceptTreeDiv");
                         },
                         error: function (err) {
                             alert("cannot delete source");
-                            // eslint-disable-next-line no-console
-                            console.log(err);
+                            console.error(err);
                         },
                     });
                 }

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var KGbrowserDataTable = (function () {
     var self = {};
 
@@ -13,7 +14,7 @@ var KGbrowserDataTable = (function () {
             keys[key] = 1;
             keys[key + "Label"] = 1;
         });
-        data.data.forEach(function (item, indexRow) {
+        data.data.forEach(function (item, _indexRow) {
             var line = [];
             for (var key in keys) {
                 if (item[key]) line.push(item[key].value);
@@ -22,7 +23,6 @@ var KGbrowserDataTable = (function () {
             dataSet.push(line);
         });
 
-        //  $("#KGquery_tabs").tabs("option", "active", 1);
         $("#mainDialogDiv").dialog("open");
 
         $("#mainDialogDiv").html("<table id='dataTableDiv'></table>");
@@ -30,12 +30,8 @@ var KGbrowserDataTable = (function () {
             $("#dataTableDiv").DataTable({
                 data: dataSet,
                 columns: cols,
-                // async: false,
                 pageLength: 10,
                 dom: "Bfrtip",
-                /*buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ]*/
                 buttons: [
                     {
                         extend: "csvHtml5",

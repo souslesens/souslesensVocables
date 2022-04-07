@@ -7,14 +7,14 @@ var Lineage_projectedGraphs = (function () {
 
         items.openGraph = {
             label: "open graph",
-            action: function (e) {
+            action: function (_e) {
                 Lineage_projectedGraphs.openGraph();
             },
         };
 
         items.openGraph = {
             label: "open graph",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 Lineage_projectedGraphs.openGraph();
             },
@@ -23,8 +23,8 @@ var Lineage_projectedGraphs = (function () {
         return items;
     };
 
-    self.initProjectedGraphs = function (callback) {
-        Sparql_OWL.getGraphsByRegex(Config.sources[Lineage_classes.mainSource].graphUri, function (err, result) {
+    self.initProjectedGraphs = function (_callback) {
+        Sparql_OWL.getGraphsByRegex(Config.sources[Lineage_classes.mainSource].graphUri, function (_err, result) {
             var projectedGraphs = {};
 
             result.forEach(function (item) {
@@ -65,10 +65,6 @@ var Lineage_projectedGraphs = (function () {
                     });
                 }
             }
-
-            var options = {};
-
-            // common.fillSelectOptions("LineageRelations_projectedGraphsSelect", Object.keys(self.projectedGraphs), true)
         });
     };
 

@@ -1,7 +1,6 @@
 /**
  * Created by claud on 23/11/2017.
  */
-var paintAccordion;
 var GraphHighlight = (function () {
     var self = {};
     self.colorsPalette;
@@ -13,7 +12,6 @@ var GraphHighlight = (function () {
     self.initialNodesattrs = {};
     self.initialLinksattrs = {};
     self.currentHighlightProperty = null;
-    var currentAction = "";
 
     var clickedLegendItem = false;
     var scale;
@@ -73,7 +71,7 @@ var GraphHighlight = (function () {
             var color = self.colorsPalette(i);
             $("#" + divId).append("<div style='background-color:" + color + ";' class='colorPaletteSquare'>");
         }
-        $(".colorPaletteSquare").on("click", function (e) {
+        $(".colorPaletteSquare").on("click", function (_e) {
             self.currentColor = $(this).css("background-color");
             self.paintAll();
         });
@@ -100,7 +98,6 @@ var GraphHighlight = (function () {
             // domain = d3.scaleLinear().domain([min, max]).nice().range([0, nClasses]);
             // if (false && d3.scaleLinear) scale = d3.scale.linear().domain().interpolator(d3.interpolateRainbow);
             //  scale = d3.scaleLinear().domain().interpolator(d3.interpolateRainbow);
-            var xx = d3.scale.quantize().domain([min, max]);
             scale = d3.scale.quantize().domain([min, max]).range(palette);
 
             // scale = d3.scale.quantize().domain([min, max]).nice().range(palette);
@@ -119,12 +116,10 @@ var GraphHighlight = (function () {
     self.paintClasses = function (property) {
         var nClasses = palettes[palettes.length - 1].length; // parseInt($("#paintDialog_NclassesInput").val());
         var palette = palettes[nClasses];
-        var size = Config.visjs.defaultNodeSize; // parseInt($("#paintDialog_circleRadiusInput").val() * 2);
         self.currentHighlightProperty = property;
 
         if (property == "") {
             $("#GraphHighlight_legendDiv").html("").css("visibility", "hidden");
-            var targetNodes = [];
             var nodes = visjsGraph.data.nodes.get();
             nodes.forEach(function (node) {
                 (node.color = node.initialColor), (node.shape = node.shape || Config.visjs.defaultNodeShape), (node.hidden = false);
@@ -150,7 +145,6 @@ var GraphHighlight = (function () {
                         color = d3Scale(item.highlightedProperty);
                         color = self.rgb2hex(color);
                     } else {
-                        var index = Math.round(domain(data[i].highlightedProperty));
                         color = d3Scale(item.highlightedProperty);
                         color = self.rgb2hex(color);
                     }
@@ -166,15 +160,13 @@ var GraphHighlight = (function () {
         self.drawPaletteColorLegend(scale, domain, palette, nClasses, ordinalLegendMap);
     };
 
-    self.drawPaletteColorLegend = function (scale, domain, palette, nClasses, ordinalLegendMap) {
+    self.drawPaletteColorLegend = function (scale, domain, _palette, nClasses, ordinalLegendMap) {
         $("#GraphHighlight_legendDiv").html("").css("visibility", "visible");
 
         var ticks;
-        var type;
         ticksColors = [];
 
         if (domain.ticks) {
-            type = "linear";
             ticks = domain.ticks(nClasses);
             //  ticks = scale.ticks(nClasses);
             for (var i = 0; i < ticks.length; i++) {
@@ -194,8 +186,6 @@ var GraphHighlight = (function () {
         str += "<hr>";
 
         color;
-        var shapes = ["dot", "diamond", "triangle", "trangleDown", "square", "star"];
-        var shapeIndex = 0;
         for (i = 0; i < ticksColors.length; i++) {
             var onClick = " onclick='GraphHighlight.onLegendItemClick(\"" + ticksColors[i].tick + "\")'";
 
@@ -237,7 +227,6 @@ var GraphHighlight = (function () {
         var radius = $("#paintDialog_circleRadiusInput").val();
         var property = $("#propertiesSelectionDialog_propertySelect").val();
         var value = $("#propertiesSelectionDialog_valueInput").val();
-        var filterObjectType = $("#propertiesSelectionDialog_ObjectTypeInput").val();
         var operator = $("#propertiesSelectionDialog_operatorSelect").val();
         var type = $("#propertiesSelectionDialog_NodeLabelInput").val();
         // self.currentLabel = $("#paintDialog_labelSelect").val();
@@ -316,10 +305,8 @@ var GraphHighlight = (function () {
     };
 
     self.onActionTypeSelect = function (action) {
-        currentAction = action;
         if (action == "outline") {
             //outline
-            //   $("#paintDialogAction").css("visibility", "visible");
             $("#paintDialogPaletteDiv").css("visibility", "visible");
             $("#paintDialogPropDiv").css("visibility", "visible");
             $("#paintDialog_classesDiv").css("visibility", "hidden");
@@ -343,7 +330,6 @@ var GraphHighlight = (function () {
             $("#paintDialogPropDiv").css("visibility", "visible");
             $("#paintDialogPaletteDiv").css("visibility", "hidden");
             $("#paintDialog_GraphicAttrsDiv").css("visibility", "visible");
-            // $("#paintDialog_classesDiv").css("visibility", "visible");
         }
     };
 
@@ -406,7 +392,7 @@ var GraphHighlight = (function () {
                         }
                         return false; // the color is fully defined in the node.
                     },
-                    processProperties: function (clusterOptions, childNodes, childEdges) {
+                    processProperties: function (clusterOptions, childNodes, _childEdges) {
                         var totalMass = 0;
                         for (var i = 0; i < childNodes.length; i++) {
                             totalMass += childNodes[i].mass;
@@ -448,7 +434,6 @@ var GraphHighlight = (function () {
         for (i = 1; i < ticksColors.length; i++) {
             clusterSize = ticksColors[i].size;
             var size = logScale(ticksColors[i].size);
-            // size=size/10
             // eslint-disable-next-line no-console
             console.log(clusterSize + "  " + size);
             visjsGraph.nodesDS.update({
@@ -475,12 +460,10 @@ var GraphHighlight = (function () {
         if (!currentClusterProperty || currentClusterProperty == "") return;
         $("#paint_unClusterButton").css("visibility", "hidden");
 
-        var x = visjsGraph.network;
-
         for (var i = 1; i < ticksColors.length; i++) {
             var tickColor = ticksColors[i].color;
             visjsGraph.network.openCluster("cluster:" + tickColor, {
-                releaseFunction: function (clusterPosition, containedNodesPositions) {
+                releaseFunction: function (_clusterPosition, containedNodesPositions) {
                     return containedNodesPositions;
                 },
             });
@@ -496,9 +479,6 @@ var GraphHighlight = (function () {
             for (var key in props) if (properties.indexOf(key) < 0) properties.push(key);
         }
         properties.sort();
-        /*   if (paintDialog_highlightPropertySelect)
-                   common.fillSelectOptionsWithStringArray(paintDialog_highlightPropertySelect, properties,true);
-               common.fillSelectOptionsWithStringArray(paint_showNodeNamesForLabelSelect, GraphFilter.currentLabels,true);*/
     };
 
     self.dispatchAction = function (action) {
@@ -508,13 +488,13 @@ var GraphHighlight = (function () {
 
         if (action == "openCluster") {
             visjsGraph.network.openCluster(context.currentNode.id, {
-                releaseFunction: function (clusterPosition, containedNodesPositions) {
+                releaseFunction: function (_clusterPosition, containedNodesPositions) {
                     return containedNodesPositions;
                 },
             });
         } else if (action == "graphClusterNodes") {
             var nodeIds = visjsGraph.network.getNodesInCluster(context.currentNode.id);
-            buildPaths.getWhereClauseFromArray("_id", nodeIds, function (err, result) {
+            buildPaths.getWhereClauseFromArray("_id", nodeIds, function (_err, _result) {
                 toutlesensController.generateGraph(
                     null,
                     {

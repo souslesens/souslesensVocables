@@ -16,7 +16,7 @@ var authentication = (function () {
     self.userIndexes = [];
     self.currentUser = {};
 
-    self.init = function (activate) {
+    self.init = function (_activate) {
         // Redirect to login if user is not logged
         $.ajax({
             type: "GET",

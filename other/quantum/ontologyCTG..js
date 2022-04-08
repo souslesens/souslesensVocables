@@ -78,7 +78,7 @@ var ontologyCTG = {
                         callbackSeries();
                     });
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     jsonArray = dataArray;
 
                     var quantumMap = {};
@@ -156,7 +156,7 @@ var ontologyCTG = {
                         strEntities += "<http://data.total.com/resource/ontology/ctg/EntityType/" + key + '> <http://www.w3.org/2000/01/rdf-schema#label> "' + key + '"@en .\n';
                     }
 
-                    jsonArray.forEach(function (item, index) {
+                    jsonArray.forEach(function (item, _index) {
                         var docId;
 
                         var paragraphUrl = "<http://data.total.com/resource/ontology/ctg/Paragraph/" + item.ID + ">";
@@ -248,7 +248,7 @@ var ontologyCTG = {
 
                         var entitiesUriStr = item["Entity_URI"];
                         if (entitiesUriStr && entitiesUriStr.split) {
-                            entitiesUriStr.split(";").forEach(function (itemEntity, indexX) {
+                            entitiesUriStr.split(";").forEach(function (itemEntity, _indexX) {
                                 var splitArray = itemEntity.split("|");
                                 var entityId = splitArray[2];
                                 var type = splitArray[0];
@@ -281,7 +281,7 @@ var ontologyCTG = {
 
                         var entitiesUriStr = item["METRIC"];
                         if (entitiesUriStr && entitiesUriStr.split) {
-                            entitiesUriStr.split(";").forEach(function (itemEntity, indexX) {
+                            entitiesUriStr.split(";").forEach(function (itemEntity, _indexX) {
                                 var splitArray = itemEntity.split("|");
 
                                 var type = splitArray[0];
@@ -380,6 +380,6 @@ module.exports = ontologyCTG;
 var xlsx = "OntoCOR.xlsx";
 //xlsx="OntoMEC_triplet_20200402.xlsx"
 xlsx = "OntoAllDomain.xlsx";
-ontologyCTG.readXlsx("D:\\NLP\\rdfs\\Total\\" + xlsx, function (err, result) {});
+ontologyCTG.readXlsx("D:\\NLP\\rdfs\\Total\\" + xlsx, function (_err, _result) {});
 
 //ontologyCTG.buildNTfile();

@@ -152,7 +152,7 @@ var annotatorLive = {
             color: "#17becf",
         };
 
-        annotatorLive.annotate(text, [source], function (err, result) {
+        annotatorLive.annotate(text, [source], function (err, _result) {
             if (err) return err;
         });
     },

@@ -28,14 +28,14 @@ mappingsMap = {
             {
                 s: "Class",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Class).code + "'";
                 },
             },
             {
                 s: "Class",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Class).label + "'";
                 },
             },
@@ -47,14 +47,14 @@ mappingsMap = {
             {
                 s: "Parent_1",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_1).code + "'";
                 },
             },
             {
                 s: "Parent_1",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_1).label + "'";
                 },
             },
@@ -66,14 +66,14 @@ mappingsMap = {
             {
                 s: "Parent_2",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_2).code + "'";
                 },
             },
             {
                 s: "Parent_2",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_2).label + "'";
                 },
             },
@@ -105,14 +105,14 @@ mappingsMap = {
             {
                 s: "Class",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Class).code + "'";
                 },
             },
             {
                 s: "Class",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Class).label + "'";
                 },
             },
@@ -124,14 +124,14 @@ mappingsMap = {
             {
                 s: "Parent_1",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_1).code + "'";
                 },
             },
             {
                 s: "Parent_1",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_1).label + "'";
                 },
             },
@@ -162,14 +162,14 @@ mappingsMap = {
             {
                 s: "Parent_1",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_1).code + "'";
                 },
             },
             {
                 s: "Parent_1",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_1).label + "'";
                 },
             },
@@ -181,14 +181,14 @@ mappingsMap = {
             {
                 s: "Parent_2",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_2).code + "'";
                 },
             },
             {
                 s: "Parent_2",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_2).label + "'";
                 },
             },
@@ -200,14 +200,14 @@ mappingsMap = {
             {
                 s: "Parent_3",
                 p: "iso81346:hasCode",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_3).code + "'";
                 },
             },
             {
                 s: "Parent_3",
                 p: "rdfs:label",
-                o: function (line, item) {
+                o: function (line, _item) {
                     return "'" + decode81346(line.Parent_3).label + "'";
                 },
             },

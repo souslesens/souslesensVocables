@@ -105,7 +105,7 @@ var ConfigManager = {
                             };
                         }
 
-                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
                             callbackSeries(err);
                         });
                     });
@@ -132,7 +132,7 @@ var ConfigManager = {
                         if (err) return callback(err);
                         delete sources[sourceName];
 
-                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
                             callbackSeries(err);
                         });
                     });

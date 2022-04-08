@@ -6,7 +6,7 @@ const csvCrawler = require("../bin/_csvCrawler.");
 const SPARQLutil = require("../bin/SPARQLutil.");
 
 var Iso19800toOWL = {
-    parse: function (sourcePath, prefix, callback) {
+    parse: function (sourcePath, prefix, _callback) {
         var data;
         var headers;
         var triples = [];
@@ -78,7 +78,7 @@ var Iso19800toOWL = {
 
                     return callbackSeries();
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     SPARQLutil.generateTriples(graphUri, triples, true, function (err, result) {
                         if (err) return console.log(err);
                         console.log(result);
@@ -168,7 +168,7 @@ var Iso19800toOWL = {
 
                     return callbackSeries();
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     SPARQLutil.generateTriples(graphUri, triples, true, function (err, result) {
                         if (err) return console.log(err);
                         console.log(result);

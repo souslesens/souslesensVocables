@@ -148,7 +148,7 @@ var CsvTripleBuilder = {
                             }
 
                             var emptyMappings = 0;
-                            lines.forEach(function (line, indexLine) {
+                            lines.forEach(function (line, _indexLine) {
                                 var hasDirectSuperClass = false;
                                 var subjectStr = null;
                                 var objectStr = null;
@@ -368,19 +368,19 @@ var CsvTripleBuilder = {
                                         callbackEach();
                                     });
                                 },
-                                function (err) {
+                                function (_err) {
                                     callbackSeries();
                                 }
                             );
                         },
                     ],
 
-                    function (err) {
+                    function (_err) {
                         callbackEachMapping();
                     }
                 );
             },
-            function (err) {
+            function (_err) {
                 if (callback) {
                     var message = "------------ created triples " + totalTriples;
                     return callback(errors ? +"    ERRORS" + errors : null, message);
@@ -417,7 +417,7 @@ var CsvTripleBuilder = {
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
         var params = { query: queryGraph };
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
                 var x = queryGraph;
                 return callback(err);
@@ -442,11 +442,11 @@ var CsvTripleBuilder = {
                         callbackSeries();
                     });
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     var query = "clear graph   <" + graphUri + ">";
                     var params = { query: query };
 
-                    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         if (err) {
                             return callback(err);
                         }
@@ -481,7 +481,7 @@ var CsvTripleBuilder = {
                     if (!options.deleteOldGraph) {
                         return callbackSeries();
                     }
-                    CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, result) {
+                    CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
                         if (err) return callbackSeries(err);
                         console.log("graph deleted");
                         callbackSeries();
@@ -575,5 +575,5 @@ if (false) {
         deleteOldGraph: true,
         sampleSize: 500,
     };
-    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (err, result) {});
+    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (_err, _result) {});
 }

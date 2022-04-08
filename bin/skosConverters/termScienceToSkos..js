@@ -305,7 +305,7 @@ var termScienceToSkos = {
             function (err) {
                 if (err) return callback(err);
 
-                skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, result) {
+                skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, _result) {
                     if (err) {
                         return callback(err);
                     }
@@ -340,7 +340,7 @@ var termScienceToSkos = {
         return conceptsArray;
     },
 
-    commonConcepts: function (rdfPath, callback) {
+    commonConcepts: function (rdfPath, _callback) {
         var thesaurusTerms = [];
         async.series(
             [
@@ -373,8 +373,8 @@ var termScienceToSkos = {
                 },
 
                 function (callbackSeries) {
-                    async.eachSeries(thesaurusTerms, function (term, callbackEach) {
-                        termScienceToSkos.queryTermScience(conceptId, function (err, xmlStr) {});
+                    async.eachSeries(thesaurusTerms, function (_term, _callbackEach) {
+                        termScienceToSkos.queryTermScience(conceptId, function (_err, _xmlStr) {});
                     });
 
                     callbackSeries();
@@ -392,7 +392,7 @@ var termScienceToSkos = {
         );
     },
 
-    listConcepts: function (callback) {
+    listConcepts: function (_callback) {
         var pages = [];
         for (var i = 65; i <= 90; i++) {
             pages.push(String.fromCharCode(i));
@@ -469,7 +469,7 @@ var termScienceToSkos = {
                     }
                 );
             },
-            function (err) {
+            function (_err) {
                 var x = terms;
                 fs.writeFileSync("D:\\NLP\\termScience\\allTerms.csv", JSON.stringify(terms, null, 2));
             }
@@ -478,12 +478,12 @@ var termScienceToSkos = {
 };
 
 if (false) {
-    termScienceToSkos.listConcepts(function (err, result) {});
+    termScienceToSkos.listConcepts(function (_err, _result) {});
 }
 
 if (false) {
     var rdfPath = "D:\\NLP\\thesaurus_CTG_Product.rdf";
-    termScienceToSkos.commonConcepts(rdfPath, function (err, result) {});
+    termScienceToSkos.commonConcepts(rdfPath, function (_err, _result) {});
 }
 
 if (false) {
@@ -504,7 +504,7 @@ if (false) {
 
         async.eachSeries(
             concept.children,
-            function (childConcept, callbackEach) {
+            function (childConcept, _callbackEach) {
                 termScienceToSkos.recurseChildren(childConcept, 0, 2);
             },
             function (err) {
@@ -613,7 +613,7 @@ if (false) {
     }
 
     var rdfPath = "D:\\NLP\\termScience\\termScience_" + "Chemistry" + ".rdf";
-    skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, result) {});
+    skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (_err, _result) {});
 }
 
 if (false) {
@@ -657,7 +657,7 @@ if (false) {
     var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\temp.json"));
     // var rdfPath = "D:\\NLP\\commonConcepts_TERM_SCIENCE_CTG2.rdf";
     var rdfPath = "D:\\NLP\\temp.rdf";
-    skoReader.skosEditorToRdf(rdfPath, data, {}, function (err, result) {});
+    skoReader.skosEditorToRdf(rdfPath, data, {}, function (_err, _result) {});
 }
 
 //get Parents

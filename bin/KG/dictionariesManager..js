@@ -37,7 +37,7 @@ var DictionariesManager = {
             }
 
             var referenceDictionary = {};
-            data.forEach(function (item, index) {
+            data.forEach(function (item, _index) {
                 if (item.term) {
                     if (!referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]) referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {};
                     if (!referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
@@ -80,7 +80,7 @@ var DictionariesManager = {
                 //delete index
                 function (callbackSeries) {
                     if (!_options.replaceIndex) return callbackSeries();
-                    ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, result) {
+                    ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -161,7 +161,7 @@ var DictionariesManager = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    request(options, function (error, response, body) {
+                    request(options, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -172,7 +172,7 @@ var DictionariesManager = {
                     var totalLines = 0;
                     var bulkStr = "";
 
-                    data.forEach(function (item, indexedLine) {
+                    data.forEach(function (item, _indexedLine) {
                         if (_options.owlType) item.owlType = _options.owlType;
                         var lineContent = "";
                         var id = "R" + util.getRandomHexaId(10);
@@ -195,7 +195,7 @@ var DictionariesManager = {
                             return callbackSeries(error);
                         }
                         const elasticRestProxy = require("../elasticRestProxy..js");
-                        elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
+                        elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                             if (err) return callbackSeries(err);
                             callbackSeries();
                         });

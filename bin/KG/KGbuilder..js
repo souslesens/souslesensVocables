@@ -61,7 +61,7 @@ var KGbuilder = {
         }
 
         //decode mappings
-        mappings.forEach(function (mapping, indexMapping) {
+        mappings.forEach(function (mapping, _indexMapping) {
             var obj = util.deconcatSQLTableColumn(mapping.subject);
             if (obj && obj.column) mapping.subject = obj.column;
             var obj = util.deconcatSQLTableColumn(mapping.object);
@@ -71,8 +71,8 @@ var KGbuilder = {
         ///process type and label
         var rejectedItems = [];
         var triples = [];
-        data.forEach(function (item, indexItem) {
-            mappings.forEach(function (mapping, indexMapping) {
+        data.forEach(function (item, _indexItem) {
+            mappings.forEach(function (mapping, _indexMapping) {
                 if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     var subjectValue = getItemSubjectValue(mapping, item);
                     if (!subjectValue) return;
@@ -148,8 +148,8 @@ var KGbuilder = {
 
         //process ObjectProperties
 
-        data.forEach(function (item, indexItem) {
-            mappings.forEach(function (mapping, indexMapping) {
+        data.forEach(function (item, _indexItem) {
+            mappings.forEach(function (mapping, _indexMapping) {
                 if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") return;
 
                 var subjectValue = item[mapping.subject];
@@ -231,7 +231,7 @@ var KGbuilder = {
                     var queryDeleteGraph = " CLEAR GRAPH <" + KGgraphUri + ">";
                     var params = { query: queryDeleteGraph };
                     socket.message("KGbuild", "delete graph " + KGgraphUri);
-                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -385,7 +385,7 @@ var KGbuilder = {
 
                                     var params = { query: queryGraph };
 
-                                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, _result) {
                                         if (err) {
                                             socket.message(err);
                                             return callbackEach(err);
@@ -428,7 +428,7 @@ var KGbuilder = {
                             var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName + "." + sqlTable + " ";
 
                             //sqlQuery += " ORDER BY " + selectStr + " "
-                            SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, result) {
+                            SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, _result) {
                                 //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
                                 if (err) return callbackSeries(err);
 
@@ -444,7 +444,7 @@ var KGbuilder = {
                             sqlParams.maxOffset,
                             processor,
                             uniqueTriples,
-                            function (err, result) {
+                            function (err, _result) {
                                 if (err) return callbackSeries(err);
                                 callbackSeries();
                             }
@@ -464,7 +464,7 @@ var KGbuilder = {
                     } catch (e) {
                         return callbackSeries(e);
                     }
-                    fs.writeFile(mappingFilePath, JSON.stringify(mappings, null, 2), function (err, result) {
+                    fs.writeFile(mappingFilePath, JSON.stringify(mappings, null, 2), function (err, _result) {
                         return callbackSeries(err);
                     });
                 },
@@ -562,7 +562,7 @@ var KGbuilder = {
                 };
 
                 socket.message("KGbuild", "creating triples for mapping " + mappingFilePath);
-                KGbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, result) {
+                KGbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, _result) {
                     if (err) return callbackEach(err);
                     //  totalTriples += result.length
                     return callbackEach();
@@ -601,7 +601,7 @@ if (false) {
         var replaceGraph = true;
     }
 
-    KGbuilder.buidlKG(mappingFilePaths, sparqlServerUrl, adlGraphUri, replaceGraph, function (err, result) {
+    KGbuilder.buidlKG(mappingFilePaths, sparqlServerUrl, adlGraphUri, replaceGraph, function (err, _result) {
         if (err) return socket.message("KGbuild", err);
         return socket.message("KGbuild", "ALL DONE");
     });

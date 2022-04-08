@@ -47,7 +47,7 @@ if (config.auth == "keycloak") {
 
             // Search users
             let findUser = Object.keys(users)
-                .map(function (key, index) {
+                .map(function (key, _index) {
                     return {
                         id: users[key].id,
                         login: users[key].login,
@@ -108,7 +108,7 @@ if (config.auth == "keycloak") {
                 }
 
                 var findUser = Object.keys(users)
-                    .map(function (key, index) {
+                    .map(function (key, _index) {
                         return {
                             login: users[key].login,
                             password: users[key].password,

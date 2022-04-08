@@ -229,7 +229,7 @@ var RcReportsTriples = {
             countAll += 1;
         });
 
-        readInterface.on("close", function (x) {
+        readInterface.on("close", function (_x) {
             var y = countLines;
             outputStream.close();
         });

@@ -200,7 +200,7 @@ var TE_14224_browser = (function () {
             },
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error(err) {
@@ -343,7 +343,7 @@ var TE_14224_browser = (function () {
                                     callbackEach();
                                 });
                             },
-                            function (err) {
+                            function (_err) {
                                 callbackSeries();
                             }
                         );
@@ -553,7 +553,7 @@ var TE_14224_browser = (function () {
 
         items.nodeInfos = {
             label: "Node Infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 //  if (self.currentTreeNode.data.type == "tag")
                 self.showAssetNodeInfos(self.currentTreeNode, "tree");
@@ -561,14 +561,14 @@ var TE_14224_browser = (function () {
         };
         items.graphAssetNodeAndParents = {
             label: "Graph Node",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_14224_browser.graphAssetNodeAndParents(self.currentTreeNode.data);
             },
         };
         items.mapClassesTo14224 = {
             label: "mapClassesTo14224",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_14224_browser.mapClassesTo14224(self.currentTreeNode);
             },
@@ -582,7 +582,7 @@ var TE_14224_browser = (function () {
 
         items.nodeInfos = {
             label: "Node Infos",
-            action: function (e) {
+            action: function (_e) {
                 var x = self.currentGraphNode;
 
                 SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode.id, "mainDialogDiv");
@@ -591,7 +591,7 @@ var TE_14224_browser = (function () {
 
         items.ShowAssetData = {
             label: "Show Asset Data",
-            action: function (e) {
+            action: function (_e) {
                 TE_14224_browser.ontology.showAssetData(self.currentOntologyTreeNode);
             },
         };
@@ -932,7 +932,7 @@ var TE_14224_browser = (function () {
             });
         },
 
-        showAssetFailures: function (failureNode) {},
+        showAssetFailures: function (_failureNode) {},
 
         showAssetAspects: function (params) {
             var assetIdsFilterStr = "";
@@ -980,7 +980,7 @@ var TE_14224_browser = (function () {
                                 callbackSeries();
                             });
                         },
-                        function (callbackSeries) {
+                        function (_callbackSeries) {
                             var level = -1;
                             result.forEach(function (item) {
                                 var label = item[params.labelColumn]; //item.Designation ;// self.iso_14224InverseCodesMap[item.ActivityCode].label

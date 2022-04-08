@@ -26,7 +26,7 @@ var generateRdf = function (entitiesArray) {
             str += "  <skos:prefLabel xml:lang='en'>" + scheme + "</skos:prefLabel>";
             str += "</skos:ConceptScheme>";
 
-            entitiesArray.forEach(function (entity, index) {
+            entitiesArray.forEach(function (entity, _index) {
                 if (!entity.inScheme) {
                     if (!stats["noScheme"]) stats["noScheme"] = 0;
                     stats["noScheme"] += 1;
@@ -64,7 +64,7 @@ var generateRdf = function (entitiesArray) {
             fs.writeFileSync("D:\\NLP\\quantum_F_" + scheme + ".rdf", str);
             return callbackSeries();
         },
-        function (err) {
+        function (_err) {
             console.log("done");
 
             console.log(JSON.stringify(stats, null, 2));

@@ -105,7 +105,7 @@ Csv2Sql = {
                     });
                     insertStr = insertStr.substring(0, insertStr.length - 1);
 
-                    sql.getData(dbName, insertStr, function (err, result) {
+                    sql.getData(dbName, insertStr, function (err, _result) {
                         if (err) {
                             console.log("error slice " + sliceIndex + "  " + err);
                             return callbackEach();
@@ -162,5 +162,5 @@ var dbName = "evolen";
 
 Csv2Sql.getColumns(input, tableName, function (err, result) {
     var createSql = result.createSql;
-    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (err, result) {});
+    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (_err, _result) {});
 });

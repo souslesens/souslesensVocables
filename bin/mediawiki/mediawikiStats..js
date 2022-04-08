@@ -20,7 +20,7 @@ var thesauriiConcepts = {};
 var mediawikiStats = {
     sparqlUrl: "http://51.178.139.80:8890/sparql/",
 
-    generateCatWords: function (categoryWord, thesaurusWord, callback) {
+    generateCatWords: function (categoryWord, thesaurusWord, _callback) {
         mediawikiStats.getCatWordsTriples(categoryWord, thesaurusWord, function (err, bindings) {
             var Allconcepts = [];
             var catWordsMap = {};
@@ -51,7 +51,7 @@ var mediawikiStats = {
 */
         });
     },
-    generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
+    generateCatWordsMatrix: function (categoryWord, thesaurusWord, _callback) {
         mediawikiStats.getCatWordsTriples(categoryWord, thesaurusWord, function (err, bindings) {
             var Allconcepts = [];
             var catWordsMap = {};
@@ -136,7 +136,7 @@ var mediawikiStats = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 return callback(null, allBindings);
             }
@@ -148,7 +148,7 @@ module.exports = mediawikiStats;
 
 if (false) {
     //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediawikiStats.generateCatWordsMatrix("aapg", null, function (err, result) {
+    mediawikiStats.generateCatWordsMatrix("aapg", null, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });
@@ -156,7 +156,7 @@ if (false) {
 
 if (true) {
     //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediawikiStats.generateCatWords("aapg", null, function (err, result) {
+    mediawikiStats.generateCatWords("aapg", null, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });

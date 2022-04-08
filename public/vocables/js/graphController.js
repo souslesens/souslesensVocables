@@ -13,7 +13,7 @@ var GraphController = (function () {
     self.defaultNodeColor = "blue";
     defaultNodeShape = "dot";
 
-    self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions, fromLevel) {
+    self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions, _fromLevel) {
         self.defaultNodeColor = visjsGraph.globalOptions.nodes.color || self.defaultNodeColor;
         self.defaultNodeShape = visjsGraph.globalOptions.nodes.coshapelor || defaultNodeShape;
 

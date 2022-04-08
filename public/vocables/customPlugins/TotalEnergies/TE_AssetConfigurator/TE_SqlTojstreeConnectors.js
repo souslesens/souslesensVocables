@@ -113,7 +113,7 @@ var TE_SqlTojstreeConnectors = (function () {
         });
     };
 
-    self.showAssetNodeInfos = function (dbName, node, callee) {
+    self.showAssetNodeInfos = function (dbName, node, _callee) {
         var sqlQuery = " select distinct * from " + node.data.type + " where  id=" + node.data.id;
 
         self.querySQLserver(dbName, sqlQuery, function (err, data) {
@@ -201,7 +201,7 @@ var TE_SqlTojstreeConnectors = (function () {
             },
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error(err) {

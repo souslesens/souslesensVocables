@@ -2106,7 +2106,7 @@ async.eachSeries(
             callbackEach();
         });
     },
-    function (err) {
+    function (_err) {
         fs.writeFileSync("D:\\NLP\\ontologies\\dataDomains\\definitions.txt", dataStr);
     }
 );

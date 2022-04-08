@@ -45,7 +45,7 @@ var CSVtoSKOS = {
         concat: function (fieldsStr, data, lineIndex, lang) {
             var fields = fieldsStr.split(",");
             var str = "";
-            fields.forEach(function (field, index) {
+            fields.forEach(function (field, _index) {
                 if (str != "") str += "   ";
 
                 var value = null;

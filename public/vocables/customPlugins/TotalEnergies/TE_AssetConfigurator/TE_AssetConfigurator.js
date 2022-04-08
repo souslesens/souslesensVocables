@@ -99,7 +99,7 @@ var TE_AssetConfigurator = (function () {
         $("#rightPanelDiv").html("");
         $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/rightPanel.html", function () {
             $("#TE_AssetConfigurator_Tabs").tabs({
-                activate: function (e, ui) {},
+                activat_e: function (_e, _ui) {},
             });
         });
 
@@ -149,7 +149,7 @@ var TE_AssetConfigurator = (function () {
 
         items.addNode = {
             label: "add Node",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetConfigurator.addNode(self.currentTreeNode);
             },
@@ -157,7 +157,7 @@ var TE_AssetConfigurator = (function () {
 
         items.nodeInfos = {
             label: "Node infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv");
             },
@@ -165,7 +165,7 @@ var TE_AssetConfigurator = (function () {
 
         items.sameAsQualities = {
             label: "Same as Qualities",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetConfigurator.showNodeQualities(self.currentTreeNode, "tree");
             },
@@ -318,7 +318,7 @@ var TE_AssetConfigurator = (function () {
                 },
                 nodes: {
                     chosen: {
-                        node: function (values, id, selected, hovering) {
+                        node: function (values, id, selected, _hovering) {
                             if (selected) values.color = "red";
                         },
                     },
@@ -345,17 +345,17 @@ var TE_AssetConfigurator = (function () {
                     },
                 };
 
-            options.dndCtrlFn = function (startNode, endNode, point) {
-                if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label)) self.createRelation(startNode, endNode, function (err, visjsData) {});
+            options.dndCtrlFn = function (startNode, endNode, _point) {
+                if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label)) self.createRelation(startNode, endNode, function (_err, _visjsData) {});
             };
-            options.onclickFn = function (node, point, options) {
+            _options.onclickFn = function (node, _point, _options) {
                 MainController.UI.hidePopup("graphPopupDiv");
                 self.currentGraphNode = node;
             };
-            options.onClusterClickFn = function (clusterId, point, options) {
+            _options.onClusterClickFn = function (clusterId, _point, _options) {
                 visjsGraph.network.openCluster(clusterId);
             };
-            options.onHoverNodeFn = function (node, point, options) {
+            _options.onHoverNodeFn = function (node, _point, _options) {
                 self.showGraphNodeInfos(node);
             };
             options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
@@ -404,7 +404,7 @@ var TE_AssetConfigurator = (function () {
         });
     };
 
-    self.showGraphPopupMenus = function (node, point, event) {
+    self.showGraphPopupMenus = function (node, point, _event) {
         if (!node) return MainController.UI.hidePopup("graphPopupDiv");
         if (node.from) {
             //edge
@@ -537,7 +537,7 @@ var TE_AssetConfigurator = (function () {
 
     self.createRelation = function (startNode, endNode, callback) {
         if (startNode.id == endNode.id) return;
-        var getEdge = function (relationType, drawLabel) {
+        var getEdge = function (relationType, _drawLabel) {
             var edgeId = common.getRandomHexaId(10);
             var edge;
 
@@ -738,7 +738,7 @@ var TE_AssetConfigurator = (function () {
                 function (callbackSeries) {
                     var parentIds = [];
                     matchingHits.forEach(function (hit) {
-                        hit._source.parents.forEach(function (item, indexParent) {
+                        hit._source.parents.forEach(function (item, _indexParent) {
                             if (parentIds.indexOf(item) < 0) parentIds.push(item);
                         });
                     });
@@ -810,7 +810,7 @@ var TE_AssetConfigurator = (function () {
                 function (callbackSeries) {
                     var parentIds = [];
                     matchingHits.forEach(function (hit) {
-                        hit._source.parents.forEach(function (item, indexParent) {
+                        hit._source.parents.forEach(function (item, _indexParent) {
                             if (parentIds.indexOf(item) < 0) parentIds.push(item);
                         });
                         if (parentIds.indexOf(hit._source.id) < 0) parentIds.push(hit._source.id);
@@ -848,7 +848,7 @@ var TE_AssetConfigurator = (function () {
                 },
 
                 //set tree
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     var jstreeData = [];
                     var existingNodes = {};
 
@@ -1041,7 +1041,7 @@ var TE_AssetConfigurator = (function () {
                 joinCondition: function (childOptions) {
                     return clustersMap[key].indexOf(childOptions.id) > -1;
                 },
-                processProperties: function (clusterOptions, childNodes, childEdges) {
+                processProperties: function (clusterOptions, childNodes, _childEdges) {
                     clusterOptions.mass = childNodes.length;
                     return clusterOptions;
                 },

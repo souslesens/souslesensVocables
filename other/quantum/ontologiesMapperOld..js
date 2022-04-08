@@ -210,7 +210,7 @@ var ontologiesMapper = {
                                 }
                             );
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
@@ -319,7 +319,7 @@ var ontologiesMapper = {
                 triplesSubClasssOf += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n";
                 triplesLabel += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + item.sourceLabel + "'.\n";
 
-                sources.forEach(function (source, indexSource) {
+                sources.forEach(function (source, _indexSource) {
                     var orphansMatch = "";
                     if (item.targets[source.name].length == 0) {
                         orphans += orphansMatch + "\t";
@@ -335,7 +335,7 @@ var ontologiesMapper = {
                     }
                 });
             } else {
-                sources.forEach(function (source, indexSource) {
+                sources.forEach(function (_source, _indexSource) {
                     orphans += "\t";
                 });
             }

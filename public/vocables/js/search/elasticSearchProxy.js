@@ -20,7 +20,7 @@ var ElasticSearchProxy = (function () {
             data: JSON.stringify(payload),
             contentType: "application/json",
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var xx = data;
                 callback(null, data);
             },
@@ -44,7 +44,7 @@ var ElasticSearchProxy = (function () {
             url: Config.apiUrl + "/elasticsearch/msearch",
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var xx = data;
                 callback(null, data);
             },
@@ -67,7 +67,7 @@ var ElasticSearchProxy = (function () {
             url: Config.apiUrl + "/analyzesentence",
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var xx = data;
                 callback(null, data);
             },

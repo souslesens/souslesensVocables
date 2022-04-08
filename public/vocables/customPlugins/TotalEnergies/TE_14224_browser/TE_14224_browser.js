@@ -228,7 +228,7 @@ var TE_14224_browser = (function () {
             url: Config.apiUrl + "?" + params.toString(),
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error(err) {
@@ -371,7 +371,7 @@ var TE_14224_browser = (function () {
                                     callbackEach();
                                 });
                             },
-                            function (err) {
+                            function (_err) {
                                 callbackSeries();
                             }
                         );
@@ -581,7 +581,7 @@ var TE_14224_browser = (function () {
 
         items.nodeInfos = {
             label: "Node Infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 //  if (self.currentTreeNode.data.type == "tag")
                 self.showAssetNodeInfos(self.currentTreeNode, "tree");
@@ -589,14 +589,14 @@ var TE_14224_browser = (function () {
         };
         items.graphAssetNodeAndParents = {
             label: "Graph Node",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_14224_browser.graphAssetNodeAndParents(self.currentTreeNode.data);
             },
         };
         items.mapClassesTo14224 = {
             label: "mapClassesTo14224",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_14224_browser.mapClassesTo14224(self.currentTreeNode);
             },
@@ -610,7 +610,7 @@ var TE_14224_browser = (function () {
 
         items.nodeInfos = {
             label: "Node Infos",
-            action: function (e) {
+            action: function (_e) {
                 var x = self.currentGraphNode;
 
                 SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode.id, "mainDialogDiv");
@@ -619,7 +619,7 @@ var TE_14224_browser = (function () {
 
         items.ShowAssetData = {
             label: "Show Asset Data",
-            action: function (e) {
+            action: function (_e) {
                 TE_14224_browser.ontology.showAssetData(self.currentOntologyTreeNode);
             },
         };
@@ -981,7 +981,7 @@ var TE_14224_browser = (function () {
             });
         },
 
-        showAssetFailures: function (failureNode) {},
+        showAssetFailures: function (_failureNode) {},
         showAssetData: function () {
             if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3") > -1) {
                 TE_14224_browser.ontology.showAssetSystemData(self.currentOntologyTreeNode);
@@ -1076,7 +1076,7 @@ var TE_14224_browser = (function () {
                             });
                         },
 
-                        function (callbackSeries) {
+                        function (_callbackSeries) {
                             var level = -1;
                             var assetNodesMap = {};
                             visjsData.nodes.forEach(function (item) {

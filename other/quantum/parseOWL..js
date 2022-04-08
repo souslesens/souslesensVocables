@@ -4,7 +4,7 @@ var sax = require("sax");
 
 var distinctTags = {};
 var parseOWL = {
-    parse: function (sourcePath, options, callback) {
+    parse: function (sourcePath, _options, _callback) {
         function toShortURI(uri) {
             //  http://ltts.org/GS_EP_DEV_002_003_Appendix_5_Rev3.owl#
             if (uri.indexOf("GS_EP_DEV") > 0) return "http://QUANTUM#" + uri.substring(54);
@@ -118,10 +118,10 @@ var parseOWL = {
             }
         });
 
-        saxStream.on("text", function (text) {});
+        saxStream.on("_text", function (_text) {});
 
-        saxStream.on("closetag", function (node) {});
-        saxStream.on("end", function (node) {
+        saxStream.on("closetag", function (_node) {});
+        saxStream.on("end", function (_node) {
             fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\triples.nt", triples);
             //console.log(JSON.stringify(triples, null, 2))
         });

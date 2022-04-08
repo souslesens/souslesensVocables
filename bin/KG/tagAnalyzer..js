@@ -89,7 +89,7 @@ var TagAnalyzer = {
 
                     var keys = Object.keys(output[0]);
                     var str = "";
-                    keys.forEach(function (key, index) {
+                    keys.forEach(function (key, _index) {
                         str += key + "\t";
                     });
                     str += "systemLabel\t";
@@ -98,9 +98,9 @@ var TagAnalyzer = {
 
                     str += "\n";
 
-                    output.forEach(function (item, index0) {
+                    output.forEach(function (item, _index0) {
                         if (!item["system"]) return (str += item.tag + "\n");
-                        keys.forEach(function (key, index) {
+                        keys.forEach(function (key, _index) {
                             str += item[key] + "\t";
                         });
                         var systemCode = item["system"];
@@ -164,7 +164,7 @@ return callbackSeries()
                     fs.writeFileSync("D:\\NLP\\ontologies\\MIE\\parseTagsB.txt", str)
                 }*/
             ],
-            function (err) {}
+            function (_err) {}
         );
     },
 
@@ -230,7 +230,7 @@ return callbackSeries()
             var okLetters = ["A", "N", "X"];
             var contents = [];
 
-            array.forEach(function (str, index) {
+            array.forEach(function (str, _index) {
                 var isOptional = false;
 
                 var content = [];
@@ -384,7 +384,7 @@ return callbackSeries()
                     });
                 },
                 //parse tags
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     for (var key in TagAnalyzer.ClovRegexps) {
                         var regex = new RegExp(TagAnalyzer.ClovRegexps[key]);
                         for (var tag in tags) {
@@ -396,7 +396,7 @@ return callbackSeries()
                     }
                 },
             ],
-            function (err) {}
+            function (_err) {}
         );
     },
 };

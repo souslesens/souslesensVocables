@@ -1,6 +1,6 @@
 declare const identity: <Type>(a: Type) => Type;
 declare function sanitizeValue(value: string | string[]): string[];
-export declare function exhaustiveCheck(type: never): never;
+export declare function exhaustiveCheck(_type: never): never;
 export declare const style: {
     position: "absolute";
     top: string;

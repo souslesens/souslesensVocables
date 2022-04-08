@@ -20,7 +20,7 @@ var docxArraysExtractor = {
         return callback(null, { headers: headers, data: dataArray });
     },
 
-    testJson: function (filePath, callback) {
+    testJson: function (filePath, _callback) {
         docxArraysExtractor.readJson(filePath, function (err, result) {
             var x = result;
         });
@@ -98,7 +98,7 @@ var docxArraysExtractor = {
             }
         });
 
-        saxStream.on("end", function (node) {
+        saxStream.on("end", function (_node) {
             var x = tables;
             callback(null, tables);
         });
@@ -249,12 +249,12 @@ options = {
 docxArraysExtractor.parseXml(openXmlFilePath, options, function (err, result) {
     var str = "";
     if (options.rotate) {
-        result.forEach(function (array, arrayIndex) {
+        result.forEach(function (array, _arrayIndex) {
             var cols = [];
             var totalCols = 0;
             var totalLines = 0;
             var colsMap = {};
-            array.forEach(function (line, lineIndex) {
+            array.forEach(function (line, _lineIndex) {
                 if (line) {
                     line.forEach(function (cell, cellIndex) {
                         var X = "K" + cellIndex;

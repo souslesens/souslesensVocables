@@ -25,7 +25,7 @@ var Sunburst = (function () {
             .partition()
             .sort(null)
             .size([2 * Math.PI, radius * radius])
-            .value(function (d) {
+            .value(function (_d) {
                 return 1;
             });
 

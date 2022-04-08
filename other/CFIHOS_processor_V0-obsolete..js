@@ -33,7 +33,7 @@ var CFIHOS_processor_V0Obsolete = {
                     callbackSeries();
                 });
             },
-            function (err) {
+            function (_err) {
                 fs.writeFileSync(rootDir + "\\description.json", JSON.stringify(descriptionMap, null, 2));
                 //  console.log(JSON.stringify(descriptionMap,null,2))
             }
@@ -85,7 +85,7 @@ var CFIHOS_processor_V0Obsolete = {
                                         callbackEachLookup();
                                     });
                                 },
-                                function (err) {
+                                function (_err) {
                                     callbackSeries();
                                 }
                             );
@@ -231,7 +231,7 @@ var CFIHOS_processor_V0Obsolete = {
                                     // console.log(query)
                                     var params = { query: queryGraph };
 
-                                    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                                         if (err) {
                                             return callbackEach(err);
                                         }
@@ -240,18 +240,18 @@ var CFIHOS_processor_V0Obsolete = {
                                         return callbackEach(null);
                                     });
                                 },
-                                function (err) {
+                                function (_err) {
                                     callbackSeries();
                                 }
                             );
                         },
                     ],
-                    function (err) {
+                    function (_err) {
                         callbackEachMapping();
                     }
                 );
             },
-            function (err) {}
+            function (_err) {}
         );
     },
 };
@@ -357,7 +357,7 @@ if (true) {
     var jsonPath = sourcePath + ".json";
 
     UML2OWLparser.parseXMI(sourcePath, jsonPath, function () {
-        UML2OWLparser.buildOwl(jsonPath, graphUri, function (err, result) {
+        UML2OWLparser.buildOwl(jsonPath, graphUri, function (err, _result) {
             if (err) return console.lg(err);
             CFIHOS_processor_V0Obsolete.processSubClasses(mappings, graphUri);
         });

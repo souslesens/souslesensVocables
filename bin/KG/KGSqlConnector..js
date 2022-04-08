@@ -112,7 +112,7 @@ var KGSqlConnector = {
                     }
                     length = result.length;
                     if (processor) {
-                        processor(result, uniqueTriples, function (err, resultProcessor) {
+                        processor(result, uniqueTriples, function (err, _resultProcessor) {
                             if (err) {
                                 return callbackWhilst(err);
                             }
@@ -124,7 +124,7 @@ var KGSqlConnector = {
                     }
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 callback(null, allResults);
             }

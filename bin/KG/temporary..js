@@ -11,7 +11,7 @@ xlsx2json.parse(xlsxFilePath, null, function (err, result) {
     for (var sheet in result.data) {
         result.data[sheet].forEach(function (line) {
             var lineStr = "";
-            columns.forEach(function (column, index) {
+            columns.forEach(function (column, _index) {
                 if (lineStr != "") lineStr += "\t";
                 var value = line[column];
                 if (!value) value = "";

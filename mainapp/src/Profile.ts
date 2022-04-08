@@ -5,7 +5,7 @@ import { Msg } from "./Admin";
 import React from "react";
 
 const endpoint = "/api/v1/profiles";
-async function getProfiles(url: string): Promise<Profile[]> {
+async function getProfiles(_url: string): Promise<Profile[]> {
     const response = await fetch(endpoint);
     const json = await response.json();
     const entries: [string, ProfileJson][] = Object.entries(json.ressources);

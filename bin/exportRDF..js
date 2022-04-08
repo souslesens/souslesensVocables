@@ -19,7 +19,7 @@ var exportRDF = {
         var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " + fromStr + " where { ?subject ?predicate ?object.}";
 
         stream.write("with <" + graphUri + "> insert{\n");
-        exportRDF.POST_cursor(sparql_url, query, stream, function (err, result) {
+        exportRDF.POST_cursor(sparql_url, query, stream, function (err, _result) {
             if (err) return console.log(err);
 
             callback(null);
@@ -84,7 +84,7 @@ var exportRDF = {
                     resultSize = data.results.bindings.length;
                     allData = data.results.bindings;
                     offset += limit;
-                    exportRDF.appendToFileStream(stream, allData, function (err, result) {
+                    exportRDF.appendToFileStream(stream, allData, function (err, _result) {
                         if (err) return callbackWhilst(err);
                         callbackWhilst(null);
                     });
@@ -132,11 +132,11 @@ if (false) {
             //   var filePath = "/var/lib/nodejs/souslesensVocables/public/exports/" + source + ".nt"
             var stream = fs.createWriteStream(filePath, { flags: "a" });
 
-            exportRDF.export(sparql_url, graphUri, stream, function (err, result) {
+            exportRDF.export(sparql_url, graphUri, stream, function (_err, _result) {
                 callbackEach();
             });
         },
-        function (err) {}
+        function (_err) {}
     );
 }
 if (true) {

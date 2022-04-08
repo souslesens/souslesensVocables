@@ -149,7 +149,7 @@ var processor = {
                             }
 
                             var emptyMappings = 0;
-                            lines.forEach(function (line, indexLine) {
+                            lines.forEach(function (line, _indexLine) {
                                 var hasDirectSuperClass = false;
                                 var subjectStr = null;
                                 var objectStr = null;
@@ -329,14 +329,14 @@ var processor = {
                                         callbackEach();
                                     });
                                 },
-                                function (err) {
+                                function (_err) {
                                     console.log("------------" + filePath + " " + totalTriples);
                                     callbackSeries();
                                 }
                             );
                         },
                     ],
-                    function (err) {
+                    function (_err) {
                         callbackEachMapping();
                     }
                 );
@@ -372,7 +372,7 @@ var processor = {
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
         var params = { query: queryGraph };
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
                 var x = queryGraph;
                 return callback(err);
@@ -387,7 +387,7 @@ var processor = {
         var query = "clear graph   <" + graphUri + ">";
         var params = { query: query };
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
                 return callback(err);
             }

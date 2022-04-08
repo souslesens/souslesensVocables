@@ -15,11 +15,11 @@ mappingsMap = {
         },
         lookups: [],
         transform: {
-            id: function (value, role, prop) {
+            id: function (value, _role, _prop) {
                 return "absheron#" + value;
             },
 
-            RDLRelation: function (value, role, prop) {
+            RDLRelation: function (value, _role, _prop) {
                 if (value == "") return "";
                 return "http://data.total.com/resource/tsf/maintenance/romain_14224/" + value;
             },
@@ -38,11 +38,11 @@ mappingsMap = {
         },
         lookups: [],
         transform: {
-            id: function (value, role, prop) {
+            id: function (value, _role, _prop) {
                 return "girassol#" + value;
             },
 
-            RDLRelation: function (value, role, prop) {
+            RDLRelation: function (value, _role, _prop) {
                 if (value == "") return "";
                 return "http://data.total.com/resource/tsf/maintenance/romain_14224/" + value;
             },

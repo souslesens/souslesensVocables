@@ -104,7 +104,7 @@ var mediaWikiTagger = {
 
                     request(options, function (error, response, body) {
                         if (error) return callbackSeries(error);
-                        elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
+                        elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                             if (err) return callbackSeries(err);
                         });
 
@@ -192,7 +192,7 @@ var mediaWikiTagger = {
                             url: elasticUrl + "_msearch",
                         };
 
-                        request(options, function (error, response, body) {
+                        request(options, function (error, response, _body) {
                             if (error) return callbackSeries(error);
                             var json = JSON.parse(response.body);
                             if (json.error) {
@@ -230,7 +230,7 @@ var mediaWikiTagger = {
                             async.eachSeries(
                                 splittedtTriples,
                                 function (triples, callbackResponse) {
-                                    mediaWikiTagger.storeTriples(graphUri, triples, function (err, result) {
+                                    mediaWikiTagger.storeTriples(graphUri, triples, function (err, _result) {
                                         callbackResponse(err);
                                     });
                                 },
@@ -300,7 +300,7 @@ var mediaWikiTagger = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 callback(null, thesaurusConcepts);
             }
@@ -399,7 +399,7 @@ var mediaWikiTagger = {
             return callback();
         });
     },
-    deleteTriples: function (graph) {
+    deleteTriples: function (_graph) {
         var query = "DELETE WHERE  {" + "  GRAPH <http://souslesens.org/oil-gas/upstream/>" + "  { ?concept <http://souslesens.org/vocab#wikimedia-category> ?category} }";
     },
     generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
@@ -459,7 +459,7 @@ var mediaWikiTagger = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
 
                 Allconcepts.forEach(function (concept) {
@@ -547,7 +547,7 @@ var mediaWikiTagger = {
                                 if (excludedPages.indexOf(page) > -1) return callbackEach2();
 
                                 totalPages += 1;
-                                mediaWikiTagger.indexPage(wikiUrl, page, elasticUrl, indexName, function (err, result) {
+                                mediaWikiTagger.indexPage(wikiUrl, page, elasticUrl, indexName, function (err, _result) {
                                     if (err) console.log(err);
                                     else console.log(totalPages + " indexed page  " + page);
 
@@ -830,7 +830,7 @@ var mediaWikiTagger = {
                             console.log(params.query);
                             return callback(err);
                         }
-                        result.results.bindings.forEach(function (item) {
+                        result.results.bindings.forEach(function (_item) {
                             console.log("!!!!!!!! altLabel word");
                         });
                         callbackSeries();
@@ -1092,7 +1092,7 @@ if (false) {
 
     thesaurusGraphUris = ["http://resource.geosciml.org/"];
 
-    mediaWikiTagger.tagPages(thesaurusGraphUris, elasticUrl, indexName, wikiUrl, function (err, result) {
+    mediaWikiTagger.tagPages(thesaurusGraphUris, elasticUrl, indexName, wikiUrl, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });
@@ -1100,7 +1100,7 @@ if (false) {
 
 if (false) {
     //mediaWikiTagger.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediaWikiTagger.generateCatWordsMatrix("aapg", null, function (err, result) {
+    mediaWikiTagger.generateCatWordsMatrix("aapg", null, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });

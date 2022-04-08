@@ -121,7 +121,7 @@ var buildOwl = function (json, graphUri) {
         var packages = {};
         var topClassUri;
 
-        function recurseElements(aClass) {}
+        function recurseElements(_aClass) {}
 
         if (items.forEach) {
             items.forEach(function (aClass, index) {
@@ -325,7 +325,7 @@ var buildOwl = function (json, graphUri) {
             function (callbackSeries) {
                 var queryGraph = "CLEAR GRAPH <" + graphUri + ">";
                 var params = { query: queryGraph };
-                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                     return callbackSeries(err);
                 });
             },
@@ -360,7 +360,7 @@ var buildOwl = function (json, graphUri) {
 
                         var params = { query: queryGraph };
 
-                        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                             if (err) {
                                 var x = queryGraph;
                                 return callbackEach(err);
@@ -470,11 +470,11 @@ if (true) {
                 );
             },
             //concat all json together
-            function (callbackSeries) {
+            function (_callbackSeries) {
                 var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
                 buildOwl(json, graphUri);
             },
         ],
-        function (err) {}
+        function (_err) {}
     );
 }

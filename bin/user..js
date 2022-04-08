@@ -17,7 +17,7 @@ const user = {
 
         const findUser = logged
             ? Object.keys(users)
-                  .map(function (key, index) {
+                  .map(function (key, _index) {
                       return {
                           id: users[key].id,
                           login: users[key].login,

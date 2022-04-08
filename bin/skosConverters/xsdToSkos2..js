@@ -124,7 +124,7 @@ var xsdToSkos = {
         return callback(null, strElements);
     },
 
-    parseXsdToSkos: function (xsdPath, options, callback) {
+    parseXsdToSkos: function (xsdPath, options, _callback) {
         if (!options) options = {};
 
         var files = [];
@@ -178,7 +178,7 @@ var scheme = "Reservoir";
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\prodml\\v2.1\\xsd_schemas\\";var scheme="Production"
 
 var includeFiles = [""];
-xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (err, result) {
+xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (err, _result) {
     var x = err;
 });
 

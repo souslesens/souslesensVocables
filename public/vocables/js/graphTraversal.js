@@ -134,7 +134,7 @@ var GraphTraversal = (function () {
                 // on laisse le path entier
                 newPathNodes.push(pathObj);
                 var path = [];
-                pathObj.path.forEach(function (node, nodeIndex) {
+                pathObj.path.forEach(function (node, _nodeIndex) {
                     path.push(node);
                 });
                 var pathStr = self.getWhereFromPath(path);

@@ -225,7 +225,7 @@ var processTEPDKtags = function () {
             }*/
         });
         var query = "SELECT [TagNumber]\n" + "      ,[FunctionalClassID]\n" + "      ,[FunctionalClassLabel]\n" + "      ,[ServiceDescription] FROM [TEPDK].[dbo].[tblTag] ";
-        sqlServer.getFetchedData("TEPDK", query, processor, 1000, codesMap, function (err, result) {
+        sqlServer.getFetchedData("TEPDK", query, processor, 1000, codesMap, function (_err, _result) {
             fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\tagDescriptor.csv", str);
         });
     });

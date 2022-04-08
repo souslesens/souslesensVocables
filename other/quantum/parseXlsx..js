@@ -91,7 +91,7 @@ var parseXlsx = {
                     callbackSeries();
                 },
             ],
-            function (err) {
+            function (_err) {
                 console.log("done");
                 var x = allData;
 
@@ -103,7 +103,7 @@ var parseXlsx = {
             }
         );
     },
-    loadSheet: function (filePath, callback) {},
+    loadSheet: function (_filePath, _callback) {},
     generateTriples: function (sheetNames, mappingFilter) {
         var graphUrisMap = {
             quantumUri: "http://data.total.com/resource/quantum/vocab#",
@@ -176,7 +176,7 @@ var parseXlsx = {
                 });
                 callbackEach();
             },
-            function (err) {
+            function (_err) {
                 //  triples+="<http://data.15926.org/lci/ClassOfPhysicalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>."
                 //   triples+="<http://data.15926.org/dm/ClassOfFunctionalObject> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://www.w3.org/2002/07/owl#Thing>"
 

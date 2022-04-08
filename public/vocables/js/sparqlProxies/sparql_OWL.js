@@ -783,7 +783,7 @@ var Sparql_OWL = (function () {
         var limitSize = 2000;
         var offset = 0;
         async.whilst(
-            function (test) {
+            function (_test) {
                 return resultSize > 0;
             },
             function (callbackWhilst) {
@@ -799,7 +799,7 @@ var Sparql_OWL = (function () {
                     resultSize = result.length;
                     offset += limit;
                     if (processor) {
-                        processor(result, function (err, result) {
+                        processor(result, function (err, _result) {
                             if (err) return callbackWhilst(err);
                             callbackWhilst();
                         });
@@ -899,7 +899,7 @@ var Sparql_OWL = (function () {
             async.eachSeries(
                 slices,
                 function (slice, callbackEach) {
-                    Sparql_generic.insertTriples(source, slice, null, function (err, result) {
+                    Sparql_generic.insertTriples(source, slice, null, function (err, _result) {
                         if (err) return callbackEach(err);
                         MainController.UI.message((totalItems += slice.length) + " done ");
                         callbackEach();

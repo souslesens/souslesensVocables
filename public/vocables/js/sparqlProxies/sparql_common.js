@@ -52,7 +52,7 @@ var Sparql_common = (function () {
                     if (words.length == 0) return "";
                     if (words[0] == null) return "";
                     var conceptWordStr = "";
-                    words.forEach(function (word, index) {
+                    words.forEach(function (word, _index) {
                         if (word.length > 1) {
                             if (conceptWordStr != "") conceptWordStr += "|";
                             if (options.exactMatch) conceptWordStr += "^" + formatWord(word) + "$";
@@ -76,7 +76,7 @@ var Sparql_common = (function () {
                     if (p > -1) ids.splice(p, 1);
                     if (ids[0] == null) return "";
                     var conceptIdsStr = "";
-                    ids.forEach(function (id, index) {
+                    ids.forEach(function (id, _index) {
                         if (!id.indexOf) var x = 3;
                         //  if(id.indexOf("http")!=0)
                         if (id.match && !id.match(/.+:.+|http.+/)) return;
@@ -188,7 +188,7 @@ var Sparql_common = (function () {
         if (!graphUris || graphUris == "") return "";
         if (!Array.isArray(graphUris)) graphUris = [graphUris];
 
-        graphUris.forEach(function (graphUri, index) {
+        graphUris.forEach(function (graphUri, _index) {
             fromStr += from + "  <" + graphUri + "> ";
         });
         if (withoutImports === undefined) withoutImports = self.withoutImports;

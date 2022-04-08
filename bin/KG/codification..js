@@ -152,7 +152,7 @@ var processTEPDKtags = function () {
                     "FROM [TEPDK].[dbo].[tblTag] ";
 
                 query = " select * FROM [TEPDK].[dbo].[functional_location] " + " where SUBSTRING(tagName,1,2) in('GA','GB','GC','GD')";
-                sqlServer.getFetchedData("TEPDK", query, processor, 1000, GormCodesMap, function (err, result) {
+                sqlServer.getFetchedData("TEPDK", query, processor, 1000, GormCodesMap, function (err, _result) {
                     if (err) return callbackSeries(err);
 
                     callbackSeries();

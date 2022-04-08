@@ -174,7 +174,7 @@ var Sparql_NPD = (function () {
                      request.setRequestHeader('Age', '10000');
                  },*/
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 if (data.result && typeof data.result != "object")
                     //cas GEMET
                     data = JSON.parse(data.result);

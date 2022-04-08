@@ -14,7 +14,7 @@ var SQLutil = {
             fs.createReadStream(csvFilePath).pipe(
                 csv({
                     separator: separator,
-                    mapHeaders: ({ header, index }) => util.normalizeHeader(headers, header),
+                    mapHeaders: ({ header, _index }) => util.normalizeHeader(headers, header),
                 })
                     .on("header", function (header) {
                         headers.push(header);
@@ -155,4 +155,4 @@ var SQLutil = {
 
 module.exports = SQLutil;
 
-SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (err, result) {});
+SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (_err, _result) {});

@@ -2,7 +2,7 @@ var httpProxy = require("./httpProxy.");
 var async = require("async");
 var util = require("./util.");
 var SourceManager = {
-    createNewOwlSourceGraph: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {},
+    createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {},
     createNewSkosSourceGraph: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         var type = options.type;
         var lang = options.lang;
@@ -144,13 +144,13 @@ var SourceManager = {
 
                 targetSparqlServerUrl += "format=json&query=";
 
-                httpProxy.post(targetSparqlServerUrl, body.headers, body.params, function (err, result) {
+                httpProxy.post(targetSparqlServerUrl, body.headers, body.params, function (err, _result) {
                     if (err) return callbackEach(err);
 
                     callbackEach();
                 });
             },
-            function (err) {
+            function (_err) {
                 callback();
             }
         );
@@ -169,7 +169,7 @@ var SourceManager = {
         };
         if (sparqlServerUrl.charAt(sparqlServerUrl.length - 1) != "/") sparqlServerUrl += "/";
         sparqlServerUrl += "format=json&query=";
-        httpProxy.post(sparqlServerUrl, body.headers, body.params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, body.headers, body.params, function (err, _result) {
             callback(err, "graph deleted");
         });
     },

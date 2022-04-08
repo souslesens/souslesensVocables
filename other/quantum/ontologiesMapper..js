@@ -198,7 +198,7 @@ var ontologiesMapper = {
                                 }
                             );
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
@@ -332,7 +332,7 @@ var ontologiesMapper = {
 
             triplesLabel += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + mappingLabelItem.sourceLabel + "'.\n";
 
-            sources.forEach(function (source, indexSource) {
+            sources.forEach(function (source, _indexSource) {
                 var orphansMatch = "";
                 if (mappingLabelItem.targets[source.name].length == 0) {
                     orphans += orphansMatch + "\t";
@@ -360,7 +360,7 @@ var ontologiesMapper = {
                 });
                 orphans += originMap[mappingSourceItem["MappingSourceOriginID"]] + "\t";
             } else {
-                sources.forEach(function (source, indexSource) {
+                sources.forEach(function (_source, _indexSource) {
                     orphans += "\t";
                 });
             }
@@ -1014,7 +1014,7 @@ var ontologiesMapper = {
                 },
                 function (callbackSeries) {
                     function processResult(bindings) {
-                        bindings.forEach(function (item) {});
+                        bindings.forEach(function (_item) {});
                     }
 
                     var filter = "";
@@ -1073,7 +1073,7 @@ var ontologiesMapper = {
                                 });
                             }
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );

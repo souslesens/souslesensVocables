@@ -124,13 +124,13 @@ var dictionaryMatcher = {
                                 callbackEach();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
                 },
             ],
-            function (err) {
+            function (_err) {
                 fs.writeFileSync(filePath + "_" + index + "_orphans.json", JSON.stringify(orphans, null, 2));
                 fs.writeFileSync(filePath + "_" + index + "_matches.json", JSON.stringify(matchesMap, null, 2));
                 if (callback) return callback(null, matchesMap);
@@ -177,10 +177,10 @@ if (false) {
     var file = "D:\\NLP\\ontologies\\dictionaries\\bomaftwinequip2.csv_orphans.json";
     var csvFile = "label\t";
     var data = JSON.parse(fs.readFileSync(file));
-    data.forEach(function (line) {
+    data.forEach(function (_line) {
         var matches = JSON.parse(fs.readFileSync(dir + file));
 
-        matches.forEach(function (match) {});
+        matches.forEach(function (_match) {});
     });
     csvFile += "";
 }

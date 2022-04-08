@@ -24,7 +24,7 @@ var Sparql_proxy = (function () {
         query += " LIMIT " + limit;
 
         async.whilst(
-            function (callbackTest) {
+            function (_callbackTest) {
                 //test
                 return resultSize > 0;
             },
@@ -59,7 +59,7 @@ var Sparql_proxy = (function () {
                          request.setRequestHeader('Age', '10000');
                      },*/
 
-                    success: function (data, textStatus, jqXHR) {
+                    success: function (data, _textStatus, _jqXHR) {
                         var xx = data;
 
                         callbackWhilst(null, data);
@@ -144,7 +144,7 @@ var Sparql_proxy = (function () {
                  request.setRequestHeader('Age', '10000');
              },*/
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
 
                 if (!data.results) return callback(null, { results: { bindings: [] } });

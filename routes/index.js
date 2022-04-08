@@ -30,7 +30,7 @@ var serverParams = { routesRootUrl: "" };
 // see : https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi#argssecurityhandlers
 let ensureLoggedIn;
 if (!config.disableAuth) {
-    ensureLoggedIn = function ensureLoggedIn(options) {
+    ensureLoggedIn = function ensureLoggedIn(_options) {
         config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
         return function (req, res, next) {
             if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -40,7 +40,7 @@ if (!config.disableAuth) {
         };
     };
 } else {
-    ensureLoggedIn = function ensureLoggedIn(options) {
+    ensureLoggedIn = function ensureLoggedIn(_options) {
         return function (req, res, next) {
             next();
         };
@@ -48,7 +48,7 @@ if (!config.disableAuth) {
 }
 
 // Home (redirect to /vocables)
-router.get("/", function (req, res, next) {
+router.get("/", function (req, res, _next) {
     res.redirect("vocables");
 });
 
@@ -58,7 +58,7 @@ if (!config.disableAuth) {
         router.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
         router.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
     } else {
-        router.get("/login", function (req, res, next) {
+        router.get("/login", function (req, res, _next) {
             res.render("login", { title: "souslesensVocables - Login" });
         });
         router.post(
@@ -71,7 +71,7 @@ if (!config.disableAuth) {
         );
     }
 } else {
-    router.get("/login", function (req, res, next) {
+    router.get("/login", function (req, res, _next) {
         res.redirect("vocables");
     });
 }
@@ -185,7 +185,7 @@ router.post(
             });
         }
     },
-    router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
+    router.get("/heatMap", ensureLoggedIn(), function (req, res, _next) {
         var elasticQuery = JSON.parse(req.query.query);
 
         statistics.getEntitiesMatrix(null, elasticQuery, function (err, result) {
@@ -193,12 +193,12 @@ router.post(
         });
     }),
 
-    router.get("/httpProxy", ensureLoggedIn(), function (req, res, next) {
+    router.get("/httpProxy", ensureLoggedIn(), function (req, res, _next) {
         httpProxy.get(req.query, function (err, result) {
             processResponse(res, err, result);
         });
     }),
-    router.get("/ontology/*", ensureLoggedIn(), function (req, res, next) {
+    router.get("/ontology/*", ensureLoggedIn(), function (req, res, _next) {
         if (req.params.length == 0) return req.send("missing ontology label");
         var name = req.params[0];
         RDF_IO.getOntology(name, function (err, result) {
@@ -206,7 +206,7 @@ router.post(
             res.status(200).send(result);
         });
     }),
-    router.get("/getJsonFile", ensureLoggedIn(), function (req, res, next) {
+    router.get("/getJsonFile", ensureLoggedIn(), function (req, res, _next) {
         //  if (req.body.filePath){}
         var filePath = req.query.filePath;
         var realPath = path.join(__dirname, "../public/vocables/" + filePath);

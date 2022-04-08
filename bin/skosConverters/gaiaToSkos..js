@@ -72,7 +72,7 @@ var gaiaToSkos = {
         var classesMap = {};
         var categoriesMap = {};
         var categoriesClassMap = {};
-        objs.forEach(function (item, index) {
+        objs.forEach(function (item, _index) {
             if (item.Class && classes.indexOf(item.Class) < 0) {
                 classes.push(item.Class);
             }
@@ -121,7 +121,7 @@ var gaiaToSkos = {
         }
 
         if (true) {
-            objs.forEach(function (item, index) {
+            objs.forEach(function (item, _index) {
                 if (item.ClassExtended) {
                     var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
                     var label = gaiaToSkos.formatString(item.Term);

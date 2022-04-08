@@ -104,7 +104,7 @@ var tulsaToSkos = {
                 .join("");
         }
 
-        jsonArray.forEach(function (item, indexItem) {
+        jsonArray.forEach(function (item, _indexItem) {
             /*   if (item.term && item.term.indexOf("ADDED") > -1)
                    return;*/
             item.term = unicodeEscape(item.term).replace(/&/g, " ").replace(/'/g, " ");
@@ -163,7 +163,7 @@ var tulsaToSkos = {
         var x = orphanEntities;
         if (entity.broaders) return entitiesMap;
     },
-    setDSMap: function (jsonArray) {},
+    setDSMap: function (_jsonArray) {},
 
     setEntitiesNarrowersScheme: function (entitiesMap) {
         function recurse(parent, currentScheme) {
@@ -213,7 +213,7 @@ var tulsaToSkos = {
         return entitiesMap;
     },
 
-    getRootConcepts: function (entitesArray) {
+    getRootConcepts: function (_entitesArray) {
         entitiesArray.forEach(function (entity) {
             if (!entity.broader && entity.narrowers.length > 2) rootConcepts.push(entity.prefLabel);
         });
@@ -240,7 +240,7 @@ var tulsaToSkos = {
                 str += "  <skos:prefLabel xml:lang='en'>" + scheme + "</skos:prefLabel>";
                 str += "</skos:ConceptScheme>";
 
-                entitiesArray.forEach(function (entity, index) {
+                entitiesArray.forEach(function (entity, _index) {
                     if (!entity.inScheme) {
                         if (!stats["noScheme"]) stats["noScheme"] = 0;
                         stats["noScheme"] += 1;
@@ -283,7 +283,7 @@ var tulsaToSkos = {
                 fs.writeFileSync("D:\\NLP\\Tulsa_" + scheme + ".rdf", str);
                 return callbackSeries();
             },
-            function (err) {
+            function (_err) {
                 console.log("done");
 
                 console.log(JSON.stringify(stats, null, 2));

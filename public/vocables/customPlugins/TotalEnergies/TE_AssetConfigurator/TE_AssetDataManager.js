@@ -92,7 +92,7 @@ var TE_AssetDataManager = (function () {
 
         items.nodeInfos = {
             label: "Node infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
 
                 TE_SqlTojstreeConnectors.showAssetNodeInfos(self.currentDbName, self.currentTreeNode);
@@ -101,21 +101,21 @@ var TE_AssetDataManager = (function () {
 
         items.associateToRDSnode = {
             label: "Associate to RDS node",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetConfigurator.asset.associateAssetNode(self.currentTreeNode.data);
             },
         };
         items.showOnGraph = {
             label: "ShowOnGraph",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetConfigurator.asset.focus(self.currentTreeNode.data.id);
             },
         };
         items.addToPID = {
             label: "addToPID",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetDataManager.addToPID(self.currentTreeNode);
             },
@@ -132,7 +132,7 @@ var TE_AssetDataManager = (function () {
         label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3;
     };
 
-    self.openAssetTreeNode = function (node, level, callback) {
+    self.openAssetTreeNode = function (node, _level, _callback) {
         TE_SqlTojstreeConnectors.getChildrenNodesJsTreeData(self.currentDbName, node, coloredNodesMap, function (err, jstreeData) {
             if (err) return alert(err);
             if (jstreeData.length > 0) common.jstree.addNodesToJstree("TE_AssetConfigurator_assetPanelTreeDiv", node.id, jstreeData);
@@ -141,16 +141,16 @@ var TE_AssetDataManager = (function () {
 
     self.loadPIDgraph = function () {
         var options = {};
-        options.onclickFn = function (node, point, options) {
+        options.onclickFn = function (node, point, _options) {
             var nodes = visjsGraph.data.nodes.get();
             MainController.UI.hidePopup("graphPopupDiv");
             self.currentGraphNode = node;
             MainController.UI.message(JSON.stringify(point));
         };
-        options.onClusterClickFn = function (clusterId, point, options) {
+        options.onClusterClickFn = function (clusterId, _point, _options) {
             visjsGraph.network.openCluster(clusterId);
         };
-        options.onHoverNodeFn = function (node, point, options) {};
+        options.onHoverNodeFn = function (_node, _point, _options) {};
         options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
         options.manipulation = {
             enabled: true,
@@ -256,7 +256,7 @@ var TE_AssetDataManager = (function () {
 
         visjsGraph.data.nodes.update(visjsData.nodes);
     };
-    self.savePIDgraph = function (node) {
+    self.savePIDgraph = function (_node) {
         if (!visjsGraph.data.nodes.get("CenterNode"))
             visjsGraph.data.nodes.add({
                 id: "CenterNode",

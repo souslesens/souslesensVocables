@@ -1299,7 +1299,7 @@
     /**
      * Generates a pattern tag
      */
-    ctx.prototype.createPattern = function (image, repetition) {
+    ctx.prototype.createPattern = function (image, _repetition) {
         var pattern = this.__document.createElementNS("http://www.w3.org/2000/svg", "pattern"),
             id = randomString(this.__ids),
             img;

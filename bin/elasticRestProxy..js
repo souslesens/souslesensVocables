@@ -77,7 +77,7 @@ var elasticRestProxy = {
         };
 
         //   console.log(ndjson);
-        request(options, function (error, response, body) {
+        request(options, function (error, response, _body) {
             if (error) {
                 return callback(error, null);
             }
@@ -138,7 +138,7 @@ var elasticRestProxy = {
             url: config.indexation.elasticUrl + config.general.indexName + "/_refresh",
         };
 
-        request(options, function (error, response, body) {
+        request(options, function (error, _response, _body) {
             if (error) {
                 return callback(error);
             }
@@ -184,7 +184,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName + "/",
                     };
-                    request(options, function (error, response, body) {
+                    request(options, function (error, response, _body) {
                         if (error) return callbackSeries(error);
                         if (response.statusCode == 200) indexExists = true;
                         callbackSeries();
@@ -202,7 +202,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    request(options, function (error, response, body) {
+                    request(options, function (error, _response, _body) {
                         if (error) return callbackSeries(error);
                         var message = "delete index :" + indexName;
                         callbackSeries();

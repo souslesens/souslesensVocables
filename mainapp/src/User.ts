@@ -6,7 +6,7 @@ import { ThemeContext } from "@emotion/react";
 import React from "react";
 const endpoint = "/api/v1/users";
 
-async function getUsers(url: string): Promise<User[]> {
+async function getUsers(_url: string): Promise<User[]> {
     const response = await fetch(endpoint);
     const { message, ressources } = await response.json();
     return mapUsers(ressources);
@@ -22,7 +22,7 @@ async function putUsers(url: string, body: User[]): Promise<User[]> {
     const response = await fetch(endpoint, { method: "put", body: JSON.stringify(body, null, "\t"), headers: { "Content-Type": "application/json" } });
     const json = await response.json();
     const users: [string, UserJSON][] = Object.entries(json);
-    const decoded_users = users.map(([key, val]) => decodeUser(val));
+    const decoded_users = users.map(([_key, val]) => decodeUser(val));
 
     return decoded_users;
 }

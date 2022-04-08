@@ -380,7 +380,7 @@ var common = (function () {
             );
         }
         if (Array.isArray(data)) {
-            data.forEach(function (item, index) {
+            data.forEach(function (item, _index) {
                 var text, value;
                 if (textfield) {
                     if (item[textfield] && item[textfield].value && item[valueField].value) {
@@ -487,7 +487,7 @@ var common = (function () {
             arr.splice(fromIndex, 1);
             arr.splice(toIndex, 0, element);
         },
-        sortObjectArray: function (array, field, options) {
+        sortObjectArray: function (array, field, _options) {
             array.sort(function (a, b) {
                 var aValue = a[field] ? a[field] : "";
                 var bValue = b[field] ? b[field] : "";
@@ -514,10 +514,10 @@ var common = (function () {
             var matrix = [];
             var countCols = 0;
             var countLines = array.length;
-            array.forEach(function (line, lineIndex) {
+            array.forEach(function (line, _lineIndex) {
                 var mLine = [];
                 countCols = Math.max(countCols, line.length);
-                line.forEach(function (cell, lineIndex) {
+                line.forEach(function (cell, _lineIndex) {
                     mLine.push(cell);
                 });
                 matrix.push(mLine);
@@ -538,7 +538,7 @@ var common = (function () {
         },
     };
 
-    self.concatArraysWithoutDuplicateXX = function (array, addedArray, key) {
+    self.concatArraysWithoutDuplicateXX = function (_array, _addedArray, _key) {
         var filteredArray = [];
         result.nodes.forEach(function (item) {
             var unique = true;
@@ -614,7 +614,7 @@ var common = (function () {
         return "0".repeat(length - str.length) + str;
     };
 
-    self.getItemLabel = function (item, varName, lang) {
+    self.getItemLabel = function (item, varName, _lang) {
         if (item[varName + "Label"]) return item[varName + "Label"].value;
         else {
             var p = item[varName].value.lastIndexOf("#");

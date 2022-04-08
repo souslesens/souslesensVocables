@@ -14,7 +14,7 @@ var KGcontroller = {
 
     saveMappings: function (source, mappings, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";
-        fs.writeFile(filePath, JSON.stringify(mappings, null, 2), null, function (err, result) {
+        fs.writeFile(filePath, JSON.stringify(mappings, null, 2), null, function (err, _result) {
             callback(err);
         });
     },
@@ -34,7 +34,7 @@ var KGcontroller = {
         });
     },
 
-    generateTriples: function (config) {},
+    generateTriples: function (_config) {},
     getAssetGlobalMappings: function (source, callback) {
         var dir = KGcontroller.getMappingsDirPath();
         var files = fs.readdirSync(dir);

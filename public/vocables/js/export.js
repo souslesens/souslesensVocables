@@ -193,7 +193,7 @@ var Export = (function () {
             var matrixLabels = [];
             var matrixIds = [];
             var maxParentsLength = 0;
-            result.data.forEach(function (hit, index) {
+            result.data.forEach(function (hit, _index) {
                 var parentIdsArray = [];
                 var parentLabelsArray = [];
                 if (hit.parents || hit.parents.forEach) return;

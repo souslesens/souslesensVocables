@@ -1,7 +1,7 @@
 import { Msg } from "./Admin";
 import { Msg_, Mode } from "../src/Component/UsersTable";
 import React from "react";
-declare function getUsers(url: string): Promise<User[]>;
+declare function getUsers(_url: string): Promise<User[]>;
 declare function putUsers(url: string, body: User[]): Promise<User[]>;
 declare function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>): Promise<void>;
 declare function deleteUser(user: User, updateModel: React.Dispatch<Msg>): Promise<void>;

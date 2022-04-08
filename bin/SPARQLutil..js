@@ -1,5 +1,4 @@
 const async = require("async");
-var sax = require("sax");
 var util = require("../bin/util.");
 var httpProxy = require("../bin/httpProxy.");
 
@@ -58,7 +57,6 @@ var SPARQLutil = {
 
                             httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                                 if (err) {
-                                    var x = queryGraph;
                                     console.log(err);
                                     return callbackEach();
                                 } else {

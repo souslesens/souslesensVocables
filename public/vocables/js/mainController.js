@@ -57,7 +57,6 @@ var MainController = (function () {
                         data[source].imports.forEach(function (item) {
                             if (item.graphUri) {
                                 var importSourceName = Sparql_common.getLabelFromURI(item.graphUri);
-                                var sparqlEndpointUrl = item.sparql_server.url;
                                 if (!item.sparql_server) item.sparql_server = data[source].sparql_server;
                                 else if (item.sparql_server.url == "_default") {
                                     item.sparql_server.url = Config.default_sparql_url;
@@ -319,7 +318,6 @@ var MainController = (function () {
         },
 
         showToolsList: function (treeDiv) {
-            var x = $(window).height();
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.tools) {
@@ -406,7 +404,6 @@ var MainController = (function () {
 
             if (!open && display == "flex") {
                 //open->close
-                var w2 = self.UI.initialGraphDivWitdh + rightPanelWidth;
                 $("#rightPanelDiv").css("display", "none");
                 $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh);
                 $("#graphDiv").animate({ width: self.UI.initialGraphDivWitdh });
@@ -466,7 +463,6 @@ var MainController = (function () {
 
         openRightPanel: function () {
             var w = $(window).width() - leftPanelWidth;
-            var h = $(window).height() - 30;
             // $("#centralPanel").width(w)
             $("#centralPanelDiv").width(w - rightPanelWidth);
             $("#graphDiv").width(w - rightPanelWidth);

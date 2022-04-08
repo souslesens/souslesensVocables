@@ -132,4 +132,3 @@ if (false) {
     });
 }
 generateRdf(entities);
-var x = entities;

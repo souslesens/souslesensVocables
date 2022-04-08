@@ -198,7 +198,6 @@ var CFIHOS_processor_V0Obsolete = {
                                     }
                                 });
 
-                                var x = triples;
                                 callbackSeries();
                             });
                         },

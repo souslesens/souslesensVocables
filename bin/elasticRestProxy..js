@@ -15,7 +15,6 @@ const ConfigManager = require("./configManager.");
 const async = require("async");
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 
-const debug = true;
 var elasticRestProxy = {
     elasticUrl: null,
     getElasticUrl: function () {
@@ -86,7 +85,6 @@ var elasticRestProxy = {
                 return callback(json.error.reason, null);
             }
             var responses = json.responses;
-            var totalDocsAnnotated = 0;
             /*  responses.forEach(function (response, responseIndex) {
 
                   var hits = response.hits.hits;
@@ -204,7 +202,6 @@ var elasticRestProxy = {
                     };
                     request(options, function (error, _response, _body) {
                         if (error) return callbackSeries(error);
-                        var message = "delete index :" + indexName;
                         callbackSeries();
                     });
                 },

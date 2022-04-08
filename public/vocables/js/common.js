@@ -220,7 +220,6 @@ var common = (function () {
                 $("#" + jstreeDiv)
                     .jstree(true)
                     .open_node(parentNodeId, null, 500);
-                var offset = $(document.getElementById(parentNodeId)).offset();
             }, 500);
         },
 
@@ -314,7 +313,6 @@ var common = (function () {
                 return;
 
             var p = $("#" + jstreeDiv).offset();
-            var p2 = $("#" + jstreeDiv).position();
             if (p.top > 200)
                 //in case jstreeDiv in inactive tab
                 p.top = 200;
@@ -533,25 +531,20 @@ var common = (function () {
                 matrix2.push(col);
             }
 
-            var x = matrix2;
             return matrix2;
         },
     };
 
     self.concatArraysWithoutDuplicateXX = function (_array, _addedArray, _key) {
-        var filteredArray = [];
         result.nodes.forEach(function (item) {
             var unique = true;
-            visjsData.nodes.forEach(function (item2) {
-                if (item2.id == item.id) unique = false;
-            });
+            visjsData.nodes.forEach(function (item2) {});
             filteredNodes.push(item);
         });
     };
 
     self.concatArraysWithoutDuplicate = function (array, addedArray, key) {
         var filteredArray = JSON.parse(JSON.stringify(array));
-        var keyValues = {};
         addedArray.forEach(function (addedItem) {
             var refuse = false;
             array.forEach(function (item) {
@@ -596,7 +589,6 @@ var common = (function () {
     self.decapitalizeLabel = function (label) {
         if (!label.match(/[a-z]/)) return label;
         if (label == "LEVEL TRANSMITTER") var x = 3;
-        if (!label.replace) var x = 3;
         var altLabel = label.replace(/[A-Z]/g, function (maj) {
             return " " + maj;
         });
@@ -686,7 +678,6 @@ var common = (function () {
 
         try {
             var successful = document.execCommand("copy");
-            var msg = successful ? "successful" : "unsuccessful";
             document.body.removeChild(textArea);
             if (successful) return "graph copied in clipboard";
             else return "graph copy failed";
@@ -742,7 +733,6 @@ var common = (function () {
                 if (month.length == 1) month = "0" + month;
                 var day = "" + date.getDate();
                 if (day.length == 1) day = "0" + day;
-                var time = "" + date.getTime();
                 str = date.getFullYear() + "" + month + "" + day + " " + dateArray[1] + " " + dateArray[2];
             } else str = "";
             return str;
@@ -752,7 +742,6 @@ var common = (function () {
 
     self.dateToRDFString = function (date) {
         var str = "";
-        var dateArray = date.toLocaleString("en-US").split(" ");
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
             if (month.length == 1) month = "0" + month;

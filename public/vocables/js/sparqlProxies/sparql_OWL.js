@@ -12,10 +12,7 @@
 var Sparql_OWL = (function () {
     var self = {};
 
-    var filterCollectionsGenealogyDepth = 4;
     self.ancestorsDepth = 6;
-
-    var elasticUrl = Config.serverUrl;
 
     self.getSourceTaxonomyPredicates = function (source) {
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
@@ -278,7 +275,6 @@ var Sparql_OWL = (function () {
         var url = self.sparql_url + "?format=json&query=";
         self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
         if (self.no_params) url = self.sparql_url;
-        var method = Config.sources[sourceLabel].server_method;
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
@@ -697,7 +693,6 @@ var Sparql_OWL = (function () {
         async.eachSeries(
             slices,
             function (slice, callbackEach) {
-                var fromStr = Sparql_common.getFromStr(source, false, false);
                 var filterStr = Sparql_common.setFilter("concept", slice);
                 var query = " select  distinct *   WHERE { GRAPH ?g{ " + " ?concept rdf:type ?type. " + filterStr + " }}";
 
@@ -768,7 +763,6 @@ var Sparql_OWL = (function () {
     self.getDictionary = function (sourceLabel, options, processor, callback) {
         if (!options) options = {};
         var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var filterStr = "";
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +

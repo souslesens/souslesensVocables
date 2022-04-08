@@ -1,27 +1,9 @@
 var fs = require("fs");
 const async = require("async");
-var sax = require("sax");
 var util = require("../../bin/util.");
 var httpProxy = require("../../bin/httpProxy.");
-var SPARQLutil = require("../../bin/SPARQLutil.");
 
 var xml2js = require("xml2js");
-
-var topParentTag;
-var triples = "";
-var currentTriple = "";
-var currentUri = "";
-
-var line = 0;
-
-var currentParent;
-var currentAttr;
-var currentX;
-var currentNodeName;
-
-var currentNodePath = "";
-var currentObjects = {};
-var currentParentObj;
 
 var parse = function (sourcePath, prefix, callback) {
     var parser = new xml2js.Parser();
@@ -72,16 +54,13 @@ var parse = function (sourcePath, prefix, callback) {
                     } else if (item["xs:sequence"]) sequences = [item["xs:sequence"]][0];
 
                     if (!sequences) {
-                        var x = item;
                     } else {
                         sequences.forEach(function (sequence) {
                             var elements = sequence["xs:element"];
                             if (!elements) {
-                                var x = item;
                             } else {
                                 elements.forEach(function (element) {
                                     var documentation = "";
-                                    var attrs = element.$;
 
                                     if (element["xs:annotation"] && element["xs:annotation"][0]["xs:documentation"]) documentation = element["xs:annotation"][0]["xs:documentation"][0];
                                     var elementObj = element.$;
@@ -118,7 +97,6 @@ var buildOwl = function (json, graphUri) {
     // var json = JSON.parse("" + fs.readFileSync(jsonPath));
     for (var topClassKey in json) {
         var items = json[topClassKey];
-        var packages = {};
         var topClassUri;
 
         function recurseElements(_aClass) {}
@@ -171,7 +149,6 @@ var buildOwl = function (json, graphUri) {
                 var className = aClass.name.toLowerCase();
                 if (aClass.elements) {
                     aClass.elements.forEach(function (element) {
-                        if (element.name == "GeochronologicalUnit") var x = 3;
                         var type = element.type;
                         if (!type) return;
                         var typeArray = type.split(":");
@@ -250,7 +227,6 @@ var buildOwl = function (json, graphUri) {
                         }
                     });
                 }
-                if (aClass.name == "MatrixCementKind") var x = 3;
 
                 if (aClass.enumerations) {
                     var enumsMap = {};
@@ -362,7 +338,6 @@ var buildOwl = function (json, graphUri) {
 
                         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                             if (err) {
-                                var x = queryGraph;
                                 return callbackEach(err);
                             }
                             totalTriples += triples.length;
@@ -387,12 +362,8 @@ var buildOwl = function (json, graphUri) {
 /***********************************************************************************************************************************************/
 /***********************************************************************************************************************************************/
 
-var sourcePath = "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
-
 var dirPathCommon = { dir: "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\", prefix: "eml" };
 var dirPathWitsml = { dir: "D:\\NLP\\ontologies\\energistics\\witsml\\v2.0\\xsd_schemas\\", prefix: "witsml" };
-var dirPathProdml = { dir: "D:\\NLP\\ontologies\\energistics\\prodml\\v2.1\\xsd_schemas\\", prefix: "prodml" };
-var dirPathResqml = { dir: "D:\\NLP\\ontologies\\energistics\\resqmlv2\\v2.0.1\\xsd_schemas\\", prefix: "resqml" };
 
 if (false) {
     var dirPath = dirPathWitsml.dir;

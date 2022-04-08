@@ -12,7 +12,6 @@ var authentication = (function () {
     var self = {};
     // pb avec l'url sur serveur a cause d'nginx qui n'adment pas authentication ??? voir Config version antérieure déployéee
     // self.authenticationUrl = "../authentication";
-    var authenticationDBUrl = Config.serverUrl;
     self.userIndexes = [];
     self.currentUser = {};
 
@@ -25,7 +24,6 @@ var authentication = (function () {
                 if (!data.logged) {
                     location.href = "/login";
                 } else {
-                    var url = window.location.host;
                     authentication.currentUser = {
                         identifiant: data.user.login,
                         login: data.user.login,

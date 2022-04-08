@@ -11,14 +11,11 @@
  */
 var fs = require("fs");
 var DOMParser = require("xmldom").DOMParser;
-var skoReader = require("../backoffice/skosReader..js");
 var async = require("async");
 
 var xsdToSkos = {
     xsdElementsTree: function (xsdPath, options, callback) {
         function formatString(str, options) {
-            if (!str.replace) var x = 3;
-
             str = str.replace(/"/gm, '\\"');
             str = str.replace(/;/gm, " ");
             str = str.replace(/\n/gm, "\\\\n");
@@ -32,14 +29,11 @@ var xsdToSkos = {
             return str;
         }
 
-        var maxRecurseLevels = 60;
         var p = xsdPath.lastIndexOf("\\");
         var q = xsdPath.lastIndexOf(".");
-        var rootEltName = xsdPath.substring(p + 1, q);
         var str = "" + fs.readFileSync(xsdPath);
         var fileTitle = xsdPath.substring(xsdPath.lastIndexOf("\\") + 1, xsdPath.lastIndexOf("."));
         var doc = new DOMParser().parseFromString(str, "text/xml");
-        if (!doc || !doc.documentElement) var x = 3;
         var schema = doc.documentElement.getElementsByTagName("xs:schema");
         schema = schema._node;
         var strElements = "";
@@ -103,7 +97,6 @@ var xsdToSkos = {
                     var parentName = node.parentNode.getAttribute("name");
                     if (parentName == "") parentName = node.parentNode.parentNode.getAttribute("name");
                     if (parentName == "") parentName = node.parentNode.parentNode.parentNode.getAttribute("name");
-                    if (parentName == "") var x = 3;
                     parentId = "<" + graphURI + parentName + ">";
 
                     strElements += parentId + ' <http://www.w3.org/2004/02/skos/core#definition> "' + definition + '" .\n';
@@ -128,7 +121,6 @@ var xsdToSkos = {
         if (!options) options = {};
 
         var files = [];
-        var fileTitle = xsdPath.substring(xsdPath.lastIndexOf("\\") + 1);
 
         function recurseDir(xsdPath) {
             if (fs.lstatSync(xsdPath).isDirectory()) {
@@ -177,9 +169,6 @@ var scheme = "Reservoir";
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\witsml\\v2.0\\xsd_schemas\\";var scheme="Well"
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\prodml\\v2.1\\xsd_schemas\\";var scheme="Production"
 
-var includeFiles = [""];
-xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (err, _result) {
-    var x = err;
-});
+xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (err, _result) {});
 
 //var commonEnums=xsdToSkos.getCommonEnumeration();

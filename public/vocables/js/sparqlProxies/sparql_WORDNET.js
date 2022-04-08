@@ -11,7 +11,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_WORDNET = (function () {
     var self = {};
-    var sourceLabel = "WORDNET";
 
     self.sparql_url = "http://wordnet.rkbexplorer.com/sparql/";
     self.ancestorsDepth = 3;
@@ -61,7 +60,6 @@ var Sparql_WORDNET = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
             });
@@ -134,7 +132,6 @@ var Sparql_WORDNET = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
             });

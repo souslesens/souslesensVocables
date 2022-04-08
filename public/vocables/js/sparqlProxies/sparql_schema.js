@@ -69,7 +69,6 @@ var Sparql_schema = (function () {
     };
     self.getObjectAnnotations = function (schema, classIds, callback) {
         var fromStr = self.getFromGraphStr(schema.graphUri);
-        var classIdsFilter = Sparql_common.setFilter("classId", classIds);
         var query =
             " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +

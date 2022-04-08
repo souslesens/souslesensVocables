@@ -1,5 +1,4 @@
 var fs = require("fs");
-const async = require("async");
 var sax = require("sax");
 
 var distinctTags = {};
@@ -24,7 +23,6 @@ var parseOWL = {
         });
 
         saxStream.on("opentag", function (node) {
-            var x = node;
             if (!distinctTags[node.name]) distinctTags[node.name] = 1;
             else distinctTags[node.name] += 1;
 

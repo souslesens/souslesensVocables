@@ -11,12 +11,9 @@
  */
 
 var httpProxy = require("../../httpProxy.");
-var elasticRestProxy = require("../../elasticRestProxy.");
 //var superagent = require('superagent')
-var request = require("request");
 var fs = require("fs");
 var async = require("async");
-var thesauriiConcepts = {};
 var mediawikiStats = {
     sparqlUrl: "http://51.178.139.80:8890/sparql/",
 
@@ -34,8 +31,6 @@ var mediawikiStats = {
                 if (!catWordsMap[category].concepts[concept]) catWordsMap[category].concepts[concept] = 0;
                 catWordsMap[category].concepts[concept] += 1;
             });
-
-            var xx = catWordsMap;
 
             /*  var str = "titre\tx\n"
             for (var category in catWordsMap) {

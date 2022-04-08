@@ -82,7 +82,6 @@ var annotatorLive = {
                                     query += " filter " + filter + "} limit 10000";
 
                                     var url = source.sparql_server.url;
-                                    var queryOptions = ""; // "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
 
                                     var params = { query: query };
                                     var headers = {
@@ -93,8 +92,6 @@ var annotatorLive = {
                                         if (err) {
                                             return callbackEachNounsSlice(err);
                                         }
-                                        var bindings = [];
-                                        var ids = [];
                                         if (result.results.bindings.length > 0) {
                                             result.results.bindings.forEach(function (item) {
                                                 var key = item.prefLabel.value.toLowerCase();

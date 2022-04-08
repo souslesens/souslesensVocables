@@ -9,7 +9,6 @@ var parseXlsx = {
         var sheets = {};
         var allData = {};
         var allModel = {};
-        var jsonArrayQuantum = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -39,10 +38,7 @@ var parseXlsx = {
                             return callbackSeries(null, null);
                         var lineDebut = range[2];
                         var lineFin = range[4];
-                        var colDebut = range[1];
                         var colFin = range[3];
-                        var alphabet = "A,";
-                        var dbleLetterColName = colFin.length > 1;
                         var colNames = [];
                         for (var j = 65; j < 120; j++) {
                             var colName;
@@ -84,7 +80,6 @@ var parseXlsx = {
 
                         console.log("saving " + filePath.replace(/\.xlsx/i, "json"));
                         var str = JSON.stringify(allData[sheetKey], null, 2);
-                        var xx = filePath.replace(/\.xlsx/i, "_") + sheetKey + ".json";
                         fs.writeFileSync(filePath.replace(/\.xlsx/i, "_") + sheetKey + ".json", str);
                         console.log("done");
                     }
@@ -93,7 +88,6 @@ var parseXlsx = {
             ],
             function (_err) {
                 console.log("done");
-                var x = allData;
 
                 console.log("saving " + filePath.replace(/\.xlsx/i, "model.json"));
                 var str = JSON.stringify(allModel, null, 2);

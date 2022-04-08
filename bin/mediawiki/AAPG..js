@@ -49,7 +49,6 @@ var AAPG = {
             },
             function (err) {
                 if (err) return console.log(err);
-                var xx = links;
 
                 fs.writeFileSync("D:\\Total\\2020\\Stephanie\\AAPG-links.json", JSON.stringify(links));
             }

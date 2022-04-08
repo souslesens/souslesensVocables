@@ -12,10 +12,7 @@
 var Sparql_INDIVIDUALS = (function () {
     var self = {};
 
-    var filterCollectionsGenealogyDepth = 4;
     self.ancestorsDepth = 6;
-
-    var elasticUrl = Config.serverUrl;
 
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) options = {};
@@ -97,7 +94,6 @@ var Sparql_INDIVIDUALS = (function () {
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var owlPredicate = "subClassOf";
-        if (options.owlType) owlPredicate = options.owlType;
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -119,7 +115,6 @@ var Sparql_INDIVIDUALS = (function () {
         query += " limit " + limit;
 
         var url = self.sparql_url + "?format=json&query=";
-        var method = Config.sources[sourceLabel].server_method;
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);

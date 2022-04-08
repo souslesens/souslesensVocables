@@ -4,11 +4,7 @@ var util = require("./util.");
 var SourceManager = {
     createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {},
     createNewSkosSourceGraph: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
-        var type = options.type;
-        var lang = options.lang;
         var referenceSource = options.referenceSource;
-        var keepOriginalUris = options.keepOriginalUris;
-        var addExactMatchPredicate = options.addExactMatchPredicate;
         options.createCollectionRootNode = true;
 
         var sourceData = [];
@@ -66,13 +62,9 @@ var SourceManager = {
     },
 
     createTriples: function (sourceData, graphUri, targetSparqlServerUrl, options, callback) {
-        var type = options.type;
         var lang = options.lang;
         var keepOriginalUris = options.keepOriginalUris;
         var addExactMatchPredicate = options.addExactMatchPredicate;
-
-        var broaderPredicate = "";
-        var labelPredicate = "";
 
         var urisMap = {};
         var slices = util.sliceArray(sourceData, 50);

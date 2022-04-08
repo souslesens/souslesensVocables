@@ -160,7 +160,6 @@ var visjsGraph = (function () {
                 var edge = self.data.edges.get(edgeId);
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
-                var point = params.pointer.DOM;
                 //   sinequaResultVis.onEdgeHover(edge, point)
             })
             .on("blurEdge", function (_params) {
@@ -199,7 +198,6 @@ var visjsGraph = (function () {
                          return;*/
 
                     var nodeId = params.nodes[0];
-                    var nodeObj = self.data.nodes.get(nodeId);
 
                     self.lastMovedNode = nodeId;
                     //   var nodes = self.data.nodes.getIds();
@@ -544,7 +542,6 @@ var visjsGraph = (function () {
     };
 
     self.getNodesPosition = function () {
-        var nodes = self.data.nodes.getIds();
         var positions = self.network.getPositions();
         return positions;
     };
@@ -555,7 +552,6 @@ var visjsGraph = (function () {
             lastClickTime = now;
             return;
         }
-        if (isDbleClick) var x = 3;
 
         if (params.edges.length == 0 && params.nodes.length == 0) {
             //simple click stop animation
@@ -727,7 +723,6 @@ var visjsGraph = (function () {
 
     self.saveGraph = function (fileName, raw) {
         if (!self.currentContext) return;
-        var nodes = visjsGraph.data.nodes.get();
         var positions = self.network.getPositions();
 
         if (!raw) {

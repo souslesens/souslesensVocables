@@ -1,7 +1,5 @@
 var TE_AssetDataManager = (function () {
     var self = {};
-    var assetTreeDistinctNodes = {};
-    var graphAssetNodes;
     var coloredNodesMap;
     self.loadAsset = function (asset) {
         if (asset == "") return;
@@ -142,7 +140,6 @@ var TE_AssetDataManager = (function () {
     self.loadPIDgraph = function () {
         var options = {};
         options.onclickFn = function (node, point, _options) {
-            var nodes = visjsGraph.data.nodes.get();
             MainController.UI.hidePopup("graphPopupDiv");
             self.currentGraphNode = node;
             MainController.UI.message(JSON.stringify(point));
@@ -181,7 +178,6 @@ var TE_AssetDataManager = (function () {
 }}
 }
 }*/
-        var positionNode = { id: "PP", shape: "star", color: "red" };
         var visjsData = { nodes: [], edges: [] };
 
         var assetDataLabel = $("#TE_AssetDataManager_assetDataSelect").val();

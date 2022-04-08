@@ -54,7 +54,6 @@ var skosToElastic = {
                             for (var i = 0; i <= index; i++) {
                                 sep += "_";
                             }
-                            if (ancestor.indexOf("GROUP IIB") > -1) var x = 3;
                             ancestors = ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
                         });
                         newJson.push({
@@ -233,8 +232,6 @@ var skosToElastic = {
                         }
                         var responses = json.responses;
 
-                        if (!responses || !responses.forEach) var x = 3;
-
                         responses.forEach(function (response, _responseIndex) {
                             if (response.error) {
                                 hitsIndexTarget.push({ _source: {} });
@@ -248,14 +245,12 @@ var skosToElastic = {
 
                 //process common
                 function (callbackSeries) {
-                    var targetHitsIds = [];
                     hitsIndexTarget.forEach(function (hits, index) {
                         if (hits.length > 0) {
                             commonConcepts.push({
                                 source: hitsIndexSource[index],
                                 target: hitsIndexTarget[index],
                             });
-                            var targetIds = [];
                             //    console.log(hitsIndexSource[index]._source.concept+"  "+hitsIndexTarget[index]._source.path)
                             /*    hits.forEach(function (hit) {
                                 targetIds.push({
@@ -280,7 +275,6 @@ var skosToElastic = {
 
     compareThesaurus: function (indexSource, indexTarget, callback) {
         var hitsIndexSource = [];
-        var hitsIndexTarget = [];
         var commonConcepts = [];
         var totalHits = 0;
         var scroll_id = "";
@@ -442,6 +436,5 @@ if (false) {
 if (false) {
     skosToElastic.compareThesaurus("libraryofcongress", "flat_thesaurus", function (err, result) {
         //  skosToElastic.compareThesaurus("termscience_all", "flat_thesaurus", function (err, result) {
-        var x = result;
     });
 }

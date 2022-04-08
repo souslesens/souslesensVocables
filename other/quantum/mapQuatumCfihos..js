@@ -2,7 +2,6 @@ var fs = require("fs");
 const async = require("async");
 var httpProxy = require("../../bin/httpProxy.");
 var util = require("../../bin/util.");
-var distinctTags = {};
 
 var mapQuatumCfihos = {
     mapClasses: function (sourceConfig, targetConfig, callback) {
@@ -56,7 +55,6 @@ var mapQuatumCfihos = {
                         function (labels, callbackEach) {
                             var fitlerStr = "";
                             labels.forEach(function (label, index) {
-                                if (label.indexOf("\\") > -1) var x = "3";
                                 if (index > 0) fitlerStr += "|";
                                 fitlerStr += "^" + label.replace(/\\/g, "") + "$";
                             });
@@ -85,7 +83,6 @@ var mapQuatumCfihos = {
                                         data = JSON.parse(data.result.trim());
 
                                     data.results.bindings.forEach(function (item) {
-                                        var x = item;
                                         var id = item.concept.value;
                                         var label = item.conceptLabel.value.toLowerCase();
                                         if (!sourceClasses[label]) return console.log(label);
@@ -115,7 +112,6 @@ var mapQuatumCfihos = {
                                         data = JSON.parse(data.result.trim());
 
                                     data.results.bindings.forEach(function (item) {
-                                        var x = item;
                                         var id = item.concept.value;
                                         var label = item.conceptLabel.value.toLowerCase();
                                         if (!sourceClasses[label]) return console.log(label);
@@ -129,7 +125,6 @@ var mapQuatumCfihos = {
                             }
                         },
                         function (err) {
-                            var x = sourceClasses;
                             callbackSeries(err);
                         }
                     );
@@ -156,7 +151,6 @@ var mapQuatumCfihos = {
                 str += item.sourceId + key + "\t" + targetId + "\t" + item.targetLabels[index] + "\n";
             });
         }
-        var x = str;
         fs.writeFileSync(filePath.replace(".json", "nt"), triples);
     },
 };

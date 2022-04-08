@@ -24,11 +24,9 @@ var graphController = (function () {
     self.sliderIndexMax = 200;
 
     self.drawEntitiesGraph = function (data) {
-        var xx = data;
         var nodes = [];
         var edges = [];
         var nodeMap = {};
-        var max = data.max;
         var rootEntityColors = {};
         var colorIndex = 0;
         data.labels.forEach(function (label, rowIndex) {
@@ -92,7 +90,6 @@ var graphController = (function () {
 
     self.showGraph = function () {
         var nodes = [];
-        var edges = [];
 
         context.currentHits.forEach(function (hit) {
             var node = {

@@ -61,8 +61,6 @@ var Sparql_proxy = (function () {
                      },*/
 
                     success: function (data, _textStatus, _jqXHR) {
-                        var xx = data;
-
                         callbackWhilst(null, data);
                         resultSize = data.results.bindings.length;
                         allData.results.bindings = allData.results.bindings.concat(data.results.bindings);

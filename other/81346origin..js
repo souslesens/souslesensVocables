@@ -71,7 +71,6 @@ mappingsMap = {
                 p: "rdfs:label",
                 isString: true,
                 o: function (line, _mapping) {
-                    if (line.ClassName == "Assembly system") var x = 3;
                     if (line.code1 && !line.code2 && !line.code3) return util.formatStringForTriple(line.ClassName);
                     return "";
                 },

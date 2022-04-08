@@ -13,7 +13,6 @@
 const superagent = require("superagent");
 require("superagent-proxy")(superagent);
 var request = require("request");
-const util = require("./util.");
 var proxy = null;
 var httpProxy = {
     host: null,
@@ -38,7 +37,6 @@ var httpProxy = {
             /* options.headers={  "Accept": 'application/sparql-results+json',
                     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.106 Safari/537.36"}*/
         } else {
-            var x = 3;
         }
 
         var request = superagent.get(url);
@@ -81,7 +79,6 @@ var httpProxy = {
       ,*/
 
     post: function (url, headers, params, callback) {
-        var x = httpProxy.app;
         var options = {
             method: "POST",
 

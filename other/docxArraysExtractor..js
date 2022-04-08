@@ -1,7 +1,6 @@
 var fs = require("fs");
 var sax = require("sax");
 var async = require("async");
-const csv = require("csv-parser");
 var docxArraysExtractor = {
     readJson: function (filePath, callback) {
         var headers = [];
@@ -21,9 +20,7 @@ var docxArraysExtractor = {
     },
 
     testJson: function (filePath, _callback) {
-        docxArraysExtractor.readJson(filePath, function (err, result) {
-            var x = result;
-        });
+        docxArraysExtractor.readJson(filePath, function (err, result) {});
     },
 
     parseXml: function (filePath, options, callback) {
@@ -43,7 +40,6 @@ var docxArraysExtractor = {
             this._parser.resume();
         });
 
-        var json = { classes: [], generalizations: [], collaborations: [], associations: [] };
         saxStream.on("opentag", function (node) {
             line++;
             if (line % 10000 == 0) console.log(line);
@@ -69,7 +65,6 @@ var docxArraysExtractor = {
 
         saxStream.on("text", function (text) {
             currentTableTitle = text;
-            var x = 3;
 
             if (currentCell !== null) {
                 if (text && text != "\n" && currentCell.indexOf(text) < 0) currentCell += text;
@@ -89,17 +84,15 @@ var docxArraysExtractor = {
             }
             if (node == "W:TC") {
                 var str = currentCell.replace(/[\n\t\r]/g, "");
-                if (!currentRow || !currentRow.push) var x = 3;
-                else {
+                if (currentRow && currentRow.push) {
                     str = str.trim();
-                    str = str.replace(/  /g, "");
+                    str = str.replace(/ {2}/g, "");
                     currentRow.push(str);
                 }
             }
         });
 
         saxStream.on("end", function (_node) {
-            var x = tables;
             callback(null, tables);
         });
 
@@ -154,7 +147,6 @@ var docxArraysExtractor = {
                 // Each line in input.txt will be successively available here as `line`.
                 //   var array=line.split("│");
                 if (start) {
-                    if (count++ > maxLines) var x = 3;
                     if (line.indexOf(".") < 0 && line.indexOf("JPG") < 0) console.log(line);
                 }
                 //console.log(JSON.stringify(array))
@@ -167,8 +159,6 @@ var docxArraysExtractor = {
     buildParts: function (treeDirPath, openXmlFilePath) {
         var tableArray = null;
         var treeDirJson = null;
-        var treeDirRoot = {};
-        var treeMap = {};
         var str = "";
 
         //  var colNames = ['n1', 'n2', 'n3', 'contenu', 'auteur', 'remarques', 'x', 'debut', 'fin', 'C', 'P', 'R']
@@ -179,7 +169,6 @@ var docxArraysExtractor = {
                 function (callbackSeries) {
                     docxArraysExtractor.readJson(treeDirPath, function (err, result) {
                         if (err) return callbackSeries(err);
-                        treeDirJson = result;
                         callbackSeries();
                     });
                 },
@@ -211,7 +200,6 @@ var docxArraysExtractor = {
                         });
                     });
 
-                    var str2 = str; // Buffer.from(str, 'Windows-1252')
                     fs.writeFileSync(openXmlFilePath + ".csv", str);
 
                     callbackSeries();
@@ -228,8 +216,6 @@ var docxArraysExtractor = {
 };
 
 module.exports = docxArraysExtractor;
-
-var treeDirPath = "D:\\ATD_Baillet\\Search2021\\treeDirs.json";
 
 var openXmlFilePath = "D:\\NLP\\ontologies\\14224\\ISO14224_Datacollection-oilandgas\\word\\document.xml";
 //var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
@@ -250,22 +236,16 @@ docxArraysExtractor.parseXml(openXmlFilePath, options, function (err, result) {
     var str = "";
     if (options.rotate) {
         result.forEach(function (array, _arrayIndex) {
-            var cols = [];
-            var totalCols = 0;
-            var totalLines = 0;
             var colsMap = {};
             array.forEach(function (line, _lineIndex) {
                 if (line) {
                     line.forEach(function (cell, cellIndex) {
                         var X = "K" + cellIndex;
                         if (!colsMap[X]) colsMap[X] = "";
-                        else var x = 3;
                         colsMap[X] = (cell ? cell.trim() : "") + "\t" + colsMap[X];
                     });
                 }
             });
-
-            var x = colsMap;
 
             for (var key in colsMap) {
                 str += colsMap[key] + "\n";
@@ -289,6 +269,5 @@ docxArraysExtractor.parseXml(openXmlFilePath, options, function (err, result) {
         });
     }
 
-    var str2 = str; // Buffer.from(str, 'Windows-1252')
     fs.writeFileSync(openXmlFilePath + "R.csv", str);
 });

@@ -11,7 +11,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_NPD = (function () {
     var self = {};
-    var sourceLabel = "CIDOC";
 
     self.ancestorsDepth = 6;
     self.sparql_url = "http://51.178.139.80:8890/sparql";
@@ -76,7 +75,6 @@ var Sparql_NPD = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
                 var id = item.child1.value;
@@ -137,7 +135,6 @@ var Sparql_NPD = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
             });

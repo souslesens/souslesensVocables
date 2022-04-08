@@ -1224,7 +1224,6 @@
         }
 
         parent = this.__closestGroupOrSvg();
-        currentElement = this.__currentElement;
         var translateDirective = "translate(" + dx + ", " + dy + ")";
         if (image instanceof ctx) {
             //canvas2svg mock canvas context. In the future we may want to clone nodes instead.

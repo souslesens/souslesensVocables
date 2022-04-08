@@ -16,16 +16,12 @@ var common = require("../backoffice/common.");
 var tulsaToSkos = {
     topConcepts: ["COMMON ATTRIBUTE", "EARTH AND SPACE CONCEPTS", "ECONOMIC FACTOR", "EQUIPMENT", "LIFE FORM", "OPERATING CONDITION", "PHENOMENON", "PROCESS", "PROPERTY", "WORLD", "MATERIAL"],
     parseTxt: function () {
-        var entitiesArray = [];
-
-        var rootConcepts = [];
         var jsonArray = [];
 
         var filePath = "D:\\NLP\\importedResources\\Tulsa.txt";
 
         var str = "" + fs.readFileSync(filePath);
         var lines = str.split("\n");
-        var isPreviousBT = false;
         var types = {};
         lines.forEach(function (line, index) {
             var offset1 = 32;
@@ -133,7 +129,6 @@ var tulsaToSkos = {
 
             if (item.type == "BT") {
                 if (entity.broaders.indexOf(item.term) < 0) entity.broaders.push(item.term);
-                if (entity.broaders.length > 1) var x = 3;
                 entity.broader = item.term;
             } else if (item.type == "SA") {
                 if (entity.relateds.indexOf(item.term) < 0) entity.relateds.push(item.term);
@@ -160,7 +155,6 @@ var tulsaToSkos = {
                 orphanEntities.push(entity.prefLabel)
             }*/
         });
-        var x = orphanEntities;
         if (entity.broaders) return entitiesMap;
     },
     setDSMap: function (_jsonArray) {},

@@ -8,7 +8,6 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 var fs = require("fs");
-var async = require("async");
 
 var gaiaToSkos = {
     csvToJson: function (filePath) {
@@ -59,9 +58,6 @@ var gaiaToSkos = {
         var classes = [];
         var categories = [];
         var categoriesLetters = [];
-
-        var rootConcepts = [];
-        var jsonArray = [];
 
         var filePath = "D:\\NLP\\importedResources\\gaia.txt";
 
@@ -132,10 +128,6 @@ var gaiaToSkos = {
             });
         }
 
-        var x = categoriesLetters;
-        var y = categories;
-        var z = classes;
-
         fs.writeFileSync(filePath.replace(".txt", ".rdf.nt"), str);
     },
 
@@ -144,9 +136,6 @@ var gaiaToSkos = {
 
         var objs = gaiaToSkos.csvToJson(filePath);
 
-        var classesMap = {};
-        var categoriesMap = {};
-        var categoriesClassMap = {};
         var str = "";
         objs.forEach(function (item, index) {
             // category	syn 	term	acronymEn	synEn

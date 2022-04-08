@@ -9,16 +9,13 @@
  */
 const async = require("async");
 const util = require("../util.");
-const request = require("request");
 const fs = require("fs");
 const csv = require("csv-parser");
 
-var distinctUris = {};
 var CSVtoSKOS = {
     getCSVColumns: function (filePath, callback) {
         CSVtoSKOS.readCsv({ filePath: filePath }, 50000, function (err, result) {
             if (err) return callback(err);
-            var data = result.data;
             var headers = result.headers;
             return callback(null, headers);
         });
@@ -48,7 +45,6 @@ var CSVtoSKOS = {
             fields.forEach(function (field, _index) {
                 if (str != "") str += "   ";
 
-                var value = null;
                 if (field.indexOf("$") >= 0) {
                     field = field.trim();
                     field = field.substring(1);
@@ -78,7 +74,6 @@ var CSVtoSKOS = {
                     CSVtoSKOS.readCsv(config, config.maxLines, function (err, result) {
                         if (err) return callbackseries(err);
                         data = result.data;
-                        headers = result.headers;
                         return callbackseries();
                     });
                 },
@@ -90,7 +85,6 @@ var CSVtoSKOS = {
                     async.eachSeries(
                         slicedData,
                         function (data, callbackEach) {
-                            totalLines += data.length;
                             data.forEach(function (line, lineIndex) {
                                 if (lineIndex == 0) return;
                                 mappings.forEach(function (mapping) {
@@ -178,7 +172,6 @@ var CSVtoSKOS = {
             var headers = [];
             var jsonData = [];
             var jsonDataFetch = [];
-            var startId = 100000;
             fs.createReadStream(connector.filePath).pipe(
                 csv({
                     separator: separator,
@@ -206,9 +199,7 @@ var CSVtoSKOS = {
 module.exports = CSVtoSKOS;
 
 if (false) {
-    CSVtoSKOS.getCSVColumns("D:\\NLP\\importedResources\\iec.csv", function (err, result) {
-        var x = result;
-    });
+    CSVtoSKOS.getCSVColumns("D:\\NLP\\importedResources\\iec.csv", function (err, result) {});
 }
 
 var mappings = [

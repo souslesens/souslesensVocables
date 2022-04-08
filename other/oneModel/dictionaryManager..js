@@ -7,8 +7,6 @@ var DictionaryManager = {
         var sparql_server_url = "http://51.178.139.80:8890/sparql";
         var dictionaryGraphUri = "http://vocables.souslesens.org/dictionary/";
 
-        var offset = 0;
-        var fecthSize = 100000;
         var resultSize = 1;
         var totalLines = 0;
         async.whilst(

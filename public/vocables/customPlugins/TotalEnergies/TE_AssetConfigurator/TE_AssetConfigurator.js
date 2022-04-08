@@ -249,7 +249,6 @@ var TE_AssetConfigurator = (function () {
         node.data.system = self.currentSystem;
         node.data.aspect = self.systemsMap[self.currentSystem].aspect;
 
-        var existingNodes = visjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
         var visjsId = common.getRandomHexaId(10);
         var code = node.data.code;
@@ -372,7 +371,6 @@ var TE_AssetConfigurator = (function () {
     self.showGraphNodeInfos = function (node) {
         self.getNodeClassificationTree(node.data, function (err, parentsMap) {
             if (err) return MainController.UI.message(err);
-            var color = self.systemsMap[node.data.system].color;
             var parentsStr = "<ul>";
             var i = 0;
             var sep = "";
@@ -473,7 +471,6 @@ var TE_AssetConfigurator = (function () {
     self.getNodeTag = function (targetNode) {
         if (!targetNode) return;
         var edges = visjsGraph.data.edges.get();
-        var nodeIds = [];
         if (edges.length < 1)
             return {
                 locationTag: "-" + targetNode.data.code + targetNode.data.number,
@@ -495,9 +492,6 @@ var TE_AssetConfigurator = (function () {
         recursePaths(startNode);
 
         nodeAncestors.reverse();
-
-        var bulQueryStr = "";
-        var header = {};
 
         var locationTag = "";
         var functionTag = "";
@@ -819,8 +813,6 @@ var TE_AssetConfigurator = (function () {
                     SearchUtil.getSourceLabels(self.currentSource.toLowerCase(), parentIds, null, null, function (err, hits) {
                         if (err) return callbackSeries(err);
                         hits.forEach(function (hit) {
-                            if (hit._source.label == "Centrifugal pump") var x = 3;
-
                             var parents = hit._source.parents;
                             var code = hit._source.skoslabels[0];
 
@@ -853,7 +845,6 @@ var TE_AssetConfigurator = (function () {
                     var existingNodes = {};
 
                     var getNodeLabel = function (item) {
-                        if (item == "http://data.total.com/resource/tsf/RDS_OG_81346/Location_aspect/Construction_complexe_1") var x = 3;
                         var label;
                         var prefix = "";
                         if (self.systemsMap[item]) label = "System " + self.systemsMap[item].label;
@@ -913,7 +904,6 @@ var TE_AssetConfigurator = (function () {
                             }
                         });
 
-                        if (hit._source.id.indexOf("Centri") > -1) var x = 3;
                         var parent2 = getParent(hit._source.id);
                         var code2 = getCode(hit._source.id);
                         var label2 = getNodeLabel(hit._source.id);
@@ -1092,7 +1082,6 @@ var TE_AssetConfigurator = (function () {
         },
         showInfos: function () {
             if (!self.currentGraphNode) return alert("select a node in the graph");
-            var rdsNodeData = self.currentGraphNode.data;
             // JSON.stringify(rdsNodeData, null,2).replace("\\n","<br>")
 
             var headers = Object.keys(self.currentGraphNode.data);

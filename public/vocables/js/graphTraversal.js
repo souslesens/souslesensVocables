@@ -11,7 +11,6 @@ var GraphTraversal = (function () {
         var route = new Graph();
         var routeMap = {};
         for (var subject in allClassesMap) {
-            var objectsArray = [];
             var predicates = allClassesMap[subject];
             if (!routeMap[subject]) {
                 routeMap[subject] = [];
@@ -61,8 +60,6 @@ var GraphTraversal = (function () {
         var obj = self.initRoute(allClassesMap);
 
         var route = obj.route;
-        var directPredicates = obj.directPredicates;
-        var inversePredicates = obj.inversePredicates;
 
         var path = route.path(fromNodeObj.class, toNodeObj.class).path;
         self.currentPathNodes = [];
@@ -77,7 +74,6 @@ var GraphTraversal = (function () {
     self.getWhereFromPath = function (path) {
         var where = "";
         path.forEach(function (aclass, index) {
-            var propertyObj = {};
             if (index > 0) {
                 if (index > 1) where += "/";
                 var str = aclass + "_" + path[index - 1];
@@ -95,8 +91,6 @@ var GraphTraversal = (function () {
     self.addNodeToPath = function (targetNodeObj, allClassesMap, seqNumber) {
         var obj = self.initRoute(allClassesMap);
         var route = obj.route;
-        var directPredicates = obj.directPredicates;
-        var inversePredicates = obj.inversePredicates;
 
         var candidatePathes = [];
         self.currentPathNodes.forEach(function (pathObj) {
@@ -146,7 +140,6 @@ var GraphTraversal = (function () {
                 var splitPath1 = [];
                 var splitPath2 = [];
                 pathObj.path.forEach(function (node, nodeIndex) {
-                    var currentPath = [];
                     if (nodeIndex < intersectionPoint.nodeIndex) splitPath1.push(node);
                     else if (nodeIndex > intersectionPoint.nodeIndex) splitPath2.push(node);
                     else {

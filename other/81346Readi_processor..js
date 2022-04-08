@@ -1,11 +1,9 @@
 var processor = require("../bin/KG/CsvTripleBuilder.");
-var util = require("../bin/util.");
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
 var decode81346 = function (str) {
     var regex = /(?<code>[A-Z]{3}[1|2|3] [A-Z]{1,3}) (?<label>[A-z \-\/]{3,})/;
     var array = regex.exec(str);
-    if (!array) var x = 3;
     return array.groups;
 };
 

@@ -1,6 +1,5 @@
 var fs = require("fs");
 var path = require("path");
-var async = require("async");
 var csvCrawler = require("../bin/_csvCrawler.");
 
 var DataController = {

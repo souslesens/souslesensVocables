@@ -118,7 +118,6 @@ var TE_SqlTojstreeConnectors = (function () {
 
         self.querySQLserver(dbName, sqlQuery, function (err, data) {
             if (err) return MainController.UI.message(err);
-            var jstreeData = [];
             var nodeId = node.id;
             if (data.length == 0) return;
             var headers = Object.keys(data[0]);
@@ -146,8 +145,6 @@ var TE_SqlTojstreeConnectors = (function () {
 
     self.getChildrenNodesJsTreeData = function (dbName, node, coloredNodes, callback) {
         if ((node.data.type = "equipments")) {
-            var limit = 100000;
-            var parentData = node.data;
             var sqlQuery = "  select *  from equipments where  location2 ='" + node.data.label + "'";
             self.querySQLserver(dbName, sqlQuery, function (err, result) {
                 if (err) return callback(null, result);
@@ -180,7 +177,6 @@ var TE_SqlTojstreeConnectors = (function () {
     };
 
     self.querySQLserver = function (dbName, sqlQuery, callback) {
-        var limit = 100000;
         var dataSource = {
             type: "sql.sqlserver",
             connection: "_default",

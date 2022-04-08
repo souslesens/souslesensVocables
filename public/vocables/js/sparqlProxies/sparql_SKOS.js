@@ -12,8 +12,6 @@
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_SKOS = (function () {
-    var source = "";
-
     self.getTopConcepts = function (sourceLabel, options, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
@@ -506,7 +504,6 @@ var Sparql_SKOS = (function () {
             if (!subject) subject = item.subject;
             insertTriplesStr += self.triplesObjectToString(item);
         });
-        deleteTriplesStr += "<?s ?p ?o.";
         var query =
             " WITH GRAPH  <" +
             graphUri +

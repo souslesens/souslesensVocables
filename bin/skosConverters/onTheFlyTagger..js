@@ -10,9 +10,7 @@
 var async = require("async");
 var httpProxy = require("../httpProxy.");
 var elasticRestProxy = require("../elasticRestProxy.");
-var superagent = require("superagent");
 var fs = require("fs");
-var lemmatizer = require("lemmatizer");
 var onTheFlyTagger = {
     mediawikistopWords: [
         "wikitable",
@@ -259,7 +257,6 @@ var onTheFlyTagger = {
     getPageWords: function (pageUri, callback) {
         var pageText = "";
         var pageWords = [];
-        var intersection = [];
 
         async.series(
             [
@@ -393,7 +390,6 @@ var onTheFlyTagger = {
 
         var offset = 0;
         var length = 1;
-        var result = [];
         async.whilst(
             function test(cb) {
                 return cb(null, length > 0);
@@ -802,7 +798,6 @@ var onTheFlyTagger = {
 
                 //print csv
                 function (callbackSeries) {
-                    var thesauriiLabels = Object.keys[thesauriiMap];
                     var str = "";
                     /* thesauriiLabels.forEach(function (thesaurus){
                          str+=thesaurus+"\t";
@@ -857,9 +852,7 @@ var onTheFlyTagger = {
                                         if (themeFreq) str += themeFreq + "\t";
                                         else str += "0" + "\t";
                                     }
-                                } catch (e) {
-                                    var w = 3;
-                                }
+                                } catch (e) {}
                             });
                         }
 
@@ -920,8 +913,6 @@ var onTheFlyTagger = {
                 return console.log(err);
             }
         );
-
-        var xx = wordsByCategory;
     },
 
     getCommonWords: function (thesaurus, words, callback) {

@@ -16,7 +16,6 @@ var xlsx2json = {
         var sheets = {};
         var allData = {};
         var allModel = {};
-        var jsonArrayQuantum = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -49,10 +48,7 @@ var xlsx2json = {
                             return callbackSeries(null, null);
                         var lineDebut = range[2];
                         var lineFin = range[4];
-                        var colDebut = range[1];
                         var colFin = range[3];
-                        var alphabet = "A,";
-                        var dbleLetterColName = colFin.length > 1;
                         var colNames = [];
                         for (var j = 65; j < 120; j++) {
                             var colName;
@@ -114,7 +110,6 @@ var xlsx2json = {
 
                 if (!callback) {
                     console.log("done");
-                    var x = allData;
                     console.log("saving " + filePath.replace(/\.xlsx/i, "model.json"));
                     var str = JSON.stringify(allModel, null, 2);
 

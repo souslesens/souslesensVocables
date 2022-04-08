@@ -137,8 +137,6 @@ var csvCrawler = {
             var headers = [];
             var jsonData = [];
             var jsonDataFetch = [];
-            var startId = 100000;
-            var linesCount = 0;
             fs.createReadStream(connector.filePath).pipe(
                 csv({
                     separator: separator,
@@ -170,7 +168,6 @@ var csvCrawler = {
                         return callback(null, { headers: headers, data: jsonData });
                     })
                     .on("error", function (error) {
-                        var x = error;
                         return callback(error);
                     })
             );

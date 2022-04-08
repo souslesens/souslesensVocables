@@ -1,7 +1,5 @@
-var fs = require("fs");
 const async = require("async");
 var util = require("../bin/util.");
-var httpProxy = require("../bin/httpProxy.");
 const csvCrawler = require("../bin/_csvCrawler.");
 const SPARQLutil = require("../bin/SPARQLutil.");
 
@@ -21,7 +19,6 @@ var Iso19800toOWL = {
                     csvCrawler.readCsv({ filePath: sourcePath }, 5000000, function (err, result) {
                         if (err) return callbackseries(err);
                         data = result.data;
-                        headers = result.headers;
                         return callbackSeries();
                     });
                 },
@@ -87,7 +84,6 @@ var Iso19800toOWL = {
             ],
             function (err) {
                 if (err) return console.log(err);
-                var x = triples;
                 console.log("DONE");
             }
         );
@@ -108,7 +104,6 @@ var Iso19800toOWL = {
                     csvCrawler.readCsv({ filePath: sourcePath }, 5000000, function (err, result) {
                         if (err) return callbackSeries(err);
                         data = result.data;
-                        headers = result.headers;
                         return callbackSeries();
                     });
                 },
@@ -177,7 +172,6 @@ var Iso19800toOWL = {
             ],
             function (err) {
                 if (err) return console.log(err);
-                var x = triples;
                 console.log("DONE");
             }
         );

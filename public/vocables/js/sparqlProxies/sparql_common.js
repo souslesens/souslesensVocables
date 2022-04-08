@@ -78,7 +78,6 @@ var Sparql_common = (function () {
                     if (ids[0] == null) return "";
                     var conceptIdsStr = "";
                     ids.forEach(function (id, _index) {
-                        if (!id.indexOf) var x = 3;
                         //  if(id.indexOf("http")!=0)
                         if (id.match && !id.match(/.+:.+|http.+/)) return;
                         if (id != "") {
@@ -138,7 +137,6 @@ var Sparql_common = (function () {
 
     self.formatStringForTriple = function (str, forUri) {
         if (!str || !str.replace) return null;
-        if (str.indexOf("$") > -1) var x = 3;
         str = str.trim();
         str = str.replace(/\\/gm, "");
         str = str.replace(/"/gm, '\\"');

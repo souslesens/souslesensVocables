@@ -159,6 +159,7 @@ module.exports = {
             },
             rules: {
                 "no-constant-condition": "warn",
+                "no-empty-function": "warn",
                 "no-unreachable": "warn",
             },
             env: { browser: true },

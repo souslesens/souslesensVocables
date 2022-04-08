@@ -59,9 +59,6 @@ var KGSqlConnector = {
         for (var key in KGqueryMap) {
             query += " and ";
 
-            if (true) {
-                "" + key + " is not null";
-            }
             if (Array.isArray(KGqueryMap[key])) {
                 query += "" + key + " in (";
                 KGqueryMap[key].forEach(function (quantumTotalId, indexId) {
@@ -150,6 +147,7 @@ var KGSqlConnector = {
 };
 module.exports = KGSqlConnector;
 
+// eslint-disable-next-line no-constant-condition
 if (false) {
     KGSqlConnector.get("tag", {
         AttributeID: "XXXX",
@@ -157,6 +155,7 @@ if (false) {
     });
 }
 
+// eslint-disable-next-line no-constant-condition
 if (false) {
     KGSqlConnector.getKGmodel("clov");
 }

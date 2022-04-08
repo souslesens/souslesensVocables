@@ -1,15 +1,12 @@
-var httpProxy = require("../../bin/httpProxy.");
 var csvCrawler = require("../../bin/_csvCrawler.");
 var elasticRestProxy = require("../../bin/elasticRestProxy.");
 var fs = require("fs");
 var async = require("async");
 var dictionaryMatcher = {
     getSimilars: function (filePath, index, fileField, indexLabelField, indexIdField, callback) {
-        var elasticServerUrl = "http://vps254642.ovh.net:2009/";
         var data = [];
         var matchesMap = {};
         var orphans = [];
-        var headers = [];
         var count = 0;
         async.series(
             [
@@ -18,7 +15,6 @@ var dictionaryMatcher = {
                     csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
                         if (err) return callbackseries(err);
                         data = result.data;
-                        headers = result.headers;
                         return callbackseries();
                     });
                 },
@@ -118,8 +114,6 @@ var dictionaryMatcher = {
                                             });
                                         });
                                     }
-                                } else {
-                                    var x = 3;
                                 }
                                 callbackEach();
                             });
@@ -173,17 +167,18 @@ var dictionaryMatcher = {
 };
 
 module.exports = dictionaryMatcher;
+
+/*
 if (false) {
     var file = "D:\\NLP\\ontologies\\dictionaries\\bomaftwinequip2.csv_orphans.json";
-    var csvFile = "label\t";
     var data = JSON.parse(fs.readFileSync(file));
     data.forEach(function (_line) {
         var matches = JSON.parse(fs.readFileSync(dir + file));
 
         matches.forEach(function (_match) {});
     });
-    csvFile += "";
 }
+*/
 
 //dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\readiLabel.csv", "bomaftwin","label","equipmentDescription","materialNumber ")
 if (true) {
@@ -198,6 +193,7 @@ if (true) {
     });
 }
 
+/*
 if (false) {
     var file = "bomaftwinequip2.csv";
     var file = "Quantum_physicalClasses.txt";
@@ -212,6 +208,8 @@ if (false) {
 
     dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\" + file, "pca", "name", "label", "subject");
 }
+*/
+/*
 if (false) {
     var files = {
         "Quantum_functionalClasses.txt": {
@@ -256,3 +254,4 @@ if (false) {
     var dir = "D:\\NLP\\ontologies\\dictionaries\\";
     dictionaryMatcher.merge(files, "pca", dir);
 }
+*/

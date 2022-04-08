@@ -50,19 +50,16 @@ var TagAnalyzer = {
                     });
                 },
                 function (callbackSeries) {
-                    if (true) {
-                        return callbackSeries();
-                    }
-                    var str = "" + fs.readFileSync("D:\\NLP\\ontologies\\MIE\\distinctTags.txt");
+                    return callbackSeries();
+                    /*
+                     var str = "" + fs.readFileSync("D:\\NLP\\ontologies\\MIE\\distinctTags.txt");
                     tags = str.split(",");
                     return callbackSeries();
+                    */
                 },
 
-                //load tags
+                // load tags
                 function (callbackSeries) {
-                    if (false) {
-                        return callbackSeries();
-                    }
                     var query = "select  TagNumber,FunctionalClassID from KG_tblTag";
                     SQLserverConnector.getData("clov", query, function (err, result) {
                         if (err) return callback(err);
@@ -77,7 +74,6 @@ var TagAnalyzer = {
                     });
                 },
                 function (callbackSeries) {
-                    var patterns = {};
                     var output = [];
                     var regexEquipment_501 = /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g;
 
@@ -117,9 +113,8 @@ var TagAnalyzer = {
 
                         str += subSystemName + "\t";
 
-                        var functionalClassCode = item["equipmentType"];
-                        var functionalClassName = "";
-                        var functionalClassName = item.functionalClass; // tagCodesMap[functionalClassCode]
+                        // var functionalClassName = tagCodesMap[item["equipmentType"]];
+                        var functionalClassName = item.functionalClass;
                         /*   if (functionalClass)
                             functionalClassName = functionalClass.functionalClass_Name*/
 
@@ -164,23 +159,21 @@ return callbackSeries()
                     fs.writeFileSync("D:\\NLP\\ontologies\\MIE\\parseTagsB.txt", str)
                 }*/
             ],
-            function (_err) {}
+            function (_err) {
+                /* XXX do nothing ? */
+            }
         );
     },
 
     parseTag: function (tag, regex) {
-        //  var regexEquipment_501 = /^(?<sector>[\d]{1,2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})(?<more>.*)$/
-
         var obj = regex.exec(tag);
         if (obj) {
             var groups = obj.groups;
             groups.tag = tag;
             return groups;
-            // console.log(tag + "\t" + JSON.stringify(groups,))
         } else {
             return { tag: tag };
         }
-        return null;
     },
     deconcat: function () {
         var str =
@@ -191,7 +184,7 @@ return callbackSeries()
             var p = str.indexOf(" ");
             output += str.substring(0, p) + "," + str.substring(p + 1) + "\n";
         });
-        var x = output;
+        console.log(output);
     },
 
     clovFormats: [
@@ -221,14 +214,12 @@ return callbackSeries()
                 value: item[1],
             });
         });
-        var regexEquipment_501 = /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g;
-        var x = formats;
         var formatRegexmap = {};
         formats.forEach(function (item) {
             var regexStr = "";
             var array = item.value.split("-");
-            var okLetters = ["A", "N", "X"];
-            var contents = [];
+            //var okLetters = ["A", "N", "X"];
+            const contents = [];
 
             array.forEach(function (str, _index) {
                 var isOptional = false;
@@ -254,20 +245,17 @@ return callbackSeries()
                     }
                 }
 
-                var x = content;
                 contents.push(content);
 
                 regexStr += "-";
             });
-
-            var x = contents;
 
             var map = {
                 X: "[\\w\\d]",
                 A: "\\w",
                 N: "\\d",
             };
-            var regexStr = "";
+            regexStr = "";
             contents.forEach(function (content, index) {
                 if (index > 0) regexStr += "-";
                 regexStr += "(?<group" + index + ">";
@@ -286,7 +274,6 @@ return callbackSeries()
 
             formatRegexmap[regexStr] = item;
         });
-        var xx = formatRegexmap;
     },
     ClovRegexps: {
         501: /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
@@ -371,11 +358,10 @@ return callbackSeries()
 
         async.series(
             [
-                //load tags
+                // load tags
                 function (callbackSeries) {
                     var query = "select  TOP (1000) TagNumber from KG_tblTag";
-                    SQLserverConnector.getData("clov", query, function (err, result) {
-                        if (err) return callback(err);
+                    SQLserverConnector.getData("clov", query, function (_err, result) {
                         result.forEach(function (item) {
                             tags[item.TagNumber] = {};
                         });
@@ -383,20 +369,22 @@ return callbackSeries()
                         return callbackSeries();
                     });
                 },
-                //parse tags
+                // parse tags
                 function (_callbackSeries) {
                     for (var key in TagAnalyzer.ClovRegexps) {
                         var regex = new RegExp(TagAnalyzer.ClovRegexps[key]);
                         for (var tag in tags) {
                             var array = regex.exec(tag);
                             if (array && array.length > 0) {
-                                var x = 3;
+                                // XXX do nothing
                             }
                         }
                     }
                 },
             ],
-            function (_err) {}
+            function (_err) {
+                /* XXX do nothing ? */
+            }
         );
     },
 };

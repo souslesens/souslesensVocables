@@ -2,8 +2,6 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 
-var KGSqlConnector = require("./KGSqlConnector.");
-var SQLserverConnector = require("./SQLserverConnector.");
 var ConfigManager = require("../configManager.");
 
 var KGcontroller = {
@@ -34,7 +32,9 @@ var KGcontroller = {
         });
     },
 
-    generateTriples: function (_config) {},
+    generateTriples: function (_config) {
+        /*pass*/
+    },
     getAssetGlobalMappings: function (source, callback) {
         var dir = KGcontroller.getMappingsDirPath();
         var files = fs.readdirSync(dir);
@@ -98,8 +98,6 @@ var KGcontroller = {
                     predicatesMap[subjectType].push(objectType);
                 }
             });
-
-            var x = predicatesMap;
         });
     },
 
@@ -252,10 +250,8 @@ var KGcontroller = {
         "tbltypicalassemblypatterntofunctionalclasschild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
     },
 };
 

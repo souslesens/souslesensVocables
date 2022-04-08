@@ -157,7 +157,10 @@ module.exports = {
                 w: "readable",
                 yasr: "readable",
             },
-            rules: {},
+            rules: {
+                "no-constant-condition": "warn",
+                "no-unreachable": "warn",
+            },
             env: { browser: true },
         },
         {

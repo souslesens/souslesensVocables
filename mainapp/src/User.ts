@@ -1,26 +1,26 @@
+import React from "react";
 import { ulid } from "ulid";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
+import { failure, success } from "srd";
+
 import { Msg } from "./Admin";
 import { Msg_, Type, Mode } from "../src/Component/UsersTable";
-import { ThemeContext } from "@emotion/react";
-import React from "react";
+
 const endpoint = "/api/v1/users";
 
 async function getUsers(_url: string): Promise<User[]> {
     const response = await fetch(endpoint);
-    const { message, ressources } = await response.json();
+    const { ressources } = (await response.json()) as { ressources: Record<string, UserJSON> };
     return mapUsers(ressources);
 }
-function mapUsers(ressources: any) {
+function mapUsers(ressources: Record<string, UserJSON>) {
     const users: [string, UserJSON][] = Object.entries(ressources);
     const mapped_users = users.map(([_, val]) => decodeUser(val));
     return mapped_users;
 }
 
 async function putUsers(url: string, body: User[]): Promise<User[]> {
-    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.id]: item }), {});
     const response = await fetch(endpoint, { method: "put", body: JSON.stringify(body, null, "\t"), headers: { "Content-Type": "application/json" } });
-    const json = await response.json();
+    const json = (await response.json()) as Record<string, UserJSON>;
     const users: [string, UserJSON][] = Object.entries(json);
     const decoded_users = users.map(([_key, val]) => decodeUser(val));
 
@@ -34,7 +34,7 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as { message: string; ressources: Record<string, UserJSON> };
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(ressources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
@@ -50,7 +50,7 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
 async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${user.id}`, { method: "delete" });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as { message: string; ressources: Record<string, UserJSON> };
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(ressources)) });
         } else {
@@ -66,19 +66,9 @@ function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch
         getUsers("/users")
             .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
             .then(() => setModal(false))
-            .catch((err) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
+            .catch((err: { msg: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
     };
 }
-
-const encodeUser = (user: User): UserJSON => {
-    return {
-        login: user.login,
-        password: user.password,
-        groups: user.groups,
-        source: user.source,
-        id: user.id,
-    };
-};
 
 const decodeUser = (user: UserJSON): User => {
     // TODO: (06/10/21 9:45 am) Uniquely identify users

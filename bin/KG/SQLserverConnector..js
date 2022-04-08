@@ -11,7 +11,6 @@
  */
 
 const sql = require("mssql");
-const async = require("async");
 
 const ConfigManager = require("../configManager.");
 

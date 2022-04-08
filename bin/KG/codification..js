@@ -1,4 +1,3 @@
-var Codification = {};
 var sqlServer = require("./SQLserverConnector.");
 var fs = require("fs");
 var async = require("async");
@@ -102,10 +101,6 @@ var processTEPDKtags = function () {
                         "\t" +
                         item.Description +
                         "\n";
-
-                    for (var group in array.groups) {
-                        var x = 3;
-                    }
                 }
             }
         });

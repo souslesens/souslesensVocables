@@ -1,4 +1,3 @@
-var Codification = {};
 var sqlServer = require("./SQLserverConnector.");
 var fs = require("fs");
 var codeRegex = {
@@ -9,7 +8,7 @@ var codeRegex = {
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})-(?<circuitBreaker>\d{2})(?<seqNumber>[\d\w]{0,2})$/g,
     "11.1	Piping tag structure (TOTAL-T0000000009)":
         /^(?<sector>[\w\d]{2})-(?<pipingSize>\d\d\{0,3}\d)-(?<fluid>\w{2,3})(?<system>\w)(?<subSystem>\d)-(?<seqNum>\d{1,4})-(?<pipingClass>\w\d{2}\w{0,1}\d{0,1})-(?<insulationCode>\w{0.2})$/gm,
-    FL: /([^\/][\d\w]+)\/*([^\/][\d\w]*)\/*([^\/][-\d\w]*)\/*([^\/][-\d\w]*)/g,
+    FL: /([^/][\d\w]+)\/*([^/][\d\w]*)\/*([^/][-\d\w]*)\/*([^/][-\d\w]*)/g,
 };
 
 var codeRegex501 = {
@@ -22,7 +21,7 @@ var codeRegex501 = {
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})-(?<circuitBreaker>\d{2})(?<seqNumber>[\d\w]{0,2})$/g,
     "11.1	Piping tag structure (TOTAL-T0000000009)":
         /^(?<sector>[\w\d]{2})-(?<pipingSize>\d\d\{0,3}\d)-(?<fluid>\w{2,3})(?<system>\w)(?<subSystem>\d)-(?<seqNum>\d{1,4})-(?<pipingClass>\w\d{2}\w{0,1}\d{0,1})-(?<insulationCode>\w{0.2})$/gm,
-    FL: /([^\/][\d\w]+)\/*([^\/][\d\w]*)\/*([^\/][-\d\w]*)\/*([^\/][-\d\w]*)/g,
+    FL: /([^/][\d\w]+)\/*([^/][\d\w]*)\/*([^/][-\d\w]*)\/*([^/][-\d\w]*)/g,
 };
 
 var codeRegExTEPDK = {
@@ -63,7 +62,7 @@ var decodeFunctionalLocation = function () {
         //   console.log(JSON.stringify(formatMap, null, 2))
     });
 };
-processBreakDown = function () {
+const processBreakDown = function () {
     var dbName = "EF_SAP";
 
     var sql = "SELECT Functional_Location\n" + "  FROM [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] ";
@@ -75,7 +74,6 @@ processBreakDown = function () {
         if (err) if (err) console.log(err);
 
         var map = {};
-        var maxLength = 0;
         result2.forEach(function (item) {
             var array = item.Functional_Location.split("/");
             if (array.length == 4) {
@@ -90,28 +88,11 @@ processBreakDown = function () {
             }
         });
         fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_FL.json", JSON.stringify(map, null, 2));
-        //   var x = maxLength
     });
 };
 var processKGtagsBreakDown = function () {
     var dbName = "MDM_2.3_AFTWIN";
-
-    var sql =
-        "SELECT  [parentTagId]\n" +
-        "      ,[parentClassId]\n" +
-        "      ,[childTagId]\n" +
-        "      ,[childClassId]\n" +
-        "      ,[parentName]\n" +
-        "      ,[childName]\n" +
-        "      ,[parentAliasNumber]\n" +
-        "      ,[parentAliasSystem]\n" +
-        "      ,[childtAliasNumber]\n" +
-        "      ,[childAliasSystem]\n" +
-        "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]";
-
     var sql = "SELECT distinct  " + "      [parentName]\n" + "      ,[childName]\n" + "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]";
-    /*  var sql = "SELECT Functional_Location\n" +
-          "  [EF_SAP].[dbo].[Functional_Locations_IH06] "*/
 
     sqlServer.getData(dbName, sql, function (err, result) {
         var array = [];
@@ -134,9 +115,8 @@ var processKGtagsBreakDown = function () {
             }
 
             for (var id in mappedArr) {
-                if (mappedArr.hasOwnProperty(id)) {
+                if (Object.prototype.hasOwnProperty.call(mappedArr, id)) {
                     mappedElem = mappedArr[id];
-                    if (mappedElem["parentid"] == "Turbo Expander") var x = 3;
                     // If the element is not at the root level, add it to its parent array of children.
                     if (mappedArr[mappedElem["parentid"]]) {
                         mappedArr[mappedElem["parentid"]]["children"].push(mappedElem);
@@ -164,12 +144,8 @@ var processKGtagsBreakDown = function () {
         tree.forEach(function (item) {
             recurse(tree2, item);
         });
-        var x = tree2;
 
         return;
-
-        fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_FL.json", JSON.stringify(map, null, 2));
-        //   var x = maxLength
     });
 };
 
@@ -201,10 +177,6 @@ var processTEPDKtags = function () {
                             "\t" +
                             item.ServiceDescription +
                             "\n";
-
-                    for (var group in array.groups) {
-                        var x = 3;
-                    }
                 }
             }
         });
@@ -234,21 +206,5 @@ var processTEPDKtags = function () {
 //processKGtagsBreakDown()
 //processBreakDown()
 //decodeFunctionalLocation();
-
-var sql2 =
-    "SELECT *\n" +
-    "  FROM [rdlquantum].[rdl].[tblAttribute] ,[rdlquantum].[rdl].[tblAttributePickListValue] where [rdlquantum].[rdl].[tblAttributePickListValue].[PickListValueGroupingID] in ('TOTAL-G0000000133',\n" +
-    "'TOTAL-G0000000134',\n" +
-    "'TOTAL-G0000000135',\n" +
-    "'TOTAL-G0000000136',\n" +
-    "'TOTAL-G0000000137',\n" +
-    "'TOTAL-G0000000138',\n" +
-    "'TOTAL-G0000000139',\n" +
-    "'TOTAL-G0000000140',\n" +
-    "'TOTAL-G0000000141',\n" +
-    "'TOTAL-G0000000142',\n" +
-    "'TOTAL-G0000000143')\n" +
-    "\n" +
-    "and [rdlquantum].[rdl].[tblAttributePickListValue].PickListValueGroupingID= [rdlquantum].[rdl].[tblAttribute].PickListValueGroupingID";
 
 processTEPDKtags();

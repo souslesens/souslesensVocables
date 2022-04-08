@@ -6,9 +6,6 @@ var util = require("../util.");
 const request = require("request");
 var DictionariesManager = {
     getOneModelSuperClasses: function (callback) {
-        var column = "*";
-        var table = "[onemodel].[dbo].[superClasses]";
-        var sqlQuery = " select distinct " + column + " from " + table; //+ " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
         SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, data) {
             if (err) {
                 return callback(err.responseText);
@@ -17,20 +14,6 @@ var DictionariesManager = {
         });
     },
     getReferenceDictionary: function (superClassId, sources, callback) {
-        var sourceStr = "";
-        if (sources) {
-            if (!Array.isArray(sources)) sources = [sources];
-            sources.forEach(function (source, index) {
-                if (index > 0) sourceStr += ",";
-                sourceStr += source;
-            });
-            sourceStr = " and source in ('" + sourceStr + "')";
-        }
-
-        var column = "*";
-        var table = "[onemodel].[dbo].[reference_dictionary]";
-        var where = " where superClassUri='" + superClassId + "'" + sourceStr;
-        var sqlQuery = " select distinct " + column + " from " + table + where; //+ " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
         SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, data) {
             if (err) {
                 return callback(err.responseText);
@@ -56,7 +39,7 @@ var DictionariesManager = {
         ConfigManager.getGeneralConfig(function (err, config) {
             console.log("ee");
             if (err) return callback(err);
-            elasticUrl = config.ElasticSearch.url;
+            const elasticUrl = config.ElasticSearch.url;
             ElasticRestProxy.listIndexes(elasticUrl, function (err, indexes) {
                 return callback(err, indexes);
             });
@@ -169,12 +152,10 @@ var DictionariesManager = {
                     });
                 },
                 function (callbackSeries) {
-                    var totalLines = 0;
                     var bulkStr = "";
 
                     data.forEach(function (item, _indexedLine) {
                         if (_options.owlType) item.owlType = _options.owlType;
-                        var lineContent = "";
                         var id = "R" + util.getRandomHexaId(10);
                         bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";
                         bulkStr += JSON.stringify(item) + "\r\n";

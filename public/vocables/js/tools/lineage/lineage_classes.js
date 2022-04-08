@@ -112,7 +112,8 @@ var Lineage_classes = (function () {
                 return
 
             if (event.button == 0)// except context menu
-                visjsGraph.clearGraph()
+                self.initUI()
+               // visjsGraph.clearGraph()
 
             self.mainSource = sourceLabel
             if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.mainSource].editable > -1) {
@@ -262,10 +263,11 @@ var Lineage_classes = (function () {
             MainController.UI.message("")
             visjsGraph.clearGraph()
             expandedLevels = {}
-            //  Lineage_common.currentSource = null;
             $("#lineage_drawnSources").html("");
-            self.registerSourceImports(self.mainSource)
-            // $("#Lineage_toSource").val("")
+            $("#LineagejsTreeDiv").empty()
+            $("#Lineage_classes_graphDecoration_legendDiv").html("")
+            if(self.mainSource)
+                self.registerSourceImports(self.mainSource)
         }
 
         self.clearLastAddedNodes = function () {
@@ -273,6 +275,7 @@ var Lineage_classes = (function () {
             if (nodes && nodes.length > 0)
                 visjsGraph.data.nodes.remove(nodes)
         }
+
 
 
         self.drawTopConcepts = function (source, callback) {
@@ -286,9 +289,7 @@ var Lineage_classes = (function () {
             if (!source)
                 return;
 
-            if (false && source == self.mainSource) {
-                self.initUI();
-            }
+
 
             if (!Config.sources[source])
                 return
@@ -489,13 +490,19 @@ var Lineage_classes = (function () {
                     "minVelocity": 0.75,
 
                 },
+                onAddNodeToGraph:function(properties,senderId){
+                    self.graphDecoration.colorGraphNodesByType()
+                }
                 // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
                 //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
 
             }
 
 
-            visjsGraph.draw("graphDiv", visjsData, options)
+            visjsGraph.draw("graphDiv", visjsData, options,function(){
+                Lineage_classes.graphDecoration.colorGraphNodesByType()
+            })
+
             $("#waitImg").css("display", "none");
         }
 

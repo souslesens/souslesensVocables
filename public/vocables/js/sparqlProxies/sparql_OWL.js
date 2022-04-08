@@ -25,10 +25,13 @@ var Sparql_OWL = (function () {
             if (!source)
                 return defaultTaxonomyPredicates;
             var sourceConfig = Config.sources[source];
+
+            if (sourceConfig && sourceConfig.schemaType=="KNOWLEDGE_GRAPH")
+                return " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "
+
             if (!sourceConfig || !sourceConfig.taxonomyPredicates)
                 return defaultTaxonomyPredicates
 
-            var str = ""
             sourceConfig.taxonomyPredicates.forEach(function (item, index) {
                 if (index > 0)
                     str += "|"

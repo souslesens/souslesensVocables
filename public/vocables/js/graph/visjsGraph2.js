@@ -51,6 +51,10 @@ var visjsGraph = (function () {
         var nodesDataSet = new vis.DataSet(visjsData.nodes)
         var edgesDataSet = new vis.DataSet(visjsData.edges)
         nodesDataSet.on('*', function (event, properties, senderId) {
+            if(_options.onAddNodeToGraph){
+                if (event == "add")
+                    _options.onAddNodeToGraph(properties,senderId)
+            }
             if (event == "add")
                 self.lastAddedNodes = properties.items
             // console.log('add:', event, 'properties:', properties, 'senderId:', senderId);

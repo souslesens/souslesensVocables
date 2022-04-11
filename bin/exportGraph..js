@@ -74,6 +74,9 @@ var exportGraph = {
 
 module.exports = exportGraph;
 
+/*
+var serverUrl = "http://51.178.139.80:8890/sparql";
+
 var graphUri = "https://www2.usgs.gov/science/USGSThesaurus/";
 var filePath = "D:\\NLP\\rdfs\\USGSThesaurus.nt";
 
@@ -113,4 +116,7 @@ var filePath = "D:\\NLP\\rdfs\\14224_merged.nt";
 var graphUri = "http://data.total.com/resource/one-model/iogp_iso14224/";
 var filePath = "D:\\NLP\\rdfs\\14224_merged.nt";
 
+var graphUri = "http://sandbox.dexpi.org/informationmodel/";
+var filePath = "D:\\NLP\\rdfs\\DEXPI.nt";
+*/
 //exportGraph.execute(serverUrl, graphUri, filePath);

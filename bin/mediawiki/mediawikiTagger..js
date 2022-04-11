@@ -47,6 +47,8 @@ var mediaWikiTagger = {
                 //getPageCategories
                 function (callbackSeries) {
                     pageCategories = [];
+                    // var regex = /wgCategories":\[([^\].]*)/m;
+                    // var regex = /href="\/Category:([^"]*)/gm;
                     var regex = /<li><a href="\/Category:([^"^]*)/gm;
                     let array = [];
 
@@ -383,7 +385,7 @@ var mediaWikiTagger = {
         });
     },
     deleteTriples: function (_graph) {
-        /*pass*/
+        // var query = "DELETE WHERE  {" + "  GRAPH <http://souslesens.org/oil-gas/upstream/>" + "  { ?concept <http://souslesens.org/vocab#wikimedia-category> ?category} }";
     },
     generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
         var limit = 10000;
@@ -480,7 +482,8 @@ var mediaWikiTagger = {
             if (indexLetter > letters.length - 1) callbackEach();
             // letters.forEach(function(letter,indexLetter){
             console.log("getting pages from " + letter);
-            let categoryUrl = wikiUrl + "/wiki/Special:AllPages?from=" + letters[indexLetter] + "&to=" + letters[indexLetter + 1] + "&namespace=0";
+            var categoryUrl = wikiUrl + "/index.php?title=Special%3AAllPages&from=" + letters[indexLetter] + "&to=" + letters[indexLetter + 1] + "&namespace=0";
+            categoryUrl = wikiUrl + "/wiki/Special:AllPages?from=" + letters[indexLetter] + "&to=" + letters[indexLetter + 1] + "&namespace=0";
 
             indexLetter++;
             var rawPageText = "";
@@ -602,9 +605,7 @@ var mediaWikiTagger = {
             url: elasticUrl + indexName + "/_search",
         };
 
-        request(options, function (error, response, body) {
-            if (error) return callbackSeries(error);
-
+        request(options, function (_error, _response, body) {
             var str = "";
             body.hits.hits.forEach(function (hit) {
                 var pageName = hit._source.pageName;
@@ -769,7 +770,7 @@ var mediaWikiTagger = {
                 //check altLabels in Virtuoso thesaurus NOT NECESSARY !!!
                 function (callbackSeries) {
                     return callbackSeries();
-
+                    /*
                     var wordsFilter = "";
                     pageNonThesaurusWords.forEach(function (word, index) {
                         if (index > 0) wordsFilter += "|";
@@ -804,6 +805,7 @@ var mediaWikiTagger = {
                         });
                         callbackSeries();
                     });
+                    */
                 },
             ],
 
@@ -868,22 +870,21 @@ var mediaWikiTagger = {
                                         "  " +
                                         "}" +
                                         "";
-                                    if (true) {
-                                        query +=
-                                            "WHERE{  ?concept1  skos:broader <" +
-                                            scheme.id +
-                                            ">.  " +
-                                            "  optional {?concept2 skos:broader ?concept1. " +
-                                            "optional {?concept2 ^skos:broader ?concept3. " +
-                                            "optional {?concept3 ^skos:broader ?concept4. " +
-                                            "optional {?concept4 ^skos:broader ?concept5.  " +
-                                            "optional {?concept5 ^skos:broader ?concept6. " +
-                                            "optional {?concept6 ^skos:broader ?concept7. " +
-                                            "optional {?concept7 ^skos:broader ?concept8.  " +
-                                            "}}}}}}}" +
-                                            "  " +
-                                            "       } ";
-                                    } else if (false) {
+                                    query +=
+                                        "WHERE{  ?concept1  skos:broader <" +
+                                        scheme.id +
+                                        ">.  " +
+                                        "  optional {?concept2 skos:broader ?concept1. " +
+                                        "optional {?concept2 ^skos:broader ?concept3. " +
+                                        "optional {?concept3 ^skos:broader ?concept4. " +
+                                        "optional {?concept4 ^skos:broader ?concept5.  " +
+                                        "optional {?concept5 ^skos:broader ?concept6. " +
+                                        "optional {?concept6 ^skos:broader ?concept7. " +
+                                        "optional {?concept7 ^skos:broader ?concept8.  " +
+                                        "}}}}}}}" +
+                                        "  " +
+                                        "       } ";
+                                    /*
                                         query +=
                                             "WHERE{  ?concept1 ^skos:narrower <" +
                                             scheme.id +
@@ -898,7 +899,8 @@ var mediaWikiTagger = {
                                             "}}}}}}}" +
                                             "  " +
                                             "       } ";
-                                    } else {
+                                            */
+                                    /*
                                         query =
                                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -909,8 +911,8 @@ var mediaWikiTagger = {
                                             "(count(distinct ?concept5) as ?Level5) " +
                                             "(count(distinct ?concept6) as ?Level6) " +
                                             "(count(distinct ?concept7)  as ?Level7)" +
-                                            /*   "(count(distinct ?concept9) as ?Level8) " +
-                                       "  (count(distinct ?concept9)  as ?Leve9)" +*/
+                                            // "(count(distinct ?concept9) as ?Level8) " +
+                                            // "  (count(distinct ?concept9)  as ?Leve9)" +
 
                                             "" +
                                             "WHERE{  ?concept  skos:broader <" +
@@ -922,13 +924,13 @@ var mediaWikiTagger = {
                                             "optional {?concept4 ^skos:broader|skos:narrower ?concept5.  " +
                                             "optional {?concept5 ^skos:broader|skos:narrower ?concept6. " +
                                             "optional {?concept6 ^skos:broader|skos:narrower ?concept7. " +
-                                            /* "optional {?concept7 ^skos:broader|skos:narrower ?concept8.  " +
-                                     "optional {?concept8 ^skos:broader|skos:narrower ?concept9. " +
-                                     "                }}" +*/
+                                            // "optional {?concept7 ^skos:broader|skos:narrower ?concept8.  " +
+                                            // "optional {?concept8 ^skos:broader|skos:narrower ?concept9. " +
+                                            // "                }}" +
                                             "}}}}}}" +
                                             "  " +
                                             "       } ";
-                                    }
+                                   */
 
                                     var params = { query: query };
 
@@ -990,17 +992,18 @@ module.exports = mediaWikiTagger;
 
 //mediaWikiTagger.createMediawikiIndex()
 
-var thesaurusGraphUris = [
+/*
+ * var thesaurusGraphUris = [
     "http://souslesens.org/oil-gas/upstream/",
     "http://www.eionet.europa.eu/gemet/",
     "http://data.total.com/resource/thesaurus/ctg/",
     "https://www2.usgs.gov/science/USGSThesaurus/",
 ];
+*/
 //var thesaurusGraphUris = ["http://data.total.com/resource/thesaurus/ctg/", "https://www2.usgs.gov/science/USGSThesaurus/"]
 
 //var thesaurusGraphUris = [ "http://www.eionet.europa.eu/gemet/"]
-
-let wikiUrl, startMark, endMark, elasticUrl, graphUri, indexName;
+/*
 if (false) {
     if (false) {
         wikiUrl = "https://wiki.aapg.org";
@@ -1096,4 +1099,4 @@ if (false) {
     indexName = "mediawiki-pages-spe";
     indexName = "mediawiki-pages-seg";
     mediaWikiTagger.listWikiPages(elasticUrl, indexName);
-}
+}*/

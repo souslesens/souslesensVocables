@@ -762,29 +762,18 @@ var onTheFlyTagger = {
 
                 //map organisation theme
                 function (callbackSeries) {
-                    function printCharCodes(str) {
-                        var codes = "";
-                        for (var i = 0; i < str.length; i++) {
-                            codes += str.charCodeAt(i) + "_";
-                        }
-                        console.log(codes);
-                    }
-
                     var catsOrgJson = onTheFlyTagger.csvToJson("D:\\Total\\2020\\Stephanie\\AAPGcats-org.txt");
 
                     catsOrgJson.forEach(function (line) {
                         if (line.category) {
                             catThemes[line.category] = line;
                             if (allThemesLabels.indexOf(line.theme) < 0) allThemesLabels.push(line.theme);
-                            // printCharCodes(line.category)
                         }
                     });
 
                     wordsTotalFreq.forEach(function (item, _wordIndex) {
                         for (var cat in item.catFreq) {
                             var cat2 = cat.substring(1).replace(/_/g, " ").trim();
-                            /*   if(wordIndex==0)
-                                   printCharCodes(cat2)*/
                             var theme = catThemes[cat2];
                             if (theme) {
                                 if (!item.themes) item.themes = {};
@@ -846,13 +835,11 @@ var onTheFlyTagger = {
                         {
                             //print cat themes
                             allThemesLabels.forEach(function (theme) {
-                                try {
-                                    if (item.themes) {
-                                        var themeFreq = item.themes[theme];
-                                        if (themeFreq) str += themeFreq + "\t";
-                                        else str += "0" + "\t";
-                                    }
-                                } catch (e) {}
+                                if (item.themes) {
+                                    var themeFreq = item.themes[theme];
+                                    if (themeFreq) str += themeFreq + "\t";
+                                    else str += "0" + "\t";
+                                }
                             });
                         }
 
@@ -866,7 +853,6 @@ var onTheFlyTagger = {
                 function (callbackSeries) {
                     var thesaurusGraphUris = ["http://souslesens.org/oil-gas/upstream/", "http://www.eionet.europa.eu/gemet/", "https://www2.usgs.gov/science/USGSThesaurus/"];
 
-                    str += "\n";
                     async.eachSeries(
                         thesaurusGraphUris,
                         function (graph, callbackEach) {
@@ -939,7 +925,7 @@ var onTheFlyTagger = {
     },
 };
 module.exports = onTheFlyTagger;
-
+/*
 if (false) {
     var wikiPageUri = "https://wiki.aapg.org/3-D_seismic_data_views";
     var thesaurusGraphUri = "http://souslesens.org/oil-gas/upstream/";
@@ -1014,4 +1000,4 @@ if (true) {
 }
 if (false) {
     onTheFlyTagger.setThesaursusConceptsOrganisation();
-}
+}*/

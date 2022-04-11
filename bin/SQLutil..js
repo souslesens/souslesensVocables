@@ -14,7 +14,7 @@ var SQLutil = {
             fs.createReadStream(csvFilePath).pipe(
                 csv({
                     separator: separator,
-                    mapHeaders: ({ header, _index }) => util.normalizeHeader(headers, header),
+                    mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
                 })
                     .on("header", function (header) {
                         headers.push(header);
@@ -105,7 +105,6 @@ var SQLutil = {
         //console.log(str)
         if (typeof str != "string") return str;
 
-        // eslint-disable-next-line no-control-regex
         str = str.replace(/[\0\x08\x09\x1a\n\r"'\\%]/g, function (char) {
             switch (char) {
                 case "\0":
@@ -155,6 +154,4 @@ var SQLutil = {
 
 module.exports = SQLutil;
 
-SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (_err, _result) {
-    // Pass
-});
+// SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (err, result) {});

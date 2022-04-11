@@ -2,8 +2,11 @@ var httpProxy = require("./httpProxy.");
 var async = require("async");
 var util = require("./util.");
 var SourceManager = {
-    createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {},
-    createNewSkosSourceGraph: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
+    // eslint-disable-next-line no-unused-vars
+    createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {
+        // do nothing ? XXX
+    },
+    createNewSkosSourceGraph: function (_sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         var referenceSource = options.referenceSource;
         options.createCollectionRootNode = true;
 

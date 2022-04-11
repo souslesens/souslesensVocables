@@ -216,16 +216,13 @@ var RcReportsTriples = {
             console: false,
         });
 
-        var countLines = 0;
-        var countAll = 0;
         readInterface.on("line", function (line) {
             if (line.indexOf(tag) > -1) {
                 outputStream.write(line + "\n");
-                countLines += 1;
             }
         });
 
-        readInterface.on("close", function (_x) {
+        readInterface.on("close", function () {
             outputStream.close();
         });
     },

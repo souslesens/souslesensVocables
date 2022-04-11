@@ -33,7 +33,7 @@ var KGcontroller = {
     },
 
     generateTriples: function (_config) {
-        /*pass*/
+        // do nothing ? XXX
     },
     getAssetGlobalMappings: function (source, callback) {
         var dir = KGcontroller.getMappingsDirPath();

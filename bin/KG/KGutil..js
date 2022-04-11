@@ -59,12 +59,6 @@ var util = {
         return hash >>> 0;
     },
 
-    base64_encodeFile: function (file) {
-        // read binary data
-        var bitmap = fs.readFileSync(file);
-        // convert binary data to base64 encoded string
-        return new Buffer(bitmap).toString("base64");
-    },
     prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))
          obj = JSON.parse(obj);*/
@@ -288,9 +282,11 @@ var util = {
                     if (p < 0) continue;
                     var extension = fileName.substring(p + 1).toLowerCase();
                     if (options.acceptedExtensions && options.acceptedExtensions.indexOf(extension) < 0) {
+                        message += "!!!!!!  refusedExtension " + fileName;
                         continue;
                     }
                     if (options.maxDocSize && stats.size > options.maxDocSize) {
+                        message += "!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ";
                         continue;
                     }
                     if (!dirFilesMap[parent]) dirFilesMap[parent] = [];

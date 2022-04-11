@@ -1,10 +1,8 @@
-//const writer = require('csv-to-sql-script');
-
 var csvCrawler = require("../bin/_csvCrawler.");
 const util = require("./util.");
 var async = require("async");
 var sql = require("./KG/SQLserverConnector.");
-var Csv2Sql = {
+const Csv2Sql = {
     readCsv: function (filePath, lines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
             if (err) return callback(err);
@@ -127,6 +125,7 @@ var Csv2Sql = {
         });
     },
 };
+/*
 var input = "D:\\NLP\\ontologies\\14224\\girassolExtract.csv";
 input = "D:\\NLP\\ontologies\\14224\\data\\girassol.csv";
 
@@ -163,3 +162,5 @@ Csv2Sql.getColumns(input, tableName, function (err, result) {
         // Pass
     });
 });
+
+*/

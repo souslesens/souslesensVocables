@@ -77,7 +77,6 @@ var processTEPDKtags = function () {
                             }
                         }
                     }
-                    // str += key + "\t" + item.TagNumber + "\t" + functionCode + "\t" + functionLabel + "\t" + moduleCode + "\t" + moduleLabel + "\t" + locationCode + "\t" + locationLabel + "\t" + item.FunctionalClassID + "\t" + item.FunctionalClassLabel + "\t" + item.ServiceDescription + "\n"
                     str +=
                         key +
                         "\t" +

@@ -11,7 +11,6 @@
  */
 
 var httpProxy = require("../../httpProxy.");
-//var superagent = require('superagent')
 var fs = require("fs");
 var async = require("async");
 var mediawikiStats = {
@@ -140,7 +139,7 @@ var mediawikiStats = {
 };
 
 module.exports = mediawikiStats;
-
+/*
 if (false) {
     //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
     mediawikiStats.generateCatWordsMatrix("aapg", null, function (err, _result) {
@@ -148,12 +147,10 @@ if (false) {
         console.log("Done ");
     });
 }
-
-if (true) {
-    //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediawikiStats.generateCatWords("aapg", null, function (err, _result) {
-        if (err) console.log(err);
-        console.log("Done ");
-    });
-}
+*/
+//mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
+mediawikiStats.generateCatWords("aapg", null, function (err, _result) {
+    if (err) console.log(err);
+    console.log("Done ");
+});
 //mediawikiStats.createMediawikiIndex(elasticUri,"mediawiki");

@@ -57,7 +57,6 @@ var gaiaToSkos = {
     parseTxt: function () {
         var classes = [];
         var categories = [];
-        var categoriesLetters = [];
 
         var filePath = "D:\\NLP\\importedResources\\gaia.txt";
 
@@ -116,17 +115,15 @@ var gaiaToSkos = {
             else str += subject + " <http://www.w3.org/2004/02/skos/core#broader> " + object + ".\n";
         }
 
-        if (true) {
-            objs.forEach(function (item, _index) {
-                if (item.ClassExtended) {
-                    var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
-                    var label = gaiaToSkos.formatString(item.Term);
-                    str += subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
-                    str += subject + "  <http://www.w3.org/2004/02/skos/core#broader> " + categoriesMap[item.ClassExtended] + ".\n";
-                    counter++;
-                }
-            });
-        }
+        objs.forEach(function (item, _index) {
+            if (item.ClassExtended) {
+                var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
+                var label = gaiaToSkos.formatString(item.Term);
+                str += subject + " <http://www.w3.org/2004/02/skos/core#prefLabel> '" + label + "'@en .\n";
+                str += subject + "  <http://www.w3.org/2004/02/skos/core#broader> " + categoriesMap[item.ClassExtended] + ".\n";
+                counter++;
+            }
+        });
 
         fs.writeFileSync(filePath.replace(".txt", ".rdf.nt"), str);
     },

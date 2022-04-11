@@ -1,6 +1,5 @@
 /**
  The MIT License
- The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -44,13 +43,11 @@ var termScienceToSkos = {
             if (type == "definition") obj.definitions.push(value);
 
             if (type == "broaderConceptGeneric") {
-                const target = feature.getAttribute("target");
-                //  obj.broaders.push({id: target.substring(1), name: value})
+                var target = feature.getAttribute("target");
                 obj.broaders.push(target.substring(1));
             }
             if (type == "specificConcept") {
-                const target = feature.getAttribute("target");
-                // obj.narrowers.push({id: target.substring(1), name: value})
+                target = feature.getAttribute("target");
                 obj.narrowers.push(target.substring(1));
             }
         }
@@ -447,7 +444,6 @@ var termScienceToSkos = {
                                 }
                             }
                             console.log(page[0] + "-" + pageNum + "   " + pageItemsCount);
-
                             return callbackEachPageNum();
                         });
                     },
@@ -464,76 +460,75 @@ var termScienceToSkos = {
         );
     },
 };
+// if (false) {
+//     termScienceToSkos.listConcepts(function (_err, _result) {
+//         /*pass*/
+// });
+// }
 
-if (false) {
-    termScienceToSkos.listConcepts(function (_err, _result) {
-        /*pass*/
-    });
-}
 
-if (false) {
-    const rdfPath = "D:\\NLP\\thesaurus_CTG_Product.rdf";
-    termScienceToSkos.commonConcepts(rdfPath, function (_err, _result) {
-        /*pass*/
-    });
-}
+// if (false) {
+//     const rdfPath = "D:\\NLP\\thesaurus_CTG_Product.rdf";
+//     termScienceToSkos.commonConcepts(rdfPath, function (_err, _result) {
+//         /*pass*/
+//     });
+// }
 
-if (false) {
-    const xmlPath = "D:\\NLP\\termScience\\termScienceRoot.xml";
-    const rdfPath = "D:\\NLP\\termScience\\termScience.rdf";
+// if (false) {
+//     const xmlPath = "D:\\NLP\\termScience\\termScienceRoot.xml";
+//     const rdfPath = "D:\\NLP\\termScience\\termScience.rdf";
 
-    var xmlStr = "" + fs.readFileSync(xmlPath);
-    var depth = 0;
-    var rootConcept;
+//     var xmlStr = "" + fs.readFileSync(xmlPath);
+//     var depth = 0;
+//     var rootConcept;
 
-    termScienceToSkos.xmlToTree(xmlStr, {}, function (err, concept) {
-        if (depth == 0) rootConcept = concept;
+//     termScienceToSkos.xmlToTree(xmlStr, {}, function (err, concept) {
+//         if (depth == 0) rootConcept = concept;
 
-        async.eachSeries(
-            concept.children,
-            function (childConcept, _callbackEach) {
-                termScienceToSkos.recurseChildren(childConcept, 0, 2);
-            },
-            function (err) {
-                if (err) console.log(err);
-                fs.writeFileSync(rdfPath, JSON.stringify(rootConcept, null, 2));
-                console.log("Done ");
-            }
-        );
-    });
-}
-if (false) {
-    var selectedSubjects = [{ name: "Elements_Chimiques", id: "TE.173836" }];
+//         async.eachSeries(
+//             concept.children,
+//             function (childConcept, _callbackEach) {
+//                 termScienceToSkos.recurseChildren(childConcept, 0, 2);
+//             },
+//             function (err) {
+//                 if (err) console.log(err);
+//                 fs.writeFileSync(rdfPath, JSON.stringify(rootConcept, null, 2));
+//                 console.log("Done ");
+//             }
+//         );
+//     });
+// }
+// if (false) {
+//     var selectedSubjects = [{ name: "Elements_Chimiques", id: "TE.173836" }];
 
-    async.eachSeries(
-        selectedSubjects,
-        function (subject, callbackEachSubject) {
-            var rdfPath = "D:\\NLP\\termScience\\termScience_" + subject.name + ".rdf";
-            termScienceToSkos.buildTreeToSkos(subject.id, 6, rdfPath, function (err, _result) {
-                if (err) {
-                    return callbackEachSubject(err);
-                }
+//     async.eachSeries(
+//         selectedSubjects,
+//         function (subject, callbackEachSubject) {
+//             var rdfPath = "D:\\NLP\\termScience\\termScience_" + subject.name + ".rdf";
+//             termScienceToSkos.buildTreeToSkos(subject.id, 6, rdfPath, function (err, _result) {
+//                 if (err) {
+//                     return callbackEachSubject(err);
+//                 }
 
-                callbackEachSubject();
-            });
-        },
-        function (err) {
-            if (err) {
-                return console.log(err);
-            }
-            return console.log("ALL DONE");
-        }
-    );
-}
+//                 callbackEachSubject();
+//             });
+//         },
+//         function (err) {
+//             if (err) {
+//                 return console.log(err);
+//             }
+//             return console.log("ALL DONE");
+//         }
+//     );
+// }
 
-if (false) {
-    var rdfPath = "D:\\NLP\\termScience\\termSciences_Physics.rdf";
 
-    skoReader.skosEditorToRdf(rdfPath, conceptsArray, {
-        /*pass*/
-    });
-}
+// if (false) {
+//     var rdfPath = "D:\\NLP\\termScience\\termSciences_Physics.rdf";
 
+//     skoReader.skosEditorToRdf(rdfPath, conceptsArray, {});
+// }
+/*
 if (false) {
     var conceptsMap = JSON.parse("" + fs.readFileSync("d:\\NLP\\conceptsMap.json"));
 
@@ -571,19 +566,18 @@ if (false) {
         recurseChildren(node);
     }
 
-    const rdfPath = "D:\\NLP\\termScience\\termScience_" + "Chemistry" + ".rdf";
-    skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (_err, _result) {
-        /*pass*/
-    });
-}
-
+    var rdfPath = "D:\\NLP\\termScience\\termScience_" + "Chemistry" + ".rdf";
+    skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, result) {});
+}*/
+/*
 if (false) {
     var conceptId = "TE.182846";
     termScienceToSkos.queryTermScience(conceptId, function (err, _xmlStr) {
         if (err) return console.log(err);
     });
 }
-
+*/
+/*
 if (false) {
     var items = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.json"));
     var concepts = [];
@@ -612,6 +606,8 @@ if (false) {
         }
     );
 }
+*/
+/*
 if (false) {
     //   var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf"));
     var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\temp.json"));
@@ -621,13 +617,15 @@ if (false) {
         /*pass*/
     });
 }
-
+*/
 //get Parents
+/*
 if (false) {
-    const data = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf"));
-    const conceptIds = [];
-    const allBroaders = [];
-    const newBroaders = [];
+    var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf"));
+    var concepts = [];
+    var conceptIds = [];
+    var allBroaders = [];
+    var newBroaders = [];
     data.forEach(function (item) {
         if (conceptIds.indexOf(item.id) < 0) conceptIds.push(item.id);
     });
@@ -661,8 +659,9 @@ if (false) {
         }
     );
 }
-
+*/
 // getChildren
+/*
 if (false) {
     skoReader.rdfToEditor("D:\\NLP\\commonConcepts_TERM_SCIENCE_CTGshort.rdf", {}, function (err, result) {
         var dataShort = result;
@@ -722,4 +721,5 @@ if (false) {
     });
 }
 
+*/
 //var commonEnums=xsdToSkos.getCommonEnumeration();

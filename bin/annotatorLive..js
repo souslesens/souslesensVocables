@@ -82,7 +82,6 @@ var annotatorLive = {
                                     query += " filter " + filter + "} limit 10000";
 
                                     var url = source.sparql_server.url;
-
                                     var params = { query: query };
                                     var headers = {
                                         Accept: "application/sparql-results+json",

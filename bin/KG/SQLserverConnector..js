@@ -11,7 +11,6 @@
  */
 
 const sql = require("mssql");
-
 const ConfigManager = require("../configManager.");
 
 //update dbo.QUANTUM_BOMST_TPUK_ELFR set breakdown= left (Functional_Location,(LEN(Functional_Location) -  CHARINDEX('/', REVERSE(Functional_Location))))

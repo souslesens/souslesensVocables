@@ -192,7 +192,7 @@ var CsvTripleBuilder = {
                                         } else objectStr = line[item.o];
 
                                         if (item.lookup_o) {
-                                            const lookupValue = getLookupValue(item.lookup_o, objectStr);
+                                            lookupValue = getLookupValue(item.lookup_o, objectStr);
 
                                             if (!lookupValue) console.log("missing lookup_o: " + line[item.o]);
                                             else if (lookupValue == "badLookupName");
@@ -207,19 +207,19 @@ var CsvTripleBuilder = {
                                     //format subject
                                     {
                                         subjectStr = subjectStr.trim();
-
                                         if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
-                                        else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
-                                            /*pass*/
-                                        } else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        else if (!(subjectStr.indexOf && subjectStr.indexOf(":") > -1)) {
+                                            subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        }
                                     }
 
                                     //format object
                                     {
                                         objectStr = objectStr.trim();
+
                                         if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
                                         else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
-                                            /*pass*/
+                                            // do nothing
                                         } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
                                         else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                     }
@@ -261,10 +261,10 @@ var CsvTripleBuilder = {
                                         });
 
                                         if (item.inverseRestrictionProperty) {
-                                            let propStr = item.inverseRestrictionProperty;
+                                            propStr = item.inverseRestrictionProperty;
 
-                                            let blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                            let prop = propStr;
+                                            blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                            prop = propStr;
                                             if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
                                             if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
@@ -390,9 +390,7 @@ var CsvTripleBuilder = {
             "";
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
-        // console.log(query)
 
-        //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
         var params = { query: queryGraph };
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
@@ -546,13 +544,11 @@ var CsvTripleBuilder = {
 };
 
 module.exports = CsvTripleBuilder;
-// eslint-disable-next-line no-constant-condition
+/*
 if (false) {
     var options = {
         deleteOldGraph: true,
         sampleSize: 500,
     };
-    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (_err, _result) {
-        /*pass*/
-    });
-}
+    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (err, result) {});
+} */

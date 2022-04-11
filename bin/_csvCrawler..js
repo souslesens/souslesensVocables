@@ -140,7 +140,7 @@ var csvCrawler = {
             fs.createReadStream(connector.filePath).pipe(
                 csv({
                     separator: separator,
-                    mapHeaders: ({ header, _index }) => util.normalizeHeader(headers, header),
+                    mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
                 })
                     .on("header", function (header) {
                         headers.push(header);

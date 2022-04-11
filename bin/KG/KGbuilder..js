@@ -19,6 +19,9 @@ var socket = require("../socketManager.");
 var KGcontroller = require("./KGcontroller.");
 
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";
+// var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";
+// var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri";
+// var totalRdlKGgraphUri = "http://data.total.com/resource/one-model/quantum-rdl/";
 
 var triplesFetchtLength = 1000;
 
@@ -50,7 +53,7 @@ var KGbuilder = {
 
         //decode mappings
         mappings.forEach(function (mapping, _indexMapping) {
-            let obj = util.deconcatSQLTableColumn(mapping.subject);
+            var obj = util.deconcatSQLTableColumn(mapping.subject);
             if (obj && obj.column) mapping.subject = obj.column;
             obj = util.deconcatSQLTableColumn(mapping.object);
             if (obj && obj.column) mapping.object = obj.column;
@@ -58,7 +61,7 @@ var KGbuilder = {
 
         ///process type and label
         var rejectedItems = [];
-        const triples = [];
+        var triples = [];
         data.forEach(function (item, _indexItem) {
             mappings.forEach(function (mapping, _indexMapping) {
                 if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
@@ -68,9 +71,9 @@ var KGbuilder = {
 
                     var classType = oneModelSuperClasses[objectClass];
                     var processAsNoSubclass = false;
-
+                    var uri = "";
                     if (classType == "ARDL-SPECIFIC") {
-                        const uri = KGgraphUri + subjectValue;
+                        uri = KGgraphUri + subjectValue;
                         if (ARDLdictionary[subjectValue]) {
                             triples.push({
                                 subject: uri,
@@ -109,7 +112,7 @@ var KGbuilder = {
                     }
 
                     if (classType == "NO-SUBCLASSES" || processAsNoSubclass) {
-                        let uri = existingUrisMap[subjectValue];
+                        uri = existingUrisMap[subjectValue];
                         if (!uri) {
                             uri = KGgraphUri + util.getRandomHexaId(options.generateIds);
                             existingUrisMap[subjectValue] = uri;
@@ -156,7 +159,7 @@ var KGbuilder = {
                 }
                 if (!objectValue) return;
                 if (objectValue.trim) objectValue = objectValue.trim();
-
+                let objectSuffix = "";
                 if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
                     if (util.isInt(objectValue)) {
                         const objectSuffix = "^^xsd:integer";
@@ -385,7 +388,7 @@ var KGbuilder = {
                         });
                     };
                     var selectStr = "";
-                    for (const _mapping in mappings.mappings) {
+                    for (var _mapping in mappings.mappings) {
                         mappings.mappings.forEach(function (mapping) {
                             var column = mapping.subject;
                             column = column.substring(column.lastIndexOf(".") + 1);
@@ -522,7 +525,7 @@ var KGbuilder = {
                 if (count++ > 0) replaceGraph = false;
                 socket.message("KGbuild", "-----------Processing " + mappingFilePath1 + "--------------");
 
-                var mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath1;
+                mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
 
                 if (mappingFilePath.indexOf(".json") < 0) mappingFilePath += ".json";
                 //   mappingFilePath = path.resolve(mappingFilePath);*/
@@ -533,8 +536,6 @@ var KGbuilder = {
                 var options = {
                     generateIds: 15,
                     sparqlServerUrl: sparqlServerUrl,
-                    rdlGraphUri: rdlGraphUri,
-                    oneModelGraphUri: oneModelGraphUri,
                     replaceGraph: replaceGraph,
                     dataSource: dataSource,
                     _options: _options,
@@ -557,8 +558,7 @@ var KGbuilder = {
 };
 
 module.exports = KGbuilder;
-
-// eslint-disable-next-line no-constant-condition
+/*
 if (false) {
     // eslint-disable-next-line no-constant-condition
     if (false) {
@@ -577,4 +577,4 @@ if (false) {
         if (err) return socket.message("KGbuild", err);
         return socket.message("KGbuild", "ALL DONE");
     });
-}
+}*/

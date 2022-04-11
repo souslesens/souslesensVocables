@@ -109,7 +109,7 @@ lines.forEach(function (line, index) {
     });
 
     function xmlEncode(str) {
-        str = str.replace(/[',\&/<>=\(\)]/g, " ");
+        str = str.replace(/[',&/<>=()]/g, " ");
         return str;
     }
 
@@ -123,12 +123,13 @@ lines.forEach(function (line, index) {
     entities.push(entity);
 });
 
-if (false) {
+/*
+ * if (false) {
     var dir = "D:\\\\NLP\\\\cgi\\\\";
     //   var dir="D:\\\\NLP\\\\";
     var dirs = fs.readdirSync(dir);
     dirs.forEach(function (file) {
         if (file.indexOf(".rdf") > -1) console.log('"' + dir + file + '",');
     });
-}
+}*/
 generateRdf(entities);

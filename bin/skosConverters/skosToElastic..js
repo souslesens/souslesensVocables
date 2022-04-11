@@ -12,7 +12,6 @@ var async = require("async");
 var request = require("request");
 var skosReader = require("../backoffice/skosReader.");
 var indexer = require("../backoffice/indexer.");
-var indexer = require("../backoffice/indexer.");
 
 var ndjson = require("ndjson");
 
@@ -77,7 +76,6 @@ var skosToElastic = {
             function (err) {
                 if (err) {
                     return callback(err);
-                    callback();
                 }
             }
         );
@@ -144,7 +142,6 @@ var skosToElastic = {
                         }
 
                         if (Buffer.isBuffer(body)) body = JSON.parse(body.toString());
-                        else body = body;
                         var errors = [];
                         if (body.error) {
                             if (body.error.reason) return callbackSeries(body.error.reason);
@@ -245,12 +242,14 @@ var skosToElastic = {
 
                 //process common
                 function (callbackSeries) {
+                    // var targetHitsIds = [];
                     hitsIndexTarget.forEach(function (hits, index) {
                         if (hits.length > 0) {
                             commonConcepts.push({
                                 source: hitsIndexSource[index],
                                 target: hitsIndexTarget[index],
                             });
+                            // var targetIds = [];
                             //    console.log(hitsIndexSource[index]._source.concept+"  "+hitsIndexTarget[index]._source.path)
                             /*    hits.forEach(function (hit) {
                                 targetIds.push({
@@ -373,6 +372,7 @@ var skosToElastic = {
 
 module.exports = skosToElastic;
 
+/*
 function getThesaurusListFromNlp2App() {
     var listPath = "D:\\GitHub\\nlp2\\public\\skosEditor\\js\\theaususList.js";
     var str = "" + fs.readFileSync(listPath);
@@ -387,10 +387,10 @@ function getThesaurusListFromNlp2App() {
     return list;
 }
 
+
 if (false) {
     var thesaurusList = getThesaurusListFromNlp2App();
 
-    /*
     http://localhost:9200/flat_thesaurus2/_delete_by_query
     {
   "query": {
@@ -404,7 +404,6 @@ if (false) {
   }
 
 }
-     */
 
     //   thesaursusList = ["D:\\NLP\\thesaurusCTG-02-20.rdf"]
 
@@ -432,9 +431,10 @@ if (false) {
         if (err) return console.log(err);
         return console.log("done");
     });
-}
+}*/
+/*
 if (false) {
     skosToElastic.compareThesaurus("libraryofcongress", "flat_thesaurus", function (err, result) {
         //  skosToElastic.compareThesaurus("termscience_all", "flat_thesaurus", function (err, result) {
     });
-}
+}*/

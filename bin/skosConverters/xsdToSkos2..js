@@ -1,6 +1,5 @@
 /**
  The MIT License
- The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -29,8 +28,6 @@ var xsdToSkos = {
             return str;
         }
 
-        var p = xsdPath.lastIndexOf("\\");
-        var q = xsdPath.lastIndexOf(".");
         var str = "" + fs.readFileSync(xsdPath);
         var fileTitle = xsdPath.substring(xsdPath.lastIndexOf("\\") + 1, xsdPath.lastIndexOf("."));
         var doc = new DOMParser().parseFromString(str, "text/xml");
@@ -53,17 +50,18 @@ var xsdToSkos = {
                 parentId = "<" + graphURI + name + ">";
             }
             if (node.tagName && node.tagName == "xs:sequence") {
+                // do nothing
             }
             if (node.tagName && node.tagName == "xs:simpleType") {
-                var name = node.getAttribute("name");
+                name = node.getAttribute("name");
                 strElements += "<" + graphURI + name + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + name + '".\n';
                 strElements += "<" + graphURI + name + ">" + " <http://www.w3.org/2004/02/skos/core#broader> " + parentId + ".\n";
                 parentId = "<" + graphURI + name + ">";
             }
 
-            //www.w3.org/2002/07/owl#oneOf
+            // http://www.w3.org/2002/07/owl#oneOf
 
-            http: if (node.tagName && node.tagName == "xs:restriction") {
+            if (node.tagName && node.tagName == "xs:restriction") {
                 parentId = "<" + graphURI + node.parentNode.getAttribute("name") + ">";
             }
             if (node.tagName && node.tagName == "xs:enumeration") {
@@ -74,7 +72,7 @@ var xsdToSkos = {
             }
 
             if (node.tagName && node.tagName == "xs:element") {
-                var name = node.getAttribute("name");
+                name = node.getAttribute("name");
                 strElements += "<" + graphURI + name + ">" + ' <http://www.w3.org/2004/02/skos/core#prefLabel> "' + name + '".\n';
                 strElements += "<" + graphURI + name + ">" + " <http://www.w3.org/2004/02/skos/core#broader> " + parentId + ".\n";
                 parentId = "<" + graphURI + name + ">";
@@ -84,7 +82,7 @@ var xsdToSkos = {
             }
 
             if (node.tagName && node.tagName == "xs:annotation") {
-                var name = node.getAttribute("name");
+                name = node.getAttribute("name");
                 var definition = node.getElementsByTagName("xs:documentation").item(0).childNodes.item(0).data;
                 definition = formatString(definition);
 
@@ -121,6 +119,7 @@ var xsdToSkos = {
         if (!options) options = {};
 
         var files = [];
+        // var fileTitle = xsdPath.substring(xsdPath.lastIndexOf("\\") + 1);
 
         function recurseDir(xsdPath) {
             if (fs.lstatSync(xsdPath).isDirectory()) {
@@ -169,6 +168,8 @@ var scheme = "Reservoir";
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\witsml\\v2.0\\xsd_schemas\\";var scheme="Well"
 //var xsdPath = "D:\\NLP\\importedResources\\energistics\\prodml\\v2.1\\xsd_schemas\\";var scheme="Production"
 
-xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (err, _result) {});
+xsdToSkos.parseXsdToSkos(xsdPath, { scheme: scheme, graphURI: "http://www.energistics.org/energyml/data/" + scheme + "/" }, function (_err, _result) {
+    // do nothing
+});
 
 //var commonEnums=xsdToSkos.getCommonEnumeration();

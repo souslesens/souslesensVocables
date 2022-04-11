@@ -18,24 +18,18 @@ const user = {
                   }
                 : {};
 
-        if (config.disableAuth) {
-            result = {
-                logged: true,
-                user: { login: "admin", groups: "admin" },
-                authSource: "json",
-                auth: {},
-            };
-        } else if (logged) {
-            const findUser = Object.keys(users)
-                .map(function (key, index) {
-                    return {
-                        id: users[key].id,
-                        login: users[key].login,
-                        groups: users[key].groups,
-                        source: users[key].source,
-                    };
-                })
-                .find((user) => user.login == reqUser.login);
+        const findUser = logged
+            ? Object.keys(users)
+                  .map(function (key, _index) {
+                      return {
+                          id: users[key].id,
+                          login: users[key].login,
+                          groups: users[key].groups,
+                          source: users[key].source,
+                      };
+                  })
+                  .find((user) => user.login == reqUser.login)
+            : {};
 
             if (findUser === undefined) {
                 console.log("could not find logged user ", reqUser, typeof reqUser);
@@ -62,7 +56,7 @@ const user = {
     },
     getProfiles: function (reqUser) {
         const currentUser = user.getUser(reqUser);
-        return currentUser.user.hasOwnProperty("groups") ? currentUser.user.groups : [];
+        return currentUser.user.groups !== undefined ? currentUser.user.groups : [];
     },
 };
 

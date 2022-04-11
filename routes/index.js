@@ -1,26 +1,15 @@
 var express = require("express");
-const bcrypt = require("bcrypt");
 var fs = require("fs");
-const promiseFs = require("fs").promises;
 var path = require("path");
 var passport = require("passport");
-
-var elasticRestProxy = require("../bin/elasticRestProxy.");
-var authentication = require("../bin/authentication.");
-var logger = require("../bin/logger.");
 var httpProxy = require("../bin/httpProxy.");
-var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.");
 var RDF_IO = require("../bin/RDF_IO.");
-var KGcontroller = require("../bin/KG/KGcontroller.");
 var DataController = require("../bin/dataController.");
-var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
-var DictionariesManager = require("../bin/KG/dictionariesManager.");
 var CsvTripleBuilder = require("../bin/KG/CsvTripleBuilder.");
 
 const config = require(path.resolve("config/mainConfig.json"));
-const users = require(path.resolve("config/users/users.json"));
 
 var router = express.Router();
 var serverParams = { routesRootUrl: "" };
@@ -77,14 +66,11 @@ if (!config.disableAuth) {
 }
 
 router.post("/upload", ensureLoggedIn(), function (req, response) {
-    let sampleFile;
-    let uploadPath;
-
     if (!req.files || Object.keys(req.files).length === 0) {
-        return res.status(400).send("No files were uploaded.");
+        return response.status(400).send("No files were uploaded.");
     }
     if (req.files.EvaluateToolZipFile) {
-        var zipFile = req.files.EvaluateToolZipFile;
+        const zipFile = req.files.EvaluateToolZipFile;
         DirContentAnnotator.uploadAndAnnotateCorpus(zipFile, req.body.corpusName, JSON.parse(req.body.sources), JSON.parse(req.body.options), function (err, result) {
             processResponse(response, err, result);
         });
@@ -138,11 +124,11 @@ router.post(
         }
 
         if (req.query.SPARQLquery) {
-            var query = req.body.query;
+            let query = req.body.query;
+            const headers = {};
             if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
 
             if (req.query.method == "POST") {
-                var headers = {};
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 
@@ -150,7 +136,6 @@ router.post(
                     processResponse(response, err, result);
                 });
             } else if (req.query.method == "GET") {
-                var headers = {};
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 

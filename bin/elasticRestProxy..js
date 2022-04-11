@@ -169,7 +169,6 @@ var elasticRestProxy = {
     },
 
     deleteIndex: function (elasticUrl, indexName, callback) {
-        var elasticUrl = elasticUrl;
         var indexExists = false;
         async.series(
             [
@@ -202,6 +201,7 @@ var elasticRestProxy = {
                     };
                     request(options, function (error, _response, _body) {
                         if (error) return callbackSeries(error);
+                        // var message = "delete index :" + indexName;
                         callbackSeries();
                     });
                 },

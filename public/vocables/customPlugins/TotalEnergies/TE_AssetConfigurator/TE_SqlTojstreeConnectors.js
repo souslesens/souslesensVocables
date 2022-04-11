@@ -1,4 +1,4 @@
-var TE_SqlTojstreeConnectors = (function () {
+export var TE_SqlTojstreeConnectors = (function () {
     var self = {};
 
     self.getJsTreeData_moho_equipments = function (parentNode, coloredNodes, callback) {
@@ -29,7 +29,7 @@ var TE_SqlTojstreeConnectors = (function () {
                 }
                 if (!assetTreeDistinctNodes[item.location2]) {
                     assetTreeDistinctNodes[item.location2] = 1;
-                    var text = item.location2;
+                    text = item.location2;
                     if (coloredNodes && coloredNodes["A_" + item.id]) text = "<span class='RDSassetTreeNode'>" + text + " </span>";
                     jstreeData.push({
                         //  id: item.location1 + "/" + item.location2,
@@ -122,7 +122,7 @@ var TE_SqlTojstreeConnectors = (function () {
             if (data.length == 0) return;
             var headers = Object.keys(data[0]);
 
-            var nodeId = data[0].tag;
+            nodeId = data[0].tag;
             var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
             str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
             str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
@@ -144,7 +144,7 @@ var TE_SqlTojstreeConnectors = (function () {
     };
 
     self.getChildrenNodesJsTreeData = function (dbName, node, coloredNodes, callback) {
-        if ((node.data.type = "equipments")) {
+        if (node.data.type == "equipments") {
             var sqlQuery = "  select *  from equipments where  location2 ='" + node.data.label + "'";
             self.querySQLserver(dbName, sqlQuery, function (err, result) {
                 if (err) return callback(null, result);
@@ -183,8 +183,6 @@ var TE_SqlTojstreeConnectors = (function () {
             dbName: dbName,
             table_schema: "dbo",
         };
-
-        console.log(sqlQuery);
 
         $.ajax({
             type: "POST",

@@ -42,6 +42,7 @@ var Export = (function () {
                         if (!ancestors["_" + level]) ancestors["_" + level] = [];
 
                         ancestors["_" + level].push(edge.to);
+                        // eslint-disable-next-line no-console
                         console.log(nodesMap[edge.to].label);
                         recurse(nodesMap[edge.to], ancestors, ++level);
                     }
@@ -154,27 +155,6 @@ var Export = (function () {
         self.showDataTable(null, data.cols, data.dataSet);
 
         return;
-
-        var cols = [];
-        var dataSet = [];
-        var colsMax = 0;
-        nodesArray.forEach(function (item) {
-            var line = [];
-            item.forEach(function (id) {
-                var obj = nodesMap[id];
-                line.push(obj.data.id);
-                line.push(obj.data.label);
-            });
-            colsMax = Math.max(colsMax, line.length);
-            dataSet.push(line);
-        });
-
-        for (var i = 0; i < colsMax / 2; i++) {
-            cols.push({ title: "Uri_" + i, defaultContent: "" });
-            cols.push({ title: "Label_" + i, defaultContent: "" });
-        }
-
-        self.showDataTable(null, cols, dataSet);
     };
 
     self.exportAllDescendants = function (parentId, options, indexes) {
@@ -203,7 +183,6 @@ var Export = (function () {
                     parentIdsArray.push(hit.id);
                     parentIdsArray = parentIdsArray.reverse();
                 } else {
-                    parentIdsArray = parentIdsArray;
                     parentIdsArray.push(hit.id);
                 }
 
@@ -213,7 +192,6 @@ var Export = (function () {
                     parentLabelsArray.push(hit.label);
                     parentLabelsArray = parentLabelsArray.reverse();
                 } else {
-                    parentLabelsArray = parentLabelsArray;
                     parentLabelsArray.push(hit.label);
                 }
 
@@ -265,7 +243,7 @@ var Export = (function () {
         for (var i = 1; i <= colsMax; i++) {
             cols.push({ title: "Label_" + i, defaultContent: "", width: "20%" });
         }
-        for (var i = 1; i <= colsMax; i++) {
+        for (let i = 1; i <= colsMax; i++) {
             cols.push({ title: "Uri_" + i, defaultContent: "" });
         }
         return { cols: cols, dataSet: dataSet };

@@ -1,7 +1,6 @@
 var TE_14224_browser = (function () {
     var self = {};
     var source;
-    var graphUri;
     var assetTreeDistinctNodes = {};
 
     var sqlQuerySize = 500;
@@ -15,13 +14,17 @@ var TE_14224_browser = (function () {
     self.iso_14224CodesMap = {};
     self.iso_14224InverseCodesMap = {};
     //self.graphUri = Config.sources[self.referenceOntologySource]
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
     self.onLoaded = function () {
         $("#actionDiv").html("");
         $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/TE_14224_browser/snippets/leftPanel.html");
         MainController.UI.toogleRightPanel(true);
         $("#rightPanelDiv").html("");
-        $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_14224_browser/snippets/rightPanel.html", function () {});
+        $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_14224_browser/snippets/rightPanel.html", function () {
+            // Pass
+        });
 
         $("#graphDiv").html("");
         // $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
@@ -60,8 +63,8 @@ var TE_14224_browser = (function () {
         self.iso_14224AssetMap = {};
         Sparql_OWL.getItems("TSF_ASSET_14224_MAPPINGS", null, function (err, result) {
             if (err) return alert(err);
-            var pIso, pAsset;
-            result.forEach(function (item, index) {
+            var pAsset;
+            result.forEach(function (item) {
                 pAsset = item.o.value.lastIndexOf("#") + 1;
                 if (item.o.value.indexOf(asset) > -1) {
                     var assetId = item.o.value.substring(pAsset);
@@ -92,12 +95,12 @@ var TE_14224_browser = (function () {
     };
     self.loadFailureCodesMap = function () {
         return;
-        self.querySQLserver(sqlQuery, function (err, data) {
-            if (err) return MainController.UI.message(err);
-            data.forEach(function (item) {
-                self.iso_14224AssetMap[item.ActivityCode] = item.count;
-            });
-        });
+        // self.querySQLserver(sqlQuery, function (err, data) {
+        //     if (err) return MainController.UI.message(err);
+        //     data.forEach(function (item) {
+        //         self.iso_14224AssetMap[item.ActivityCode] = item.count;
+        //     });
+        // });
     };
 
     self.clearGraph = function () {
@@ -208,8 +211,6 @@ var TE_14224_browser = (function () {
             table_schema: "dbo",
         };
 
-        console.log(sqlQuery);
-
         const params = new URLSearchParams({
             dbName: dataSource.dbName,
             type: dataSource.type,
@@ -245,7 +246,7 @@ var TE_14224_browser = (function () {
             if (data.length == 0) return;
             var headers = Object.keys(data[0]);
 
-            var nodeId = data[0].tag;
+            nodeId = data[0].tag;
             var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
             str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
             str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
@@ -455,8 +456,6 @@ var TE_14224_browser = (function () {
                 var node = {
                     id: "A_" + item.id,
                     label: item.className,
-
-                    size: Lineage_classes.defaultShapeSize,
                     shape: "square",
                     size: Lineage_classes.defaultShapeSize,
                     color: Lineage_classes.getSourceColor(self.currenTable),
@@ -474,11 +473,9 @@ var TE_14224_browser = (function () {
 
                         if (!visjsExistingNodes[id]) {
                             visjsExistingNodes[id] = 1;
-                            var node = {
+                            node = {
                                 id: id,
                                 label: id,
-
-                                size: Lineage_classes.defaultShapeSize,
                                 shape: "square",
                                 size: Lineage_classes.defaultShapeSize,
                                 color: Lineage_classes.getSourceColor(self.currenTable),
@@ -619,12 +616,13 @@ var TE_14224_browser = (function () {
         if (!assetNodesIds) {
             var nodes = visjsGraph.data.nodes.get();
             self.currentAssetLevel += 1;
-            var assetNodesIds = [];
+            assetNodesIds = [];
 
             nodes.forEach(function (node) {
                 if (node.data.type == "assetNode") if (assetNodesIds.indexOf(node.data.id) < 0) assetNodesIds.push(node.data.id);
             });
         } else {
+            // Pass
         }
         var filterStr = "";
         assetNodesIds.forEach(function (item) {
@@ -674,8 +672,6 @@ var TE_14224_browser = (function () {
                     var node = {
                         id: id,
                         label: item.className,
-
-                        size: 10,
                         shape: "diamond",
                         size: Lineage_classes.defaultShapeSize,
                         color: Lineage_classes.getSourceColor(self.currenTable),
@@ -967,7 +963,9 @@ var TE_14224_browser = (function () {
             });
         },
 
-        showAssetFailures: function (_failureNode) {},
+        showAssetFailures: function (_failureNode) {
+            // Pass
+        },
         showAssetData: function () {
             if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3") > -1) {
                 TE_14224_browser.ontology.showAssetSystemData(self.currentOntologyTreeNode);

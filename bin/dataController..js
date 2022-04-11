@@ -1,6 +1,5 @@
 var fs = require("fs");
 var path = require("path");
-var async = require("async");
 var csvCrawler = require("../bin/_csvCrawler.");
 
 var DataController = {
@@ -15,7 +14,7 @@ var DataController = {
 
     saveDataToFile: function (fileName, data, callback) {
         var filePath = path.join(__dirname, "../data/graphs/" + fileName);
-        fs.writeFile(filePath, JSON.stringify(data, null, 2), {}, function (err, result) {
+        fs.writeFile(filePath, JSON.stringify(data, null, 2), {}, function (err, _result) {
             return callback(err, "file saved");
         });
     },

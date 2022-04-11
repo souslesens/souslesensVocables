@@ -12,7 +12,6 @@ var async = require("async");
 var request = require("request");
 var skosReader = require("../backoffice/skosReader.");
 var indexer = require("../backoffice/indexer.");
-var indexer = require("../backoffice/indexer.");
 
 var ndjson = require("ndjson");
 
@@ -54,7 +53,6 @@ var skosToElastic = {
                             for (var i = 0; i <= index; i++) {
                                 sep += "_";
                             }
-                            if (ancestor.indexOf("GROUP IIB") > -1) var x = 3;
                             ancestors = ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
                         });
                         newJson.push({
@@ -78,7 +76,6 @@ var skosToElastic = {
             function (err) {
                 if (err) {
                     return callback(err);
-                    callback();
                 }
             }
         );
@@ -94,7 +91,7 @@ var skosToElastic = {
             [
                 function (callbackSeries) {
                     if (!createIndex) return callbackSeries();
-                    indexer.deleteIndex(indexconfig, function (err, result) {
+                    indexer.deleteIndex(indexconfig, function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -145,7 +142,6 @@ var skosToElastic = {
                         }
 
                         if (Buffer.isBuffer(body)) body = JSON.parse(body.toString());
-                        else body = body;
                         var errors = [];
                         if (body.error) {
                             if (body.error.reason) return callbackSeries(body.error.reason);
@@ -188,7 +184,7 @@ var skosToElastic = {
                         ndjsonStr += line; // line is a line of stringified JSON with a newline delimiter at the end
                     });
 
-                    hitsIndexSource.forEach(function (item, index) {
+                    hitsIndexSource.forEach(function (item, _index) {
                         //   var label = item._source.concept;
                         var label = item._source.name;
 
@@ -225,7 +221,7 @@ var skosToElastic = {
                         url: "http://localhost:9200/" + "_msearch",
                     };
 
-                    request(options, function (error, response, body) {
+                    request(options, function (error, response, _body) {
                         if (error) return callbackSeries(error);
                         var json = JSON.parse(response.body);
                         if (json.error) {
@@ -233,9 +229,7 @@ var skosToElastic = {
                         }
                         var responses = json.responses;
 
-                        if (!responses || !responses.forEach) var x = 3;
-
-                        responses.forEach(function (response, responseIndex) {
+                        responses.forEach(function (response, _responseIndex) {
                             if (response.error) {
                                 hitsIndexTarget.push({ _source: {} });
                                 return; //  return callbackSeries(response.error.root_cause)
@@ -248,14 +242,14 @@ var skosToElastic = {
 
                 //process common
                 function (callbackSeries) {
-                    var targetHitsIds = [];
+                    // var targetHitsIds = [];
                     hitsIndexTarget.forEach(function (hits, index) {
                         if (hits.length > 0) {
                             commonConcepts.push({
                                 source: hitsIndexSource[index],
                                 target: hitsIndexTarget[index],
                             });
-                            var targetIds = [];
+                            // var targetIds = [];
                             //    console.log(hitsIndexSource[index]._source.concept+"  "+hitsIndexTarget[index]._source.path)
                             /*    hits.forEach(function (hit) {
                                 targetIds.push({
@@ -280,7 +274,6 @@ var skosToElastic = {
 
     compareThesaurus: function (indexSource, indexTarget, callback) {
         var hitsIndexSource = [];
-        var hitsIndexTarget = [];
         var commonConcepts = [];
         var totalHits = 0;
         var scroll_id = "";
@@ -354,7 +347,7 @@ var skosToElastic = {
                                     });
                                 });
                             },
-                            function (err, n) {
+                            function (err, _n) {
                                 if (err) return callbackSeries(err);
                                 fs.writeFileSync("D:\\NLP\\LOC\\commonConcepts_" + indexTarget + ".json", JSON.stringify(commonConcepts, null, 2));
                                 callbackSeries();
@@ -379,6 +372,7 @@ var skosToElastic = {
 
 module.exports = skosToElastic;
 
+/*
 function getThesaurusListFromNlp2App() {
     var listPath = "D:\\GitHub\\nlp2\\public\\skosEditor\\js\\theaususList.js";
     var str = "" + fs.readFileSync(listPath);
@@ -393,10 +387,10 @@ function getThesaurusListFromNlp2App() {
     return list;
 }
 
+
 if (false) {
     var thesaurusList = getThesaurusListFromNlp2App();
 
-    /*
     http://localhost:9200/flat_thesaurus2/_delete_by_query
     {
   "query": {
@@ -410,7 +404,6 @@ if (false) {
   }
 
 }
-     */
 
     //   thesaursusList = ["D:\\NLP\\thesaurusCTG-02-20.rdf"]
 
@@ -438,10 +431,10 @@ if (false) {
         if (err) return console.log(err);
         return console.log("done");
     });
-}
+}*/
+/*
 if (false) {
     skosToElastic.compareThesaurus("libraryofcongress", "flat_thesaurus", function (err, result) {
         //  skosToElastic.compareThesaurus("termscience_all", "flat_thesaurus", function (err, result) {
-        var x = result;
     });
-}
+}*/

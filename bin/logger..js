@@ -12,15 +12,17 @@
 var path = require("path");
 var winston = require("winston");
 
-const { createLogger, format, transports } = require("winston");
+const { createLogger, format } = require("winston");
 const { combine, timestamp, json } = format;
 const config = require(path.resolve("config/mainConfig.json"));
 
 const logDir = config.logDir ? config.logDir : "log/souslesens";
 
-const ConfigManager = require("./configManager.");
+/*
+ * const ConfigManager = require("./configManager.");
 
 var logPaths = null;
+
 const getlogPaths = function () {
     if (logPaths) return logPaths;
     else {
@@ -37,8 +39,9 @@ const getlogPaths = function () {
         }
     }
 };
-var errorsLogPath = "logs/error.log";
-var usersLogPath = "logs/vocables.log";
+*/
+// var errorsLogPath = "logs/error.log";
+// var usersLogPath = "logs/vocables.log";
 
 /*var errorsLogPath = getlogPaths().errorsLogPath;
 var usersLogPath = getlogPaths().usersLogPath;*/

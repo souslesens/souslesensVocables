@@ -10,9 +10,7 @@
 var async = require("async");
 var httpProxy = require("../httpProxy.");
 var elasticRestProxy = require("../elasticRestProxy.");
-var superagent = require("superagent");
 var fs = require("fs");
-var lemmatizer = require("lemmatizer");
 var onTheFlyTagger = {
     mediawikistopWords: [
         "wikitable",
@@ -259,7 +257,6 @@ var onTheFlyTagger = {
     getPageWords: function (pageUri, callback) {
         var pageText = "";
         var pageWords = [];
-        var intersection = [];
 
         async.series(
             [
@@ -393,7 +390,6 @@ var onTheFlyTagger = {
 
         var offset = 0;
         var length = 1;
-        var result = [];
         async.whilst(
             function test(cb) {
                 return cb(null, length > 0);
@@ -419,7 +415,7 @@ var onTheFlyTagger = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 callback(null, thesaurusConcepts);
             }
@@ -578,13 +574,13 @@ var onTheFlyTagger = {
 
                                         callbackEach2();
                                     },
-                                    function (err) {
+                                    function (_err) {
                                         return callbackEach1();
                                     }
                                 );
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             return callbackSeries();
                         }
                     );
@@ -635,7 +631,7 @@ var onTheFlyTagger = {
                 var terms = json[category][graph].terms;
                 var strs = [];
 
-                terms.forEach(function (term, index) {
+                terms.forEach(function (term, _index) {
                     var category2 = category.replace("Special:URIResolver/Category-3A", "Category:");
 
                     strs.push("<" + term.id + "> <http://souslesens.org/vocab#wikimedia-category> <" + category2 + ">. ");
@@ -659,7 +655,7 @@ var onTheFlyTagger = {
                 var query = "WITH <" + graphs + ">" + "DELETE { ?a ?property ?b } " + "WHERE " + "{ ?a ?property ?b. filter(?property=<http://souslesens.org/vocab#wikimedia-category>) } ";
                 var params = { query: query };
 
-                httpProxy.post(onTheFlyTagger.sparqlUrl, null, params, function (err, result) {
+                httpProxy.post(onTheFlyTagger.sparqlUrl, null, params, function (err, _result) {
                     if (err) {
                         console.log(err);
                         return callbackEach(err);
@@ -676,7 +672,7 @@ var onTheFlyTagger = {
                             query = "INSERT DATA" + "  { " + "    GRAPH <" + graph + "> " + "      { " + query + "}}";
                             var params = { query: query };
 
-                            httpProxy.post(onTheFlyTagger.sparqlUrl, null, params, function (err, result) {
+                            httpProxy.post(onTheFlyTagger.sparqlUrl, null, params, function (err, _result) {
                                 if (err) {
                                     console.log(params.query);
                                     return callbackEach2(err);
@@ -684,7 +680,7 @@ var onTheFlyTagger = {
                                 return callbackEach2();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             return callbackEach();
                         }
                     );
@@ -766,29 +762,18 @@ var onTheFlyTagger = {
 
                 //map organisation theme
                 function (callbackSeries) {
-                    function printCharCodes(str) {
-                        var codes = "";
-                        for (var i = 0; i < str.length; i++) {
-                            codes += str.charCodeAt(i) + "_";
-                        }
-                        console.log(codes);
-                    }
-
                     var catsOrgJson = onTheFlyTagger.csvToJson("D:\\Total\\2020\\Stephanie\\AAPGcats-org.txt");
 
                     catsOrgJson.forEach(function (line) {
                         if (line.category) {
                             catThemes[line.category] = line;
                             if (allThemesLabels.indexOf(line.theme) < 0) allThemesLabels.push(line.theme);
-                            // printCharCodes(line.category)
                         }
                     });
 
-                    wordsTotalFreq.forEach(function (item, wordIndex) {
+                    wordsTotalFreq.forEach(function (item, _wordIndex) {
                         for (var cat in item.catFreq) {
                             var cat2 = cat.substring(1).replace(/_/g, " ").trim();
-                            /*   if(wordIndex==0)
-                                   printCharCodes(cat2)*/
                             var theme = catThemes[cat2];
                             if (theme) {
                                 if (!item.themes) item.themes = {};
@@ -802,7 +787,6 @@ var onTheFlyTagger = {
 
                 //print csv
                 function (callbackSeries) {
-                    var thesauriiLabels = Object.keys[thesauriiMap];
                     var str = "";
                     /* thesauriiLabels.forEach(function (thesaurus){
                          str+=thesaurus+"\t";
@@ -819,7 +803,7 @@ var onTheFlyTagger = {
                     });
 
                     str += "\n";
-                    wordsTotalFreq.forEach(function (item, wordIndex) {
+                    wordsTotalFreq.forEach(function (item, _wordIndex) {
                         /*   {//print thesaurus presence
 
 
@@ -836,7 +820,7 @@ var onTheFlyTagger = {
                         if (printCategories) {
                             //print cat freqs
                             var catStrs = [];
-                            allCategoriesLabels.forEach(function (cat) {
+                            allCategoriesLabels.forEach(function (_cat) {
                                 catStrs.push(0);
                             });
                             for (var cat in item.catFreq) {
@@ -851,14 +835,10 @@ var onTheFlyTagger = {
                         {
                             //print cat themes
                             allThemesLabels.forEach(function (theme) {
-                                try {
-                                    if (item.themes) {
-                                        var themeFreq = item.themes[theme];
-                                        if (themeFreq) str += themeFreq + "\t";
-                                        else str += "0" + "\t";
-                                    }
-                                } catch (e) {
-                                    var w = 3;
+                                if (item.themes) {
+                                    var themeFreq = item.themes[theme];
+                                    if (themeFreq) str += themeFreq + "\t";
+                                    else str += "0" + "\t";
                                 }
                             });
                         }
@@ -873,7 +853,6 @@ var onTheFlyTagger = {
                 function (callbackSeries) {
                     var thesaurusGraphUris = ["http://souslesens.org/oil-gas/upstream/", "http://www.eionet.europa.eu/gemet/", "https://www2.usgs.gov/science/USGSThesaurus/"];
 
-                    str += "\n";
                     async.eachSeries(
                         thesaurusGraphUris,
                         function (graph, callbackEach) {
@@ -920,8 +899,6 @@ var onTheFlyTagger = {
                 return console.log(err);
             }
         );
-
-        var xx = wordsByCategory;
     },
 
     getCommonWords: function (thesaurus, words, callback) {
@@ -948,7 +925,7 @@ var onTheFlyTagger = {
     },
 };
 module.exports = onTheFlyTagger;
-
+/*
 if (false) {
     var wikiPageUri = "https://wiki.aapg.org/3-D_seismic_data_views";
     var thesaurusGraphUri = "http://souslesens.org/oil-gas/upstream/";
@@ -1023,4 +1000,4 @@ if (true) {
 }
 if (false) {
     onTheFlyTagger.setThesaursusConceptsOrganisation();
-}
+}*/

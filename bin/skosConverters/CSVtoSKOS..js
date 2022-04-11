@@ -9,18 +9,14 @@
  */
 const async = require("async");
 const util = require("../util.");
-const request = require("request");
 const fs = require("fs");
 const csv = require("csv-parser");
 
-var distinctUris = {};
 var CSVtoSKOS = {
     getCSVColumns: function (filePath, callback) {
         CSVtoSKOS.readCsv({ filePath: filePath }, 50000, function (err, result) {
             if (err) return callback(err);
-            var data = result.data;
-            var headers = result.headers;
-            return callback(null, headers);
+            else return callback(null, result.headers);
         });
     },
 
@@ -45,10 +41,9 @@ var CSVtoSKOS = {
         concat: function (fieldsStr, data, lineIndex, lang) {
             var fields = fieldsStr.split(",");
             var str = "";
-            fields.forEach(function (field, index) {
+            fields.forEach(function (field, _index) {
                 if (str != "") str += "   ";
 
-                var value = null;
                 if (field.indexOf("$") >= 0) {
                     field = field.trim();
                     field = field.substring(1);
@@ -68,9 +63,7 @@ var CSVtoSKOS = {
 
     generatTriples: function (config, callback) {
         var data = [];
-        var headers = [];
         var triples = "";
-        distinctTriples = {};
         async.series(
             [
                 // read csv
@@ -78,39 +71,33 @@ var CSVtoSKOS = {
                     CSVtoSKOS.readCsv(config, config.maxLines, function (err, result) {
                         if (err) return callbackseries(err);
                         data = result.data;
-                        headers = result.headers;
                         return callbackseries();
                     });
                 },
                 //generate triples
                 function (callbackseries) {
-                    var totalLines = 0;
                     var mappings = config.mappings;
                     var slicedData = util.sliceArray(data[0], 100);
                     async.eachSeries(
                         slicedData,
                         function (data, callbackEach) {
-                            totalLines += data.length;
                             data.forEach(function (line, lineIndex) {
                                 if (lineIndex == 0) return;
                                 mappings.forEach(function (mapping) {
-                                    var subject;
+                                    var subject, object, fn, fields;
                                     if (typeof mapping.subject === "object") {
-                                        var fn = mapping.subject.fn;
-                                        if (fn == "distinctTriple") {
-                                        }
+                                        fn = mapping.subject.fn;
 
-                                        var fields = mapping.subject.params;
+                                        fields = mapping.subject.params;
                                         subject = fn(fields, data, lineIndex);
                                     } else {
                                         subject = line[mapping.subject];
                                     }
 
-                                    var object;
                                     if (typeof mapping.object === "object") {
-                                        var fn = mapping.object.fn;
+                                        fn = mapping.object.fn;
                                         if (typeof fn !== "function") console.log(fn);
-                                        var fields = mapping.object.params;
+                                        fields = mapping.object.params;
                                         object = fn(fields, data, lineIndex, mapping.object.lang);
                                     } else {
                                         if (mapping.object.indexOf("$") == 0) {
@@ -129,8 +116,7 @@ var CSVtoSKOS = {
                                         var triple = subject + " " + predicate + " " + object + ".\n";
                                         var tripleHash = util.getStringHash(triple);
 
-                                        if (mapping.distinctTriple && distinctTriples[tripleHash]) {
-                                        } else {
+                                        if (!(mapping.distinctTriple && distinctTriples[tripleHash])) {
                                             distinctTriples[tripleHash] = 1;
                                             triples += triple;
                                         }
@@ -178,7 +164,6 @@ var CSVtoSKOS = {
             var headers = [];
             var jsonData = [];
             var jsonDataFetch = [];
-            var startId = 100000;
             fs.createReadStream(connector.filePath).pipe(
                 csv({
                     separator: separator,
@@ -204,13 +189,13 @@ var CSVtoSKOS = {
     },
 };
 module.exports = CSVtoSKOS;
-
+/*
 if (false) {
-    CSVtoSKOS.getCSVColumns("D:\\NLP\\importedResources\\iec.csv", function (err, result) {
-        var x = result;
+    CSVtoSKOS.getCSVColumns("D:\\NLP\\importedResources\\iec.csv", function (_err, _result) {
+        // do nothing
     });
 }
-
+*/
 var mappings = [
     {
         subject: { fn: CSVtoSKOS.importFunctions.uri, params: "Id" },
@@ -287,7 +272,7 @@ var mappings = [
 ];
 
 var config = {
-    filePath: "D:\\NLP\\importedResources\\iec.csv",
+    //filePath: "D:\\NLP\\importedResources\\iec.csv",
     filePath: "D:\\NLP\\importedResources\\iec_60050_v2.txt",
 
     graphUri: "http://souslesens.org/vocabulary/iec/",

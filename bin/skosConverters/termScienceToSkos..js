@@ -1,6 +1,5 @@
 /**
  The MIT License
- The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -19,7 +18,6 @@ var termScienceToSkos = {
     xmlToSkosConcept: function (xmlStr) {
         var xml = new DOMParser().parseFromString(xmlStr, "text/xml");
         var doc = xml.documentElement;
-        var concepts = [];
         var obj = {
             id: "",
             prefLabels: [],
@@ -32,7 +30,7 @@ var termScienceToSkos = {
 
         var features = doc.getElementsByTagName("feat");
 
-        for (var i = 0; i < features.length; i++) {
+        for (let i = 0; i < features.length; i++) {
             var feature = features.item(i);
             var type = feature.getAttribute("type");
 
@@ -46,20 +44,18 @@ var termScienceToSkos = {
 
             if (type == "broaderConceptGeneric") {
                 var target = feature.getAttribute("target");
-                //  obj.broaders.push({id: target.substring(1), name: value})
                 obj.broaders.push(target.substring(1));
             }
             if (type == "specificConcept") {
-                var target = feature.getAttribute("target");
-                // obj.narrowers.push({id: target.substring(1), name: value})
+                target = feature.getAttribute("target");
                 obj.narrowers.push(target.substring(1));
             }
         }
 
         var structs = doc.getElementsByTagName("struct");
-        for (var i = 0; i < structs.length; i++) {
+        for (let i = 0; i < structs.length; i++) {
             var struct = structs.item(i);
-            var type = struct.getAttribute("type");
+            type = struct.getAttribute("type");
 
             if (type == "languageSection") {
                 var lang = "";
@@ -123,8 +119,6 @@ var termScienceToSkos = {
 
     buildTreeToSkos: function (rootConceptId, maxLevel, rdfPath, callback) {
         function getConcept(conceptId, callback) {
-            if (conceptId == "TE.173836") var x = 3;
-
             if (conceptId)
                 termScienceToSkos.queryTermScience(conceptId, function (err, xmlStr) {
                     if (err) return callback(err);
@@ -291,12 +285,11 @@ var termScienceToSkos = {
                         var concept = conceptsMap[key];
                         concept.narrowers.forEach(function (narrower) {
                             if (conceptsMap[narrower] && conceptsMap[narrower].broaders) conceptsMap[narrower].broaders.push(concept.id);
-                            else var x = 3;
                         });
                     }
 
-                    for (var key in conceptsMap) {
-                        editorArray.push(conceptsMap[key]);
+                    for (var akey in conceptsMap) {
+                        editorArray.push(conceptsMap[akey]);
                     }
 
                     callbackSeries();
@@ -305,7 +298,7 @@ var termScienceToSkos = {
             function (err) {
                 if (err) return callback(err);
 
-                skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, result) {
+                skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, _result) {
                     if (err) {
                         return callback(err);
                     }
@@ -340,7 +333,7 @@ var termScienceToSkos = {
         return conceptsArray;
     },
 
-    commonConcepts: function (rdfPath, callback) {
+    commonConcepts: function (rdfPath, _callback) {
         var thesaurusTerms = [];
         async.series(
             [
@@ -373,8 +366,10 @@ var termScienceToSkos = {
                 },
 
                 function (callbackSeries) {
-                    async.eachSeries(thesaurusTerms, function (term, callbackEach) {
-                        termScienceToSkos.queryTermScience(conceptId, function (err, xmlStr) {});
+                    async.eachSeries(thesaurusTerms, function (_term, _callbackEach) {
+                        termScienceToSkos.queryTermScience(conceptId, function (_err, _xmlStr) {
+                            /*v*/
+                        });
                     });
 
                     callbackSeries();
@@ -392,7 +387,7 @@ var termScienceToSkos = {
         );
     },
 
-    listConcepts: function (callback) {
+    listConcepts: function (_callback) {
         var pages = [];
         for (var i = 65; i <= 90; i++) {
             pages.push(String.fromCharCode(i));
@@ -403,12 +398,10 @@ var termScienceToSkos = {
 
         var terms = [];
         var termIds = [];
-        var previousPageCount = -1;
         async.eachSeries(
             pages,
             function (page, callbackEachPageLetter) {
                 var pageNums = [];
-                previousPageCount = -1;
                 for (var i = 1; i <= 500; i++) {
                     pageNums.push(i);
                 }
@@ -447,18 +440,10 @@ var termScienceToSkos = {
                                             // on a fini les numero de pages
                                             return callbackEachPageNum("endLetter");
                                         }
-                                    } else {
-                                        var x = 3;
                                     }
                                 }
                             }
-                            /*  if (previousPageCount != -1 && previousPageCount == pageItemsCount) {
-                          return callbackEachPageNum("endLetter");
-                      }*/
                             console.log(page[0] + "-" + pageNum + "   " + pageItemsCount);
-
-                            previousPageCount = pageItemsCount;
-
                             return callbackEachPageNum();
                         });
                     },
@@ -469,14 +454,14 @@ var termScienceToSkos = {
                     }
                 );
             },
-            function (err) {
-                var x = terms;
+            function (_err) {
                 fs.writeFileSync("D:\\NLP\\termScience\\allTerms.csv", JSON.stringify(terms, null, 2));
             }
         );
     },
 };
 
+/*
 if (false) {
     termScienceToSkos.listConcepts(function (err, result) {});
 }
@@ -564,16 +549,16 @@ if (false) {
             return console.log("ALL DONE");
         }
     );
-}
-
+}*/
+/*
 if (false) {
     var jsonPath = "D:\\NLP\\termScience\\terms2.json";
     var rdfPath = "D:\\NLP\\termScience\\termSciences_Physics.rdf";
     var json = JSON.parse("" + fs.readFileSync(jsonPath));
 
     skoReader.skosEditorToRdf(rdfPath, conceptsArray, {});
-}
-
+}*/
+/*
 if (false) {
     var conceptsMap = JSON.parse("" + fs.readFileSync("d:\\NLP\\conceptsMap.json"));
 
@@ -614,8 +599,8 @@ if (false) {
 
     var rdfPath = "D:\\NLP\\termScience\\termScience_" + "Chemistry" + ".rdf";
     skoReader.skosEditorToRdf(rdfPath, editorArray, {}, function (err, result) {});
-}
-
+}*/
+/*
 if (false) {
     var conceptId = "TE.182846";
     termScienceToSkos.queryTermScience(conceptId, function (err, xmlStr) {
@@ -623,7 +608,8 @@ if (false) {
         var concept = termScienceToSkos.xmlToSkosConcept(xmlStr);
     });
 }
-
+*/
+/*
 if (false) {
     var items = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.json"));
     var concepts = [];
@@ -652,6 +638,8 @@ if (false) {
         }
     );
 }
+*/
+/*
 if (false) {
     //   var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf"));
     var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\temp.json"));
@@ -659,15 +647,15 @@ if (false) {
     var rdfPath = "D:\\NLP\\temp.rdf";
     skoReader.skosEditorToRdf(rdfPath, data, {}, function (err, result) {});
 }
-
+*/
 //get Parents
+/*
 if (false) {
     var data = JSON.parse("" + fs.readFileSync("d:\\NLP\\commonConcepts_TERM_SCIENCE_CTG.rdf"));
     var concepts = [];
     var conceptIds = [];
     var allBroaders = [];
     var newBroaders = [];
-    var newBroadersIds = [];
     data.forEach(function (item) {
         if (conceptIds.indexOf(item.id) < 0) conceptIds.push(item.id);
     });
@@ -701,8 +689,9 @@ if (false) {
         }
     );
 }
-
+*/
 // getChildren
+/*
 if (false) {
     skoReader.rdfToEditor("D:\\NLP\\commonConcepts_TERM_SCIENCE_CTGshort.rdf", {}, function (err, result) {
         var dataShort = result;
@@ -718,7 +707,6 @@ if (false) {
             if (shortIds.indexOf(item.id) > -1) data.push(item);
         });
 
-        var concepts = [];
         var conceptIds = [];
         var allNarrowers = [];
 
@@ -763,4 +751,5 @@ if (false) {
     });
 }
 
+*/
 //var commonEnums=xsdToSkos.getCommonEnumeration();

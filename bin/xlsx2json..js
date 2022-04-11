@@ -8,6 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+const fs = require("fs");
 const XLSX = require("xlsx");
 const async = require("async");
 var xlsx2json = {
@@ -16,7 +17,6 @@ var xlsx2json = {
         var sheets = {};
         var allData = {};
         var allModel = {};
-        var jsonArrayQuantum = [];
         async.series(
             [
                 function (callbackSeries) {
@@ -49,12 +49,9 @@ var xlsx2json = {
                             return callbackSeries(null, null);
                         var lineDebut = range[2];
                         var lineFin = range[4];
-                        var colDebut = range[1];
                         var colFin = range[3];
-                        var alphabet = "A,";
-                        var dbleLetterColName = colFin.length > 1;
                         var colNames = [];
-                        for (var j = 65; j < 120; j++) {
+                        for (let j = 65; j < 120; j++) {
                             var colName;
                             if (j <= 90) colName = String.fromCharCode(j);
                             else colName = "A" + String.fromCharCode(j - 26);
@@ -64,8 +61,8 @@ var xlsx2json = {
                         }
 
                         if (options.firstLineNumber) lineDebut = options.firstLineNumber;
-                        for (var i = lineDebut; i <= lineFin; i++) {
-                            for (var j = 0; j < colNames.length; j++) {
+                        for (let i = lineDebut; i <= lineFin; i++) {
+                            for (let j = 0; j < colNames.length; j++) {
                                 var key = colNames[j] + i;
 
                                 if (!worksheet[key]) {
@@ -89,8 +86,8 @@ var xlsx2json = {
                             }
                         }
 
-                        for (var key in data) {
-                            dataArray.push(data[key]);
+                        for (var akey in data) {
+                            dataArray.push(data[akey]);
                         }
 
                         allData[sheetKey] = dataArray;
@@ -114,7 +111,6 @@ var xlsx2json = {
 
                 if (!callback) {
                     console.log("done");
-                    var x = allData;
                     console.log("saving " + filePath.replace(/\.xlsx/i, "model.json"));
                     var str = JSON.stringify(allModel, null, 2);
 

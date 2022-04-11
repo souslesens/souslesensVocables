@@ -11,21 +11,16 @@
  */
 var fs = require("fs");
 var async = require("async");
-var common = require("../backoffice/common.");
 
 var tulsaToSkos = {
     topConcepts: ["COMMON ATTRIBUTE", "EARTH AND SPACE CONCEPTS", "ECONOMIC FACTOR", "EQUIPMENT", "LIFE FORM", "OPERATING CONDITION", "PHENOMENON", "PROCESS", "PROPERTY", "WORLD", "MATERIAL"],
     parseTxt: function () {
-        var entitiesArray = [];
-
-        var rootConcepts = [];
         var jsonArray = [];
 
         var filePath = "D:\\NLP\\importedResources\\Tulsa.txt";
 
         var str = "" + fs.readFileSync(filePath);
         var lines = str.split("\n");
-        var isPreviousBT = false;
         var types = {};
         lines.forEach(function (line, index) {
             var offset1 = 32;
@@ -84,8 +79,6 @@ var tulsaToSkos = {
     setEntitiesByBroaders: function (jsonArray) {
         var entity = null;
         var entitiesMap = {};
-        var orphanEntities = [];
-
         function padWithLeadingZeros(string) {
             return new Array(5 - string.length).join("0") + string;
         }
@@ -104,12 +97,12 @@ var tulsaToSkos = {
                 .join("");
         }
 
-        jsonArray.forEach(function (item, indexItem) {
+        jsonArray.forEach(function (item, _indexItem) {
             /*   if (item.term && item.term.indexOf("ADDED") > -1)
                    return;*/
             item.term = unicodeEscape(item.term).replace(/&/g, " ").replace(/'/g, " ");
             // remove dates and annotations  see Format of PA Thesauri USE...
-            item.term = item.term.replace(/.*\(\d+\-*\d*\)\s*/g, "");
+            item.term = item.term.replace(/.*\(\d+-*\d*\)\s*/g, "");
             item.term = item.term.replace("/", " ");
 
             if (item.type == "DS") {
@@ -133,7 +126,6 @@ var tulsaToSkos = {
 
             if (item.type == "BT") {
                 if (entity.broaders.indexOf(item.term) < 0) entity.broaders.push(item.term);
-                if (entity.broaders.length > 1) var x = 3;
                 entity.broader = item.term;
             } else if (item.type == "SA") {
                 if (entity.relateds.indexOf(item.term) < 0) entity.relateds.push(item.term);
@@ -160,10 +152,9 @@ var tulsaToSkos = {
                 orphanEntities.push(entity.prefLabel)
             }*/
         });
-        var x = orphanEntities;
         if (entity.broaders) return entitiesMap;
     },
-    setDSMap: function (jsonArray) {},
+    // setDSMap: function (jsonArray) {},
 
     setEntitiesNarrowersScheme: function (entitiesMap) {
         function recurse(parent, currentScheme) {
@@ -213,7 +204,7 @@ var tulsaToSkos = {
         return entitiesMap;
     },
 
-    getRootConcepts: function (entitesArray) {
+    getRootConcepts: function (entitiesArray) {
         entitiesArray.forEach(function (entity) {
             if (!entity.broader && entity.narrowers.length > 2) rootConcepts.push(entity.prefLabel);
         });
@@ -240,7 +231,7 @@ var tulsaToSkos = {
                 str += "  <skos:prefLabel xml:lang='en'>" + scheme + "</skos:prefLabel>";
                 str += "</skos:ConceptScheme>";
 
-                entitiesArray.forEach(function (entity, index) {
+                entitiesArray.forEach(function (entity, _index) {
                     if (!entity.inScheme) {
                         if (!stats["noScheme"]) stats["noScheme"] = 0;
                         stats["noScheme"] += 1;
@@ -283,9 +274,8 @@ var tulsaToSkos = {
                 fs.writeFileSync("D:\\NLP\\Tulsa_" + scheme + ".rdf", str);
                 return callbackSeries();
             },
-            function (err) {
+            function (_err) {
                 console.log("done");
-
                 console.log(JSON.stringify(stats, null, 2));
             }
         );
@@ -324,10 +314,11 @@ var tulsaToSkos = {
         fs.writeFileSync("D:\\NLP\\Tulsa_08_20.rdf.nt", str);
     },
 
-    checkOrphans: function () {},
+    // checkOrphans: function () {},
 };
 
 module.exports = tulsaToSkos;
+/*
 if (false) {
     var jsonArray = tulsaToSkos.parseTxt();
 
@@ -339,7 +330,7 @@ if (false) {
 
     //  var entitiesMap = tulsaToSkos.setEntitiesBoadersScheme(entitiesMap);
 }
-
+*/
 //tulsaToSkos.generateRdf(entitiesMap)
 //!!!!!!!!!  ATTENTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /*Post import
@@ -347,7 +338,7 @@ if (false) {
 {?c  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#ConceptScheme>}
 
     where {?a skos:broader ?c filter( NOT EXISTS{ ?c skos:broader ?d.})}*/
-
+/*
 if (false) {
     var filePath = "D:\\NLP\\importedResources\\Tulsa.txt";
 
@@ -380,4 +371,4 @@ if (false) {
                 ">. \n";
     });
     fs.writeFileSync(filePath.replace(".txt", "rdf.nt"), str);
-}
+}*/

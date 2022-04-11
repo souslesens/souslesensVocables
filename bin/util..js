@@ -22,7 +22,6 @@ var util = {
         });
         slices.push(slice);
         return slices;
-        ormat;
     },
     deconcatSQLTableColumn: function (str) {
         if (str.indexOf(":") > -1) return null;
@@ -60,12 +59,6 @@ var util = {
         return hash >>> 0;
     },
 
-    base64_encodeFile: function (file) {
-        // read binary data
-        var bitmap = fs.readFileSync(file);
-        // convert binary data to base64 encoded string
-        return new Buffer(bitmap).toString("base64");
-    },
     prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))
          obj = JSON.parse(obj);*/
@@ -109,9 +102,9 @@ var util = {
         return new Buffer(bitmap).toString("base64");
     },
     convertNumStringToNumber: function (value) {
-        if (value.match && value.match(/.*[a-zA-Z\/\\$].*/)) return value;
-        if (Util.isInt(value)) return parseInt(value);
-        if (Util.isFloat(value)) return parseFloat(value);
+        if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) return value;
+        if (util.isInt(value)) return parseInt(value);
+        if (util.isFloat(value)) return parseFloat(value);
         if (value == "true") return true;
         if (value == "false") return false;
         return value;
@@ -205,7 +198,6 @@ var util = {
     },
     getCsvFileSeparator: function (file, callback) {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
-        var separator = ",";
         var line = "";
         var separators = [",", "\t", ";"];
         readStream
@@ -230,7 +222,6 @@ var util = {
                 }
             })
             .on("end", function () {
-                var xx = 3;
                 return;
             })
             .on("close", function () {
@@ -239,9 +230,8 @@ var util = {
     },
 
     normalizeHeader: function (headerArray, s) {
-        //   var   r = s.toLowerCase();
         var r = s;
-        r = r.replace(/[\(\)'.]/g, "");
+        r = r.replace(/[()'.]/g, "");
         r = r.replace(/[\s-]+\w/g, function (txt) {
             return txt.charAt(txt.length - 1).toUpperCase();
         });
@@ -293,7 +283,6 @@ var util = {
         var dirFilesMap = {};
         var message = "";
         if (!options) options = {};
-        var rootDirName = path.basename(dirPath);
 
         function recurse(parent) {
             parent = path.normalize(parent);
@@ -314,11 +303,11 @@ var util = {
                     var p = fileName.lastIndexOf(".");
                     if (p < 0) continue;
                     var extension = fileName.substring(p + 1).toLowerCase();
-                    if (options.acceptedExtensions && acceptedExtensions.indexOf(extension) < 0) {
+                    if (options.acceptedExtensions && options.acceptedExtensions.indexOf(extension) < 0) {
                         message += "!!!!!!  refusedExtension " + fileName;
                         continue;
                     }
-                    if (options.maxDocSize && stats.size > maxDocSize) {
+                    if (options.maxDocSize && stats.size > options.maxDocSize) {
                         message += "!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ";
                         continue;
                     }
@@ -335,8 +324,6 @@ var util = {
         }
 
         recurse(dirPath, dirPath);
-        var x = dirsArray;
-        var y = dirFilesMap;
 
         return callback(null, dirFilesMap);
     },

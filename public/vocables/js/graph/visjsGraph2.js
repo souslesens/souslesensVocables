@@ -117,7 +117,7 @@ var visjsGraph = (function () {
                         if (obj) _options.onRightClickFn(obj, point, params.event);
                     } else {
                         objId = self.network.getEdgeAt(params.pointer.DOM);
-                        var obj = self.data.edges.get(objId);
+                        obj = self.data.edges.get(objId);
                         if (obj) _options.onRightClickFn(obj, point, params.event);
                     }
                 }
@@ -130,12 +130,14 @@ var visjsGraph = (function () {
 
         self.network
             .on("click", function (params) {
+                // eslint-disable-next-line no-console
                 console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
                 self.processClicks(params, _options);
             })
             .on("hoverNode", function (params) {
                 var nodeId = params.node;
                 var node = self.data.nodes.get(nodeId);
+                // eslint-disable-next-line no-console
                 if (!node) return console.log("hoverNode :no node ");
                 node._graphPosition = params.pointer.DOM;
                 var point = params.pointer.DOM;
@@ -294,7 +296,6 @@ var visjsGraph = (function () {
                     roundness: 0.1,
                 },
             };
-            shakeTowards: true;
             self.currentContext.simulationTimeOut = 10000;
 
             self.redraw();
@@ -345,7 +346,7 @@ var visjsGraph = (function () {
     self.importGraph = function (str) {
         var edges = json.parse();
         var nodes = visjsGraph.data.nodes.get();
-        var edges = visjsGraph.data.edges.get();
+        edges = visjsGraph.data.edges.get();
         var nodesMap = {};
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
@@ -354,7 +355,7 @@ var visjsGraph = (function () {
             edge.fromNode = nodesMap[edge.from];
             edge.toNode = nodesMap[edge.to];
         });
-        var str = JSON.stringify(edges);
+        str = JSON.stringify(edges);
         common.copyTextToClipboard(str);
     };
 
@@ -368,7 +369,9 @@ var visjsGraph = (function () {
         self.data = null;
     };
 
-    self.drawLegend = function () {};
+    self.drawLegend = function () {
+        // Pass
+    };
 
     self.removeNodes = function (key, value, removeEdges) {
         var nodeIds = [];

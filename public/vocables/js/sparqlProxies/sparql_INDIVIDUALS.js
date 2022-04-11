@@ -93,7 +93,7 @@ var Sparql_INDIVIDUALS = (function () {
         }
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var owlPredicate = "subClassOf";
+        var _owlPredicate = "subClassOf";
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

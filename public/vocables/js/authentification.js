@@ -33,6 +33,7 @@ var authentication = (function () {
                     if (data.authSource == "keycloak") {
                         $("#manage-account").attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
                     } else {
+                        // eslint-disable-next-line no-console
                         console.log("hide account management");
                         $("#manage-account-li").hide();
                     }

@@ -127,7 +127,7 @@ var TE_AssetDataManager = (function () {
         if (assetNode.location1) return assetNode.location1 + " ";
         else return assetNode.FunctionalLocationCode;
 
-        label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3;
+        // label = node.label = assetNode.location1 + "/" + assetNode.location2 + "/" + assetNode.location3;
     };
 
     self.openAssetTreeNode = function (node, _level, _callback) {
@@ -147,7 +147,9 @@ var TE_AssetDataManager = (function () {
         options.onClusterClickFn = function (clusterId, _point, _options) {
             visjsGraph.network.openCluster(clusterId);
         };
-        options.onHoverNodeFn = function (_node, _point, _options) {};
+        options.onHoverNodeFn = function (_node, _point, _options) {
+            // Pass
+        };
         options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
         options.manipulation = {
             enabled: true,

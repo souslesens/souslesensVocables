@@ -1,7 +1,7 @@
 import { Mode, Msg_ } from "./Component/ProfilesTable";
 import { Msg } from "./Admin";
 import React from "react";
-declare function getProfiles(url: string): Promise<Profile[]>;
+declare function getProfiles(): Promise<Profile[]>;
 export declare function saveProfile(body: Profile, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>): Promise<void>;
 declare function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>): Promise<void>;
 declare type Blender = {

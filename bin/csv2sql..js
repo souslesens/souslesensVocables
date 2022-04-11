@@ -4,7 +4,7 @@ var csvCrawler = require("../bin/_csvCrawler.");
 const util = require("./util.");
 var async = require("async");
 var sql = require("./KG/SQLserverConnector.");
-Csv2Sql = {
+var Csv2Sql = {
     readCsv: function (filePath, lines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
             if (err) return callback(err);
@@ -128,36 +128,38 @@ Csv2Sql = {
     },
 };
 var input = "D:\\NLP\\ontologies\\14224\\girassolExtract.csv";
-var input = "D:\\NLP\\ontologies\\14224\\data\\girassol.csv";
+input = "D:\\NLP\\ontologies\\14224\\data\\girassol.csv";
 
 var tableName = "girassol";
 
-var input = "D:\\NLP\\ontologies\\14224\\data\\absheron.txt";
-var tableName = "absheron";
+input = "D:\\NLP\\ontologies\\14224\\data\\absheron.txt";
+tableName = "absheron";
 
-var input = "D:\\NLP\\ontologies\\14224\\mappingISO14224-207.txt";
-var tableName = "mappingISO14224_207";
+input = "D:\\NLP\\ontologies\\14224\\mappingISO14224-207.txt";
+tableName = "mappingISO14224_207";
 
-var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Notifications failure analysis.txt";
-var tableName = "Maintenance_girassol";
+input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Notifications failure analysis.txt";
+tableName = "Maintenance_girassol";
 
-var input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
-var tableName = "Wordorder_girassol";
+input = "D:\\NLP\\ontologies\\14224\\data\\20220111_Girassol SAP Work Orders.txt";
+tableName = "Wordorder_girassol";
 
-var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N.csv";
-var tableName = "moho_north_fl";
+input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N.csv";
+tableName = "moho_north_fl";
 
-var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\systems.txt";
-var tableName = "systems";
+input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\systems.txt";
+tableName = "systems";
 
-var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_instruments.csv";
-var tableName = "instruments";
+input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_instruments.csv";
+tableName = "instruments";
 
-var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_lines.txt";
-var tableName = "lines";
+input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_lines.txt";
+tableName = "lines";
 
 var dbName = "evolen";
 
 Csv2Sql.getColumns(input, tableName, function (err, result) {
-    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (_err, _result) {});
+    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (_err, _result) {
+        // Pass
+    });
 });

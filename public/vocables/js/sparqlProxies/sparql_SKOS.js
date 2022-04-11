@@ -497,7 +497,7 @@ var Sparql_SKOS = (function () {
 
     self.update = function (sourceLabel, triples, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
-        var deleteTriplesStr = "";
+        var _deleteTriplesStr = "";
         var insertTriplesStr = "";
         var subject;
         triples.forEach(function (item, _index) {

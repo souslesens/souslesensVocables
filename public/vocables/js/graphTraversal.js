@@ -30,10 +30,10 @@ var GraphTraversal = (function () {
 
         //inverse
 
-        for (var subject in allClassesMap) {
-            var predicates = allClassesMap[subject];
+        for (const subject in allClassesMap) {
+            predicates = allClassesMap[subject];
 
-            for (var predicate in predicates) {
+            for (const predicate in predicates) {
                 if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     predicates[predicate].forEach(function (object) {
                         routeMap[object].push([subject, 1]);

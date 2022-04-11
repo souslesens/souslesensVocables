@@ -1,31 +1,26 @@
 import { ulid } from "ulid";
 import { Mode, Type, Msg_ } from "./Component/SourcesTable";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
+import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
 
 const endpoint = "/api/v1/sources";
 
+type Response = { message: string; ressources: SourceJson[] };
+
 async function getSources(): Promise<Source[]> {
-    try {
-        const response = await fetch(endpoint);
-        const json = await response.json();
-        return mapSources(json.ressources);
-    } catch (e) {
-        throw e;
-    }
+    const response = await fetch(endpoint);
+    const json = (await response.json()) as Response;
+    return mapSources(json.ressources);
 }
 
 export async function putSources(body: Source[]): Promise<Source[]> {
     const sourcesToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
     const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
-    const json = await response.json();
-    const entries: [string, SourceJson][] = Object.entries(json);
-    const decodedEntries = entries.map(([key, val]) => decodeSource(key, val));
-
-    return decodedEntries;
+    const json = (await response.json()) as Response;
+    return mapSources(json.ressources);
 }
-function mapSources(ressources: any) {
+function mapSources(ressources: SourceJson[]) {
     const sources: [string, SourceJson][] = Object.entries(ressources);
     const mapped_users = sources.map(([key, val]) => decodeSource(key, val));
     return mapped_users;
@@ -38,7 +33,7 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(ressources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
@@ -47,6 +42,7 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
             updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         updateModel({ type: "ServerRespondedWithSources", payload: failure(`Uncatched : ${e}`) });
     }
 }
@@ -54,13 +50,14 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
 export async function deleteSource(source: Source, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${source.id}`, { method: "delete" });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(ressources)) });
         } else {
             updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         updateModel({ type: "ServerRespondedWithSources", payload: failure(`Unhandled Error : ${e}`) });
     }
 }

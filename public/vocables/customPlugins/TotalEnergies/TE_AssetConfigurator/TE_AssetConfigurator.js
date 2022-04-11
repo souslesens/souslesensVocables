@@ -99,7 +99,9 @@ var TE_AssetConfigurator = (function () {
         $("#rightPanelDiv").html("");
         $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/rightPanel.html", function () {
             $("#TE_AssetConfigurator_Tabs").tabs({
-                activat_e: function (_e, _ui) {},
+                activat_e: function (_e, _ui) {
+                    // Pass
+                },
             });
         });
 
@@ -117,7 +119,7 @@ var TE_AssetConfigurator = (function () {
         }
 
         var html = "";
-        for (var key in htmlAspects) {
+        for (const key in htmlAspects) {
             var suffix = "";
             if (key == "Location") suffix = " (point)";
             if (key == "Construction work") suffix = " (site)";
@@ -263,7 +265,7 @@ var TE_AssetConfigurator = (function () {
         node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example;
         node.data.code = code;
         node.data.number = self.getNodeNewSequenceNumber(self.currentSystem, node.data.id);
-        var node = {
+        node = {
             id: visjsId,
             label: code + node.data.number,
             data: node.data,
@@ -345,7 +347,10 @@ var TE_AssetConfigurator = (function () {
                 };
 
             options.dndCtrlFn = function (startNode, endNode, _point) {
-                if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label)) self.createRelation(startNode, endNode, function (_err, _visjsData) {});
+                if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label))
+                    self.createRelation(startNode, endNode, function (_err, _visjsData) {
+                        // Pass
+                    });
             };
             _options.onclickFn = function (node, _point, _options) {
                 MainController.UI.hidePopup("graphPopupDiv");
@@ -359,7 +364,9 @@ var TE_AssetConfigurator = (function () {
             };
             options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
 
-            visjsGraph.draw("graphDiv", visjsData, options, function () {});
+            visjsGraph.draw("graphDiv", visjsData, options, function () {
+                // Pass
+            });
         }
         if (self.currentSystem) self.setSystemTypesSelectVisibility(self.currentSystem.level);
 
@@ -408,7 +415,7 @@ var TE_AssetConfigurator = (function () {
             //edge
             var html = '    <span  class="popupMenuItem"onclick="TE_AssetConfigurator.deleteSelectedEdge()();"> Delete</span>';
         } else {
-            var html =
+            html =
                 '    <span  class="popupMenuItem"onclick="TE_AssetConfigurator.deleteSelectedObject()();"> Delete</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="TE_AssetConfigurator.graphActions.showInfos();">Node infos</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="TE_AssetConfigurator.graphActions.rename();">Rename</span>' +
@@ -430,7 +437,6 @@ var TE_AssetConfigurator = (function () {
     };
 
     self.setSystemTypesSelectVisibilityOld = function () {
-        var currentSystem = 10;
         var currentSystem = null;
         if (self.currentDisplayDivId) currentSystem = self.displayedDivsMap[self.currentDisplayDivId].systemType;
         if (currentSystem) {

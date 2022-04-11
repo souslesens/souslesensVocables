@@ -1,6 +1,6 @@
 var sqlServer = require("./SQLserverConnector.");
 var fs = require("fs");
-var codeRegex = {
+var _codeRegex = {
     "6.2	Main equipment tag structure  (TOTAL-T0000000001) ": /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
     "7.2	Switchgears and MCC compartments tag structure (TOTAL-T0000000003)":
         /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,5})(?<suffix>\w{0,1})-(?<busBar>\w{1,2})(?<column>\d{0,2})(?<row>\d{0,2})$/g,
@@ -11,7 +11,7 @@ var codeRegex = {
     FL: /([^/][\d\w]+)\/*([^/][\d\w]*)\/*([^/][-\d\w]*)\/*([^/][-\d\w]*)/g,
 };
 
-var codeRegex501 = {
+var _codeRegex501 = {
     equipment: /^(?<sector>[\d]{2})[-\s]{0,1}(?<equipmentType>\w{2})[-\s]{0,1}(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<discriminationCode>[\w]{0,4})$/,
     AFtwin: /^(?<sector>[\w\d]{1,2})-*(?<item>\w{1,3})-*(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,2})-*(?<suffix>[\w\d]{0,5})-*.*$/g,
     Equipment: /^(?<sector>[\w\d]{2})-(?<item>\w{1,5})-(?<system>\d)(?<subSystem>\d)(?<seqNum>\d{1,4})(?<suffix>\w{0,1})$/g,
@@ -31,7 +31,7 @@ var codeRegExTEPDK = {
     ExistingFields1: /(?<Location>\w{2,4})-(?<Function>\w{1,5})-(?<MaintenaceCodeNumber>[\d\w]+)/g,
 };
 
-var decodeFunctionalLocation = function () {
+var _decodeFunctionalLocation = function () {
     //  var sql = "SELECT [dbo].[tblTagFormat_UK].name format,[dbo].[tblTagFormatGroup_UK].name meaning,[dbo].[tblTagFormatGroup_UK].[order]  FROM [codification].[dbo].[tblTagFormatGroup_UK],[dbo].[tblTagFormat_UK] where [dbo].[tblTagFormat_UK].ID=TagFormatID order by    [dbo].[tblTagFormat_UK].name ,[dbo].[tblTagFormatGroup_UK].[order]"
     var dbName = "codification";
 
@@ -62,7 +62,7 @@ var decodeFunctionalLocation = function () {
         //   console.log(JSON.stringify(formatMap, null, 2))
     });
 };
-const processBreakDown = function () {
+const _processBreakDown = function () {
     var dbName = "EF_SAP";
 
     var sql = "SELECT Functional_Location\n" + "  FROM [EF_SAP].[dbo].[QUANTUM_BOMST_TPUK_ELFR] ";
@@ -90,7 +90,7 @@ const processBreakDown = function () {
         fs.writeFileSync("D:\\NLP\\ontologies\\codification\\EF_FL.json", JSON.stringify(map, null, 2));
     });
 };
-var processKGtagsBreakDown = function () {
+var _processKGtagsBreakDown = function () {
     var dbName = "MDM_2.3_AFTWIN";
     var sql = "SELECT distinct  " + "      [parentName]\n" + "      ,[childName]\n" + "  FROM [MDM_2.3_AFTWIN].[dbo].[tagBreakdowns]";
 

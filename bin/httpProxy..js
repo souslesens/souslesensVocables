@@ -121,7 +121,7 @@ var httpProxy = {
                     console.log(e);
                     err = e;
                 } finally {
-                    return callback(err, body);
+                    callback(err, body);
                 }
             } else {
                 return callback(null, body);

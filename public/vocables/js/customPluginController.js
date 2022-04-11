@@ -1,4 +1,4 @@
-var CustomPluginController = (function () {
+export var CustomPluginController = (function () {
     var self = {};
     self.rootDir = "customPlugins/";
     self.typeUrisIcons = {};
@@ -24,10 +24,8 @@ var CustomPluginController = (function () {
                             function (tool, callbackEach) {
                                 $.getScript("customPlugins/" + self.pluginDir + "/" + tool.controller + ".js", function (data, _textStatus, _jqxhr) {
                                     Config.tools[tool.label] = tool;
-                                    if (true) {
-                                        var script = document.createElement("script");
-                                        script = eval(data);
-                                    }
+                                    var _script = document.createElement("script");
+                                    _script = eval(data);
                                     tool.controller = eval(tool.controller);
 
                                     callbackEach();
@@ -68,6 +66,7 @@ var CustomPluginController = (function () {
 
         setTimeout(function () {
             Sparql_OWL.getNodesTypes(Lineage_classes.mainSource, nodeIds, function (err, result) {
+                // eslint-disable-next-line no-console
                 if (err) return console.log(err);
                 result.forEach(function (item) {
                     var newNode = { id: item.concept.value };

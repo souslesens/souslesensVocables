@@ -4,7 +4,6 @@ var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
-var UML2OWLparser = require("../../other/UML2OWLparser");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
@@ -148,9 +147,7 @@ var processor = {
                                 return target;
                             }
 
-                            var emptyMappings = 0;
-                            lines.forEach(function (line, indexLine) {
-                                var hasDirectSuperClass = false;
+                            lines.forEach(function (line, _indexLine) {
                                 var subjectStr = null;
                                 var objectStr = null;
 
@@ -222,7 +219,6 @@ var processor = {
                                         objectStr = objectStr.trim();
                                         if (!objectStr || !objectStr.indexOf) {
                                             var x = line;
-                                            var y = item;
                                         }
                                         if (typeof item.o === "function") objectStr = objectStr;
 
@@ -263,7 +259,6 @@ var processor = {
                                                 o: objectStr,
                                             });
                                         } else {
-                                            var x = 5;
                                         }
                                         triples.push({
                                             s: subjectStr,
@@ -304,11 +299,8 @@ var processor = {
                                         }
                                     }
                                 });
-
-                                var x = triples;
                             });
 
-                            var x = triples;
                             callbackSeries();
                         },
                         //write triples
@@ -321,7 +313,6 @@ var processor = {
                                 function (slice, callbackEach) {
                                     processor.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                         if (err) {
-                                            var x = sparqlServerUrl;
                                             return callbackEach(err);
                                         }
                                         totalTriples += result;
@@ -329,14 +320,14 @@ var processor = {
                                         callbackEach();
                                     });
                                 },
-                                function (err) {
+                                function (_err) {
                                     console.log("------------" + filePath + " " + totalTriples);
                                     callbackSeries();
                                 }
                             );
                         },
                     ],
-                    function (err) {
+                    function (_err) {
                         callbackEachMapping();
                     }
                 );
@@ -372,9 +363,8 @@ var processor = {
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
         var params = { query: queryGraph };
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
-                var x = queryGraph;
                 return callback(err);
             }
             totalTriples += triples.length;
@@ -387,7 +377,7 @@ var processor = {
         var query = "clear graph   <" + graphUri + ">";
         var params = { query: query };
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
                 return callback(err);
             }

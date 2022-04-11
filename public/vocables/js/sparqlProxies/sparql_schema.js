@@ -8,6 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_schema = (function () {
     var self = {};
     self.skosUri = "http://www.w3.org/2004/02/skos/core/";
@@ -68,7 +69,6 @@ var Sparql_schema = (function () {
     };
     self.getObjectAnnotations = function (schema, classIds, callback) {
         var fromStr = self.getFromGraphStr(schema.graphUri);
-        var classIdsFilter = Sparql_common.setFilter("classId", classIds);
         var query =
             " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " +
             "PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +

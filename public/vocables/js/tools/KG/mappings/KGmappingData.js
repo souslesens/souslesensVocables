@@ -52,7 +52,7 @@ var KGmappingData = (function () {
             url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
-            success: function (tablesData, textStatus, jqXHR) {
+            success: function (tablesData, _textStatus, _jqXHR) {
                 self.addMappingDataToTableData(self.currentSource, function (err, mappingData) {
                     if (err) return alert(err);
                     var data = {};
@@ -80,7 +80,6 @@ var KGmappingData = (function () {
             self.currentMappingsMap = {};
         }
         var modelJstreeData = [];
-        var existingNodes = {};
         for (var key in data) {
             var parent = "#";
             var nodeData = {};
@@ -107,7 +106,7 @@ var KGmappingData = (function () {
         }
 
         var options = {
-            selectTreeNodeFn: function (event, obj) {
+            selectTreeNodeFn: function (_event, obj) {
                 if (!KGmappings.checkMappingEditionSave()) return;
 
                 if (KGmappings.isShowingAssetGraph) {
@@ -133,7 +132,7 @@ var KGmappingData = (function () {
         var items = {};
         items.addFilteredViewToTable = {
             label: "add filtered view",
-            action: function (e, xx) {
+            action: function (_e, _xx) {
                 // pb avec source
                 KGmappingData.showAddFilteredViewDialog();
             },
@@ -141,14 +140,14 @@ var KGmappingData = (function () {
         return items;
     };
     self.addMappingDataToTableData = function (assetLabel, callback) {
-        KGassetGraph.getBuiltMappingsStats(assetLabel, function (err, builtClasses) {
+        KGassetGraph.getBuiltMappingsStats(assetLabel, function (err, _builtClasses) {
             if (err) return alert(err);
             $.ajax({
                 type: "GET",
                 url: Config.apiUrl + "/kg/assets/" + assetLabel,
                 dataType: "json",
 
-                success: function (result, textStatus, jqXHR) {
+                success: function (result, _textStatus, _jqXHR) {
                     return callback(null, result.data);
 
                     // eslint-disable-next-line no-unreachable
@@ -236,38 +235,27 @@ var KGmappingData = (function () {
             var cols = [];
             var str = "<table><tr>";
             var strTypes = "";
-            var strMappings = "";
-            var strJoins = "";
             data.forEach(function (item) {
                 for (var key in item) {
                     if (cols.indexOf(key) < 0) {
                         cols.push(key);
                         var colId = table + "." + key;
                         var colType = "";
-                        var colMappings = "";
-                        var colJoins = "";
                         if (!self.currentMappingsMap[colId]) self.currentMappingsMap[colId] = { type: "", joins: [], mappings: [] };
                         else {
                             colType = self.currentMappingsMap[colId].type;
-                            colMappings = JSON.stringify(self.currentMappingsMap[colId].mappings);
-                            colJoins = JSON.stringify(self.currentMappingsMap[colId].joins);
                         }
 
                         str += "<td class='dataSample_cell'>" + key + "</td>";
-                        //   strJoins += "<td  class='dataSample_cell dataSample_join'<span id='dataSample_join_" + colId + "'>" + colJoins + "</span> </td>"
 
                         var id = common.encodeToJqueryId("datasample_type_" + colId).toLowerCase();
                         strTypes += "<td  class='dataSample_cell dataSample_type'<span id='" + id + "'>" + colType + "</span> </td>";
-
-                        //   strMappings += "<td  class='dataSample_cell dataSample_mapping'<span id='dataSample_mapping_" + colId + "'>" + colMappings + "</span> </td>"
                     }
                 }
             });
             str += "</tr>";
 
             str += "<tr>" + strTypes + "</tr>";
-            //   str += "<tr>" + strMappings + "</tr>"
-            //   str += "<tr>" + strJoins + "</tr>"
 
             data.forEach(function (item) {
                 str += "<tr>";
@@ -297,28 +285,20 @@ var KGmappingData = (function () {
                         '    <span class="popupMenuItem" onclick="KGmappingData.menuActions.removeMapping();"> remove Mapping</span>' +
                         '<span class="popupMenuItem" onclick="KGmappingData.menuActions.showAdvancedMappingDialog();"> advanced Mapping</span>' +
                         '<span class="popupMenuItem" onclick="KGadvancedMapping.standardizeValues();"> Standardize values</span>';
-                    //   "<span class=\"popupMenuItem\" onclick=\"KGadvancedMapping.executeBulkMappingSequence();\">executeBulkMappingSequence</span>"
 
                     $("#graphPopupDiv").html(html);
                     MainController.UI.showPopup(point, "graphPopupDiv");
                 });
 
-                $(".dataSample_type").bind("click", function (event) {
+                $(".dataSample_type").bind("click", function (_event) {
                     MainController.UI.hidePopup("graphPopupDiv");
 
-                    //  var nodeId = $(this).attr("id").substring(16).replace("__", ".")
                     var nodeId = common.decodeFromJqueryId($(this).attr("id"));
                     nodeId = nodeId.replace("datasample_type_", "");
                     self.currentColumn = nodeId;
-                    /*    var mode = "properties"
-                        if (event.ctrlKey)*/
-                    var mode = "types";
                     $(".dataSample_type").removeClass("datasample_type_selected");
                     $(this).addClass("datasample_type_selected");
                 });
-                /*   $(".dataSample_mapping").bind("click", function () {
-
-                   })*/
             });
         }
 
@@ -339,11 +319,11 @@ var KGmappingData = (function () {
                 url: Config.apiUrl + "?" + params.toString(),
                 dataType: "json",
 
-                success: function (data, textStatus, jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     (self.sampleData[table] = data), displaySampleData(self.sampleData[table]);
                 },
 
-                error: function (err) {
+                error: function (_err) {
                     // Pass
                 },
             });
@@ -353,7 +333,6 @@ var KGmappingData = (function () {
     self.setDataSampleColumntype = function (columnId, typeObj) {
         var jqueryId = "#" + common.encodeToJqueryId("datasample_type_" + columnId).toLowerCase();
         if (!typeObj || typeObj == "") return $(jqueryId).html("");
-        var typeStr = "";
         if (!Array.isArray(typeObj.data)) typeObj.data = [typeObj.data];
 
         if (typeObj.data.length == 1) {
@@ -361,7 +340,7 @@ var KGmappingData = (function () {
         }
 
         var typesStr = "";
-        typeObj.data.forEach(function (item, index) {
+        typeObj.data.forEach(function (item, _index) {
             typesStr += "-" + item.condition + " : " + item.label + "\n";
         });
         typesStr += "";

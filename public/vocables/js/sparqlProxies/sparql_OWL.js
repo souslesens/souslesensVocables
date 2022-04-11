@@ -8,13 +8,11 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_OWL = (function () {
     var self = {};
 
-    var filterCollectionsGenealogyDepth = 4;
     self.ancestorsDepth = 6;
-
-    var elasticUrl = Config.serverUrl;
 
     self.getSourceTaxonomyPredicates = function (source) {
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
@@ -277,7 +275,6 @@ var Sparql_OWL = (function () {
         var url = self.sparql_url + "?format=json&query=";
         self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
         if (self.no_params) url = self.sparql_url;
-        var method = Config.sources[sourceLabel].server_method;
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
@@ -696,7 +693,6 @@ var Sparql_OWL = (function () {
         async.eachSeries(
             slices,
             function (slice, callbackEach) {
-                var fromStr = Sparql_common.getFromStr(source, false, false);
                 var filterStr = Sparql_common.setFilter("concept", slice);
                 var query = " select  distinct *   WHERE { GRAPH ?g{ " + " ?concept rdf:type ?type. " + filterStr + " }}";
 
@@ -767,7 +763,6 @@ var Sparql_OWL = (function () {
     self.getDictionary = function (sourceLabel, options, processor, callback) {
         if (!options) options = {};
         var fromStr = Sparql_common.getFromStr(sourceLabel);
-        var filterStr = "";
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -783,7 +778,7 @@ var Sparql_OWL = (function () {
         var limitSize = 2000;
         var offset = 0;
         async.whilst(
-            function (test) {
+            function (_test) {
                 return resultSize > 0;
             },
             function (callbackWhilst) {
@@ -799,7 +794,7 @@ var Sparql_OWL = (function () {
                     resultSize = result.length;
                     offset += limit;
                     if (processor) {
-                        processor(result, function (err, result) {
+                        processor(result, function (err, _result) {
                             if (err) return callbackWhilst(err);
                             callbackWhilst();
                         });
@@ -899,7 +894,7 @@ var Sparql_OWL = (function () {
             async.eachSeries(
                 slices,
                 function (slice, callbackEach) {
-                    Sparql_generic.insertTriples(source, slice, null, function (err, result) {
+                    Sparql_generic.insertTriples(source, slice, null, function (err, _result) {
                         if (err) return callbackEach(err);
                         MainController.UI.message((totalItems += slice.length) + " done ");
                         callbackEach();

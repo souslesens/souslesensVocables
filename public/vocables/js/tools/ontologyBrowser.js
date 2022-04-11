@@ -21,22 +21,11 @@ var OntologyBrowser = (function () {
     self.queryClassPath = {};
     self.queryLimit = 500;
 
-    var dataTypes = {
-        "http://www.w3.org/2001/XMLSchema#decimal": "number",
-        "http://www.w3.org/2001/XMLSchema#string": "string",
-        "http://www.w3.org/2001/XMLSchema#dateTime": "date",
-    };
-    var operators = {
-        number: ["=", ">", "<", "!=", ">=", "<="],
-        date: ["=", ">", "<", "!=", ">=", "<="],
-        string: ["=", "!=", "startWith", "contains"],
-    };
-
     self.onLoaded = function () {
         // $("#graphDiv").load("snippets/OntologyBrowser.html")
     };
 
-    self.onSourceSelect = function (sourceLabel) {
+    self.onSourceSelect = function (_sourceLabel) {
         return null;
     };
 
@@ -74,21 +63,21 @@ var OntologyBrowser = (function () {
 
         items.addQueryFilter = {
             label: "Add Query Filter...",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 OntologyBrowser.query.addQueryFilterShowDialog();
             },
         };
         items.removeQueryFilter = {
             label: "Remove Query Filter",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 OntologyBrowser.query.removeQueryFilter();
             },
         };
         items.setOptional = {
             label: "Optional",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 OntologyBrowser.query.setOptional();
             },
@@ -96,11 +85,11 @@ var OntologyBrowser = (function () {
 
         return items;
     };
-    self.selectTreeNodeFn = function (xx, obj) {
+    self.selectTreeNodeFn = function (_xx, obj) {
         self.currentTreeNode = obj.node;
     };
-    self.checkTreeNodeFn = function (item, xx) {
-        var range = OntologyBrowser.currentNode.dataProperties[item];
+    self.checkTreeNodeFn = function (_item, _xx) {
+        /*pass*/
     };
 
     self.showProperties = function (classId, classLabel, callback) {
@@ -245,10 +234,10 @@ var OntologyBrowser = (function () {
         $("#graphPopupDiv").html(html);
     };
 
-    self.onNodeClick = function (node, point, event) {
+    self.onNodeClick = function (node, _point, _event) {
         if (!node) return MainController.UI.hidePopup("graphPopupDiv");
 
-        OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, result) {
+        OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, _result) {
             if (err) {
                 self.currentNode = null;
                 return MainController.UI.message(err);
@@ -258,7 +247,7 @@ var OntologyBrowser = (function () {
             self.graphActions.showDataTypeProperties();
         });
     };
-    self.showGraphPopupMenu = function (node, point, event) {
+    self.showGraphPopupMenu = function (node, point, _event) {
         self.setGraphPopupMenus(node);
         self.currentNode = node;
         MainController.UI.showPopup(point, "graphPopupDiv");
@@ -269,8 +258,7 @@ var OntologyBrowser = (function () {
             self.showProperties(OntologyBrowser.currentNode.id, OntologyBrowser.currentNode.text);
         },
         showDataTypeProperties: function () {
-            var schema = Config.sources[MainController.currentSource].schema;
-            Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentNode.id, function (err, result) {
+            Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, OntologyBrowser.currentNode.id, function (_err, result) {
                 OwlSchema.setLabelsFromQueryResult(result);
                 var html = "<B>" + OntologyBrowser.currentNode.label + "</B>" + "<div style='display:flex;flex-direction:column'>";
                 var existingItems = [];
@@ -413,7 +401,6 @@ var OntologyBrowser = (function () {
             $("#OntologyBrowser_dataPropertyFilterDialog").dialog("close");
 
             var node = $("#OntologyBrowser_queryTreeDiv").jstree(true).get_selected(true)[0];
-            var property = node.data;
             var jstreeData = [];
             jstreeData.push({
                 id: "" + Math.random(),
@@ -451,10 +438,6 @@ var OntologyBrowser = (function () {
 
             var classNodeIds = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", "#").children;
 
-            var filters = [];
-            var selectFields = [];
-            var previousClassId = null;
-            var previousClassLabel = null;
             var selectStr = " * ";
             var showIds = $("OntologyBrowser_queryShowItemsIdsCBX").prop("checked");
             var query = "";
@@ -462,7 +445,6 @@ var OntologyBrowser = (function () {
             classNodeIds.forEach(function (classNodeId, index) {
                 // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
 
-                var propertyNodes = [];
                 var classNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId]);
 
                 if (index > 0) {
@@ -552,9 +534,9 @@ var OntologyBrowser = (function () {
             result.head.vars.forEach(function (item) {
                 cols.push({ title: item });
             });
-            result.results.bindings.forEach(function (item, indexRow) {
+            result.results.bindings.forEach(function (item, _indexRow) {
                 var line = [];
-                result.head.vars.forEach(function (col, indexCol) {
+                result.head.vars.forEach(function (col, _indexCol) {
                     if (item[col]) line.push(item[col].value);
                     else line.push("");
                 });

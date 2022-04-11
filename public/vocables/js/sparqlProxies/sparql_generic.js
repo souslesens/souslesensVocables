@@ -24,15 +24,7 @@ var Sparql_generic = (function () {
                 defaultPredicates = Sparql_SKOS.defaultPredicates;
             }
 
-            var graphUri = "";
             var predicates = "";
-            var prefixesStr = "";
-            var fromStr = "";
-            var topConceptFilter = "";
-            var broaderPredicate = "";
-            var prefLabelPredicate = "";
-            var limit = "";
-            var url = "";
 
             var obj = {};
             var source = Config.sources[sourceLabel];
@@ -517,8 +509,6 @@ WHERE {
                 function (callbackSeries) {
                     self.getNodeInfos(fromSourceLabel, sourceIds, null, function (err, result) {
                         if (err) return callbackSeries(err);
-                        var subject, prop, object;
-                        var valueStr = "";
 
                         result.forEach(function (item) {
                             if (options.setSubjectFn) options.setSubjectFn(item);
@@ -608,7 +598,6 @@ WHERE {
         _fields.forEach(function (_field) {
             bindings.forEach(function (item) {
                 for (var i = 0; i < 20; i++) {
-                    if (i == 5) var x = 9;
                     var iStr = "" + i;
                     if (i == 0) iStr = "";
                     var field = _field + "" + iStr;
@@ -672,7 +661,6 @@ WHERE {
                     var limitSize = 2000;
                     var offset = 0;
                     var fromStr = Sparql_common.getFromStr(sourceLabel);
-                    var filterStr = "";
                     var query =
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -733,7 +721,6 @@ WHERE {
                     });
 
                     var x = Object.keys(allClassesMap).length;
-                    var y = Object.keys(parentChildrenMap).length;
 
                     taxonomy = {
                         id: sourceLabel,
@@ -746,8 +733,6 @@ WHERE {
                     topClasses.forEach(function (item) {
                         parentChildrenMap[sourceLabel].push(item.topConcept.value);
                     });
-
-                    var count = 0;
 
                     function recurseChildren(str, classId) {
                         if (parentChildrenMap[classId]) {
@@ -764,8 +749,6 @@ WHERE {
                     recurseChildren("", sourceLabel);
 
                     //  recurseChildren("", "http://w3id.org/readi/rdl/CFIHOS-30000311")
-
-                    var x = allClassesMap;
 
                     callbackSeries();
                 },
@@ -928,7 +911,6 @@ WHERE {
                     for (var key in allClassesMap) {
                         recurse(key, allClassesMap[key].parents);
                     }
-                    var x = allClassesMap;
                     //format parents
                     for (var key in allClassesMap) {
                         var obj = allClassesMap[key];

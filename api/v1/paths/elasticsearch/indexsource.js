@@ -6,7 +6,7 @@ module.exports = function () {
         POST,
     };
 
-    function POST(req, res, next) {
+    function POST(req, res, _next) {
         dictionariesManager.indexSource(req.body.name, req.body.data, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });

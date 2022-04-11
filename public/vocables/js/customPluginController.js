@@ -12,7 +12,7 @@ var CustomPluginController = (function () {
                 url: "/getJsonFile",
                 data: { filePath: self.rootDir + self.pluginDir + "/manifest.json" },
                 dataType: "json",
-                success: function (data, textStatus, jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     if (data.uri_icons) {
                         for (var uri in data.uri_icons) {
                             self.typeUrisIcons[uri] = data.uri_icons[uri];
@@ -22,7 +22,7 @@ var CustomPluginController = (function () {
                         async.eachSeries(
                             data.tools,
                             function (tool, callbackEach) {
-                                $.getScript("customPlugins/" + self.pluginDir + "/" + tool.controller + ".js", function (data, textStatus, jqxhr) {
+                                $.getScript("customPlugins/" + self.pluginDir + "/" + tool.controller + ".js", function (data, _textStatus, _jqxhr) {
                                     Config.tools[tool.label] = tool;
                                     if (true) {
                                         var script = document.createElement("script");

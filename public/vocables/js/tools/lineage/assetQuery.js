@@ -16,12 +16,9 @@ var KGquery = (function () {
     self.queryClassPath = {};
 
     self.showJstreeNodeChildren = function (jstreeTargetDiv, node) {
-        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, { propertiesStats: false }, function (err, result) {
-            var existingsNodes = { [node.data.id]: 1 };
-
+        return Sparql_INDIVIDUALS.getObjectProperties(node.data.source, node.data.id, { propertiesStats: false }, function (_err, result) {
             var jstreeData = [];
             var existingNodes = {};
-            var propIdsMap = {};
             result.forEach(function (item) {
                 if (!existingNodes[item.prop.value]) {
                     var propId = item.prop.value + "_" + common.getRandomHexaId(3);
@@ -136,7 +133,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 //matching object label to filter Quantum item mapping source label
                 function (callbackSeries) {
                     if (Config.sources[MainController.currentSource].KGqueryController != "remoteSQL") return callbackSeries();
-                    var sourceObjs = [];
 
                     self.getMatchingLabels([node], "QUANTUM", function (err, result) {
                         if (err) return callbackSeries(err);
@@ -178,7 +174,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     var existingItems = [];
                     data.forEach(function (item) {
                         var range = null;
-                        var rangeLabel = null;
                         var propLabel = null;
                         if (item.propLabel) {
                             propLabel = item.propLabel.value;
@@ -216,7 +211,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                        MainController.UI.showPopup(point, "graphPopupDiv")*/
                 },
             ],
-            function (err) {
+            function (_err) {
                 // pass
             }
         );
@@ -229,21 +224,21 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
         items.addQueryFilter = {
             label: "Add Query Filter...",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 KGquery.query.addQueryFilterShowDialog();
             },
         };
         items.removeQueryFilter = {
             label: "Remove Query Filter",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 KGquery.query.removeQueryFilter();
             },
         };
         items.setOptional = {
             label: "Optional",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 KGquery.query.setOptional();
             },
@@ -251,7 +246,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
         return items;
     };
-    self.selectTreeNodeFn = function (xx, obj) {
+    self.selectTreeNodeFn = function (_xx, obj) {
         self.currentTreeNode = obj.node;
     };
     self.actions = {
@@ -262,8 +257,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
             self.showProperties(KGquery.currentProperty.id, KGquery.currentProperty.text);
         },
         showDataProperties: function () {
-            var schema = Config.sources[MainController.currentSource].schema;
-            Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, KGquery.currentProperty.id, function (err, result) {
+            Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema, KGquery.currentProperty.id, function (_err, result) {
                 OwlSchema.setLabelsFromQueryResult(result);
                 var html = "<B>" + KGquery.currentProperty.label + "</B>" + "<div style='display:flex;flex-direction:column'>";
                 var existingItems = [];
@@ -329,7 +323,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
         addPropertiesToTree: function (div, all) {
             var props = [];
             if (all) {
-                $(".KGquery_existsInRemoteSource").each(function (item) {
+                $(".KGquery_existsInRemoteSource").each(function (_item) {
                     var str = decodeURIComponent($(this).attr("id"));
                     var array = str.split("|");
                     props.push(self.currentNode.properties[array[1]]);
@@ -409,7 +403,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
         var selectStr = "?targetId  ?sourceLabel ";
         var fromStr = "";
 
-        var graphUri = Config.sources[targetSource].graphUri;
         fromStr = Sparql_common.getFromStr(targetSource);
 
         var query =
@@ -463,7 +456,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 $("#KGquery_dataPropertyFilterDialog").dialog("close");
 
                 var node = $("#KGquery_queryTreeDiv").jstree(true).get_selected(true)[0];
-                var property = node.data;
                 var jstreeData = [];
                 jstreeData.push({
                     id: "" + Math.random(),
@@ -506,10 +498,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 var classNodeIds = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", "#").children;
 
-                var filters = [];
-                var selectFields = [];
-                var previousClassId = null;
-                var previousClassLabel = null;
                 var selectStr = " * ";
                 var showIds = $("KGquery_queryShowItemsIdsCBX").prop("checked");
                 var query = "";
@@ -517,7 +505,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 classNodeIds.forEach(function (classNodeId, index) {
                     // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
 
-                    var propertyNodes = [];
                     var classNode = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", [classNodeId]);
 
                     if (index > 0) {
@@ -604,9 +591,9 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     result.head.vars.forEach(function (item) {
                         cols.push({ title: item });
                     });
-                    result.results.bindings.forEach(function (item, indexRow) {
+                    result.results.bindings.forEach(function (item, _indexRow) {
                         var line = [];
-                        result.head.vars.forEach(function (col, indexCol) {
+                        result.head.vars.forEach(function (col, _indexCol) {
                             if (item[col]) line.push(item[col].value);
                             else line.push("");
                         });
@@ -630,24 +617,8 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                     var classNodeIds = $("#KGquery_queryTreeDiv").jstree(true).get_node("#").children;
 
-                    var filters = [];
-                    var selectFields = [];
-                    var previousClassId = null;
-                    var previousClassLabel = null;
-                    var selectStr = " * ";
-                    var showIds = $("KGquery_queryShowItemsIdsCBX").prop("checked");
-                    var query = "";
-                    if (!showIds) selectStr = " ";
-
-                    var formatVariableName = function (str) {
-                        return str.replace(/ /g, "_");
-                    };
-
-                    classNodeIds.forEach(function (classNodeId, index) {
+                    classNodeIds.forEach(function (classNodeId, _index) {
                         var props = common.jstree.getjsTreeNodes("KGquery_queryTreeDiv", false, [classNodeId]);
-
-                        var labels = [];
-                        var sourceObjs = [];
 
                         props.forEach(function (prop) {
                             if (prop.data.existsInRemoteSource) {
@@ -666,12 +637,12 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     });
                 }
 
-                self.query.queryRemoteAssetSource(remoteObjs, function (err, result) {
+                self.query.queryRemoteAssetSource(remoteObjs, function (err, _result) {
                     if (err) return MainController.UI.message(err);
                 });
             },
 
-            queryRemoteAssetSource: function (quantumObjs, callback) {
+            queryRemoteAssetSource: function (quantumObjs, _callback) {
                 var payload = {};
                 payload.KGquery = true;
                 payload.asset = $("#KGquery_assetObjectSelect").val();
@@ -686,7 +657,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                              request.setRequestHeader('Age', '10000');
                          },*/
 
-                    success: function (data, textStatus, jqXHR) {
+                    success: function (data, _textStatus, _jqXHR) {
                         $("#mainDialogDiv").dialog("open");
 
                         var dataSet = [];
@@ -700,10 +671,10 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                             colNames.push(key);
                         }
 
-                        data.forEach(function (item, index) {
+                        data.forEach(function (item, _index) {
                             var line = [];
 
-                            colNames.forEach(function (col, index) {
+                            colNames.forEach(function (col, _index) {
                                 line.push(item[col] || "");
                             });
                             dataSet.push(line);

@@ -28,7 +28,7 @@ module.exports = function () {
         });
     }
     async function DELETE(req, res, _next) {
-        const profiles = await readFile(profilesJSON).catch((_err) => res.status(500).json(e));
+        const profiles = await readFile(profilesJSON).catch((_err) => res.status(500).json(_err));
         const oldProfiles = JSON.parse(profiles);
         const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles;
         const successfullyDeleted = JSON.stringify(remainingProfiles) !== JSON.stringify(oldProfiles);

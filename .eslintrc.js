@@ -1,5 +1,3 @@
-const { read } = require("xlsx");
-
 module.exports = {
     parser: "@typescript-eslint/parser",
     settings: {
@@ -11,10 +9,11 @@ module.exports = {
 
     rules: {
         "no-console": ["error", { allow: ["error", "warn"] }],
+        "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true, varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
     },
     overrides: [
         {
-            files: ["scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js"],
+            files: ["app.js", "scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js"],
             env: {
                 node: true,
             },
@@ -29,6 +28,7 @@ module.exports = {
                 $: "readable",
                 Admin: "readable",
                 Blender: "readable",
+                C2S: "readable",
                 Clipboard: "readable",
                 Collection: "readable",
                 Config: "readable",
@@ -36,6 +36,7 @@ module.exports = {
                 ElasticSearchProxy: "readable",
                 Evaluate: "readable",
                 Export: "readable",
+                Genealogy: "readable",
                 GraphController: "readable",
                 GraphFilter: "readable",
                 GraphTraversal: "readable",
@@ -49,6 +50,7 @@ module.exports = {
                 KGbrowserQuery: "readable",
                 KGbuild: "readable",
                 KGcommon: "readable",
+                KGcreator: "readable",
                 KGmappingData: "readable",
                 KGmappingGraph: "readable",
                 KGmappings: "readable",
@@ -65,16 +67,25 @@ module.exports = {
                 SearchUtil: "readable",
                 SourceBrowser: "readable",
                 SourceEditor: "readable",
+                SourceMatcher: "readable",
                 Sparql_INDIVIDUALS: "readable",
                 Sparql_ISO_15926: "readable",
+                Sparql_ISO_15926_part4: "readable",
                 Sparql_OWL: "readable",
                 Sparql_SKOS: "readable",
                 Sparql_common: "readable",
+                Sparql_endpoint: "readable",
                 Sparql_generic: "readable",
                 Sparql_proxy: "readable",
                 Sparql_schema: "readable",
+                Sparql_WORDNET: "readable",
+                SQLquery: "readable",
                 Standardizer: "readable",
                 Sunburst: "readable",
+                TE_14224_browser: "readable",
+                TE_AssetConfigurator: "readable",
+                TE_AssetDataManager: "readable",
+                TE_SqlTojstreeConnectors: "readable",
                 TextAnnotator: "readable",
                 TreeController: "readable",
                 Treemap: "readable",
@@ -84,6 +95,7 @@ module.exports = {
                 arcTween: "readable",
                 async: "readable",
                 authentication: "readable",
+                blinkVisjsNode: "readable",
                 broadcastChannel: "readable",
                 buildPaths: "readable",
                 call: "readable",
@@ -96,6 +108,7 @@ module.exports = {
                 context: "readable",
                 d3: "readable",
                 dataTable: "readable",
+                defaultNodeShape: "readable",
                 dialogLarge: "readable",
                 displaySampleData: "readable",
                 domain: "readable",
@@ -125,6 +138,7 @@ module.exports = {
                 query: "readable",
                 radius: "readable",
                 rangeSource: "readable",
+                rightPanelWidth: "readable",
                 showOlderGenealogyOnly: "readable",
                 socket: "readable",
                 source: "writable",
@@ -137,12 +151,17 @@ module.exports = {
                 toutlesensController: "readable",
                 typeObj: "readable",
                 updateArc: "readable",
+                vis: "readable",
                 visJsDataProcessor: "readable",
                 visjsGraph: "readable",
                 w: "readable",
                 yasr: "readable",
             },
-            rules: {},
+            rules: {
+                "no-constant-condition": "warn",
+                "no-empty-function": "warn",
+                "no-unreachable": "warn",
+            },
             env: { browser: true },
         },
         {
@@ -158,6 +177,7 @@ module.exports = {
             parserOptions: {
                 ecmaVersion: 2018,
                 sourceType: "module",
+                tsconfigRootDir: __dirname,
                 project: "mainapp/tsconfig.json",
                 ecmaFeatures: {
                     jsx: true,
@@ -173,7 +193,6 @@ module.exports = {
                         },
                     },
                 ],
-                "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true, varsIgnorePattern: "^_" }],
                 "@typescript-eslint/explicit-function-return-type": "off",
                 "@typescript-eslint/no-explicit-any": "off",
                 "@typescript-eslint/ban-types": [

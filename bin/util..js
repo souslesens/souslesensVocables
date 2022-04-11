@@ -205,7 +205,6 @@ var util = {
     },
     getCsvFileSeparator: function (file, callback) {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
-        var separator = ",";
         var line = "";
         var separators = [",", "\t", ";"];
         readStream
@@ -230,7 +229,6 @@ var util = {
                 }
             })
             .on("end", function () {
-                var xx = 3;
                 return;
             })
             .on("close", function () {
@@ -293,7 +291,6 @@ var util = {
         var dirFilesMap = {};
         var message = "";
         if (!options) options = {};
-        var rootDirName = path.basename(dirPath);
 
         function recurse(parent) {
             parent = path.normalize(parent);
@@ -319,7 +316,6 @@ var util = {
                         continue;
                     }
                     if (options.maxDocSize && stats.size > maxDocSize) {
-                        message += "!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ";
                         continue;
                     }
                     if (!dirFilesMap[parent]) dirFilesMap[parent] = [];
@@ -335,8 +331,6 @@ var util = {
         }
 
         recurse(dirPath, dirPath);
-        var x = dirsArray;
-        var y = dirFilesMap;
 
         return callback(null, dirFilesMap);
     },

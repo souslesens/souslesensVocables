@@ -8,13 +8,11 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_INDIVIDUALS = (function () {
     var self = {};
 
-    var filterCollectionsGenealogyDepth = 4;
     self.ancestorsDepth = 6;
-
-    var elasticUrl = Config.serverUrl;
 
     self.getTopConcepts = function (sourceLabel, options, callback) {
         if (!options) options = {};
@@ -96,7 +94,6 @@ var Sparql_INDIVIDUALS = (function () {
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var owlPredicate = "subClassOf";
-        if (options.owlType) owlPredicate = options.owlType;
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -118,7 +115,6 @@ var Sparql_INDIVIDUALS = (function () {
         query += " limit " + limit;
 
         var url = self.sparql_url + "?format=json&query=";
-        var method = Config.sources[sourceLabel].server_method;
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);

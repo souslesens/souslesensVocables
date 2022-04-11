@@ -26,7 +26,7 @@ mappingsMap = {
         type: "owl:Class",
         fileName: "D:\\NLP\\ontologies\\14224\\classes_3.txt",
         transform: {
-            label2: function (value, role, prop) {
+            label2: function (value, _role, _prop) {
                 return "Pack-" + value;
             },
         },
@@ -49,7 +49,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\classes_4.txt",
         lookups: [],
         transform: {
-            label2: function (value, role, prop) {
+            label2: function (value, _role, _prop) {
                 return "Equip-" + value;
             },
         },
@@ -70,7 +70,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\functionalObjects.txt",
         lookups: [],
         transform: {
-            xx: function (value, role, prop) {
+            xx: function (value, _role, _prop) {
                 return "Class-" + value;
             },
         },
@@ -91,7 +91,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\components.txt",
         lookups: [],
         transform: {
-            xx: function (value, role, prop) {
+            xx: function (value, _role, _prop) {
                 return "Class-" + value;
             },
         },

@@ -256,9 +256,9 @@ if (true) {
 
     //   var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
 
-    processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
+    processor.clearGraph(graphUri, sparqlServerUrl, function (err, _result) {
         if (err) return console.log(err);
-        processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, result) {
+        processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, _result) {
             if (err) return console.log(err);
             processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
         });

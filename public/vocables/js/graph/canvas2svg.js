@@ -1224,7 +1224,6 @@
         }
 
         parent = this.__closestGroupOrSvg();
-        currentElement = this.__currentElement;
         var translateDirective = "translate(" + dx + ", " + dy + ")";
         if (image instanceof ctx) {
             //canvas2svg mock canvas context. In the future we may want to clone nodes instead.
@@ -1299,7 +1298,7 @@
     /**
      * Generates a pattern tag
      */
-    ctx.prototype.createPattern = function (image, repetition) {
+    ctx.prototype.createPattern = function (image, _repetition) {
         var pattern = this.__document.createElementNS("http://www.w3.org/2000/svg", "pattern"),
             id = randomString(this.__ids),
             img;

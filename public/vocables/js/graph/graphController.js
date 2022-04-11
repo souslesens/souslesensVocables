@@ -24,11 +24,9 @@ var graphController = (function () {
     self.sliderIndexMax = 200;
 
     self.drawEntitiesGraph = function (data) {
-        var xx = data;
         var nodes = [];
         var edges = [];
         var nodeMap = {};
-        var max = data.max;
         var rootEntityColors = {};
         var colorIndex = 0;
         data.labels.forEach(function (label, rowIndex) {
@@ -92,7 +90,6 @@ var graphController = (function () {
 
     self.showGraph = function () {
         var nodes = [];
-        var edges = [];
 
         context.currentHits.forEach(function (hit) {
             var node = {
@@ -113,7 +110,7 @@ var graphController = (function () {
         visjsGraph.draw("graphDiv", { nodes: nodes, edges: [] });
     };
 
-    self.onNodeClicked = function (node, point, options) {
+    self.onNodeClicked = function (node, _point, _options) {
         var docIds = [];
         node.attrs.documents.forEach(function (doc) {
             docIds.push(doc.id);
@@ -131,7 +128,7 @@ var graphController = (function () {
             url: appConfig.elasticUrl,
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 var hits = data.hits.hits;
                 self.addEntityHitsToGraph(hits);
             },
@@ -141,7 +138,7 @@ var graphController = (function () {
         });
     };
 
-    self.onEdgeClicked = function (edge, point, options) {
+    self.onEdgeClicked = function (edge, _point, _options) {
         var fromEntity = edge.fromNode.label;
         var toEntity = edge.toNode.label;
         var str = "<b>" + fromEntity + " / <br>" + toEntity + "<br> </b>";

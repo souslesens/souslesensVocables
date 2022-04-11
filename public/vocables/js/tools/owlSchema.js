@@ -7,7 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var OwlSchema = (function () {
     var self = {};
     self.currentSourceSchema = null;
@@ -69,8 +69,6 @@ var OwlSchema = (function () {
 
         // for OWL   and not SKOS
         if (!sourceSchema) {
-            //    console.log(sourceLabel)
-            if (!Config.sources[sourceLabel]) var x = 3;
             sourceSchema = {
                 sparql_url: Config.sources[sourceLabel].sparql_server.url,
                 graphUri: Config.sources[sourceLabel].graphUri,
@@ -169,7 +167,7 @@ var OwlSchema = (function () {
                             callbackSeries();
                         });
                     } else if (schemaType == "OWL") {
-                        Sparql_OWL.schema.getObjectProperties(classId, function (err, result) {
+                        Sparql_OWL.schema.getObjectProperties(classId, function (_err, _result) {
                             return null;
                         });
                     } else {
@@ -208,9 +206,7 @@ var OwlSchema = (function () {
                 },
                 function (callbackSeries) {
                     if (schemaType == "SKOS") {
-                        var properties = Object.keys(self.currentSourceSchema.classes[classId].objectProperties);
                         Sparql_schema.getObjectRangeProperties(self.currentSourceSchema, classId, function (err, result) {
-                            //  Sparql_schema.getPropertiesRangeAndDomain(self.currentSourceSchema, properties, null,{mandatoryDomain: 1}, function (err, result) {
                             if (err) return callbackSeries(err);
                             self.setLabelsFromQueryResult(result);
                             result.forEach(function (item) {
@@ -220,7 +216,7 @@ var OwlSchema = (function () {
                             callbackSeries();
                         });
                     } else if (schemaType == "OWL") {
-                        Sparql_OWL.schema.getObjectProperties(function (err, result) {
+                        Sparql_OWL.schema.getObjectProperties(function (_err, _result) {
                             return null;
                         });
                     } else {

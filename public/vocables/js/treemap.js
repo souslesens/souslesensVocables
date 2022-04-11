@@ -1714,7 +1714,7 @@ export var TreeMap = (function () {
                     })
                     .attr("dx", "6") // margin
                     .attr("dy", ".35em") // vertical-align
-                    .text(function (d, i) {
+                    .text(function (d, _i) {
                         return d.name;
                     });
 
@@ -1816,7 +1816,7 @@ export var TreeMap = (function () {
                         .attr("dx", "6") // margin
                         .attr("dy", ".35em") // vertical-align
                         .filter(filter_min_arc_size_text)
-                        .text(function (d, i) {
+                        .text(function (d, _i) {
                             return d.name;
                         })
                         .transition()

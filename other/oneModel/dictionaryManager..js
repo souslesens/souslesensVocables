@@ -7,8 +7,6 @@ var DictionaryManager = {
         var sparql_server_url = "http://51.178.139.80:8890/sparql";
         var dictionaryGraphUri = "http://vocables.souslesens.org/dictionary/";
 
-        var offset = 0;
-        var fecthSize = 100000;
         var resultSize = 1;
         var totalLines = 0;
         async.whilst(
@@ -73,13 +71,13 @@ var DictionaryManager = {
                     });
                 });
             },
-            function (err) {
+            function (_err) {
                 console.log("ALL DONE" + totalLines);
             }
         );
     },
 
-    getDictionaryEntries: function (words, graphUris, options, callback) {
+    getDictionaryEntries: function (_words, _graphUris, _options, _callback) {
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +

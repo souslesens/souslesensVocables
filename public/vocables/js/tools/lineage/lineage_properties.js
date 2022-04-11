@@ -85,15 +85,6 @@ Lineage_properties = (function () {
                         Lineage_common.jstree.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
                     },
                 };
-                /*   items.editProperty = {
-                           label: "edit property",
-                           action: function (e) {// pb avec source
-
-                               Lineage_properties.editProperty(self.currentTreeNode)
-
-                           }
-
-                       }*/
             }
         }
 
@@ -180,7 +171,6 @@ Lineage_properties = (function () {
                 if (err) return callback(err);
                 var distinctIds = {};
                 var jstreeData = [];
-                var parent = "#";
                 result.forEach(function (item) {
                     if (!distinctIds[item.property.value]) {
                         distinctIds[item.property.value] = 1;
@@ -294,8 +284,6 @@ Lineage_properties = (function () {
             var color = Lineage_classes.getSourceColor(source);
             //  console.log(JSON.stringify(result, null, 2))
             result.forEach(function (item) {
-                var size = Lineage_classes.defaultShapeSize;
-
                 if (!existingNodes[item.prop.value]) {
                     existingNodes[item.prop.value] = 1;
                     visjsData.nodes.push({
@@ -403,7 +391,6 @@ Lineage_properties = (function () {
     self.drawPredicateTriples = function (predicate) {
         if (!predicate) predicate = self.currentTreeNode;
         if (!predicate) return alert("select a property first");
-        var graphUri = Config.sources[Lineage_common.currentSource].graphUri;
         var sparql_url = Config.sources[Lineage_common.currentSource].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(Lineage_common.currentSource);
 
@@ -511,7 +498,6 @@ Lineage_properties = (function () {
         OwlSchema.initSourceSchema(source, function (err, schema) {
             if (err) return MainController.UI.message(err);
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
-            var options = { mandatoryDomain: 1 };
 
             Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, { mandatoryDomain: 0 }, function (err, result) {
                 if (err) return MainController.UI.message(err);
@@ -715,8 +701,6 @@ Lineage_properties = (function () {
                 }
                 visjsGraph.network.fit();
                 self.graphInited = true;
-                /*  var html = JSON.stringify(self.properties[propertyId], null, 2)
-                      $("#LineageProperties_propertyInfosDiv").html(html);*/
             });
         });
     };
@@ -761,7 +745,6 @@ Lineage_properties = (function () {
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1;
-                            //  item.parent = sourceLabel
                             jstreeData.push(item);
                         }
                     });

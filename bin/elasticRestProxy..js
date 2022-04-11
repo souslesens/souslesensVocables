@@ -15,7 +15,6 @@ const ConfigManager = require("./configManager.");
 const async = require("async");
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 
-const debug = true;
 var elasticRestProxy = {
     elasticUrl: null,
     getElasticUrl: function () {
@@ -77,7 +76,7 @@ var elasticRestProxy = {
         };
 
         //   console.log(ndjson);
-        request(options, function (error, response, body) {
+        request(options, function (error, response, _body) {
             if (error) {
                 return callback(error, null);
             }
@@ -86,7 +85,6 @@ var elasticRestProxy = {
                 return callback(json.error.reason, null);
             }
             var responses = json.responses;
-            var totalDocsAnnotated = 0;
             /*  responses.forEach(function (response, responseIndex) {
 
                   var hits = response.hits.hits;
@@ -138,7 +136,7 @@ var elasticRestProxy = {
             url: config.indexation.elasticUrl + config.general.indexName + "/_refresh",
         };
 
-        request(options, function (error, response, body) {
+        request(options, function (error, _response, _body) {
             if (error) {
                 return callback(error);
             }
@@ -184,7 +182,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName + "/",
                     };
-                    request(options, function (error, response, body) {
+                    request(options, function (error, response, _body) {
                         if (error) return callbackSeries(error);
                         if (response.statusCode == 200) indexExists = true;
                         callbackSeries();
@@ -202,9 +200,8 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    request(options, function (error, response, body) {
+                    request(options, function (error, _response, _body) {
                         if (error) return callbackSeries(error);
-                        var message = "delete index :" + indexName;
                         callbackSeries();
                     });
                 },

@@ -54,7 +54,6 @@ var skosToElastic = {
                             for (var i = 0; i <= index; i++) {
                                 sep += "_";
                             }
-                            if (ancestor.indexOf("GROUP IIB") > -1) var x = 3;
                             ancestors = ancestors + sep + ancestorsIdsArray2[index] + ";" + ancestor;
                         });
                         newJson.push({
@@ -94,7 +93,7 @@ var skosToElastic = {
             [
                 function (callbackSeries) {
                     if (!createIndex) return callbackSeries();
-                    indexer.deleteIndex(indexconfig, function (err, result) {
+                    indexer.deleteIndex(indexconfig, function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -188,7 +187,7 @@ var skosToElastic = {
                         ndjsonStr += line; // line is a line of stringified JSON with a newline delimiter at the end
                     });
 
-                    hitsIndexSource.forEach(function (item, index) {
+                    hitsIndexSource.forEach(function (item, _index) {
                         //   var label = item._source.concept;
                         var label = item._source.name;
 
@@ -225,7 +224,7 @@ var skosToElastic = {
                         url: "http://localhost:9200/" + "_msearch",
                     };
 
-                    request(options, function (error, response, body) {
+                    request(options, function (error, response, _body) {
                         if (error) return callbackSeries(error);
                         var json = JSON.parse(response.body);
                         if (json.error) {
@@ -233,9 +232,7 @@ var skosToElastic = {
                         }
                         var responses = json.responses;
 
-                        if (!responses || !responses.forEach) var x = 3;
-
-                        responses.forEach(function (response, responseIndex) {
+                        responses.forEach(function (response, _responseIndex) {
                             if (response.error) {
                                 hitsIndexTarget.push({ _source: {} });
                                 return; //  return callbackSeries(response.error.root_cause)
@@ -248,14 +245,12 @@ var skosToElastic = {
 
                 //process common
                 function (callbackSeries) {
-                    var targetHitsIds = [];
                     hitsIndexTarget.forEach(function (hits, index) {
                         if (hits.length > 0) {
                             commonConcepts.push({
                                 source: hitsIndexSource[index],
                                 target: hitsIndexTarget[index],
                             });
-                            var targetIds = [];
                             //    console.log(hitsIndexSource[index]._source.concept+"  "+hitsIndexTarget[index]._source.path)
                             /*    hits.forEach(function (hit) {
                                 targetIds.push({
@@ -280,7 +275,6 @@ var skosToElastic = {
 
     compareThesaurus: function (indexSource, indexTarget, callback) {
         var hitsIndexSource = [];
-        var hitsIndexTarget = [];
         var commonConcepts = [];
         var totalHits = 0;
         var scroll_id = "";
@@ -354,7 +348,7 @@ var skosToElastic = {
                                     });
                                 });
                             },
-                            function (err, n) {
+                            function (err, _n) {
                                 if (err) return callbackSeries(err);
                                 fs.writeFileSync("D:\\NLP\\LOC\\commonConcepts_" + indexTarget + ".json", JSON.stringify(commonConcepts, null, 2));
                                 callbackSeries();
@@ -434,7 +428,7 @@ if (false) {
     //  var thesaurusList = [ "D:\\NLP\\Tulsa_EARTH AND SPACE CONCEPTS.rdf"]
     //  var thesaurusList = ["D:\\NLP\\unesco.rdf"]
     //   var thesaurusList = [   "D:\\NLP\\rdfs\\Tulsa_MATERIAL.rdf",]
-    skosToElastic.load(thesaurusList, function (err, result) {
+    skosToElastic.load(thesaurusList, function (err, _result) {
         if (err) return console.log(err);
         return console.log("done");
     });
@@ -442,6 +436,5 @@ if (false) {
 if (false) {
     skosToElastic.compareThesaurus("libraryofcongress", "flat_thesaurus", function (err, result) {
         //  skosToElastic.compareThesaurus("termscience_all", "flat_thesaurus", function (err, result) {
-        var x = result;
     });
 }

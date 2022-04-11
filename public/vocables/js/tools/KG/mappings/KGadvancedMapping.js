@@ -26,7 +26,7 @@ var KGadvancedMapping = (function () {
             };
             KGbrowserCustom.initsuperClassesPalette();
             var typesMap = {};
-            data.forEach(function (item, index) {
+            data.forEach(function (item, _index) {
                 if (!typesMap[item.type]) {
                     typesMap[item.type] = [];
                 }
@@ -94,7 +94,7 @@ var KGadvancedMapping = (function () {
                 return MainController.UI.message(err.responseText);
             }
 
-            data.forEach(function (item, index) {
+            data.forEach(function (item, _index) {
                 if (item.term) {
                     if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]) self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {};
                     if (!self.referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
@@ -109,7 +109,7 @@ var KGadvancedMapping = (function () {
         });
     };
 
-    self.getColumnDistinctValues = function (columnClassId, callback) {
+    self.getColumnDistinctValues = function (_columnClassId, callback) {
         var obj = common.deconcatSQLTableColumn(KGmappingData.currentColumn);
         var column = obj.column;
         var table = "[" + KGmappingData.currentKGdataSource.dbName + "]." + obj.table;
@@ -152,10 +152,10 @@ var KGadvancedMapping = (function () {
         if (type != "REFERENCE" && type != "CANDIDATE") {
             return;
         }
-        KGadvancedMapping.loadReferenceDictionary(columnClassId, true, function (err, result) {
+        KGadvancedMapping.loadReferenceDictionary(columnClassId, true, function (err, _result) {
             if (err) alert(err);
 
-            self.getColumnDistinctValues(columnClassId, function (err, result) {
+            self.getColumnDistinctValues(columnClassId, function (err, _result) {
                 if (err) return alert(err);
                 $("#KGmappings_AdvancedMappingDialogDiv").load("snippets/KG/KGmappingAdvancedMappingDialog.html", function () {
                     $("#KGmappings_AdvancedMappingDialogDiv").dialog("open");
@@ -174,7 +174,7 @@ var KGadvancedMapping = (function () {
         return sourceColors[source];
     };
 
-    self.setDictionaryMappings = function (dictionary, columnClassId, columnValues) {
+    self.setDictionaryMappings = function (_dictionary, columnClassId, columnValues) {
         var statsMap = { total: 0, candidates: 0 };
         self.currentColumnClass = { id: columnClassId };
         var superClassDictionary = self.referenceDictionary[columnClassId];
@@ -192,8 +192,6 @@ var KGadvancedMapping = (function () {
             var id = "columnValue" + common.getRandomHexaId(5);
             self.currentColumnValueDivIds[id] = { value: value, sources: [], entities: termObj };
             if (termObj) {
-                var isCandidate = false;
-
                 cssClass = "KGmapping_columnValues_referenceValue";
                 for (var source in termObj) {
                     self.currentColumnValueDivIds[id].sources.push(source);
@@ -273,7 +271,6 @@ var KGadvancedMapping = (function () {
         var html = "";
         sortArray.forEach(function (item) {
             var divId = sortMap[item];
-            var x = $("#" + divId);
             html += $("#" + divId)[0].outerHTML;
         });
         $("#KGmapping_matrixContainer").html(html);
@@ -288,7 +285,6 @@ var KGadvancedMapping = (function () {
 
             if (a.index == index) a = aData.sources.indexOf(source);
             b = bData.sources.indexOf(source);
-            if (!aData.sources) var x = 3;
             return b - a;
         });
         $("#KGadvancedMapping_dictionaryMappingContainerDiv").html(divList);
@@ -312,8 +308,6 @@ var KGadvancedMapping = (function () {
         $("#" + columnValueDivId).addClass("KGmapping_columnValueSelected");
 
         if (!entity) entity = self.referenceDictionary[self.currentColumnClass.id].terms[columnValue.toLowerCase()];
-        /* var html = JSON.stringify(entities, null, 2)
-         */
         if (entity) {
             var keys = [];
 
@@ -347,15 +341,11 @@ var KGadvancedMapping = (function () {
             $("#KGadvancedMapping_dictionaryMappingContainerDiv").html(html);
         } else {
             self.searchEntities(columnValue);
-            // });
         }
     };
 
-    self.searchEntities = function (expression, validateClassFn) {
+    self.searchEntities = function (expression, _validateClassFn) {
         var queryType = $("#KGadvancedMapping_queryTypeSelect").val();
-        /*  var expression = columnValue;// columnValue.replace(/ /g, "/")
-          if (searchedText)
-              expression = searchedText*/
 
         var queryObj;
         if (queryType == "machAnyWord") {
@@ -389,7 +379,6 @@ var KGadvancedMapping = (function () {
                         {
                             query_string: {
                                 query: expression,
-                                // "default_field": "attachment.content",
                                 default_operator: "AND",
                             },
                         },
@@ -407,7 +396,6 @@ var KGadvancedMapping = (function () {
             },
         };
         var indexes = ["readi", "pca", "cfihos"];
-        //   var indexes = $('#KGMappingAdvancedMappings_sourcesTree').jstree(true).get_checked();
         var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val();
         if (selectedSource != "all") indexes = [selectedSource];
 
@@ -535,7 +523,7 @@ var KGadvancedMapping = (function () {
                 "')";
         }
 
-        self.executeSqlserverQuery(sql, KGmappingData.currentKGdataSource, function (err, result) {
+        self.executeSqlserverQuery(sql, KGmappingData.currentKGdataSource, function (err, _result) {
             if (err) return alert(err.toString());
             self.matchCandidates = {};
             return alert("Candidates mapping are registered");
@@ -545,14 +533,14 @@ var KGadvancedMapping = (function () {
     self.deleteItemFromReferenceDictionary = function (refDictId) {
         if (!confirm("Confirm delete entry from reference dictionary")) return;
         var sql = " delete from [onemodel].[dbo].[reference_dictionary] where id='" + refDictId + "'";
-        self.executeSqlserverQuery(sql, KGmappingData.currentKGdataSource, function (err, result) {
+        self.executeSqlserverQuery(sql, KGmappingData.currentKGdataSource, function (err, _result) {
             if (err) return alert(err.toString());
             return MainController.UI.message(" reference dictionary modified");
         });
     };
     self.validateCandidateInReferenceDictionary = function (refDictId) {
         var sql = " update  [onemodel].[dbo].[reference_dictionary] set status='REFERENCE' where id='" + refDictId + "'";
-        self.executeSqlserverQuery(sql, KGmappingData.currentKGdataSource, function (err, result) {
+        self.executeSqlserverQuery(sql, KGmappingData.currentKGdataSource, function (err, _result) {
             if (err) return alert(err.toString());
             return MainController.UI.message(" reference dictionary modified");
         });
@@ -570,7 +558,7 @@ var KGadvancedMapping = (function () {
             url: Config.apiUrl + "?" + params.toString(),
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error: function (err) {
@@ -584,8 +572,6 @@ var KGadvancedMapping = (function () {
     self.exportMappings = function () {
         var columns = [];
         var data = [];
-        var sourcesMap = {};
-        var exportAncestors = false; //$("#Standardizer_exportAncestorsCBX").prop("checked")
 
         for (var id in self.currentColumnValueDivIds) {
             var obj = self.currentColumnValueDivIds[id];
@@ -651,10 +637,10 @@ var KGadvancedMapping = (function () {
         });
     };
 
-    self.standardizeValues = function (callback) {
+    self.standardizeValues = function (_callback) {
         window.open(window.location.href + "?x=3", "SLSV_standardizer");
         setTimeout(function () {
-            KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (err, result) {
+            KGadvancedMapping.getColumnDistinctValues(KGmappingData.currentColumn, function (_err, result) {
                 broadcastChannel.postMessage({ initStandardizerWords: result });
             });
         }, 500);

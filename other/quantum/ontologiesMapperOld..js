@@ -2,7 +2,6 @@ var fs = require("fs");
 const async = require("async");
 var httpProxy = require("../../bin/httpProxy.");
 var util = require("../../bin/util.");
-var distinctTags = {};
 
 var ontologiesMapper = {
     loadCsvFile: function (file, sep) {
@@ -95,7 +94,6 @@ var ontologiesMapper = {
                     var labels = tableData.forEach(function (item) {
                         var label = formatLabel(item[sourceConfig.labelKey]);
                         var id = item[sourceConfig.idKey];
-                        if (id == "TOTAL-P0000002823") var x = 3;
                         sourceClassesLabels[label] = {
                             label: label,
                             sourceId: id,
@@ -133,7 +131,6 @@ var ontologiesMapper = {
                                 function (labels, callbackEachSlice) {
                                     var fitlerStr = "";
                                     labels.forEach(function (label, index) {
-                                        if (label.indexOf("\\") > -1) var x = "3";
                                         if (index > 0) fitlerStr += "|";
                                         fitlerStr += "^" + label.replace(/\\/g, "") + "$";
                                     });
@@ -150,7 +147,6 @@ var ontologiesMapper = {
 
                                     function setTargetValues(source, bindings) {
                                         bindings.forEach(function (item) {
-                                            var x = item;
                                             var id = item.concept.value;
                                             var label = formatLabel(item.conceptLabel.value);
                                             for (var id2 in sourceClassesIds)
@@ -210,7 +206,7 @@ var ontologiesMapper = {
                                 }
                             );
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
@@ -308,7 +304,6 @@ var ontologiesMapper = {
             if (item0.entityId.indexOf(matchingTablesPrefix[table]) < 0) return;
 
             var item = mappingLabelMap[item0.entityId];
-            if (item0.entityId == "TOTAL-P0000002823") var x = 3;
             if (item) {
                 mappingSourceFields.forEach(function (field) {
                     orphans += item0[field] + "\t";
@@ -319,7 +314,7 @@ var ontologiesMapper = {
                 triplesSubClasssOf += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <" + typesMap[table] + "> .\n";
                 triplesLabel += "<http://data.total.com/resource/quantum/" + item.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + item.sourceLabel + "'.\n";
 
-                sources.forEach(function (source, indexSource) {
+                sources.forEach(function (source, _indexSource) {
                     var orphansMatch = "";
                     if (item.targets[source.name].length == 0) {
                         orphans += orphansMatch + "\t";
@@ -335,7 +330,7 @@ var ontologiesMapper = {
                     }
                 });
             } else {
-                sources.forEach(function (source, indexSource) {
+                sources.forEach(function (_source, _indexSource) {
                     orphans += "\t";
                 });
             }
@@ -538,7 +533,6 @@ var ontologiesMapper = {
         var tableData = sourceData[sourceConfig.table];
         var str = "";
 
-        var outputArray = [];
         tableData.forEach(function (item) {
             var id;
             var id = item[sourceConfig.idKey];
@@ -783,7 +777,6 @@ if (false) {
 
                         data2.push(obj);
                     } else {
-                        var x = 3;
                     }
                 }
             }

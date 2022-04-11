@@ -30,11 +30,6 @@ var KGbrowser = (function () {
         $("#accordion").accordion("option", { active: 1 });
         MainController.UI.openRightPanel();
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html", function () {
-            // self.jstree.load.loadOneModel();
-            //  self.loadAdlJstree()
-            //  self.jstree.load.loadRdl();
-            // self.initOneModelDictionary()
-
             SourceBrowser.currentTargetDiv = "KGbrowserItemsjsTreeDiv";
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL");
             $("#sourcesTreeDiv").load("snippets/KG/KGbrowser.html", function () {
@@ -56,7 +51,6 @@ var KGbrowser = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    var ontologyProps = {};
                     Sparql_schema.getPropertiesRangeAndDomain(schema, null, null, null, function (err, result) {
                         if (err) callbackSeries(err);
                         result.forEach(function (item) {
@@ -97,7 +91,6 @@ var KGbrowser = (function () {
             ],
             function (err) {
                 if (err) return MainController.UI.message(err);
-                // console.log(JSON.stringify(self.OneModelDictionary, null, 2))
             }
         );
     };
@@ -256,8 +249,6 @@ var KGbrowser = (function () {
             loadAdlsList: function () {
                 var jstreeData = [];
                 for (var source in Config.sources) {
-                    // console.log(Config.sources[source].schemaType)
-                    // if (Config.sources[source].schemaType.indexOf("INDIVIDUAL")>-1)
                     if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH")
                         jstreeData.push({
                             id: source,
@@ -318,7 +309,6 @@ var KGbrowser = (function () {
                                 for (var i = 1; i < self.aspectsChildrenDepth; i++) {
                                     if (item["child" + i]) {
                                         var parent;
-                                        if (item.concept.value.indexOf("008") > -1) var x = 3;
                                         self.OneModelDictionary[item.concept.value] = item.conceptLabel.value;
                                         parent = topAspect.id;
 
@@ -435,8 +425,6 @@ var KGbrowser = (function () {
                 result.forEach(function (item) {
                     var targetNode;
 
-                    var role;
-
                     if (node.data.id != item.subType.value) {
                         targetNode = item.subType;
                     } else {
@@ -489,15 +477,9 @@ var KGbrowser = (function () {
             });
         },
         getJstreeConceptsContextMenu: function (_jstreeDivId) {
-            // return {}
             var items = {};
-            /*  if (!self.currentJstreeNode)
-                  return
-              var type = self.currentJstreeNode.data.type;*/
             $("#waitImg").css("display", "none");
             MainController.UI.message("");
-            //     if (jstreeDivId && $(jstreeDivId).jstree(true))
-            //  self.currentJstreeNode = $(jstreeDivId).jstree(true).get_selected(true)
             items.addFilteredNodesToQuery = {
                 label: "add to query",
                 action: function (_e, _xx) {
@@ -505,7 +487,6 @@ var KGbrowser = (function () {
                     if (!self.currentSource) return alert("select a source");
                     self.queryMode = "query";
                     self.query.addNodeToQueryTree(self.currentJstreeNode);
-                    ///  self.query.showQueryParamsDialog(e.position, "query")
                 },
             };
             items.addFilteredNodesToGraph = {
@@ -541,8 +522,6 @@ var KGbrowser = (function () {
 
             $("#waitImg").css("display", "none");
             MainController.UI.message("");
-
-            var node = self.currentJstreeQueryNode;
 
             (items.addFilter = {
                 label: "add filter",
@@ -667,7 +646,6 @@ var KGbrowser = (function () {
                         var model2 = [];
                         model.forEach(function (item) {
                             if (self.oneModelClasses[item.subType.value]) model2.push(item);
-                            else var x = 3;
                         });
                         model = model2;
 
@@ -735,8 +713,6 @@ var KGbrowser = (function () {
             var property = $("#KGbrowserQueryParams_property").val();
             var operator = $("#KGbrowserQueryParams_operator").val();
             var value = $("#KGbrowserQueryParams_value").val();
-            var field = self.currentQueryDialogField;
-            var adlNodeObj = $("#KGbrowser_adlJstreeDiv").jstree(true).get_node();
             $("#KGbrowserQueryParamsDialog").css("display", "none");
             var filterStr = "";
             var numberOperators = ("<", ">", "<=", ">=");
@@ -848,7 +824,7 @@ var KGbrowser = (function () {
                 }
             });
         },
-        addFilterToQueryTree: function (filterObj) {
+        addFilterToQueryTree: function (_filterObj) {
             return;
         },
         listQueryParamsDialogFieldValues() {
@@ -978,7 +954,6 @@ var KGbrowser = (function () {
                 }
                 if (node.data.type == "propertyFilter") {
                     //filter
-                    var filter = nodesMap[node.data.id];
                     var clause = node.data.content;
                     selectStr += " " + varNames[currentProp] + "_value";
                     var parentProp = previousType + "_" + node.parent;

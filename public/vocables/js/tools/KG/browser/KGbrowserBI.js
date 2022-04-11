@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var KGbrowserBI = (function () {
     var self = {};
 
@@ -58,7 +59,6 @@ var KGbrowserBI = (function () {
                         color = d3Scale(item.val);
                         color = self.rgb2hex(color);
                     } else {
-                        var index = Math.round(domain(data[i].highlightedProperty));
                         color = d3Scale(item.val);
                         color = self.rgb2hex(color);
                     }

@@ -1,7 +1,6 @@
 var Standardizer = (function () {
     var self = {};
     self.matchCandidates = {};
-    var matrixHtml = "";
     var maxCompareSource = 25;
     var maxWordsListLength = 2000;
     self.mode = "matrix";
@@ -54,18 +53,8 @@ var Standardizer = (function () {
             common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value");
             KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate;
             self.matchCandidates = {};
-
-            //   common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
         });
         setTimeout(function () {
-            /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
-                  $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
-                  setTimeout(function () {
-                      $("#standardizerCentral_tabs").tabs({});
-                      if(callback)
-                          callback()
-                  }, 500)*/
-
             if (callback) callback();
         }, 500);
     };
@@ -82,8 +71,6 @@ var Standardizer = (function () {
 
                 Admin.showUserSources(function (userSources) {
                     userSources.forEach(function (source) {
-                        if (userSources.index) var sourceLabel = "" + source;
-
                         if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
                             // Pass
                         } else {
@@ -106,10 +93,7 @@ var Standardizer = (function () {
     };
 
     self.getClassesLabels = function (classUris, indexes, callback) {
-        var bulQueryStr = "";
         var slices = common.array.slice(classUris, 100);
-        var allResults = [];
-        var totalProcessed = 0;
         var size = 200;
         var queryResultsSize = 5000;
         var classesMap = {};
@@ -360,7 +344,6 @@ var Standardizer = (function () {
         if (words.length > maxWordsListLength) return alert(" too many words, max " + maxWordsListLength);
         self.matrixDivsMap = {};
 
-        var resultSize = 1;
         var size = 200;
         var totalProcessed = 0;
         var searchResultArray = [];
@@ -408,7 +391,6 @@ var Standardizer = (function () {
 
     self.compareSource = function (source, useClassFilter) {
         var options = {};
-        var classFilter = null;
         if (useClassFilter) {
             var node = $("#Standardizer_filterClassesTree").jstree().get_selected(true);
             $("#Standardizer_filterClassesDialogDiv").dialog("close");
@@ -424,7 +406,6 @@ var Standardizer = (function () {
         var index = source.toLowerCase();
         var resultSize = 1;
         var size = 200;
-        var from = offset;
         var offset = 0;
         var totalProcessed = 0;
         var indexes = self.getSelectedIndexes(true);
@@ -511,8 +492,7 @@ var Standardizer = (function () {
     };
 
     self.onMatrixWordExactMatchClick = function (_event) {
-        var cellData = self.matrixDivsMap[this.id];
-        //  self.editCellData(cellData)
+        // pass
     };
     self.onMatrixWordNoMatchClick = function (_event) {
         var word = self.matrixDivsMap[this.id].word;
@@ -613,7 +593,6 @@ var Standardizer = (function () {
     };
 
     self.exportMappings = function () {
-        var columns = [];
         var sourcesMap = {};
         var exportAncestors = $("#Standardizer_exportAncestorsCBX").prop("checked");
 
@@ -654,8 +633,6 @@ var Standardizer = (function () {
 
                 var ids = Object.keys(idsMap);
                 var ancestorsDepth = 4;
-                var datatableColumns = [];
-                var dataTableData = [];
                 $("#waitImg").css("display", "block");
                 MainController.UI.message("searching, classes ancestors in source " + source);
                 Sparql_OWL.getNodeParents(source, null, ids, ancestorsDepth, null, function (err, result) {
@@ -794,7 +771,6 @@ var Standardizer = (function () {
         var classUris = [];
         var nodes = {};
         var orphans = [];
-        var treemapData = {};
         var hierarchy = {};
 
         async.series(
@@ -821,7 +797,6 @@ var Standardizer = (function () {
                             classUris.push(hit._source.id);
                             if (parents) {
                                 var lastParent;
-                                //   var parents = parentsStr.substring(0, parentsStr.length - 1).split("|")
 
                                 var ancestors = [];
                                 var path = "";
@@ -922,7 +897,6 @@ var Standardizer = (function () {
 
                 function (callbackSeries) {
                     return callbackSeries();
-                    //$("#standardizerCentral_tabs").tabs("active",2)
                 },
 
                 function (callbackSeries) {
@@ -930,13 +904,10 @@ var Standardizer = (function () {
                     var maxlevels = 2;
                     maxlevels = parseInt($("#Standardizer_ancestorsMaxLevels").val());
                     var existingNodes = {};
-                    var y0 = -200;
-                    var yOffset = 50;
 
                     var recurse = function (parent, level) {
                         if (level > maxlevels) return;
                         if (!parent.children) return;
-                        var y = y0 + yOffset * level;
                         parent.children.forEach(function (item) {
                             if (!existingNodes[item.id]) {
                                 existingNodes[item.id] = 1;
@@ -958,9 +929,7 @@ var Standardizer = (function () {
                                     level: level,
                                     color: Lineage_classes.getSourceColor(item.index),
                                     shape: "box",
-                                    //  fixed:{x:false, y:true},
 
-                                    // y:  y,
                                     data: {
                                         id: item.id,
                                         text: item.name,
@@ -1021,8 +990,6 @@ var Standardizer = (function () {
                                 });
                             }
                         });
-                        var x = -100;
-                        var xoffset = 100;
                         for (var key in pairs) {
                             // eslint-disable-next-line no-constant-condition
                             if (true) {
@@ -1139,7 +1106,7 @@ var Standardizer = (function () {
 
     self.generateElasticIndex = function (sourceLabel, _callback) {
         var totalLines = 0;
-
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         var processor = function (data, replaceIndex, callback) {
             if (data.length == 0) return callback();
             //  MainController.UI.message("indexing " + data.length)
@@ -1181,7 +1148,6 @@ var Standardizer = (function () {
         var classUris = [];
         var nodes = {};
         var orphans = [];
-        var treemapData = {};
 
         var hierarchy = {};
 
@@ -1204,15 +1170,10 @@ var Standardizer = (function () {
                 function (callbackSeries) {
                     //get indexes matches class map
                     MainController.UI.message("matching " + words.length + "words");
-                    var resultSize = 1;
                     var size = 200;
-                    var offset = 0;
-                    var totalProcessed = 0;
 
                     SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
                         if (err) return callbackSeries(err);
-                        resultSize = result.length;
-                        offset += size;
                         searchResultArray = result;
                         MainController.UI.message("matches found :" + searchResultArray.length);
                         callbackSeries();
@@ -1418,7 +1379,6 @@ var Standardizer = (function () {
 
                             var label = self.classUriLabelMap[node.id];
 
-                            if (!label) var x = 3;
                             jstreeData.push({
                                 id: node.path,
                                 text: label || node.id,
@@ -1593,7 +1553,6 @@ var Standardizer = (function () {
 
         var size = 200;
         var slices = common.array.slice(words, size);
-        var html = "";
         self.currentSearchedResultsMap = {};
 
         var dataSet = [];
@@ -1620,8 +1579,7 @@ var Standardizer = (function () {
                         });
                     });
 
-                    if (Object.keys(self.currentSearchedResultsMap).length == 0) html = "No similar Match";
-                    else {
+                    if (Object.keys(self.currentSearchedResultsMap).length !== 0) {
                         cols.push({
                             title: "source",
                             defaultContent: "",
@@ -1750,22 +1708,6 @@ var Standardizer = (function () {
                 $("#Standardizer_wordsTA").val(str);
             }
         );
-
-        /*  ElasticSearchProxy.analyzeSentence(text, function (err, result) {
-            if (err)
-                return alert(err)
-            var str = ""
-            result.tokens.forEach(function (item) {
-
-                var word = item.token
-                if (word.length > 4) {
-                    str += word + "\n"
-                }
-            })
-            $("#Standardizer_wordsTA").val(str)
-
-
-        }) */
     };
 
     self.selectAsFuzzyMatch = function (source, itemId) {
@@ -1839,7 +1781,6 @@ var Standardizer = (function () {
     self.showMatchesIntoLineage = function () {
         window.open(window.location.href + "?x=3", "SLSV_lineage");
         setTimeout(function () {
-            var indexes = [];
             var classUrisBySource = {};
 
             self.searchResultArray.forEach(function (item, _itemIndex) {
@@ -2003,12 +1944,6 @@ var Standardizer = (function () {
                         function (slice, callbackEach) {
                             Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, _result) {
                                 if (err) return callbackEach(err);
-                                /*   slice.forEach(function(relation){
-                               var labelTriples=[
-                                   { subject: relation.sourceNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.sourceNode.label},
-                                   { subject: relation.targetNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.targetNode.label},
-                                   })*/
-
                                 totalCreated += sliceLength;
                                 MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel);
 

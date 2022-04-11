@@ -1,8 +1,8 @@
+import React from "react";
 import { ulid } from "ulid";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import { Msg_, Type, Mode } from "../src/Component/UsersTable";
-import React from "react";
 const endpoint = "/api/v1/users";
 
 async function getUsers(): Promise<User[]> {
@@ -62,7 +62,7 @@ function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch
         getUsers()
             .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
             .then(() => setModal(false))
-            .catch((err) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err) }));
+            .catch((err: { msg: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
     };
 }
 

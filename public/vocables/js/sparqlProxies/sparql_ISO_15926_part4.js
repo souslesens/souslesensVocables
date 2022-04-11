@@ -8,24 +8,14 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_ISO_15926_part4 = (function () {
     var self = {};
     self.ancestorsDepth = 6;
 
     var elasticUrl = Config.serverUrl;
 
-    function prefixLabelWithScheme(id, label) {
-        var array = id.split("/");
-        if (array.length != 5) return label;
-        return array[3] + "_" + label;
-    }
-
-    self.getTopConcepts = function (sourceLabel, options, callback) {
-        /*  if( !self.sparql_url ) {
-                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                return self.selectGraphDialog()
-            }*/
+    self.getTopConcepts = function (sourceLabel, _options, callback) {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -67,10 +57,10 @@ var Sparql_ISO_15926_part4 = (function () {
             "> where { ?child1 rdfs:subClassOf|rdf:type ?concept. " +
             strFilter;
 
-        for (var i = 1; i < descendantsDepth; i++) {
+        for (let i = 1; i < descendantsDepth; i++) {
             query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." + "OPTIONAL{?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
         }
-        for (i = 1; i < descendantsDepth; i++) {
+        for (let i = 1; i < descendantsDepth; i++) {
             query += "} ";
         }
 
@@ -85,7 +75,7 @@ var Sparql_ISO_15926_part4 = (function () {
         });
     };
 
-    self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
+    self.getNodeInfos = function (sourceLabel, conceptId, _options, callback) {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -141,18 +131,15 @@ var Sparql_ISO_15926_part4 = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.broader1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
 
-                for (var i = 1; i < 20; i++) {
+                for (let i = 1; i < 20; i++) {
                     if (item["broader" + i]) {
                         var id = item["broader" + i].value;
                         item["broader" + i + "Label"] = { value: id.substring(id.lastIndexOf("#") + 1) };
                     }
-                    // item["broader" + i + "Label"].value = prefixLabelWithScheme(item["broader" + i].value, item["broader" + i + "Label"].value)
                 }
-                //   item.conceptLabel.value = prefixLabelWithScheme(item.concept.value, item.conceptLabel.value)
             });
             return callback(null, result.results.bindings);
         });
@@ -188,8 +175,7 @@ var Sparql_ISO_15926_part4 = (function () {
                      request.setRequestHeader('Age', '10000');
                  },*/
 
-            success: function (data, textStatus, jqXHR) {
-                var xx = data;
+            success: function (data, _textStatus, _jqXHR) {
                 if (typeof data === "string") data = JSON.parse(data);
                 else if (data.result && typeof data.result != "object")
                     //cas GEMET
@@ -201,8 +187,8 @@ var Sparql_ISO_15926_part4 = (function () {
                 $("#messageDiv").html(err.responseText);
 
                 $("#waitImg").css("display", "none");
-                console.log(JSON.stringify(err));
-                console.log(JSON.stringify(query));
+                console.error(JSON.stringify(err));
+                console.error(JSON.stringify(query));
                 if (callback) {
                     return callback(err);
                 }
@@ -211,7 +197,7 @@ var Sparql_ISO_15926_part4 = (function () {
         });
     };
 
-    self.selectGraphDialog = function (callback) {
+    self.selectGraphDialog = function (_callback) {
         var query = "select distinct ?g WHERE{ GRAPH ?g{?a ?b ?c}} order by ?g";
         Sparql_ISO_15926.execute_GET_query(query, function (err, result) {
             if (err) return MainController.UI.message(err);
@@ -223,7 +209,7 @@ var Sparql_ISO_15926_part4 = (function () {
             $("#mainDialogDiv").dialog("open");
             var html = "select a endPoint<br> <select size='20' id='Sparql_ISO_15926_sparql_urlSelect'onclick='Sparql_ISO_15926.setCurrentSparql_url($(this).val())'></select>";
             sparql_urls.sort();
-            sparql_urls.splice(0, 0, "ALL");
+            sparql_urls = ["ALL", ...sparql_urls];
             $("#mainDialogDiv").html(html);
             setTimeout(function () {
                 common.fillSelectOptions("Sparql_ISO_15926_sparql_urlSelect", sparql_urls);
@@ -232,8 +218,7 @@ var Sparql_ISO_15926_part4 = (function () {
     };
 
     self.setCurrentSparql_url = function (sparql_url) {
-        if ((graphUri = "ALL"));
-        else self.sparql_url = sparql_url;
+        if (sparql_url !== "ALL") self.sparql_url = sparql_url;
         $("#mainDialogDiv").dialog("close");
     };
 

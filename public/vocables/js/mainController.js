@@ -20,7 +20,7 @@ var MainController = (function () {
             type: "GET",
             url: Config.apiUrl + "/config",
             dataType: "json",
-            success: function (serverConfig, textStatus, jqXHR) {
+            success: function (serverConfig, _textStatus, _jqXHR) {
                 //  Config.serverUrl = serverConfig.serverUrl
                 Config.default_lang = serverConfig.default_lang;
                 Config.default_sparql_url = serverConfig.default_sparql_url;
@@ -45,7 +45,7 @@ var MainController = (function () {
             type: "GET",
             url: "/api/v1/sources",
             dataType: "json",
-            success: function (data_, textStatus, jqXHR) {
+            success: function (data_, _textStatus, _jqXHR) {
                 const data = data_.ressources;
                 for (var source in data) {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
@@ -57,7 +57,6 @@ var MainController = (function () {
                         data[source].imports.forEach(function (item) {
                             if (item.graphUri) {
                                 var importSourceName = Sparql_common.getLabelFromURI(item.graphUri);
-                                var sparqlEndpointUrl = item.sparql_server.url;
                                 if (!item.sparql_server) item.sparql_server = data[source].sparql_server;
                                 else if (item.sparql_server.url == "_default") {
                                     item.sparql_server.url = Config.default_sparql_url;
@@ -99,7 +98,7 @@ var MainController = (function () {
             type: "GET",
             url: "/api/v1/profiles",
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 Config.profiles = data.ressources;
                 if (callback) return callback();
             },
@@ -121,7 +120,7 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {},
+            success: function (_data, _textStatus, _jqXHR) {},
             error: function (err) {
                 console.log(err);
             },
@@ -129,14 +128,14 @@ var MainController = (function () {
     };
 
     function groupWithinCurrentProfile(valueCheckedAgainst) {
-        return Object.entries(Config.profiles).filter(([key, val]) => val.name === valueCheckedAgainst);
+        return Object.entries(Config.profiles).filter(([_key, val]) => val.name === valueCheckedAgainst);
     }
 
     self.onAfterLogin = function () {
         if (!authentication.currentUser) return alert(" no user identified");
         var groups = authentication.currentUser.groupes;
-        MainController.loadSources(function (err, result) {
-            MainController.loadProfiles(function (err, result) {
+        MainController.loadSources(function (_err, _result) {
+            MainController.loadProfiles(function (_err, _result) {
                 //  Config.currentProfile=Config.profiles["reader_all"]
                 groups.forEach(function (group) {
                     if (groupWithinCurrentProfile(group).length) return (Config.currentProfile = groupWithinCurrentProfile(group)[0][1]);
@@ -146,7 +145,7 @@ var MainController = (function () {
                     [
                         function (callbackSeries) {
                             if (!Config.currentProfile.customPlugins) return callbackSeries();
-                            CustomPluginController.init(Config.currentProfile.customPlugins, function (err, result) {
+                            CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
                                 callbackSeries();
                             });
                         },
@@ -155,7 +154,7 @@ var MainController = (function () {
                             callbackSeries();
                         },
                     ],
-                    function (err) {
+                    function (_err) {
                         MainController.UI.configureUI();
                     }
                 );
@@ -166,7 +165,7 @@ var MainController = (function () {
     self.initControllers = function () {
         Object.keys(Config.sources)
             .sort()
-            .forEach(function (sourceLabel, index) {
+            .forEach(function (sourceLabel, _index) {
                 if (!Config.sources[sourceLabel].controllerName) {
                     Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller;
                     Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller);
@@ -319,7 +318,6 @@ var MainController = (function () {
         },
 
         showToolsList: function (treeDiv) {
-            var x = $(window).height();
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.tools) {
@@ -406,7 +404,6 @@ var MainController = (function () {
 
             if (!open && display == "flex") {
                 //open->close
-                var w2 = self.UI.initialGraphDivWitdh + rightPanelWidth;
                 $("#rightPanelDiv").css("display", "none");
                 $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh);
                 $("#graphDiv").animate({ width: self.UI.initialGraphDivWitdh });
@@ -466,7 +463,6 @@ var MainController = (function () {
 
         openRightPanel: function () {
             var w = $(window).width() - leftPanelWidth;
-            var h = $(window).height() - 30;
             // $("#centralPanel").width(w)
             $("#centralPanelDiv").width(w - rightPanelWidth);
             $("#graphDiv").width(w - rightPanelWidth);

@@ -11,7 +11,6 @@
  */
 
 const sql = require("mssql");
-const async = require("async");
 
 const ConfigManager = require("../configManager.");
 
@@ -116,14 +115,14 @@ var SQLserverConnector = {
         var connection = SQLserverConnector.getConnection();
         connection.database = dbName;
         var fetchedCount = 0;
-        sql.connect(connection, (err) => {
+        sql.connect(connection, (_err) => {
             // ... error checks
 
             const request = new sql.Request();
             request.stream = true; // You can set streaming differently for each request
             request.query(query); // or request.execute(procedure)
 
-            request.on("recordset", (columns) => {
+            request.on("recordset", (_columns) => {
                 // Emitted once for each recordset in a query
             });
 
@@ -133,7 +132,7 @@ var SQLserverConnector = {
                 if (data.length >= fetchSize) {
                     request.pause();
                     fetchedCount += data.length;
-                    processorFn(data, uniqueTriples, fetchedCount, function (err, resultProcessor) {
+                    processorFn(data, uniqueTriples, fetchedCount, function (_err, _resultProcessor) {
                         data = [];
                         request.resume();
                     });
@@ -142,7 +141,7 @@ var SQLserverConnector = {
                 // Emitted for each row in a recordset
             });
 
-            request.on("rowsaffected", (rowCount) => {
+            request.on("rowsaffected", (_rowCount) => {
                 // Emitted for each `INSERT`, `UPDATE` or `DELETE` statement
                 // Requires NOCOUNT to be OFF (default)
             });
@@ -151,7 +150,7 @@ var SQLserverConnector = {
                 callback(err);
             });
 
-            request.on("done", (result) => {
+            request.on("done", (_result) => {
                 callback(null, data);
                 // Always emitted as the last one
             });

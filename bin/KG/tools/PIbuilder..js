@@ -52,7 +52,9 @@ var PIbuilder = {
                     callbackSeries();
                 },
             ],
-            function (err) {}
+            function (_err) {
+                /* do nothing ? */
+            }
         );
     },
 };

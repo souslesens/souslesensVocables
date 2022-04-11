@@ -23,8 +23,6 @@ Lineage_relations = (function () {
         common.fillSelectOptions("LineageRelations_statusSelect", statusList, true, "label", "id");
         var provenances = ["manual", " auto_exactMatch"];
         common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true);
-        var withoutImports = 0;
-        if (Config.sources[source].isDictionary) withoutImports = 1;
         Sparql_OWL.getObjectRestrictions(
             Lineage_common.currentSource,
             null,
@@ -35,7 +33,6 @@ Lineage_relations = (function () {
             },
             function (err, result) {
                 if (err) return alert(err);
-                var x = result;
                 var props = [];
                 var asSamAsProp = false;
                 result.forEach(function (item) {
@@ -221,9 +218,7 @@ Lineage_relations = (function () {
 
         self.showRestrictions = function (output, relations, toLabelsMap) {
             var currentSource = Lineage_common.currentSource;
-            var selectedNodes = null;
 
-            var graphUriSourceMap = {};
             async.series(
                 [
                     //get nodes to map
@@ -271,7 +266,6 @@ Lineage_relations = (function () {
                             sameAsLevel = visjsData.maxLevel + 1;
                         } else existingNodes = {};
 
-                        var color;
                         var shape = Lineage_classes.defaultShape;
                         var size = Lineage_classes.defaultShapeSize;
 
@@ -482,7 +476,6 @@ Lineage_relations = (function () {
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = visjsGraph.getExistingIdsMap();
 
-            var color;
             var shape = Lineage_classes.defaultShape;
             var size = Lineage_classes.defaultShapeSize;
 
@@ -493,8 +486,6 @@ Lineage_relations = (function () {
 
                 var ancestorsSource = parentsArray[0];
                 parentsArray.forEach(function (parentId, index) {
-                    if (parentId == "http://souslesens.org/workorder/maintenance_inspection/Maintenance_Details") var x = 3;
-
                     if (output == "jstree") {
                         var nodeId = item.domain + "_" + prop + "_" + item.range;
                         if (!existingNodes[nodeId]) {
@@ -585,7 +576,6 @@ Lineage_relations = (function () {
             var toIndex = toSource.toLowerCase();
 
             var restrictions = [];
-            var fromClasses = [];
             var toLabelsMap = {};
             var wordsMap = {};
             var fromNodesSelection = null;
@@ -601,9 +591,7 @@ Lineage_relations = (function () {
                     function (callbackSeries) {
                         var resultSize = 1;
                         var size = 200;
-                        var from = offset;
                         var offset = 0;
-                        var totalProcessed = 0;
 
                         async.whilst(
                             function (_test) {
@@ -614,7 +602,6 @@ Lineage_relations = (function () {
                                 Standardizer.listSourceLabels(fromIndex, offset, size, null, function (err, hits) {
                                     if (err) return callbackWhilst(err);
                                     resultSize = hits.length;
-                                    totalProcessed += resultSize;
 
                                     offset += size;
 
@@ -629,7 +616,6 @@ Lineage_relations = (function () {
 
                                     SearchUtil.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
                                         if (err) return alert(err);
-                                        var entities = [];
                                         Object.keys(wordsMap).forEach(function (word, index) {
                                             if (!result[index] || !result[index].hits) return;
                                             var hits = result[index].hits.hits;
@@ -668,9 +654,7 @@ Lineage_relations = (function () {
                     function (callbackSeries) {
                         var resultSize = 1;
                         var size = 200;
-                        var from = offset;
                         var offset = 0;
-                        var totalProcessed = 0;
                         async.whilst(
                             function (_test) {
                                 return resultSize > 0;
@@ -726,7 +710,6 @@ Lineage_relations = (function () {
                     } else if (index == 1) {
                         // pass
                     } else {
-                        var id = parentId + "_" + parentsArray[index - 1];
                         if (!uniqueIds[parentId]) {
                             triples = triples.concat(Lineage_blend.getSubClassTriples(parentId, parentsArray[index - 1]));
                         }
@@ -768,8 +751,6 @@ Lineage_relations = (function () {
         };
 
         self.loadProjectedGraph = function (graphUri) {
-            //   var graphUri= $("#LineageRelations_projectedGraphsSelect").val()
-            var properties = self.projectedGraphs[graphUri];
             var query = " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
             // console.log(query)

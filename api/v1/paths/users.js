@@ -3,7 +3,6 @@ const fs = require("fs");
 const profilesJSON = path.resolve("config/users/users.json");
 exports.profilesJSON = profilesJSON;
 const _ = require("lodash");
-const { rest } = require("lodash");
 const { readRessource, writeRessource, responseSchema, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
 const bcrypt = require("bcrypt");
 module.exports = function () {
@@ -12,7 +11,7 @@ module.exports = function () {
         POST,
         PUT,
     };
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         fs.readFile(profilesJSON, "utf8", (err, data) => {
             if (err) {
                 res.status(500).json({ message: "I couldn't read users.json" });
@@ -23,30 +22,27 @@ module.exports = function () {
         });
     }
 
-    async function PUT(req, res, next) {
+    async function PUT(req, res, _next) {
         const updatedProfile = ressourceWithHashedPassword(req);
         try {
-            const objectToUpdateKey = Object.keys(req.body)[0];
-            const oldProfiles = await readRessource(profilesJSON, res); //.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));
+            const oldProfiles = await readRessource(profilesJSON, res);
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
-            if (oldProfiles.hasOwnProperty(objectToUpdateKey)) {
-                const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res); //.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
+            if (Object.keys(oldProfiles).includes(Object.keys(req.body)[0])) {
+                const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res);
                 ressourceUpdated(res, savedProfiles);
             } else {
                 res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." });
             }
         } catch (e) {
-            res.status(500);
+            res.status(500).json({ message: e });
         }
     }
 
-    async function POST(req, res, next) {
-        //        const successfullyCreated = newProfiles[req.params.id]
+    async function POST(req, res, _next) {
         const userToAdd = ressourceWithHashedPassword(req);
         try {
             const oldUsers = await readRessource(profilesJSON, res);
-            //const hash = await bcrypt.hash(req.body.password, 10)
-            const userDoesntExist = !oldUsers.hasOwnProperty(Object.keys(userToAdd)[0]);
+            const userDoesntExist = !Object.keys(oldUsers).includes(Object.keys(userToAdd)[0]);
             const newUsers = { ...oldUsers, ...userToAdd };
             if (userDoesntExist) {
                 const saved = await writeRessource(profilesJSON, newUsers, res);

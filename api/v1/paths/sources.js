@@ -5,7 +5,6 @@ const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = sourcesJSON;
 const _ = require("lodash");
 const util = require("util");
-const { rest, get } = require("lodash");
 const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, responseSchema, ressourceFetched } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
 const read = util.promisify(fs.readFile);
@@ -31,7 +30,7 @@ module.exports = function () {
         let acc = [];
 
         for (let p of aProfiles) {
-            const [k, val] = p;
+            const [_k, val] = p;
             const hasAny = user.groups.some((v) => v === val.name);
 
             if (hasAny) {
@@ -43,7 +42,7 @@ module.exports = function () {
         return Array.from(new Set(acc));
     };
 
-    async function GET(req, res, next) {
+    async function GET(req, res, _next) {
         const profiles = await read(profilesJSON);
         const parsedProfiles = await JSON.parse(profiles);
         const userInfo = userManager.getUser(req.user);
@@ -60,32 +59,30 @@ module.exports = function () {
         });
     }
 
-    async function PUT(req, res, next) {
+    async function PUT(req, res, _next) {
         const updatedSource = req.body;
         const profiles = await read(profilesJSON).then((p) => JSON.parse(p));
         const userInfo = userManager.getUser(req.user);
         const allowedSources = getAllowedSources(userInfo.user, profiles);
         try {
-            const objectToUpdateKey = Object.keys(req.body)[0];
-            const oldSources = await readRessource(sourcesJSON, res); //.catch(e => res.status((500).json({ message: 'I couldn\'t read the ressource' })));
+            const oldSources = await readRessource(sourcesJSON, res);
             const updatedSources = { ...oldSources, ...updatedSource };
-            const savedSources = await writeRessource(sourcesJSON, updatedSources, res); //.catch(e => res.status((500).json({ message: "I couldn't write the ressource" })));
-            if (oldSources.hasOwnProperty(objectToUpdateKey)) {
-                ressourceUpdated(res, filterSources(allowedSources, sources));
+            if (Object.keys(oldSources).includes(Object.keys(req.body)[0])) {
+                ressourceUpdated(res, filterSources(allowedSources, updatedSources));
             } else {
                 res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." });
             }
-        } catch (e) {
-            res.status(500);
+        } catch (err) {
+            res.status(500).json({ message: err });
         }
     }
 
-    async function POST(req, res, next) {
+    async function POST(req, res, _next) {
         const profileToAdd = req.body;
         //        const successfullyCreated = newProfiles[req.params.id]
         try {
             const oldProfiles = await readRessource(sourcesJSON, res);
-            const profileDoesntExist = !oldProfiles.hasOwnProperty(Object.keys(profileToAdd)[0]);
+            const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
             const objectToCreateKey = req.body;
             const newProfiles = { ...oldProfiles, ...objectToCreateKey };
             if (profileDoesntExist) {

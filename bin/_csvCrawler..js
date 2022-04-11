@@ -33,7 +33,7 @@ var csvCrawler = {
                         data,
                         function (dataFetch, callbackEach) {
                             totalLines += dataFetch.length;
-                            dataFetch.forEach(function (line, indexedLine) {
+                            dataFetch.forEach(function (line, _indexedLine) {
                                 var lineContent = "";
                                 var record = {};
                                 headers.forEach(function (header) {
@@ -80,12 +80,12 @@ var csvCrawler = {
                                     return callbackEach(error);
                                 }
                                 const elasticRestProxy = require("./elasticRestProxy..js");
-                                elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
+                                elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                                     if (err) return callbackEach(err);
                                     var message = "indexed " + totalLines + " records ";
                                     socket.message(message);
                                     setTimeout(function () {
-                                        elasticRestProxy.refreshIndex(config, function (err, result) {
+                                        elasticRestProxy.refreshIndex(config, function (err, _result) {
                                             if (err) return callbackEach(err);
                                             return callbackEach();
                                         });
@@ -137,12 +137,10 @@ var csvCrawler = {
             var headers = [];
             var jsonData = [];
             var jsonDataFetch = [];
-            var startId = 100000;
-            var linesCount = 0;
             fs.createReadStream(connector.filePath).pipe(
                 csv({
                     separator: separator,
-                    mapHeaders: ({ header, index }) => util.normalizeHeader(headers, header),
+                    mapHeaders: ({ header, _index }) => util.normalizeHeader(headers, header),
                 })
                     .on("header", function (header) {
                         headers.push(header);
@@ -170,7 +168,6 @@ var csvCrawler = {
                         return callback(null, { headers: headers, data: jsonData });
                     })
                     .on("error", function (error) {
-                        var x = error;
                         return callback(error);
                     })
             );

@@ -44,7 +44,7 @@ var visjsGraph = (function () {
 
         var nodesDataSet = new vis.DataSet(visjsData.nodes);
         var edgesDataSet = new vis.DataSet(visjsData.edges);
-        nodesDataSet.on("*", function (event, properties, senderId) {
+        nodesDataSet.on("*", function (event, properties, _senderId) {
             if (event == "add") self.lastAddedNodes = properties.items;
             // console.log('add:', event, 'properties:', properties, 'senderId:', senderId);
         });
@@ -102,7 +102,7 @@ var visjsGraph = (function () {
             }
         }, self.simulationTimeOut);
 
-        self.network.on("afterDrawing", function (params) {
+        self.network.on("afterDrawing", function (_params) {
             self.drawingDone = true;
         });
 
@@ -149,10 +149,10 @@ var visjsGraph = (function () {
               }*/
                 if (_options.onHoverNodeFn) _options.onHoverNodeFn(node, point, options);
             })
-            .on("blurNode", function (params) {
+            .on("blurNode", function (_params) {
                 // $("#graphPopupDiv").css("display", "none")
             })
-            .on("zoom", function (params) {
+            .on("zoom", function (_params) {
                 self.onScaleChange();
             })
             .on("hoverEdge", function (params) {
@@ -160,10 +160,9 @@ var visjsGraph = (function () {
                 var edge = self.data.edges.get(edgeId);
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
-                var point = params.pointer.DOM;
                 //   sinequaResultVis.onEdgeHover(edge, point)
             })
-            .on("blurEdge", function (params) {
+            .on("blurEdge", function (_params) {
                 //  sinequaResultVis.onEdgeBlur()
             })
 
@@ -179,7 +178,7 @@ var visjsGraph = (function () {
                 visjsGraph.data.nodes.update(newNodes);
             })
 
-            .on("dragging", function (params) {
+            .on("dragging", function (_params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                 return false;
                 }*/
@@ -199,7 +198,6 @@ var visjsGraph = (function () {
                          return;*/
 
                     var nodeId = params.nodes[0];
-                    var nodeObj = self.data.nodes.get(nodeId);
 
                     self.lastMovedNode = nodeId;
                     //   var nodes = self.data.nodes.getIds();
@@ -463,7 +461,7 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv();
-        common.copyTextToClipboard(csv, function (err, result) {
+        common.copyTextToClipboard(csv, function (err, _result) {
             if (err) MainController.UI.message(err);
             MainController.UI.message("csv copied in system clipboard");
         });
@@ -544,7 +542,6 @@ var visjsGraph = (function () {
     };
 
     self.getNodesPosition = function () {
-        var nodes = self.data.nodes.getIds();
         var positions = self.network.getPositions();
         return positions;
     };
@@ -555,7 +552,6 @@ var visjsGraph = (function () {
             lastClickTime = now;
             return;
         }
-        if (isDbleClick) var x = 3;
 
         if (params.edges.length == 0 && params.nodes.length == 0) {
             //simple click stop animation
@@ -622,7 +618,7 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.remove(targetNodes);
     };
 
-    self.focusOnNode = function (id, label) {
+    self.focusOnNode = function (id, _label) {
         if (id) {
             var newNodes = [];
             self.data.nodes.getIds().forEach(function (nodeId) {
@@ -727,7 +723,6 @@ var visjsGraph = (function () {
 
     self.saveGraph = function (fileName, raw) {
         if (!self.currentContext) return;
-        var nodes = visjsGraph.data.nodes.get();
         var positions = self.network.getPositions();
 
         if (!raw) {
@@ -755,7 +750,7 @@ var visjsGraph = (function () {
             url: Config.apiUrl + "/data",
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 MainController.UI.message("graph saved");
             },
@@ -781,7 +776,7 @@ var visjsGraph = (function () {
             url: Config.apiUrl + "/data/" + fileName,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 var data = JSON.parse(result.result);
                 var positions = data.positions;
                 var options = data.context.options;
@@ -845,7 +840,7 @@ var visjsGraph = (function () {
             type: "GET",
             url: Config.apiUrl + "/data/files",
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 if (callback) return callback(null, result);
                 common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true);
             },

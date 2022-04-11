@@ -8,6 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_proxy = (function () {
     var self = {};
 
@@ -24,7 +25,7 @@ var Sparql_proxy = (function () {
         query += " LIMIT " + limit;
 
         async.whilst(
-            function (callbackTest) {
+            function (_callbackTest) {
                 //test
                 return resultSize > 0;
             },
@@ -59,9 +60,7 @@ var Sparql_proxy = (function () {
                          request.setRequestHeader('Age', '10000');
                      },*/
 
-                    success: function (data, textStatus, jqXHR) {
-                        var xx = data;
-
+                    success: function (data, _textStatus, _jqXHR) {
                         callbackWhilst(null, data);
                         resultSize = data.results.bindings.length;
                         allData.results.bindings = allData.results.bindings.concat(data.results.bindings);
@@ -144,7 +143,7 @@ var Sparql_proxy = (function () {
                  request.setRequestHeader('Age', '10000');
              },*/
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
 
                 if (!data.results) return callback(null, { results: { bindings: [] } });

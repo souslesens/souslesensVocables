@@ -8,7 +8,6 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 var fs = require("fs");
-var async = require("async");
 var RcReportsTriples = {
     csvToJson: function (filePath, sep) {
         if (!sep) sep = "\t";
@@ -61,8 +60,6 @@ var RcReportsTriples = {
     csvToTriples: function (filePath) {
         var json = RcReportsTriples.csvToJson(filePath, ",");
         var graphUri = "http://data.total.com/resource/reportsRC/";
-        var strConcepts = "";
-        var strCorpus = "";
         var types = [];
         var typesCorpus = [];
         var typesConcept = [];
@@ -226,11 +223,9 @@ var RcReportsTriples = {
                 outputStream.write(line + "\n");
                 countLines += 1;
             }
-            countAll += 1;
         });
 
-        readInterface.on("close", function (x) {
-            var y = countLines;
+        readInterface.on("close", function (_x) {
             outputStream.close();
         });
     },

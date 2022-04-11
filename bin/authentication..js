@@ -12,11 +12,8 @@
 var jsonFileStorage = require("./jsonFileStorage.js");
 var path = require("path");
 var fs = require("fs");
-var logger = require("./logger..js");
 //var mySqlProxy = require("./mySQLproxy..js");
 const bcrypt = require("bcrypt");
-var async = require("async");
-var saltRounds = 10;
 
 var passport = require("passport");
 var Strategy = require("passport-local");
@@ -47,7 +44,7 @@ if (config.auth == "keycloak") {
 
             // Search users
             let findUser = Object.keys(users)
-                .map(function (key, index) {
+                .map(function (key, _index) {
                     return {
                         id: users[key].id,
                         login: users[key].login,
@@ -108,7 +105,7 @@ if (config.auth == "keycloak") {
                 }
 
                 var findUser = Object.keys(users)
-                    .map(function (key, index) {
+                    .map(function (key, _index) {
                         return {
                             login: users[key].login,
                             password: users[key].password,

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var KGcommon = (function () {
     var self = {};
     self.currentSource;
@@ -8,11 +9,8 @@ var KGcommon = (function () {
         jstreeData_types: [],
         load: function (source, callback) {
             self.currentSource = source;
-            var classJstreeData = [];
-            var depth = 5;
 
             self.constraintsMap = { domains: [], properties: [], ranges: [] };
-            var allClassIds = [];
             var subPropertiesMap = {};
             async.series(
                 [
@@ -73,10 +71,8 @@ var KGcommon = (function () {
                                 if (!item.value) {
                                     item.value = { value: "any" };
                                 }
-                                var hasId = true;
                                 if (!item.id) {
                                     item.id = { value: "any" };
-                                    hasId = false;
                                 }
 
                                 var obj = { property: item.prop.value, domain: item.id.value, range: item.value.value };

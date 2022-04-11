@@ -1,6 +1,5 @@
 //const writer = require('csv-to-sql-script');
 
-const fs = require("fs");
 var csvCrawler = require("../bin/_csvCrawler.");
 const util = require("./util.");
 var async = require("async");
@@ -43,7 +42,6 @@ Csv2Sql = {
                 if (header == "") return;
                 var colName = header.replace(/ ([a-z])/, "$1");
                 colName = util.formatStringForTriple(colName);
-                if (!fields[header]) var x = 3;
                 fields[header].colName = colName;
             });
 
@@ -105,7 +103,7 @@ Csv2Sql = {
                     });
                     insertStr = insertStr.substring(0, insertStr.length - 1);
 
-                    sql.getData(dbName, insertStr, function (err, result) {
+                    sql.getData(dbName, insertStr, function (err, _result) {
                         if (err) {
                             console.log("error slice " + sliceIndex + "  " + err);
                             return callbackEach();
@@ -161,6 +159,5 @@ var tableName = "lines";
 var dbName = "evolen";
 
 Csv2Sql.getColumns(input, tableName, function (err, result) {
-    var createSql = result.createSql;
-    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (err, result) {});
+    Csv2Sql.getInsert(input, dbName, tableName, result.fieldsDecription, function (_err, _result) {});
 });

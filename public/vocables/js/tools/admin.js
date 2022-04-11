@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
     var self = {};
 
@@ -21,14 +22,13 @@ var Admin = (function () {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
         if (!sources || sources.length == 0) return alert(" no source selected");
         if (!confirm("refresh selected indexes")) return;
-        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
 
         async.eachSeries(
             sources,
             function (source, callbackEach) {
                 if (!Config.sources[source] || !Config.sources[source].schemaType) return callbackEach();
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, function (err, result) {
+                SearchUtil.generateElasticIndex(source, function (err, _result) {
                     MainController.UI.message("DONE " + source, true);
                     callbackEach(err);
                 });
@@ -51,7 +51,7 @@ var Admin = (function () {
             type: "GET",
             url: "/ontology/" + sources[0],
             dataType: "text/plain",
-            success: function (data2, textStatus, jqXHR) {
+            success: function (_data2, _textStatus, _jqXHR) {
                 // no success see index.js
             },
             error: function (err) {
@@ -66,7 +66,7 @@ var Admin = (function () {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
         if (sources.length != 1) return alert("select a single source");
 
-        Sparql_generic.getSourceTaxonomy(sources[0], null, function (err, result) {
+        Sparql_generic.getSourceTaxonomy(sources[0], null, function (_err, _result) {
             // Pass
         });
     };
@@ -75,7 +75,7 @@ var Admin = (function () {
         var sources = [];
         Object.keys(Config.sources)
             .sort()
-            .forEach(function (sourceLabel, index) {
+            .forEach(function (sourceLabel, _index) {
                 MainController.initControllers();
                 if (sourcesSelection && sourcesSelection.indexOf(sourceLabel) < 0) return;
                 if (Config.sources[sourceLabel].isDraft) return;
@@ -102,8 +102,7 @@ var Admin = (function () {
         var sources = [];
         Object.keys(Config.sources)
             .sort()
-            .forEach(function (sourceLabel, index) {
-                //if (false && Config.sources[sourceLabel].isDraft) return;
+            .forEach(function (sourceLabel, _index) {
                 if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
                 if (
                     (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
@@ -157,7 +156,7 @@ var Admin = (function () {
         } else alert("missing propId or inversePropId");
     };
 
-    self.exportTaxonomyToCsv = function (rootUri) {
+    self.exportTaxonomyToCsv = function (_rootUri) {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
         if (sources.length != 1) return alert("select a single source");
 
@@ -194,7 +193,7 @@ var Admin = (function () {
                         callbackSeries();
                     });
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     var cols = [];
                     for (var i = 1; i <= maxLevels; i++) {
                         cols.push({ title: "Level_" + i, defaultContent: "" });

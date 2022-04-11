@@ -37,8 +37,6 @@ const getlogPaths = function () {
         }
     }
 };
-var errorsLogPath = "logs/error.log";
-var usersLogPath = "logs/vocables.log";
 
 /*var errorsLogPath = getlogPaths().errorsLogPath;
 var usersLogPath = getlogPaths().usersLogPath;*/

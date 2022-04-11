@@ -42,7 +42,7 @@ var KGmappingGraph = (function () {
 
             if (!visjsGraph.data || !visjsGraph.data.nodes) {
                 var options = {
-                    selectNodeFn: function (node, event) {
+                    selectNodeFn: function (node, _event) {
                         MainController.UI.hidePopup("graphPopupDiv");
                         if (node) self.currentNode = node;
                     },
@@ -60,7 +60,7 @@ var KGmappingGraph = (function () {
         });
 
     self.graphActions = {
-        showGraphPopupMenu: function (node, point, e) {
+        showGraphPopupMenu: function (node, point, _e) {
             var top = $("#KGmappings_graph").position().top;
             point.y += top;
             var html = "";
@@ -94,7 +94,6 @@ var KGmappingGraph = (function () {
         setLabelAssociation: function () {
             if (!self.currentAssociation.subject) return alert("select a subject first");
             self.currentAssociation.object = self.currentNode;
-            var x = self.currentAssociation;
             var property = { data: { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "rdfs:label" } };
             self.graphActions.setAssociation(property, self.currentAssociation);
         },
@@ -119,19 +118,6 @@ var KGmappingGraph = (function () {
                 objectLabel += item.type_label;
             });
 
-            /* var html = "MAPPING ASSOCIATION<br>" +
-                  "<table>" +
-                  "<tr><td class='td_title'>Subject</td><td class='td_value>" + self.currentAssociation.subject.data.columnId + "</td><td class='td_value'>" + subjectLabel + "</td></tr>" +
-                  "<tr><td class='td_title'>Object</td><td class='td_value>" + self.currentAssociation.object.data.columnId + "</td><td class='td_value>" + objectLabel + "</td></tr>" +
-                  "<tr><td class='td_title'>Property</td><td colspan='2' class='td_value></td><td class='td_value> <span id='KGMapping_graphPropertySpan' style='font-weight:bold'>select  a property...</span></td></tr>" +
-
-                  "</table>" +
-
-                  "</div>" +
-                  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGmappingGraph.graphActions.setAssociation()'>OK</button>" +
-                  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='KGmappingGraph.graphActions.cancelAssociation()'>Cancel</button>"
-  $("#KGmappings_Tabs").tabs("option", "active", 3);
-              $("#mainDialogDiv").html(html);*/
             $("#mainDialogDiv").load("snippets/KG/KGPropertyassocationDialog.html", function () {
                 $("#mainDialogDiv").dialog("open");
                 $("#KGMapping_graphAssociationSubjectSpan").html(self.currentAssociation.subject.data.columnId + "->" + subjectLabel);
@@ -146,7 +132,6 @@ var KGmappingGraph = (function () {
                     to2 = setTimeout(function () {
                         var searchString = $("#KGmappings_propertiesSearchTree").val();
 
-                        var xx = $("#KGmappingPropertiesTree").jstree(true);
                         $("#KGmappingPropertiesTree").jstree(true).search(searchString);
                     }, 250);
                 });
@@ -207,7 +192,7 @@ var KGmappingGraph = (function () {
 
                 if (!visjsGraph.data || !visjsGraph.data.nodes) {
                     var options = {
-                        onclickFn: function (node, event) {
+                        onclickFn: function (_node, _event) {
                             return;
                         },
                         onRightClickFn: self.graphActions.showGraphPopupMenu,
@@ -219,13 +204,6 @@ var KGmappingGraph = (function () {
                     visjsGraph.data.edges.add(visjsData.edges);
                 }
                 visjsGraph.network.fit();
-
-                /*   setTimeout(function(){
-                       visjsGraph.network.moveTo({
-                           position: {x:-500, y:-500}
-                       });
-                       },200)
-                       visjsGraph.network.fit()*/
             }
             KGmappingGraph.isAssigningProperty = false;
             $("#mainDialogDiv").dialog("close");

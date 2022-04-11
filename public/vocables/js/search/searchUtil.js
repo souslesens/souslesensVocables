@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SearchUtil = (function () {
     var self = {};
 
@@ -15,10 +16,7 @@ var SearchUtil = (function () {
         if (!options) options = {};
         var resultSize = 1;
         var size = 200;
-        var from = offset;
         var offset = 0;
-        var totalProcessed = 0;
-        var searchResultArray = [];
         var allWords = [];
 
         var indexes = null;
@@ -28,7 +26,7 @@ var SearchUtil = (function () {
         var classesArray = [];
         var parentsMap = {};
         async.whilst(
-            function (test) {
+            function (_test) {
                 return resultSize > 0;
             },
             function (callbackWhilst) {
@@ -123,7 +121,6 @@ var SearchUtil = (function () {
                                                 if (indexParent > 0 && !parentsMap[parent]) parentsMap[parent] = {};
                                             });
                                         } else {
-                                            var x = 3;
                                         }
                                     });
                                     classesArray[index].matches = matches;
@@ -232,9 +229,6 @@ var SearchUtil = (function () {
         $("#waitImg").css("display", "block");
         //   MainController.UI.message("Searching exact matches ")
 
-        var entitiesMap = {};
-        var count = 0;
-
         self.getWordBulkQuery = function (word, mode, indexes) {
             var field = "label.keyword";
             if (word.indexOf && word.indexOf("http://") == 0) field = "id.keyword";
@@ -306,7 +300,6 @@ var SearchUtil = (function () {
         var bulQueryStr = "";
         var slices = common.array.slice(words, 100);
         var allResults = [];
-        var totalProcessed = 0;
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {
@@ -330,7 +323,6 @@ var SearchUtil = (function () {
     };
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
-        var totalLines = 0;
         if (data.length == 0) return callback();
         //  MainController.UI.message("indexing " + data.length)
         var options = { replaceIndex: replaceIndex, owlType: "Class" };
@@ -346,7 +338,7 @@ var SearchUtil = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (data2, textStatus, jqXHR) {
+            success: function (_data2, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error: function (err) {
@@ -424,7 +416,7 @@ var SearchUtil = (function () {
                 function (data, callbackEach) {
                     var replaceIndex = false;
 
-                    self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                    self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, _result) {
                         if (err) return callbackEach(err);
                         callbackEach();
                     });
@@ -454,7 +446,7 @@ var SearchUtil = (function () {
                     var resultSize = 1;
 
                     async.whilst(
-                        function (test) {
+                        function (_test) {
                             return resultSize > 0;
                         },
 
@@ -487,11 +479,10 @@ var SearchUtil = (function () {
                 },
                 function (callbackSeries) {
                     var resultSize = 1;
-                    var allData = [];
                     var offset = 0;
                     var size = 500;
                     async.whilst(
-                        function (test) {
+                        function (_test) {
                             return resultSize > 0;
                         },
 

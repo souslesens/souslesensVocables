@@ -9,10 +9,7 @@ var Export = (function () {
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
 
-        var root = {};
-
         var nodesToMap = {};
-        var nodesFromMap = {};
         edges.forEach(function (edge) {
             if (!nodesToMap[edge.to]) nodesToMap[edge.to] = [];
             nodesToMap[edge.to].push(edge);
@@ -22,7 +19,6 @@ var Export = (function () {
               nodesFromMap[edge.from].push(edge)*/
         });
 
-        var topNodes = [];
         var leafNodes = [];
         var nodesMap = {};
         nodes.forEach(function (node) {
@@ -31,7 +27,6 @@ var Export = (function () {
                 leafNodes.push(node);
             }
         });
-        var uniqueNodes = {};
 
         function recurse(node, ancestors, level) {
             if (!node.id) return;
@@ -138,7 +133,6 @@ var Export = (function () {
             nodesMap[node.id] = node;
         });
 
-        var depth = 0;
         const result = [];
 
         function flat(data, prev = "") {
@@ -193,7 +187,7 @@ var Export = (function () {
             var matrixLabels = [];
             var matrixIds = [];
             var maxParentsLength = 0;
-            result.data.forEach(function (hit, index) {
+            result.data.forEach(function (hit, _index) {
                 var parentIdsArray = [];
                 var parentLabelsArray = [];
                 if (hit.parents || hit.parents.forEach) return;

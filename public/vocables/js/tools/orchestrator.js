@@ -4,7 +4,7 @@ broadcastChannel.onmessage = function (ev) {
     if (ev.data.initStandardizerWords) {
         var data = ev.data.initStandardizerWords;
 
-        MainController.UI.initTool("Standardizer", function (err, result) {
+        MainController.UI.initTool("Standardizer", function (_err, _result) {
             //  setTimeout(function () {
             var str = "";
             data.forEach(function (item) {
@@ -17,7 +17,7 @@ broadcastChannel.onmessage = function (ev) {
     } else if (ev.data.showStandardizerResultsInLineage) {
         var classUrisBySource = ev.data.showStandardizerResultsInLineage;
 
-        MainController.UI.initTool("lineage", function (err, result) {
+        MainController.UI.initTool("lineage", function (_err, _result) {
             //  setTimeout(function () {
             var i = 0;
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
@@ -34,6 +34,7 @@ broadcastChannel.onmessage = function (ev) {
 
     //  alert(ev);
 };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Orchestrator = (function () {
     var self = {};
 

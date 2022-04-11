@@ -236,7 +236,7 @@ mappingsMap = {
                 s: "code",
                 p: "_restriction",
                 o: "propId",
-                prop: function (line, mapping) {
+                prop: function (line, _mapping) {
                     return line.physicalQuantity ? "part14:hasPhysicalQuantity" : "part14:hasQuality";
                 },
             },
@@ -252,7 +252,7 @@ mappingsMap = {
             {
                 s: "propId",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.type == "PQ") return "part14:PhysicalQuantity";
                     else if (line.type == "Bool") return "xsd:boolean";
                     else if (line.type == "Number") return "xsd:decimal";

@@ -6,7 +6,7 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, next) {
+    function GET(req, res, _next) {
         const result = {
             auth: config.auth,
             default_lang: config.default_lang,

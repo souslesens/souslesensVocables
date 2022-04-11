@@ -11,7 +11,6 @@
 var Genealogy = (function () {
     var self = { context: {} };
 
-    var colorsMap = {};
     var conceptsMap = {};
     var sourceLabels = [];
 
@@ -44,7 +43,6 @@ var Genealogy = (function () {
 
         var exactMatch = $("#exactMatchCBX").prop("checked");
 
-        var bindings = {};
         var sourceNodes = [];
 
         sourceLabels.forEach(function (sourceId) {
@@ -264,13 +262,12 @@ var Genealogy = (function () {
             if (self.currentChildren[nodeId] == 1) return "triangle";
             else return "dot";
         },
-        showDetails: function (defaultLang) {
+        showDetails: function (_defaultLang) {
             SourceBrowser.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, "Genealogy_nodeInfosDialogDiv");
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
                        return MainController.UI.message(err);
-                   }
-                   $("#Genealogy_nodeInfosDialogDiv").dialog("open");
+                   } $("#Genealogy_nodeInfosDialogDiv").dialog("open");
                    SourceEditor.showNodeInfos("Genealogy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 
                })*/

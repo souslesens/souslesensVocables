@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var ElasticSearchProxy = (function () {
     var self = {};
 
@@ -7,7 +8,6 @@ var ElasticSearchProxy = (function () {
         /*    console.log(JSON.stringify(indexes, null, 2))
             console.log(JSON.stringify(query, null, 2))*/
 
-        var strQuery = JSON.stringify(query);
         var payload = {
             query: query,
             url: "_search",
@@ -20,8 +20,7 @@ var ElasticSearchProxy = (function () {
             data: JSON.stringify(payload),
             contentType: "application/json",
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
-                var xx = data;
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error: function (err) {
@@ -44,8 +43,7 @@ var ElasticSearchProxy = (function () {
             url: Config.apiUrl + "/elasticsearch/msearch",
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
-                var xx = data;
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error: function (err) {
@@ -67,8 +65,7 @@ var ElasticSearchProxy = (function () {
             url: Config.apiUrl + "/analyzesentence",
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
-                var xx = data;
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error: function (err) {
@@ -136,7 +133,7 @@ var ElasticSearchProxy = (function () {
                 };
             }
 
-            Search.queryElastic(
+            ElasticSearchProxy.queryElastic(
                 {
                     query: query,
                     from: from,
@@ -230,7 +227,6 @@ var ElasticSearchProxy = (function () {
     };
     self.analyzeQuestion = function (question, options, callback) {
         if (!options) options = {};
-        var queryString = "";
 
         var query = {
             query_string: {

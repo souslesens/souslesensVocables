@@ -8,7 +8,6 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 var fs = require("fs");
-var async = require("async");
 
 var gaiaToSkos = {
     csvToJson: function (filePath) {
@@ -60,9 +59,6 @@ var gaiaToSkos = {
         var categories = [];
         var categoriesLetters = [];
 
-        var rootConcepts = [];
-        var jsonArray = [];
-
         var filePath = "D:\\NLP\\importedResources\\gaia.txt";
 
         var objs = gaiaToSkos.csvToJson(filePath);
@@ -72,7 +68,7 @@ var gaiaToSkos = {
         var classesMap = {};
         var categoriesMap = {};
         var categoriesClassMap = {};
-        objs.forEach(function (item, index) {
+        objs.forEach(function (item, _index) {
             if (item.Class && classes.indexOf(item.Class) < 0) {
                 classes.push(item.Class);
             }
@@ -121,7 +117,7 @@ var gaiaToSkos = {
         }
 
         if (true) {
-            objs.forEach(function (item, index) {
+            objs.forEach(function (item, _index) {
                 if (item.ClassExtended) {
                     var subject = "<http://data.total.com/resource/dictionary/gaia/" + counter + ">";
                     var label = gaiaToSkos.formatString(item.Term);
@@ -132,10 +128,6 @@ var gaiaToSkos = {
             });
         }
 
-        var x = categoriesLetters;
-        var y = categories;
-        var z = classes;
-
         fs.writeFileSync(filePath.replace(".txt", ".rdf.nt"), str);
     },
 
@@ -144,9 +136,6 @@ var gaiaToSkos = {
 
         var objs = gaiaToSkos.csvToJson(filePath);
 
-        var classesMap = {};
-        var categoriesMap = {};
-        var categoriesClassMap = {};
         var str = "";
         objs.forEach(function (item, index) {
             // category	syn 	term	acronymEn	synEn

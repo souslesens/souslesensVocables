@@ -10,9 +10,8 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_SKOS = (function () {
-    var source = "";
-
     self.getTopConcepts = function (sourceLabel, options, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>";
@@ -483,7 +482,7 @@ var Sparql_SKOS = (function () {
     self.insertTriples = function (sourceLabel, triples, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
         var insertTriplesStr = "";
-        triples.forEach(function (item, index) {
+        triples.forEach(function (item, _index) {
             insertTriplesStr += self.triplesObjectToString(item);
         });
 
@@ -491,7 +490,7 @@ var Sparql_SKOS = (function () {
 
         // console.log(query)
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err);
         });
     };
@@ -501,11 +500,10 @@ var Sparql_SKOS = (function () {
         var deleteTriplesStr = "";
         var insertTriplesStr = "";
         var subject;
-        triples.forEach(function (item, index) {
+        triples.forEach(function (item, _index) {
             if (!subject) subject = item.subject;
             insertTriplesStr += self.triplesObjectToString(item);
         });
-        deleteTriplesStr += "<?s ?p ?o.";
         var query =
             " WITH GRAPH  <" +
             graphUri +
@@ -528,7 +526,7 @@ var Sparql_SKOS = (function () {
 
         // console.log(query)
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err);
         });
     };
@@ -538,7 +536,7 @@ var Sparql_SKOS = (function () {
 
         var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err);
         });
     };
@@ -547,7 +545,7 @@ var Sparql_SKOS = (function () {
         var fromGraphUri = Config.sources[fromSourceLabel].graphUri;
         var query = " COPY <" + fromGraphUri + "> TO <" + toGraphUri + ">;";
         var url = Config.sources[fromSourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: fromSourceLabel }, function (err, _result) {
             return callback(err);
         });
     };

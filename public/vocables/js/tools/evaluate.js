@@ -2,7 +2,6 @@ var Evaluate = (function () {
     var self = {};
 
     self.maxGraphConceptLength = 200;
-    var sourceGraphsUriMap = {};
     self.currentCorpusData;
     self.selectedSources = [];
     self.categoriesTreeId = "evaluate_treeDiv";
@@ -93,7 +92,7 @@ var Evaluate = (function () {
             data: payload,
             dataType: "json",
 
-            success: function (result, textStatus, jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {
                 MainController.initControllers();
                 $("#annotate_messageDiv").prepend("<span class='KGbuild_infosOK'>ALL DONE</span><br>");
                 $("#annotate_waitImg").css("display", "none");
@@ -144,7 +143,7 @@ var Evaluate = (function () {
             contentType: false,
             processData: false,
             dataType: "json",
-            success: function (textResponse) {
+            success: function (_textResponse) {
                 MainController.initControllers();
                 $("#annotate_messageDiv").prepend("<span class='KGbuild_infosOK'>ALL DONE</span><br>");
                 $("#annotate_waitImg").css("display", "none");
@@ -198,7 +197,7 @@ var Evaluate = (function () {
             url: Config.apiUrl + "/annotator/corpus",
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 common.fillSelectOptions("evaluate_corpusSelect", result, true);
             },
             error(err) {
@@ -207,16 +206,16 @@ var Evaluate = (function () {
         });
     };
 
-    self.loadCorpusSubjectTree = function (corpusName, callback) {
+    self.loadCorpusSubjectTree = function (corpusName, _callback) {
         if (corpusName == "") return;
 
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/annotator/tree/" + corpusName,
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 self.currentCorpusData = data;
 
-                common.jstree.loadJsTree(self.categoriesTreeId, data.jstreeData, { selectTreeNodeFn: Evaluate.onTreeClickNode }, function (err, result) {
+                common.jstree.loadJsTree(self.categoriesTreeId, data.jstreeData, { selectTreeNodeFn: Evaluate.onTreeClickNode }, function (_err, _result) {
                     common.jstree.openNode(self.categoriesTreeId, data.jstreeData[0].id);
                 });
 
@@ -228,15 +227,15 @@ var Evaluate = (function () {
         });
     };
 
-    self.onTreeClickNode = function (evt, obj) {
+    self.onTreeClickNode = function (_evt, obj) {
         $("#messageDiv").html("");
         self.currentTreeNode = obj.node;
-        self.getSubjectGraphData(obj.node, function (err, result) {
+        self.getSubjectGraphData(obj.node, function (err, _result) {
             if (err) return MainController.UI.message(err);
             self.showMissingWords(self.currentTreeNode);
         });
     };
-    self.onTabActivate = function (e, ui) {
+    self.onTabActivate = function (_e, ui) {
         var divId = ui.newPanel.attr("id");
         if (divId == "Annotate_tabs_missingTerms") {
             self.showMissingWords(self.currentTreeNode);
@@ -248,7 +247,6 @@ var Evaluate = (function () {
     self.getSubjectGraphData = function (jstreeNode, callback) {
         MainController.UI.message("processing data");
         var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
-        var concepts = [];
         var ancestorsDepth = 3;
 
         var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked();
@@ -399,7 +397,7 @@ var Evaluate = (function () {
                     }
                 );
             },
-            function (err) {
+            function (_err) {
                 MainController.UI.message("Drawing graph (" + visjsData.nodes.length + " nodes)");
                 visjsGraph.draw("Evaluate_graphDiv", visjsData, { onclickFn: Evaluate.onGraphNodeClick }, function () {
                     $("#waitImg").css("display", "none");
@@ -411,12 +409,8 @@ var Evaluate = (function () {
         );
     };
 
-    self.showMissingWords = function (jstreeNode) {
+    self.showMissingWords = function (_jstreeNode) {
         var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id);
-
-        var sources = {};
-        var missingNouns = [];
-        var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked();
 
         var sourceMissingWords = [];
         descendants.forEach(function (node) {
@@ -435,7 +429,7 @@ var Evaluate = (function () {
         var html = ""; //<div style='flex-wrap;width:500px'>"
 
         sourceMissingWords.sort();
-        sourceMissingWords.forEach(function (noun, index) {
+        sourceMissingWords.forEach(function (noun, _index) {
             html += "<div class='evaluate_missingWord'>" + noun + "</div>";
             /*if(index%15==0)
                     html += "<br>"*/
@@ -507,8 +501,6 @@ var Evaluate = (function () {
     self.showUnderlinedEntities = function (jstreeNode) {
         MainController.UI.message("processing data");
         var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
-        var concepts = [];
-        var ancestorsDepth = 3;
 
         var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked();
         var sources = {};
@@ -519,7 +511,7 @@ var Evaluate = (function () {
         descendants.forEach(function (node) {
             if (!node.data.files) return;
 
-            node.data.files.forEach(function (fileObj, index) {
+            node.data.files.forEach(function (fileObj, _index) {
                 $("#underlineEntities").append("<br><b>----------------" + fileObj.filePath + "-----------------</b><br>");
                 var outputText = "";
                 var initialText = fileObj.text;
@@ -568,17 +560,17 @@ var Evaluate = (function () {
                 withCheckboxes: true,
                 openAll: true,
             },
-            function (err, result) {
+            function (_err, _result) {
                 common.jstree.checkAll("Evaluate_rightPanel_sourcesTreeDiv");
             }
         );
     };
 
-    self.contextMenuFn = function (treeDiv) {
+    self.contextMenuFn = function (_treeDiv) {
         var items = {};
         items.matchAllResources = {
             label: "match all ressources",
-            action: function (e, xx) {
+            action: function (_e, _xx) {
                 // pb avec source
                 self.treeMenu.matchAllRessources();
             },
@@ -586,12 +578,10 @@ var Evaluate = (function () {
         /*    self.currentTreeNode = obj.node
                 self.getSubjectGraphData(obj.node)
                 self.showMissingWords(obj.node)*/
-
-        var sources = {};
     };
     self.treeMenu = {
         matchAllRessources: function () {
-            var x = self.currentTreeNode;
+            // pass
         },
     };
 

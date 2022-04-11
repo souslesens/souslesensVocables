@@ -1,3 +1,4 @@
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SQLquery = (function () {
     var self = {};
 
@@ -39,11 +40,11 @@ var SQLquery = (function () {
             url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 (self.sampleData[table] = data), displaySampleData(self.sampleData[table]);
             },
 
-            error: function (err) {
+            error: function (_err) {
                 // pass
             },
         });

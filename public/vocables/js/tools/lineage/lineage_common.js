@@ -7,7 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+// eslint-disable-next-line no-global-assign
 Lineage_common = (function () {
     var self = {};
     self.currentSource = null;
@@ -21,7 +21,7 @@ Lineage_common = (function () {
     self.deleteNode = function (node, jstreeId) {
         if (node.children && node.children.length > 0) return alert("cannot delete node with children");
         if (confirm("delete node " + node.data.label)) {
-            Sparql_generic.deleteTriples(Lineage_common.currentSource, node.data.id, null, null, function (err, result) {
+            Sparql_generic.deleteTriples(Lineage_common.currentSource, node.data.id, null, null, function (err, _result) {
                 if (err) MainController.UI.message(err);
                 MainController.UI.message("node " + node.data.label + " deleted");
                 $("#" + jstreeId)
@@ -84,9 +84,8 @@ Lineage_common = (function () {
                     return alert(" paste from clipboard not allowed");
                 }
 
-                var message = "";
                 if (confirm("insert inside " + parentNode.data.label + "  triples " + JSON.stringify(triples, null, 2))) {
-                    Sparql_generic.insertTriples(parentNode.data.source, triples, null, function (err, result) {
+                    Sparql_generic.insertTriples(parentNode.data.source, triples, null, function (err, _result) {
                         if (err) return MainController.UI.message(err);
                         nodeData.source = parentNode.data.source;
                         var jstreeData = [

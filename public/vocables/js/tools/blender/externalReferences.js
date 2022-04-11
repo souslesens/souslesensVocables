@@ -15,45 +15,22 @@ var ExternalReferences = (function () {
         if (!treeNode || !treeNode.data) return menuItems;
         (menuItems.showExternalReferenceNodeInfos = {
             label: "view node properties",
-            action: function (obj, sss, cc) {
+            action: function (_obj, _sss, _cc) {
                 ExternalReferences.showExternalReferenceNodeInfos();
             },
         }),
             (menuItems.showExternalReferenceChildren = {
                 label: "show external nodes ",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     ExternalReferences.showExternalReferenceChildren();
                 },
             }),
             (menuItems.deleteExternalReferenceTreeNode = {
                 label: "delete external reference",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     ExternalReferences.deleteReference();
                 },
             });
-        /*   menuItems.importReference = {
-
-                label: "import external reference",
-                "action": false,
-                "submenu": {
-                    importReferenceNodeOnly: {
-                        label: "import node reference",
-                        action: function () {
-                            self.importReferenceNode()
-
-                        }
-                    },
-                    importReferenceDescendants: {
-                        label: "node and descendants references",
-                        action: function () {
-                            self.importReferenceDescendants()
-
-                        }
-                    }
-
-                }
-
-            }*/
         return menuItems;
     };
 
@@ -62,9 +39,6 @@ var ExternalReferences = (function () {
      *
      * adds nodes to tree comining from another scheme
      * using narrowMatch property : its values concats <nodeUri>@<saprqlServerUrl>:<graphUri
-
-
-
      */
     (self.openNarrowMatchNodes = function (sourceLabel, node) {
         if (node.children.length > 0) return;
@@ -101,7 +75,6 @@ var ExternalReferences = (function () {
             async.eachSeries(
                 dataArray,
                 function (data, callbackEach) {
-                    var existingNodeIds = common.jstree.getjsTreeNodes("Blender_conceptTreeDiv", true);
                     var fromSource = data.source;
                     var fromGraphUri = Config.sources[fromSource].graphUri;
                     var fromSparql_url = Config.sources[fromSource].sparql_server.url;
@@ -116,13 +89,12 @@ var ExternalReferences = (function () {
                     });
 
                     var triple = { subject: Blender.currentTreeNode.data.id, predicate: "http://www.w3.org/2004/02/skos/core#narrowMatch", object: objectUri, valueType: "uri" };
-                    Sparql_generic.insertTriples(Blender.currentSource, [triple], null, function (err, result) {
+                    Sparql_generic.insertTriples(Blender.currentSource, [triple], null, function (err, _result) {
                         callbackEach(err);
                     });
                 },
                 function (err) {
                     if (err) return MainController.UI.message(err);
-                    var jsTreeOptions = { type: "externalReference", labelClass: "treeType_externalReference" };
                     common.jstree.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.data.id, newTreeNodes);
                     Clipboard.clear();
                 }
@@ -147,18 +119,7 @@ var ExternalReferences = (function () {
             var params = self.parseExternalUrl(url);
 
             if (!params.sourceLabel) return MainController.UI.message("no sourceLabel found from node id url params");
-            var sourceLabel = Blender.currentTreeNode.data.source;
             SourceBrowser.showNodeInfos(params.sourceLabel, params.id, "mainDialogDiv");
-            /*  Sparql_generic.getNodeInfos(params.sourceLabel, params.id, null, function (err, result) {
-                if (err) {
-                    return MainController.UI.message(err);
-                }
-                $("#Blender_PopupEditDiv").dialog("open")
-
-                //   $(".ui-dialog-titlebar-close").css("display", "block")
-                $("#Blender_PopupEditButtonsDiv").css("display", "none")
-                SourceEditor.showNodeInfos("Blender_PopupEditDiv", "en", Blender.currentTreeNode.data.id, result);
-            })*/
         }),
         (self.parseExternalUrl = function (url) {
             var p = url.indexOf("?");
@@ -170,7 +131,6 @@ var ExternalReferences = (function () {
                 var array = str.split("=");
                 obj[array[0]] = array[1];
             });
-            var sourceLabel = null;
             for (var key in Config.sources) {
                 if (Config.sources[key].sparql_server.url == obj.sparql_url && Config.sources[key].graphUri == obj.graphUri) obj.sourceLabel = key;
             }
@@ -205,7 +165,7 @@ var ExternalReferences = (function () {
     self.deleteReference = function () {
         if (confirm(" delete reference ")) {
             var parentId = Blender.currentTreeNode.parent;
-            Sparql_generic.deleteTriples(Blender.currentSource, parentId, "http://www.w3.org/2004/02/skos/core#narrowMatch", Blender.currentTreeNode.data.id, function (err, result) {
+            Sparql_generic.deleteTriples(Blender.currentSource, parentId, "http://www.w3.org/2004/02/skos/core#narrowMatch", Blender.currentTreeNode.data.id, function (err, _result) {
                 if (err) {
                     Blender.currentTreeNode = null;
                     return MainController.UI.message(err);

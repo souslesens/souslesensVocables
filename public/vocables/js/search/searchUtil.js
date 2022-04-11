@@ -121,6 +121,7 @@ var SearchUtil = (function () {
                                                 if (indexParent > 0 && !parentsMap[parent]) parentsMap[parent] = {};
                                             });
                                         } else {
+                                            // Pass
                                         }
                                     });
                                     classesArray[index].matches = matches;

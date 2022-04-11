@@ -38,7 +38,7 @@ var MainController = (function () {
     };
 
     self.loadSources = function (callback) {
-        var payload = {
+        var _payload = {
             getSources: 1,
         };
         $.ajax({
@@ -78,6 +78,7 @@ var MainController = (function () {
             },
             error: function (err) {
                 alert("cannot load sources");
+                // eslint-disable-next-line no-console
                 console.log(err);
                 if (callback) return callback();
             },
@@ -104,6 +105,7 @@ var MainController = (function () {
             },
             error: function (err) {
                 alert("cannot load profiles");
+                // eslint-disable-next-line no-console
                 console.log(err);
                 if (callback) return callback();
             },
@@ -120,8 +122,11 @@ var MainController = (function () {
             data: payload,
             dataType: "json",
 
-            success: function (_data, _textStatus, _jqXHR) {},
+            success: function (_data, _textStatus, _jqXHR) {
+                // Pass
+            },
             error: function (err) {
+                // eslint-disable-next-line no-console
                 console.log(err);
             },
         });
@@ -181,12 +186,6 @@ var MainController = (function () {
             // broadcastChannel.postMessage("eeee")
             broadcastChannel.postMessage({ from: MainController.currentTool, to: "Lineage" });
             return;
-
-            var variables = "";
-            for (var name in this) {
-                console.log(name + "  :  " + this[name]);
-            }
-            console.log(variables);
         },
 
         initialGraphDivWitdh: 0,
@@ -455,6 +454,7 @@ var MainController = (function () {
 
         onAccordionChangePanel: function (panelLabel) {
             if (self.previousPanelLabel && self.previousPanelLabel == "toolPanelDiv") {
+                // Pass
             } else {
                 //  $("#graphDiv").html("...");
             }
@@ -481,6 +481,7 @@ var MainController = (function () {
             common.copyTextToClipboard(Sparql_proxy.currentQuery);
         },
         logout: function () {
+            // eslint-disable-next-line no-console
             console.log("logout");
         },
     };

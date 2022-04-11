@@ -133,13 +133,13 @@ const Admin = () => {
     //TODO: combine both fetch with promise.all() or something like that
 
     React.useEffect(() => {
-        getProfiles("/profiles")
+        getProfiles()
             .then((profiles) => updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) }))
             .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithProfiles", payload: failure(err.message) }));
     }, []);
 
     React.useEffect(() => {
-        getUsers("/users")
+        getUsers()
             .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
             .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.message) }));
     }, []);

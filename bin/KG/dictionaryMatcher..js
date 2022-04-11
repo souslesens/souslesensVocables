@@ -181,17 +181,15 @@ if (false) {
 */
 
 //dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\readiLabel.csv", "bomaftwin","label","equipmentDescription","materialNumber ")
-if (true) {
-    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv", "tepdk_tags", "assetTagCode", "Functional_Location_code", "tagName", function (err, result) {
-        var str = "";
-        for (var code in result) {
-            result[code].forEach(function (tag) {
-                str += tag.id + "\t" + code + "\n";
-            });
-        }
-        fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str);
-    });
-}
+dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv", "tepdk_tags", "assetTagCode", "Functional_Location_code", "tagName", function (err, result) {
+    var str = "";
+    for (var code in result) {
+        result[code].forEach(function (tag) {
+            str += tag.id + "\t" + code + "\n";
+        });
+    }
+    fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str);
+});
 
 /*
 if (false) {

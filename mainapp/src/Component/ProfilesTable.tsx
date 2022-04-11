@@ -1,25 +1,20 @@
-import { Box, CircularProgress, ButtonGroup, Grid, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
+import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
 import { useModel } from "../Admin";
-import { User } from "../User";
 import * as React from "react";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, putProfiles } from "../Profile";
-import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField, TextFieldProps } from "@material-ui/core";
+import { SRD } from "srd";
+import { defaultProfile, saveProfile, Profile, deleteProfile } from "../Profile";
+import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField } from "@material-ui/core";
 import { identity, style } from "../Utils";
 import { ulid } from "ulid";
-import { MAX_PAGE_SIZE } from "@mui/x-data-grid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
     const [filteringChars, setFilteringChars] = React.useState("");
-
-    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
-
     const renderProfiles = SRD.match(
         {
-            notAsked: () => <p>Let's fetch some data!</p>,
+            notAsked: () => <p>Let&aposs fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -87,8 +82,6 @@ const ProfilesTable = () => {
 
 type ProfileEditionState = { modal: boolean; profileForm: Profile };
 
-const initProfileEditionState: ProfileEditionState = { modal: false, profileForm: defaultProfile(ulid()) };
-
 const enum Type {
     UserClickedModal,
     UserUpdatedField,
@@ -112,17 +105,18 @@ type Msg_ =
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
     const { model } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
+    const getUnmodifiedProfiles = unwrappedProfiles.reduce((acc, value) => (profileEditionState.profileForm.id === value.id ? value : acc), defaultProfile(ulid()));
+    const resetSourceForm = msg.payload ? profileEditionState.profileForm : getUnmodifiedProfiles;
+    const fieldToUpdate: any = msg.type === Type.UserClickedCheckAll || msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
     switch (msg.type) {
         case Type.UserClickedModal:
             return { ...profileEditionState, modal: msg.payload };
 
         case Type.UserUpdatedField:
-            const fieldToUpdate = msg.payload.fieldname;
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } };
 
         case Type.UserClickedCheckAll:
-            const _fieldToUpdate = msg.payload.fieldname;
-            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [_fieldToUpdate]: msg.payload.value ? "ALL" : [] } };
+            return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.value ? "ALL" : [] } };
 
         case Type.UserUpdatedBlenderLevel:
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, blender: { contextMenuActionStartLevel: msg.payload } } };
@@ -130,12 +124,8 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
         case Type.ResetProfile:
             switch (msg.payload) {
                 case Mode.Creation:
-                    console.log("resetSourceCreationMode");
                     return { ...profileEditionState, profileForm: defaultProfile(ulid()) };
                 case Mode.Edition:
-                    const getUnmodifiedProfiles = unwrappedProfiles.reduce((acc, value) => (profileEditionState.profileForm.id === value.id ? value : acc), defaultProfile(ulid()));
-                    const resetSourceForm = msg.payload ? profileEditionState.profileForm : getUnmodifiedProfiles;
-
                     return { ...profileEditionState, profileForm: msg.payload ? profileEditionState.profileForm : resetSourceForm };
             }
     }
@@ -150,7 +140,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const schemaTypes = [...new Set(unwrappedSources.map((source) => source.schemaType))];
-    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
 
@@ -163,7 +152,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
     const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
 
-    const shouldDisplayMultiselect = () => Array.isArray(profileModel.profileForm.allowedTools);
     const saveProfiles = () => {
         // const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
         // const addProfile = [...unwrappedProfiles, profileModel.profileForm]
@@ -173,7 +161,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         //     .then(() => update({ type: Type.UserClickedModal, payload: false }))
         //     .then(() => update({ type: Type.ResetProfile, payload: create ? Mode.Creation : Mode.Edition }))
         //     .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
-        saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+        void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
     return (

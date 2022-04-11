@@ -51,6 +51,7 @@ var GraphController = (function () {
                 var fromId = "";
                 var fromLabel = "";
                 if (!fromVar) {
+                    // Pass
                 } else if (fromVar == "#") {
                     fromId = "#";
                     fromLabel = visjOptions.rootLabel || "#";
@@ -95,8 +96,8 @@ var GraphController = (function () {
 
                 if (!existingIds[toId]) {
                     existingIds[toId] = 1;
-                    var color = Lineage_classes.getSourceColor(null, toId);
-                    var node = {
+                    color = Lineage_classes.getSourceColor(null, toId);
+                    node = {
                         id: toId,
                         label: toLabel,
                         shape: getShape("to", toId),

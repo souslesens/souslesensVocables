@@ -3,7 +3,7 @@ const identity = <Type>(a: Type): Type => a;
 function sanitizeValue(value: string | string[]): string[] {
     return typeof value === "string" ? value.split(",") : value;
 }
-export function exhaustiveCheck(type: never): never {
+export function exhaustiveCheck(): never {
     throw new Error("Missing type");
 }
 export const style = {

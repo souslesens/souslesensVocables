@@ -66,8 +66,8 @@ var graphController = (function () {
             }
 
             if (!nodeMap[edge.to]) {
-                var rootEntity = data.labels[edge.from].split("-")[0];
-                var color = rootEntityColors[rootEntity];
+                rootEntity = data.labels[edge.from].split("-")[0];
+                color = rootEntityColors[rootEntity];
                 nodeMap[edge.to] = {
                     id: "E_" + edge.to,
                     color: color,
@@ -133,6 +133,7 @@ var graphController = (function () {
                 self.addEntityHitsToGraph(hits);
             },
             error: function (err) {
+                // eslint-disable-next-line no-console
                 console.log(err);
             },
         });
@@ -171,7 +172,7 @@ var graphController = (function () {
     };
 
     self.addEntityHitsToGraph = function (hits, nodes) {
-        if (!nodes) var nodes = visjsGraph.data.nodes.get();
+        if (!nodes) nodes = visjsGraph.data.nodes.get();
         var relations = {};
         var newEdges = [];
         var newNodes = [];

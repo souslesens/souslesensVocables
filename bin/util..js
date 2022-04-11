@@ -281,7 +281,7 @@ var util = {
         var path = require("path");
         var dirsArray = [];
         var dirFilesMap = {};
-        var message = "";
+        var _message = "";
         if (!options) options = {};
 
         function recurse(parent) {

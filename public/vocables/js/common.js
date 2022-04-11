@@ -81,9 +81,7 @@ var common = (function () {
                 plugins.push("contextmenu");
             }
             if (options.dnd) plugins.push("dnd");
-            if (true || options.types) {
-                plugins.push("types");
-            }
+            plugins.push("types");
 
             var check_callbackFn = function (op, node, parent, position, more) {
                 if (op == "move_node" && options.dropAllowedFn) {
@@ -208,11 +206,14 @@ var common = (function () {
 
                 if (!parentNode) return;
 
+                // eslint-disable-next-line no-console
                 if (parentNodeId == node.id) return console.log("  Error jstree parent == childNode : " + parentNodeId);
 
                 $("#" + jstreeDiv)
                     .jstree(true)
-                    .create_node(parentNodeId, node, position, function () {});
+                    .create_node(parentNodeId, node, position, function () {
+                        // Pass
+                    });
             });
             setTimeout(function () {
                 self.jstree.setTreeAppearance();
@@ -247,6 +248,7 @@ var common = (function () {
                     .jstree(true)
                     .delete_node(descendants);
             } catch (e) {
+                // eslint-disable-next-line no-console
                 console.log(e);
             }
         },
@@ -330,15 +332,10 @@ var common = (function () {
 
             parentDiv.css("overflow", "auto");
             parentDiv.css("margin-top", "5px");
-            if (false && p.left < 600) parentDiv.css("margin-left", "-25px");
         },
 
         setTreeAppearance: function () {
             return;
-            $(".jstree-themeicon").css("display", "none");
-            $(".jstree-anchor").css("line-height", "18px");
-            $(".jstree-anchor").css("height", "18px");
-            $(".jstree-anchor").css("font-size", "14px");
         },
         onAllTreeCbxChange: function (allCBX, jstreeDiv) {
             var checked = $(allCBX).prop("checked");
@@ -521,7 +518,7 @@ var common = (function () {
                 matrix.push(mLine);
             });
 
-            var x = matrix;
+            var _x = matrix;
             var matrix2 = [];
             for (var i = 0; i < countCols; i++) {
                 var col = [];
@@ -537,8 +534,10 @@ var common = (function () {
 
     self.concatArraysWithoutDuplicateXX = function (_array, _addedArray, _key) {
         result.nodes.forEach(function (item) {
-            var unique = true;
-            visjsData.nodes.forEach(function (item2) {});
+            var _unique = true;
+            visjsData.nodes.forEach(function (_item2) {
+                // Pass
+            });
             filteredNodes.push(item);
         });
     };
@@ -588,7 +587,7 @@ var common = (function () {
 
     self.decapitalizeLabel = function (label) {
         if (!label.match(/[a-z]/)) return label;
-        if (label == "LEVEL TRANSMITTER") var x = 3;
+        if (label == "LEVEL TRANSMITTER") var _x = 3;
         var altLabel = label.replace(/[A-Z]/g, function (maj) {
             return " " + maj;
         });
@@ -649,42 +648,6 @@ var common = (function () {
 
         copy();
         return;
-
-        var textArea = document.createElement("textarea");
-        textArea.style.position = "fixed";
-        textArea.style.top = 0;
-        textArea.style.left = 0;
-
-        // Ensure it has a small width and height. Setting to 1px / 1em
-        // doesn't work as this gives a negative w/h on some browsers.
-        textArea.style.width = "2em";
-        textArea.style.height = "2em";
-
-        // We don't need padding, reducing the size if it does flash render.
-        textArea.style.padding = 0;
-
-        // Clean up any borders.
-        textArea.style.border = "none";
-        textArea.style.outline = "none";
-        textArea.style.boxShadow = "none";
-
-        // Avoid flash of the white box if rendered for any reason.
-        textArea.style.background = "transparent";
-
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-            var successful = document.execCommand("copy");
-            document.body.removeChild(textArea);
-            if (successful) return "graph copied in clipboard";
-            else return "graph copy failed";
-        } catch (err) {
-            console.log(err);
-            return "graph copy faild";
-        }
     };
 
     self.createBGColorCssClasses = function (classPrefix, values, palette) {
@@ -718,7 +681,7 @@ var common = (function () {
     };
 
     (self.convertNumStringToNumber = function (value) {
-        if (value.match && value.match(/.*[a-zA-Z\/\\$].*/)) return value;
+        if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) return value;
         if (self.isInt(value)) return parseInt(value);
         if (self.isFloat(value)) return parseFloat(value);
         if (value == "true") return true;
@@ -821,7 +784,6 @@ var common = (function () {
         "http://w3id.org/readi/rdl/D101001188": "CFIHOS_READI",
         "http://data.15926.org/rdl/RDS1138994": "CFIHOS-ISO",
         "http://standards.iso.org/iso/15926/part14/FunctionalObject": "ISO_15926-part-14",
-        "http://w3id.org/readi/rdl/D101001516": "CFIHOS_READI",
         "http://data.posccaesar.org/rdl/RDS11984375": "ISO_15926-PCA",
         "http://data.15926.org/rdl/RDS11984375": "CFIHOS-ISO",
         "http://standards.iso.org/iso/15926/part14/PhysicalObject": "ISO_15926-part-14",

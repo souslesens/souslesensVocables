@@ -16,7 +16,7 @@ const SourcesTable = () => {
 
     const renderSources = SRD.match(
         {
-            notAsked: () => <p>Let's fetch some data!</p>,
+            notAsked: () => <p>Let&aposs fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -86,8 +86,6 @@ const SourcesTable = () => {
 
 type SourceEditionState = { modal: boolean; sourceForm: Source };
 
-const initSourceEditionState: SourceEditionState = { modal: false, sourceForm: defaultSource(ulid()) };
-
 const enum Type {
     UserClickedModal,
     UserUpdatedField,
@@ -122,14 +120,14 @@ type Msg_ =
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
     const { model } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
-
+    const getUnmodifiedSources = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? value : acc), defaultSource(ulid()));
+    const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources;
+    const fieldToUpdate: any = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
     switch (msg.type) {
         case Type.UserClickedModal:
             return { ...sourceEditionState, modal: msg.payload };
 
         case Type.UserUpdatedField:
-            const fieldToUpdate = msg.payload.fieldname;
-
             return { ...sourceEditionState, sourceForm: { ...sourceEditionState.sourceForm, [fieldToUpdate]: msg.payload.newValue } };
 
         case Type.UserAddedGraphUri:
@@ -162,9 +160,6 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
                     return { ...sourceEditionState, sourceForm: defaultSource(ulid()) };
 
                 case Mode.Edition:
-                    const getUnmodifiedSources = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? value : acc), defaultSource(ulid()));
-                    const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources;
-
                     return { ...sourceEditionState, sourceForm: msg.payload ? sourceEditionState.sourceForm : resetSourceForm };
             }
     }
@@ -193,19 +188,6 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             type: Type.UserUpdatedsparql_server,
             payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, "").split(",") : event.target.value },
         });
-    // const saveSources = () => {
-
-    //     const updateSources = unwrappedSources.map(s => s.name === source.name ? sourceModel.sourceForm : s)
-    //     const addSources = [...unwrappedSources, sourceModel.sourceForm]
-
-    //     putSources(create ? addSources : updateSources)
-    //         .then((sources) => updateModel({ type: 'ServerRespondedWithSources', payload: success(sources) }))
-    //         .then(() => update({ type: Type.UserClickedModal, payload: false }))
-    //         .then(() => update({ type: Type.ResetSource, payload: create ? Mode.Creation : Mode.Edition }))
-    //         .catch((err) => updateModel({ type: 'ServerRespondedWithSources', payload: failure(err.msg) }));
-    // };
-
-    const creationVariant = (edition: any, creation: any) => (create ? creation : edition);
 
     return (
         <>
@@ -311,7 +293,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl>
-                                <InputLabel id="schemaType-label">Schema's Type</InputLabel>
+                                <InputLabel id="schemaType-label">Schema&aposs Type</InputLabel>
                                 <Select
                                     labelId="schemaType-label"
                                     id="schemaType"
@@ -394,7 +376,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
 
                     <Grid item xs={6}>
                         <FormControl>
-                            <InputLabel id="dataSource-type">DataSource's type</InputLabel>
+                            <InputLabel id="dataSource-type">DataSource&aposs type</InputLabel>
                             <Select
                                 labelId="dataSource-type"
                                 id="dataSource"

@@ -2,8 +2,6 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 
-var KGSqlConnector = require("./KGSqlConnector.");
-var SQLserverConnector = require("./SQLserverConnector.");
 var ConfigManager = require("../configManager.");
 
 var KGcontroller = {
@@ -14,7 +12,7 @@ var KGcontroller = {
 
     saveMappings: function (source, mappings, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";
-        fs.writeFile(filePath, JSON.stringify(mappings, null, 2), null, function (err, result) {
+        fs.writeFile(filePath, JSON.stringify(mappings, null, 2), null, function (err, _result) {
             callback(err);
         });
     },
@@ -34,7 +32,9 @@ var KGcontroller = {
         });
     },
 
-    generateTriples: function (config) {},
+    generateTriples: function (_config) {
+        // do nothing ? XXX
+    },
     getAssetGlobalMappings: function (source, callback) {
         var dir = KGcontroller.getMappingsDirPath();
         var files = fs.readdirSync(dir);
@@ -98,8 +98,6 @@ var KGcontroller = {
                     predicatesMap[subjectType].push(objectType);
                 }
             });
-
-            var x = predicatesMap;
         });
     },
 
@@ -252,10 +250,8 @@ var KGcontroller = {
         "tbltypicalassemblypatterntofunctionalclasschild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
     },
 };
 

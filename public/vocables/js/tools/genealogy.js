@@ -11,7 +11,6 @@
 var Genealogy = (function () {
     var self = { context: {} };
 
-    var colorsMap = {};
     var conceptsMap = {};
     var sourceLabels = [];
 
@@ -44,7 +43,6 @@ var Genealogy = (function () {
 
         var exactMatch = $("#exactMatchCBX").prop("checked");
 
-        var bindings = {};
         var sourceNodes = [];
 
         sourceLabels.forEach(function (sourceId) {
@@ -159,6 +157,7 @@ var Genealogy = (function () {
                 if (direction == "ancestors") {
                     //  sparql_abstract.getGenealogy(concept.source.id, concept.id, {exactMatch: true}, function (err, result) {
                     Sparql_generic.getNodeParents(item.sourceId, null, conceptId, maxDepth, { exactMatch: true }, function (err, result) {
+                        // eslint-disable-next-line no-console
                         if (err) return console.log(err);
                         if (!result || !result.forEach) return;
                         self.addGenealogyGraph(item.sourceId, self.context.currentWord, result, maxDepth);
@@ -166,6 +165,7 @@ var Genealogy = (function () {
                 } else if (direction == "children") {
                     self.drawSourceRootNode(self.context.currentWord, item);
                     sparql_abstract.getChildren(item.source, item.id, {}, function (err, result) {
+                        // eslint-disable-next-line no-console
                         if (err) return console.log(err);
                         self.addChildrenNodesToGraph(item, result);
                     });
@@ -241,6 +241,7 @@ var Genealogy = (function () {
         drawChildren: function () {
             self.graphActions.hidePopup();
             Sparql_generic.getNodeChildren(self.graphActions.currentNode.data.source, null, self.graphActions.currentNode.id, 2, {}, function (err, result) {
+                // eslint-disable-next-line no-console
                 if (err) return console.log(err);
                 self.currentChildren = {};
                 result.forEach(function (item) {
@@ -261,13 +262,12 @@ var Genealogy = (function () {
             if (self.currentChildren[nodeId] == 1) return "triangle";
             else return "dot";
         },
-        showDetails: function (defaultLang) {
+        showDetails: function (_defaultLang) {
             SourceBrowser.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, "Genealogy_nodeInfosDialogDiv");
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
                        return MainController.UI.message(err);
-                   }
-                   $("#Genealogy_nodeInfosDialogDiv").dialog("open");
+                   } $("#Genealogy_nodeInfosDialogDiv").dialog("open");
                    SourceEditor.showNodeInfos("Genealogy_nodeInfosDialogDiv", "en", self.graphActions.currentNode.id, result)
 
                })*/

@@ -1,23 +1,20 @@
-import { ulid } from "ulid";
-import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 
-import { RadioGroup, Box, CircularProgress, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack, SliderValueLabel } from "@mui/material";
+import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
+import { SRD } from "srd";
 import { Log } from "../Log";
-import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel, MenuItem, Modal, Radio, Select, TextField } from "@material-ui/core";
-import { identity, style } from "../Utils";
+import { TextField } from "@material-ui/core";
 
 export const LogsTable = () => {
-    const { model, updateModel } = useModel();
+    const { model } = useModel();
 
     const [filteringChars, setFilteringChars] = React.useState("");
 
     const renderLogs = SRD.match(
         {
-            notAsked: () => <p>Let's fetch some data!</p>,
+            notAsked: () => <p>Let&aposs fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />

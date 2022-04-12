@@ -1,27 +1,7 @@
 var fs = require("fs");
 const async = require("async");
-var sax = require("sax");
 var util = require("../../bin/util.");
 var httpProxy = require("../../bin/httpProxy.");
-var SPARQLutil = require("../../bin/SPARQLutil.");
-
-var xml2js = require("xml2js");
-
-var topParentTag;
-var triples = "";
-var currentTriple = "";
-var currentUri = "";
-
-var line = 0;
-
-var currentParent;
-var currentAttr;
-var currentX;
-var currentNodeName;
-
-var currentNodePath = "";
-var currentObjects = {};
-var currentParentObj;
 
 var buildOwl = function (json, graphUri) {
     var triples = [];
@@ -35,8 +15,6 @@ var buildOwl = function (json, graphUri) {
 
     // var json = JSON.parse("" + fs.readFileSync(jsonPath));
     for (var topClassKey in json) {
-        var items = json[topClassKey];
-        var packages = {};
         var topClassUri;
 
         topClassUri = graphUri + util.formatStringForTriple(topClassKey, true);
@@ -59,8 +37,8 @@ var buildOwl = function (json, graphUri) {
         });
 
         var properties = json[topClassKey].Data.IndividualTypeProperties;
-        for (var aclass in properties) {
-            var className = aClass.name;
+        for (const aClass in properties) {
+            let className = aClass.name;
             if (!className) return;
 
             var uri = graphUri + util.formatStringForTriple(aClass.name, true);
@@ -93,10 +71,9 @@ var buildOwl = function (json, graphUri) {
                 });
             }
 
-            var className = aClass.name.toLowerCase();
+            className = aClass.name.toLowerCase();
             if (aClass.elements) {
                 aClass.elements.forEach(function (element) {
-                    if (element.name == "GeochronologicalUnit") var x = 3;
                     var type = element.type;
                     if (!type) return;
                     var typeArray = type.split(":");
@@ -175,7 +152,6 @@ var buildOwl = function (json, graphUri) {
                     }
                 });
             }
-            if (aClass.name == "MatrixCementKind") var x = 3;
 
             if (aClass.enumerations) {
                 var enumsMap = {};
@@ -249,7 +225,7 @@ var buildOwl = function (json, graphUri) {
             function (callbackSeries) {
                 var queryGraph = "CLEAR GRAPH <" + graphUri + ">";
                 var params = { query: queryGraph };
-                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                     return callbackSeries(err);
                 });
             },
@@ -284,9 +260,8 @@ var buildOwl = function (json, graphUri) {
 
                         var params = { query: queryGraph };
 
-                        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                             if (err) {
-                                var x = queryGraph;
                                 return callbackEach(err);
                             }
                             totalTriples += triples.length;
@@ -311,62 +286,59 @@ var buildOwl = function (json, graphUri) {
 /***********************************************************************************************************************************************/
 /***********************************************************************************************************************************************/
 
-var sourcePath = "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
-
 var dirPathMasterData = { dir: "D:\\NLP\\ontologies\\OSDU\\301018_Shell_SDU_JSON_Schemas_for_OSDU\\resource-group-type__master-data\\", prefix: "master_data" };
 
-if (true) {
-    var doAll = false;
-    var currentDir = dirPathMasterData;
+var doAll = false;
+var currentDir = dirPathMasterData;
 
-    //  var currentDir = dirPathCommon
-    var dirPath = currentDir.dir;
-    var prefix = currentDir.prefix;
+//  var currentDir = dirPathCommon
+var dirPath = currentDir.dir;
+var prefix = currentDir.prefix;
 
-    var graphUri = "http://souslesens.org/osdu/ontology/" + prefix + "/";
+var graphUri = "http://souslesens.org/osdu/ontology/" + prefix + "/";
 
-    async.series(
-        [
-            //concat all json together
-            function (callbackSeries) {
-                if (!doAll) return callbackSeries();
+async.series(
+    [
+        //concat all json together
+        function (callbackSeries) {
+            if (!doAll) return callbackSeries();
 
-                var globalJson = {};
-                var dirPaths = [dirPath];
-                async.eachSeries(
-                    dirPaths,
-                    function (dirPath, callbackEachDir) {
-                        var files = fs.readdirSync(dirPath);
-                        async.eachSeries(
-                            files,
-                            function (file, callbackEach) {
-                                if (file.endsWith(".json")) {
-                                    var json = JSON.parse(fs.readFileSync(dirPath + file));
-                                    var objName = file.substring(0, file.indexOf("."));
-                                    var obj = (globalJson[objName] = json);
-                                    // globalJson = globalJson.concat(jsonFile);
-                                    callbackEach();
-                                } else callbackEach();
-                            },
-                            function (err) {
-                                callbackEachDir(err);
-                            }
-                        );
-                    },
-                    function (err) {
-                        if (err) return callbackSeries(err);
-                        fs.writeFileSync(dirPath + prefix + "merged.json", JSON.stringify(globalJson, null, 2));
-                        callbackSeries(err);
-                        console.log("done");
-                    }
-                );
-            },
-            //concat all json together
-            function (callbackSeries) {
-                var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
-                buildOwl(json, graphUri);
-            },
-        ],
-        function (err) {}
-    );
-}
+            var globalJson = {};
+            var dirPaths = [dirPath];
+            async.eachSeries(
+                dirPaths,
+                function (dirPath, callbackEachDir) {
+                    var files = fs.readdirSync(dirPath);
+                    async.eachSeries(
+                        files,
+                        function (file, callbackEach) {
+                            if (file.endsWith(".json")) {
+                                var json = JSON.parse(fs.readFileSync(dirPath + file));
+                                var objName = file.substring(0, file.indexOf("."));
+                                globalJson[objName] = json;
+                                callbackEach();
+                            } else callbackEach();
+                        },
+                        function (err) {
+                            callbackEachDir(err);
+                        }
+                    );
+                },
+                function (err) {
+                    if (err) return callbackSeries(err);
+                    fs.writeFileSync(dirPath + prefix + "merged.json", JSON.stringify(globalJson, null, 2));
+                    callbackSeries(err);
+                    console.log("done");
+                }
+            );
+        },
+        //concat all json together
+        function (_callbackSeries) {
+            var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
+            buildOwl(json, graphUri);
+        },
+    ],
+    function (_err) {
+        /*pass*/
+    }
+);

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Tabs, Tab } from "@mui/material";
 import { SRD, RD, loading, failure, success } from "srd";
-import { User as User, getUsers, newUser } from "./User";
+import { User, getUsers, newUser } from "./User";
 import { getProfiles } from "./Profile";
 import Box from "@mui/material/Box";
 import { identity } from "./Utils";
@@ -111,13 +111,13 @@ function update(model: Model, msg: Msg): Model {
             return { ...model, isModalOpen: false };
 
         case "UserClickedAddUser":
-            console.log(`userCreated ${msg.payload}`);
             return { ...model, users: SRD.of([...unwrappedUsers, newUser(msg.payload)]) };
 
-        case "UserUpdatedField":
+        case "UserUpdatedField": {
             const fieldToUpdate = msg.payload.fieldName;
             const updatedUsers = unwrappedUsers.map((u) => (u.id === msg.payload.id ? { ...u, [fieldToUpdate]: msg.payload.newValue } : u));
             return { ...model, users: SRD.of(updatedUsers) };
+        }
 
         case "UserClickedNewTab":
             return { ...model, currentEditionTab: editionTabToString(msg.payload) };
@@ -133,31 +133,33 @@ const Admin = () => {
     //TODO: combine both fetch with promise.all() or something like that
 
     React.useEffect(() => {
-        getProfiles("/profiles")
+        getProfiles()
             .then((profiles) => updateModel({ type: "ServerRespondedWithProfiles", payload: success(profiles) }))
-            .catch((err) => updateModel({ type: "ServerRespondedWithProfiles", payload: failure(err.msg) }));
+            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithProfiles", payload: failure(err.message) }));
     }, []);
 
     React.useEffect(() => {
-        getUsers("/users")
+        getUsers()
             .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
-            .catch((err) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
+            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.message) }));
     }, []);
 
     React.useEffect(() => {
         getSources()
             .then((sources) => updateModel({ type: "ServerRespondedWithSources", payload: success(sources) }))
-            .catch((err) => updateModel({ type: "ServerRespondedWithSources", payload: failure(err.msg) }));
+            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithSources", payload: failure(err.message) }));
     }, []);
 
     React.useEffect(() => {
         getConfig()
             .then((config) => updateModel({ type: "ServerRespondedWithConfig", payload: success(config) }))
-            .catch((err) => updateModel({ type: "ServerRespondedWithConfig", payload: failure(err.msg) }));
+            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithConfig", payload: failure(err.message) }));
     }, []);
 
     React.useEffect(() => {
-        getLogs().then((logs) => updateModel({ type: "ServerRespondedWithLogs", payload: success(logs) }));
+        getLogs()
+            .then((logs) => updateModel({ type: "ServerRespondedWithLogs", payload: success(logs) }))
+            .catch((err: { message: string }) => failure(err.message));
     }, []);
 
     return (

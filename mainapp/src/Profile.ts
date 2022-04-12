@@ -1,19 +1,18 @@
 import { ulid } from "ulid";
 import { Mode, Type, Msg_ } from "./Component/ProfilesTable";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
+import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
 
+type Response = { message: string; ressources: ProfileJson[] };
 const endpoint = "/api/v1/profiles";
-async function getProfiles(url: string): Promise<Profile[]> {
+async function getProfiles(): Promise<Profile[]> {
     const response = await fetch(endpoint);
-    const json = await response.json();
-    const entries: [string, ProfileJson][] = Object.entries(json.ressources);
-    const decodedEntries = entries.map(([key, val]) => decodeProfile(key, val));
-    return decodedEntries;
+    const json = (await response.json()) as Response;
+    return mapProfiles(json.ressources);
 }
 
-function mapProfiles(ressources: any) {
+function mapProfiles(ressources: ProfileJson[]) {
     const profiles: [string, ProfileJson][] = Object.entries(ressources);
     const mapped_users = profiles.map(([key, val]) => {
         return decodeProfile(key, val);
@@ -29,7 +28,7 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(ressources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
@@ -38,31 +37,23 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
             updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`Uncatched : ${e}`) });
     }
 }
 async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${profile.id}`, { method: "delete" });
-        const { message, ressources } = await response.json();
+        const { message, ressources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(ressources)) });
         } else {
             updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
         }
     } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`Uncatched Error : ${e}`) });
     }
-}
-
-export async function putProfiles(body: Profile[]): Promise<Profile[]> {
-    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
-    const response = await fetch("/profiles", { method: "put", body: JSON.stringify(usersToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
-    const json = await response.json();
-    const entries: [string, ProfileJson][] = Object.entries(json);
-    const decodedEntries = entries.map(([key, val]) => decodeProfile(key, val));
-
-    return decodedEntries;
 }
 
 type ProfileJson = {
@@ -119,17 +110,4 @@ export const defaultProfile = (uuid: string): Profile => {
         blender: { contextMenuActionStartLevel: 0 },
     };
 };
-const test = {
-    admin: {
-        allowedSourceSchemas: ["SKOS", "OWL", "INDIVIDUALS"],
-        allowedSources: "ALL",
-        forbiddenSources: ["Dbpedia"],
-        allowedTools: "ALL",
-        forbiddenTools: [],
-        blender: {
-            contextMenuActionStartLevel: 0,
-        },
-    },
-};
-
 export { getProfiles, deleteProfile, Profile };

@@ -12,13 +12,10 @@ var KGmappings = (function () {
     var self = {};
     self.currentModelSource;
     self.prefixes = {
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdf",
         "http://www.w3.org/1999/02/22-rdf-syntax-ns#": "rdfs",
         "http://www.w3.org/2002/07/owl#": "owl",
         "http://data.total.com/resource/one-model/ontology/": "total",
     };
-
-    var dbName;
 
     //  self.currentMappingsMap={type:"",joins:[],relations:[] }
     self.currentMappingsMap = null;
@@ -38,7 +35,7 @@ var KGmappings = (function () {
         for (var source in Config.sources) {
             if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") KGsources.push(source);
         }
-        MainController.UI.showSources("sourcesTreeDiv", false, KGsources, ["KNOWLEDGE_GRAPH"], function (err, result) {
+        MainController.UI.showSources("sourcesTreeDiv", false, KGsources, ["KNOWLEDGE_GRAPH"], function (err, _result) {
             if (err) alert(err);
         });
         MainController.UI.openRightPanel();
@@ -76,7 +73,7 @@ var KGmappings = (function () {
                     height: 800,
                     width: 1000,
                     modal: false,
-                    beforeClose: function (ui, event) {
+                    beforeClose: function (_ui, _event) {
                         return KGadvancedMapping.beforeCloseDialog();
                     },
                 });
@@ -86,10 +83,10 @@ var KGmappings = (function () {
                     height: 900,
                     width: 1100,
                     modal: false,
-                    close: function (event, ui) {
+                    close: function (_event, _ui) {
                         KGmappings.isShowingAssetGraph = false;
                     },
-                    open: function (event, ui) {
+                    open: function (_event, _ui) {
                         KGmappings.isShowingAssetGraph = true;
                     },
                 });
@@ -122,13 +119,11 @@ var KGmappings = (function () {
         self.currentJstreeNode = propertiesMap.node;
 
         self.currentJstreeNode.jstreeDiv = event.currentTarget.id;
-        if (true || KGmappingData.currentColumn) {
-            KGmappings.isModifyingMapping = true;
-            if (KGadvancedMapping.addingValueManuallyToNode) {
-                KGadvancedMapping.addValueManuallyFromOntology(KGadvancedMapping.addingValueManuallyToNode, propertiesMap.node);
-            } else if (false && KGadvancedMapping.assignConditionalTypeOn) return KGmappingData.assignConditionalType(propertiesMap.node);
-            else self.AssignOntologyTypeToColumn(KGmappingData.currentColumn, propertiesMap.node, true);
-        } else if (TextAnnotator.isAnnotatingText) TextAnnotator.setAnnotation(propertiesMap.node);
+        KGmappings.isModifyingMapping = true;
+        if (KGadvancedMapping.addingValueManuallyToNode) {
+            KGadvancedMapping.addValueManuallyFromOntology(KGadvancedMapping.addingValueManuallyToNode, propertiesMap.node);
+        }
+        self.AssignOntologyTypeToColumn(KGmappingData.currentColumn, propertiesMap.node, true);
     };
 
     (self.selectPropertyTreeNodeFn = function (event, propertiesMap) {
@@ -144,7 +139,7 @@ var KGmappings = (function () {
             var items = {};
             items.nodeInfos = {
                 label: "node infos",
-                action: function (e, xx) {
+                action: function (_e, _xx) {
                     // pb avec source
                     self.showNodeInfos();
                 },
@@ -152,7 +147,7 @@ var KGmappings = (function () {
 
             items.openNode = {
                 label: "open Node",
-                action: function (e, xx) {
+                action: function (_e, _xx) {
                     // pb avec source
 
                     SourceBrowser.openTreeNode(self.currentJstreeNode.jstreeDiv, self.currentJstreeNode.data.source, self.currentJstreeNode, null);
@@ -161,7 +156,7 @@ var KGmappings = (function () {
             if (treeDiv != "KGmappings_OneModelTree") {
                 items.copyNodeToClipboard = {
                     label: "copy toClipboard",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
 
                         Lineage_common.copyNodeToClipboard(self.currentJstreeNode.data);
@@ -172,7 +167,7 @@ var KGmappings = (function () {
             if (treeDiv == "KGmappings_OneModelTree") {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
 
                         Lineage_common.pasteNodeFromClipboard(self.currentJstreeNode);
@@ -199,7 +194,7 @@ var KGmappings = (function () {
         common.jstree.loadJsTree("KGmappings_LiteralsTree", jstreeData, optionsClass);
     };
     self.displayOneModelTree = function () {
-        KGcommon.Ontology.load(Config.KG.OneModelSource, function (err, result) {
+        KGcommon.Ontology.load(Config.KG.OneModelSource, function (err, _result) {
             if (err) return MainController.UI.message(err);
             var propJstreeData = [];
 
@@ -242,7 +237,7 @@ var KGmappings = (function () {
                 },
             });
 
-            for (var id in self.typedObjectsMap) {
+            for (id in self.typedObjectsMap) {
                 propJstreeData.push({
                     id: id + common.getRandomHexaId(3),
                     text: id,
@@ -270,18 +265,6 @@ var KGmappings = (function () {
                 type: "owl:ObjectProperty",
                 parent: "#",
             });
-            var optionsClass = {
-                selectTreeNodeFn: self.selectTreeNodeFn,
-                openAll: true,
-                searchPlugin: {
-                    case_insensitive: true,
-                    fuzzy: false,
-                    show_only_matches: true,
-                },
-
-                contextMenu: self.contextMenuFn("KGmappings_OneModelTree"),
-            };
-            if (false) common.jstree.loadJsTree("KGmappings_OneModelTree", propJstreeData, optionsClass);
         });
     };
 
@@ -369,7 +352,7 @@ var KGmappings = (function () {
         }
     };
 
-    self.unAssignOntologyTypeToColumn = function (column, node) {
+    self.unAssignOntologyTypeToColumn = function (column, _node) {
         KGmappingData.setDataSampleColumntype(column, "");
 
         delete KGmappings.currentMappedColumns[column];
@@ -399,17 +382,12 @@ var KGmappings = (function () {
             type: "GET",
             url: Config.apiUrl + "/kg/mappings/" + name,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 if (!data.mappings) return;
                 if (!data.model) {
                     data.model = self.generateKGModel(data.mappings);
                 }
 
-                var basicPredicates = {
-                    // "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    "http://www.w3.org/2000/01/rdf-schema#label": "rdfs:label",
-                    "http://www.w3.org/2002/07/owl#DatatypeProperty": "owl:DatatypeProperty",
-                };
                 var associations = [];
                 self.currentMappingData = data.data;
                 data.mappings.forEach(function (item) {
@@ -457,24 +435,7 @@ var KGmappings = (function () {
                     //association
                     else if (item.object.indexOf("http") < 0) {
                         //label and DatatypeProperty
-                        if (false && basicPredicates[item.predicate]) {
-                            node = {
-                                data: {
-                                    label: basicPredicates[item.predicate] + "<br>" + item.subject,
-                                },
-                            };
-                            KGmappingData.setDataSampleColumntype(item.object, node);
-                            var edgeId = item.subject + "_" + item.predicate + "_" + item.object;
-                            KGmappingGraph.mappedProperties.mappings[edgeId] = {
-                                subject: item.subject,
-                                predicate: item.predicate,
-                                object: item.object,
-                            };
-
-                            return;
-                        } else if (data.model[item.predicate]) {
-                            data.model[item.predicate];
-                        }
+                        data.model[item.predicate];
 
                         if (!data.model[item.predicate]) {
                             data.model[item.predicate] = {
@@ -496,7 +457,7 @@ var KGmappings = (function () {
                         if (p > -1) {
                             column = column.substring(0, p);
 
-                            var label = data.model[item.predicate].label + "<br>" + item.subject;
+                            label = data.model[item.predicate].label + "<br>" + item.subject;
                             KGmappingData.setDataSampleColumntype(column, { data: { label: label } });
                         }
                     }
@@ -600,7 +561,7 @@ var KGmappings = (function () {
             url: Config.apiUrl + "/kg/mappings",
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (_data, _textStatus, _jqXHR) {
                 return MainController.UI.message(mappingName + " mappings saved");
             },
             error: function (err) {
@@ -638,31 +599,27 @@ var KGmappings = (function () {
             data.graph = visjsGraph.getNodesPosition();
         }
 
-        for (var key in KGmappingGraph.mappedProperties.mappings) {
-            var obj = KGmappingGraph.mappedProperties.mappings[key];
+        for (key in KGmappingGraph.mappedProperties.mappings) {
+            obj = KGmappingGraph.mappedProperties.mappings[key];
             data.mappings.push({
                 subject: obj.subject,
                 predicate: obj.predicate,
                 object: obj.object,
             });
         }
-        for (var key in KGmappingGraph.mappedProperties.model) {
+        for (key in KGmappingGraph.mappedProperties.model) {
             data.model[key] = KGmappingGraph.mappedProperties.model[key];
         }
-        if (true || !self.currentMappingData) {
-            self.currentMappingData = {};
+        self.currentMappingData = {};
 
-            data.data = {
-                adlSource: KGmappingData.currentKGdataSource,
-                adlTable: KGmappingData.currentKGtable.data.adlTable,
-                //  build: self.currentMappingData.build
-            };
-            if (KGmappingData.currentKGtable.data.sql) {
-                data.data.sql = KGmappingData.currentKGtable.data.sql;
-                data.data.adlTable = KGmappingData.currentKGtable.data.adlTable;
-            }
-        } else {
-            data.data = self.currentMappingData;
+        data.data = {
+            adlSource: KGmappingData.currentKGdataSource,
+            adlTable: KGmappingData.currentKGtable.data.adlTable,
+            //  build: self.currentMappingData.build
+        };
+        if (KGmappingData.currentKGtable.data.sql) {
+            data.data.sql = KGmappingData.currentKGtable.data.sql;
+            data.data.adlTable = KGmappingData.currentKGtable.data.adlTable;
         }
 
         return data;

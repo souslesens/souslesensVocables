@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var GraphTraversal = (function () {
     var self = {};
     self.currentPathNodes = [];
@@ -10,7 +11,6 @@ var GraphTraversal = (function () {
         var route = new Graph();
         var routeMap = {};
         for (var subject in allClassesMap) {
-            var objectsArray = [];
             var predicates = allClassesMap[subject];
             if (!routeMap[subject]) {
                 routeMap[subject] = [];
@@ -30,10 +30,10 @@ var GraphTraversal = (function () {
 
         //inverse
 
-        for (var subject in allClassesMap) {
-            var predicates = allClassesMap[subject];
+        for (const subject in allClassesMap) {
+            predicates = allClassesMap[subject];
 
-            for (var predicate in predicates) {
+            for (const predicate in predicates) {
                 if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     predicates[predicate].forEach(function (object) {
                         routeMap[object].push([subject, 1]);
@@ -60,8 +60,6 @@ var GraphTraversal = (function () {
         var obj = self.initRoute(allClassesMap);
 
         var route = obj.route;
-        var directPredicates = obj.directPredicates;
-        var inversePredicates = obj.inversePredicates;
 
         var path = route.path(fromNodeObj.class, toNodeObj.class).path;
         self.currentPathNodes = [];
@@ -76,7 +74,6 @@ var GraphTraversal = (function () {
     self.getWhereFromPath = function (path) {
         var where = "";
         path.forEach(function (aclass, index) {
-            var propertyObj = {};
             if (index > 0) {
                 if (index > 1) where += "/";
                 var str = aclass + "_" + path[index - 1];
@@ -94,8 +91,6 @@ var GraphTraversal = (function () {
     self.addNodeToPath = function (targetNodeObj, allClassesMap, seqNumber) {
         var obj = self.initRoute(allClassesMap);
         var route = obj.route;
-        var directPredicates = obj.directPredicates;
-        var inversePredicates = obj.inversePredicates;
 
         var candidatePathes = [];
         self.currentPathNodes.forEach(function (pathObj) {
@@ -134,7 +129,7 @@ var GraphTraversal = (function () {
                 // on laisse le path entier
                 newPathNodes.push(pathObj);
                 var path = [];
-                pathObj.path.forEach(function (node, nodeIndex) {
+                pathObj.path.forEach(function (node, _nodeIndex) {
                     path.push(node);
                 });
                 var pathStr = self.getWhereFromPath(path);
@@ -145,7 +140,6 @@ var GraphTraversal = (function () {
                 var splitPath1 = [];
                 var splitPath2 = [];
                 pathObj.path.forEach(function (node, nodeIndex) {
-                    var currentPath = [];
                     if (nodeIndex < intersectionPoint.nodeIndex) splitPath1.push(node);
                     else if (nodeIndex > intersectionPoint.nodeIndex) splitPath2.push(node);
                     else {

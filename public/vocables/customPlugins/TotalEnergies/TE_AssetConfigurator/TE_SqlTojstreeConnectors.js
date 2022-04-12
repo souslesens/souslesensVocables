@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var TE_SqlTojstreeConnectors = (function () {
     var self = {};
 
@@ -29,7 +30,7 @@ var TE_SqlTojstreeConnectors = (function () {
                 }
                 if (!assetTreeDistinctNodes[item.location2]) {
                     assetTreeDistinctNodes[item.location2] = 1;
-                    var text = item.location2;
+                    text = item.location2;
                     if (coloredNodes && coloredNodes["A_" + item.id]) text = "<span class='RDSassetTreeNode'>" + text + " </span>";
                     jstreeData.push({
                         //  id: item.location1 + "/" + item.location2,
@@ -113,17 +114,16 @@ var TE_SqlTojstreeConnectors = (function () {
         });
     };
 
-    self.showAssetNodeInfos = function (dbName, node, callee) {
+    self.showAssetNodeInfos = function (dbName, node, _callee) {
         var sqlQuery = " select distinct * from " + node.data.type + " where  id=" + node.data.id;
 
         self.querySQLserver(dbName, sqlQuery, function (err, data) {
             if (err) return MainController.UI.message(err);
-            var jstreeData = [];
             var nodeId = node.id;
             if (data.length == 0) return;
             var headers = Object.keys(data[0]);
 
-            var nodeId = data[0].tag;
+            nodeId = data[0].tag;
             var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
             str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
             str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
@@ -145,9 +145,7 @@ var TE_SqlTojstreeConnectors = (function () {
     };
 
     self.getChildrenNodesJsTreeData = function (dbName, node, coloredNodes, callback) {
-        if ((node.data.type = "equipments")) {
-            var limit = 100000;
-            var parentData = node.data;
+        if (node.data.type == "equipments") {
             var sqlQuery = "  select *  from equipments where  location2 ='" + node.data.label + "'";
             self.querySQLserver(dbName, sqlQuery, function (err, result) {
                 if (err) return callback(null, result);
@@ -180,15 +178,12 @@ var TE_SqlTojstreeConnectors = (function () {
     };
 
     self.querySQLserver = function (dbName, sqlQuery, callback) {
-        var limit = 100000;
         var dataSource = {
             type: "sql.sqlserver",
             connection: "_default",
             dbName: dbName,
             table_schema: "dbo",
         };
-
-        console.log(sqlQuery);
 
         $.ajax({
             type: "POST",
@@ -201,7 +196,7 @@ var TE_SqlTojstreeConnectors = (function () {
             },
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error(err) {

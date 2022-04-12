@@ -7,7 +7,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var TreeController = (function () {
     var self = {};
 
@@ -21,6 +21,7 @@ var TreeController = (function () {
             if (!typeObj) {
                 // force concept Type
                 typeObj = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                // eslint-disable-next-line no-console
                 console.log("node " + item[childNodeVar].value + " has no type");
             }
 
@@ -36,9 +37,10 @@ var TreeController = (function () {
 
                     var childNodeLabel = common.getItemLabel(item, childNodeVar);
 
-                    if (true || jsTreeOptions.labelClass) {
-                        var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
-                    }
+                    // PROBLEM
+                    //if (true || jsTreeOptions.labelClass) {
+                    var label = "<span class='treeType_" + cssType + "'>" + childNodeLabel + "</span>";
+                    //}
 
                     var child = {
                         parent: parentNodeId,

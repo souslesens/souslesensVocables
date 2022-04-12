@@ -1,3 +1,4 @@
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SQLquery = (function () {
     var self = {};
 
@@ -11,6 +12,7 @@ var SQLquery = (function () {
         var adls = [];
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
+            // eslint-disable-next-line no-console
             if (!sourceObj.schemaType) console.log(key);
             if (sourceObj.schemaType.indexOf("INDIVIDUAL") > -1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
                 adls.push({ id: key, label: key });
@@ -38,11 +40,13 @@ var SQLquery = (function () {
             url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 (self.sampleData[table] = data), displaySampleData(self.sampleData[table]);
             },
 
-            error: function (err) {},
+            error: function (_err) {
+                // pass
+            },
         });
     };
 

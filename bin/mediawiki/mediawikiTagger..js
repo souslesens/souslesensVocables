@@ -24,7 +24,6 @@ var mediaWikiTagger = {
         var pageText = "";
         var pageCategories = [];
 
-        var categoriesRdfTriples = "";
         async.series(
             [
                 //get Page content
@@ -48,32 +47,25 @@ var mediaWikiTagger = {
                 //getPageCategories
                 function (callbackSeries) {
                     pageCategories = [];
-                    var regex = /wgCategories":\[([^\].]*)/m;
-                    var regex = /href="\/Category:([^"]*)/gm;
+                    // var regex = /wgCategories":\[([^\].]*)/m;
+                    // var regex = /href="\/Category:([^"]*)/gm;
                     var regex = /<li><a href="\/Category:([^"^]*)/gm;
-                    //    var regex = /wgCategories":([^\]]*)/m
-                    //  var strCats = regex.exec(rawPageText)
-                    var array = [];
+                    let array = [];
 
                     while ((array = regex.exec(rawPageText)) != null) {
                         pageCategories.push(array[1]);
                     }
                     var regex2 = /<li><a href="\/index\.php\?title=Category:([^"^&]*)/gm;
-                    var array = [];
+                    array = [];
                     while ((array = regex2.exec(rawPageText)) != null) {
                         pageCategories.push(array[1]);
                     }
                     var regex3 = /<li><a href="\/wiki\/Category:([^"^&]*)/gm;
-                    var array = [];
+                    array = [];
                     while ((array = regex3.exec(rawPageText)) != null) {
                         pageCategories.push(array[1]);
                     }
                     console.log(JSON.stringify(pageCategories));
-                    /*   if(array && array.length>0) {
-
-                          var strCats = array[0].replace(/","/g, "|")
-                           pageCategories = strCats.replace(/[\[\]]/g, "").replace(/"/g, "").split("|")
-                       }*/
                     callbackSeries();
                 },
 
@@ -104,7 +96,7 @@ var mediaWikiTagger = {
 
                     request(options, function (error, response, body) {
                         if (error) return callbackSeries(error);
-                        elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
+                        elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                             if (err) return callbackSeries(err);
                         });
 
@@ -119,8 +111,6 @@ var mediaWikiTagger = {
         );
     },
     tagPages: function (thesaurusGraphUris, elasticUrl, indexName, wikiUri, callback) {
-        var x = 3;
-
         async.series(
             [
                 //getThesaurusTerms
@@ -154,7 +144,6 @@ var mediaWikiTagger = {
                 //extract TheasurusPageWords in    categoriesRdfTriples and store them
                 function (callbackSeries) {
                     var bulkStr = "";
-                    var synonyms;
                     //  thesauriiConcepts["test"].conceptsWords.forEach(function (conceptWord) {
                     async.eachSeries(thesaurusGraphUris, function (graphUri, callbackEach) {
                         bulkStr = "";
@@ -162,7 +151,6 @@ var mediaWikiTagger = {
                         var conceptsFound = 0;
                         thesauriiConcepts[graphUri].concepts.forEach(function (concept) {
                             var queryString = "";
-                            var shouldQuery = [];
                             concept.synonyms.forEach(function (synonym, indexSynonym) {
                                 if (indexSynonym > 0) queryString += " OR ";
                                 queryString += '\\\\"' + synonym + '\\\\"';
@@ -192,7 +180,7 @@ var mediaWikiTagger = {
                             url: elasticUrl + "_msearch",
                         };
 
-                        request(options, function (error, response, body) {
+                        request(options, function (error, response, _body) {
                             if (error) return callbackSeries(error);
                             var json = JSON.parse(response.body);
                             if (json.error) {
@@ -230,7 +218,7 @@ var mediaWikiTagger = {
                             async.eachSeries(
                                 splittedtTriples,
                                 function (triples, callbackResponse) {
-                                    mediaWikiTagger.storeTriples(graphUri, triples, function (err, result) {
+                                    mediaWikiTagger.storeTriples(graphUri, triples, function (err, _result) {
                                         callbackResponse(err);
                                     });
                                 },
@@ -271,7 +259,6 @@ var mediaWikiTagger = {
 
         var offset = 0;
         var length = 1;
-        var result = [];
         async.whilst(
             function (callbackTest) {
                 //test
@@ -300,7 +287,7 @@ var mediaWikiTagger = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 callback(null, thesaurusConcepts);
             }
@@ -310,7 +297,6 @@ var mediaWikiTagger = {
     storeTriples: function (graphUri, triples, callback) {
         var triplesStr = "";
         triples.forEach(function (triple) {
-            if (triple.indexOf("https://wiki.aapg.org/") > -1) var x = 3;
             triplesStr += triple;
         });
 
@@ -394,13 +380,12 @@ var mediaWikiTagger = {
         request(options, function (error, response, body) {
             if (error) return callback(error);
             if (body.error) return callback(body.error);
-            var message = "index " + index + " created";
 
             return callback();
         });
     },
-    deleteTriples: function (graph) {
-        var query = "DELETE WHERE  {" + "  GRAPH <http://souslesens.org/oil-gas/upstream/>" + "  { ?concept <http://souslesens.org/vocab#wikimedia-category> ?category} }";
+    deleteTriples: function (_graph) {
+        // var query = "DELETE WHERE  {" + "  GRAPH <http://souslesens.org/oil-gas/upstream/>" + "  { ?concept <http://souslesens.org/vocab#wikimedia-category> ?category} }";
     },
     generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
         var limit = 10000;
@@ -459,7 +444,7 @@ var mediaWikiTagger = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
 
                 Allconcepts.forEach(function (concept) {
@@ -498,7 +483,7 @@ var mediaWikiTagger = {
             // letters.forEach(function(letter,indexLetter){
             console.log("getting pages from " + letter);
             var categoryUrl = wikiUrl + "/index.php?title=Special%3AAllPages&from=" + letters[indexLetter] + "&to=" + letters[indexLetter + 1] + "&namespace=0";
-            var categoryUrl = wikiUrl + "/wiki/Special:AllPages?from=" + letters[indexLetter] + "&to=" + letters[indexLetter + 1] + "&namespace=0";
+            categoryUrl = wikiUrl + "/wiki/Special:AllPages?from=" + letters[indexLetter] + "&to=" + letters[indexLetter + 1] + "&namespace=0";
 
             indexLetter++;
             var rawPageText = "";
@@ -535,7 +520,6 @@ var mediaWikiTagger = {
                         while ((array = regex.exec(pageText)) != null) {
                             pages.push(array[1]);
                         }
-                        var x = pages;
                         callbackSeries();
                     },
                     //getPageContent
@@ -547,7 +531,7 @@ var mediaWikiTagger = {
                                 if (excludedPages.indexOf(page) > -1) return callbackEach2();
 
                                 totalPages += 1;
-                                mediaWikiTagger.indexPage(wikiUrl, page, elasticUrl, indexName, function (err, result) {
+                                mediaWikiTagger.indexPage(wikiUrl, page, elasticUrl, indexName, function (err, _result) {
                                     if (err) console.log(err);
                                     else console.log(totalPages + " indexed page  " + page);
 
@@ -621,9 +605,7 @@ var mediaWikiTagger = {
             url: elasticUrl + indexName + "/_search",
         };
 
-        request(options, function (error, response, body) {
-            if (error) return callbackSeries(error);
-
+        request(options, function (_error, _response, body) {
             var str = "";
             body.hits.hits.forEach(function (hit) {
                 var pageName = hit._source.pageName;
@@ -665,7 +647,6 @@ var mediaWikiTagger = {
             "classprintfoote",
         ];
         var pageThesaurusWords = [];
-        var pageSpecificWords = [];
         var pageNonThesaurusWords = [];
 
         var rawPageContent = "";
@@ -708,18 +689,10 @@ var mediaWikiTagger = {
                  */
 
                 function (callbackSeries) {
-                    /*   var spacyServerUrl = "http://vps475829.ovh.net:3020/nlp"
-                    var json = {
-                        "parse": 1,
-                        "text": rawPageContent
-                    }*/
-
                     var spacyServerUrl = "http://vps475829.ovh.net/spacy/pos";
                     var json = {
                         text: rawPageContent,
                     };
-                    /*     var nlpServer = require('../spacy/nlpServer.')
-                         nlpServer.parse(rawPageContent, function (err, result) {*/
 
                     httpProxy.post(spacyServerUrl, { "content-type": "application/json" }, json, function (err, result) {
                         if (err) {
@@ -730,10 +703,7 @@ var mediaWikiTagger = {
                         result.data.forEach(function (sentence) {
                             sentence.tags.forEach(function (item) {
                                 if (item.tag == "NN") {
-                                    //item.tag.indexOf("NN")>-1) {
                                     item.text = item.text.toLowerCase();
-                                    //  console.log(item.text)
-                                    //  item.text= item.text.replace(/[^A-Za-z0-9]/g, '');
                                     item.text = item.text.replace(/-/g, "").trim();
                                     if (!pageAllwordsMap[item.text]) pageAllwordsMap[item.text] = 0;
                                     pageAllwordsMap[item.text] += 1;
@@ -800,7 +770,7 @@ var mediaWikiTagger = {
                 //check altLabels in Virtuoso thesaurus NOT NECESSARY !!!
                 function (callbackSeries) {
                     return callbackSeries();
-
+                    /*
                     var wordsFilter = "";
                     pageNonThesaurusWords.forEach(function (word, index) {
                         if (index > 0) wordsFilter += "|";
@@ -830,11 +800,12 @@ var mediaWikiTagger = {
                             console.log(params.query);
                             return callback(err);
                         }
-                        result.results.bindings.forEach(function (item) {
+                        result.results.bindings.forEach(function (_item) {
                             console.log("!!!!!!!! altLabel word");
                         });
                         callbackSeries();
                     });
+                    */
                 },
             ],
 
@@ -899,22 +870,21 @@ var mediaWikiTagger = {
                                         "  " +
                                         "}" +
                                         "";
-                                    if (true) {
-                                        query +=
-                                            "WHERE{  ?concept1  skos:broader <" +
-                                            scheme.id +
-                                            ">.  " +
-                                            "  optional {?concept2 skos:broader ?concept1. " +
-                                            "optional {?concept2 ^skos:broader ?concept3. " +
-                                            "optional {?concept3 ^skos:broader ?concept4. " +
-                                            "optional {?concept4 ^skos:broader ?concept5.  " +
-                                            "optional {?concept5 ^skos:broader ?concept6. " +
-                                            "optional {?concept6 ^skos:broader ?concept7. " +
-                                            "optional {?concept7 ^skos:broader ?concept8.  " +
-                                            "}}}}}}}" +
-                                            "  " +
-                                            "       } ";
-                                    } else if (false) {
+                                    query +=
+                                        "WHERE{  ?concept1  skos:broader <" +
+                                        scheme.id +
+                                        ">.  " +
+                                        "  optional {?concept2 skos:broader ?concept1. " +
+                                        "optional {?concept2 ^skos:broader ?concept3. " +
+                                        "optional {?concept3 ^skos:broader ?concept4. " +
+                                        "optional {?concept4 ^skos:broader ?concept5.  " +
+                                        "optional {?concept5 ^skos:broader ?concept6. " +
+                                        "optional {?concept6 ^skos:broader ?concept7. " +
+                                        "optional {?concept7 ^skos:broader ?concept8.  " +
+                                        "}}}}}}}" +
+                                        "  " +
+                                        "       } ";
+                                    /*
                                         query +=
                                             "WHERE{  ?concept1 ^skos:narrower <" +
                                             scheme.id +
@@ -929,7 +899,8 @@ var mediaWikiTagger = {
                                             "}}}}}}}" +
                                             "  " +
                                             "       } ";
-                                    } else {
+                                            */
+                                    /*
                                         query =
                                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -940,8 +911,8 @@ var mediaWikiTagger = {
                                             "(count(distinct ?concept5) as ?Level5) " +
                                             "(count(distinct ?concept6) as ?Level6) " +
                                             "(count(distinct ?concept7)  as ?Level7)" +
-                                            /*   "(count(distinct ?concept9) as ?Level8) " +
-                                       "  (count(distinct ?concept9)  as ?Leve9)" +*/
+                                            // "(count(distinct ?concept9) as ?Level8) " +
+                                            // "  (count(distinct ?concept9)  as ?Leve9)" +
 
                                             "" +
                                             "WHERE{  ?concept  skos:broader <" +
@@ -953,29 +924,21 @@ var mediaWikiTagger = {
                                             "optional {?concept4 ^skos:broader|skos:narrower ?concept5.  " +
                                             "optional {?concept5 ^skos:broader|skos:narrower ?concept6. " +
                                             "optional {?concept6 ^skos:broader|skos:narrower ?concept7. " +
-                                            /* "optional {?concept7 ^skos:broader|skos:narrower ?concept8.  " +
-                                     "optional {?concept8 ^skos:broader|skos:narrower ?concept9. " +
-                                     "                }}" +*/
+                                            // "optional {?concept7 ^skos:broader|skos:narrower ?concept8.  " +
+                                            // "optional {?concept8 ^skos:broader|skos:narrower ?concept9. " +
+                                            // "                }}" +
                                             "}}}}}}" +
                                             "  " +
                                             "       } ";
-                                    }
+                                   */
 
                                     var params = { query: query };
 
-                                    httpProxy.post(mediaWikiTagger.sparqlUrl, null, params, function (err, result) {
+                                    httpProxy.post(mediaWikiTagger.sparqlUrl, null, params, function (err, _result) {
                                         if (err) {
                                             console.log(params.query);
                                             return callbackEach(err);
                                         }
-
-                                        var obj = result.results.bindings[0];
-
-                                        for (var i = 1; i < 8; i++) {
-                                            //  str += scheme.label + "," + i + "," + obj["Level" + i].value + "\n"
-                                        }
-
-                                        // console.log(scheme.id+","+i+","+result.results.bindings[0]["callret-0"].value)
                                         return callbackEach();
                                     });
                                 },
@@ -1029,59 +992,61 @@ module.exports = mediaWikiTagger;
 
 //mediaWikiTagger.createMediawikiIndex()
 
-var thesaurusGraphUris = [
+/*
+ * var thesaurusGraphUris = [
     "http://souslesens.org/oil-gas/upstream/",
     "http://www.eionet.europa.eu/gemet/",
     "http://data.total.com/resource/thesaurus/ctg/",
     "https://www2.usgs.gov/science/USGSThesaurus/",
 ];
+*/
 //var thesaurusGraphUris = ["http://data.total.com/resource/thesaurus/ctg/", "https://www2.usgs.gov/science/USGSThesaurus/"]
 
 //var thesaurusGraphUris = [ "http://www.eionet.europa.eu/gemet/"]
-
+/*
 if (false) {
     if (false) {
-        var wikiUrl = "https://wiki.aapg.org";
-        var startMark = '<table class="mw-allpages-table-chunk"';
-        var endMark = "</table>";
-        var elasticUrl = "http://vps254642.ovh.net:2009/";
-        var indexName = "mediawiki-pages-aapg";
+        wikiUrl = "https://wiki.aapg.org";
+        startMark = '<table class="mw-allpages-table-chunk"';
+        endMark = "</table>";
+        elasticUrl = "http://vps254642.ovh.net:2009/";
+        indexName = "mediawiki-pages-aapg";
     }
     if (false) {
-        var wikiUrl = "https://petrowiki.spe.org";
-        var startMark = null;
-        var endMark = null;
-        var elasticUrl = "http://vps254642.ovh.net:2009/";
-        var indexName = "mediawiki-pages-spe";
+        wikiUrl = "https://petrowiki.spe.org";
+        startMark = null;
+        endMark = null;
+        elasticUrl = "http://vps254642.ovh.net:2009/";
+        indexName = "mediawiki-pages-spe";
     }
 
     if (true) {
-        var wikiUrl = "https://wiki.seg.org";
-        var startMark = null;
-        var endMark = null;
-        var elasticUrl = "http://vps254642.ovh.net:2009/";
-        var indexName = "mediawiki-pages-seg";
+        wikiUrl = "https://wiki.seg.org";
+        startMark = null;
+        endMark = null;
+        elasticUrl = "http://vps254642.ovh.net:2009/";
+        indexName = "mediawiki-pages-seg";
     }
     mediaWikiTagger.indexWikiPages(wikiUrl, startMark, endMark, elasticUrl, indexName);
 }
 
 if (false) {
-    var wikiUrl = "https://wiki.seg.org/wiki/";
-    var indexName = "mediawiki-pages-seg";
+    wikiUrl = "https://wiki.seg.org/wiki/";
+    indexName = "mediawiki-pages-seg";
 
-    var wikiUrl = "https://wiki.aapg.org/";
-    var indexName = "mediawiki-pages-aapg";
+    wikiUrl = "https://wiki.aapg.org/";
+    indexName = "mediawiki-pages-aapg";
 
-    var wikiUrl = "https://wiki.aapg.org/";
-    var indexName = "mediawiki-pages-aapg";
+    wikiUrl = "https://wiki.aapg.org/";
+    indexName = "mediawiki-pages-aapg";
 
-    var wikiUrl = "https://wiki.aapg.org/";
-    var indexName = "mediawiki-pages-aapg";
+    wikiUrl = "https://wiki.aapg.org/";
+    indexName = "mediawiki-pages-aapg";
 
-    var wikiUrl = "https://petrowiki.spe.org/";
-    var indexName = "mediawiki-pages-spe";
+    wikiUrl = "https://petrowiki.spe.org/";
+    indexName = "mediawiki-pages-spe";
 
-    var elasticUrl = "http://vps254642.ovh.net:2009/";
+    elasticUrl = "http://vps254642.ovh.net:2009/";
     thesaurusGraphUris = ["http://souslesens.org/oil-gas/upstream/"]; //, "http://www.eionet.europa.eu/gemet/", "http://data.total.com/resource/thesaurus/ctg/", "https://www2.usgs.gov/science/USGSThesaurus/"]
 
     //  thesaurusGraphUris = ["http://data.total.com/resource/dictionary/gaia/"];
@@ -1092,7 +1057,7 @@ if (false) {
 
     thesaurusGraphUris = ["http://resource.geosciml.org/"];
 
-    mediaWikiTagger.tagPages(thesaurusGraphUris, elasticUrl, indexName, wikiUrl, function (err, result) {
+    mediaWikiTagger.tagPages(thesaurusGraphUris, elasticUrl, indexName, wikiUrl, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });
@@ -1100,38 +1065,38 @@ if (false) {
 
 if (false) {
     //mediaWikiTagger.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediaWikiTagger.generateCatWordsMatrix("aapg", null, function (err, result) {
+    mediaWikiTagger.generateCatWordsMatrix("aapg", null, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });
 }
 
 if (false) {
-    var elasticUrl = "http://vps254642.ovh.net:2009/";
-    var indexName = "mediawiki-pages-aapg";
+    elasticUrl = "http://vps254642.ovh.net:2009/";
+    indexName = "mediawiki-pages-aapg";
     mediaWikiTagger.listIndexCategories(elasticUrl, indexName);
 }
 if (false) {
-    var elasticUrl = "http://vps254642.ovh.net:2009/";
-    var indexName = "mediawiki-pages-aapg";
-    var wikiUrl = "https://wiki.aapg.org/";
+    elasticUrl = "http://vps254642.ovh.net:2009/";
+    indexName = "mediawiki-pages-aapg";
+    wikiUrl = "https://wiki.aapg.org/";
 
-    var wikiUrl = "https://petrowiki.spe.org/";
-    var indexName = "mediawiki-pages-spe";
+    wikiUrl = "https://petrowiki.spe.org/";
+    indexName = "mediawiki-pages-spe";
 
     mediaWikiTagger.getCategoriesPagesRdf(elasticUrl, indexName, wikiUrl);
 }
 //mediaWikiTagger.createMediawikiIndex(elasticUrl,"mediawiki");
 if (false) {
-    var graphUri = "http://data.total.com/resource/thesaurus/ctg/";
-    var graphUri = "http://www.eionet.europa.eu/gemet/";
-    var graphUri = "http://souslesens.org/oil-gas/upstream/";
+    graphUri = "http://data.total.com/resource/thesaurus/ctg/";
+    graphUri = "http://www.eionet.europa.eu/gemet/";
+    graphUri = "http://souslesens.org/oil-gas/upstream/";
     mediaWikiTagger.setTulsaSchemes(graphUri);
 }
 if (false) {
-    var elasticUrl = "http://vps254642.ovh.net:2009/";
-    var indexName = "mediawiki-pages-aapg";
-    var indexName = "mediawiki-pages-spe";
-    var indexName = "mediawiki-pages-seg";
+    elasticUrl = "http://vps254642.ovh.net:2009/";
+    indexName = "mediawiki-pages-aapg";
+    indexName = "mediawiki-pages-spe";
+    indexName = "mediawiki-pages-seg";
     mediaWikiTagger.listWikiPages(elasticUrl, indexName);
-}
+}*/

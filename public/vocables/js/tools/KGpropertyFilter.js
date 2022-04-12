@@ -28,10 +28,11 @@ var KGpropertyFilter = (function () {
 
         $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function () {
             $("#KGcreator_centralPanelTabs").tabs({
-                activate: function (e, ui) {
+                activate: function (_e, ui) {
                     self.currentOwlType = "Class";
                     var divId = ui.newPanel.selector;
                     if (divId == "#LineageTypesTab") {
+                        //pass
                     }
                 },
             });
@@ -39,7 +40,9 @@ var KGpropertyFilter = (function () {
         MainController.UI.toogleRightPanel(true);
         $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function () {
             $("#KGpropertyFilter_rightPanelTabs").tabs({
-                activate: function (e, ui) {},
+                activate: function (_e, _ui) {
+                    //pass
+                },
             });
             self.initRightPanel();
         });
@@ -102,17 +105,10 @@ var KGpropertyFilter = (function () {
                 contextMenu: KGpropertyFilter.getPropertyTreeContextMenu(),
             };
             common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
-
-            /*  self.loadPropertiesFilters(restrictionIds, function (err, result) {
-
-
-
-
-                  });*/
         });
     };
 
-    self.onPropertyNodeClicked = function (event, obj) {
+    self.onPropertyNodeClicked = function (_event, obj) {
         self.currentPropertyNode = obj.node;
         if (self.currentPropertyNode.parents.length > 1) self.currentClassId = self.currentPropertyNode.parents[1];
         else self.currentClassId = self.currentPropertyNode.id;
@@ -122,9 +118,13 @@ var KGpropertyFilter = (function () {
 
         self.client.filterProperties(self.currentClassId);
     };
-    self.getPropertyTreeContextMenu = function () {};
+    self.getPropertyTreeContextMenu = function () {
+        //pass
+    };
 
-    self.getAssociatedProperties = function (selectId) {};
+    self.getAssociatedProperties = function (_selectId) {
+        //pass
+    };
 
     self.associateFiltersToPropertyRestriction = function () {
         var existingNodesArray = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
@@ -141,12 +141,9 @@ var KGpropertyFilter = (function () {
             var classId;
             var classObj;
             var classLabel;
-            var classId;
 
             propertyObjs.forEach(function (propertyObj) {
                 if (!propertyObj || propertyObj.parents.length < 2) return; //alert(" Select a property")
-                //   var props=$("#KGpropertyFilter_propertiesTreeDiv").jstree().get_selected(true)
-                //   props.forEach(function(prop) {
                 classId = propertyObj.parent;
                 classObj = $("#KGpropertyFilter_propertiesTreeDiv").jstree().get_node(classId);
                 classLabel = classObj.data.label;
@@ -205,10 +202,8 @@ var KGpropertyFilter = (function () {
         var propertyObjs = $("#KGpropertyFilter_propertiesTreeDiv").jstree().get_selected(true);
         propertyObjs.forEach(function (propertyObj) {
             if (!propertyObj || propertyObj.parents.length < 2) return alert(" Select a property");
-            var classId = propertyObj.parent;
 
             function execute(filterType, selectId) {
-                var items = $("#" + selectId).val();
                 var jstreedata = [];
                 var jstreedata2 = [];
                 var aspectId = propertyObj.id + "_" + filterType;
@@ -256,14 +251,14 @@ var KGpropertyFilter = (function () {
 
     self.loadPropertiesFilters = function (ids, callback) {
         var existingNodesArray = []; //common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", false, "#")
-        var ids = [];
+        ids = [];
         existingNodesArray.forEach(function (node) {
             if (node.data.type == "filterClass") {
                 ids.push(node.data.retrictionId);
             }
         });
         var filter = Sparql_common.setFilter("concept", ids);
-        Sparql_OWL.getItems(self.propertyFilteringSource, { filter, filter }, function (err, result) {
+        Sparql_OWL.getItems(self.propertyFilteringSource, { filter }, function (err, result) {
             callback(err);
 
             var filtersMap = {};
@@ -297,17 +292,17 @@ var KGpropertyFilter = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    self.loadLifeCycleTree(function (err, result) {
+                    self.loadLifeCycleTree(function (err, _result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    self.loadDisciplinesTree(function (err, result) {
+                    self.loadDisciplinesTree(function (err, _result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    self.loadOrganizationsTree(function (err, result) {
+                    self.loadOrganizationsTree(function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -319,7 +314,9 @@ var KGpropertyFilter = (function () {
 
         return;
     };
-    self.onSelectFilter = function () {};
+    self.onSelectFilter = function () {
+        // Pass
+    };
 
     self.loadLifeCycleTree = function (callback) {
         Sparql_OWL.getNodeChildren("ISO-15663", null, null, 2, {}, function (err, result) {
@@ -490,7 +487,9 @@ var KGpropertyFilter = (function () {
 
     self.client = {
         filterProperties: function (allClasses) {
+            //Problem
             return;
+            // eslint-disable-next-line no-unreachable
             var classId = null;
             if (!allClasses) classId = self.currentClassId;
 

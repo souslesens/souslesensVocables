@@ -1,19 +1,16 @@
-var createError = require("http-errors");
-var express = require("express");
-var fs = require("fs");
-var path = require("path");
-var passport = require("passport");
-var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-var bodyParser = require("body-parser");
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const passport = require("passport");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
 const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
 
-var indexRouter = require(path.resolve("routes/index"));
-var httpProxy = require(path.resolve("bin/httpProxy."));
-var configManager = require(path.resolve("bin/configManager."));
+const indexRouter = require(path.resolve("routes/index"));
+const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
 const config = require(path.resolve("config/mainConfig.json"));
@@ -79,7 +76,7 @@ openapi.initialize({
     app: app,
     paths: "./api/v1/paths",
     securityHandlers: {
-        loginScheme: function (req, scopes, definition) {
+        loginScheme: function (req, _scopes, _definition) {
             if (!config.disableAuth) {
                 config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
                 if (!req.isAuthenticated || !req.isAuthenticated()) {
@@ -91,8 +88,8 @@ openapi.initialize({
             }
             return Promise.resolve(true);
         },
-        restrictAdmin: function (req, scopes, definition) {
-            currentUser = userManager.getUser(req.user);
+        restrictAdmin: function (req, _scopes, _definition) {
+            const currentUser = userManager.getUser(req.user);
 
             if (!currentUser.logged) {
                 throw {
@@ -133,7 +130,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res, _next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get("env") === "development" ? err : {};

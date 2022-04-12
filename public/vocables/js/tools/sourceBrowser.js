@@ -51,11 +51,7 @@ var SourceBrowser = (function () {
         self.currentTreeNode = obj.node;
         if (obj.event.ctrlKey) self.copyNode(self.currentTreeNode);
 
-        if (true || obj.event.ctrlKey) {
-            self.editThesaurusConceptInfos(source, obj.node);
-        }
-        {
-        }
+        self.editThesaurusConceptInfos(source, obj.node);
     };
 
     self.copyNode = function (event, node) {
@@ -130,7 +126,7 @@ var SourceBrowser = (function () {
 
         items.nodeInfos = {
             label: "Node infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv");
             },
@@ -139,7 +135,7 @@ var SourceBrowser = (function () {
         if (MainController.currentTool == "lineage" || MainController.currentTool == "KGmappings") {
             items.graphNode = {
                 label: "graph Node",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
 
                     Lineage_classes.drawNodeAndParents(self.currentTreeNode.data);
@@ -147,7 +143,7 @@ var SourceBrowser = (function () {
             };
             items.copyNodeToClipboard = {
                 label: "copy toClipboard",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
 
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
@@ -187,7 +183,7 @@ var SourceBrowser = (function () {
             if (Lineage_common.currentSource && Config.sources[Lineage_common.currentSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
 
                         Lineage_common.pasteNodeFromClipboard(self.currentTreeNode);
@@ -195,13 +191,13 @@ var SourceBrowser = (function () {
                 };
                 items.editNode = {
                     label: "Edit node",
-                    action: function (obj, sss, cc) {
+                    action: function (_obj, _sss, _cc) {
                         SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
                     },
                 };
                 items.deleteClass = {
                     label: "delete Class",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
 
                         Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
@@ -212,7 +208,7 @@ var SourceBrowser = (function () {
             if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
                 items.uploadOntologyFromOwlFile = {
                     label: "upload Ontology FromOwl File",
-                    action: function (e) {
+                    action: function (_e) {
                         SourceBrowser.uploadOntologyFromOwlFile();
                     },
                 };
@@ -236,7 +232,7 @@ var SourceBrowser = (function () {
 
         items.exportAllDescendants = {
             label: "Export all descendants",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 SourceBrowser.exportAllDescendants();
             },
@@ -253,7 +249,6 @@ var SourceBrowser = (function () {
 
     self.openTreeNode = function (divId, sourceLabel, node, options) {
         if (!options) options = {};
-        var existingNodes = common.jstree.getjsTreeNodes(divId, true);
         if (node.children && node.children.length > 0)
             if (!options.reopen) return;
             else {
@@ -280,7 +275,7 @@ var SourceBrowser = (function () {
         });
     };
 
-    self.editThesaurusConceptInfos = function (sourceLabel, node, callback) {
+    self.editThesaurusConceptInfos = function (sourceLabel, node, _callback) {
         SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv");
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
@@ -300,6 +295,7 @@ var SourceBrowser = (function () {
             if (!lang) lang = $("#detailsLangSelect_" + property).val();
             if ($("#detailsLangDiv_" + property + "_" + lang).html()) $("#detailsLangDiv_" + property + "_" + lang).css("display", "block");
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.log(err);
         }
     };
@@ -341,7 +337,9 @@ var SourceBrowser = (function () {
 
         var term = $("#GenericTools_searchAllSourcesTermInput").val();
         var selectedSources = [];
-        if ($("#searchAll_sourcesTree").jstree(true)) var selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+        if ($("#searchAll_sourcesTree").jstree(true)) {
+            selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+        }
 
         if (!term || term == "") return alert(" enter a word ");
         if (term.indexOf("*") > -1) $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
@@ -378,11 +376,12 @@ var SourceBrowser = (function () {
         var mode = "fuzzyMatch";
         if (exactMatch) mode = "exactMatch";
 
-        var indexes;
         options.parentlabels = true;
+        // PROBLEM
+        // eslint-disable-next-line no-constant-condition
         if (true || schemaType == "OWL") {
-            SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (err, result) {
-                self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, result) {
+            SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
+                self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) return alert(err);
                 });
             });
@@ -415,7 +414,7 @@ var SourceBrowser = (function () {
                                 data: { source: sourceLabel, id: sourceLabel, label: text },
                             });
                         } else {
-                            var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
+                            text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
 
                             jstreeData.push({
                                 id: sourceLabel,
@@ -434,12 +433,12 @@ var SourceBrowser = (function () {
                         callbackEach();
                     });
                 },
-                function (err) {
+                function (_err) {
                     $("#accordion").accordion("option", { active: 2 });
                     var html = "<div id='" + self.currentTargetDiv + "'></div>";
 
                     if ($("#" + self.currentTargetDiv).length == 0) {
-                        var html = "<div id='" + self.currentTargetDiv + "'></div>";
+                        html = "<div id='" + self.currentTargetDiv + "'></div>";
                         $("#actionDiv").html(html);
                     }
                     $("#" + self.currentTargetDiv).html(html);
@@ -494,8 +493,7 @@ var SourceBrowser = (function () {
                 return $("#" + self.currentTargetDiv).html("No data found");
             }
 
-            var allJstreeIds = {};
-            result.forEach(function (item, index) {
+            result.forEach(function (item, _index) {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
                         //   item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
@@ -508,13 +506,13 @@ var SourceBrowser = (function () {
             var type = Config.sources[sourceLabel].schemaType;
             if (type == "SKOS") type = "concept";
             else if (type == "OWL") type = "class";
-            result.forEach(function (item, index) {
+            result.forEach(function (item, _index) {
                 for (var i = 20; i > 0; i--) {
                     if (item["broader" + i]) {
                         var id = item["broader" + i].value;
-                        if (false && id.indexOf("nodeID://") > -1)
-                            //skip anonym nodes
-                            return;
+                        //if (false && id.indexOf("nodeID://") > -1)
+                        //skip anonym nodes
+                        //  return;
                         var jstreeId = item["broader" + i].jstreeId;
                         if (!existingNodes[jstreeId]) {
                             existingNodes[jstreeId] = 1;
@@ -538,11 +536,11 @@ var SourceBrowser = (function () {
                     }
                 }
 
-                var jstreeId = item.concept.jstreeId;
+                jstreeId = item.concept.jstreeId;
                 if (!existingNodes[jstreeId]) {
                     existingNodes[jstreeId] = 1;
                     var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>";
-                    var id = item.concept.value;
+                    id = item.concept.value;
                     self.currentFoundIds.push(id);
 
                     var broader1 = item["broader1"];
@@ -569,13 +567,12 @@ var SourceBrowser = (function () {
         });
     };
 
-    self.searchResultToJstree = function (targetDiv, result, options, callback) {
+    self.searchResultToJstree = function (targetDiv, result, _options, _callback) {
         var existingNodes = {};
         var jstreeData = [];
         var parentIdsLabelsMap = result.parentIdsLabelsMap;
 
         result.forEach(function (item) {
-            var term = item.label.toLowerCase();
             var matches = item.matches;
             for (var source in matches) {
                 var items = matches[source];
@@ -688,7 +685,7 @@ var SourceBrowser = (function () {
             data: payload,
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (_data, _textStatus, _jqXHR) {
                 alert("Ontology updated");
             },
             error: function (err) {
@@ -699,8 +696,7 @@ var SourceBrowser = (function () {
 
     self.exportSearchResult = function () {
         if (!self.currentFoundIds || self.currentFoundIds.length == 0) return;
-        var query = "";
-        var idsStr = Sparql_common.setFilter("id", self.currentFoundIds);
+        Sparql_common.setFilter("id", self.currentFoundIds);
     };
 
     self.showNodeInfos = function (sourceLabel, nodeId, divId, options, callback) {
@@ -729,13 +725,11 @@ var SourceBrowser = (function () {
         self.currentNodeIdInfosDivId = divId;
 
         var type;
-        var classesWithRestrictions = false;
         async.series(
             [
                 function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, divId, options, function (err, result) {
+                    self.drawCommonInfos(sourceLabel, nodeId, divId, options, function (_err, result) {
                         type = result.type;
-                        classesWithRestrictions = result.blankNodes.length > 0;
                         callbackSeries();
                     });
                 },
@@ -770,15 +764,15 @@ var SourceBrowser = (function () {
                     if (type != "http://www.w3.org/2002/07/owl#Class") {
                         return callbackSeries();
                     }
-                    self.showNamedIndividualProperties(sourceLabel, nodeId, function (err, result) {
+                    self.showNamedIndividualProperties(sourceLabel, nodeId, function (err) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    if (false && type != "http://www.w3.org/2002/07/owl#Class") {
-                        return callbackSeries();
-                    }
-                    self.showClassRestrictions(sourceLabel, [nodeId], options, function (err, result) {
+                    // if (false && type != "http://www.w3.org/2002/07/owl#Class") {
+                    //     return callbackSeries();
+                    // }
+                    self.showClassRestrictions(sourceLabel, [nodeId], options, function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -787,7 +781,7 @@ var SourceBrowser = (function () {
                     if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
                         return callbackSeries();
                     }
-                    self.showPropertyRestrictions(sourceLabel, nodeId, divId, function (err, result) {
+                    self.showPropertyRestrictions(sourceLabel, nodeId, divId, function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -799,9 +793,8 @@ var SourceBrowser = (function () {
         );
     };
 
-    self.drawCommonInfos = function (sourceLabel, nodeId, divId, options, callback) {
+    self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
         var valueLabelsMap = {};
-        var bindings = [];
         self.propertiesMap = { label: "", id: "", properties: {} };
         var blankNodes = [];
         Sparql_generic.getNodeInfos(
@@ -816,7 +809,7 @@ var SourceBrowser = (function () {
                     return MainController.UI.message(err);
                 }
                 if (divId.indexOf("Dialog") > -1) {
-                    $("#" + divId).on("dialogbeforeclose", function (event, ui) {
+                    $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
                         SourceBrowser.indexObjectIfNew();
                     });
                     $("#" + divId).dialog("open");
@@ -926,11 +919,11 @@ var SourceBrowser = (function () {
                         var langDivs = "";
 
                         for (var lang in self.propertiesMap.properties[key].langValues) {
-                            var values = self.propertiesMap.properties[key].langValues[lang];
+                            values = self.propertiesMap.properties[key].langValues[lang];
                             var selected = "";
                             if (lang == defaultLang) selected = "selected";
                             propNameSelect += "<option " + selected + ">" + lang + "</option> ";
-                            var valuesStr = "";
+                            valuesStr = "";
                             values.forEach(function (value, index) {
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value]) value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
@@ -968,7 +961,7 @@ var SourceBrowser = (function () {
         );
     };
 
-    self.showClassRestrictions = function (sourceLabel, nodeId, options, callback) {
+    self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
         // blankNodes.
 
         Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
@@ -985,7 +978,7 @@ var SourceBrowser = (function () {
 
                 var targetClassStr = "any";
                 if (item.value) {
-                    var targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                    targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
                 }
                 str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
 
@@ -1000,7 +993,6 @@ var SourceBrowser = (function () {
     };
 
     self.showNamedIndividualProperties = function (sourceLabel, nodeId, callback) {
-        var graphUri = Config.sources[sourceLabel].graphUri;
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select distinct * " + fromStr + " where {";
@@ -1017,6 +1009,7 @@ var SourceBrowser = (function () {
             var data = result.results.bindings;
 
             if (data.length == 0) {
+                return;
             } else {
                 var str = "<b>NamedIndividuals</b><br><table>";
 
@@ -1031,7 +1024,7 @@ var SourceBrowser = (function () {
         });
     };
 
-    self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, callback) {
+    self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, _callback) {
         Sparql_OWL.getPropertyClasses(sourceLabel, nodeId, {}, function (err, result) {
             if (err) {
                 alert(err.responseText);
@@ -1104,7 +1097,7 @@ var SourceBrowser = (function () {
                 object: value,
             });
 
-            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, result) {
+            Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
                 if (err) return alert(err);
 
                 self.isModified = true;
@@ -1136,7 +1129,7 @@ var SourceBrowser = (function () {
 
     self.deletePropertyValue = function (property, value) {
         if (confirm("delete property " + property)) {
-            Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, value, function (err, result) {
+            Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, value, function (err, _result) {
                 if (err) return alert(err);
                 self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
             });
@@ -1145,9 +1138,9 @@ var SourceBrowser = (function () {
 
     self.deleteNode = function () {
         if (confirm("delete node " + self.currentNodeId)) {
-            Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, result) {
+            Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
                 if (err) return alert(err);
-                Sparql_generic.deleteTriples(null, null, self.currentNodeId, null, function (err, result) {
+                Sparql_generic.deleteTriples(null, null, self.currentNodeId, null, function (err, _result) {
                     if (err) return alert(err);
 
                     $("#" + self.divId).dialog("close");
@@ -1160,7 +1153,7 @@ var SourceBrowser = (function () {
 
     self.indexObjectIfNew = function () {
         if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
-            SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, result) {
+            SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, _result) {
                 if (err) return alert(err);
             });
         }
@@ -1173,7 +1166,7 @@ var SourceBrowser = (function () {
 
                 $("#searchAllDialogDiv").dialog("open");
                 var options = {
-                    selectTreeNodeFn: function () {},
+                    selectTreeNodeFn: null,
                 };
                 self.searchableSourcesTreeIsInitialized = true;
                 MainController.UI.showSources("searchAll_sourcesTree", true, sources, ["OWL"], options);

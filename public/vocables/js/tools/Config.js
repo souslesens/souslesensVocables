@@ -1,7 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Config = (function () {
     var self = {};
 
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
 
     self.onLoaded = function () {
         $("#accordion").accordion("option", { active: 2 });

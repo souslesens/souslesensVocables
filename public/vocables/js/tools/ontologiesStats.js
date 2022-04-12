@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -7,10 +8,10 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var OntologiesStats = (function () {
     var self = {};
-    self.generateAllOwlStats = function (type) {
+    self.generateAllOwlStats = function (_type) {
         var fromSources = ["ISO 15926-14", "ISO_15926_part_12", "CFIHOS-ISO", "ISO_15926_.org", "CFIHOS_equipment", "CFIHOS_READI", "ISO_15926_part_4", "ISO_15926_PCA", "QUANTUM"];
         //  var fromSources=[ "ISO_15926_part_12"]
         var toSources = ["ISO 15926-14", "ISO_15926_part_12", "CFIHOS-ISO", "ISO_15926_.org", "CFIHOS_equipment", "CFIHOS_READI", "ISO_15926_part_4", "ISO_15926_PCA", "QUANTUM"];
@@ -44,18 +45,19 @@ var OntologiesStats = (function () {
                                     });
                                 } else return callbackEnd();
                             },
-                            function (err) {
+                            function (_err) {
                                 return callbackStart();
                             }
                         );
                     },
-                    function (err) {
+                    function (_err) {
                         return callbackRdfType();
                     }
                 );
             },
             function (err) {
                 if (err) MainController.UI.message(err);
+                // eslint-disable-next-line no-console
                 console.log(JSON.stringify(resultArray, null, 2));
                 $("#graphDiv").html(JSON.stringify(resultArray, null, 2));
                 MainController.UI.message("Done");
@@ -248,7 +250,7 @@ var OntologiesStats = (function () {
         }
         str += "\n";
 
-        for (var keyFrom in sources) {
+        for (keyFrom in sources) {
             var total = sources[keyFrom].total;
             str += keyFrom + "\t" + total;
 
@@ -283,8 +285,6 @@ var OntologiesStats = (function () {
         var lines = str.split("\n");
         var visjsData = { nodes: [], edges: [] };
         var header = lines[0].split(",");
-        var maxLength = 500;
-        var minLength = 100;
 
         header.forEach(function (source, indexLine) {
             if (indexLine > 0) {
@@ -302,12 +302,9 @@ var OntologiesStats = (function () {
 
                 cells.forEach(function (cell, indexCell) {
                     if (indexCell > 0) {
-                        var length;
-
                         if (cell == 0) {
                             return;
                         } else var value = cell;
-                        length = minLength + 1 / (cell * 400);
 
                         visjsData.edges.push({
                             from: cells[0],

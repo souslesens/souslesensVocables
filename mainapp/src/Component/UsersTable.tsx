@@ -1,7 +1,7 @@
-import { Box, CircularProgress, ButtonGroup, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
+import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
-import { SRD, RD, notAsked, loading, failure, success } from "srd";
+import { SRD } from "srd";
 import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from "@material-ui/core";
 import { identity, style } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
@@ -11,12 +11,11 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
-    const unwrappedSources = SRD.unwrap([], (users) => users.sort((x, y) => x.login.localeCompare(y.login)), model.users);
     const [filteringChars, setFilteringChars] = React.useState("");
 
     const renderUsers = SRD.match(
         {
-            notAsked: () => <p>Let's fetch some data!</p>,
+            notAsked: () => <p>Let&apos;s fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -88,8 +87,6 @@ const UsersTable = () => {
 
 type UserEditionState = { modal: boolean; userForm: User };
 
-const initSourceEditionState: UserEditionState = { modal: false, userForm: newUser(ulid()) };
-
 const enum Type {
     UserClickedModal,
     UserUpdatedField,
@@ -106,14 +103,14 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
     //console.log(Type[msg.type], msg.payload)
     const { model } = useModel();
     const unwrappedUsers = SRD.unwrap([], identity, model.users);
-
+    const getUnmodifiedUsers = unwrappedUsers.reduce((acc, value) => (userEditionState.userForm.id === value.id ? value : acc), newUser(ulid()));
+    const resetSourceForm = msg.payload ? userEditionState.userForm : getUnmodifiedUsers;
+    const fieldToUpdate: any = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
     switch (msg.type) {
         case Type.UserClickedModal:
             return { ...userEditionState, modal: msg.payload };
 
         case Type.UserUpdatedField:
-            const fieldToUpdate = msg.payload.fieldname;
-
             return { ...userEditionState, userForm: { ...userEditionState.userForm, [fieldToUpdate]: msg.payload.newValue } };
 
         case Type.ResetUser:
@@ -121,9 +118,6 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
                 case Mode.Creation:
                     return { ...userEditionState, userForm: newUser(ulid()) };
                 case Mode.Edition:
-                    const getUnmodifiedUsers = unwrappedUsers.reduce((acc, value) => (userEditionState.userForm.id === value.id ? value : acc), newUser(ulid()));
-                    const resetSourceForm = msg.payload ? userEditionState.userForm : getUnmodifiedUsers;
-
                     return { ...userEditionState, userForm: msg.payload ? userEditionState.userForm : resetSourceForm };
             }
     }
@@ -137,7 +131,6 @@ type UserFormProps = {
 const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
     const user = maybeUser ? maybeUser : newUser(ulid());
     const { model, updateModel } = useModel();
-    const unwrappedUsers = SRD.unwrap([], identity, model.users);
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
 
     const [userModel, update] = React.useReducer(updateUser, { modal: false, userForm: user });
@@ -149,16 +142,13 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const saveSources = () => {
         if (create) {
-            putUsersBis(userModel.userForm, Mode.Creation, updateModel, update);
+            void putUsersBis(userModel.userForm, Mode.Creation, updateModel, update);
         } else {
-            putUsersBis(userModel.userForm, Mode.Edition, updateModel, update);
+            void putUsersBis(userModel.userForm, Mode.Edition, updateModel, update);
         }
     };
 
-    const creationVariant = (edition: any, creation: any) => (create ? creation : edition);
-
     const config = SRD.unwrap({ auth: "json" }, identity, model.config);
-
     const createEditButton = (
         <Button color="primary" variant="contained" onClick={handleOpen}>
             {create ? "Create User" : "Edit"}

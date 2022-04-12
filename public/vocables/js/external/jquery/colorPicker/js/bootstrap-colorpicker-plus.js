@@ -80,7 +80,7 @@
             }
             row.appendTo(container);
         }
-        var inputGrp = $('<div class="input-group input-group-sm"><input type="text" class="form-control"/><span class="input-group-btn"><button class='btn btn-sm my-1 py-0 btn-outline-primary' class="btn btn-default" type="button" title="Custom Color">C</button></span></div>');
+        var inputGrp = $('<div class="input-group input-group-sm"><input type="text" class="form-control"/><span class="input-group-btn"><button class="btn btn-sm my-1 py-0 btn-outline-primary" class="btn btn-default" type="button" title="Custom Color">C</button></span></div>');
         var colorInput = $('input', inputGrp);
         inputGrp.appendTo(container);
         container.on('click.colorpickerplus-container', '.colorcell', $.proxy(this.select, this));

@@ -35,7 +35,9 @@ var KGcreator = (function () {
         $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
             self.initCentralPanel();
         });
-        $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {});
+        $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
+            // Pass
+        });
         $("#accordion").accordion("option", { active: 2 });
     };
 
@@ -49,7 +51,7 @@ var KGcreator = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 common.fillSelectOptions("KGcreator_csvDirsSelect", result, true);
             },
             error: function (err) {
@@ -69,7 +71,7 @@ var KGcreator = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 var jstreeData = [];
 
                 result.forEach(function (file) {
@@ -96,7 +98,7 @@ var KGcreator = (function () {
             },
         });
     };
-    (self.onCsvtreeNodeClicked = function (event, obj) {
+    (self.onCsvtreeNodeClicked = function (_event, obj) {
         $("#KGcreator_dataSampleDiv").val("");
         self.currentTreeNode = obj.node;
         if (obj.node.parents.length == 0) return;
@@ -129,7 +131,7 @@ var KGcreator = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 var jstreeData = [];
 
                 result.headers.forEach(function (col) {
@@ -152,7 +154,7 @@ var KGcreator = (function () {
 
             items.setAsSubject = {
                 label: "Subject",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length < 2) return;
                     $("#KGcreator_subjectInput").val(self.currentTreeNode.id);
@@ -161,7 +163,7 @@ var KGcreator = (function () {
 
             items.setAsObject = {
                 label: "Object",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length < 2) return;
                     $("#KGcreator_objectInput").val(self.currentTreeNode.id);
@@ -170,7 +172,7 @@ var KGcreator = (function () {
 
             items.copy = {
                 label: "Copy",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     navigator.clipboard.writeText(self.currentTreeNode.id);
                 },
@@ -178,7 +180,7 @@ var KGcreator = (function () {
 
             items.showLookupDialog = {
                 label: "Add lookup",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length < 1) return;
                     $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function () {
@@ -189,7 +191,7 @@ var KGcreator = (function () {
             };
             items.showTransformDialog = {
                 label: "Add Transform",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length != 2) return;
                     $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function () {
@@ -201,7 +203,7 @@ var KGcreator = (function () {
 
             items.loadMappings = {
                 label: "load",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length != 1) return;
                     KGcreator.loadMappings();
@@ -294,7 +296,6 @@ var KGcreator = (function () {
         var predicate = $("#KGcreator_predicateInput").val();
         var object = $("#KGcreator_objectInput").val();
         var isObjectString = $("#KGcreator_isStringCBX").prop("checked");
-        var isSubjectString = $("#KGcreator_isStringCBX").prop("checked");
 
         var subjectLookupName = $("#KGcreator_subjectLookupName").val();
         var objectLookupName = $("#KGcreator_objectLookupName").val();
@@ -326,8 +327,6 @@ var KGcreator = (function () {
         $("#KGcreator_objectSelect").val("");
         $("#KGcreator_predicateInput").val("");
         $("#KGcreator_predicateSelect").val("");
-
-        //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
     };
 
     self.onTripleModelSelect = function (role, value) {
@@ -354,7 +353,7 @@ var KGcreator = (function () {
         self.mainJsonEditorModified = true;
         $("#KGcreator_dialogDiv").dialog("close");
     };
-    self.showFunctionDialog = function (role) {
+    self.showFunctionDialog = function (_role) {
         $("#KGcreator_dialogDiv").load("snippets/KGcreator/functionDialog.html");
         $("#KGcreator_dialogDiv").dialog("open");
     };
@@ -362,7 +361,7 @@ var KGcreator = (function () {
         var fnBody = $("#KGcreator_fnBody").val();
         fnBody = fnBody.replace(/"/g, "'");
         try {
-            var fn = new Function("row", "mapping", fnBody);
+            new Function("row", "mapping", fnBody);
             $("#KGcreator_testFnResult").html("function OK");
         } catch (err) {
             $("#KGcreator_testFnResult").html("error in function code " + err.message);
@@ -373,7 +372,7 @@ var KGcreator = (function () {
         fnBody = fnBody.replace(/"/g, "'");
 
         try {
-            var fn = new Function("row", "mapping", fnBody);
+            new Function("row", "mapping", fnBody);
         } catch (err) {
             return alert("error in function code " + err.message);
         }
@@ -392,11 +391,10 @@ var KGcreator = (function () {
         fnBody = fnBody.replace(/"/g, "'");
 
         try {
-            var fn = new Function("value", "role", "prop", "row", fnBody);
+            new Function("value", "role", "prop", "row", fnBody);
         } catch (err) {
             return alert("error in function code " + err.message);
         }
-        var fnObject = "function{" + fnBody + "}";
         self.currentJsonObject = self.mainJsonEditor.get();
         if (!self.currentJsonObject.transform) self.currentJsonObject.transform = {};
         self.currentJsonObject.transform[column] = fnBody;
@@ -410,9 +408,6 @@ var KGcreator = (function () {
         try {
             var data = self.mainJsonEditor.get();
         } catch (err) {
-            var p = err.message.substring(err.message.indexOf("position") + 9);
-            var x = $("#KGcreator_mainJsonDisplay").val();
-            var y = $("#KGcreator_mainJsonDisplay");
             alert(err.message);
         }
         self.currentJsonObject = data;
@@ -427,7 +422,7 @@ var KGcreator = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {
                 MainController.UI.message("json saved");
                 if (callback) return callback();
             },
@@ -446,7 +441,7 @@ var KGcreator = (function () {
                     var expression = item.o["_function(line, mapping)_"];
                     try {
                         var fn = new Function("line", "mapping", expression);
-                        var x = fn({ x: 1 });
+                        fn({ x: 1 });
                     } catch (err) {
                         $("#KGcreator_dataSampleDiv").val(err);
                     }
@@ -458,7 +453,7 @@ var KGcreator = (function () {
         }
     };
     self.clearMappings = function () {
-        var data = self.mainJsonEditor.load({});
+        self.mainJsonEditor.load({});
         self.mainJsonEditorModified = false;
     };
     self.loadMappings = function (csvFileName) {
@@ -476,7 +471,7 @@ var KGcreator = (function () {
                 url: Config.serverUrl,
                 data: payload,
                 dataType: "json",
-                success: function (result, textStatus, jqXHR) {
+                success: function (result, _textStatus, _jqXHR) {
                     self.currentJsonObject = JSON.parse(result.result);
 
                     if (!self.currentJsonObject.graphUri) self.currentJsonObject.graphUri = self.currentGraphUri || "";
@@ -485,7 +480,7 @@ var KGcreator = (function () {
                     self.mainJsonEditor.load(self.currentJsonObject);
                     self.mainJsonEditorModified = false;
                 },
-                error(err) {
+                error(_err) {
                     self.currentJsonObject = {
                         fileName: csvFileName,
                         tripleModels: [],
@@ -498,11 +493,10 @@ var KGcreator = (function () {
         }
 
         if (self.mainJsonEditorModified) {
-            //self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
             if (!self.currentJsonObject.fileName) return execLoadMappings();
 
             if (confirm(" save current json before opening new file")) {
-                self.saveMappings(function (err, result) {
+                self.saveMappings(function (_err, _result) {
                     execLoadMappings();
                 });
             } else {
@@ -527,17 +521,17 @@ var KGcreator = (function () {
         }
         var options = {};
         if (test) {
-            var options = {
+            options = {
                 deleteOldGraph: false,
                 sampleSize: 500,
             };
         } else {
-            var options = {
+            options = {
                 deleteOldGraph: false,
             };
         }
 
-        self.saveMappings(function (err, result) {
+        self.saveMappings(function (_err, _result) {
             $("#KGcreator_dataSampleDiv").val("");
             var payload = {
                 createTriplesFromCsv: 1,
@@ -550,7 +544,7 @@ var KGcreator = (function () {
                 url: Config.serverUrl,
                 data: payload,
                 dataType: "json",
-                success: function (result, textStatus, jqXHR) {
+                success: function (result, _textStatus, _jqXHR) {
                     if (test) {
                         var str = JSON.stringify(result, null, 2);
 
@@ -579,7 +573,7 @@ var KGcreator = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {
                 return MainController.UI.message("graph deleted " + self.currentJsonObject.graphUri);
             },
             error(err) {

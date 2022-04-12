@@ -8,12 +8,13 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Clipboard = (function () {
     var self = {};
     var content = [];
 
     self.copy = function (data, element, event) {
-        if (false && !data.source) return console.log("copied data has no source property " + data.label);
+        // if (false && !data.source) return console.log("copied data has no source property " + data.label);
 
         data.tool = MainController.currentTool;
         data.date = new Date();
@@ -48,7 +49,7 @@ var Clipboard = (function () {
         content = [];
     };
 
-    blinkVisjsNode = function (selectedNodeId, initialShape) {
+    var blinkVisjsNode = function (selectedNodeId, initialShape) {
         var hidden = true;
         var setInt;
         if (!initialShape) initialShape = "box";

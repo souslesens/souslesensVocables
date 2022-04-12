@@ -8,7 +8,6 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var fs = require("fs");
 var httpProxy = require("./httpProxy.");
 var async = require("async");
 const util = require("./util.");
@@ -19,7 +18,7 @@ var exportRDF = {
         var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct * " + fromStr + " where { ?subject ?predicate ?object.}";
 
         stream.write("with <" + graphUri + "> insert{\n");
-        exportRDF.POST_cursor(sparql_url, query, stream, function (err, result) {
+        exportRDF.POST_cursor(sparql_url, query, stream, function (err, _result) {
             if (err) return console.log(err);
 
             callback(null);
@@ -37,7 +36,7 @@ var exportRDF = {
         data.forEach(function (item) {
             var objectStr = "";
             if (item.object.type != "uri") {
-                if (item.object.value.indexOf("every part in every performance of the system") > -1) var x = 3;
+                // if (item.object.value.indexOf("every part in every performance of the system") > -1) var x = 3;
                 objectStr = "'" + util.formatStringForTriple(item.object.value) + "'";
                 if (item.object.lang) objectStr += "@" + item.object.lang;
             } else {
@@ -57,7 +56,7 @@ var exportRDF = {
         var maxLinesExport = 900000;
 
         var p = query.toLowerCase().indexOf("limit");
-        if (p > -1) var query = query.substring(0, p);
+        if (p > -1) query = query.substring(0, p);
         query += " LIMIT " + limit;
 
         async.whilst(
@@ -80,11 +79,10 @@ var exportRDF = {
                 httpProxy.post(url, body.headers, body.params, function (err, data) {
                     console.log("processed " + offset + " lines");
                     if (err) return callbackWhilst(err);
-                    var xx = data;
                     resultSize = data.results.bindings.length;
                     allData = data.results.bindings;
                     offset += limit;
-                    exportRDF.appendToFileStream(stream, allData, function (err, result) {
+                    exportRDF.appendToFileStream(stream, allData, function (err, _result) {
                         if (err) return callbackWhilst(err);
                         callbackWhilst(null);
                     });
@@ -99,11 +97,13 @@ var exportRDF = {
     },
 };
 module.exports = exportRDF;
-var graphUri = "http://data.total.com/quantum/vocab/";
+/*
+ * var graphUri = "http://data.total.com/quantum/vocab/";
 var sparql_url = "http://51.178.139.80:8890/sparql";
 var filePath = "D:\\NLP\\ontologies\\quantum\\export.nt";
-
-var map = {
+*/
+/*
+ * var map = {
     "ISO_15926-part-14": "http://standards.iso.org/iso/15926/part14/",
     "ONE-MODEL": "http://data.total.com/resource/one-model/ontology/0.2/",
     CFIHOS_READI: "http://w3id.org/readi/rdl/",
@@ -117,8 +117,8 @@ var map = {
     "ISO_15926-part-13": "http://standards.iso.org/iso/15926/part13/",
     QUANTUM: "http://data.total.com/resource/quantum/",
     "NPD-DATA": "http://sws.ifi.uio.no/data/npd-v2/",
-};
-
+};*/
+/*
 if (false) {
     var sparql_url = "http://51.178.139.80:8890/sparql";
     async.eachSeries(
@@ -132,11 +132,11 @@ if (false) {
             //   var filePath = "/var/lib/nodejs/souslesensVocables/public/exports/" + source + ".nt"
             var stream = fs.createWriteStream(filePath, { flags: "a" });
 
-            exportRDF.export(sparql_url, graphUri, stream, function (err, result) {
+            exportRDF.export(sparql_url, graphUri, stream, function (_err, _result) {
                 callbackEach();
             });
         },
-        function (err) {}
+        function (_err) {}
     );
 }
 if (true) {
@@ -163,4 +163,4 @@ if (false) {
         var str = "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" + map[source].substring(map[source].lastIndexOf("/")) + ".ttl000001.ttl.gz', 'http://standards.iso.org/iso/15926/part14/');\n";
         console.log(str);
     }
-}
+}*/

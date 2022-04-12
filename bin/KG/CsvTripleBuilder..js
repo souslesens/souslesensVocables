@@ -4,7 +4,6 @@ var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
-var UML2OWLparser = require("../../other/UML2OWLparser");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 var ConfigManager = require("../configManager.");
@@ -64,7 +63,6 @@ var CsvTripleBuilder = {
             "rdfs:subClassOf": "uri",
             _restriction: "uri",
         };
-        var totalTriplesCount = 0;
         async.eachSeries(
             mappings,
             function (mapping, callbackEachMapping) {
@@ -147,9 +145,7 @@ var CsvTripleBuilder = {
                                 return target;
                             }
 
-                            var emptyMappings = 0;
-                            lines.forEach(function (line, indexLine) {
-                                var hasDirectSuperClass = false;
+                            lines.forEach(function (line) {
                                 var subjectStr = null;
                                 var objectStr = null;
 
@@ -157,7 +153,6 @@ var CsvTripleBuilder = {
                                     subjectStr = null;
                                     objectStr = null;
 
-                                    if (line[item.s] == "CFIHOS-30000310") var x = 3;
                                     //get value for Subject
                                     {
                                         if (item.s_type == "fixed") subjectStr = item.s;
@@ -172,8 +167,7 @@ var CsvTripleBuilder = {
                                         }
 
                                         if (item.lookup_s) {
-                                            if (subjectStr == "IT and telecom equipment") var x = 3;
-                                            var lookupValue = getLookupValue(item.lookup_s, subjectStr);
+                                            const lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                             if (!lookupValue) {
                                                 console.log("missing lookup_s: " + line[item.s]);
                                             } else if (lookupValue == "badLookupName");
@@ -198,7 +192,7 @@ var CsvTripleBuilder = {
                                         } else objectStr = line[item.o];
 
                                         if (item.lookup_o) {
-                                            var lookupValue = getLookupValue(item.lookup_o, objectStr);
+                                            lookupValue = getLookupValue(item.lookup_o, objectStr);
 
                                             if (!lookupValue) console.log("missing lookup_o: " + line[item.o]);
                                             else if (lookupValue == "badLookupName");
@@ -213,25 +207,19 @@ var CsvTripleBuilder = {
                                     //format subject
                                     {
                                         subjectStr = subjectStr.trim();
-                                        if (typeof item.s === "function") subjectStr = subjectStr;
-
                                         if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
-                                        else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) subjectStr = subjectStr;
-                                        else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        else if (!(subjectStr.indexOf && subjectStr.indexOf(":") > -1)) {
+                                            subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                        }
                                     }
 
                                     //format object
                                     {
                                         objectStr = objectStr.trim();
-                                        if (!objectStr || !objectStr.indexOf) {
-                                            var x = line;
-                                            var y = item;
-                                        }
-                                        if (typeof item.o === "function") objectStr = objectStr;
 
                                         if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
                                         else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
-                                            objectStr = objectStr;
+                                            // do nothing
                                         } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
                                         else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                     }
@@ -240,12 +228,12 @@ var CsvTripleBuilder = {
                                         item.p = "<" + graphUri + util.formatStringForTriple(item.p, true) + ">";
                                     }
                                     if (item.isRestriction) {
-                                        var propStr = item.p;
+                                        let propStr = item.p;
                                         if (typeof item.p === "function") {
                                             propStr = item.p(line, item);
                                         }
                                         var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                        var prop = propStr;
+                                        let prop = propStr;
                                         if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
                                         if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
@@ -265,8 +253,6 @@ var CsvTripleBuilder = {
                                                 p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
                                                 o: objectStr,
                                             });
-                                        } else {
-                                            var x = 5;
                                         }
                                         triples.push({
                                             s: subjectStr,
@@ -275,10 +261,10 @@ var CsvTripleBuilder = {
                                         });
 
                                         if (item.inverseRestrictionProperty) {
-                                            var propStr = item.inverseRestrictionProperty;
+                                            propStr = item.inverseRestrictionProperty;
 
-                                            var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                            var prop = propStr;
+                                            blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                            prop = propStr;
                                             if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
                                             if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
@@ -298,8 +284,6 @@ var CsvTripleBuilder = {
                                                     p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
                                                     o: subjectStr,
                                                 });
-                                            } else {
-                                                var x = 5;
                                             }
                                             triples.push({
                                                 s: objectStr,
@@ -333,11 +317,8 @@ var CsvTripleBuilder = {
                                         }
                                     }
                                 });
-
-                                var x = triples;
                             });
 
-                            var x = triples;
                             callbackSeries();
                         },
 
@@ -348,8 +329,6 @@ var CsvTripleBuilder = {
                                 return callback(null, sampleTriples);
                             }
 
-                            totalTriplesCount += triples.length;
-
                             var slices = util.sliceArray(triples, 200);
 
                             var sliceIndex = 0;
@@ -358,7 +337,6 @@ var CsvTripleBuilder = {
                                 function (slice, callbackEach) {
                                     CsvTripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                         if (err) {
-                                            var x = sparqlServerUrl;
                                             errors += err + " slice " + sliceIndex + "\n";
                                             return callbackEach(err);
                                         }
@@ -368,19 +346,19 @@ var CsvTripleBuilder = {
                                         callbackEach();
                                     });
                                 },
-                                function (err) {
+                                function (_err) {
                                     callbackSeries();
                                 }
                             );
                         },
                     ],
 
-                    function (err) {
+                    function (_err) {
                         callbackEachMapping();
                     }
                 );
             },
-            function (err) {
+            function (_err) {
                 if (callback) {
                     var message = "------------ created triples " + totalTriples;
                     return callback(errors ? +"    ERRORS" + errors : null, message);
@@ -412,14 +390,11 @@ var CsvTripleBuilder = {
             "";
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
-        // console.log(query)
 
-        //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
         var params = { query: queryGraph };
 
-        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
-                var x = queryGraph;
                 return callback(err);
             }
             totalTriples += triples.length;
@@ -442,11 +417,11 @@ var CsvTripleBuilder = {
                         callbackSeries();
                     });
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     var query = "clear graph   <" + graphUri + ">";
                     var params = { query: query };
 
-                    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         if (err) {
                             return callback(err);
                         }
@@ -481,7 +456,7 @@ var CsvTripleBuilder = {
                     if (!options.deleteOldGraph) {
                         return callbackSeries();
                     }
-                    CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, result) {
+                    CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
                         if (err) return callbackSeries(err);
                         console.log("graph deleted");
                         callbackSeries();
@@ -496,10 +471,10 @@ var CsvTripleBuilder = {
 
                     function getFunction(argsArray, fnStr, callback) {
                         try {
-                            fnStr = fnStr.replace(/[\/r\/n\/t]gm/, "");
+                            fnStr = fnStr.replace(/[/r/n/t]gm/, "");
                             var array = /\{(?<body>.*)\}/.exec(fnStr);
                             if (!array) {
-                                return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                                return callbackSeries("cannot parse object function " + JSON.stringify(fnStr) + " missing enclosing body into 'function{..}'");
                             }
                             var fnBody = array.groups["body"];
                             var fn = new Function(argsArray, fnBody);
@@ -529,7 +504,7 @@ var CsvTripleBuilder = {
                         var fnStr = mappings.transform[key];
                         if (fnStr.indexOf("function") > -1) {
                             getFunction(["value", "role", "prop", "row"], fnStr, function (err, fn) {
-                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
                                 mappings.transform[key] = fn;
                             });
                         }
@@ -569,11 +544,11 @@ var CsvTripleBuilder = {
 };
 
 module.exports = CsvTripleBuilder;
-
+/*
 if (false) {
     var options = {
         deleteOldGraph: true,
         sampleSize: 500,
     };
     CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (err, result) {});
-}
+} */

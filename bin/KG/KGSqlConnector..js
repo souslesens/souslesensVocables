@@ -58,10 +58,7 @@ var KGSqlConnector = {
 
         for (var key in KGqueryMap) {
             query += " and ";
-
-            if (true) {
-                "" + key + " is not null";
-            }
+            // "" + key + " is not null";
             if (Array.isArray(KGqueryMap[key])) {
                 query += "" + key + " in (";
                 KGqueryMap[key].forEach(function (quantumTotalId, indexId) {
@@ -112,7 +109,7 @@ var KGSqlConnector = {
                     }
                     length = result.length;
                     if (processor) {
-                        processor(result, uniqueTriples, function (err, resultProcessor) {
+                        processor(result, uniqueTriples, function (err, _resultProcessor) {
                             if (err) {
                                 return callbackWhilst(err);
                             }
@@ -124,7 +121,7 @@ var KGSqlConnector = {
                     }
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 callback(null, allResults);
             }
@@ -149,7 +146,7 @@ var KGSqlConnector = {
     },
 };
 module.exports = KGSqlConnector;
-
+/*
 if (false) {
     KGSqlConnector.get("tag", {
         AttributeID: "XXXX",
@@ -157,6 +154,8 @@ if (false) {
     });
 }
 
+// eslint-disable-next-line no-constant-condition
 if (false) {
     KGSqlConnector.getKGmodel("clov");
 }
+*/

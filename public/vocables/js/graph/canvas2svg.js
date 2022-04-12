@@ -49,13 +49,12 @@
             entity,
             lookup = {},
             base10,
-            base16;
-        items = items.split(",");
+            split_items = items.split(",");
         radix = radix || 10;
         // Map from named to numbered entities.
-        for (i = 0; i < items.length; i += 2) {
-            entity = "&" + items[i + 1] + ";";
-            base10 = parseInt(items[i], radix);
+        for (i = 0; i < split_items.length; i += 2) {
+            entity = "&" + split_items[i + 1] + ";";
+            base10 = parseInt(split_items[i], radix);
             lookup[entity] = "&#" + base10 + ";";
         }
         //FF and IE need to create a regex from hex values ie &nbsp; == \xa0
@@ -990,7 +989,7 @@
      */
     ctx.prototype.__parseFont = function () {
         var regex =
-            /^\s*(?=(?:(?:[-a-z]+\s*){0,2}(italic|oblique))?)(?=(?:(?:[-a-z]+\s*){0,2}(small-caps))?)(?=(?:(?:[-a-z]+\s*){0,2}(bold(?:er)?|lighter|[1-9]00))?)(?:(?:normal|\1|\2|\3)\s*){0,3}((?:xx?-)?(?:small|large)|medium|smaller|larger|[.\d]+(?:\%|in|[cem]m|ex|p[ctx]))(?:\s*\/\s*(normal|[.\d]+(?:\%|in|[cem]m|ex|p[ctx])))?\s*([-,\'\"\sa-z0-9]+?)\s*$/i;
+            /^\s*(?=(?:(?:[-a-z]+\s*){0,2}(italic|oblique))?)(?=(?:(?:[-a-z]+\s*){0,2}(small-caps))?)(?=(?:(?:[-a-z]+\s*){0,2}(bold(?:er)?|lighter|[1-9]00))?)(?:(?:normal|\1|\2|\3)\s*){0,3}((?:xx?-)?(?:small|large)|medium|smaller|larger|[.\d]+(?:%|in|[cem]m|ex|p[ctx]))(?:\s*\/\s*(normal|[.\d]+(?:%|in|[cem]m|ex|p[ctx])))?\s*([-,'"\sa-z0-9]+?)\s*$/i;
         var fontPart = regex.exec(this.font);
         var data = {
             style: fontPart[1] || "normal",
@@ -1190,7 +1189,6 @@
             svg,
             defs,
             group,
-            currentElement,
             svgImage,
             canvas,
             context,
@@ -1224,7 +1222,6 @@
         }
 
         parent = this.__closestGroupOrSvg();
-        currentElement = this.__currentElement;
         var translateDirective = "translate(" + dx + ", " + dy + ")";
         if (image instanceof ctx) {
             //canvas2svg mock canvas context. In the future we may want to clone nodes instead.
@@ -1299,7 +1296,7 @@
     /**
      * Generates a pattern tag
      */
-    ctx.prototype.createPattern = function (image, repetition) {
+    ctx.prototype.createPattern = function (image, _repetition) {
         var pattern = this.__document.createElementNS("http://www.w3.org/2000/svg", "pattern"),
             id = randomString(this.__ids),
             img;
@@ -1331,12 +1328,24 @@
     /**
      * Not yet implemented
      */
-    ctx.prototype.drawFocusRing = function () {};
-    ctx.prototype.createImageData = function () {};
-    ctx.prototype.getImageData = function () {};
-    ctx.prototype.putImageData = function () {};
-    ctx.prototype.globalCompositeOperation = function () {};
-    ctx.prototype.setTransform = function () {};
+    ctx.prototype.drawFocusRing = function () {
+        // Pass
+    };
+    ctx.prototype.createImageData = function () {
+        // Pass
+    };
+    ctx.prototype.getImageData = function () {
+        // Pass
+    };
+    ctx.prototype.putImageData = function () {
+        // Pass
+    };
+    ctx.prototype.globalCompositeOperation = function () {
+        // Pass
+    };
+    ctx.prototype.setTransform = function () {
+        // Pass
+    };
 
     //add options for alternative namespace
     if (typeof window === "object") {

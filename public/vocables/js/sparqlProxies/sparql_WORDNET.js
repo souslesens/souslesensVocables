@@ -8,9 +8,9 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_WORDNET = (function () {
     var self = {};
-    var sourceLabel = "WORDNET";
 
     self.sparql_url = "http://wordnet.rkbexplorer.com/sparql/";
     self.ancestorsDepth = 3;
@@ -26,7 +26,9 @@ var Sparql_WORDNET = (function () {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings.forEach(function (item) {});
+            result.results.bindings.forEach(function (_item) {
+                // Pass
+            });
             return callback(null, result.results.bindings);
         });
     };
@@ -58,7 +60,6 @@ var Sparql_WORDNET = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
             });
@@ -131,7 +132,6 @@ var Sparql_WORDNET = (function () {
             if (err) {
                 return callback(err);
             }
-            var bindings = [];
             result.results.bindings.forEach(function (item) {
                 item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
             });

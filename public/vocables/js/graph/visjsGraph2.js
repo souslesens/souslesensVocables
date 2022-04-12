@@ -44,7 +44,7 @@ var visjsGraph = (function () {
 
         var nodesDataSet = new vis.DataSet(visjsData.nodes);
         var edgesDataSet = new vis.DataSet(visjsData.edges);
-        nodesDataSet.on("*", function (event, properties, senderId) {
+        nodesDataSet.on("*", function (event, properties, _senderId) {
             if (event == "add") self.lastAddedNodes = properties.items;
             // console.log('add:', event, 'properties:', properties, 'senderId:', senderId);
         });
@@ -92,17 +92,16 @@ var visjsGraph = (function () {
         // self.network.startSimulation()
         window.setTimeout(function () {
             return;
-
-            if (!_options.layoutHierarchical) {
-                if (!self.network.stopSimulation) return;
-                self.network.stopSimulation();
-                if (!_options.noFit) self.network.fit();
-                self.simulationOn = false;
-                if (_options.afterDrawing) _options.afterDrawing();
-            }
+            // if (!_options.layoutHierarchical) {
+            //     if (!self.network.stopSimulation) return;
+            //     self.network.stopSimulation();
+            //     if (!_options.noFit) self.network.fit();
+            //     self.simulationOn = false;
+            //     if (_options.afterDrawing) _options.afterDrawing();
+            // }
         }, self.simulationTimeOut);
 
-        self.network.on("afterDrawing", function (params) {
+        self.network.on("afterDrawing", function (_params) {
             self.drawingDone = true;
         });
 
@@ -117,7 +116,7 @@ var visjsGraph = (function () {
                         if (obj) _options.onRightClickFn(obj, point, params.event);
                     } else {
                         objId = self.network.getEdgeAt(params.pointer.DOM);
-                        var obj = self.data.edges.get(objId);
+                        obj = self.data.edges.get(objId);
                         if (obj) _options.onRightClickFn(obj, point, params.event);
                     }
                 }
@@ -130,12 +129,14 @@ var visjsGraph = (function () {
 
         self.network
             .on("click", function (params) {
+                // eslint-disable-next-line no-console
                 console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
                 self.processClicks(params, _options);
             })
             .on("hoverNode", function (params) {
                 var nodeId = params.node;
                 var node = self.data.nodes.get(nodeId);
+                // eslint-disable-next-line no-console
                 if (!node) return console.log("hoverNode :no node ");
                 node._graphPosition = params.pointer.DOM;
                 var point = params.pointer.DOM;
@@ -149,10 +150,10 @@ var visjsGraph = (function () {
               }*/
                 if (_options.onHoverNodeFn) _options.onHoverNodeFn(node, point, options);
             })
-            .on("blurNode", function (params) {
+            .on("blurNode", function (_params) {
                 // $("#graphPopupDiv").css("display", "none")
             })
-            .on("zoom", function (params) {
+            .on("zoom", function (_params) {
                 self.onScaleChange();
             })
             .on("hoverEdge", function (params) {
@@ -160,10 +161,9 @@ var visjsGraph = (function () {
                 var edge = self.data.edges.get(edgeId);
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
-                var point = params.pointer.DOM;
                 //   sinequaResultVis.onEdgeHover(edge, point)
             })
-            .on("blurEdge", function (params) {
+            .on("blurEdge", function (_params) {
                 //  sinequaResultVis.onEdgeBlur()
             })
 
@@ -179,7 +179,7 @@ var visjsGraph = (function () {
                 visjsGraph.data.nodes.update(newNodes);
             })
 
-            .on("dragging", function (params) {
+            .on("dragging", function (_params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                 return false;
                 }*/
@@ -199,7 +199,6 @@ var visjsGraph = (function () {
                          return;*/
 
                     var nodeId = params.nodes[0];
-                    var nodeObj = self.data.nodes.get(nodeId);
 
                     self.lastMovedNode = nodeId;
                     //   var nodes = self.data.nodes.getIds();
@@ -223,40 +222,31 @@ var visjsGraph = (function () {
 
               }, 3000)*/
 
-        var htmlPlus =
-            "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.saveGraph()'>Save </button>" +
-            "Load<select style='width: 100px' id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>" +
-            "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>add</div><div id='VisJsGraph_message'></div>";
+        if (!$("#graphButtons").length) {
+            var html =
+                "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
+                // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+                "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
+                "<option ></option>" +
+                "<option >standard</option>" +
+                "<option>hierarchical vertical</option>" +
+                "<option>hierarchical horizontal</option>" +
+                "</select></div>";
 
-        if (true) {
-            if (!$("#graphButtons").length) {
-                var html =
-                    "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                    // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                    " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
-                    "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
-                    "<option ></option>" +
-                    "<option >standard</option>" +
-                    "<option>hierarchical vertical</option>" +
-                    "<option>hierarchical horizontal</option>" +
-                    "</select></div>";
+            html +=
+                " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
 
-                html +=
-                    " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
+            html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
+            html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
 
-                html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
-                html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
+            var parent = $("#" + divId).parent();
 
-                if (false) html += " &nbsp;&nbsp;" + htmlPlus;
-
-                var parent = $("#" + divId).parent();
-
-                $(parent).css("flex-direction", "column");
-                $(parent).prepend(html);
-            }
-
-            html += "</div>";
+            $(parent).css("flex-direction", "column");
+            $(parent).prepend(html);
         }
+
+        html += "</div>";
         setTimeout(function () {
             self.listSavedGraphs();
             // CustomPluginController.setGraphNodesIcons()
@@ -275,16 +265,6 @@ var visjsGraph = (function () {
     };
     self.setLayout = function (layout) {
         if (layout == "hierarchical vertical") {
-            if (false && self.lastMovedNode) {
-                var newNodes = [];
-                self.data.nodes.getIds().forEach(function (nodeId) {
-                    var fixed = false;
-                    if (nodeId == self.lastMovedNode) fixed = true;
-                    newNodes.push({ id: nodeId, x: { fixed: fixed }, y: { fixed: fixed } });
-                });
-                self.data.nodes.update(newNodes);
-            }
-
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
                 sortMethod: "hubsize",
@@ -296,7 +276,6 @@ var visjsGraph = (function () {
                     roundness: 0.1,
                 },
             };
-            shakeTowards: true;
             self.currentContext.simulationTimeOut = 10000;
 
             self.redraw();
@@ -347,7 +326,7 @@ var visjsGraph = (function () {
     self.importGraph = function (str) {
         var edges = json.parse();
         var nodes = visjsGraph.data.nodes.get();
-        var edges = visjsGraph.data.edges.get();
+        edges = visjsGraph.data.edges.get();
         var nodesMap = {};
         nodes.forEach(function (node) {
             nodesMap[node.id] = node;
@@ -356,7 +335,7 @@ var visjsGraph = (function () {
             edge.fromNode = nodesMap[edge.from];
             edge.toNode = nodesMap[edge.to];
         });
-        var str = JSON.stringify(edges);
+        str = JSON.stringify(edges);
         common.copyTextToClipboard(str);
     };
 
@@ -370,7 +349,9 @@ var visjsGraph = (function () {
         self.data = null;
     };
 
-    self.drawLegend = function () {};
+    self.drawLegend = function () {
+        // Pass
+    };
 
     self.removeNodes = function (key, value, removeEdges) {
         var nodeIds = [];
@@ -463,7 +444,7 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv();
-        common.copyTextToClipboard(csv, function (err, result) {
+        common.copyTextToClipboard(csv, function (err, _result) {
             if (err) MainController.UI.message(err);
             MainController.UI.message("csv copied in system clipboard");
         });
@@ -544,7 +525,6 @@ var visjsGraph = (function () {
     };
 
     self.getNodesPosition = function () {
-        var nodes = self.data.nodes.getIds();
         var positions = self.network.getPositions();
         return positions;
     };
@@ -555,7 +535,6 @@ var visjsGraph = (function () {
             lastClickTime = now;
             return;
         }
-        if (isDbleClick) var x = 3;
 
         if (params.edges.length == 0 && params.nodes.length == 0) {
             //simple click stop animation
@@ -571,7 +550,7 @@ var visjsGraph = (function () {
 
         // select node
         else if (params.nodes.length == 1) {
-            var options = {
+            const options = {
                 dbleClick: isDbleClick,
                 ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,
                 altKey: params.event.srcEvent.altKey ? 1 : 0,
@@ -597,8 +576,8 @@ var visjsGraph = (function () {
             var edge = self.data.edges.get(edgeId);
             edge.fromNode = self.data.nodes.get(edge.from);
             edge.toNode = self.data.nodes.get(edge.to);
-            var point = params.pointer.DOM;
-            var options = {
+            const point = params.pointer.DOM;
+            const options = {
                 dbleClick: isDbleClick,
                 ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,
                 altKey: params.event.srcEvent.altKey ? 1 : 0,
@@ -622,7 +601,7 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.remove(targetNodes);
     };
 
-    self.focusOnNode = function (id, label) {
+    self.focusOnNode = function (id, _label) {
         if (id) {
             var newNodes = [];
             self.data.nodes.getIds().forEach(function (nodeId) {
@@ -727,7 +706,6 @@ var visjsGraph = (function () {
 
     self.saveGraph = function (fileName, raw) {
         if (!self.currentContext) return;
-        var nodes = visjsGraph.data.nodes.get();
         var positions = self.network.getPositions();
 
         if (!raw) {
@@ -755,7 +733,7 @@ var visjsGraph = (function () {
             url: Config.apiUrl + "/data",
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 MainController.UI.message("graph saved");
             },
@@ -770,7 +748,6 @@ var visjsGraph = (function () {
     };
 
     self.loadGraph = function (fileName, add, callback) {
-        if (false && !self.currentContext) return;
         if (!fileName) fileName = $("#visjsGraph_savedGraphsSelect").val();
         var addToCurrentGraph = $("#visjsGraph_addToCurrentGraphCBX").prop("checked");
         if (!fileName || fileName == "") return;
@@ -781,7 +758,7 @@ var visjsGraph = (function () {
             url: Config.apiUrl + "/data/" + fileName,
             data: payload,
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 var data = JSON.parse(result.result);
                 var positions = data.positions;
                 var options = data.context.options;
@@ -845,7 +822,7 @@ var visjsGraph = (function () {
             type: "GET",
             url: Config.apiUrl + "/data/files",
             dataType: "json",
-            success: function (result, textStatus, jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {
                 if (callback) return callback(null, result);
                 common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true);
             },

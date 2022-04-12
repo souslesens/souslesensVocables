@@ -8,7 +8,6 @@ var KGbrowserQuery = (function () {
     self.shortestPathQueriesStack = [];
     self.varNamesMap = {};
     self.currentPath = null;
-    var previousVarName = null;
     self.onSelectKGtreeNode = function (event, obj) {
         if (obj.node.id == "..") return self.loadAdl();
 
@@ -43,7 +42,7 @@ var KGbrowserQuery = (function () {
                     self.currentQueryDialogPredicates.push(item);
                 } else {
                     self.currentMatchingFilterNode = null;
-                    KGbrowserQuery.queryFilterNodes.forEach(function (filter, index) {
+                    KGbrowserQuery.queryFilterNodes.forEach(function (filter, _index) {
                         var previousClass = filter.class;
                         if (item.object == previousClass) {
                             ok = true;
@@ -71,7 +70,6 @@ var KGbrowserQuery = (function () {
             $("#KGbrowserQueryParams_valuesSelect").val("");
             common.fillSelectOptions("KGbrowserQueryParams_valuesSelect", [""]);
 
-            var emptyOptions = self.currentQueryDialogPredicates.length > 1;
             common.fillSelectOptions("KGbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", "predicate");
             if (node.data.searchedLabel) {
                 var array = [{ label: " rdfs:label", id: "http://www.w3.org/2000/01/rdf-schema#label" }];
@@ -82,7 +80,7 @@ var KGbrowserQuery = (function () {
         }, 500);
     };
 
-    self.getClassesPredicates = function (classIds, withInverse) {
+    self.getClassesPredicates = function (classIds, _withInverse) {
         var classes = KGbrowserQuery.classes;
         if (!Array.isArray(classIds)) classIds = [classIds];
 
@@ -109,43 +107,28 @@ var KGbrowserQuery = (function () {
                     }
                 });
             }
-            if (true || withInverse) {
-                //inverse
-                for (var subject in classes) {
-                    for (var predicate in classes[subject]) {
-                        classes[subject][predicate].forEach(function (object) {
-                            if (predicate.indexOf("label") > -1) return;
-                            if (predicate.indexOf("type") > -1) return;
-                            if (object == classId) {
-                                if (!uniquePredicates["^" + predicate + object]) {
-                                    uniquePredicates["^" + predicate + object] = 1;
-                                    if (false) {
-                                        var label = KGbrowserQuery.model[subject].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[classId].label;
-                                        var id = subject + "|" + predicate + "|" + classId;
-                                        retainedPredicates.push({
-                                            predicate: predicate,
-                                            inverse: true,
-                                            subject: subject,
-                                            object: classId,
-                                            id: id,
-                                            label: label,
-                                        });
-                                    } else {
-                                        var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label;
-                                        var id = classId + "|" + predicate + "|" + subject;
-                                        retainedPredicates.push({
-                                            predicate: predicate,
-                                            inverse: true,
-                                            subject: classId,
-                                            object: subject,
-                                            id: id,
-                                            label: label,
-                                        });
-                                    }
-                                }
+            //inverse
+            for (var subject in classes) {
+                for (predicate in classes[subject]) {
+                    classes[subject][predicate].forEach(function (object) {
+                        if (predicate.indexOf("label") > -1) return;
+                        if (predicate.indexOf("type") > -1) return;
+                        if (object == classId) {
+                            if (!uniquePredicates["^" + predicate + object]) {
+                                uniquePredicates["^" + predicate + object] = 1;
+                                var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label;
+                                var id = classId + "|" + predicate + "|" + subject;
+                                retainedPredicates.push({
+                                    predicate: predicate,
+                                    inverse: true,
+                                    subject: classId,
+                                    object: subject,
+                                    id: id,
+                                    label: label,
+                                });
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         });
@@ -176,17 +159,11 @@ var KGbrowserQuery = (function () {
                 });
             }
         }
-        if (true || properties.length == 0) {
-            properties.push({
-                propertyLabel: "label",
-                property: "http://www.w3.org/2000/01/rdf-schema#label",
-            });
+        properties.push({
+            propertyLabel: "label",
+            property: "http://www.w3.org/2000/01/rdf-schema#label",
+        });
 
-            /*   Sparql_OWL.getItems(KGbrowser.currentSource, {
-                       filter:" FILTER (?concept =<"+self.currentNode.data.id+">)."
-                   }, function (err, result) {
-                   })*/
-        }
         var withBlankOption = false;
         if (properties.length > 1) withBlankOption = true;
         $("#KGbrowserQueryParams_type").html(node.data.label);
@@ -244,7 +221,9 @@ var KGbrowserQuery = (function () {
             self.query.showNodeProperties({ data: { type: type, id: type, label: self.OneModelDictionary[type] } });
         });
 
-    self.onOperatorSelect = function (operator) {};
+    self.onOperatorSelect = function (_operator) {
+        // Pass
+    };
 
     self.onQueryParamsDialogValidate = function (logicalMode) {
         var predicate = $("#KGbrowserQueryParams_predicateSelect").val();
@@ -265,7 +244,6 @@ var KGbrowserQuery = (function () {
             self.varNamesMap[varName] = { id: field, predicates: self.classes[field], color: color };
         }
         var varNameX = varName + "_X";
-        var typeVarName = varName;
         /*   if (logicalMode == "union")//self.queryTypesArray.length == 0)
                    typeVarName = "?sub"
                else
@@ -396,7 +374,7 @@ var KGbrowserQuery = (function () {
         $("#KGbrowserQueryParamsDialog").css("display", "none");
     };
 
-    self.addNodeToQueryTree = function (node, prop) {
+    self.addNodeToQueryTree = function (node, _prop) {
         self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
             var isNewTree = $("#KGbrowser_queryTreeDiv").is(":empty");
             var existingNodes = [];
@@ -450,7 +428,7 @@ var KGbrowserQuery = (function () {
             });
 
             if (isNewTree) {
-                var options = {
+                options = {
                     selectTreeNodeFn: self.jstree.events.onSelectNodeQuery,
                     contextMenu: self.jstree.getJstreeQueryContextMenu("KGbrowser_queryTreeDiv"),
 
@@ -466,7 +444,7 @@ var KGbrowserQuery = (function () {
 
     self.getQueryFilter = function (filterId) {
         var obj = null;
-        self.queryFilterNodes.forEach(function (filterData, index) {
+        self.queryFilterNodes.forEach(function (filterData, _index) {
             if (filterData.filterDivId == filterId) obj = filterData;
         });
         return obj;
@@ -494,8 +472,7 @@ var KGbrowserQuery = (function () {
                 selectVars: [filterData.varName],
             };
 
-            var node = { data: { id: id } };
-            self.executeQuery(self.currentNode, options, function (err, queryResult) {
+            self.executeQuery(self.currentNode, options, function (_err, queryResult) {
                 var jstreeData = [];
                 var keyName = filterData.varName.substring(1);
                 queryResult.data.forEach(function (item) {
@@ -536,8 +513,7 @@ var KGbrowserQuery = (function () {
                 }
             });
 
-            KGbrowserQuery.executeShortestPathQuery(null, null, { restPath: 1 }, function (err, queryResult) {
-                // self.executeQuery(null, options, function (err, queryResult) {
+            KGbrowserQuery.executeShortestPathQuery(null, null, { restPath: 1 }, function (_err, queryResult) {
                 if (queryResult.length == 0) return MainController.UI.message("No results", true);
                 if (output == "graph") {
                     if (!self.ALDmodelGraph) {
@@ -576,7 +552,6 @@ var KGbrowserQuery = (function () {
         resetAllFilters: function () {
             KGbrowserQuery.graphActions.backToModel();
             setTimeout(function () {
-                previousVarName = null;
                 if ($("#KGbrowser_adlJstreeDiv").jstree) $("#KGbrowser_adlJstreeDiv").jstree("destroy");
 
                 while (self.queryFilterNodes.length > 0) {
@@ -616,7 +591,7 @@ var KGbrowserQuery = (function () {
                 }
             }
         },
-        showGraphPopupMenu: function (node, point, e) {
+        showGraphPopupMenu: function (node, point, _e) {
             var top = $("#graphDiv").position().top;
             point.y += top;
             var html = "";
@@ -652,7 +627,7 @@ var KGbrowserQuery = (function () {
                 if (err) {
                     return MainController.UI.message(err);
                 }
-                var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"]);
+                Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"]);
                 var jstreeData = [];
                 result.results.bindings.forEach(function (item) {
                     jstreeData.push({
@@ -673,7 +648,7 @@ var KGbrowserQuery = (function () {
         },
     };
 
-    self.executeQuery = function (node, options, callback) {
+    self.executeQuery = function (_node, options, callback) {
         var fetchLength = Config.KG.queryLimit;
         var queryFilterNodes = KGbrowserQuery.queryFilterNodes;
         var dialogFilterStr = "";
@@ -689,8 +664,6 @@ var KGbrowserQuery = (function () {
 
         // join classes (anonym predicate)
         var message = null;
-        var filterSubType;
-        var filterObjType;
 
         var varName2 = varName;
 
@@ -707,7 +680,7 @@ var KGbrowserQuery = (function () {
                 queryFilterNodes[0].filter += predicateStr;
                 self.currentNode.filter += predicateStr;
             } else {
-                queryFilterNodes.forEach(function (filterNodeData, index2) {
+                queryFilterNodes.forEach(function (filterNodeData, _index2) {
                     if (!previousVarName && (options.predicate.subject == filterNodeData.class || options.predicate.object == filterNodeData.class)) {
                         previousVarName = filterNodeData.varName;
                         predicateStr = " " + varName2 + " " + predicateStr + " " + previousVarName + ". ";
@@ -720,7 +693,7 @@ var KGbrowserQuery = (function () {
 
         //build query with all previous filters and varnames
 
-        queryFilterNodes.forEach(function (filterNodeData, index) {
+        queryFilterNodes.forEach(function (filterNodeData, _index) {
             if (!filterNodeData) return;
 
             where += filterNodeData.filter;
@@ -757,7 +730,7 @@ var KGbrowserQuery = (function () {
         if (options.count) query += "select (count(distinct " + varName + ") as ?count) ";
         else if (options.selectVars) {
             var selectVarsStr = "";
-            options.selectVars.forEach(function (varName, index) {
+            options.selectVars.forEach(function (varName, _index) {
                 selectVarsStr += varName + " " + varName + "Label " + varName + "Type ";
             });
             query += "select distinct " + selectVarsStr;
@@ -775,7 +748,7 @@ var KGbrowserQuery = (function () {
         var maxOffset = 50000;
         MainController.UI.message("searching...");
         async.whilst(
-            function (callbackTest) {
+            function (_callbackTest) {
                 //test
                 if (offset >= maxOffset) alert("query results truncated : larger than " + maxOffset + " maximum authorized ");
                 return length > 0 && offset < maxOffset;
@@ -813,21 +786,19 @@ var KGbrowserQuery = (function () {
 
         var where = "";
 
-        if (true || self.existPath) {
-            self.queryFilterNodes.forEach(function (item, index) {
-                where += item.filter + "\n";
-                if (index == 0) return;
-                if (index == 1) {
-                    fromNode = self.queryFilterNodes[index - 1];
-                    toNode = self.queryFilterNodes[index];
-                    where += GraphTraversal.getShortestPaths(fromNode, toNode, self.classes);
-                } else {
-                    toNode = self.queryFilterNodes[index];
-                    where += GraphTraversal.addNodeToPath(toNode, self.classes, self.queryFilterNodes.length);
-                    where += toNode.filter + "\n";
-                }
-            });
-        }
+        self.queryFilterNodes.forEach(function (item, index) {
+            where += item.filter + "\n";
+            if (index == 0) return;
+            if (index == 1) {
+                fromNode = self.queryFilterNodes[index - 1];
+                toNode = self.queryFilterNodes[index];
+                where += GraphTraversal.getShortestPaths(fromNode, toNode, self.classes);
+            } else {
+                toNode = self.queryFilterNodes[index];
+                where += GraphTraversal.addNodeToPath(toNode, self.classes, self.queryFilterNodes.length);
+                where += toNode.filter + "\n";
+            }
+        });
 
         /*  self.queryFilterNodes.forEach(function (filterNode) {
                 where += filterNode.filter + "\n"
@@ -850,7 +821,7 @@ var KGbrowserQuery = (function () {
         var maxOffset = 50000;
         MainController.UI.message("searching...");
         async.whilst(
-            function (callbackTest) {
+            function (_callbackTest) {
                 //test
                 if (length != 1 && length < fetchLength) return false;
                 if (offset >= maxOffset) alert("query results truncated : larger than " + maxOffset + " maximum authorized ");
@@ -879,7 +850,7 @@ var KGbrowserQuery = (function () {
         );
     };
 
-    self.loadAdl = function (node) {
+    self.loadAdl = function (_node) {
         if (!KGbrowser.currentSource) {
             return alert("select a source");
         }
@@ -892,7 +863,7 @@ var KGbrowserQuery = (function () {
         };
         var graphDiv = "graphDiv";
         // var graphDiv = "KGbrowser_adlJstreeDiv"
-        return KGassetGraph.drawClassesAndPropertiesGraph(KGbrowser.currentSource, graphDiv, options, function (err, result) {
+        return KGassetGraph.drawClassesAndPropertiesGraph(KGbrowser.currentSource, graphDiv, options, function (_err, result) {
             self.classes = result.classes;
             self.model = result.model;
             self.initClassesTab(result.classes, result.model);
@@ -925,8 +896,7 @@ var KGbrowserQuery = (function () {
                 });
             }
             for (var predicate in classes[classId]) {
-                if (!model[predicate]) var x = predicate;
-                else {
+                if (model[predicate]) {
                     var id2 = common.getRandomHexaId(5);
                     if (!distinctNode[id2]) {
                         distinctNode[id2] = 1;
@@ -962,21 +932,13 @@ var KGbrowserQuery = (function () {
             }
         });
         var options = {
-            selectTreeNodeFn: function (event, obj) {
+            selectTreeNodeFn: function (_event, obj) {
                 self.currentNode = obj.node;
 
                 self.showQueryParamsDialog({ x: 300, y: 300 });
             },
             contextMenu: function () {
                 var items = {};
-                /*    items.nodeInfos = {
-                            label: "node infos",
-                            action: function (e, xx) {// pb avec source
-                                SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv")
-
-
-                            }
-                        }*/
                 return items;
             },
         };
@@ -996,7 +958,6 @@ var KGbrowserQuery = (function () {
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
         MainController.UI.message("searching...");
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-            // $("#waitImg").css("display", "none");
             if (err) {
                 return callback(err);
             }
@@ -1056,50 +1017,3 @@ var KGbrowserQuery = (function () {
 
     return self;
 })();
-
-if (false) {
-    var path1 =
-        "^<http://standards.iso.org/iso/15926/part14/hasQuality>/^<http://standards.iso.org/iso/15926/part14/representedBy>/<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/^<http://standards.iso.org/iso/15926/part14/hasSubLocation> ?FacilitySector_1.";
-    var path2 =
-        " <http://standards.iso.org/iso/15926/part14/hasSubLocation>/^<http://standards.iso.org/iso/15926/part14/locatedRelativeTo>/<http://standards.iso.org/iso/15926/part14/concretizedBy>/<http://w3id.org/readi/rdl/D101001101> ?organization_0.";
-
-    var shortestPathQueriesStack = [path1, path2];
-    var query = "";
-    var varIndex = 0;
-    var allPropertiesMap = {};
-    var predicatesMap = {};
-    shortestPathQueriesStack.forEach(function (path, index) {
-        var regex = /<(.[^>]*)>/gm;
-        var predicates;
-
-        while ((predicates = regex.exec(path)) != null) {
-            var property = predicates[1];
-            if (!predicatesMap[index]) predicatesMap[index] = [];
-            predicatesMap[index].push(property);
-
-            if (!allPropertiesMap[property]) allPropertiesMap[property] = 0;
-            allPropertiesMap[property] += 1;
-        }
-    });
-
-    var indexProperty = 0;
-    for (var property in allPropertiesMap) {
-        indexProperty++;
-        shortestPathQueriesStack.forEach(function (path, indexPath) {
-            var count = allPropertiesMap[property];
-            if (count > 1) {
-                var varName = " ?Q" + indexProperty;
-                varName = varName + ". " + varName + " ";
-                var p = predicatesMap[indexPath].indexOf(property);
-                if (p > 0 && p < predicatesMap[indexPath].length - 1) {
-                    if (predicatesMap[indexPath].indexOf("^") > -1) {
-                        predicatesMap[indexPath][p] = varName + predicatesMap[indexPath][p];
-                    } else {
-                        predicatesMap[indexPath][p] = predicatesMap[indexPath][p] + varName;
-                    }
-                }
-            }
-        });
-    }
-    var x = predicatesMap;
-}

@@ -99,7 +99,9 @@ var TE_AssetConfigurator = (function () {
         $("#rightPanelDiv").html("");
         $("#rightPanelDiv").load("customPlugins/TotalEnergies/TE_AssetConfigurator/snippets/rightPanel.html", function () {
             $("#TE_AssetConfigurator_Tabs").tabs({
-                activate: function (e, ui) {},
+                activat_e: function (_e, _ui) {
+                    // Pass
+                },
             });
         });
 
@@ -117,7 +119,7 @@ var TE_AssetConfigurator = (function () {
         }
 
         var html = "";
-        for (var key in htmlAspects) {
+        for (const key in htmlAspects) {
             var suffix = "";
             if (key == "Location") suffix = " (point)";
             if (key == "Construction work") suffix = " (site)";
@@ -149,7 +151,7 @@ var TE_AssetConfigurator = (function () {
 
         items.addNode = {
             label: "add Node",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetConfigurator.addNode(self.currentTreeNode);
             },
@@ -157,7 +159,7 @@ var TE_AssetConfigurator = (function () {
 
         items.nodeInfos = {
             label: "Node infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv");
             },
@@ -165,7 +167,7 @@ var TE_AssetConfigurator = (function () {
 
         items.sameAsQualities = {
             label: "Same as Qualities",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_AssetConfigurator.showNodeQualities(self.currentTreeNode, "tree");
             },
@@ -249,7 +251,6 @@ var TE_AssetConfigurator = (function () {
         node.data.system = self.currentSystem;
         node.data.aspect = self.systemsMap[self.currentSystem].aspect;
 
-        var existingNodes = visjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
         var visjsId = common.getRandomHexaId(10);
         var code = node.data.code;
@@ -264,7 +265,7 @@ var TE_AssetConfigurator = (function () {
         node.data.example = self.systemsMap[self.currentSystem].items[node.data.id].example;
         node.data.code = code;
         node.data.number = self.getNodeNewSequenceNumber(self.currentSystem, node.data.id);
-        var node = {
+        node = {
             id: visjsId,
             label: code + node.data.number,
             data: node.data,
@@ -318,7 +319,7 @@ var TE_AssetConfigurator = (function () {
                 },
                 nodes: {
                     chosen: {
-                        node: function (values, id, selected, hovering) {
+                        node: function (values, id, selected, _hovering) {
                             if (selected) values.color = "red";
                         },
                     },
@@ -345,22 +346,27 @@ var TE_AssetConfigurator = (function () {
                     },
                 };
 
-            options.dndCtrlFn = function (startNode, endNode, point) {
-                if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label)) self.createRelation(startNode, endNode, function (err, visjsData) {});
+            options.dndCtrlFn = function (startNode, endNode, _point) {
+                if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label))
+                    self.createRelation(startNode, endNode, function (_err, _visjsData) {
+                        // Pass
+                    });
             };
-            options.onclickFn = function (node, point, options) {
+            _options.onclickFn = function (node, _point, _options) {
                 MainController.UI.hidePopup("graphPopupDiv");
                 self.currentGraphNode = node;
             };
-            options.onClusterClickFn = function (clusterId, point, options) {
+            _options.onClusterClickFn = function (clusterId, _point, _options) {
                 visjsGraph.network.openCluster(clusterId);
             };
-            options.onHoverNodeFn = function (node, point, options) {
+            _options.onHoverNodeFn = function (node, _point, _options) {
                 self.showGraphNodeInfos(node);
             };
             options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
 
-            visjsGraph.draw("graphDiv", visjsData, options, function () {});
+            visjsGraph.draw("graphDiv", visjsData, options, function () {
+                // Pass
+            });
         }
         if (self.currentSystem) self.setSystemTypesSelectVisibility(self.currentSystem.level);
 
@@ -372,7 +378,6 @@ var TE_AssetConfigurator = (function () {
     self.showGraphNodeInfos = function (node) {
         self.getNodeClassificationTree(node.data, function (err, parentsMap) {
             if (err) return MainController.UI.message(err);
-            var color = self.systemsMap[node.data.system].color;
             var parentsStr = "<ul>";
             var i = 0;
             var sep = "";
@@ -404,13 +409,13 @@ var TE_AssetConfigurator = (function () {
         });
     };
 
-    self.showGraphPopupMenus = function (node, point, event) {
+    self.showGraphPopupMenus = function (node, point, _event) {
         if (!node) return MainController.UI.hidePopup("graphPopupDiv");
         if (node.from) {
             //edge
             var html = '    <span  class="popupMenuItem"onclick="TE_AssetConfigurator.deleteSelectedEdge()();"> Delete</span>';
         } else {
-            var html =
+            html =
                 '    <span  class="popupMenuItem"onclick="TE_AssetConfigurator.deleteSelectedObject()();"> Delete</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="TE_AssetConfigurator.graphActions.showInfos();">Node infos</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="TE_AssetConfigurator.graphActions.rename();">Rename</span>' +
@@ -432,7 +437,6 @@ var TE_AssetConfigurator = (function () {
     };
 
     self.setSystemTypesSelectVisibilityOld = function () {
-        var currentSystem = 10;
         var currentSystem = null;
         if (self.currentDisplayDivId) currentSystem = self.displayedDivsMap[self.currentDisplayDivId].systemType;
         if (currentSystem) {
@@ -473,7 +477,6 @@ var TE_AssetConfigurator = (function () {
     self.getNodeTag = function (targetNode) {
         if (!targetNode) return;
         var edges = visjsGraph.data.edges.get();
-        var nodeIds = [];
         if (edges.length < 1)
             return {
                 locationTag: "-" + targetNode.data.code + targetNode.data.number,
@@ -495,9 +498,6 @@ var TE_AssetConfigurator = (function () {
         recursePaths(startNode);
 
         nodeAncestors.reverse();
-
-        var bulQueryStr = "";
-        var header = {};
 
         var locationTag = "";
         var functionTag = "";
@@ -537,7 +537,7 @@ var TE_AssetConfigurator = (function () {
 
     self.createRelation = function (startNode, endNode, callback) {
         if (startNode.id == endNode.id) return;
-        var getEdge = function (relationType, drawLabel) {
+        var getEdge = function (relationType, _drawLabel) {
             var edgeId = common.getRandomHexaId(10);
             var edge;
 
@@ -738,7 +738,7 @@ var TE_AssetConfigurator = (function () {
                 function (callbackSeries) {
                     var parentIds = [];
                     matchingHits.forEach(function (hit) {
-                        hit._source.parents.forEach(function (item, indexParent) {
+                        hit._source.parents.forEach(function (item, _indexParent) {
                             if (parentIds.indexOf(item) < 0) parentIds.push(item);
                         });
                     });
@@ -810,7 +810,7 @@ var TE_AssetConfigurator = (function () {
                 function (callbackSeries) {
                     var parentIds = [];
                     matchingHits.forEach(function (hit) {
-                        hit._source.parents.forEach(function (item, indexParent) {
+                        hit._source.parents.forEach(function (item, _indexParent) {
                             if (parentIds.indexOf(item) < 0) parentIds.push(item);
                         });
                         if (parentIds.indexOf(hit._source.id) < 0) parentIds.push(hit._source.id);
@@ -819,8 +819,6 @@ var TE_AssetConfigurator = (function () {
                     SearchUtil.getSourceLabels(self.currentSource.toLowerCase(), parentIds, null, null, function (err, hits) {
                         if (err) return callbackSeries(err);
                         hits.forEach(function (hit) {
-                            if (hit._source.label == "Centrifugal pump") var x = 3;
-
                             var parents = hit._source.parents;
                             var code = hit._source.skoslabels[0];
 
@@ -848,12 +846,11 @@ var TE_AssetConfigurator = (function () {
                 },
 
                 //set tree
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     var jstreeData = [];
                     var existingNodes = {};
 
                     var getNodeLabel = function (item) {
-                        if (item == "http://data.total.com/resource/tsf/RDS_OG_81346/Location_aspect/Construction_complexe_1") var x = 3;
                         var label;
                         var prefix = "";
                         if (self.systemsMap[item]) label = "System " + self.systemsMap[item].label;
@@ -913,7 +910,6 @@ var TE_AssetConfigurator = (function () {
                             }
                         });
 
-                        if (hit._source.id.indexOf("Centri") > -1) var x = 3;
                         var parent2 = getParent(hit._source.id);
                         var code2 = getCode(hit._source.id);
                         var label2 = getNodeLabel(hit._source.id);
@@ -1041,7 +1037,7 @@ var TE_AssetConfigurator = (function () {
                 joinCondition: function (childOptions) {
                     return clustersMap[key].indexOf(childOptions.id) > -1;
                 },
-                processProperties: function (clusterOptions, childNodes, childEdges) {
+                processProperties: function (clusterOptions, childNodes, _childEdges) {
                     clusterOptions.mass = childNodes.length;
                     return clusterOptions;
                 },
@@ -1092,7 +1088,6 @@ var TE_AssetConfigurator = (function () {
         },
         showInfos: function () {
             if (!self.currentGraphNode) return alert("select a node in the graph");
-            var rdsNodeData = self.currentGraphNode.data;
             // JSON.stringify(rdsNodeData, null,2).replace("\\n","<br>")
 
             var headers = Object.keys(self.currentGraphNode.data);

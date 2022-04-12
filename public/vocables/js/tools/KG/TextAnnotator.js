@@ -63,7 +63,7 @@ var TextAnnotator = (function () {
 
         newParent.setAttribute("id", "xxxx");
         var xx = self.Selector.getSelected();
-        var range = xx.getRangeAt(0);
+        range = xx.getRangeAt(0);
 
         range.surroundContents(newParent);
         self.Selector.getSelected().empty();

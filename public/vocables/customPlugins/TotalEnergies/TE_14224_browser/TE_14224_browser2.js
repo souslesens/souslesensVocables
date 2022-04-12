@@ -1,7 +1,6 @@
 var TE_14224_browser = (function () {
     var self = {};
     var source;
-    var graphUri;
     var assetTreeDistinctNodes = {};
 
     self.currentTable_14224Field;
@@ -13,13 +12,17 @@ var TE_14224_browser = (function () {
     self.iso_14224CodesMap = {};
     self.iso_14224InverseCodesMap = {};
     //self.graphUri = Config.sources[self.referenceOntologySource]
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
     self.onLoaded = function () {
         $("#actionDiv").html("");
         $("#actionDivContolPanelDiv").load("customPlugins/TotalEnergies/snippets/leftPanel.html");
         MainController.UI.toogleRightPanel(true);
         $("#rightPanelDiv").html("");
-        $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html", function () {});
+        $("#rightPanelDiv").load("customPlugins/TotalEnergies/snippets/rightPanel.html", function () {
+            // Pass
+        });
 
         $("#graphDiv").html("");
         // $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
@@ -29,7 +32,6 @@ var TE_14224_browser = (function () {
         source = "TSF_GS_EP-EXP_207_11";
         source = "TSF_maintenance_ROMAIN_14224";
         self.referenceOntologySource = source;
-        graphUri = Config.sources[source].graphUri;
         Lineage_classes.mainSource = source;
         Lineage_common.currentSource = source;
     };
@@ -57,9 +59,8 @@ var TE_14224_browser = (function () {
         self.iso_14224AssetMap = {};
         Sparql_OWL.getItems("TSF_ASSET_14224_MAPPINGS", null, function (err, result) {
             if (err) return alert(err);
-            var pIso, pAsset;
-            result.forEach(function (item, index) {
-                if (index == 0) pIso = item.concept.value.lastIndexOf("/") + 1;
+            var pAsset;
+            result.forEach(function (item) {
                 pAsset = item.o.value.lastIndexOf("#") + 1;
                 if (item.o.value.indexOf(asset) > -1) {
                     var assetId = item.o.value.substring(pAsset);
@@ -83,8 +84,6 @@ var TE_14224_browser = (function () {
     };
 
     self.getFunctionalLocations = function (table) {
-        var limit = 100000;
-
         var sqlQuery = " select distinct concat('A_',id) as id,location1,location2 from " + table + " where (location4 is null or location4='')";
         (""); // " where (location3 is null or location3='') and (location2 is not null and location2 !='')";
 
@@ -141,7 +140,6 @@ var TE_14224_browser = (function () {
     };
 
     self.openAssetTreeNode = function (node, level, callback) {
-        var limit = 100000;
         var parentData = node.data;
         var sqlQuery =
             " select id," +
@@ -181,7 +179,6 @@ var TE_14224_browser = (function () {
     };
 
     self.querySQLserver = function (sqlQuery, callback) {
-        var limit = 100000;
         var dataSource = {
             type: "sql.sqlserver",
             connection: "_default",
@@ -200,7 +197,7 @@ var TE_14224_browser = (function () {
             },
             dataType: "json",
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 callback(null, data);
             },
             error(err) {
@@ -220,12 +217,11 @@ var TE_14224_browser = (function () {
 
         self.querySQLserver(sqlQuery, function (err, data) {
             if (err) return MainController.UI.message(err);
-            var jstreeData = [];
             var nodeId = node.id;
             if (data.length == 0) return;
             var headers = Object.keys(data[0]);
 
-            var nodeId = data[0].tag;
+            nodeId = data[0].tag;
             var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
             str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_blank' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
             str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
@@ -274,8 +270,6 @@ var TE_14224_browser = (function () {
                         if (err) return callbackSeries(err);
                         data.forEach(function (item) {
                             childrenMap[item.id] = item;
-
-                            var childId = item.id;
 
                             if (!Iso14224AssetMap[item.mapping_14224]) Iso14224AssetMap[item.mapping_14224] = [];
                             Iso14224AssetMap[item.mapping_14224].push(item);
@@ -343,7 +337,7 @@ var TE_14224_browser = (function () {
                                     callbackEach();
                                 });
                             },
-                            function (err) {
+                            function (_err) {
                                 callbackSeries();
                             }
                         );
@@ -437,8 +431,6 @@ var TE_14224_browser = (function () {
                 var node = {
                     id: "A_" + item.id,
                     label: item.className,
-
-                    size: Lineage_classes.defaultShapeSize,
                     shape: "square",
                     size: Lineage_classes.defaultShapeSize,
                     color: Lineage_classes.getSourceColor(self.currenTable),
@@ -456,11 +448,9 @@ var TE_14224_browser = (function () {
 
                         if (!visjsExistingNodes[id]) {
                             visjsExistingNodes[id] = 1;
-                            var node = {
+                            node = {
                                 id: id,
                                 label: id,
-
-                                size: Lineage_classes.defaultShapeSize,
                                 shape: "square",
                                 size: Lineage_classes.defaultShapeSize,
                                 color: Lineage_classes.getSourceColor(self.currenTable),
@@ -553,7 +543,7 @@ var TE_14224_browser = (function () {
 
         items.nodeInfos = {
             label: "Node Infos",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 //  if (self.currentTreeNode.data.type == "tag")
                 self.showAssetNodeInfos(self.currentTreeNode, "tree");
@@ -561,14 +551,14 @@ var TE_14224_browser = (function () {
         };
         items.graphAssetNodeAndParents = {
             label: "Graph Node",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_14224_browser.graphAssetNodeAndParents(self.currentTreeNode.data);
             },
         };
         items.mapClassesTo14224 = {
             label: "mapClassesTo14224",
-            action: function (e) {
+            action: function (_e) {
                 // pb avec source
                 TE_14224_browser.mapClassesTo14224(self.currentTreeNode);
             },
@@ -582,16 +572,14 @@ var TE_14224_browser = (function () {
 
         items.nodeInfos = {
             label: "Node Infos",
-            action: function (e) {
-                var x = self.currentGraphNode;
-
+            action: function (_e) {
                 SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode.id, "mainDialogDiv");
             },
         };
 
         items.ShowAssetData = {
             label: "Show Asset Data",
-            action: function (e) {
+            action: function (_e) {
                 TE_14224_browser.ontology.showAssetData(self.currentOntologyTreeNode);
             },
         };
@@ -604,12 +592,13 @@ var TE_14224_browser = (function () {
         if (!assetNodesIds) {
             var nodes = visjsGraph.data.nodes.get();
             self.currentAssetLevel += 1;
-            var assetNodesIds = [];
+            assetNodesIds = [];
 
             nodes.forEach(function (node) {
                 if (node.data.type == "assetNode") if (assetNodesIds.indexOf(node.data.id) < 0) assetNodesIds.push(node.data.id);
             });
         } else {
+            // Pass
         }
         var filterStr = "";
         assetNodesIds.forEach(function (item) {
@@ -656,8 +645,6 @@ var TE_14224_browser = (function () {
                     var node = {
                         id: id,
                         label: item.className,
-
-                        size: 10,
                         shape: "diamond",
                         size: Lineage_classes.defaultShapeSize,
                         color: Lineage_classes.getSourceColor(self.currenTable),
@@ -722,8 +709,6 @@ var TE_14224_browser = (function () {
         },
 
         showAssetNodeChildren: function () {
-            var node = self.currentGraphNode;
-
             self.openAssetTreeNode(self.currentGraphNode, null, function (err, result) {
                 if (err) return;
                 var visjsData = { nodes: [], edges: [] };
@@ -932,7 +917,9 @@ var TE_14224_browser = (function () {
             });
         },
 
-        showAssetFailures: function (failureNode) {},
+        showAssetFailures: function (_failureNode) {
+            // Pass
+        },
 
         showAssetAspects: function (params) {
             var assetIdsFilterStr = "";
@@ -980,7 +967,7 @@ var TE_14224_browser = (function () {
                                 callbackSeries();
                             });
                         },
-                        function (callbackSeries) {
+                        function (_callbackSeries) {
                             var level = -1;
                             result.forEach(function (item) {
                                 var label = item[params.labelColumn]; //item.Designation ;// self.iso_14224InverseCodesMap[item.ActivityCode].label
@@ -1126,7 +1113,6 @@ var TE_14224_browser = (function () {
                             mappings_14224FilterStr +
                             ")";
 
-                        var startLevel = 10;
                         self.querySQLserver(sqlQuery, function (err, result) {
                             if (err) return callbackSeries(err);
                             if (result.length == 0) {

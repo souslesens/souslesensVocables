@@ -6,7 +6,7 @@ const async = require("async");
 var util = require("./util.");
 const N3 = require("n3");
 const { DataFactory } = N3;
-const { namedNode, literal, defaultGraph, quad } = DataFactory;
+const { namedNode, literal } = DataFactory;
 var graphUrisMap = {};
 
 var sparql_server_url = "http://51.178.139.80:8890/sparql";
@@ -144,7 +144,6 @@ var RDF_IO = {
         rdfParser
             .parse(textStream, { contentType: "text/turtle", baseIRI: "" })
             .on("data", function (quad) {
-                if (!quad) var x = 3;
                 var objectValue = "<" + quad.object.value + ">";
                 var subjectValue = quad.subject.value;
                 var predicate = quad.predicate.value;

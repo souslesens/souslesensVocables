@@ -10,23 +10,21 @@ var socket = require("../socketManager.");
 const ConfigManager = require("../configManager.");
 var etl = require("etl");
 var async = require("async");
-//var annotatorLive = require('../annotatorLive.')
 
 var acceptedExtensions = ["ttl", "doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx", "html", "htm", "txt", "csv"];
 var base64Extensions = ["doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx"];
 var maxDocSize = 20 * 1000 * 1000;
 //var tikaServerUrl = 'http://vps475829.ovh.net:9998';
-var tikaServerUrl = "127.0.0.1:41000";
-var spacyServerUrl = "http://51.178.39.209:8000/pos";
+//const tikaServerUrl = "127.0.0.1:41000";
+const spacyServerUrl = "http://51.178.39.209:8000/pos";
 
-//var parsedDocumentsHomeDir = "D:\\temp\\annotator\\data\\";
 var parsedDocumentsHomeDir = null; //"../../data/annotator/parsedDocuments"
 var uploadDirPath = null; //"../../data/annotator/temp"
 var Inflector = require("inflected");
 var tikaServer = null;
-var tikaserverStarted = false;
+// var tikaserverStarted = false;
 var unzipper = require("unzipper");
-var MemoryStream = require("memory-stream");
+// var MemoryStream = require("memory-stream");
 var jsonData = {};
 var DirContentAnnotator = {
     socket: {
@@ -45,12 +43,10 @@ var DirContentAnnotator = {
         DirContentAnnotator.socket.message("unziping file " + zipFile.name + "(" + zipFile.size / 1000 + "ko)");
         var tempzip = uploadDirPath + "temp.zip";
         jsonData = { sources: [], files: {} };
-        var entries = [];
         var fileNames = [];
         var tempFileNames = [];
         zipFile.mv(tempzip, function (err) {
             if (err) return callback(err);
-            var rootFileName = null;
 
             fs.createReadStream(tempzip)
                 .pipe(unzipper.Parse())
@@ -63,10 +59,8 @@ var DirContentAnnotator = {
                             var tempFileName = uploadDirPath + array[array.length - 1];
                             tempFileNames.push(tempFileName);
                             fileNames.push(fileName);
-                            //  console.log(tempFileName);
-
-                            entry.pipe(etl.toFile(tempFileName)).promise(function (resolve, reject) {
-                                var x = resolve;
+                            entry.pipe(etl.toFile(tempFileName)).promise(function (_resolve, _reject) {
+                                // do nothing ?
                             });
 
                             return;
@@ -95,14 +89,12 @@ var DirContentAnnotator = {
     processZippedFiles: function (fileNames, corpusName, sources, options, callback) {
         var tempFileName;
 
-        var filesCount = 0;
         var filesProcessed = 0;
         var rootFileName = null;
 
         async.eachSeries(
             fileNames,
             function (fileName, callbackEachSeries) {
-                //   var fileName = entry.path;
                 if (!rootFileName) rootFileName = fileName;
                 var array = fileName.split("/");
                 var shortFileName = array[array.length - 1];
@@ -146,7 +138,6 @@ var DirContentAnnotator = {
                                         sentence.tags.forEach(function (item) {
                                             if (item.text.length > 2)
                                                 if (item.tag.indexOf("NN") > -1) {
-                                                    //item.tag.indexOf("NN")>-1) {
                                                     var noun = Inflector.singularize(item.text.toLowerCase());
 
                                                     if (!jsonData.files[fileName].nouns[noun]) {
@@ -155,26 +146,20 @@ var DirContentAnnotator = {
                                                         };
                                                     }
                                                     jsonData.files[fileName].nouns[noun].offsets.push(sentenceOffset + item.char_offset);
-                                                    if (jsonData.files[fileName].nouns[noun].offsets.length > 1) var x = 3;
                                                 }
                                         });
-                                        sentenceOffset += 0; //sentence.text.length
-                                        //   console.log(sentenceOffset)
+                                        sentenceOffset += 0;
                                     });
                                     return callbackSeries();
                                 });
                             },
                             function (callbackSeries) {
-                                DirContentAnnotator.annotateText(jsonData.files[fileName], sources, corpusName, options, function (err, result) {
+                                DirContentAnnotator.annotateText(jsonData.files[fileName], sources, corpusName, options, function (_err, _result) {
                                     filesProcessed++;
                                     console.log(filesProcessed);
-                                    //  DirContentAnnotator.socket.message("annotating  " + fileName);
-
                                     return callbackSeries();
                                 });
                             },
-
-                            //
                         ],
                         function (err) {
                             if (err) return callbackEachSeries(err);
@@ -183,10 +168,8 @@ var DirContentAnnotator = {
                     );
                 }
             },
-            function (err) {
+            function (_err) {
                 fs.writeFileSync(parsedDocumentsHomeDir + corpusName + "_concepts.json", JSON.stringify(jsonData, null, 2));
-                // fs.unlink(tempFileName,)
-
                 callback(null, "done");
             }
         );
@@ -211,12 +194,11 @@ var DirContentAnnotator = {
                         // var allnouns=[]
                         var regexStr = "(";
                         nounSlice.forEach(function (noun, index) {
-                            noun = noun.replace(/[\x00-\x2F]/, "");
+                            noun = noun.replace(/[\x00-\x2F]/, ""); // eslint-disable-line no-control-regex
                             noun = util.formatStringForTriple(noun);
 
                             if (index > 0) regexStr += "|";
-                            if (true || options.exactMatch) regexStr += "^" + noun + "$";
-                            else regexStr += noun;
+                            regexStr += "^" + noun + "$"; // XXX what if not exactMatch ?
                         });
                         regexStr += ")";
 
@@ -230,8 +212,6 @@ var DirContentAnnotator = {
                         query += " filter " + filter + "} limit 10000";
 
                         var url = source.sparql_server.url + "?format=json&query=";
-                        var queryOptions = ""; // "&should-sponge=&format=application%2Fsparql-results%2BjsonData&timeout=20000&debug=off"
-
                         var params = { query: query };
                         var headers = {
                             /* "Accept": "application/sparql-results+jsonData",
@@ -244,9 +224,6 @@ var DirContentAnnotator = {
                             if (err) {
                                 return callbackEachNounSlice(err);
                             } else {
-                                var bindings = [];
-                                var ids = [];
-
                                 result.results.bindings.forEach(function (item) {
                                     var word = item.label.value.toLowerCase();
                                     entitiesCount += 1;
@@ -254,13 +231,9 @@ var DirContentAnnotator = {
                                         if (!fileObj.nouns[word].entities) fileObj.nouns[word].entities = {};
                                         if (!fileObj.nouns[word].entities[source.name]) fileObj.nouns[word].entities[source.name] = [];
                                         if (fileObj.nouns[word].entities[source.name].indexOf(item.id.value) < 0) fileObj.nouns[word].entities[source.name].push(item.id.value);
-                                    } else {
-                                        var x = 3;
                                     }
                                 });
-
                                 callbackEachNounSlice();
-                                // callbackEachSource()
                             }
                         });
                     },
@@ -299,11 +272,10 @@ var DirContentAnnotator = {
     startTikaServer: function (filePath, callback) {
         tikaServer = new TikaServer();
         (async () => {
-            tikaServer.on("debug", (msg) => {
-                //  console.log(`DEBUG: ${msg}`)
-            });
+            /* tikaServer.on("debug", (msg) => {
+                  console.log(`DEBUG: ${msg}`)
+            }); */
             await tikaServer.start();
-            var options = {};
             /* await tikaServer.query(text).then((data) => {
                    callback(null,data)
                  })*/
@@ -324,13 +296,9 @@ var DirContentAnnotator = {
         });
     },
     getDocTextContentFromFile: function (filePath, callback) {
-        var fileContent;
         var file = path.resolve(filePath);
 
         var extension = file.substring(file.lastIndexOf(".") + 1);
-        var title = file;
-        var p = file.lastIndexOf(path.sep);
-        if (p > -1) title = file.substring(p + 1);
         var base64 = false;
         if (base64Extensions.indexOf(extension) > -1) {
             base64 = true;
@@ -404,8 +372,6 @@ var DirContentAnnotator = {
         }
 
         recurse(dirPath, dirPath);
-        var x = dirsArray;
-        var y = dirFilesMap;
 
         var files = [];
         for (var dir in dirFilesMap) {
@@ -437,8 +403,6 @@ var DirContentAnnotator = {
                 },
                 function (callbackSeries) {
                     var index = -1;
-                    var docText = "";
-                    var output = [];
                     async.eachSeries(
                         files,
                         function (file, callbackEach) {
@@ -495,10 +459,6 @@ var DirContentAnnotator = {
         );
     },
     annotateParsedDocuments: function (data, sources, corpusName, options, callback) {
-        /*  var parsedDocumentsFilePath = parsedDocumentsHomeDir + name + ".jsonData"
-          var str = "" + fs.readFileSync(parsedDocumentsFilePath)
-          var data = JSON.parse(str);*/
-
         var conceptsMap = {};
 
         async.eachSeries(
@@ -519,15 +479,13 @@ var DirContentAnnotator = {
                         async.eachSeries(
                             nounSlices,
                             function (nounSlice, callbackEachNounSlice) {
-                                // var allnouns=[]
                                 var regexStr = "(";
                                 nounSlice.forEach(function (noun, index) {
-                                    noun = noun.replace(/[\x00-\x2F]/, "");
+                                    noun = noun.replace(/[\x00-\x2F]/, ""); // eslint-disable-line no-control-regex
                                     noun = util.formatStringForTriple(noun);
 
                                     if (index > 0) regexStr += "|";
-                                    if (true || options.exactMatch) regexStr += "^" + noun + "$";
-                                    else regexStr += noun;
+                                    regexStr += "^" + noun + "$"; // what if not exactMatch
                                 });
                                 regexStr += ")";
 
@@ -545,7 +503,6 @@ var DirContentAnnotator = {
                                 query += " filter " + filter + "} limit 10000";
 
                                 var url = source.sparql_server.url;
-                                var queryOptions = ""; // "&should-sponge=&format=application%2Fsparql-results%2BjsonData&timeout=20000&debug=off"
 
                                 var params = { query: query };
                                 var headers = {
@@ -557,9 +514,6 @@ var DirContentAnnotator = {
                                     if (err) {
                                         return callbackEachNounSlice(err);
                                     } else {
-                                        var bindings = [];
-                                        var ids = [];
-
                                         result.results.bindings.forEach(function (item) {
                                             matchingWords.push(item.label.value.toLowerCase());
 
@@ -569,12 +523,10 @@ var DirContentAnnotator = {
                                             });
                                         });
                                         callbackEachNounSlice();
-                                        // callbackEachSource()
                                     }
                                 });
                             },
                             function (err) {
-                                //  callbackEachNounSlice()
                                 var missingNouns = allWords.filter((x) => !matchingWords.includes(x));
                                 conceptsMap[fileObj.path].sources[source.name].missingNouns = missingNouns;
                                 DirContentAnnotator.socket.message(" ---" + conceptsMap[fileObj.path].sources[source.name].entities.length + " entities matched / " + allWords.length + "nouns");
@@ -585,9 +537,7 @@ var DirContentAnnotator = {
                             }
                         );
                     },
-                    function (err) {
-                        //feed orphans
-
+                    function (_err) {
                         return callbackEachDocument();
                     }
                 );
@@ -652,7 +602,6 @@ var DirContentAnnotator = {
         var str = "" + fs.readFileSync(storePath);
         var data = JSON.parse(str);
 
-        var conceptsTree = {};
         var parents = {};
         var subjectsMap = {};
         for (var key in data.files) {
@@ -696,7 +645,6 @@ var DirContentAnnotator = {
 
         var rootNode = { text: corpusName, children: [] };
         recurse(rootNode);
-        var x = rootNode;
 
         var jstreeData = [];
 
@@ -723,7 +671,6 @@ var DirContentAnnotator = {
         if (callback) {
             return callback(null, { jstreeData: jstreeData, sources: data.sources });
         } else {
-            var storePath = path.resolve(__dirname, "../../data/parseDocuments/" + corpusName + "_subjectsTree.jsonData");
             storePath = parsedDocumentsHomeDir + corpusName + "_subjectsTree.jsonData";
             fs.writeFileSync(storePath, JSON.stringify(jstreeData, null, 2));
         }
@@ -769,6 +716,8 @@ var DirContentAnnotator = {
 };
 DirContentAnnotator.init();
 module.exports = DirContentAnnotator;
+
+/*
 if (false) {
     DirContentAnnotator.getDirContent("D:\\NLP\\ontologies");
 }
@@ -819,3 +768,4 @@ if (false) {
         "The distance between the pump and driver shaft ends (distance between shaft ends, or DBSE) shall begreater than the seal cartridge length for all pumps other than OH type or at least 125 mm (5 in) and shallpermit removal of the coupling, bearing housing, bearings, seal and rotor, as applicable, without disturbingthe driver, driver coupling hub, pump coupling hub or the suction and discharge piping. For Types BB and VSpumps, this dimension, DBSE, shall always be greater than the total seal length, l, listed in Table 7, and shallbe included on the pump data sheet (Annex N).";
     DirContentAnnotator.SpacyExtract(text, ["NN"], { composedWords_2: 1 }, function (err, result) {});
 }
+*/

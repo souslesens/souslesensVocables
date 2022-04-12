@@ -17,7 +17,9 @@ var Annotator = (function () {
         $("#sourceDivControlPanelDiv").html(html);
     };
 
-    self.onSourceSelect = function () {};
+    self.onSourceSelect = function () {
+        // Pass
+    };
 
     self.showActionPanel = function () {
         self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked();
@@ -26,7 +28,9 @@ var Annotator = (function () {
         $("#accordion").accordion("option", { active: 2 });
     };
 
-    self.uploadAndaAnnotate = function () {};
+    self.uploadAndaAnnotate = function () {
+        // Pass
+    };
     self.annotate = function () {
         $("#waitImg").css("display", "block");
         MainController.UI.message("querying Spacy library (can take time...)");
@@ -52,10 +56,9 @@ var Annotator = (function () {
                      request.setRequestHeader('Age', '10000');
                  },*/
 
-            success: function (data, textStatus, jqXHR) {
+            success: function (data, _textStatus, _jqXHR) {
                 MainController.UI.message("");
                 $("#waitImg").css("display", "none");
-                var x = data;
                 self.showAnnotationResult(data);
             },
 
@@ -100,7 +103,7 @@ var Annotator = (function () {
         $("#Annotator_AnnotationResultDiv").html(html);
         $(".Annotator_entitySpan").bind("click", Annotator.onNodeClick);
 
-        var html = "";
+        html = "";
         var uniqueMissingNouns = {};
         data.missingNouns.forEach(function (item) {
             if (!uniqueMissingNouns[item]) {
@@ -129,11 +132,6 @@ var Annotator = (function () {
         var source = array[1];
         id = array[2];
         SourceBrowser.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
-        /*  Sparql_generic.getNodeInfos(source, id, null, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err)
-                SourceEditor.showNodeInfos("Annotator_EntityDetailsDiv", "en", id, result);
-            })*/
         Sparql_generic.getSingleNodeAllGenealogy(source, id, function (err, result) {
             if (err) return MainController.UI.message(err);
 

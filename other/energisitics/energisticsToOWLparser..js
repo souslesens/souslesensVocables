@@ -1,27 +1,9 @@
 var fs = require("fs");
 const async = require("async");
-var sax = require("sax");
 var util = require("../../bin/util.");
 var httpProxy = require("../../bin/httpProxy.");
-var SPARQLutil = require("../../bin/SPARQLutil.");
 
 var xml2js = require("xml2js");
-
-var topParentTag;
-var triples = "";
-var currentTriple = "";
-var currentUri = "";
-
-var line = 0;
-
-var currentParent;
-var currentAttr;
-var currentX;
-var currentNodeName;
-
-var currentNodePath = "";
-var currentObjects = {};
-var currentParentObj;
 
 var parse = function (sourcePath, prefix, callback) {
     var parser = new xml2js.Parser();
@@ -54,7 +36,9 @@ var parse = function (sourcePath, prefix, callback) {
             var complexTypes = schema["xs:complexType"];
             if (complexTypes) {
                 complexTypes.forEach(function (item) {
-                    if (item.$["name"] == "LithologyQualifier") var x = 3;
+                    if (item.$["name"] == "LithologyQualifier") {
+                        // Pass
+                    } //var x = 3;
                     var documentation = "";
                     if (item["xs:annotation"] && item["xs:annotation"][0]["xs:documentation"]) documentation = item["xs:annotation"][0]["xs:documentation"][0];
                     var complexTypeObj = { name: item.$.name, documentation: documentation, elements: [] };
@@ -72,16 +56,15 @@ var parse = function (sourcePath, prefix, callback) {
                     } else if (item["xs:sequence"]) sequences = [item["xs:sequence"]][0];
 
                     if (!sequences) {
-                        var x = item;
+                        // Pass
                     } else {
                         sequences.forEach(function (sequence) {
                             var elements = sequence["xs:element"];
                             if (!elements) {
-                                var x = item;
+                                // Pass
                             } else {
                                 elements.forEach(function (element) {
                                     var documentation = "";
-                                    var attrs = element.$;
 
                                     if (element["xs:annotation"] && element["xs:annotation"][0]["xs:documentation"]) documentation = element["xs:annotation"][0]["xs:documentation"][0];
                                     var elementObj = element.$;
@@ -118,10 +101,9 @@ var buildOwl = function (json, graphUri) {
     // var json = JSON.parse("" + fs.readFileSync(jsonPath));
     for (var topClassKey in json) {
         var items = json[topClassKey];
-        var packages = {};
         var topClassUri;
 
-        function recurseElements(aClass) {}
+        // function recurseElements(_aClass) {}
 
         if (items.forEach) {
             items.forEach(function (aClass, index) {
@@ -168,10 +150,9 @@ var buildOwl = function (json, graphUri) {
                     }
                 }
 
-                var className = aClass.name.toLowerCase();
+                className = aClass.name.toLowerCase();
                 if (aClass.elements) {
                     aClass.elements.forEach(function (element) {
-                        if (element.name == "GeochronologicalUnit") var x = 3;
                         var type = element.type;
                         if (!type) return;
                         var typeArray = type.split(":");
@@ -250,7 +231,6 @@ var buildOwl = function (json, graphUri) {
                         }
                     });
                 }
-                if (aClass.name == "MatrixCementKind") var x = 3;
 
                 if (aClass.enumerations) {
                     var enumsMap = {};
@@ -325,7 +305,7 @@ var buildOwl = function (json, graphUri) {
             function (callbackSeries) {
                 var queryGraph = "CLEAR GRAPH <" + graphUri + ">";
                 var params = { query: queryGraph };
-                httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                     return callbackSeries(err);
                 });
             },
@@ -360,9 +340,8 @@ var buildOwl = function (json, graphUri) {
 
                         var params = { query: queryGraph };
 
-                        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                        httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                             if (err) {
-                                var x = queryGraph;
                                 return callbackEach(err);
                             }
                             totalTriples += triples.length;
@@ -387,94 +366,90 @@ var buildOwl = function (json, graphUri) {
 /***********************************************************************************************************************************************/
 /***********************************************************************************************************************************************/
 
-var sourcePath = "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\CommonEnumerations.xsd";
-
 var dirPathCommon = { dir: "D:\\NLP\\ontologies\\energistics\\common\\v2.1\\xsd_schemas\\", prefix: "eml" };
 var dirPathWitsml = { dir: "D:\\NLP\\ontologies\\energistics\\witsml\\v2.0\\xsd_schemas\\", prefix: "witsml" };
-var dirPathProdml = { dir: "D:\\NLP\\ontologies\\energistics\\prodml\\v2.1\\xsd_schemas\\", prefix: "prodml" };
-var dirPathResqml = { dir: "D:\\NLP\\ontologies\\energistics\\resqmlv2\\v2.0.1\\xsd_schemas\\", prefix: "resqml" };
 
-if (false) {
-    var dirPath = dirPathWitsml.dir;
-    var file = "WellboreGeology.xsd";
-    parse(dirPath + file, prefix, function (err) {
-        if (err) console.log(err);
-        callbackEach();
-    });
-}
-if (true) {
-    var doAll = true;
-    var currentDir = dirPathCommon;
+// if (false) {
+//     var dirPath = dirPathWitsml.dir;
+//     var file = "WellboreGeology.xsd";
+//     parse(dirPath + file, prefix, function (err) {
+//         if (err) console.log(err);
+//         callbackEach();
+//     });
+// }
+var doAll = true;
+var currentDir = dirPathCommon;
 
-    //  var currentDir = dirPathCommon
-    var dirPath = currentDir.dir;
-    var prefix = currentDir.prefix;
+//  var currentDir = dirPathCommon
+var dirPath = currentDir.dir;
+var prefix = currentDir.prefix;
 
-    var graphUri = "http://souslesens.org/energistics/ontology/" + prefix + "/";
+var graphUri = "http://souslesens.org/energistics/ontology/" + prefix + "/";
 
-    async.series(
-        [
-            // parse each xsd to json
-            function (callbackSeries) {
-                if (!doAll) return callbackSeries();
+async.series(
+    [
+        // parse each xsd to json
+        function (callbackSeries) {
+            if (!doAll) return callbackSeries();
 
-                var files = fs.readdirSync(dirPath);
-                async.eachSeries(
-                    files,
-                    function (file, callbackEach) {
-                        if (file.endsWith(".xsd")) {
-                            parse(dirPath + file, prefix, function (err) {
-                                if (err) console.log(err);
+            var files = fs.readdirSync(dirPath);
+            async.eachSeries(
+                files,
+                function (file, callbackEach) {
+                    if (file.endsWith(".xsd")) {
+                        parse(dirPath + file, prefix, function (err) {
+                            if (err) console.log(err);
+                            callbackEach();
+                        });
+                    } else callbackEach();
+                },
+                function (err) {
+                    callbackSeries(err);
+                }
+            );
+        },
+
+        //concat all json together
+        function (callbackSeries) {
+            if (!doAll) return callbackSeries();
+
+            var globalJson = {};
+            var dirPaths = [dirPath];
+            async.eachSeries(
+                dirPaths,
+                function (dirPath, callbackEachDir) {
+                    var files = fs.readdirSync(dirPath);
+                    async.eachSeries(
+                        files,
+                        function (file, callbackEach) {
+                            if (file.endsWith(".xsd.json")) {
+                                // var json = JSON.parse(fs.readFileSync(dirPath + file));
+                                // var objName = file.substring(0, file.indexOf("."));
+                                // var obj = (globalJson[objName] = json);
+                                // globalJson = globalJson.concat(jsonFile);
                                 callbackEach();
-                            });
-                        } else callbackEach();
-                    },
-                    function (err) {
-                        callbackSeries(err);
-                    }
-                );
-            },
-
-            //concat all json together
-            function (callbackSeries) {
-                if (!doAll) return callbackSeries();
-
-                var globalJson = {};
-                var dirPaths = [dirPath];
-                async.eachSeries(
-                    dirPaths,
-                    function (dirPath, callbackEachDir) {
-                        var files = fs.readdirSync(dirPath);
-                        async.eachSeries(
-                            files,
-                            function (file, callbackEach) {
-                                if (file.endsWith(".xsd.json")) {
-                                    var json = JSON.parse(fs.readFileSync(dirPath + file));
-                                    var objName = file.substring(0, file.indexOf("."));
-                                    var obj = (globalJson[objName] = json);
-                                    // globalJson = globalJson.concat(jsonFile);
-                                    callbackEach();
-                                } else callbackEach();
-                            },
-                            function (err) {
-                                callbackEachDir(err);
-                            }
-                        );
-                    },
-                    function (err) {
-                        if (err) return callbackSeries(err);
-                        fs.writeFileSync(dirPath + prefix + "merged.json", JSON.stringify(globalJson, null, 2));
-                        callbackSeries(err);
-                        console.log("done");
-                    }
-                );
-            },
-            //concat all json together
-            function (callbackSeries) {
-                var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
-                buildOwl(json, graphUri);
-            },
-        ],
-        function (err) {}
-    );
-}
+                            } else callbackEach();
+                        },
+                        function (err) {
+                            callbackEachDir(err);
+                        }
+                    );
+                },
+                function (err) {
+                    if (err) return callbackSeries(err);
+                    fs.writeFileSync(dirPath + prefix + "merged.json", JSON.stringify(globalJson, null, 2));
+                    callbackSeries(err);
+                    console.log("done");
+                }
+            );
+        },
+        //concat all json together
+        function (_callbackSeries) {
+            var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
+            buildOwl(json, graphUri);
+        },
+    ],
+    function (_err) {
+        // Pass
+    }
+);

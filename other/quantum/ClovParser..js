@@ -8,7 +8,6 @@ var lineReader = require("readline").createInterface({
 
 lineReader.on("line", function (line) {
     if (lineIndex++ > maxLines) {
-        var x = 3;
         readStream.destroy();
     } else {
         console.log(line);

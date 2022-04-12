@@ -80,7 +80,6 @@ var SourceMatcher = (function () {
         var sourceConceptsCount = 0;
         var sourceConceptsProcessed = 0;
         var targetConceptsCount = 0;
-        var bindings = [];
         var allSourceConcepts = [];
         var commonConceptsMap = {};
         $("#dialogDiv").dialog("close");
@@ -116,7 +115,7 @@ var SourceMatcher = (function () {
                         if (sourceConceptsCount > self.maxSourceDescendants && output == "graph") {
                             var ok = confirm("too many nodes  to draw graph: " + sourceConceptsCount + " continue ?");
                             if (!ok) return callbackSeries("too many nodes");
-                            var ok = confirm("Generate same as triples");
+                            ok = confirm("Generate same as triples");
                             if (!ok) {
                                 return callbackSeries("too many nodes");
                             }
@@ -152,23 +151,20 @@ var SourceMatcher = (function () {
 
                 //search selected concepts  and descendants in targetThesaurus
                 function (callbackSeries) {
-                    if (false && output == "stats") return callbackSeries();
+                    // Should we remove this line or the false in the test condition ? It always evaluates to false
+                    // if (false && output == "stats") return callbackSeries();
 
                     var sourceConceptsSlices = common.array.slice(allSourceConcepts, sliceSize);
                     async.eachSeries(
                         sourceConceptsSlices,
                         function (sourceConcepts, callbackEach) {
                             sourceConceptsProcessed = sourceConcepts.length;
-                            var words = [];
-                            sourceConcepts.forEach(function (concept, index) {
-                                words.push(concept.label.replace(/[-"]/g, ""));
-                            });
+                            var words = sourceConcepts.map((concept) => concept.label.replace(/[-"]/g, ""));
 
                             Sparql_generic.getNodeParents(toSourceId, words, null, targetConceptAggrDepth, { exactMatch: true }, function (err, result) {
                                 if (err) {
                                     return callbackEach(err);
                                 }
-                                var ids = [];
                                 targetConceptsCount += result.length;
 
                                 result.forEach(function (item) {
@@ -227,7 +223,6 @@ var SourceMatcher = (function () {
                                 if (err) {
                                     return callbackSeriesSourceBroaders(err);
                                 }
-                                var sourceBroaders = [];
                                 result.forEach(function (item) {
                                     var sourceBroaders = [];
                                     for (var i = 1; i < 8; i++) {
@@ -246,7 +241,7 @@ var SourceMatcher = (function () {
                                 callbackSeriesSourceBroaders();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             return callbackSeries();
                         }
                     );
@@ -367,8 +362,8 @@ var SourceMatcher = (function () {
                     }
 
                     var csv = "";
-                    for (var key in commonConceptsMap) {
-                        var item = commonConceptsMap[key];
+                    for (key in commonConceptsMap) {
+                        item = commonConceptsMap[key];
                         if (showAllSourceNodes || (!showAllSourceNodes && item.target)) {
                             var sourceBroadersStr = "";
                             for (var i = 0; i < nSourceBroaders; i++) {
@@ -387,7 +382,7 @@ var SourceMatcher = (function () {
                                         csv += item.target.broaders[item.target.broaders.length - 1].label;
                                     }
                                 } else {
-                                    for (var i = nTargetBroaders; i > 0; i--) {
+                                    for (i = nTargetBroaders; i > 0; i--) {
                                         if (item.target.broaders.length <= nTargetBroaders - i) {
                                             csv += "\t";
                                             //   if (i <item.target.broaders.length)
@@ -414,7 +409,7 @@ var SourceMatcher = (function () {
                         dataSet.push(lineArray);
                     });
                     var colnames = [];
-                    for (var i = 0; i < maxCols; i++) {
+                    for (i = 0; i < maxCols; i++) {
                         colnames.push({ title: "col" + i });
                     }
 

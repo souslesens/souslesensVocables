@@ -2,21 +2,20 @@ var fs = require("fs");
 const async = require("async");
 var httpProxy = require("../../bin/httpProxy.");
 var util = require("../../bin/util.");
-var distinctTags = {};
 
 var mapQuatumCfihos = {
     mapClasses: function (sourceConfig, targetConfig, callback) {
-        function decapitalize(str) {
-            var str2 = "";
-            for (var i = 0; i < str.length; i++) {
-                var code = str.charCodeAt(i);
-                var char = str.charAt(i);
-                if (code > 64 && code < 91) str2 += " " + String.fromCharCode(code + 32);
-                else str2 += char;
-            }
+        // function decapitalize(str) {
+        //     var str2 = "";
+        //     for (var i = 0; i < str.length; i++) {
+        //         var code = str.charCodeAt(i);
+        //         var char = str.charAt(i);
+        //         if (code > 64 && code < 91) str2 += " " + String.fromCharCode(code + 32);
+        //         else str2 += char;
+        //     }
 
-            return str2.trim();
-        }
+        //     return str2.trim();
+        // }
 
         // var x=  decapitalize("FibreOpticPatchPanelsCabinet")
 
@@ -56,7 +55,6 @@ var mapQuatumCfihos = {
                         function (labels, callbackEach) {
                             var fitlerStr = "";
                             labels.forEach(function (label, index) {
-                                if (label.indexOf("\\") > -1) var x = "3";
                                 if (index > 0) fitlerStr += "|";
                                 fitlerStr += "^" + label.replace(/\\/g, "") + "$";
                             });
@@ -85,7 +83,6 @@ var mapQuatumCfihos = {
                                         data = JSON.parse(data.result.trim());
 
                                     data.results.bindings.forEach(function (item) {
-                                        var x = item;
                                         var id = item.concept.value;
                                         var label = item.conceptLabel.value.toLowerCase();
                                         if (!sourceClasses[label]) return console.log(label);
@@ -115,7 +112,6 @@ var mapQuatumCfihos = {
                                         data = JSON.parse(data.result.trim());
 
                                     data.results.bindings.forEach(function (item) {
-                                        var x = item;
                                         var id = item.concept.value;
                                         var label = item.conceptLabel.value.toLowerCase();
                                         if (!sourceClasses[label]) return console.log(label);
@@ -129,7 +125,6 @@ var mapQuatumCfihos = {
                             }
                         },
                         function (err) {
-                            var x = sourceClasses;
                             callbackSeries(err);
                         }
                     );
@@ -148,15 +143,14 @@ var mapQuatumCfihos = {
     writeMappings: function (json, filePath) {
         //    var json = JSON.parse(fs.readFileSync(filePath));
         var triples = "";
-        var str = "";
+        //var str = "";
         for (var key in json) {
             var item = json[key];
-            item.targetIds.forEach(function (targetId, index) {
+            item.targetIds.forEach(function (targetId, _index) {
                 triples += "<" + item.sourceId + "> <http://www.w3.org/2002/07/owl#sameAs> <" + targetId + ">.\n";
-                str += item.sourceId + key + "\t" + targetId + "\t" + item.targetLabels[index] + "\n";
+                // str += item.sourceId + key + "\t" + targetId + "\t" + item.targetLabels[index] + "\n";
             });
         }
-        var x = str;
         fs.writeFileSync(filePath.replace(".json", "nt"), triples);
     },
 };
@@ -182,17 +176,15 @@ var targetConfig = {
     method: "GET",
 };
 
-if (true) {
-    module.exports = mapQuatumCfihos;
+module.exports = mapQuatumCfihos;
 
-    mapQuatumCfihos.mapClasses(sourceConfig, targetConfig, function (err, sourceClasses) {
-        if (err) return console.log(err);
-        mapQuatumCfihos.writeMappings(sourceClasses, sourceConfig.filePath);
-    });
-}
-if (false) {
-    var filePath = "D:\\NLP\\ontologies\\quantum\\mappingPart4_PCS.json";
-    mapQuatumCfihos.writeMappings(filePath);
-}
+mapQuatumCfihos.mapClasses(sourceConfig, targetConfig, function (err, sourceClasses) {
+    if (err) return console.log(err);
+    mapQuatumCfihos.writeMappings(sourceClasses, sourceConfig.filePath);
+});
+// if (false) {
+//     var filePath = "D:\\NLP\\ontologies\\quantum\\mappingPart4_PCS.json";
+//     mapQuatumCfihos.writeMappings(filePath);
+// }
 
 //mapQuatumCfihos.writeMappings()

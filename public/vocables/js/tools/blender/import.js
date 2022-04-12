@@ -8,6 +8,7 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Import = (function () {
     var self = {};
     self.currentType;
@@ -62,7 +63,7 @@ var Import = (function () {
             triples.push(labelTriple);
         });
 
-        Sparql_generic.insertTriples(Blender.currentSource, triples, null, function (err, result) {
+        Sparql_generic.insertTriples(Blender.currentSource, triples, null, function (err, _result) {
             if (err) return $("#Import_MessageDiv").html(err);
             $("#Import_MessageDiv").html("imported " + words.length + " new nodes");
 

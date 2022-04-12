@@ -1,7 +1,6 @@
 /**
  * Created by claud on 23/11/2017.
  */
-var paintAccordion;
 var GraphHighlight = (function () {
     var self = {};
     self.colorsPalette;
@@ -13,7 +12,6 @@ var GraphHighlight = (function () {
     self.initialNodesattrs = {};
     self.initialLinksattrs = {};
     self.currentHighlightProperty = null;
-    var currentAction = "";
 
     var clickedLegendItem = false;
     var scale;
@@ -73,8 +71,7 @@ var GraphHighlight = (function () {
             var color = self.colorsPalette(i);
             $("#" + divId).append("<div style='background-color:" + color + ";' class='colorPaletteSquare'>");
         }
-        $(".colorPaletteSquare").on("click", function (e) {
-            var xxx = this;
+        $(".colorPaletteSquare").on("click", function (_e) {
             self.currentColor = $(this).css("background-color");
             self.paintAll();
         });
@@ -99,16 +96,15 @@ var GraphHighlight = (function () {
             scaleType = "linear";
             domain = d3.scale.linear().domain([min, max]).nice().range([0, nClasses]);
             // domain = d3.scaleLinear().domain([min, max]).nice().range([0, nClasses]);
-            if (false && d3.scaleLinear) scale = d3.scale.linear().domain().interpolator(d3.interpolateRainbow);
+            // if (false && d3.scaleLinear) scale = d3.scale.linear().domain().interpolator(d3.interpolateRainbow);
             //  scale = d3.scaleLinear().domain().interpolator(d3.interpolateRainbow);
-            else var xx = d3.scale.quantize().domain([min, max]);
             scale = d3.scale.quantize().domain([min, max]).range(palette);
 
             // scale = d3.scale.quantize().domain([min, max]).nice().range(palette);
         } else {
-            if (false && d3.scalePoint) domain = d3.scalePoint().domain(data).range([0, palette.length]);
+            // if (false && d3.scalePoint) domain = d3.scalePoint().domain(data).range([0, palette.length]);
             //  domain = d3.scale.point().domain(data).range([0, palette.length]);
-            else domain = d3.scale.ordinal().domain(data).range([0, palette.length]);
+            domain = d3.scale.ordinal().domain(data).range([0, palette.length]);
             //domain = d3.scaleOrdinal().domain(data).range([0, palette.length]);
             scaleType = "ordinal";
             scale = d3.scale.ordinal().domain(data).range(palette);
@@ -120,12 +116,10 @@ var GraphHighlight = (function () {
     self.paintClasses = function (property) {
         var nClasses = palettes[palettes.length - 1].length; // parseInt($("#paintDialog_NclassesInput").val());
         var palette = palettes[nClasses];
-        var size = Config.visjs.defaultNodeSize; // parseInt($("#paintDialog_circleRadiusInput").val() * 2);
         self.currentHighlightProperty = property;
 
         if (property == "") {
             $("#GraphHighlight_legendDiv").html("").css("visibility", "hidden");
-            var targetNodes = [];
             var nodes = visjsGraph.data.nodes.get();
             nodes.forEach(function (node) {
                 (node.color = node.initialColor), (node.shape = node.shape || Config.visjs.defaultNodeShape), (node.hidden = false);
@@ -151,7 +145,6 @@ var GraphHighlight = (function () {
                         color = d3Scale(item.highlightedProperty);
                         color = self.rgb2hex(color);
                     } else {
-                        var index = Math.round(domain(data[i].highlightedProperty));
                         color = d3Scale(item.highlightedProperty);
                         color = self.rgb2hex(color);
                     }
@@ -167,15 +160,13 @@ var GraphHighlight = (function () {
         self.drawPaletteColorLegend(scale, domain, palette, nClasses, ordinalLegendMap);
     };
 
-    self.drawPaletteColorLegend = function (scale, domain, palette, nClasses, ordinalLegendMap) {
+    self.drawPaletteColorLegend = function (scale, domain, _palette, nClasses, ordinalLegendMap) {
         $("#GraphHighlight_legendDiv").html("").css("visibility", "visible");
 
         var ticks;
-        var type;
         ticksColors = [];
 
         if (domain.ticks) {
-            type = "linear";
             ticks = domain.ticks(nClasses);
             //  ticks = scale.ticks(nClasses);
             for (var i = 0; i < ticks.length; i++) {
@@ -194,10 +185,8 @@ var GraphHighlight = (function () {
         str += "<b>" + self.currentHighlightProperty + "<b></b><br><table style='font-size: 10px;font-weight: normal'>";
         str += "<hr>";
 
-        var color;
-        var shapes = ["dot", "diamond", "triangle", "trangleDown", "square", "star"];
-        var shapeIndex = 0;
-        for (var i = 0; i < ticksColors.length; i++) {
+        color;
+        for (i = 0; i < ticksColors.length; i++) {
             var onClick = " onclick='GraphHighlight.onLegendItemClick(\"" + ticksColors[i].tick + "\")'";
 
             str +=
@@ -238,7 +227,6 @@ var GraphHighlight = (function () {
         var radius = $("#paintDialog_circleRadiusInput").val();
         var property = $("#propertiesSelectionDialog_propertySelect").val();
         var value = $("#propertiesSelectionDialog_valueInput").val();
-        var filterObjectType = $("#propertiesSelectionDialog_ObjectTypeInput").val();
         var operator = $("#propertiesSelectionDialog_operatorSelect").val();
         var type = $("#propertiesSelectionDialog_NodeLabelInput").val();
         // self.currentLabel = $("#paintDialog_labelSelect").val();
@@ -246,7 +234,9 @@ var GraphHighlight = (function () {
 
         var legendStr = "";
 
+        // eslint-disable-next-line no-constant-condition
         if (true) {
+            // eslint-disable-next-line no-constant-condition
             if (true) {
                 //($("#propertiesSelectionDialog_ObjectTypeInput").val() == "node") {
 
@@ -267,7 +257,7 @@ var GraphHighlight = (function () {
                      $("#paintDiv").html(legendStr);*/
             } else {
                 // relation
-                var ids = [];
+                ids = [];
                 var relations = visjsGraph.visjsData.edges;
 
                 for (var i = 0; i < relations.length; i++) {
@@ -315,10 +305,8 @@ var GraphHighlight = (function () {
     };
 
     self.onActionTypeSelect = function (action) {
-        currentAction = action;
         if (action == "outline") {
             //outline
-            //   $("#paintDialogAction").css("visibility", "visible");
             $("#paintDialogPaletteDiv").css("visibility", "visible");
             $("#paintDialogPropDiv").css("visibility", "visible");
             $("#paintDialog_classesDiv").css("visibility", "hidden");
@@ -342,7 +330,6 @@ var GraphHighlight = (function () {
             $("#paintDialogPropDiv").css("visibility", "visible");
             $("#paintDialogPaletteDiv").css("visibility", "hidden");
             $("#paintDialog_GraphicAttrsDiv").css("visibility", "visible");
-            // $("#paintDialog_classesDiv").css("visibility", "visible");
         }
     };
 
@@ -405,7 +392,7 @@ var GraphHighlight = (function () {
                         }
                         return false; // the color is fully defined in the node.
                     },
-                    processProperties: function (clusterOptions, childNodes, childEdges) {
+                    processProperties: function (clusterOptions, childNodes, _childEdges) {
                         var totalMass = 0;
                         for (var i = 0; i < childNodes.length; i++) {
                             totalMass += childNodes[i].mass;
@@ -426,7 +413,7 @@ var GraphHighlight = (function () {
                 };
                 visjsGraph.network.cluster(clusterOptionsByData);
             } else {
-                var clusterOptionsByData = {
+                clusterOptionsByData = {
                     processProperties: function (clusterOptions, childNodes) {
                         clusterOptions.label = "[" + childNodes.length + "]";
                         return clusterOptions;
@@ -439,15 +426,15 @@ var GraphHighlight = (function () {
 
         var maxSize = 0;
         var minSize = 10000000;
-        for (var i = 1; i < ticksColors.length; i++) {
+        for (i = 1; i < ticksColors.length; i++) {
             maxSize = Math.max(maxSize, ticksColors[i].size);
             minSize = Math.min(minSize, ticksColors[i].size);
         }
         var logScale = d3.scale.log().domain([minSize, maxSize]).range([20, 60]);
-        for (var i = 1; i < ticksColors.length; i++) {
-            var clusterSize = ticksColors[i].size;
+        for (i = 1; i < ticksColors.length; i++) {
+            clusterSize = ticksColors[i].size;
             var size = logScale(ticksColors[i].size);
-            // size=size/10
+            // eslint-disable-next-line no-console
             console.log(clusterSize + "  " + size);
             visjsGraph.nodesDS.update({
                 id: "cluster:" + ticksColors[i].color,
@@ -473,12 +460,10 @@ var GraphHighlight = (function () {
         if (!currentClusterProperty || currentClusterProperty == "") return;
         $("#paint_unClusterButton").css("visibility", "hidden");
 
-        var x = visjsGraph.network;
-
         for (var i = 1; i < ticksColors.length; i++) {
             var tickColor = ticksColors[i].color;
             visjsGraph.network.openCluster("cluster:" + tickColor, {
-                releaseFunction: function (clusterPosition, containedNodesPositions) {
+                releaseFunction: function (_clusterPosition, containedNodesPositions) {
                     return containedNodesPositions;
                 },
             });
@@ -494,9 +479,6 @@ var GraphHighlight = (function () {
             for (var key in props) if (properties.indexOf(key) < 0) properties.push(key);
         }
         properties.sort();
-        /*   if (paintDialog_highlightPropertySelect)
-                   common.fillSelectOptionsWithStringArray(paintDialog_highlightPropertySelect, properties,true);
-               common.fillSelectOptionsWithStringArray(paint_showNodeNamesForLabelSelect, GraphFilter.currentLabels,true);*/
     };
 
     self.dispatchAction = function (action) {
@@ -506,13 +488,13 @@ var GraphHighlight = (function () {
 
         if (action == "openCluster") {
             visjsGraph.network.openCluster(context.currentNode.id, {
-                releaseFunction: function (clusterPosition, containedNodesPositions) {
+                releaseFunction: function (_clusterPosition, containedNodesPositions) {
                     return containedNodesPositions;
                 },
             });
         } else if (action == "graphClusterNodes") {
             var nodeIds = visjsGraph.network.getNodesInCluster(context.currentNode.id);
-            buildPaths.getWhereClauseFromArray("_id", nodeIds, function (err, result) {
+            buildPaths.getWhereClauseFromArray("_id", nodeIds, function (_err, _result) {
                 toutlesensController.generateGraph(
                     null,
                     {
@@ -526,7 +508,7 @@ var GraphHighlight = (function () {
                 );
             });
         } else if (action == "listClusterNodes") {
-            var nodeIds = visjsGraph.network.getNodesInCluster(context.currentNode.id);
+            nodeIds = visjsGraph.network.getNodesInCluster(context.currentNode.id);
 
             var query = "match (n) where ID(n) in " + JSON.stringify(nodeIds).replace(/"/g, "") + " return n";
 

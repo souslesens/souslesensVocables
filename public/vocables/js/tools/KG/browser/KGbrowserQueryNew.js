@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 var KGbrowserQuery = (function () {
     var self = {};
     self.classes = {};
@@ -6,8 +7,7 @@ var KGbrowserQuery = (function () {
     self.queryMode = "count";
     self.queryFilterNodes = [];
     self.varNamesMap = {};
-    var previousVarName = null;
-    self.onSelectKGtreeNode = function (event, obj) {
+    self.onSelectKGtreeNode = function (_event, obj) {
         if (obj.node.id == "..") return self.loadAdl();
 
         //  return self.loadAdl(obj.node)
@@ -39,7 +39,7 @@ var KGbrowserQuery = (function () {
                 if (firstClass) {
                     self.currentQueryDialogPredicates.push(item);
                 } else {
-                    KGbrowserQuery.queryFilterNodes.forEach(function (filter, index) {
+                    KGbrowserQuery.queryFilterNodes.forEach(function (filter, _index) {
                         var previousClass = filter.class;
                         if (item.object == previousClass) {
                             ok = true;
@@ -67,7 +67,6 @@ var KGbrowserQuery = (function () {
             $("#KGbrowserQueryParams_valuesSelect").val("");
             common.fillSelectOptions("KGbrowserQueryParams_valuesSelect", [""]);
 
-            var emptyOptions = self.currentQueryDialogPredicates.length > 1;
             common.fillSelectOptions("KGbrowserQueryParams_predicateSelect", self.currentQueryDialogPredicates, null, "predicateLabel", "predicate");
             if (self.currentNode.data.searchedLabel) {
                 var array = [{ label: " rdfs:label", id: "http://www.w3.org/2000/01/rdf-schema#label" }];
@@ -78,7 +77,7 @@ var KGbrowserQuery = (function () {
         }, 500);
     };
 
-    self.getClassesPredicates = function (classIds, withInverse) {
+    self.getClassesPredicates = function (classIds, _withInverse) {
         var classes = KGbrowserQuery.classes;
         if (!Array.isArray(classIds)) classIds = [classIds];
 
@@ -105,43 +104,28 @@ var KGbrowserQuery = (function () {
                     }
                 });
             }
-            if (true || withInverse) {
-                //inverse
-                for (var subject in classes) {
-                    for (var predicate in classes[subject]) {
-                        classes[subject][predicate].forEach(function (object) {
-                            if (predicate.indexOf("label") > -1) return;
-                            if (predicate.indexOf("type") > -1) return;
-                            if (object == classId) {
-                                if (!uniquePredicates["^" + predicate + object]) {
-                                    uniquePredicates["^" + predicate + object] = 1;
-                                    if (false) {
-                                        var label = KGbrowserQuery.model[subject].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[classId].label;
-                                        var id = subject + "|" + predicate + "|" + classId;
-                                        retainedPredicates.push({
-                                            predicate: predicate,
-                                            inverse: true,
-                                            subject: subject,
-                                            object: classId,
-                                            id: id,
-                                            label: label,
-                                        });
-                                    } else {
-                                        var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label;
-                                        var id = classId + "|" + predicate + "|" + subject;
-                                        retainedPredicates.push({
-                                            predicate: predicate,
-                                            inverse: true,
-                                            subject: classId,
-                                            object: subject,
-                                            id: id,
-                                            label: label,
-                                        });
-                                    }
-                                }
+            //inverse
+            for (var subject in classes) {
+                for (predicate in classes[subject]) {
+                    classes[subject][predicate].forEach(function (object) {
+                        if (predicate.indexOf("label") > -1) return;
+                        if (predicate.indexOf("type") > -1) return;
+                        if (object == classId) {
+                            if (!uniquePredicates["^" + predicate + object]) {
+                                uniquePredicates["^" + predicate + object] = 1;
+                                var label = KGbrowserQuery.model[classId].label + "-" + KGbrowserQuery.model[predicate].label + "->" + KGbrowserQuery.model[subject].label;
+                                var id = classId + "|" + predicate + "|" + subject;
+                                retainedPredicates.push({
+                                    predicate: predicate,
+                                    inverse: true,
+                                    subject: classId,
+                                    object: subject,
+                                    id: id,
+                                    label: label,
+                                });
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         });
@@ -227,7 +211,9 @@ var KGbrowserQuery = (function () {
             self.query.showNodeProperties({ data: { type: type, id: type, label: self.OneModelDictionary[type] } });
         });
 
-    self.onOperatorSelect = function (operator) {};
+    self.onOperatorSelect = function (_operator) {
+        // Pass
+    };
 
     self.onQueryParamsDialogValidate = function (logicalMode) {
         var predicate = $("#KGbrowserQueryParams_predicateSelect").val();
@@ -248,11 +234,6 @@ var KGbrowserQuery = (function () {
             self.varNamesMap[varName] = { id: field, predicates: self.classes[field], color: color };
         }
         var varNameX = varName + "_X";
-        var typeVarName = varName;
-        /*   if (logicalMode == "union")//self.queryTypesArray.length == 0)
-                   typeVarName = "?sub"
-               else
-                   typeVarName = "?obj"*/
 
         if (property && property != "") {
             if (value && value != "") {
@@ -330,7 +311,7 @@ var KGbrowserQuery = (function () {
         $("#KGbrowserQueryParamsDialog").css("display", "none");
     };
 
-    self.addNodeToQueryTree = function (node, prop) {
+    self.addNodeToQueryTree = function (node, _prop) {
         self.query.getAdlModel(node.data.type || node.data.id, null, "subject", function (err, result) {
             var isNewTree = $("#KGbrowser_queryTreeDiv").is(":empty");
             var existingNodes = [];
@@ -384,7 +365,7 @@ var KGbrowserQuery = (function () {
             });
 
             if (isNewTree) {
-                var options = {
+                options = {
                     selectTreeNodeFn: self.jstree.events.onSelectNodeQuery,
                     contextMenu: self.jstree.getJstreeQueryContextMenu("KGbrowser_queryTreeDiv"),
 
@@ -400,7 +381,7 @@ var KGbrowserQuery = (function () {
 
     self.getQueryFilter = function (filterId) {
         var obj = null;
-        self.queryFilterNodes.forEach(function (filterData, index) {
+        self.queryFilterNodes.forEach(function (filterData, _index) {
             if (filterData.id == filterId) obj = filterData;
         });
         return obj;
@@ -428,8 +409,7 @@ var KGbrowserQuery = (function () {
                 selectVars: [filterData.varName],
             };
 
-            var node = { data: { id: id } };
-            self.executeQuery(self.currentNode, options, function (err, queryResult) {
+            self.executeQuery(self.currentNode, options, function (_err, queryResult) {
                 var jstreeData = [];
                 var keyName = filterData.varName.substring(1);
                 queryResult.data.forEach(function (item) {
@@ -474,7 +454,7 @@ var KGbrowserQuery = (function () {
                 logicalMode: "union",
                 selectVars: selectVars,
             };
-            self.executeQuery(null, options, function (err, queryResult) {
+            self.executeQuery(null, options, function (_err, queryResult) {
                 if (output == "graph") {
                     if (!self.ALDmodelGraph) {
                         //save modelGraph before drawing quryGraph
@@ -507,7 +487,6 @@ var KGbrowserQuery = (function () {
         resetAllFilters: function () {
             KGbrowserQuery.graphActions.backToModel();
             setTimeout(function () {
-                previousVarName = null;
                 if ($("#KGbrowser_adlJstreeDiv").jstree) $("#KGbrowser_adlJstreeDiv").jstree("destroy");
 
                 while (self.queryFilterNodes.length > 0) {
@@ -542,7 +521,7 @@ var KGbrowserQuery = (function () {
                 }
             }
         },
-        showGraphPopupMenu: function (node, point, e) {
+        showGraphPopupMenu: function (node, point, _e) {
             var top = $("#graphDiv").position().top;
             point.y += top;
             var html = "";
@@ -578,7 +557,7 @@ var KGbrowserQuery = (function () {
                 if (err) {
                     return MainController.UI.message(err);
                 }
-                var data = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"]);
+                Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub"]);
                 var jstreeData = [];
                 result.results.bindings.forEach(function (item) {
                     jstreeData.push({
@@ -599,12 +578,10 @@ var KGbrowserQuery = (function () {
         },
     };
 
-    self.executeQuery = function (node, options, callback) {
+    self.executeQuery = function (_node, options, _callback) {
         var queryFilterNodes = KGbrowserQuery.queryFilterNodes;
         var dialogFilterStr = "";
-        var where = "";
         var varName = options.varName;
-        var source = KGbrowser.currentSource;
         if (varName) {
             // add filter to query
             if (options.filter) dialogFilterStr = options.filter;
@@ -619,125 +596,66 @@ var KGbrowserQuery = (function () {
         });
 
         // join classes (anonym predicate)
-        var message = null;
 
-        if (true) {
-            var predicateStr = "";
-            queryFilterNodes.forEach(function (filterNodeData, index) {
-                // add currentFilter to query
-                if (options.predicate && self.currentMatchingFilterNode.varName && filterNodeData.varName == self.currentMatchingFilterNode.varName) {
-                    if (index > 0) {
-                        // when count (predicate comes from dialog
-                        predicateStr = " <" + options.predicate.predicate + "> ";
-                        if (true || options.predicate.inverse) predicateStr += "|^" + predicateStr;
-                    }
-                    where += "" + varName + predicateStr + self.currentMatchingFilterNode + ". ";
-                }
-            });
-        }
-        if (false) {
-            var varName2 = varName;
-            queryFilterNodes.forEach(function (filterNodeData, index) {
-                if (!filterNodeData) return;
-                if (!queryFilterNodesMap[options.predicate]);
-
-                var predicates = [];
-
-                if (index == 0) {
-                    if (!varName2) {
-                        var filter2 = filterNodeData.filter;
-                        where += filter2;
-                        return;
-                    }
-                    previousVarName = queryFilterNodes[index].varName;
-                } else {
-                    previousVarName = queryFilterNodes[index - 1].varName;
-                    varName2 = queryFilterNodes[index].varName;
-                }
-
-                var subjectOb = self.varNamesMap[previousVarName];
-                var objectId = self.varNamesMap[varName2].id;
-
-                var predicateStr;
-                if (index == 0 && options.predicate) {
+        var predicateStr = "";
+        queryFilterNodes.forEach(function (filterNodeData, index) {
+            // add currentFilter to query
+            if (options.predicate && self.currentMatchingFilterNode.varName && filterNodeData.varName == self.currentMatchingFilterNode.varName) {
+                if (index > 0) {
                     // when count (predicate comes from dialog
                     predicateStr = " <" + options.predicate.predicate + "> ";
-                    if (true || options.predicate.inverse) predicateStr += "|^" + predicateStr;
-                } else {
-                    var previouPredicate = queryFilterNodes[index - 1].predicate;
-                    predicateStr = " <" + previouPredicate.predicate + "> ";
-                    if (true || !previouPredicate.predicate.inverse)
-                        //has to inverse predicate becaus it is in previous nodeData
-                        predicateStr += "|^" + predicateStr;
+                    predicateStr += "|^" + predicateStr;
                 }
-
-                where += "" + varName2 + predicateStr + previousVarName + ". ";
-                if (!options.count) {
-                    where += " OPTIONAL{" + varName2 + " rdfs:label " + varName2 + "Label" + "} ";
-                    where += " OPTIONAL{" + previousVarName + " rdfs:label " + previousVarName + "Label" + "} ";
-                    where += " " + previousVarName + " rdf:type " + previousVarName + "Type" + ". ";
-                    where += " " + varName2 + " rdf:type " + varName2 + "Type" + ". ";
-                }
-                var filter2 = filterNodeData.filter;
-                where += filter2;
-            });
-        }
-
-        if (message) return callback(message);
-
-        //checked chexkboxes in class individuals
-        if ($("#KGbrowser_adlJstreeDiv").jstree(true)) {
-            var checkedIds = $("#KGbrowser_adlJstreeDiv").jstree().get_checked();
-            if (checkedIds && checkedIds.length > 0) {
-                self.individualFilters = { varName: self.currentFilterData.varName, ids: checkedIds };
-
-                var idsStr = "";
-                self.individualFilters.ids.forEach(function (id, index) {
-                    if (index > 0) idsStr += ",";
-                    idsStr += "<" + id + ">";
-                });
-                where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))";
+                where += "" + varName + predicateStr + self.currentMatchingFilterNode + ". ";
             }
-        }
-
-        var fromStr = Sparql_common.getFromStr(source);
-        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
-        if (options.count) query += "select (count(distinct " + varName + ") as ?count) ";
-        else if (options.selectVars) {
-            var selectVarsStr = "";
-            options.selectVars.forEach(function (varName, index) {
-                selectVarsStr += varName + " " + varName + "Label " + varName + "Type ";
-            });
-            query += "select distinct " + selectVarsStr;
-        } else {
-            query += "select distinct " + varName + " " + varName + "Label " + varName + "Type ";
-        }
-        query += fromStr + "WHERE {";
-
-        query += where + " }  limit 20000";
-
-        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
-        MainController.UI.message("searching...");
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-            // $("#waitImg").css("display", "none");
-            if (err) {
-                return callback(err);
-            }
-            /*    result.results.bindings.forEach(function (item) {
-                        for (var key in item) {
-                            if (key != "count")
-                                if (!item[key + "Label"])
-                                    item[key + "Label"] = {value: Sparql_common.getLabelFromURI(item[key].value)}
-
-                        }
-                    })*/
-            var data = result.results.bindings;
-
-            callback(null, { data: data, filter: dialogFilterStr });
         });
     };
 
-    self.loadAdl = function (node) {
+    if (message) return callback(message);
+
+    //checked chexkboxes in class individuals
+    if ($("#KGbrowser_adlJstreeDiv").jstree(true)) {
+        var checkedIds = $("#KGbrowser_adlJstreeDiv").jstree().get_checked();
+        if (checkedIds && checkedIds.length > 0) {
+            self.individualFilters = { varName: self.currentFilterData.varName, ids: checkedIds };
+
+            var idsStr = "";
+            self.individualFilters.ids.forEach(function (id, index) {
+                if (index > 0) idsStr += ",";
+                idsStr += "<" + id + ">";
+            });
+            where += "filter (" + self.individualFilters.varName + " in (" + idsStr + "))";
+        }
+    }
+
+    var fromStr = Sparql_common.getFromStr(source);
+    var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> ";
+    if (options.count) query += "select (count(distinct " + varName + ") as ?count) ";
+    else if (options.selectVars) {
+        var selectVarsStr = "";
+        options.selectVars.forEach(function (varName, _index) {
+            selectVarsStr += varName + " " + varName + "Label " + varName + "Type ";
+        });
+        query += "select distinct " + selectVarsStr;
+    } else {
+        query += "select distinct " + varName + " " + varName + "Label " + varName + "Type ";
+    }
+    query += fromStr + "WHERE {";
+
+    query += where + " }  limit 20000";
+
+    var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+    MainController.UI.message("searching...");
+    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+        if (err) {
+            return callback(err);
+        }
+        var data = result.results.bindings;
+
+        callback(null, { data: data, filter: dialogFilterStr });
+    });
+
+    self.loadAdl = function (_node) {
         if (!KGbrowser.currentSource) {
             return alert("select a source");
         }
@@ -750,7 +668,7 @@ var KGbrowserQuery = (function () {
         };
         var graphDiv = "graphDiv";
         // var graphDiv = "KGbrowser_adlJstreeDiv"
-        return KGassetGraph.drawClassesAndPropertiesGraph(KGbrowser.currentSource, graphDiv, options, function (err, result) {
+        return KGassetGraph.drawClassesAndPropertiesGraph(KGbrowser.currentSource, graphDiv, options, function (_err, result) {
             self.classes = result.classes;
             self.model = result.model;
         });
@@ -769,7 +687,6 @@ var KGbrowserQuery = (function () {
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";
         MainController.UI.message("searching...");
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-            // $("#waitImg").css("display", "none");
             if (err) {
                 return callback(err);
             }

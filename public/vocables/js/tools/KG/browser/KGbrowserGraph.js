@@ -2,7 +2,7 @@ var KGbrowserGraph = (function () {
     var self = {};
     self.defaultNodeSize = 14;
     self.zeroCountIds = [];
-    (self.setGraphPopupMenus = function (node, event) {
+    (self.setGraphPopupMenus = function (node, _event) {
         if (!node || !node.data) return;
 
         var html =
@@ -66,12 +66,6 @@ var KGbrowserGraph = (function () {
             //   KGbrowser.jstree.load.loadAdl();
         }),
         (self.addCountNodeToModelGraph = function (node, data, options, callback) {
-            var visJsNode = visjsGraph.data.nodes.get(node.id);
-            var nodePosition = {
-                x: visJsNode.x,
-                y: visJsNode.y,
-            };
-
             var nodeId = options.varName.substring(1) + "_filter";
             var count = data.data[0].count.value;
             if (count == "0") self.zeroCountIds.push(nodeId);
@@ -92,11 +86,6 @@ var KGbrowserGraph = (function () {
             var visjsData = { nodes: [], edges: [] };
 
             var color = "#ddd";
-            if (false && KGbrowserQuery.currentNode) {
-                var color = Lineage_classes.getPropertyColor(KGbrowserQuery.currentNode.id);
-                var color = KGbrowserQuery.model[nodeId];
-            }
-
             visjsGraph.data.nodes.remove(nodeId);
 
             //   var color = "#ffe0aa"
@@ -129,8 +118,6 @@ var KGbrowserGraph = (function () {
         });
 
     self.drawGraph = function (graphDiv, data, options, callback) {
-        var source = KGbrowser.currentSource;
-
         var existingNodes = {};
         if (self.currentGraph) {
             if (options.addToGraph) existingNodes = self.restoreCurrentGraph();
@@ -148,7 +135,6 @@ var KGbrowserGraph = (function () {
         });
 
         data.data.forEach(function (item) {
-            var previousId = null;
             var itemIds = [];
             var edgeNode;
             var edgeId;
@@ -203,7 +189,7 @@ var KGbrowserGraph = (function () {
                             }
                         }
                     } else if (filter.predicate && filter.predicate.subject == type) {
-                        var target = item[filter.varName.substring(1)];
+                        target = item[filter.varName.substring(1)];
                         if (target && target.value != id) {
                             target = target.value;
                             edgeId = target + "_" + id;
@@ -225,21 +211,6 @@ var KGbrowserGraph = (function () {
                         existingNodes[edgeId] = 1;
                         visjsData.edges.push(edgeNode);
                     }
-
-                    /*   if (previousId) {
-                       var edgeId = previousId + "_" + id
-                       if (!existingNodes[edgeId]) {
-                           existingNodes[edgeId] = 1
-                           visjsData.edges.push({
-                               id: edgeId,
-                               from: previousId,
-                               to: id,
-
-
-                           })
-
-                   }}
-                   previousId = id*/
                 });
             }
             if (!edgeNode) {
@@ -273,7 +244,7 @@ var KGbrowserGraph = (function () {
             self.storeGraph();
         } else {
             var visjsOptions = {
-                onclickFn: function (node, point, event) {
+                onclickFn: function (node, _point, event) {
                     if (!node) return MainController.UI.hidePopup("graphPopupDiv");
                     KGbrowser.currentJstreeNode = node;
                     if (event.ctrlKey);
@@ -326,7 +297,6 @@ var KGbrowserGraph = (function () {
         };
 
         var predicate = self.currentExpandingNode.data.predicate;
-        var objectClass = self.currentExpandingNode.data.objectClass;
         var inverse = self.currentExpandingNode.data.inverse;
         var fromStr = Sparql_common.getFromStr(KGbrowser.currentSource);
 
@@ -348,7 +318,6 @@ var KGbrowserGraph = (function () {
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "obj");
 
             KGbrowserQuery.queryMode = "expandGraphNode";
-            //KGbrowserQuery.showQueryParamsDialog({x:300,y:300}, self.currentExpandingNode)
 
             var targetNodes = [];
             self.currentExpandingNode.targeNodes = {};
@@ -384,8 +353,6 @@ var KGbrowserGraph = (function () {
             var objId = item.obj.value;
             if (!existingNodes[objId]) {
                 var color = "#ade";
-                /*  if (KGbrowserQuery.model[item.objType.value])
-                        color = KGbrowserQuery.model[item.objType.value].color*/
 
                 var imageType = KGbrowserCustom.superClassesMap[item.objType.value].group;
                 color = KGbrowserCustom.superClassesMap[item.objType.value].color;
@@ -400,7 +367,6 @@ var KGbrowserGraph = (function () {
                     color: color,
                     data: {
                         type: item.objType.value,
-                        source: KGbrowser.currentSource,
                         id: objId,
                         label: item.objLabel.value,
                         source: KGbrowser.currentSource,
@@ -411,11 +377,6 @@ var KGbrowserGraph = (function () {
             }
             var from = objId;
             var to = self.currentGraphNode.data.id;
-            /*   if (self.currentExpandingNode.data.inverse == "true") {
-                    var from = self.currentGraphNode.data.id;
-                    var to = objId
-
-                }*/
             var edgeId = from + "_" + to;
 
             if (!existingNodes[edgeId]) {
@@ -473,7 +434,6 @@ var KGbrowserGraph = (function () {
         var subject = array[0];
         var predicate = array[1];
         var object = array[2];
-        var inverse = array.length > 3;
 
         var ids = [];
         var idsStr = "";
@@ -487,7 +447,6 @@ var KGbrowserGraph = (function () {
             if (index > 0) idsStr += ",";
             idsStr += "<" + item.data.id + ">";
         });
-        var idStr = ids.toString();
         var where = "{?sub <" + predicate + "> ?obj. filter(?sub in(" + idsStr + ")) .?obj rdf:type <" + object + ">. optional {?obj rdfs:label ?objLabel}}";
         where += "UNION {?sub ^<" + predicate + "> ?obj. filter(?sub in(" + idsStr + ")) .?obj rdf:type <" + object + ">. optional {?obj rdfs:label ?objLabel}}";
 
@@ -562,8 +521,8 @@ var KGbrowserGraph = (function () {
         setGraphNodesTree: function (classesMap) {
             if (!classesMap) {
                 var nodes = visjsGraph.data.nodes.get();
-                var classesMap = {};
-                nodes.forEach(function (item, index) {
+                classesMap = {};
+                nodes.forEach(function (item, _index) {
                     if (!classesMap[item.data.type]) classesMap[item.data.type] = [];
                     classesMap[item.data.type].push({ id: item.data.id, label: item.data.label });
                 });
@@ -604,7 +563,7 @@ var KGbrowserGraph = (function () {
 
             common.jstree.loadJsTree("KGbrowserGraph_nodesJstree", jstreedata, options);
         },
-        selectTreeNodeFn: function (event, obj) {
+        selectTreeNodeFn: function (_event, obj) {
             self.dataTree.currentTreeNode = obj.node;
             if (obj.node.parent == "#");
             else visjsGraph.focusOnNode(self.dataTree.currentTreeNode.id);
@@ -615,14 +574,14 @@ var KGbrowserGraph = (function () {
 
             items.hideNodes = {
                 label: "hide nodes",
-                action: function (e, xx) {
+                action: function (_e, _xx) {
                     // pb avec source
                     if (KGbrowserGraph.dataTree.currentTreeNode.parent == "#") visjsGraph.hideShowNodes({ type: KGbrowserGraph.dataTree.currentTreeNode.data.type }, true);
                 },
             };
             items.showNodes = {
                 label: "show nodes",
-                action: function (e, xx) {
+                action: function (_e, _xx) {
                     // pb avec source
                     if (KGbrowserGraph.dataTree.currentTreeNode.parent == "#") visjsGraph.hideShowNodes({ type: KGbrowserGraph.dataTree.currentTreeNode.data.type }, false);
                 },

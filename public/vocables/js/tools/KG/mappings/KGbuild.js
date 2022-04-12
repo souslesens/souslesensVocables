@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var KGbuild = (function () {
     var self = {};
 
@@ -17,14 +18,12 @@ var KGbuild = (function () {
         });
     };
 
-    self.onAllTreeCbxChange = function (allCBX, jstreeDiv) {
-        var checked = $(allCBX).prop("checked");
+    self.onAllTreeCbxChange = function (_allCBX, jstreeDiv) {
         var jsonNodes = $("#" + jstreeDiv)
             .jstree(true)
             .get_json("#", { flat: true });
         var nodes = [];
-        var graphUri;
-        $.each(jsonNodes, function (i, val) {
+        $.each(jsonNodes, function (_i, val) {
             if (val.data.adlSource) {
                 nodes.push($(val).attr("id"));
             }
@@ -73,15 +72,13 @@ var KGbuild = (function () {
             data: payload,
             dataType: "json",
 
-            success: function (result, textStatus, jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {
                 $("#KGbuild_infosDiv").prepend("<span class='KGbuild_infosOK'>ALL DONE</span><br>");
             },
             error(err) {
                 $("#KGbuild_infosDiv").prepend("<span class='KGbuild_infosError'>" + err.responseText + "</span><br>");
             },
         });
-
-        //  triplesGenerator.buidlKG(mappingFileNames, sparqlServerUrl, adlGraphUri, rdlGraphUri, oneModelGraphUri, replaceGraph, function (err, result) {
     };
     self.serverMessage = function (message) {
         if (message.indexOf("tableSize_") == 0) self.tableSize = parseInt(message.substring(message.indexOf("_") + 1));

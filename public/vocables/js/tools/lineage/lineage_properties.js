@@ -21,7 +21,7 @@ Lineage_properties = (function () {
         self.graphInited = false;
         Lineage_common.currentSource = MainController.currentSource;
     };
-    self.showPropInfos = function (event, obj) {
+    self.showPropInfos = function (_event, obj) {
         var id = obj.node.id;
         var html = JSON.stringify(self.properties[id]);
         $("#graphDiv").html(html);
@@ -31,17 +31,19 @@ Lineage_properties = (function () {
         var items = {
             nodeInfos: {
                 label: "Property infos",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
 
-                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv", { resetVisited: 1 }, function (err, result) {});
+                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
+                        // pass
+                    });
                 },
             },
         };
         if (MainController.currentTool == "lineage") {
             items.graphNode = {
                 label: "graph Node",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     if (Config.sources[self.currentTreeNode.data.source].schemaType == "OWL") self.drawObjectProperty(self.currentTreeNode.data);
                     else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLEDGE_GRAPH") self.drawIndividualsProperty(self.currentTreeNode.data);
@@ -50,7 +52,7 @@ Lineage_properties = (function () {
             };
             items.drawRangesAndDomainsProperty = {
                 label: "Draw ranges and domains",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
                     setTimeout(function () {
                         self.drawRangeAndDomainsGraph(self.currentTreeNode);
@@ -59,7 +61,7 @@ Lineage_properties = (function () {
             };
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
-                action: function (e) {
+                action: function (_e) {
                     // pb avec source
 
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
@@ -69,7 +71,7 @@ Lineage_properties = (function () {
             if (!Lineage_common.currentSource || Config.sources[Lineage_common.currentSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
 
                         Lineage_common.pasteNodeFromClipboard(self.currentTreeNode);
@@ -77,27 +79,18 @@ Lineage_properties = (function () {
                 };
                 items.deleteProperty = {
                     label: "delete property",
-                    action: function (e) {
+                    action: function (_e) {
                         // pb avec source
 
                         Lineage_common.jstree.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
                     },
                 };
-                /*   items.editProperty = {
-                           label: "edit property",
-                           action: function (e) {// pb avec source
-
-                               Lineage_properties.editProperty(self.currentTreeNode)
-
-                           }
-
-                       }*/
             }
         }
 
         return items;
     };
-    self.onTreeNodeClick = function (event, obj) {
+    self.onTreeNodeClick = function (_event, obj) {
         if (!obj || !obj.node) return;
         self.currentTreeNode = obj.node;
         if (obj.node.children && obj.node.children.length > 0) return;
@@ -139,10 +132,11 @@ Lineage_properties = (function () {
 
     self.getPropertiesjsTreeData = function (source, ids, words, options, callback) {
         if (!options) options = {};
-        if (true || (words && words != "")) options.filter = Sparql_common.setFilter("prop", null, words, {});
-        else {
-            options.inheritedProperties = 1;
-        }
+        //if (true || (words && words != "")) options.filter = Sparql_common.setFilter("prop", null, words, {});
+        options.filter = Sparql_common.setFilter("prop", null, words, {});
+        // else {
+        //     options.inheritedProperties = 1;
+        // }
         if (Config.sources[source].schemaType == "OWL") {
             Sparql_OWL.getObjectProperties(source, ids, options, function (err, result) {
                 if (err) return callback(err);
@@ -172,12 +166,11 @@ Lineage_properties = (function () {
                 callback(null, jstreeData);
             });
         } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
-            var options = { distinct: "property" };
+            options = { distinct: "property" };
             Sparql_OWL.getIndividualProperties(source, null, null, null, options, function (err, result) {
                 if (err) return callback(err);
                 var distinctIds = {};
                 var jstreeData = [];
-                var parent = "#";
                 result.forEach(function (item) {
                     if (!distinctIds[item.property.value]) {
                         distinctIds[item.property.value] = 1;
@@ -204,7 +197,7 @@ Lineage_properties = (function () {
     self.drawIndividualsProperty = function (nodeData) {
         var nodes = null;
         if (visjsGraph.isGraphNotEmpty()) {
-            var nodes = visjsGraph.data.nodes.getIds();
+            nodes = visjsGraph.data.nodes.getIds();
         }
 
         Sparql_OWL.getIndividualProperties(nodeData.source, nodes, nodeData.id, null, {}, function (err, result) {
@@ -291,8 +284,6 @@ Lineage_properties = (function () {
             var color = Lineage_classes.getSourceColor(source);
             //  console.log(JSON.stringify(result, null, 2))
             result.forEach(function (item) {
-                var size = Lineage_classes.defaultShapeSize;
-
                 if (!existingNodes[item.prop.value]) {
                     existingNodes[item.prop.value] = 1;
                     visjsData.nodes.push({
@@ -361,7 +352,7 @@ Lineage_properties = (function () {
                             varName: "value",
                         },
                     });
-                    var edgeId = item.prop.value + "_" + item.targetClass.value;
+                    edgeId = item.prop.value + "_" + item.targetClass.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 
@@ -400,7 +391,6 @@ Lineage_properties = (function () {
     self.drawPredicateTriples = function (predicate) {
         if (!predicate) predicate = self.currentTreeNode;
         if (!predicate) return alert("select a property first");
-        var graphUri = Config.sources[Lineage_common.currentSource].graphUri;
         var sparql_url = Config.sources[Lineage_common.currentSource].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(Lineage_common.currentSource);
 
@@ -447,7 +437,7 @@ Lineage_properties = (function () {
 
                 if (!existingIds[item.obj.value]) {
                     existingIds[item.obj.value] = 1;
-                    var node = {
+                    node = {
                         id: item.obj.value,
                         label: item.objLabel.value,
                         shape: Lineage_classes.defaultShape,
@@ -508,7 +498,6 @@ Lineage_properties = (function () {
         OwlSchema.initSourceSchema(source, function (err, schema) {
             if (err) return MainController.UI.message(err);
             //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
-            var options = { mandatoryDomain: 1 };
 
             Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, { mandatoryDomain: 0 }, function (err, result) {
                 if (err) return MainController.UI.message(err);
@@ -595,7 +584,7 @@ Lineage_properties = (function () {
                                 shape: shape,
                             });
                         }
-                        var edgeId = item.property.value + "_" + item.range.value;
+                        edgeId = item.property.value + "_" + item.range.value;
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
                             visjsData.edges.push({
@@ -618,7 +607,7 @@ Lineage_properties = (function () {
                     if (item.domain) {
                         if (!existingNodes[item.domain.value]) {
                             existingNodes[item.domain.value] = 1;
-                            var shape = "text";
+                            shape = "text";
                             if (item.domainType) {
                                 if (item.domainType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
                                 if (item.domainType.value.indexOf("property") > -1) shape = self.defaultShape;
@@ -637,7 +626,7 @@ Lineage_properties = (function () {
                                 shape: shape,
                             });
                         }
-                        var edgeId = item.property.value + "_" + item.domain.value;
+                        edgeId = item.property.value + "_" + item.domain.value;
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
                             visjsData.edges.push({
@@ -659,7 +648,7 @@ Lineage_properties = (function () {
                     }
                     if (item.range) {
                         if (!existingNodes[item.range.value]) {
-                            var shape = "text";
+                            shape = "text";
                             if (item.rangeType) {
                                 if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
                                 if (item.rangeType.value.indexOf("property") > -1) shape = self.propertiesLineage_classes.defaultShape;
@@ -679,7 +668,7 @@ Lineage_properties = (function () {
                                 shape: shape,
                             });
                         }
-                        var edgeId = item.property.value + "_" + item.range.value;
+                        edgeId = item.property.value + "_" + item.range.value;
                         if (!existingNodes[edgeId]) {
                             existingNodes[edgeId] = 1;
                             visjsData.edges.push({
@@ -712,13 +701,11 @@ Lineage_properties = (function () {
                 }
                 visjsGraph.network.fit();
                 self.graphInited = true;
-                /*  var html = JSON.stringify(self.properties[propertyId], null, 2)
-                      $("#LineageProperties_propertyInfosDiv").html(html);*/
             });
         });
     };
     self.graphActions = {
-        expandNode: function (node, point, event) {
+        expandNode: function (node, _point, _event) {
             self.drawGraph(node);
         },
         showNodeInfos: function () {
@@ -758,7 +745,6 @@ Lineage_properties = (function () {
                     result.forEach(function (item) {
                         if (!uniqueIds[item.id]) {
                             uniqueIds[item.id] = 1;
-                            //  item.parent = sourceLabel
                             jstreeData.push(item);
                         }
                     });

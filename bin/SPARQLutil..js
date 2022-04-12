@@ -1,5 +1,4 @@
 const async = require("async");
-var sax = require("sax");
 var util = require("../bin/util.");
 var httpProxy = require("../bin/httpProxy.");
 
@@ -18,7 +17,7 @@ var SPARQLutil = {
                     console.log("CLEAR GRAPH <" + graphUri + ">");
                     var queryGraph = "CLEAR GRAPH <" + graphUri + ">";
                     var params = { query: queryGraph };
-                    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         return callbackSeries(err);
                     });
                 },
@@ -56,9 +55,8 @@ var SPARQLutil = {
 
                             var params = { query: queryGraph };
 
-                            httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+                            httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                                 if (err) {
-                                    var x = queryGraph;
                                     console.log(err);
                                     return callbackEach();
                                 } else {

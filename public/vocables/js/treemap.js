@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var TreeMap = (function () {
     var self = {};
     self.flare = {
@@ -1646,7 +1647,7 @@ var TreeMap = (function () {
         ],
     };
 
-    self.onClick = function (aaa, bb, ccc) {
+    self.onClick = function (aaa) {
         click(aaa);
     };
     self.draw2 = function (data) {
@@ -1714,7 +1715,7 @@ var TreeMap = (function () {
                     })
                     .attr("dx", "6") // margin
                     .attr("dy", ".35em") // vertical-align
-                    .text(function (d, i) {
+                    .text(function (d, _i) {
                         return d.name;
                     });
 
@@ -1816,7 +1817,7 @@ var TreeMap = (function () {
                         .attr("dx", "6") // margin
                         .attr("dy", ".35em") // vertical-align
                         .filter(filter_min_arc_size_text)
-                        .text(function (d, i) {
+                        .text(function (d, _i) {
                             return d.name;
                         })
                         .transition()
@@ -1853,7 +1854,7 @@ var TreeMap = (function () {
                 var divId = d3.selectAll("#treeMapDiv")[0];
                 divId = d3.selectAll("#treeMapDiv")[0];
                 divId = "treeMapDiv";
-                var chart = Treemap(data, divId, {
+                var _ = Treemap(data, divId, {
                     value: (d) => d.size, // size of each node (file); null for internal nodes (folders)
                     group: (d, n) => n.ancestors().slice(-2)[0].data.name, // e.g., "animate" in flare/animate/Easing; color
                     label: (d, n) => [...d.name.split(/(?=[A-Z][a-z])/g), n.value.toLocaleString("en")].join("\n"),

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var KGbrowserCustom = (function () {
     var self = {};
 
@@ -57,31 +58,6 @@ var KGbrowserCustom = (function () {
                     });
                 }
 
-                /*  var edgeId = item.concept.value + "_" + item.value.value + "_" + item.prop.value
-                if (!existingNodes[edgeId]) {
-                    existingNodes[edgeId] = 1
-
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.concept.value,
-                        to: item.value.value,
-                      //  label: "<i>" + item.propLabel.value + "</i>",
-                        data: {propertyId: item.prop.value, source: source},
-                        font: {multi: true, size: 10},
-                        // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
-                        //   physics:false,
-                        arrows: {
-                            to: {
-                                enabled: true,
-                                type: "bar",
-                                scaleFactor: 0.5
-                            },
-                        },
-                        dashes: true,
-                        color: Lineage_classes.restrictionColor
-
-                    })*/
-
                 var sourceId = source + "_" + KGbrowserGraph.currentGraphNode.data.id;
                 var edgeId = sourceId + "_" + item.value.value;
                 if (!existingNodes[edgeId]) {
@@ -93,8 +69,6 @@ var KGbrowserCustom = (function () {
                         label: "<i>" + item.propLabel.value + "</i>",
                         data: { propertyId: item.prop.value, source: source },
                         font: { multi: true, size: 10 },
-                        // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
-                        //   physics:false,
                         arrows: {
                             to: {
                                 enabled: true,

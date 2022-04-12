@@ -2,7 +2,7 @@ var processor = require("../bin/KG/CsvTripleBuilder.");
 var util = require("../bin/util.");
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
-mappingsMap = {
+let mappingsMap = {
     systems: {
         type: "owl:Class",
 
@@ -41,7 +41,7 @@ mappingsMap = {
             {
                 s: "aspect",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.system.indexOf("Functional") == 0) return "part14:FunctionalObject";
                     else if (line.system.indexOf("¨Product") == 0) return "part14:PhysicalObject";
                     else if (line.system.indexOf("Location") == 0) return "part14:Location";
@@ -55,7 +55,7 @@ mappingsMap = {
             {
                 s: "system",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (_line, _mapping) {
                     return "part14:System";
                 },
             },
@@ -74,7 +74,7 @@ mappingsMap = {
             {
                 s: "code1",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.system.indexOf("3") < 0) return "part14:System";
                     else {
                         if (line.aspect.indexOf("Location") > -1) return "<http://data.total.com/resource/tsf/RDS_OG_81346/Space>";
@@ -117,7 +117,7 @@ mappingsMap = {
             {
                 s: "code2",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.system.indexOf("3") < 0) return "part14:System";
                     else {
                         if (line.aspect.indexOf("Location") > -1) return "<http://data.total.com/resource/tsf/RDS_OG_81346/Space>";
@@ -156,7 +156,7 @@ mappingsMap = {
             {
                 s: "code3",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.system.indexOf("3") < 0) return "part14:System";
                     else {
                         if (line.aspect.indexOf("Location") > -1) return "<http://data.total.com/resource/tsf/RDS_OG_81346/Space>";
@@ -189,7 +189,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code3",
-                isString: true,
             },
         ],
     },
@@ -227,7 +226,7 @@ mappingsMap = {
             {
                 s: "example",
                 p: "<http://www.w3.org/2004/02/skos/core#member>",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.code3)
                         return (
                             "http://data.total.com/resource/tsf/RDS_OG_81346/" + util.formatStringForTriple(line.aspect, true) + "/" + util.formatStringForTriple(line.system, true) + "/" + line.code3
@@ -264,12 +263,10 @@ mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
 });
 
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
-var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
-var graphUri = "http://data.total.com/resource/tsf/RDS_OG_81346/";
+// var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
+// var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
+// var graphUri = "http://data.total.com/resource/tsf/RDS_OG_81346/";
 var graphUri = "http://data.total.com/resource/tsf/RDS_OG_81346/";
 
-if (true) {
-    //  graphUri="http://data.total.com/resource/tsf/top_ontology/"
-    processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-}
+//  graphUri="http://data.total.com/resource/tsf/top_ontology/"
+processor.processSubClasses(mappings, graphUri, sparqlServerUrl);

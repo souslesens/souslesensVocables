@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Lineage_blend = (function () {
     var self = {};
 
@@ -49,7 +50,7 @@ var Lineage_blend = (function () {
         }
         if (!confirm("add  source " + importedSourceLabel + " to imports of source " + mainSourceLabel)) return callback("stop");
 
-        self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (err, result) {
+        self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (_err, _result) {
             Lineage_classes.registerSource(importedSourceLabel);
             callback();
         });
@@ -72,10 +73,10 @@ var Lineage_blend = (function () {
 
         if (sourceNode == targetNode) return "source node and target node must be distinct ";
 
-        var createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked");
+        createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked");
 
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?")) return;
-        self.createRelation(type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, function (err, result) {
+        self.createRelation(type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, function (err, _result) {
             if (err) return alert(err);
             self.addRelationToGraph(propId);
             MainController.UI.message("relation added", true);
@@ -84,20 +85,19 @@ var Lineage_blend = (function () {
 
     self.createRelation = function (type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, callback) {
         if (type != "http://www.w3.org/2002/07/owl#sameAs") createInverseRelation = false;
-        var propId = type;
 
         async.series(
             [
                 function (callbackSeries) {
                     if (!addImportToCurrentSource) return callbackSeries();
-                    self.setNewImport(Lineage_classes.mainSource, targetNode.source, function (err, result) {
+                    self.setNewImport(Lineage_classes.mainSource, targetNode.source, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
 
                 function (callbackSeries) {
                     var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
-                    self.createRelationTriples(relations, createInverseRelation, Lineage_classes.mainSource, function (err, result) {
+                    self.createRelationTriples(relations, createInverseRelation, Lineage_classes.mainSource, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -153,7 +153,7 @@ var Lineage_blend = (function () {
             allTriples = allTriples.concat(restrictionTriples);
         });
 
-        Sparql_generic.insertTriples(source, allTriples, null, function (err, result) {
+        Sparql_generic.insertTriples(source, allTriples, null, function (err, _result) {
             callback(err);
         });
     };
@@ -165,13 +165,13 @@ var Lineage_blend = (function () {
                 [
                     // delete restriction
                     function (callbackSeries) {
-                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, restrictionNode.data.bNodeId, null, null, function (err, result) {
+                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, restrictionNode.data.bNodeId, null, null, function (_err, _result) {
                             visjsGraph.data.edges.remove(restrictionNode.id);
                             callbackSeries();
                         });
                     },
                     function (callbackSeries) {
-                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, restrictionNode.data.bNodeId, function (err, result) {
+                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, restrictionNode.data.bNodeId, function (_err, _result) {
                             visjsGraph.data.edges.remove(restrictionNode.id);
                             callbackSeries();
                         });
@@ -188,20 +188,20 @@ var Lineage_blend = (function () {
                     // delete inverse restriction
                     function (callbackSeries) {
                         if (!inverseRestriction) return callbackSeries();
-                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, inverseRestriction, null, null, function (err, result) {
+                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, inverseRestriction, null, null, function (_err, _result) {
                             visjsGraph.data.edges.remove(inverseRestriction);
                             callbackSeries();
                         });
                     },
                     function (callbackSeries) {
                         if (!inverseRestriction) return callbackSeries();
-                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, inverseRestriction, function (err, result) {
+                        Sparql_generic.deleteTriples(Lineage_classes.mainSource, null, null, inverseRestriction, function (_err, _result) {
                             visjsGraph.data.edges.remove(inverseRestriction);
                             callbackSeries();
                         });
                     },
                 ],
-                function (err) {
+                function (_err) {
                     MainController.UI.message("restriction removed", true);
                 }
             );
@@ -222,7 +222,7 @@ var Lineage_blend = (function () {
             object: targetNodeId,
         });
 
-        Sparql_generic.insertTriples(source, triples, null, function (err, result) {
+        Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
             self.addRelationToGraph(propId);
             // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_classes.mainSource)
             callback(err, "DONE");
@@ -278,7 +278,7 @@ var Lineage_blend = (function () {
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            success: function (data, textStatus, jqXHR) {
+            success: function (_data, _textStatus, _jqXHR) {
                 if (!Config.sources[parentSourceLabel].imports)
                     //synchro on client
                     Config.sources[parentSourceLabel].imports = [];
@@ -343,8 +343,6 @@ var Lineage_blend = (function () {
                 label: "<i>" + propLabel + "</i>",
                 data: { propertyId: propUri, source: Lineage_classes.mainSource },
                 font: { multi: true, size: 10 },
-                // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
-                //   physics:false,
                 arrows: {
                     from: {
                         enabled: true,
@@ -369,10 +367,10 @@ var Lineage_blend = (function () {
         if (existingNodes[node.id]) return alert("node " + node.label + " already exists in graph ");
         /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
              return;*/
-        self.setNewImport(Lineage_classes.mainSource, node.source, function (err, result) {
+        self.setNewImport(Lineage_classes.mainSource, node.source, function (err, _result) {
             if (err) return "";
             var toGraphUri = Config.sources[Lineage_classes.mainSource].graphUri;
-            Sparql_generic.copyNodes(node.source, toGraphUri, [node.id], null, function (err, result) {
+            Sparql_generic.copyNodes(node.source, toGraphUri, [node.id], null, function (err, _result) {
                 if (err) return alert(err);
                 visjsGraph.data.nodes.push({
                     id: node.id,
@@ -461,7 +459,7 @@ var Lineage_blend = (function () {
         return triples;
     };
 
-    self.transformSameLabelsEdgesIntoSameAsRelations = function (callback) {
+    self.transformSameLabelsEdgesIntoSameAsRelations = function (_callback) {
         var edges = visjsGraph.data.edges.get();
         var relations = [];
         var sameLabelEdgeIds = [];
@@ -476,7 +474,7 @@ var Lineage_blend = (function () {
             }
         });
         if (relations.length > 0) {
-            self.createRelationTriples(relations, true, Lineage_classes.mainSource, function (err, result) {
+            self.createRelationTriples(relations, true, Lineage_classes.mainSource, function (err, _result) {
                 if (err) return alert(err);
                 visjsGraph.data.edges.remove(sameLabelEdgeIds);
                 MainController.UI.message(relations.length + "  sameAs relations created", true);
@@ -485,7 +483,9 @@ var Lineage_blend = (function () {
     };
 
     self.createNode = function () {
-        SourceBrowser.showNodeInfos(Lineage_classes.mainSource, null, "mainDialogDiv", null, function (err, result) {});
+        SourceBrowser.showNodeInfos(Lineage_classes.mainSource, null, "mainDialogDiv", null, function (_err, _result) {
+            // pass
+        });
     };
 
     self.initAllowedPropertiesForRelation = function () {

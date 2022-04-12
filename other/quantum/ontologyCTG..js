@@ -31,10 +31,7 @@ var ontologyCTG = {
                         return callback(null, null);
                     var lineDebut = range[2];
                     var lineFin = range[4];
-                    var colDebut = range[1];
                     var colFin = range[3];
-                    var alphabet = "A,";
-                    var dbleLetterColName = colFin.length > 1;
                     var colNames = [];
                     for (var j = 65; j < 120; j++) {
                         var colName;
@@ -78,7 +75,7 @@ var ontologyCTG = {
                         callbackSeries();
                     });
                 },
-                function (callbackSeries) {
+                function (_callbackSeries) {
                     jsonArray = dataArray;
 
                     var quantumMap = {};
@@ -86,7 +83,6 @@ var ontologyCTG = {
                         quantumMap[item.ctg_id] = item;
                     });
 
-                    var entityIdCount = 0;
                     var chaptersMap = {};
                     var docsMap = {};
 
@@ -121,7 +117,6 @@ var ontologyCTG = {
 
                     var str = "";
 
-                    var strChapter = "";
                     var strEntities = "";
                     var strDocs = "";
 
@@ -129,11 +124,8 @@ var ontologyCTG = {
                     var relationsCounter = 1000;
                     var resourceStr = "";
                     //  var resourceStrXX = ""
-                    var strText = "";
 
                     function formatString(str) {
-                        if (!str.replace) var x = 3;
-
                         str = str.replace(/"/gm, '\\"');
                         str = str.replace(/;/gm, " ");
                         str = str.replace(/\n/gm, "\\\\n");
@@ -156,7 +148,7 @@ var ontologyCTG = {
                         strEntities += "<http://data.total.com/resource/ontology/ctg/EntityType/" + key + '> <http://www.w3.org/2000/01/rdf-schema#label> "' + key + '"@en .\n';
                     }
 
-                    jsonArray.forEach(function (item, index) {
+                    jsonArray.forEach(function (item, _index) {
                         var docId;
 
                         var paragraphUrl = "<http://data.total.com/resource/ontology/ctg/Paragraph/" + item.ID + ">";
@@ -166,7 +158,6 @@ var ontologyCTG = {
                         //   console.log(JSON.stringify(item,null,2))
                         if (item.Document && item.Document != "") {
                             if (!docsMap[item.Document]) {
-                                docId = item.Document;
                                 // docsMap[item.Document] = "<http://data.total.com/resource/ontology/ctg/Document/" + docId + ">"
                                 docsMap[item.Document] = "<http://data.total.com/resource/ontology/ctg/Document/" + getNewId() + ">";
 
@@ -222,7 +213,6 @@ var ontologyCTG = {
                             var key = item.ChapterId; // docsMap[item.Document] + "_" + item.ChapterId
                             if (!chaptersMap[key]) {
                                 //  var chapterId = 1000 + Object.keys(chaptersMap).length
-                                var chapterId = item.ChapterId;
                                 var topChapterUrl = "<http://data.total.com/resource/ontology/ctg/Chapter/" + getNewId() + ">";
                                 chaptersMap[key] = topChapterUrl;
                             }
@@ -248,7 +238,7 @@ var ontologyCTG = {
 
                         var entitiesUriStr = item["Entity_URI"];
                         if (entitiesUriStr && entitiesUriStr.split) {
-                            entitiesUriStr.split(";").forEach(function (itemEntity, indexX) {
+                            entitiesUriStr.split(";").forEach(function (itemEntity, _indexX) {
                                 var splitArray = itemEntity.split("|");
                                 var entityId = splitArray[2];
                                 var type = splitArray[0];
@@ -281,7 +271,7 @@ var ontologyCTG = {
 
                         var entitiesUriStr = item["METRIC"];
                         if (entitiesUriStr && entitiesUriStr.split) {
-                            entitiesUriStr.split(";").forEach(function (itemEntity, indexX) {
+                            entitiesUriStr.split(";").forEach(function (itemEntity, _indexX) {
                                 var splitArray = itemEntity.split("|");
 
                                 var type = splitArray[0];
@@ -294,7 +284,6 @@ var ontologyCTG = {
                         var relationsStr0 = item["RDF_Triple"];
                         if (relationsStr0 && relationsStr0 != "[]") {
                             var relationTypeUri = "http://data.total.com/resource/ontology/ctg/relation#";
-                            var relationUri = "http://data.total.com/resource/ontology/ctg/Relation/" + relationsCounter++;
 
                             relationsStr0 = relationsStr0.replace(/\),\s\(/g, ";");
                             relationsStr0 = relationsStr0.replace(/[\['\]\(\)]/g, "");
@@ -333,7 +322,6 @@ var ontologyCTG = {
         var headers = [];
         var jsonData = [];
         var jsonDataFetch = [];
-        var startId = 100000;
         fs.createReadStream(filePath).pipe(
             csv({
                 separator: separator,
@@ -380,6 +368,6 @@ module.exports = ontologyCTG;
 var xlsx = "OntoCOR.xlsx";
 //xlsx="OntoMEC_triplet_20200402.xlsx"
 xlsx = "OntoAllDomain.xlsx";
-ontologyCTG.readXlsx("D:\\NLP\\rdfs\\Total\\" + xlsx, function (err, result) {});
+ontologyCTG.readXlsx("D:\\NLP\\rdfs\\Total\\" + xlsx, function (_err, _result) {});
 
 //ontologyCTG.buildNTfile();

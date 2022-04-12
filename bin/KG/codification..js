@@ -1,4 +1,3 @@
-var Codification = {};
 var sqlServer = require("./SQLserverConnector.");
 var fs = require("fs");
 var async = require("async");
@@ -78,7 +77,6 @@ var processTEPDKtags = function () {
                             }
                         }
                     }
-                    // str += key + "\t" + item.TagNumber + "\t" + functionCode + "\t" + functionLabel + "\t" + moduleCode + "\t" + moduleLabel + "\t" + locationCode + "\t" + locationLabel + "\t" + item.FunctionalClassID + "\t" + item.FunctionalClassLabel + "\t" + item.ServiceDescription + "\n"
                     str +=
                         key +
                         "\t" +
@@ -102,10 +100,6 @@ var processTEPDKtags = function () {
                         "\t" +
                         item.Description +
                         "\n";
-
-                    for (var group in array.groups) {
-                        var x = 3;
-                    }
                 }
             }
         });
@@ -152,7 +146,7 @@ var processTEPDKtags = function () {
                     "FROM [TEPDK].[dbo].[tblTag] ";
 
                 query = " select * FROM [TEPDK].[dbo].[functional_location] " + " where SUBSTRING(tagName,1,2) in('GA','GB','GC','GD')";
-                sqlServer.getFetchedData("TEPDK", query, processor, 1000, GormCodesMap, function (err, result) {
+                sqlServer.getFetchedData("TEPDK", query, processor, 1000, GormCodesMap, function (err, _result) {
                     if (err) return callbackSeries(err);
 
                     callbackSeries();

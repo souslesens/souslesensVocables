@@ -11,16 +11,12 @@
  */
 
 var httpProxy = require("../../httpProxy.");
-var elasticRestProxy = require("../../elasticRestProxy.");
-//var superagent = require('superagent')
-var request = require("request");
 var fs = require("fs");
 var async = require("async");
-var thesauriiConcepts = {};
 var mediawikiStats = {
     sparqlUrl: "http://51.178.139.80:8890/sparql/",
 
-    generateCatWords: function (categoryWord, thesaurusWord, callback) {
+    generateCatWords: function (categoryWord, thesaurusWord, _callback) {
         mediawikiStats.getCatWordsTriples(categoryWord, thesaurusWord, function (err, bindings) {
             var Allconcepts = [];
             var catWordsMap = {};
@@ -34,8 +30,6 @@ var mediawikiStats = {
                 if (!catWordsMap[category].concepts[concept]) catWordsMap[category].concepts[concept] = 0;
                 catWordsMap[category].concepts[concept] += 1;
             });
-
-            var xx = catWordsMap;
 
             /*  var str = "titre\tx\n"
             for (var category in catWordsMap) {
@@ -51,7 +45,7 @@ var mediawikiStats = {
 */
         });
     },
-    generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
+    generateCatWordsMatrix: function (categoryWord, thesaurusWord, _callback) {
         mediawikiStats.getCatWordsTriples(categoryWord, thesaurusWord, function (err, bindings) {
             var Allconcepts = [];
             var catWordsMap = {};
@@ -136,7 +130,7 @@ var mediawikiStats = {
                     callbackWhilst();
                 });
             },
-            function (err, n) {
+            function (err, _n) {
                 if (err) return callback(err);
                 return callback(null, allBindings);
             }
@@ -145,20 +139,18 @@ var mediawikiStats = {
 };
 
 module.exports = mediawikiStats;
-
+/*
 if (false) {
     //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediawikiStats.generateCatWordsMatrix("aapg", null, function (err, result) {
+    mediawikiStats.generateCatWordsMatrix("aapg", null, function (err, _result) {
         if (err) console.log(err);
         console.log("Done ");
     });
 }
-
-if (true) {
-    //mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
-    mediawikiStats.generateCatWords("aapg", null, function (err, result) {
-        if (err) console.log(err);
-        console.log("Done ");
-    });
-}
+*/
+//mediawikiStats.generateCatWordsMatrix("aapg", "gemet", function (err, result) {
+mediawikiStats.generateCatWords("aapg", null, function (err, _result) {
+    if (err) console.log(err);
+    console.log("Done ");
+});
 //mediawikiStats.createMediawikiIndex(elasticUri,"mediawiki");

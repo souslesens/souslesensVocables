@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sunburst = (function () {
     var self = {};
 
@@ -13,7 +14,7 @@ var Sunburst = (function () {
             radius = Math.min(width, height) / 2,
             color = d3.scale.category10();
 
-        var svg = d3
+        svg = d3
             .select("body")
             .append("svg")
             .attr("width", width)
@@ -25,7 +26,7 @@ var Sunburst = (function () {
             .partition()
             .sort(null)
             .size([2 * Math.PI, radius * radius])
-            .value(function (d) {
+            .value(function (_d) {
                 return 1;
             });
 
@@ -44,7 +45,7 @@ var Sunburst = (function () {
                 return Math.sqrt(d.y + d.dy);
             });
 
-        var svg = d3
+        svg = d3
             .select("#" + divId)
             .append("svg")
             .attr("width", width)
@@ -99,10 +100,7 @@ var Sunburst = (function () {
             .style("left", "380px")
             .style("top", "250px");
 
-        var width = 960,
-            height = 700,
-            radius = Math.min(width, height) / 2,
-            color = d3.scale.category10();
+        (width = 960), (height = 700), (radius = Math.min(width, height) / 2), (color = d3.scale.category10());
 
         // Stash the old values for transition.
         function stash(d) {

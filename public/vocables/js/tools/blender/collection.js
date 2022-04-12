@@ -25,13 +25,13 @@ var Collection = (function () {
         if (currentNodeLevel < allowedLevels) {
             menuItems.forbidden = {
                 label: "!!",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     alert("Modifications not allowed at this level");
                 },
             };
             menuItems.nodeInfos = {
                 label: "Show Node infos",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv");
                 },
             };
@@ -39,7 +39,7 @@ var Collection = (function () {
             if (self.currentCandidateNode) {
                 menuItems.assignConcepts = {
                     label: "<span class='blender_assignCollection'>Assign selected Concepts</span>",
-                    action: function (obj, sss, cc) {
+                    action: function (_obj, _sss, _cc) {
                         Collection.assignConcepts();
                     },
                 };
@@ -47,7 +47,7 @@ var Collection = (function () {
             if (Collection.currentTreeNode && Collection.currentTreeNode.data.type == "http://www.w3.org/2004/02/skos/core#Concept") {
                 menuItems.editNode = {
                     label: "Edit node",
-                    action: function (obj, sss, cc) {
+                    action: function (_obj, _sss, _cc) {
                         Blender.nodeEdition.editNode("collection");
                     },
                 };
@@ -56,14 +56,14 @@ var Collection = (function () {
             }
             menuItems.editNode = {
                 label: "Edit node",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     Blender.nodeEdition.editNode("collection");
                 },
             };
             if (Blender.displayMode == "leftPanel") {
                 menuItems.filterTaxonomy = {
                     label: "<span class='blender_assignCollection'>Filter Taxonomy</span>",
-                    action: function (obj, sss, cc) {
+                    action: function (_obj, _sss, _cc) {
                         Collection.filterConcepts();
                     },
                 };
@@ -71,40 +71,34 @@ var Collection = (function () {
 
             menuItems.unAssignConcepts = {
                 label: "Unassign Concepts",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     Collection.unAssignConcepts();
                 },
             };
 
             menuItems.deleteNode = {
                 label: "Delete node",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     Blender.menuActions.deleteNode("collection");
                 },
             };
             menuItems.addChildNodeNode = {
                 label: "Create child",
-                action: function (obj, sss, cc) {
+                action: function (_obj, _sss, _cc) {
                     Blender.nodeEdition.createChildNode(null, "collection");
                 },
             };
         }
 
-        /*   menuItems.importChildren = {
-                label: "Import child nodes",
-                action: function (obj, sss, cc) {
-                    Import.showImportNodesDialog("collection");
-                    ;
-                },
-            }*/
         return menuItems;
     };
 
-    self.selectTreeNodeFn = function (event, propertiesMap) {
+    self.selectTreeNodeFn = function (_event, propertiesMap) {
         if (propertiesMap) self.currentTreeNode = propertiesMap.node;
 
         $("#Blender_collectionTreeDiv").jstree(true).settings.contextmenu.items = Collection.getJstreeContextMenu();
         if (Blender.displayMode == "centralPanelDiv") {
+            // Pass
         }
         if (propertiesMap.event.ctrlKey) {
             self.filterConcepts();
@@ -112,8 +106,7 @@ var Collection = (function () {
         self.openTreeNode("Blender_collectionTreeDiv", Blender.currentSource, self.currentTreeNode);
     };
 
-    self.openTreeNode = function (divId, sourceLabel, node, callback) {
-        var existingNodes = common.jstree.getjsTreeNodes(divId, true);
+    self.openTreeNode = function (divId, sourceLabel, node, _callback) {
         if (!node.children || node.children.length > 0) return;
 
         self.Sparql.getNodeChildren(sourceLabel, node.data.id, { onlyCollectionType: true }, function (err, result) {
@@ -138,7 +131,7 @@ var Collection = (function () {
                 data: { type: "treeType_concept" },
             });
         });
-        Collection.Sparql.setConceptsCollectionMembership(Blender.currentSource, conceptIds, Collection.currentTreeNode.data.id, function (err, result) {
+        Collection.Sparql.setConceptsCollectionMembership(Blender.currentSource, conceptIds, Collection.currentTreeNode.data.id, function (err, _result) {
             $("#waitImg").css("display", "none");
             if (err) return MainController.UI.message(err);
 
@@ -147,7 +140,9 @@ var Collection = (function () {
             return (self.currentCandidateNode = null);
         });
     };
-    self.unAssignConcepts = function () {};
+    self.unAssignConcepts = function () {
+        // Pass
+    };
     self.filterConcepts = function () {
         $(".blender_collectionFilter").remove();
         var collection = Collection.currentTreeNode;
@@ -155,7 +150,8 @@ var Collection = (function () {
         var options = {
             filterCollections: collection.data.id,
         };
-        if (true || !self.currentCollectionFilter) self.currentCollectionFilter = [];
+        // if (true || !self.currentCollectionFilter) self.currentCollectionFilter = [];
+        self.currentCollectionFilter = [];
         //  self.currentCollectionFilter.push(collection.id)
         self.currentCollectionFilter = collection.data.id;
 
@@ -183,7 +179,7 @@ var Collection = (function () {
         }
     };
 
-    self.removeTaxonomyFilter = function (collectionId) {
+    self.removeTaxonomyFilter = function (_collectionId) {
         self.currentCollectionFilter = null;
 
         $(".blender_collectionFilter").remove();
@@ -193,31 +189,6 @@ var Collection = (function () {
                 Blender.showTopConcepts();
             }
     };
-    /*  self.dropNode = function () {
-          if (!Blender.menuActions.movingNode)
-              return
-          var newParent = Blender.menuActions.movingNode.newParent
-          var oldParent = Blender.menuActions.movingNode.oldParent
-          var id = Blender.menuActions.movingNode.id
-          if (Blender.menuActions.lastDroppedNodeId == id)
-              return
-          Blender.menuActions.lastDroppedNodeId = id;
-          var broaderPredicate = self.broaderProperty
-
-          Sparql_generic.deleteTriples(Blender.currentSource, oldParent, "http://www.w3.org/2004/02/skos/core#member", id, function (err, result) {
-
-              if (err) {
-                  return MainController.UI.message(err)
-              }
-              var triple = {subject: newParent, predicate: "http://www.w3.org/2004/02/skos/core#member", object: id, valueType: "uri"}
-              Sparql_generic.insertTriples(Blender.currentSource, [triple], function (err, result) {
-                  if (err) {
-                      return MainController.UI.message(err)
-                  }
-              })
-          })
-
-      }*/
 
     self.Sparql = {
         getVariables: function (sourceLabel) {
@@ -248,12 +219,12 @@ var Collection = (function () {
                 " WHERE {" +
                 "?collection rdf:type  ?collectionType. filter( ?collectionType =skos:Collection). " +
                 "?collection skos:prefLabel ?collectionLabel.";
-            if (false && variables.lang) query += 'filter( lang(?collectionLabel)="' + variables.lang + '")';
+            // if (false && variables.lang) query += 'filter( lang(?collectionLabel)="' + variables.lang + '")';
             if (!options.all) query += "FILTER (  NOT EXISTS {?child skos:member ?collection})";
 
             query += "} ORDER BY ?collectionLabel limit " + variables.limit;
 
-            var options = {
+            options = {
                 source: sourceLabel,
             };
 
@@ -291,7 +262,7 @@ var Collection = (function () {
 
             query += "}" + "limit " + variables.limit;
 
-            var options = {
+            options = {
                 source: sourceLabel,
             };
             Sparql_proxy.querySPARQL_GET_proxy(variables.sparql_server.url, query, "", options, function (err, result) {

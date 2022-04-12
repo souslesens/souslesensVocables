@@ -4,7 +4,7 @@ var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
 //source	class	system	code1	code2	code3	ClassName	ClassDefinition	ExamplesOfTerms	Criteria
 
-mappingsMap = {
+let mappingsMap = {
     systems81346: {
         type: "owl:Class",
 
@@ -99,7 +99,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code1",
-                isString: true,
             },
 
             { s: "code2", p: "rdf:type", o: "owl:Class" },
@@ -144,7 +143,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code2",
-                isString: true,
             },
 
             { s: "code3", p: "rdf:type", o: "owl:Class" },
@@ -191,7 +189,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code3",
-                isString: true,
             },
         ],
     },
@@ -266,19 +263,16 @@ mappingsMap = {
 //var mappingNames = ["CLASSES_4"];
 //var mappingNames = ["CLASSES_3"]
 
-var mappingNames = ["systems81346", "examples81346"];
 var mappingNames = ["examples81346"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
 });
 
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
-var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
-var graphUri = "http://data.total.com/resource/tsf/IEC_ISO_81346/";
+// var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
+// var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
+// var graphUri = "http://data.total.com/resource/tsf/IEC_ISO_81346/";
 var graphUri = "http://data.total.com/resource/tsf/IEC_ISO_81346/";
 
-if (true) {
-    //  graphUri="http://data.total.com/resource/tsf/top_ontology/"
-    processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-}
+//  graphUri="http://data.total.com/resource/tsf/top_ontology/"
+processor.processSubClasses(mappings, graphUri, sparqlServerUrl);

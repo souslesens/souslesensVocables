@@ -21,7 +21,7 @@ const user = {
         if (config.disableAuth) {
             result = {
                 logged: true,
-                user: { login: "admin", groups: "admin" },
+                user: { login: "admin", groups: ["admin"] },
                 authSource: "json",
                 auth: {},
             };

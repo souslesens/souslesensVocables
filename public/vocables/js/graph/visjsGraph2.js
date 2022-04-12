@@ -92,14 +92,13 @@ var visjsGraph = (function () {
         // self.network.startSimulation()
         window.setTimeout(function () {
             return;
-
-            if (!_options.layoutHierarchical) {
-                if (!self.network.stopSimulation) return;
-                self.network.stopSimulation();
-                if (!_options.noFit) self.network.fit();
-                self.simulationOn = false;
-                if (_options.afterDrawing) _options.afterDrawing();
-            }
+            // if (!_options.layoutHierarchical) {
+            //     if (!self.network.stopSimulation) return;
+            //     self.network.stopSimulation();
+            //     if (!_options.noFit) self.network.fit();
+            //     self.simulationOn = false;
+            //     if (_options.afterDrawing) _options.afterDrawing();
+            // }
         }, self.simulationTimeOut);
 
         self.network.on("afterDrawing", function (_params) {
@@ -223,40 +222,31 @@ var visjsGraph = (function () {
 
               }, 3000)*/
 
-        var htmlPlus =
-            "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.saveGraph()'>Save </button>" +
-            "Load<select style='width: 100px' id='visjsGraph_savedGraphsSelect' onchange='visjsGraph.loadGraph()'></select>" +
-            "<input type='checkbox' id='visjsGraph_addToCurrentGraphCBX'>add</div><div id='VisJsGraph_message'></div>";
+        if (!$("#graphButtons").length) {
+            var html =
+                "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
+                // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
+                " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
+                "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
+                "<option ></option>" +
+                "<option >standard</option>" +
+                "<option>hierarchical vertical</option>" +
+                "<option>hierarchical horizontal</option>" +
+                "</select></div>";
 
-        if (true) {
-            if (!$("#graphButtons").length) {
-                var html =
-                    "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                    // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                    " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
-                    "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
-                    "<option ></option>" +
-                    "<option >standard</option>" +
-                    "<option>hierarchical vertical</option>" +
-                    "<option>hierarchical horizontal</option>" +
-                    "</select></div>";
+            html +=
+                " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
 
-                html +=
-                    " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
+            html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
+            html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
 
-                html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
-                html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
+            var parent = $("#" + divId).parent();
 
-                if (false) html += " &nbsp;&nbsp;" + htmlPlus;
-
-                var parent = $("#" + divId).parent();
-
-                $(parent).css("flex-direction", "column");
-                $(parent).prepend(html);
-            }
-
-            html += "</div>";
+            $(parent).css("flex-direction", "column");
+            $(parent).prepend(html);
         }
+
+        html += "</div>";
         setTimeout(function () {
             self.listSavedGraphs();
             // CustomPluginController.setGraphNodesIcons()
@@ -275,16 +265,6 @@ var visjsGraph = (function () {
     };
     self.setLayout = function (layout) {
         if (layout == "hierarchical vertical") {
-            if (false && self.lastMovedNode) {
-                var newNodes = [];
-                self.data.nodes.getIds().forEach(function (nodeId) {
-                    var fixed = false;
-                    if (nodeId == self.lastMovedNode) fixed = true;
-                    newNodes.push({ id: nodeId, x: { fixed: fixed }, y: { fixed: fixed } });
-                });
-                self.data.nodes.update(newNodes);
-            }
-
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
                 sortMethod: "hubsize",
@@ -570,7 +550,7 @@ var visjsGraph = (function () {
 
         // select node
         else if (params.nodes.length == 1) {
-            var options = {
+            const options = {
                 dbleClick: isDbleClick,
                 ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,
                 altKey: params.event.srcEvent.altKey ? 1 : 0,
@@ -596,8 +576,8 @@ var visjsGraph = (function () {
             var edge = self.data.edges.get(edgeId);
             edge.fromNode = self.data.nodes.get(edge.from);
             edge.toNode = self.data.nodes.get(edge.to);
-            var point = params.pointer.DOM;
-            var options = {
+            const point = params.pointer.DOM;
+            const options = {
                 dbleClick: isDbleClick,
                 ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,
                 altKey: params.event.srcEvent.altKey ? 1 : 0,
@@ -768,7 +748,6 @@ var visjsGraph = (function () {
     };
 
     self.loadGraph = function (fileName, add, callback) {
-        if (false && !self.currentContext) return;
         if (!fileName) fileName = $("#visjsGraph_savedGraphsSelect").val();
         var addToCurrentGraph = $("#visjsGraph_addToCurrentGraphCBX").prop("checked");
         if (!fileName || fileName == "") return;

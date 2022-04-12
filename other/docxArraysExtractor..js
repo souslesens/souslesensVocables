@@ -20,7 +20,9 @@ var docxArraysExtractor = {
     },
 
     testJson: function (filePath, _callback) {
-        docxArraysExtractor.readJson(filePath, function (err, result) {});
+        docxArraysExtractor.readJson(filePath, function (_err, _result) {
+            // Pass
+        });
     },
 
     parseXml: function (filePath, options, callback) {
@@ -127,8 +129,8 @@ var docxArraysExtractor = {
     testTextTree: function (filename) {
         const fs = require("fs");
         const readline = require("readline");
-        var maxLines = 10000;
-        count = 0;
+        // var maxLines = 10000;
+        // var count = 0;
         var start = false;
 
         async function processLineByLine() {
@@ -158,7 +160,7 @@ var docxArraysExtractor = {
     },
     buildParts: function (treeDirPath, openXmlFilePath) {
         var tableArray = null;
-        var treeDirJson = null;
+        // var treeDirJson = null;
         var str = "";
 
         //  var colNames = ['n1', 'n2', 'n3', 'contenu', 'auteur', 'remarques', 'x', 'debut', 'fin', 'C', 'P', 'R']
@@ -167,7 +169,7 @@ var docxArraysExtractor = {
             [
                 //load dirTree
                 function (callbackSeries) {
-                    docxArraysExtractor.readJson(treeDirPath, function (err, result) {
+                    docxArraysExtractor.readJson(treeDirPath, function (err, _result) {
                         if (err) return callbackSeries(err);
                         callbackSeries();
                     });
@@ -217,18 +219,18 @@ var docxArraysExtractor = {
 
 module.exports = docxArraysExtractor;
 
-var openXmlFilePath = "D:\\NLP\\ontologies\\14224\\ISO14224_Datacollection-oilandgas\\word\\document.xml";
-//var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
+// var openXmlFilePath = "D:\\NLP\\ontologies\\14224\\ISO14224_Datacollection-oilandgas\\word\\document.xml";
+// //var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISO IEC 81346-1 (1)\\word\\document.xml";
 
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\part10.xml";
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\81346-2-2022.xml";
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-2_2019.xml";
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-12_2018.xml";
-var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\RDS-OG Library.xml";
+// var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\part10.xml";
+// var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\81346-2-2022.xml";
+// var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-2_2019.xml";
+// var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-12_2018.xml";
+// var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\RDS-OG Library.xml";
 
 var openXmlFilePath = "D:\\NLP\\ontologies\\15663\\document.xml";
 
-options = {
+var options = {
     rotate: false,
 };
 

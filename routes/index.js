@@ -2,6 +2,7 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var passport = require("passport");
+require("../bin/authentication.");
 var httpProxy = require("../bin/httpProxy.");
 var RDF_IO = require("../bin/RDF_IO.");
 var DataController = require("../bin/dataController.");

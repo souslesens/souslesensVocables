@@ -1,4 +1,5 @@
-export var TreeMap = (function () {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+var TreeMap = (function () {
     var self = {};
     self.flare = {
         name: "flare",

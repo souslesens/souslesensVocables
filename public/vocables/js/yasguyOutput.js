@@ -1,5 +1,6 @@
 /*exported module*/
-export var YasguyOutput = (function () {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+var YasguyOutput = (function () {
     var self = {};
 
     self.xx = function (data) {

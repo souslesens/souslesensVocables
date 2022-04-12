@@ -1,4 +1,5 @@
-export var CustomPluginController = (function () {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+var CustomPluginController = (function () {
     var self = {};
     self.rootDir = "customPlugins/";
     self.typeUrisIcons = {};

@@ -1,4 +1,5 @@
-export var TE_SqlTojstreeConnectors = (function () {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+var TE_SqlTojstreeConnectors = (function () {
     var self = {};
 
     self.getJsTreeData_moho_equipments = function (parentNode, coloredNodes, callback) {

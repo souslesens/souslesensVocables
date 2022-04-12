@@ -266,8 +266,12 @@ var Lineage_classes = (function () {
             $("#lineage_drawnSources").html("");
             $("#LineagejsTreeDiv").empty()
             $("#Lineage_classes_graphDecoration_legendDiv").html("")
-            if(self.mainSource)
+            if(self.mainSource){
                 self.registerSourceImports(self.mainSource)
+                SourceBrowser.showThesaurusTopConcepts(self.mainSource)
+            }
+
+
         }
 
         self.clearLastAddedNodes = function () {

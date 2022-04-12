@@ -26,12 +26,15 @@ var Sparql_OWL = (function () {
                 return defaultTaxonomyPredicates;
             var sourceConfig = Config.sources[source];
 
-            if (sourceConfig && sourceConfig.schemaType=="KNOWLEDGE_GRAPH")
+            if (false && sourceConfig && sourceConfig.schemaType=="KNOWLEDGE_GRAPH")
                 return " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "
 
             if (!sourceConfig || !sourceConfig.taxonomyPredicates)
                 return defaultTaxonomyPredicates
 
+            var str=""
+            if( sourceConfig.taxonomyPredicates &&  sourceConfig.taxonomyPredicates.length==0)
+                return defaultTaxonomyPredicates
             sourceConfig.taxonomyPredicates.forEach(function (item, index) {
                 if (index > 0)
                     str += "|"
@@ -40,6 +43,7 @@ var Sparql_OWL = (function () {
                 else
                     str += " " + item + " "
             })
+
             return str;
 
         }

@@ -220,7 +220,7 @@ var util = {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         var separator = ",";
         var line = "";
-        var separators = [",", "\t", ";"];
+        var separators = ["\t" ,";",",", ];
         readStream
             .on("data", function (chunk) {
                 line += chunk;

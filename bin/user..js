@@ -18,18 +18,24 @@ const user = {
                   }
                 : {};
 
-        const findUser = logged
-            ? Object.keys(users)
-                  .map(function (key, _index) {
-                      return {
-                          id: users[key].id,
-                          login: users[key].login,
-                          groups: users[key].groups,
-                          source: users[key].source,
-                      };
-                  })
-                  .find((user) => user.login == reqUser.login)
-            : {};
+        if (config.disableAuth) {
+            result = {
+                logged: true,
+                user: { login: "admin", groups: "admin" },
+                authSource: "json",
+                auth: {},
+            };
+        } else if (logged) {
+            const findUser = Object.keys(users)
+                .map(function (key, _index) {
+                    return {
+                        id: users[key].id,
+                        login: users[key].login,
+                        groups: users[key].groups,
+                        source: users[key].source,
+                    };
+                })
+                .find((user) => user.login == reqUser.login);
 
             if (findUser === undefined) {
                 console.log("could not find logged user ", reqUser, typeof reqUser);

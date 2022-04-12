@@ -2,7 +2,7 @@ var processor = require("../bin/KG/CsvTripleBuilder.");
 var util = require("../bin/util.");
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
-mappingsMap = {
+let mappingsMap = {
     systems: {
         type: "owl:Class",
 
@@ -189,7 +189,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code3",
-                isString: true,
             },
         ],
     },
@@ -264,12 +263,10 @@ mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
 });
 
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
-var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
-var graphUri = "http://data.total.com/resource/tsf/RDS_OG_81346/";
+// var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
+// var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
+// var graphUri = "http://data.total.com/resource/tsf/RDS_OG_81346/";
 var graphUri = "http://data.total.com/resource/tsf/RDS_OG_81346/";
 
-if (true) {
-    //  graphUri="http://data.total.com/resource/tsf/top_ontology/"
-    processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-}
+//  graphUri="http://data.total.com/resource/tsf/top_ontology/"
+processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
